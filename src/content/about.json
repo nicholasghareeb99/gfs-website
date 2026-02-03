@@ -1,0 +1,48 @@
+{
+  "meta": {
+    "title": "About Ghareeb Fencing Solutions | Toledo's Trusted Fence Contractor",
+    "description": "Family-owned fence company serving Toledo since 2018. Meet Moe Ghareeb and learn why hundreds of homeowners trust us for their fence installation."
+  },
+  "hero": {
+    "headline": "About Ghareeb Fencing",
+    "description": "Family-owned. Locally operated. Committed to quality."
+  },
+  "story": {
+    "headline": "Our Story",
+    "content": "Ghareeb Fencing Solutions was founded in 2018 by Moe Ghareeb with a simple mission: provide Toledo-area homeowners with high-quality fence installation at fair prices, backed by exceptional service.",
+    "content2": "What started as a one-man operation has grown into a trusted local business, but our commitment to quality and customer satisfaction remains unchanged. Moe personally oversees every project to ensure it meets our high standards.",
+    "image": "/images/gallery/cedar-full-yard.jpg"
+  },
+  "values": {
+    "headline": "What Sets Us Apart",
+    "items": [
+      {
+        "title": "Quality Materials",
+        "description": "We only use premium materials from trusted suppliers - Homeland Vinyl, Ultra Aluminum, and Michigan-sourced cedar."
+      },
+      {
+        "title": "Expert Installation",
+        "description": "Our experienced crews follow industry best practices for every installation, ensuring your fence lasts for decades."
+      },
+      {
+        "title": "Honest Pricing",
+        "description": "No hidden fees or surprise charges. We provide detailed quotes upfront so you know exactly what to expect."
+      },
+      {
+        "title": "Local Commitment",
+        "description": "We live and work in this community. Our reputation depends on your satisfaction."
+      }
+    ]
+  },
+  "owner": {
+    "name": "Moe Ghareeb",
+    "title": "Owner & Lead Installer",
+    "bio": "Moe has been in the fencing industry for over a decade. His hands-on approach ensures every project receives personal attention and meets the highest quality standards."
+  },
+  "cta": {
+    "headline": "Ready to Work With Us?",
+    "description": "Get a free quote and see why hundreds of Toledo homeowners choose Ghareeb Fencing.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  }
+}

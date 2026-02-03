@@ -1,0 +1,81 @@
+{
+  "meta": {
+    "title": "Split Rail Fence Installation Toledo OH | Rustic Charm | Ghareeb Fencing",
+    "description": "Professional split rail fence installation in Toledo. Classic rustic fencing for property boundaries and large acreage. Free quotes."
+  },
+  "hero": {
+    "badge": "Rustic Elegance",
+    "headline": "Split Rail Fence Installation",
+    "description": "Classic American split rail fencing. Perfect for defining property boundaries with rustic charm. Great for large lots, horse properties, and country-style homes."
+  },
+  "intro": {
+    "headline": "Why Choose Split Rail?",
+    "content": "Split rail fencing offers a classic, rustic look that's perfect for country properties, horse farms, and large residential lots. It defines boundaries without blocking views or making your property feel enclosed.",
+    "content2": "An economical way to mark property lines across large areas while adding curb appeal.",
+    "benefits": [
+      "Rustic, country aesthetic",
+      "Economical for large areas",
+      "Doesn't block views",
+      "Low maintenance",
+      "Can add wire mesh for pets"
+    ],
+    "image": "/images/gallery/split-rail-1.jpg"
+  },
+  "gallery": {
+    "headline": "Split Rail Fence Installation Gallery",
+    "images": [
+      { "src": "/images/gallery/split-rail-1.jpg", "alt": "Split rail fence" },
+      { "src": "/images/gallery/split-rail-2.jpg", "alt": "Split rail corner" },
+      { "src": "/images/gallery/split-rail-3.jpg", "alt": "Split rail landscape" },
+      { "src": "/images/gallery/split-rail-4.jpg", "alt": "Split rail property line" },
+      { "src": "/images/gallery/cedar-split-rail.jpg", "alt": "Cedar split rail" }
+    ]
+  },
+  "styles": {
+    "headline": "Split Rail Options We Install",
+    "subheadline": "2-rail, 3-rail, and 4-rail options. Western red cedar or pressure-treated pine.",
+    "items": [
+      {
+        "name": "2-Rail Cedar",
+        "description": "Classic two-rail design. Great for property definition without obstruction.",
+        "image": "/images/gallery/split-rail-1.jpg"
+      },
+      {
+        "name": "3-Rail Cedar",
+        "description": "Three-rail design for more visual presence. Popular for horse properties.",
+        "image": "/images/gallery/split-rail-2.jpg"
+      }
+    ]
+  },
+  "comparison": {
+    "headline": "Split Rail Options: Good / Better / Best",
+    "subheadline": "Classic rustic style for any property",
+    "tiers": [
+      {
+        "name": "Good",
+        "subtitle": "2-Rail Pine",
+        "description": "2-rail pressure-treated pine with standard locust posts. 10ft sections. 15-20 year lifespan.",
+        "image": "/images/gallery/split-rail-1.jpg"
+      },
+      {
+        "name": "Better",
+        "subtitle": "3-Rail Cedar",
+        "description": "3-rail western red cedar with cedar posts. Natural rot resistance. 25+ year lifespan.",
+        "image": "/images/gallery/split-rail-3.jpg",
+        "featured": true
+      },
+      {
+        "name": "Best",
+        "subtitle": "Cedar with Wire Mesh",
+        "description": "3-rail cedar with welded wire mesh to contain pets and livestock. Heavy-duty posts and gate packages available.",
+        "image": "/images/gallery/cedar-split-rail-gate.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Ready for Your Split Rail Fence?",
+    "description": "Get a free quote for split rail fence installation. Classic style for your property.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  }
+}

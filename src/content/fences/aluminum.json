@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "title": "Ornamental Aluminum Fence Installation Toledo OH | Ghareeb Fencing",
+    "description": "Professional ornamental aluminum fence installation in Toledo. Elegant, rust-free, low maintenance. Perfect for pools and front yards. Free quotes."
+  },
+  "hero": {
+    "badge": "Elegant & Durable",
+    "headline": "Ornamental Aluminum Fence Installation",
+    "description": "Timeless elegance meets modern durability. Ornamental aluminum fencing adds curb appeal while providing security. Rust-free, maintenance-free, and built to last."
+  },
+  "intro": {
+    "headline": "Why Choose Aluminum Fencing?",
+    "content": "Ornamental aluminum fencing combines classic wrought-iron aesthetics with modern materials that never rust. It's the perfect choice for front yards, pools, and anywhere you want elegant visibility without maintenance headaches.",
+    "content2": "Unlike traditional iron fencing, aluminum won't rust, peel, or require painting. It maintains its beauty for decades with zero maintenance.",
+    "benefits": [
+      "Rust-free and maintenance-free for life",
+      "Classic wrought-iron look without the upkeep",
+      "Pool code compliant options available",
+      "Multiple styles and colors available",
+      "Powder-coated finish resists scratches"
+    ],
+    "image": "/images/gallery/aluminum-ornamental.jpg"
+  },
+  "gallery": {
+    "headline": "Aluminum Fence Installation Gallery",
+    "images": [
+      { "src": "/images/gallery/aluminum-ornamental.jpg", "alt": "Ornamental aluminum fence" },
+      { "src": "/images/gallery/aluminum-black.jpg", "alt": "Black aluminum fence" },
+      { "src": "/images/gallery/aluminum-pool.jpg", "alt": "Aluminum pool fence" },
+      { "src": "/images/gallery/aluminum-gate.jpg", "alt": "Aluminum fence gate" }
+    ]
+  },
+  "styles": {
+    "headline": "Aluminum Fence Styles We Install",
+    "subheadline": "Available in black, bronze, and white. Multiple heights and picket styles.",
+    "items": [
+      {
+        "name": "Classic Flat Top",
+        "description": "Traditional look with flat top rails. Perfect for front yards and property lines.",
+        "image": "/images/gallery/aluminum-ornamental.jpg"
+      },
+      {
+        "name": "Spear Top",
+        "description": "Decorative finials add elegance and security. Popular for front yards.",
+        "image": "/images/gallery/aluminum-black.jpg"
+      },
+      {
+        "name": "Pool Fence",
+        "description": "Code-compliant pool fencing with self-closing gates. Safety meets style.",
+        "image": "/images/gallery/aluminum-pool.jpg"
+      }
+    ]
+  },
+  "comparison": {
+    "headline": "Aluminum Fence Options: Good / Better / Best",
+    "subheadline": "All options include lifetime rust-free warranty",
+    "tiers": [
+      {
+        "name": "Good",
+        "subtitle": "Residential Flat Top",
+        "description": "Standard residential aluminum with flat top style. Black color, 4ft height. Lifetime rust-free warranty.",
+        "image": "/images/gallery/aluminum-ornamental.jpg"
+      },
+      {
+        "name": "Better",
+        "subtitle": "Premium Residential",
+        "description": "Heavy-duty grade with flat or spear top. Black, bronze, or white. 4-5ft heights with self-closing hinges.",
+        "image": "/images/gallery/aluminum-black.jpg",
+        "featured": true
+      },
+      {
+        "name": "Best",
+        "subtitle": "Commercial Grade",
+        "description": "Commercial-grade ornamental aluminum. Spear tops, custom heights to 6ft. Premium hardware and puppy picket option.",
+        "image": "/images/gallery/aluminum-yard.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Ready for Your Aluminum Fence?",
+    "description": "Get a free quote for ornamental aluminum fence installation. We'll help you choose the perfect style for your property.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  }
+}

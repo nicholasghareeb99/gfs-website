@@ -1,0 +1,416 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import home from '../content/home.json';
+import site from '../content/site.json';
+---
+
+<BaseLayout title={home.meta.title} description={home.meta.description}>
+    
+    <!-- Hero Section -->
+    <section class="hero" style="min-height: 90vh;">
+        <div class="hero-bg" style={`background-image: url('${home.hero.backgroundImage}')`}></div>
+        <div class="hero-overlay"></div>
+        <div class="container hero-content">
+            <div class="section-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> {home.hero.badge}</div>
+            <h1 class="hero-headline">{home.hero.headline}<br><span class="gold">{home.hero.subheadline}</span></h1>
+            <p class="hero-text">{home.hero.description}</p>
+            <div class="hero-btns">
+                <a href={home.hero.ctaPrimary.href} class="btn btn-primary btn-lg">{home.hero.ctaPrimary.text}</a>
+                <a href={home.hero.ctaSecondary.href} class="btn btn-secondary btn-lg">{home.hero.ctaSecondary.text}</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                {home.stats.map(stat => (
+                    <div class="stat-item">
+                        <span class="stat-number">{stat.number}</span>
+                        <span class="stat-label">{stat.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Fence Types Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">{home.fenceTypes.headline}</h2>
+            <p class="section-subtitle">{home.fenceTypes.subheadline}</p>
+            <div class="fence-grid">
+                {home.fenceTypes.items.map(fence => (
+                    <a href={fence.href} class="fence-card">
+                        <div class="fence-card-image">
+                            <img src={fence.image} alt={fence.name} loading="lazy">
+                        </div>
+                        <div class="fence-card-content">
+                            <h3>{fence.name}</h3>
+                            <p>{fence.description}</p>
+                            <span class="fence-price">{fence.price}</span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us Section -->
+    <section class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">{home.whyChooseUs.headline}</h2>
+            <div class="features-grid">
+                {home.whyChooseUs.items.map(item => (
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            {item.icon === 'trophy' && <span>🏆</span>}
+                            {item.icon === 'star' && <span>⭐</span>}
+                            {item.icon === 'shield' && <span>🛡️</span>}
+                            {item.icon === 'clipboard' && <span>📋</span>}
+                            {item.icon === 'dollar' && <span>💰</span>}
+                            {item.icon === 'user' && <span>👨‍💼</span>}
+                        </div>
+                        <h3>{item.title}</h3>
+                        <p>{item.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Process Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">{home.process.headline}</h2>
+            <p class="section-subtitle">{home.process.subheadline}</p>
+            <div class="process-grid">
+                {home.process.steps.map(step => (
+                    <div class="process-step">
+                        <div class="process-number">{step.number}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section section-dark">
+        <div class="container">
+            <h2 class="section-title">{home.testimonials.headline}</h2>
+            <div class="testimonials-grid">
+                {home.testimonials.items.map(testimonial => (
+                    <div class="testimonial-card">
+                        <div class="testimonial-stars">{'★'.repeat(testimonial.rating)}</div>
+                        <p class="testimonial-quote">"{testimonial.quote}"</p>
+                        <div class="testimonial-author">
+                            <strong>{testimonial.author}</strong>
+                            <span>{testimonial.location}</span>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Service Areas Section -->
+    <section class="section">
+        <div class="container">
+            <h2 class="section-title">{home.serviceAreas.headline}</h2>
+            <p class="section-subtitle">{home.serviceAreas.description}</p>
+            <div class="areas-list">
+                {home.serviceAreas.areas.map(area => (
+                    <span class="area-tag">{area}</span>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section with Lead Form -->
+    <section class="section cta-section">
+        <div class="container">
+            <div class="cta-grid">
+                <div class="cta-content">
+                    <h2 class="section-title" style="text-align:left">{home.ctaSection.headline}</h2>
+                    <p class="section-subtitle" style="text-align:left">{home.ctaSection.description}</p>
+                    <div class="cta-buttons" style="justify-content:flex-start">
+                        <a href={home.ctaSection.ctaSecondary.href} class="btn btn-secondary btn-lg">📞 {home.ctaSection.ctaSecondary.text}</a>
+                    </div>
+                    <div class="trust-points">
+                        <span>✓ Free Estimates</span>
+                        <span>✓ 0% Financing Available</span>
+                        <span>✓ 3-Year Warranty</span>
+                    </div>
+                </div>
+                <div class="cta-form-wrapper">
+                    <h3>Get Your Free Quote</h3>
+                    <form name="homepage-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/" class="quick-form">
+                        <input type="hidden" name="form-name" value="homepage-quote">
+                        <p style="display:none"><input name="bot-field"></p>
+                        <div class="form-row">
+                            <input type="text" name="name" placeholder="Your Name *" required>
+                            <input type="tel" name="phone" placeholder="Phone Number *" required>
+                        </div>
+                        <input type="email" name="email" placeholder="Email Address *" required>
+                        <input type="text" name="address" placeholder="Project Address *" required>
+                        <select name="fence-type" required>
+                            <option value="">What type of fence? *</option>
+                            <option value="cedar">Cedar Privacy</option>
+                            <option value="vinyl">Vinyl Privacy</option>
+                            <option value="wood">Wood Privacy</option>
+                            <option value="aluminum">Ornamental Aluminum</option>
+                            <option value="chainlink">Chain Link</option>
+                            <option value="split-rail">Split Rail</option>
+                            <option value="not-sure">Not Sure - Need Advice</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Request Free Quote →</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</BaseLayout>
+
+<style>
+    .stats-section {
+        background: var(--primary);
+        padding: 40px 0;
+    }
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        text-align: center;
+    }
+    .stat-number {
+        display: block;
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--accent);
+    }
+    .stat-label {
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .fence-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+    .fence-card {
+        background: var(--dark-card);
+        border-radius: 12px;
+        overflow: hidden;
+        text-decoration: none;
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid var(--border);
+    }
+    .fence-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+    }
+    .fence-card-image img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+    .fence-card-content {
+        padding: 24px;
+    }
+    .fence-card h3 {
+        color: white;
+        margin-bottom: 8px;
+    }
+    .fence-card p {
+        color: var(--text-sub);
+        margin-bottom: 12px;
+    }
+    .fence-price {
+        color: var(--accent);
+        font-weight: 600;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+    .feature-card {
+        background: var(--dark-card);
+        padding: 32px;
+        border-radius: 12px;
+        text-align: center;
+    }
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+    }
+    .feature-card h3 {
+        color: var(--accent);
+        margin-bottom: 8px;
+    }
+    .feature-card p {
+        color: var(--text-sub);
+    }
+    
+    .process-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 32px;
+        margin-top: 40px;
+    }
+    .process-step {
+        text-align: center;
+    }
+    .process-number {
+        width: 60px;
+        height: 60px;
+        background: var(--accent);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0 auto 16px;
+    }
+    .process-step h3 {
+        color: white;
+        margin-bottom: 8px;
+    }
+    .process-step p {
+        color: var(--text-sub);
+    }
+    
+    .testimonials-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+    .testimonial-card {
+        background: var(--dark-card);
+        padding: 32px;
+        border-radius: 12px;
+    }
+    .testimonial-stars {
+        color: var(--accent);
+        font-size: 1.2rem;
+        margin-bottom: 16px;
+    }
+    .testimonial-quote {
+        color: var(--text);
+        font-style: italic;
+        margin-bottom: 16px;
+        line-height: 1.6;
+    }
+    .testimonial-author strong {
+        display: block;
+        color: white;
+    }
+    .testimonial-author span {
+        color: var(--text-sub);
+        font-size: 0.9rem;
+    }
+    
+    .areas-list {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 32px;
+    }
+    .area-tag {
+        background: var(--dark-card);
+        padding: 10px 20px;
+        border-radius: 8px;
+        color: var(--text);
+        border: 1px solid var(--border);
+    }
+    
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary), #0f172a);
+    }
+    .cta-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 32px;
+    }
+    
+    .cta-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+    .cta-content .section-title { color: white; }
+    .cta-content .section-subtitle { color: rgba(255,255,255,0.8); }
+    .trust-points {
+        display: flex;
+        gap: 24px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+    .trust-points span {
+        color: rgba(255,255,255,0.9);
+        font-size: 0.9rem;
+    }
+    .cta-form-wrapper {
+        background: var(--dark-card);
+        padding: 32px;
+        border-radius: 16px;
+        border: 1px solid var(--border);
+    }
+    .cta-form-wrapper h3 {
+        color: white;
+        margin-bottom: 24px;
+        text-align: center;
+    }
+    .quick-form input,
+    .quick-form select {
+        width: 100%;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        border: 2px solid var(--border);
+        border-radius: 8px;
+        background: var(--dark);
+        color: white;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    .quick-form input:focus,
+    .quick-form select:focus {
+        border-color: var(--accent);
+        outline: none;
+    }
+    .quick-form input::placeholder {
+        color: var(--text-sub);
+    }
+    .quick-form select {
+        cursor: pointer;
+    }
+    .quick-form select option {
+        background: var(--dark);
+    }
+    .quick-form .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .process-grid { grid-template-columns: 1fr; }
+        .cta-grid { grid-template-columns: 1fr; }
+        .quick-form .form-row { grid-template-columns: 1fr; }
+    }
+</style>

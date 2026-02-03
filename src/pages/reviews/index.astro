@@ -1,0 +1,437 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import reviews from '../../content/reviews.json';
+import site from '../../content/site.json';
+---
+
+<BaseLayout title={reviews.meta.title} description={reviews.meta.description}>
+  <style>
+    .reviews-hero {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      padding: 140px 0 80px;
+      text-align: center;
+      color: white;
+    }
+    .reviews-hero h1 {
+      color: white;
+      font-size: clamp(2.2rem, 5vw, 3rem);
+      margin-bottom: 16px;
+    }
+    .reviews-hero p {
+      color: rgba(255,255,255,0.9);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .stats-bar {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .stat-item {
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+      margin-top: 4px;
+    }
+    .stars {
+      color: var(--accent);
+      font-size: 1.5rem;
+      margin-bottom: 8px;
+    }
+    
+    .filter-section {
+      background: var(--bg-light);
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 70px;
+      z-index: 50;
+    }
+    .filter-tags {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-tag {
+      padding: 10px 20px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-full);
+      background: var(--bg-card);
+      color: var(--text-body);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-tag:hover {
+      border-color: var(--accent);
+      color: var(--primary);
+    }
+    .filter-tag.active {
+      border-color: var(--accent);
+      background: var(--accent);
+      color: var(--primary-dark);
+    }
+    
+    .reviews-section {
+      padding: 60px 0;
+    }
+    
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 60px;
+    }
+    
+    .featured-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .featured-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .featured-badge {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background: var(--accent);
+      color: var(--primary-dark);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .review-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .reviewer-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .reviewer-info h3 {
+      font-size: 1rem;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+    }
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+    .review-stars {
+      color: var(--accent);
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+    .review-text {
+      color: var(--text-body);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+    .fence-type-tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 6px 12px;
+      background: rgba(212, 175, 55, 0.15);
+      color: var(--primary);
+      border-radius: var(--radius-full);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .section-divider {
+      text-align: center;
+      margin: 40px 0;
+    }
+    .section-divider h2 {
+      color: var(--text-dark);
+      font-size: 1.5rem;
+    }
+    .section-divider p {
+      color: var(--text-muted);
+    }
+    
+    .reviews-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    
+    .review-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all 0.2s;
+    }
+    .review-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow);
+    }
+    .review-card .review-header {
+      margin-bottom: 12px;
+    }
+    .review-card .reviewer-avatar {
+      width: 40px;
+      height: 40px;
+      font-size: 0.9rem;
+    }
+    .review-card .reviewer-info h3 {
+      font-size: 0.95rem;
+    }
+    .review-card .review-text {
+      font-size: 0.9rem;
+    }
+    
+    .cta-section {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      padding: 60px 0;
+      text-align: center;
+      color: white;
+    }
+    .cta-section h2 {
+      color: white;
+      margin-bottom: 16px;
+    }
+    .cta-section p {
+      color: rgba(255,255,255,0.9);
+      margin-bottom: 32px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .cta-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .cta-buttons .btn {
+      padding: 14px 28px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .btn-gold {
+      background: var(--accent);
+      color: var(--primary-dark);
+    }
+    .btn-white {
+      background: white;
+      color: var(--primary);
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    
+    .review-platforms {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 40px;
+      flex-wrap: wrap;
+    }
+    .platform-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.1);
+      border-radius: var(--radius-full);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .platform-link:hover {
+      background: rgba(255,255,255,0.2);
+      transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+      .stats-bar { gap: 24px; }
+      .stat-value { font-size: 2rem; }
+      .featured-grid { grid-template-columns: 1fr; }
+      .reviews-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+
+  <section class="reviews-hero">
+    <div class="container">
+      <div class="stars">★★★★★</div>
+      <h1>{reviews.hero.headline}</h1>
+      <p>{reviews.hero.description}</p>
+      
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-value">{reviews.stats.averageRating}</div>
+          <div class="stat-label">Average Rating</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{reviews.stats.totalReviews}</div>
+          <div class="stat-label">Happy Customers</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{reviews.stats.yearsInBusiness}</div>
+          <div class="stat-label">Years Experience</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">{reviews.stats.projectsCompleted}</div>
+          <div class="stat-label">Projects Completed</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="filter-section">
+    <div class="container">
+      <div class="filter-tags">
+        {reviews.filterTags.map(tag => (
+          <button class={`filter-tag ${tag.id === 'all' ? 'active' : ''}`} data-filter={tag.id}>
+            {tag.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="reviews-section">
+    <div class="container">
+      <div class="featured-grid">
+        {reviews.featuredReviews.map(review => (
+          <div class="featured-card" data-tags={`${review.fenceType?.toLowerCase().includes('cedar') ? 'cedar' : ''} ${review.fenceType?.toLowerCase().includes('vinyl') ? 'vinyl' : ''} ${review.highlight?.toLowerCase().includes('custom') ? 'custom' : ''} ${review.highlight?.toLowerCase().includes('fast') || review.highlight?.toLowerCase().includes('time') ? 'fast' : ''} ${review.highlight?.toLowerCase().includes('beat') || review.highlight?.toLowerCase().includes('competitive') || review.highlight?.toLowerCase().includes('price') ? 'competitive' : ''}`}>
+            {review.highlight && <div class="featured-badge">{review.highlight}</div>}
+            <div class="review-header">
+              <div class="reviewer-avatar">{review.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>
+              <div class="reviewer-info">
+                <h3>{review.name}</h3>
+                <span class="platform-badge">
+                  {review.platform === 'Google' && '📍'}
+                  {review.platform === 'Facebook' && '👤'}
+                  {review.platform} Review · {review.date}
+                </span>
+              </div>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">{review.text}</p>
+            {review.fenceType && <span class="fence-type-tag">{review.fenceType}</span>}
+          </div>
+        ))}
+      </div>
+
+      <div class="section-divider">
+        <h2>More Happy Customers</h2>
+        <p>See what others are saying about their fence projects</p>
+      </div>
+
+      <div class="reviews-grid">
+        {reviews.reviews.map(review => (
+          <div class="review-card" data-tags={`${review.fenceType?.toLowerCase().includes('cedar') ? 'cedar' : ''} ${review.fenceType?.toLowerCase().includes('vinyl') ? 'vinyl' : ''} ${review.text.toLowerCase().includes('custom') ? 'custom' : ''} ${review.text.toLowerCase().includes('quick') || review.text.toLowerCase().includes('fast') || review.text.toLowerCase().includes('timely') ? 'fast' : ''} ${review.text.toLowerCase().includes('competitive') || review.text.toLowerCase().includes('price') || review.text.toLowerCase().includes('fairly') ? 'competitive' : ''}`}>
+            <div class="review-header">
+              <div class="reviewer-avatar">{review.name.split(' ').map(n => n[0]).join('').slice(0, 2)}</div>
+              <div class="reviewer-info">
+                <h3>{review.name}</h3>
+                <span class="platform-badge">
+                  {review.platform === 'Google' && '📍'}
+                  {review.platform === 'Facebook' && '👤'}
+                  {review.platform} · {review.date}
+                </span>
+              </div>
+            </div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-text">{review.text}</p>
+            {review.fenceType && <span class="fence-type-tag">{review.fenceType}</span>}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <div class="container">
+      <h2>{reviews.cta.headline}</h2>
+      <p>{reviews.cta.description}</p>
+      <div class="cta-buttons">
+        <a href={reviews.cta.primaryButton.href} class="btn btn-gold">⚡ {reviews.cta.primaryButton.text}</a>
+        <a href={reviews.cta.secondaryButton.href} class="btn btn-white">📞 {reviews.cta.secondaryButton.text}</a>
+      </div>
+      
+      <div class="review-platforms">
+        <a href="https://g.page/r/ghareeb-fencing/review" target="_blank" rel="noopener" class="platform-link">
+          📍 Review us on Google
+        </a>
+        <a href="https://facebook.com/ghareebfencing" target="_blank" rel="noopener" class="platform-link">
+          👤 Review us on Facebook
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const filterTags = document.querySelectorAll('.filter-tag');
+      const featuredCards = document.querySelectorAll('.featured-card');
+      const reviewCards = document.querySelectorAll('.review-card');
+      
+      filterTags.forEach(tag => {
+        tag.addEventListener('click', function() {
+          // Update active state
+          filterTags.forEach(t => t.classList.remove('active'));
+          this.classList.add('active');
+          
+          const filter = this.dataset.filter;
+          
+          // Filter cards
+          [...featuredCards, ...reviewCards].forEach(card => {
+            if (filter === 'all') {
+              card.style.display = 'block';
+            } else {
+              const tags = card.dataset.tags || '';
+              if (tags.includes(filter)) {
+                card.style.display = 'block';
+              } else {
+                card.style.display = 'none';
+              }
+            }
+          });
+        });
+      });
+    });
+  </script>
+</BaseLayout>

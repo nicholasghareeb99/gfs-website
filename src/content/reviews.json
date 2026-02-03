@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "title": "Customer Reviews & Testimonials | Ghareeb Fencing Solutions Toledo",
+    "description": "Read verified 5-star reviews from real customers. 100+ happy homeowners trust Ghareeb Fencing Solutions for quality fence installation in Toledo, NW Ohio & SE Michigan."
+  },
+  "hero": {
+    "headline": "What Our Customers Say",
+    "description": "Verified reviews from Google, Facebook & BBB. Over 100 happy customers and counting.",
+    "rating": "5.0",
+    "reviewCount": "100+",
+    "yearsExperience": "7+"
+  },
+  "featuredReviews": [
+    {
+      "name": "Roy Gene Palmer III",
+      "platform": "Facebook",
+      "date": "June 2025",
+      "rating": 5,
+      "fenceType": "Cedar Picket",
+      "text": "Nick did an outstanding job installing our traditional cedar picket fence. From the start, he was incredibly patient in working through the details of our project and offered several creative solutions when we encountered challenges with our property layout. What impressed me most was how he worked within our budget constraints to find the best possible option without compromising on quality. The finished fence looks fantastic - the craftsmanship is top-notch and you can tell Nick takes pride in his work. His communication throughout the project was excellent. I'd definitely recommend Nick to anyone looking for a reliable fence contractor who delivers quality work at a fair price.",
+      "highlight": "Custom Built"
+    },
+    {
+      "name": "Josh Smith",
+      "platform": "Facebook",
+      "date": "April 2025",
+      "rating": 5,
+      "fenceType": "Cedar Privacy",
+      "text": "Hired Nick and Ghareeb Fencing Solutions. We opted for a cedar privacy fence. Nick knocked it out of the park. Price was very competitive and the job was completed on budget and on schedule. They left the yard in clean state and were happy to talk to the neighbors about what to expect with the install. 10/10 would recommend again. The fence has been up for about 6 months through winter and looks as good as when he installed it.",
+      "highlight": "On Time & Budget"
+    },
+    {
+      "name": "Jenny Wilhelm Pfeiffer",
+      "platform": "Facebook",
+      "date": "October 2025",
+      "rating": 5,
+      "fenceType": "Custom Built",
+      "text": "Nicholas was amazing to work with! Nicholas was very knowledgeable and patient with us with our decision making. He did not push vinyl on us knowing that wasn't what we wanted, unlike the other companies that quoted us. Our fencing was built from scratch, no pre-made fencing here! We cannot say enough good things about this business and the gentleman that he had working with him on our project. All of his employees were very kind and respectful. 100% a customer for life and absolutely recommend if you are looking for new fencing! Oh and he beat his competitors by over $1000.00!",
+      "highlight": "Beat Competitors by $1000+"
+    },
+    {
+      "name": "Theresa C.",
+      "platform": "Google",
+      "date": "June 2025",
+      "rating": 5,
+      "fenceType": "Vinyl Privacy",
+      "text": "Had around 230 linear feet of white vinyl fence installed. They finished the job the next day. Nicholas and his crew were professional, efficient, and the quality exceeded my expectations. Highly recommend!",
+      "highlight": "Fast Installation"
+    }
+  ],
+  "reviews": [
+    {
+      "name": "Dashawn Nickson",
+      "platform": "Google",
+      "date": "June 2025",
+      "rating": 5,
+      "text": "I just got my fence done today and let me say this is a five star Fencing service. They completed my entire yard with excellent craftsmanship. The crew was professional and respectful of our property throughout the entire process."
+    },
+    {
+      "name": "Jenna Spetz",
+      "platform": "Google",
+      "date": "May 2025",
+      "rating": 5,
+      "text": "We have nothing but amazing things to say about Ghareeb Fencing! We were so undecided about what we needed/wanted for our property and Nick helped us figure out the perfect solution. Patient, knowledgeable, and fair pricing."
+    },
+    {
+      "name": "Marissa Barnes",
+      "platform": "Facebook",
+      "date": "March 2025",
+      "rating": 5,
+      "text": "Amazing to work with! Gave a great quote and were able to get our fence up quickly. Even thought of our dogs making sure they would be able to come out if needed while he worked. Cannot recommend them enough!"
+    },
+    {
+      "name": "Nathan Gullette",
+      "platform": "Google",
+      "date": "January 2025",
+      "rating": 5,
+      "text": "Competitive price. Super easy to work with. Completed my project in the middle of winter and in a timely manner. Great communication along the way. Highly recommend!"
+    },
+    {
+      "name": "Rachael Easterwood",
+      "platform": "Google",
+      "date": "October 2024",
+      "rating": 5,
+      "text": "Very professional and quick service. He communicated very well with overall project. Went above and beyond to make sure I was happy and things were done right. Also fairly priced!"
+    },
+    {
+      "name": "Frank Powell",
+      "platform": "Google",
+      "date": "September 2024",
+      "rating": 5,
+      "text": "Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the look of our backyard. Highly recommend for any fencing project."
+    },
+    {
+      "name": "Karen Faziani",
+      "platform": "Google",
+      "date": "August 2024",
+      "rating": 5,
+      "text": "What a GREAT company. A beautiful job, by some awesome people! Highly recommend for ANY fencing! Thank you guys so much!!!"
+    },
+    {
+      "name": "Brian Hammond",
+      "platform": "Google",
+      "date": "June 2024",
+      "rating": 5,
+      "fenceType": "Privacy & Picket",
+      "text": "He installed new fence around back yard. Did a great job and price was very competitive. They didn't just install wooden panels - they built the entire fence. Did a great job on the transition from the 6' privacy fence to the 3.5' picket fence. Highly recommend them for fence work!"
+    },
+    {
+      "name": "Cindy Hill Wielfaert",
+      "platform": "Facebook",
+      "date": "August 2024",
+      "rating": 5,
+      "text": "This is one of the most trusted, knowledgeable, respectful, professional & friendly company I have ever had the chance to work with."
+    },
+    {
+      "name": "Megan Ward",
+      "platform": "Google",
+      "date": "October 2022",
+      "rating": 5,
+      "text": "Very professional, kind, hard-working, responsive and did an excellent job."
+    }
+  ],
+  "stats": {
+    "averageRating": "5.0",
+    "totalReviews": "100+",
+    "yearsInBusiness": "7+",
+    "projectsCompleted": "500+"
+  },
+  "cta": {
+    "headline": "Ready to Join Our Happy Customers?",
+    "description": "Get a free quote and see why homeowners trust Ghareeb Fencing Solutions.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  },
+  "filterTags": [
+    { "id": "all", "label": "All Reviews" },
+    { "id": "cedar", "label": "Cedar" },
+    { "id": "vinyl", "label": "Vinyl" },
+    { "id": "custom", "label": "Custom Built" },
+    { "id": "fast", "label": "Fast Service" },
+    { "id": "competitive", "label": "Competitive Price" }
+  ]
+}

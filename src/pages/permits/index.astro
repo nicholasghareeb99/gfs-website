@@ -1,0 +1,789 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import siteData from '../../content/site.json';
+
+const pageTitle = "Fence Permits & Zoning Guide 2025 | Toledo, NW Ohio & SE Michigan";
+const pageDescription = "Complete 2025 fence permit requirements, height limits, setback rules & zoning laws for Toledo, Perrysburg, Sylvania, Maumee, Monroe & 50+ municipalities.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <style>
+    .permit-hero{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:160px 0 80px;text-align:center}
+    .permit-hero h1{color:#fff;font-size:clamp(2rem,5vw,2.8rem);margin-bottom:16px;font-family:var(--font-display)}
+    .permit-hero p{font-size:1.1rem;color:#94a3b8;max-width:700px;margin:0 auto}
+    .search-box{max-width:500px;margin:30px auto 0;position:relative}
+    .search-box input{width:100%;padding:16px 20px;border:2px solid rgba(255,255,255,0.2);border-radius:30px;background:rgba(255,255,255,0.1);color:#fff;font-size:1rem;box-sizing:border-box}
+    .search-box input:focus{border-color:var(--accent);outline:none;background:rgba(255,255,255,0.15)}
+    .search-box input::placeholder{color:rgba(255,255,255,0.6)}
+    .legend{display:flex;justify-content:center;gap:24px;margin-bottom:24px;flex-wrap:wrap}
+    .legend-item{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:var(--text-muted)}
+    .legend-dot{width:14px;height:14px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .legend-dot.green{background:#22c55e}
+    .legend-dot.yellow{background:#fbbf24}
+    .county-tabs{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-bottom:30px;padding:0 20px}
+    .county-tab{padding:12px 24px;border:2px solid var(--border);border-radius:25px;background:var(--bg-card);color:var(--text-body);font-weight:600;font-size:0.9rem;cursor:pointer;transition:all .2s}
+    .county-tab:hover{border-color:var(--accent);color:var(--primary)}
+    .county-tab.active{border-color:var(--accent);background:var(--accent);color:var(--primary-dark)}
+    .municipality-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;max-width:1200px;margin:0 auto 40px;padding:0 20px}
+    .municipality-btn{padding:18px 14px;border:2px solid var(--border);border-radius:12px;background:var(--bg-card);color:var(--text-dark);font-weight:600;font-size:0.9rem;cursor:pointer;transition:all .2s;text-align:center;position:relative;box-shadow:var(--shadow-sm)}
+    .municipality-btn:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:var(--shadow)}
+    .municipality-btn.active{border-color:var(--accent);background:linear-gradient(135deg,var(--accent),var(--accent-light));color:var(--primary-dark)}
+    .municipality-btn .st{font-size:0.75rem;color:var(--text-muted);display:block;margin-top:4px}
+    .municipality-btn.active .st{color:var(--primary-dark)}
+    .municipality-btn .permit-dot{position:absolute;top:10px;right:10px;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+    .municipality-btn .permit-dot.green{background:#22c55e}
+    .municipality-btn .permit-dot.yellow{background:#fbbf24}
+    .info-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:40px;margin-bottom:24px;max-width:1000px;margin-left:auto;margin-right:auto;box-shadow:var(--shadow)}
+    .info-card h2{color:var(--primary);margin-bottom:8px;font-size:1.8rem}
+    .info-card .city-subtitle{color:var(--text-muted);font-size:0.95rem;margin-bottom:24px}
+    .permit-type-badges{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}
+    .permit-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--radius-full);font-size:0.9rem;font-weight:700}
+    .permit-badge.zoning{background:rgba(59,130,246,0.15);color:#2563eb;border:2px solid rgba(59,130,246,0.3)}
+    .permit-badge.building{background:rgba(168,85,247,0.15);color:#7c3aed;border:2px solid rgba(168,85,247,0.3)}
+    .permit-badge.none{background:rgba(34,197,94,0.15);color:#16a34a;border:2px solid rgba(34,197,94,0.3)}
+    .height-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:24px 0}
+    @media(max-width:600px){.height-grid{grid-template-columns:1fr}}
+    .height-box{background:var(--bg-light);border:2px solid var(--border);border-radius:14px;padding:24px 16px;text-align:center}
+    .height-box.front{border-color:#f59e0b;background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+    .height-box.side{border-color:#3b82f6;background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+    .height-box.back{border-color:#22c55e;background:linear-gradient(135deg,#f0fdf4,#dcfce7)}
+    .height-box-label{font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+    .height-box-value{font-size:2.8rem;font-weight:800;color:var(--text-dark)}
+    .height-box-value small{font-size:1rem;color:var(--text-muted)}
+    .height-box-note{font-size:0.75rem;color:var(--text-muted);margin-top:6px;font-weight:500}
+    .quick-facts{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0;background:var(--bg-light);border-radius:12px;padding:20px}
+    @media(max-width:600px){.quick-facts{grid-template-columns:repeat(2,1fr)}}
+    .quick-fact{text-align:center}
+    .quick-fact-value{font-size:1.3rem;font-weight:800;color:var(--primary)}
+    .quick-fact-label{font-size:0.7rem;color:var(--text-muted);margin-top:4px;text-transform:uppercase}
+    .details-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:24px 0}
+    @media(max-width:700px){.details-grid{grid-template-columns:1fr}}
+    .detail-box{background:var(--bg-light);border:1px solid var(--border);border-radius:12px;padding:20px}
+    .detail-box h4{color:var(--primary);font-size:0.9rem;margin-bottom:12px;font-weight:700}
+    .detail-box ul{list-style:none;margin:0;padding:0}
+    .detail-box li{color:var(--text-body);font-size:0.85rem;padding:6px 0;padding-left:20px;position:relative}
+    .detail-box li::before{content:'✓';color:var(--success);position:absolute;left:0;font-weight:700}
+    .full-rules{background:var(--bg-light);border-radius:12px;padding:24px;margin:24px 0;display:none}
+    .full-rules h4{color:var(--primary);margin-bottom:16px}
+    .full-rules p{margin:0 0 12px;font-size:0.9rem;line-height:1.6}
+    .rules-section{margin:24px 0}
+    .rules-section h3{font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .rules-grid{display:grid;gap:12px}
+    .rule-card{display:flex;align-items:flex-start;gap:12px;padding:16px;background:var(--bg-light);border-radius:10px;border-left:4px solid var(--border)}
+    .rule-card.good{border-left-color:#22c55e;background:linear-gradient(135deg,#f0fdf4,#dcfce7)}
+    .rule-card.warn{border-left-color:#f59e0b;background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+    .rule-card.info{border-left-color:#3b82f6;background:linear-gradient(135deg,#eff6ff,#dbeafe)}
+    .rule-icon{font-size:1.2rem;flex-shrink:0}
+    .rule-text{font-size:0.9rem;line-height:1.5}
+    .official-links{margin:24px 0}
+    .official-links h4{margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .official-links a{display:flex;align-items:center;gap:10px;padding:14px 18px;background:var(--bg-light);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;text-decoration:none;color:var(--text-dark);font-weight:500;transition:all .2s}
+    .official-links a:hover{border-color:var(--accent);background:rgba(212,175,55,0.1);transform:translateX(4px)}
+    .link-type{background:var(--primary);color:#fff;padding:4px 10px;border-radius:6px;font-size:0.7rem;font-weight:700}
+    .contact-box{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:24px;border-radius:12px;margin-top:24px}
+    .contact-box h4{margin-bottom:12px;display:flex;align-items:center;gap:8px}
+    .contact-box .phone{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:var(--primary-dark);padding:12px 24px;border-radius:var(--radius-full);font-weight:700;text-decoration:none;margin-top:16px}
+    .cta-banner{background:linear-gradient(135deg,var(--accent),var(--accent-light));padding:40px;border-radius:16px;text-align:center;margin:40px 0}
+    .cta-banner h3{color:var(--primary);margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px}
+    .cta-banner p{color:var(--primary);opacity:0.8;margin-bottom:24px}
+    .cta-banner .btn{background:var(--primary);color:#fff;padding:14px 28px;border-radius:var(--radius-full);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;margin:0 8px}
+    .seo-content{padding:60px 0;background:var(--bg-light)}
+    .seo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px}
+    .seo-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:24px}
+    .seo-card h3{font-size:1rem;margin-bottom:12px;color:var(--primary)}
+    .seo-card p{font-size:0.9rem;color:var(--text-body);line-height:1.6}
+  </style>
+
+  <section class="permit-hero">
+    <div class="container">
+      <h1>Fence Permits & Zoning Guide 2025</h1>
+      <p>Complete fence regulations for <strong>50+ municipalities</strong> in Northwest Ohio & Southeast Michigan. Height limits, permit requirements, official links & more.</p>
+      <div class="search-box">
+        <input type="text" id="citySearch" placeholder="🔍 Search your city or township..." oninput="filterCities(this.value)">
+      </div>
+    </div>
+  </section>
+
+  <main class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="legend">
+        <div class="legend-item"><span class="legend-dot green"></span> No Permit Required</div>
+        <div class="legend-item"><span class="legend-dot yellow"></span> Permit Required</div>
+      </div>
+      
+      <div class="county-tabs">
+        <button class="county-tab active" onclick="filterByCounty('all')">All Areas</button>
+        <button class="county-tab" onclick="filterByCounty('Lucas')">Lucas County, OH</button>
+        <button class="county-tab" onclick="filterByCounty('Wood')">Wood County, OH</button>
+        <button class="county-tab" onclick="filterByCounty('Fulton')">Fulton County, OH</button>
+        <button class="county-tab" onclick="filterByCounty('Monroe')">Monroe County, MI</button>
+        <button class="county-tab" onclick="filterByCounty('Wayne')">Wayne County, MI</button>
+      </div>
+
+      <div class="municipality-grid" id="cityGrid"></div>
+
+      <div class="info-card" id="cityInfoCard">
+        <h2 id="cityName">🏠 Toledo</h2>
+        <p class="city-subtitle" id="citySubtitle">Lucas County, Ohio</p>
+        
+        <div class="permit-type-badges" id="permitBadges"></div>
+        
+        <div class="height-grid">
+          <div class="height-box front"><div class="height-box-label">🚗 Front Yard Max</div><div class="height-box-value" id="frontH">4<small> ft</small></div><div class="height-box-note" id="frontNote">Open style required</div></div>
+          <div class="height-box side"><div class="height-box-label">↔️ Side Yard Max</div><div class="height-box-value" id="sideH">6<small> ft</small></div><div class="height-box-note" id="sideNote">Privacy OK</div></div>
+          <div class="height-box back"><div class="height-box-label">🌳 Rear Yard Max</div><div class="height-box-value" id="backH">6<small> ft</small></div><div class="height-box-note" id="backNote">Privacy OK</div></div>
+        </div>
+        
+        <div class="quick-facts" id="quickFacts"></div>
+        
+        <div class="details-grid">
+          <div class="detail-box"><h4>📐 Setback Requirements</h4><ul id="setbackList"></ul></div>
+          <div class="detail-box"><h4>🚗 Corner Lot / Visibility</h4><ul id="sightList"></ul></div>
+          <div class="detail-box"><h4>🏊 Pool Fence Requirements</h4><ul id="poolList"></ul></div>
+          <div class="detail-box"><h4>📋 HOA & Deed Restrictions</h4><ul id="hoaList"></ul></div>
+        </div>
+        
+        <div class="full-rules" id="fullRules"><h4>📜 Complete Fence Regulations</h4><div id="fullRulesContent"></div></div>
+        
+        <div class="rules-section">
+          <h3>⚡ Quick Summary for <span id="rulesCity">Toledo</span></h3>
+          <div class="rules-grid" id="rulesGrid"></div>
+        </div>
+        
+        <div class="official-links" id="officialLinks"><h4>🔗 Official Resources & Links</h4><div id="linksContent"></div></div>
+        
+        <div class="contact-box">
+          <h4>🏛️ Building/Zoning Department Contact</h4>
+          <p id="deptContact"></p>
+          <p style="margin-top:12px;font-size:0.85rem;opacity:0.9">We handle all permits, inspections & paperwork - included with installation!</p>
+          <a href="tel:4199028257" class="phone">📞 (419) 902-8257</a>
+        </div>
+      </div>
+      
+      <div class="cta-banner">
+        <h3>🎯 We Handle All Permits For You</h3>
+        <p>Don't stress about paperwork. We research requirements, submit applications, and coordinate inspections.</p>
+        <a href="/quote/ballpark/" class="btn">📊 Get Instant Quote</a>
+        <a href="tel:4199028257" class="btn">📞 Call Now</a>
+      </div>
+    </div>
+  </main>
+  
+  <section class="seo-content">
+    <div class="container">
+      <h2 style="text-align:center;margin-bottom:32px;">Fence Permit FAQs for Northwest Ohio & Southeast Michigan</h2>
+      <div class="seo-grid">
+        <div class="seo-card"><h3>Do I need a fence permit in Toledo, Ohio?</h3><p>Yes, Toledo requires a <strong>Certificate of Zoning Compliance</strong> (ZONING permit, not building permit) for ALL fences regardless of height. Front yard maximum is 3.5 feet (open style only), side and rear yards allow up to 6 feet. The permit is free but approval is required before installation.</p></div>
+        <div class="seo-card"><h3>Zoning Permit vs Building Permit - What's the difference?</h3><p>A <strong>ZONING permit</strong> verifies your fence meets location, height, and setback rules. A <strong>BUILDING permit</strong> verifies construction meets safety codes. Most Ohio cities require ZONING permits for fences. Michigan cities typically require BUILDING permits.</p></div>
+        <div class="seo-card"><h3>Do I need a fence permit in Perrysburg Township?</h3><p>Perrysburg Township is <strong>PARTIALLY ZONED</strong>. Some areas require a Zoning Certificate ($25-$50) and some do not. Call the Zoning Department at (419) 874-3551 ext. 4005 to verify if your property is in a zoned area. Fences may be up to 7 feet in height!</p></div>
+        <div class="seo-card"><h3>What is the maximum fence height in Ohio?</h3><p>Most Ohio municipalities allow <strong>4 feet in front yards</strong> (open style - 50%+ open) and <strong>6 feet in side/rear yards</strong> (privacy fences OK). Some areas like Toledo limit front yards to 3.5 feet.</p></div>
+        <div class="seo-card"><h3>Do I need a fence permit in Monroe, Michigan?</h3><p>Yes, Monroe MI requires a <strong>BUILDING permit</strong> ($50-$100). This is different from Ohio where zoning permits are more common. Michigan has stricter building code requirements. Call MISS DIG 811 before digging.</p></div>
+        <div class="seo-card"><h3>What are corner lot fence rules?</h3><p>Corner lots have <strong>"sight triangle"</strong> restrictions - an area near intersections where fences must be shorter (usually 2.5-3ft max) so drivers can see. The triangle is typically 20-25 feet from the corner along each street.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Do I need a fence permit in Toledo Ohio?","acceptedAnswer":{"@type":"Answer","text":"Yes, Toledo requires a Certificate of Zoning Compliance for ALL fences. This is a ZONING permit (not building permit). Front yard max is 3.5ft open style, side/rear max is 6ft. No fee but approval required before installation."}},
+    {"@type":"Question","name":"Do I need a fence permit in Perrysburg Township Ohio?","acceptedAnswer":{"@type":"Answer","text":"Perrysburg Township is PARTIALLY ZONED. Some areas require a Zoning Certificate and some do not. Call (419) 874-3551 ext 4005 to verify if your property requires a permit. Fences may be up to 7 feet in height."}},
+    {"@type":"Question","name":"What is the maximum fence height in Ohio?","acceptedAnswer":{"@type":"Answer","text":"Most Ohio municipalities allow 4 feet in front yards (open style required) and 6 feet in side/rear yards (privacy OK). Some areas like Toledo limit front yards to 3.5 feet."}}
+  ]}
+  </script>
+
+  <script>
+  const cities = {
+    // LUCAS COUNTY, OHIO
+    'Toledo': { 
+      county: 'Lucas', state: 'OH', front: 3.5, side: 6, back: 6, 
+      frontNote: 'Open style required (50%+ open)', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Certificate of Zoning Compliance', permitFee: '$0', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Toledo Plan Commission', phone: '(419) 245-1200', address: 'One Government Center, Suite 1620, Toledo, OH 43604',
+      setbacks: ['Property line (0") allowed with survey', '2" offset recommended to avoid disputes', 'Survey strongly recommended'], 
+      sight: ['Corner lots: Max 3ft within 25ft of intersection', 'Clear sight triangle required', 'Fences cannot obstruct traffic view'], 
+      pool: ['4ft minimum height required by Ohio code', 'Self-closing, self-latching gates mandatory', 'Latch must be 54" from ground or pool-side'], 
+      hoa: ['Many Toledo subdivisions have HOAs', 'Always check your CC&Rs before installation', 'We can help coordinate HOA approvals'], 
+      fullRules: '<p><strong>Toledo Municipal Code Chapter 1123 - Fences:</strong></p><p>All fences require a <strong>Certificate of Zoning Compliance</strong> from the Plan Commission BEFORE installation. This is a ZONING permit (not building permit).</p><p><strong>Height Limits:</strong> Front yard fences limited to 3.5 feet maximum and must be at least 50% open (picket, chain link, or ornamental - NO solid privacy in front). Side and rear yard fences may be up to 6 feet tall and may be solid/privacy style.</p><p><strong>Corner Lots:</strong> Within the sight triangle (25 feet from corner along each property line), fences cannot exceed 3 feet height.</p><p><strong>Construction Requirements:</strong> The "finished" or "good" side must face outward toward neighbors. Barbed wire and electric fences are prohibited in residential areas. Fences must be set back at least 2" from public sidewalks.</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> - Certificate of Zoning Compliance (free)'},
+        {type:'good',text:'Front yard: max <strong>3.5 feet</strong>, must be 50%+ open'},
+        {type:'good',text:'Side/rear yards: max <strong>6 feet</strong>, privacy OK'},
+        {type:'warn',text:'Corner lots: max 3ft within 25ft sight triangle'},
+        {type:'info',text:'Good side of fence must face neighbors'},
+        {type:'info',text:'Call OUPS 811 at least 48 hours before digging'}
+      ], 
+      links: [
+        {text:'Toledo Fence Requirements', url:'https://toledo.oh.gov/residents/homeowners/remodeling-construction/fences', type:'CODE'},
+        {text:'Certificate of Zoning Compliance Application', url:'https://cdn.toledo.oh.gov/uploads/documents/Plan-Commission/Forms/Certificate-of-Zoning-Compliance_20240926.pdf', type:'PERMITS'},
+        {text:'Toledo ePermit Portal', url:'https://citizenaccess.toledo.oh.gov/citizenaccess/', type:'PERMITS'}
+      ] 
+    },
+    'Maumee': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Approval', permitFee: '$0', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Maumee Planning & Building', phone: '(419) 897-7135', address: '400 Conant St, Maumee, OH 43537',
+      setbacks: ['Property line OK', 'Survey recommended'], 
+      sight: ['Corner visibility rules apply', 'Sight triangle enforced'], 
+      pool: ['4ft required by state code', 'Self-latching gates'], 
+      hoa: ['Many HOAs in Maumee area', 'Check deed restrictions'], 
+      fullRules: '<p><strong>City of Maumee Fence Regulations:</strong></p><p>Maumee requires <strong>ZONING approval</strong> for fence installation. The historic district (Ford Street to Key Street, Anthony Wayne Trail to the Maumee River) has additional design review requirements.</p><p><strong>Height Limits:</strong> Front yard max 4 feet (open style), side/rear max 6 feet (privacy OK).</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> (free)'},
+        {type:'good',text:'Standard heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Historic district has design review'}
+      ], 
+      links: [
+        {text:'Maumee Residential Permit Steps', url:'https://maumee.org/building-and-inspection/residential-building-permit-steps/', type:'DEPT'},
+        {text:'Fence Regulations (Chapter 1142)', url:'https://codelibrary.amlegal.com/codes/maumee/latest/maumee_oh/0-0-0-41141', type:'CODE'}
+      ] 
+    },
+    'Sylvania': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style required', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Review', permitFee: '$0', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Sylvania Planning & Zoning', phone: '(419) 885-8945', address: '6730 Monroe St, Sylvania, OH 43560',
+      setbacks: ['Property line installation OK', 'Sidewalk setback may apply', 'Survey recommended for disputes'], 
+      sight: ['Sight triangle 25ft from corners', 'Max 2.5ft fence in sight zone', 'Applies to all corner properties'], 
+      pool: ['4ft minimum barrier height', 'Self-closing/self-latching gates', 'May need separate permit'], 
+      hoa: ['Many HOAs in Sylvania area', 'Get HOA approval BEFORE city permit', 'Some restrict fence styles/colors'], 
+      fullRules: '<p><strong>City of Sylvania Fence Regulations:</strong></p><p>Sylvania requires <strong>ZONING review</strong> for fence installation. Residential fences in front yards are limited to 4 feet and must be open style (50%+ open). Side and rear yard fences may be up to 6 feet and may be solid privacy style.</p><p><strong>Important:</strong> Sylvania has many HOA communities. Always verify your specific subdivision rules BEFORE applying for city permits. The city will not override HOA restrictions.</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> (free)'},
+        {type:'good',text:'Front: max 4 feet, open style required'},
+        {type:'good',text:'Side/rear: max 6 feet, privacy OK'},
+        {type:'info',text:'Many HOAs - get HOA approval FIRST'}
+      ], 
+      links: [
+        {text:'Sylvania Planning & Building Department', url:'https://cityofsylvania.com/departments/planning-and-building/', type:'DEPT'}
+      ] 
+    },
+    'Sylvania Twp': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Permit', permitFee: '$25-$50', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Sylvania Township Zoning', phone: '(419) 882-0031', address: '4927 Holland-Sylvania Rd, Sylvania, OH 43560',
+      setbacks: ['Property line OK', 'Easy approval process', 'No survey required unless disputed'], 
+      sight: ['Standard visibility rules at intersections', 'Corner lots checked'], 
+      pool: ['4ft minimum', 'Separate permit may be needed'], 
+      hoa: ['Many subdivisions have HOAs', 'Check deed restrictions before applying'], 
+      fullRules: '<p><strong>Sylvania Township Fence Requirements:</strong></p><p>Sylvania Township requires a <strong>ZONING permit</strong> ($25-$50) for fence installation. This is NOT a building permit. The process is straightforward with approval typically within a few business days.</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25-$50)'},
+        {type:'good',text:'Standard: 4ft front, 6ft rear'},
+        {type:'good',text:'Quick and easy approval process'}
+      ], 
+      links: [
+        {text:'Sylvania Township Zoning Department', url:'https://www.sylvaniatownship.com/departments/zoning', type:'DEPT'}
+      ] 
+    },
+    'Oregon': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Oregon Building Department', phone: '(419) 698-7119', address: '5330 Seaman Rd, Oregon, OH 43616',
+      setbacks: ['Property line OK', 'Survey recommended for accuracy'], 
+      sight: ['Corner visibility rules apply', 'Sight triangle enforced'], 
+      pool: ['4ft required by state code', 'Self-latching gates'], 
+      hoa: ['Some subdivisions have restrictions', 'Check your deed'], 
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Standard heights: 4ft front, 6ft rear'},
+        {type:'good',text:'Quick approval process'}
+      ], 
+      links: [
+        {text:'City of Oregon Building Department', url:'https://www.oregonohio.org/departments/building/', type:'DEPT'}
+      ] 
+    },
+    'Holland': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Village Zoning Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Holland Village Zoning', phone: '(419) 865-7104', address: '1245 Clarion Ave, Holland, OH 43528',
+      setbacks: ['Property line OK', 'Must be outside public right-of-way'], 
+      sight: ['Standard corner visibility requirements'], 
+      pool: ['4ft required', 'Separate building permit through Lucas County'], 
+      hoa: ['Check deed restrictions', 'Some subdivisions have covenants'], 
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Quick approval - Village office'}
+      ], 
+      links: [
+        {text:'Holland Zoning FAQ', url:'https://www.hollandohio.com/zoning-faq/', type:'CODE'}
+      ] 
+    },
+    'Waterville': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Waterville Building', phone: '(419) 878-8100', address: '25 N Second St, Waterville, OH 43566',
+      setbacks: ['Property line OK', 'Very fence-friendly'], 
+      sight: ['Use common sense at corners'], 
+      pool: ['Ohio state code applies (4ft)'], 
+      hoa: ['Some subdivisions have HOAs'], 
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong> - Very easy!'},
+        {type:'good',text:'Standard heights: 4ft front, 6ft rear'}
+      ], 
+      links: [] 
+    },
+    'Jerusalem Twp': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Jerusalem Township', phone: '(419) 836-8921', address: '9501 Jerusalem Rd, Curtice, OH 43412',
+      setbacks: ['Property line OK', 'No restrictions', 'Very easy installation'], 
+      sight: ['Use common sense at corners'], 
+      pool: ['Ohio state code applies (4ft)'], 
+      hoa: ['Very few HOAs', 'Check deed if in subdivision'], 
+      fullRules: '<p><strong>Jerusalem Township - NO PERMIT REQUIRED!</strong></p><p>Jerusalem Township does <strong>NOT require a permit</strong> for fence installation - no zoning permit, no building permit. Standard height guidelines of 4 feet front and 6 feet rear are recommended but not strictly enforced. This is one of the easiest areas in Lucas County for fence installation.</p>',
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong> - One of the easiest!'},
+        {type:'good',text:'Standard heights: 4ft front, 6ft rear (recommended)'},
+        {type:'info',text:'Call OUPS 811 before digging'}
+      ], 
+      links: [
+        {text:'Jerusalem Township', url:'https://twp.jerusalem.oh.us/', type:'DEPT'}
+      ] 
+    },
+    'Monclova Twp': { 
+      county: 'Lucas', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Monclova Township', phone: '(419) 865-7862', address: '4335 Albon Rd, Monclova, OH 43542',
+      setbacks: ['Property line OK', 'No restrictions'], 
+      sight: ['Use common sense at corners'], 
+      pool: ['Ohio state code applies'], 
+      hoa: ['Check subdivision deed restrictions'], 
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong>'},
+        {type:'good',text:'Easiest regulations in Lucas County'}
+      ], 
+      links: [
+        {text:'Monclova Township', url:'https://www.monclovatwp.org/', type:'DEPT'}
+      ] 
+    },
+    // WOOD COUNTY, OHIO
+    'Perrysburg': { 
+      county: 'Wood', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style required (50%+)', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Compliance Form', permitFee: '$0', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Perrysburg Planning & Zoning', phone: '(419) 872-8060', address: '201 W Indiana Ave, Perrysburg, OH 43551',
+      setbacks: ['Property line OK', 'Survey recommended', 'Utility easements may apply'], 
+      sight: ['Sight triangle 20ft from corners', 'Max 30" (2.5ft) in sight zone', 'Strictly enforced on corners'], 
+      pool: ['Building permit required for pool fencing', '4ft with self-closing/latching gate'], 
+      hoa: ['Many developments have HOAs', 'Get HOA approval FIRST', 'We help coordinate approvals'], 
+      fullRules: '<p><strong>City of Perrysburg Fence Regulations:</strong></p><p>Perrysburg requires a <strong>Zoning Compliance Form</strong> (free, ZONING permit) for all fence installations. This is NOT a building permit.</p><p><strong>Height Limits:</strong> Front yard fences limited to 4 feet maximum and must be "open style" (50%+ open - picket, ornamental, chain link). Solid privacy fences are NOT allowed in front yards. Side and rear yard fences may be up to 6 feet and may be solid/privacy.</p><p><strong>Corner Lots:</strong> Strict sight triangle requirements - within 20 feet of corner along each property line, fences cannot exceed 30 inches (2.5 feet).</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> - Compliance Form (free)'},
+        {type:'good',text:'Front yard: max 4ft, open style only'},
+        {type:'good',text:'Side/rear: max 6ft, privacy OK'},
+        {type:'warn',text:'Corner lots: max 30" (2.5ft) in sight triangle'},
+        {type:'info',text:'Historic downtown has design guidelines'}
+      ], 
+      links: [
+        {text:'Perrysburg Planning & Zoning', url:'https://www.perrysburgoh.gov/199/Planning-Zoning', type:'DEPT'},
+        {text:'Permit FAQs (Fences)', url:'https://www.perrysburgoh.gov/faq.aspx?TID=18', type:'PERMITS'}
+      ] 
+    },
+    'Perrysburg Twp': { 
+      county: 'Wood', state: 'OH', front: 4, side: 7, back: 7,
+      frontNote: 'Gates permitted at driveways', sideNote: 'Privacy OK', backNote: 'Privacy OK - max 7ft',
+      permitType: 'zoning', permitText: 'Zoning Certificate', permitFee: '$25-$50', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Perrysburg Township Zoning', phone: '(419) 874-3551 x4005', address: '26609 Lime City Rd, Perrysburg, OH 43551',
+      setbacks: ['Property line OK', 'Check utility easements', 'Survey recommended for disputes'], 
+      sight: ['Sight triangle applies at corners', 'Check zoning resolution'], 
+      pool: ['Ohio state code applies (4ft min)', 'Self-closing gates required'], 
+      hoa: ['Check subdivision deed restrictions', 'Some developments have HOAs', 'Township is PARTIALLY ZONED'], 
+      fullRules: '<p><strong>Perrysburg Township Fence Requirements:</strong></p><p>Perrysburg Township is <strong>PARTIALLY ZONED</strong> - meaning some areas require zoning certificates and some do not. Contact the Zoning Department at (419) 874-3551 ext. 4005 to verify if your property is in a zoned area.</p><p><strong>If in zoned area:</strong> A Zoning Certificate is required before fence installation. Submit application with drawing and fee.</p><p><strong>Height Limits:</strong> Fences may not exceed 7 feet in height per the zoning resolution. Front yard fences have additional restrictions - gates at driveways are permitted.</p>',
+      rules: [
+        {type:'warn',text:'<strong>PARTIALLY ZONED</strong> - Call to verify if permit needed'},
+        {type:'info',text:'Zoning Certificate required in zoned areas ($25-$50)'},
+        {type:'good',text:'Max height: 7 feet (higher than most!)'},
+        {type:'info',text:'Check deed restrictions in your subdivision'}
+      ], 
+      links: [
+        {text:'Perrysburg Township Zoning', url:'https://www.perrysburgtownship.us/departments/planningzoning/', type:'DEPT'}
+      ] 
+    },
+    'Bowling Green': { 
+      county: 'Wood', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Bowling Green Planning', phone: '(419) 354-6218', address: '304 N Church St, Bowling Green, OH 43402',
+      setbacks: ['Property line OK'], 
+      sight: ['Corner visibility rules apply'], 
+      pool: ['4ft required'], 
+      hoa: ['Limited HOAs in area'], 
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Standard heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Rental properties have additional rules'}
+      ], 
+      links: [
+        {text:'Bowling Green Planning Division', url:'https://www.bgohio.org/planning-division/', type:'DEPT'}
+      ] 
+    },
+    'Rossford': { 
+      county: 'Wood', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Zoning Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Rossford Building', phone: '(419) 666-0210', address: '133 Osborn St, Rossford, OH 43460',
+      setbacks: ['Property line OK'], 
+      sight: ['Standard visibility'], 
+      pool: ['4ft required'], 
+      hoa: ['Limited HOAs'], 
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Quick approval'}
+      ], 
+      links: [
+        {text:'City of Rossford', url:'https://www.rossfordohio.com/', type:'DEPT'}
+      ] 
+    },
+    'Northwood': { 
+      county: 'Wood', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Northwood Building', phone: '(419) 693-9327', address: '6000 Wales Rd, Northwood, OH 43619',
+      setbacks: ['Property line OK'], 
+      sight: ['Standard visibility'], 
+      pool: ['4ft required'], 
+      hoa: ['Few HOAs'], 
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Quick approval'}
+      ], 
+      links: [
+        {text:'City of Northwood', url:'https://www.ci.northwood.oh.us/', type:'DEPT'}
+      ] 
+    },
+    'Lake Twp': { 
+      county: 'Wood', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Lake Township', phone: '(419) 666-2717', address: '27975 Cummings Rd, Millbury, OH 43447',
+      setbacks: ['Property line OK'], 
+      sight: ['Use common sense'], 
+      pool: ['Ohio state code'], 
+      hoa: ['Check subdivision restrictions'], 
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong>'},
+        {type:'good',text:'Standard heights'}
+      ], 
+      links: [
+        {text:'Lake Township', url:'https://www.laketown.us/', type:'DEPT'}
+      ] 
+    },
+    // FULTON COUNTY, OHIO
+    'Wauseon': { 
+      county: 'Fulton', state: 'OH', front: 4, side: 8, back: 8,
+      frontNote: 'Ornamental/open only', sideNote: 'Privacy up to 8ft!', backNote: 'Privacy up to 8ft!',
+      permitType: 'zoning', permitText: 'Zoning Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Wauseon Zoning Department', phone: '(419) 335-1441', address: '230 Clinton St, Wauseon, OH 43567',
+      setbacks: ['Property line OK', 'Privacy fence on property line needs neighbor written agreement'], 
+      sight: ['25ft sight triangle at intersections', 'No fence/planting over 30" in triangle'], 
+      pool: ['4ft required'], 
+      hoa: ['Few HOAs in area'], 
+      fullRules: '<p><strong>Wauseon Fence Regulations:</strong></p><p><strong>Ornamental fences:</strong> Permitted in any yard. Front yard max 4 feet. Side/rear max 6 feet.</p><p><strong>Chain link:</strong> Side and rear yards ONLY. Max 4 feet.</p><p><strong>Privacy fences:</strong> Side and rear yards ONLY. Up to <strong>8 FEET</strong> - higher than most cities! If placing on property line, need written neighbor agreement on file with Zoning.</p>',
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'<strong>PRIVACY FENCES UP TO 8 FEET!</strong>'},
+        {type:'info',text:'Chain link max 4ft side/rear only'},
+        {type:'info',text:'Privacy on lot line needs neighbor written OK'}
+      ], 
+      links: [
+        {text:'Wauseon Fence Information', url:'https://www.cityofwauseon.com/building-zoning-housing/pages/fence-information', type:'CODE'}
+      ] 
+    },
+    'Swanton': { 
+      county: 'Fulton', state: 'OH', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'zoning', permitText: 'Village Permit', permitFee: '$25', 
+      setback: '0"', processing: '3-5 days', 
+      contact: 'Swanton Village', phone: '(419) 826-8417', address: '219 Chestnut St, Swanton, OH 43558',
+      setbacks: ['Property line OK'], 
+      sight: ['Standard visibility'], 
+      pool: ['4ft required'], 
+      hoa: ['Limited'], 
+      rules: [
+        {type:'warn',text:'<strong>ZONING PERMIT REQUIRED</strong> ($25)'},
+        {type:'good',text:'Quick approval'}
+      ], 
+      links: [
+        {text:'Village of Swanton', url:'https://www.villageofswanton.com/', type:'DEPT'}
+      ] 
+    },
+    // MONROE COUNTY, MICHIGAN
+    'Monroe': { 
+      county: 'Monroe', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Open style required', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building Permit', permitFee: '$50-$100', 
+      setback: '0"', processing: '5-7 days', 
+      contact: 'Monroe Building Department', phone: '(734) 384-9115', address: '120 E First St, Monroe, MI 48161',
+      setbacks: ['Property line OK', 'Survey recommended', 'Check utility easements'], 
+      sight: ['Corner visibility requirements', 'Sight triangle enforced'], 
+      pool: ['4ft Michigan code', 'Self-closing gates required'], 
+      hoa: ['Some subdivisions have HOAs', 'Check deed restrictions'], 
+      fullRules: '<p><strong>City of Monroe, Michigan Fence Requirements:</strong></p><p>Monroe requires a <strong>BUILDING permit</strong> ($50-$100) for fence installation. This is different from Ohio where zoning permits are more common.</p><p>Standard Michigan heights: 4 feet in front yards, 6 feet in side/rear yards.</p><p><strong>Remember:</strong> Call Michigan MISS DIG 811 before digging.</p>',
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($50-$100)'},
+        {type:'good',text:'Standard MI heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Call Michigan MISS DIG: 811 before digging'}
+      ], 
+      links: [
+        {text:'Monroe Building Department', url:'https://www.monroemi.gov/departments/building_department/', type:'DEPT'}
+      ] 
+    },
+    'Bedford Twp': { 
+      county: 'Monroe', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Bedford Township Building Dept', phone: '(734) 224-7330', address: '8100 Jackman Rd, Temperance, MI 48182',
+      setbacks: ['Property line OK', 'Check utility easements', 'No permit required'], 
+      sight: ['Corner visibility - use common sense'], 
+      pool: ['4ft Michigan code', 'Self-closing gates required'], 
+      hoa: ['Many subdivisions have HOAs', 'Check your deed restrictions'], 
+      fullRules: '<p><strong>Bedford Township (Monroe County) - NO PERMIT REQUIRED!</strong></p><p>Bedford Township (including Temperance and Lambertville areas) does <strong>NOT require a fence permit</strong> for standard residential fence installation.</p><p>Standard Michigan heights apply: 4ft front yard, 6ft side/rear yards.</p>',
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong> - Easy installation!'},
+        {type:'good',text:'Standard MI heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Call MISS DIG 811 before digging'}
+      ], 
+      links: [
+        {text:'Bedford Township Building Department', url:'https://www.bedfordmi.org/departments/building/index.php', type:'DEPT'}
+      ] 
+    },
+    'Temperance': { 
+      county: 'Monroe', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Bedford Township Building', phone: '(734) 224-7330', address: '8100 Jackman Rd, Temperance, MI 48182',
+      setbacks: ['Property line OK', 'No permit required'], 
+      sight: ['Corner visibility - use common sense'], 
+      pool: ['4ft required'], 
+      hoa: ['Many subdivisions have HOAs', 'Check your deed restrictions'], 
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong> - Easy!'},
+        {type:'good',text:'Standard MI heights'}
+      ], 
+      links: [
+        {text:'Bedford Township Building', url:'https://www.bedfordmi.org/departments/building_department/', type:'DEPT'}
+      ] 
+    },
+    'Lambertville': { 
+      county: 'Monroe', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Standard', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'none', permitText: 'No Permit Required', permitFee: '$0', 
+      setback: '0"', processing: 'N/A', 
+      contact: 'Bedford Township Building', phone: '(734) 224-7330', address: '8100 Jackman Rd, Temperance, MI 48182',
+      setbacks: ['Property line OK', 'No permit required'], 
+      sight: ['Corner visibility - use common sense'], 
+      pool: ['4ft required'], 
+      hoa: ['Many subdivisions - check your deed'], 
+      rules: [
+        {type:'good',text:'<strong>NO PERMIT REQUIRED</strong> - Easy!'},
+        {type:'good',text:'Standard MI heights'}
+      ], 
+      links: [
+        {text:'Bedford Township', url:'https://www.bedfordmi.org/', type:'DEPT'}
+      ] 
+    },
+    // WAYNE COUNTY, MICHIGAN
+    'Flat Rock': { 
+      county: 'Wayne', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building/Zoning Permit', permitFee: '$50-$75', 
+      setback: '0"', processing: '5-7 days', 
+      contact: 'Flat Rock Building & Safety', phone: '(734) 782-0445', address: '1 Maguire St, Flat Rock, MI 48134',
+      setbacks: ['Property line OK', 'Survey recommended', 'Check easements'], 
+      sight: ['Corner visibility requirements'], 
+      pool: ['4ft Michigan code', 'Self-closing gates'], 
+      hoa: ['Some subdivisions have HOAs'], 
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($50-$75)'},
+        {type:'good',text:'Standard MI heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Call Michigan MISS DIG: 811'}
+      ], 
+      links: [
+        {text:'Flat Rock Building & Safety', url:'https://www.flatrockmi.org/departments/building_and_safety/index.php', type:'DEPT'}
+      ] 
+    },
+    'Woodhaven': { 
+      county: 'Wayne', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Open style required', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building Permit', permitFee: '$50-$100', 
+      setback: '0"', processing: '5-7 days', 
+      contact: 'Woodhaven Building Department', phone: '(734) 675-4905', address: '21869 West Rd, Woodhaven, MI 48183',
+      setbacks: ['Property line OK', 'Survey recommended'], 
+      sight: ['Corner lots have restrictions', 'Sight triangle enforced'], 
+      pool: ['4ft Michigan code', 'Self-closing gates'], 
+      hoa: ['Many subdivisions have HOAs', 'Check deed restrictions'], 
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($50-$100)'},
+        {type:'good',text:'Standard MI heights: 4ft front, 6ft rear'},
+        {type:'info',text:'Many HOAs - check deed restrictions'}
+      ], 
+      links: [
+        {text:'City of Woodhaven', url:'https://www.woodhaven-mi.org/', type:'DEPT'}
+      ] 
+    },
+    'Brownstown Twp': { 
+      county: 'Wayne', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building Permit', permitFee: '$35-$75', 
+      setback: '0"', processing: '5-7 days', 
+      contact: 'Brownstown Township Building', phone: '(734) 675-0920', address: '21313 Telegraph Rd, Brownstown, MI 48183',
+      setbacks: ['Property line OK'], 
+      sight: ['Corner visibility requirements'], 
+      pool: ['4ft Michigan code'], 
+      hoa: ['Many subdivisions have HOAs'], 
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($35-$75)'},
+        {type:'good',text:'Standard MI heights'},
+        {type:'info',text:'Many HOAs in the area'}
+      ], 
+      links: [
+        {text:'Brownstown Township Building', url:'https://www.brownstown-mi.org/departments/building_department/', type:'DEPT'}
+      ] 
+    },
+    'Trenton': { 
+      county: 'Wayne', state: 'MI', front: 4, side: 6, back: 6,
+      frontNote: 'Open style preferred', sideNote: 'Privacy OK', backNote: 'Privacy OK',
+      permitType: 'building', permitText: 'Building Permit', permitFee: '$50-$100', 
+      setback: '0"', processing: '5-7 days', 
+      contact: 'Trenton Building Department', phone: '(734) 675-8200', address: '2800 Third St, Trenton, MI 48183',
+      setbacks: ['Property line OK', 'Waterfront has special rules'], 
+      sight: ['Corner visibility requirements'], 
+      pool: ['4ft Michigan code'], 
+      hoa: ['Some subdivisions'], 
+      rules: [
+        {type:'warn',text:'<strong>BUILDING PERMIT REQUIRED</strong> ($50-$100)'},
+        {type:'good',text:'Standard MI heights'},
+        {type:'info',text:'Waterfront properties may have special rules'}
+      ], 
+      links: [
+        {text:'City of Trenton', url:'https://www.trenton-mi.gov/', type:'DEPT'}
+      ] 
+    }
+  };
+
+  function buildCityGrid() {
+    const grid = document.getElementById('cityGrid');
+    grid.innerHTML = Object.keys(cities).map(name => {
+      const c = cities[name];
+      const dotClass = c.permitType === 'none' ? 'green' : 'yellow';
+      return `<button class="municipality-btn" data-city="${name}" data-county="${c.county}" onclick="selectCity('${name}')"><span class="permit-dot ${dotClass}"></span>${name}<span class="st">${c.county}, ${c.state}</span></button>`;
+    }).join('');
+  }
+
+  function filterByCounty(county) {
+    document.querySelectorAll('.county-tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.querySelectorAll('.municipality-btn').forEach(btn => {
+      btn.style.display = (county === 'all' || btn.dataset.county === county) ? 'block' : 'none';
+    });
+  }
+
+  function filterCities(query) {
+    const q = query.toLowerCase();
+    document.querySelectorAll('.municipality-btn').forEach(btn => {
+      btn.style.display = btn.dataset.city.toLowerCase().includes(q) ? 'block' : 'none';
+    });
+  }
+
+  function selectCity(name) {
+    const city = cities[name];
+    if (!city) return;
+    
+    document.querySelectorAll('.municipality-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`.municipality-btn[data-city="${name}"]`)?.classList.add('active');
+    
+    document.getElementById('cityName').innerHTML = '🏠 ' + name;
+    document.getElementById('citySubtitle').textContent = `${city.county} County, ${city.state === 'OH' ? 'Ohio' : 'Michigan'}`;
+    
+    // Permit type badges
+    const badges = document.getElementById('permitBadges');
+    if (city.permitType === 'none') {
+      badges.innerHTML = '<div class="permit-badge none">✅ NO PERMIT REQUIRED</div>';
+    } else if (city.permitType === 'zoning') {
+      badges.innerHTML = `<div class="permit-badge zoning">📋 ZONING PERMIT: ${city.permitText}</div>`;
+    } else if (city.permitType === 'building') {
+      badges.innerHTML = `<div class="permit-badge building">🔨 BUILDING PERMIT: ${city.permitText}</div>`;
+    } else {
+      badges.innerHTML = `<div class="permit-badge zoning">📋 ${city.permitText}</div>`;
+    }
+    
+    document.getElementById('frontH').innerHTML = city.front + '<small> ft</small>';
+    document.getElementById('sideH').innerHTML = city.side + '<small> ft</small>';
+    document.getElementById('backH').innerHTML = city.back + '<small> ft</small>';
+    document.getElementById('frontNote').textContent = city.frontNote || 'Open style preferred';
+    document.getElementById('sideNote').textContent = city.sideNote || 'Privacy OK';
+    document.getElementById('backNote').textContent = city.backNote || 'Privacy OK';
+    
+    document.getElementById('quickFacts').innerHTML = `
+      <div class="quick-fact"><div class="quick-fact-value">${city.permitFee}</div><div class="quick-fact-label">Permit Fee</div></div>
+      <div class="quick-fact"><div class="quick-fact-value">${city.setback}</div><div class="quick-fact-label">Min Setback</div></div>
+      <div class="quick-fact"><div class="quick-fact-value">${city.processing}</div><div class="quick-fact-label">Processing</div></div>
+      <div class="quick-fact"><div class="quick-fact-value">${city.state === 'OH' ? 'OUPS' : 'MISS DIG'}</div><div class="quick-fact-label">Call 811</div></div>
+    `;
+    
+    if (city.setbacks) document.getElementById('setbackList').innerHTML = city.setbacks.map(s => `<li>${s}</li>`).join('');
+    if (city.sight) document.getElementById('sightList').innerHTML = city.sight.map(s => `<li>${s}</li>`).join('');
+    if (city.pool) document.getElementById('poolList').innerHTML = city.pool.map(s => `<li>${s}</li>`).join('');
+    if (city.hoa) document.getElementById('hoaList').innerHTML = city.hoa.map(s => `<li>${s}</li>`).join('');
+    
+    // Full rules section
+    const fullRulesEl = document.getElementById('fullRules');
+    const fullRulesContent = document.getElementById('fullRulesContent');
+    if (city.fullRules) {
+      fullRulesContent.innerHTML = city.fullRules;
+      fullRulesEl.style.display = 'block';
+    } else {
+      fullRulesEl.style.display = 'none';
+    }
+    
+    document.getElementById('rulesCity').textContent = name;
+    document.getElementById('rulesGrid').innerHTML = (city.rules || []).map(rule => {
+      const icons = { good: '✅', warn: '⚠️', info: 'ℹ️' };
+      return `<div class="rule-card ${rule.type}"><span class="rule-icon">${icons[rule.type]||'ℹ️'}</span><span class="rule-text">${rule.text}</span></div>`;
+    }).join('');
+    
+    const contactHtml = city.address 
+      ? `<strong>${city.contact}:</strong> <a href="tel:${city.phone.replace(/[^0-9]/g,'')}" style="color:#fff;text-decoration:underline">${city.phone}</a><br><span style="font-size:0.85rem;opacity:0.9;">${city.address}</span>`
+      : `<strong>${city.contact}:</strong> <a href="tel:${city.phone.replace(/[^0-9]/g,'')}" style="color:#fff;text-decoration:underline">${city.phone}</a>`;
+    document.getElementById('deptContact').innerHTML = contactHtml;
+    
+    const linksEl = document.getElementById('linksContent');
+    if (city.links && city.links.length) {
+      linksEl.innerHTML = city.links.map(l => `<a href="${l.url}" target="_blank" rel="noopener"><span class="link-type">${l.type || 'LINK'}</span> ${l.text}</a>`).join('');
+      document.getElementById('officialLinks').style.display = 'block';
+    } else {
+      document.getElementById('officialLinks').style.display = 'none';
+    }
+    
+    document.getElementById('cityInfoCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  buildCityGrid();
+  selectCity('Toledo');
+  </script>
+</BaseLayout>

@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Page Not Found | Ghareeb Fencing">
+    <section class="error-page">
+        <div class="container">
+            <h1>404</h1>
+            <p>Page not found</p>
+            <a href="/" class="btn btn-primary">Return Home</a>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .error-page {
+        min-height: 60vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .error-page h1 {
+        font-size: 8rem;
+        color: var(--accent);
+        margin-bottom: 16px;
+    }
+    .error-page p {
+        font-size: 1.5rem;
+        color: var(--text-sub);
+        margin-bottom: 32px;
+    }
+</style>

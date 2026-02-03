@@ -1,0 +1,85 @@
+{
+  "meta": {
+    "title": "Wood Privacy Fence Installation Toledo OH | Affordable & Classic | Ghareeb Fencing",
+    "description": "Professional wood privacy fence installation in Toledo. Affordable pressure-treated pine fencing with classic appeal. Free quotes."
+  },
+  "hero": {
+    "badge": "Affordable Privacy",
+    "headline": "Wood Privacy Fence Installation",
+    "description": "Classic wood privacy fencing at an affordable price. Pressure-treated for durability, perfect for homeowners who want privacy without the premium price tag."
+  },
+  "intro": {
+    "headline": "Why Choose Wood Fencing?",
+    "content": "Wood fencing offers timeless appeal at the most budget-friendly price point. Our pressure-treated pine fences provide years of reliable privacy and can be painted or stained to match your home's aesthetic.",
+    "content2": "Perfect for backyard privacy, pet containment, or property definition on a budget.",
+    "benefits": [
+      "Most affordable privacy fence option",
+      "Pressure-treated for rot resistance",
+      "Can be painted or stained any color",
+      "Easy to repair if damaged",
+      "Classic American look"
+    ],
+    "image": "/images/gallery/pt-hero.jpg"
+  },
+  "gallery": {
+    "headline": "Wood Fence Installation Gallery",
+    "images": [
+      { "src": "/images/gallery/pt-hero.jpg", "alt": "Wood privacy fence" },
+      { "src": "/images/gallery/pt-privacy.jpg", "alt": "PT privacy fence" },
+      { "src": "/images/gallery/pt-lattice-top.jpg", "alt": "Wood fence with lattice" },
+      { "src": "/images/gallery/pt-double-gate.jpg", "alt": "Wood fence double gate" }
+    ]
+  },
+  "styles": {
+    "headline": "Wood Fence Styles We Install",
+    "subheadline": "Available in 6' and 8' heights. Can be painted or stained.",
+    "items": [
+      {
+        "name": "Solid Privacy",
+        "description": "Traditional dog-ear pickets for full privacy. Our most popular wood style.",
+        "image": "/images/gallery/pt-privacy.jpg"
+      },
+      {
+        "name": "Shadowbox",
+        "description": "Alternating boards on each side. Good neighbor fence looks great from both sides.",
+        "image": "/images/gallery/pt-shadowbox-closeup.jpg"
+      },
+      {
+        "name": "Privacy with Lattice",
+        "description": "Solid privacy with decorative lattice top accent.",
+        "image": "/images/gallery/pt-lattice-top.jpg"
+      }
+    ]
+  },
+  "comparison": {
+    "headline": "Wood Fence Options: Good / Better / Best",
+    "subheadline": "All pressure-treated for rot resistance",
+    "tiers": [
+      {
+        "name": "Good",
+        "subtitle": "Economy Privacy",
+        "description": "6ft dog-ear pickets with pressure-treated pine. 4x4 treated posts. Budget-friendly option with 10-15 year lifespan.",
+        "image": "/images/gallery/pt-privacy.jpg"
+      },
+      {
+        "name": "Better",
+        "subtitle": "Standard Privacy",
+        "description": "Premium treated lumber with flat-top or dog-ear style. Metal brackets, concrete-set posts, decorative caps included.",
+        "image": "/images/gallery/pt-hero.jpg",
+        "featured": true
+      },
+      {
+        "name": "Best",
+        "subtitle": "Premium with Lattice",
+        "description": "Board-on-board or lattice-top style with select grade lumber. Custom trim options and 6x6 posts available.",
+        "image": "/images/gallery/pt-lattice-top.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Ready for Your Wood Fence?",
+    "description": "Get a free quote for wood fence installation. Affordable privacy for your backyard.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  }
+}

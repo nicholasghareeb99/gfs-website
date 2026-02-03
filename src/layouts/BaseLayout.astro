@@ -1,0 +1,134 @@
+---
+import site from '../content/site.json';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalUrl?: string;
+}
+
+const { title, description = site.company.tagline, canonicalUrl } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Google Analytics -->
+    <script async src={`https://www.googletagmanager.com/gtag/js?id=${site.analytics.gaId}`}></script>
+    <script define:vars={{ gaId: site.analytics.gaId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+    </script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231e3a5f' rx='15' width='100' height='100'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='45' fill='%23d4af37'>GF</text></svg>">
+    
+    <title>{title}</title>
+    <meta name="description" content={description}>
+    <meta name="robots" content="index, follow">
+    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+    
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    
+    <!-- Trust Bar -->
+    <div class="trust-bar">
+        <div class="trust-bar-inner">
+            <div class="trust-item">
+                <span class="stars">★★★★★</span>
+                <span>{site.trustBar.rating} Rating ({site.trustBar.reviewCount} Reviews)</span>
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                <span>Licensed & Insured</span>
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>3-Year Warranty</span>
+            </div>
+            <div class="trust-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>0% Financing Available</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation -->
+    <nav class="nav" id="mainNav">
+        <div class="nav-inner">
+            <a class="nav-brand" href="/">
+                <div class="nav-logo">{site.company.shortName}</div>
+                <div class="nav-brand-text">GHAREEB<br><span>FENCING</span></div>
+            </a>
+            <div class="nav-links" id="navLinks">
+                <a class="nav-link" href="/">Home</a>
+                <div class="nav-styles-dropdown">
+                    <button class="nav-styles-toggle">Fence Styles <span class="arrow">▼</span></button>
+                    <div class="nav-styles-menu">
+                        {site.nav.fenceStyles.map(style => (
+                            <a href={style.href} class="nav-styles-link">
+                                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M12 4v16M17 4v16"/></svg></span>
+                                <span>{style.text}</span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+                {site.nav.links.slice(1).map(link => (
+                    <a class="nav-link" href={link.href}>{link.text}</a>
+                ))}
+                <a class="nav-link nav-quote-btn" href="/quote/">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Free Quote
+                </a>
+                <a class="nav-financing" href={site.financing.url} target="_blank">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> {site.financing.text}
+                </a>
+            </div>
+            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+        </div>
+    </nav>
+
+    <main id="main-content">
+        <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>{site.footer.copyright} <a href={`tel:${site.company.phoneRaw}`}>{site.company.phone}</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation toggle
+        const navToggle = document.getElementById('navToggle');
+        const navLinks = document.getElementById('navLinks');
+        navToggle?.addEventListener('click', () => navLinks?.classList.toggle('active'));
+
+        // Scroll effects
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainNav');
+            nav?.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Dropdown
+        document.querySelectorAll('.nav-styles-dropdown').forEach(dropdown => {
+            dropdown.addEventListener('click', (e) => {
+                if (e.target.closest('.nav-styles-toggle')) {
+                    dropdown.classList.toggle('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

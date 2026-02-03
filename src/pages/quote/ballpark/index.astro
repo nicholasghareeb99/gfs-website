@@ -1,0 +1,535 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+
+const pageTitle = "Instant Fence Quote Calculator | Ghareeb Fencing Solutions";
+const pageDescription = "Get an instant ballpark estimate for your fence project. Enter your fence length, style, and gates to see pricing. Toledo, NW Ohio & SE Michigan.";
+---
+
+<BaseLayout title={pageTitle} description={pageDescription}>
+  <style>
+    .quote-hero{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:140px 0 60px;text-align:center}
+    .quote-hero h1{color:#fff;font-size:clamp(2rem,5vw,2.8rem);margin-bottom:12px}
+    .quote-hero p{color:#94a3b8;font-size:1.1rem;max-width:600px;margin:0 auto}
+    .calculator-container{max-width:900px;margin:-40px auto 60px;padding:0 20px;position:relative;z-index:10}
+    .calc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;box-shadow:var(--shadow-lg)}
+    .calc-section{margin-bottom:32px}
+    .calc-section h3{font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--primary)}
+    .input-group{margin-bottom:20px}
+    .input-group label{display:block;font-weight:600;margin-bottom:8px;color:var(--text-dark)}
+    .input-group input,.input-group select{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);font-size:1rem;background:var(--bg-light);color:var(--text-dark);box-sizing:border-box}
+    .input-group input:focus,.input-group select:focus{border-color:var(--accent);outline:none}
+    .input-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+    .style-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+    .style-option{padding:16px;border:2px solid var(--border);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-light)}
+    .style-option:hover{border-color:var(--accent)}
+    .style-option.selected{border-color:var(--accent);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.2))}
+    .style-option .style-name{font-weight:700;margin-bottom:4px;color:var(--text-dark)}
+    .style-option .style-price{font-size:0.85rem;color:var(--text-muted)}
+    .gate-counter{display:flex;align-items:center;gap:12px}
+    .gate-btn{width:40px;height:40px;border:2px solid var(--border);border-radius:50%;background:var(--bg-light);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .gate-btn:hover{border-color:var(--accent);background:var(--accent);color:var(--primary-dark)}
+    .gate-count{font-size:1.5rem;font-weight:700;min-width:40px;text-align:center}
+    .height-options{display:flex;gap:12px;flex-wrap:wrap}
+    .height-btn{padding:12px 24px;border:2px solid var(--border);border-radius:var(--radius-full);background:var(--bg-light);cursor:pointer;font-weight:600;transition:all .2s}
+    .height-btn:hover{border-color:var(--accent)}
+    .height-btn.selected{border-color:var(--accent);background:var(--accent);color:var(--primary-dark)}
+    .results-card{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-lg);padding:32px;color:#fff;margin-top:32px}
+    .results-card h3{color:#fff;margin-bottom:24px;text-align:center}
+    .price-display{text-align:center;margin-bottom:24px}
+    .price-range{font-size:2.5rem;font-weight:800;color:var(--accent)}
+    .price-note{font-size:0.9rem;opacity:0.8;margin-top:8px}
+    .breakdown{display:grid;gap:12px;margin-bottom:24px}
+    .breakdown-row{display:flex;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.1);border-radius:8px}
+    .breakdown-label{opacity:0.9}
+    .breakdown-value{font-weight:700}
+    .financing-options{background:rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-top:24px}
+    .financing-options h4{margin-bottom:16px;text-align:center}
+    .financing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+    @media(max-width:600px){.financing-grid{grid-template-columns:repeat(2,1fr)}}
+    .financing-item{padding:12px;background:rgba(255,255,255,0.1);border-radius:8px}
+    .financing-term{font-size:0.8rem;opacity:0.8}
+    .financing-amount{font-weight:700;font-size:1.1rem}
+    .cta-buttons{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+    .cta-buttons .btn{padding:14px 28px;border-radius:var(--radius-full);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn-gold{background:var(--accent);color:var(--primary-dark)}
+    .btn-white{background:#fff;color:var(--primary)}
+    .removal-toggle{display:flex;align-items:center;gap:12px;margin-top:16px}
+    .toggle-switch{position:relative;width:50px;height:28px;background:var(--border);border-radius:14px;cursor:pointer;transition:background .2s}
+    .toggle-switch.active{background:var(--accent)}
+    .toggle-switch::after{content:'';position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s}
+    .toggle-switch.active::after{transform:translateX(22px)}
+    .removal-options{margin-top:16px;padding:16px;background:var(--bg-light);border-radius:var(--radius);display:none}
+    .removal-options.show{display:block}
+    .permit-info{margin-top:24px;padding:16px;background:rgba(59,130,246,0.1);border:2px solid rgba(59,130,246,0.3);border-radius:var(--radius);display:none}
+    .permit-info.show{display:block}
+    .permit-info h4{color:#2563eb;margin-bottom:8px}
+    .address-input-wrapper{position:relative}
+    .address-suggestions{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--accent);border-top:none;border-radius:0 0 12px 12px;max-height:300px;overflow-y:auto;z-index:100;display:none}
+    .address-suggestions.show{display:block}
+    .address-suggestion{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+    .address-suggestion:hover{background:rgba(212,175,55,0.1)}
+    .addr-main{font-weight:600}
+    .addr-sub{font-size:0.85rem;color:var(--text-muted)}
+    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 24px;border-radius:var(--radius-full);z-index:1000;display:none;align-items:center;gap:8px;box-shadow:var(--shadow-lg)}
+    .toast.show{display:flex}
+  </style>
+
+  <section class="quote-hero">
+    <div class="container">
+      <h1>⚡ Instant Fence Quote</h1>
+      <p>Get a ballpark estimate in seconds. No obligation, no pressure. Just honest pricing.</p>
+    </div>
+  </section>
+
+  <div class="calculator-container">
+    <div class="calc-card">
+      <!-- Address Section -->
+      <div class="calc-section">
+        <h3>📍 Your Location (Optional)</h3>
+        <div class="input-group">
+          <label for="address">Address - helps us check permit requirements</label>
+          <div class="address-input-wrapper">
+            <input type="text" id="address" placeholder="Enter your address..." autocomplete="off">
+            <div class="address-suggestions" id="addressSuggestions"></div>
+          </div>
+        </div>
+        <div class="permit-info" id="permitInfo">
+          <h4>📋 Permit Info for Your Area</h4>
+          <p id="permitText">We'll look up permit requirements based on your address.</p>
+        </div>
+      </div>
+
+      <!-- Fence Length -->
+      <div class="calc-section">
+        <h3>📏 Fence Length</h3>
+        <div class="input-group">
+          <label for="fenceLength">Total linear feet of fencing</label>
+          <input type="number" id="fenceLength" placeholder="e.g., 150" min="10" max="2000" value="">
+        </div>
+      </div>
+
+      <!-- Fence Style -->
+      <div class="calc-section">
+        <h3>🏠 Fence Style</h3>
+        <div class="style-grid" id="styleGrid">
+          <div class="style-option" data-style="wood" data-price="25">
+            <div class="style-name">Wood Privacy</div>
+            <div class="style-price">From $25/ft</div>
+          </div>
+          <div class="style-option selected" data-style="cedar" data-price="45">
+            <div class="style-name">Cedar Privacy</div>
+            <div class="style-price">From $45/ft</div>
+          </div>
+          <div class="style-option" data-style="vinyl" data-price="50">
+            <div class="style-name">Vinyl Privacy</div>
+            <div class="style-price">From $50/ft</div>
+          </div>
+          <div class="style-option" data-style="aluminum" data-price="40">
+            <div class="style-name">Aluminum</div>
+            <div class="style-price">From $40/ft</div>
+          </div>
+          <div class="style-option" data-style="chainlink" data-price="18">
+            <div class="style-name">Chain Link</div>
+            <div class="style-price">From $18/ft</div>
+          </div>
+          <div class="style-option" data-style="splitrail" data-price="15">
+            <div class="style-name">Split Rail</div>
+            <div class="style-price">From $15/ft</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fence Height -->
+      <div class="calc-section">
+        <h3>📐 Fence Height</h3>
+        <div class="height-options" id="heightOptions">
+          <button class="height-btn" data-height="4" data-mult="0.7">4 ft</button>
+          <button class="height-btn" data-height="5" data-mult="0.85">5 ft</button>
+          <button class="height-btn selected" data-height="6" data-mult="1.0">6 ft</button>
+          <button class="height-btn" data-height="8" data-mult="1.35">8 ft</button>
+        </div>
+      </div>
+
+      <!-- Gates -->
+      <div class="calc-section">
+        <h3>🚪 Gates</h3>
+        <div class="input-row">
+          <div class="input-group">
+            <label>Walk Gates (3-4ft wide)</label>
+            <div class="gate-counter">
+              <button class="gate-btn" onclick="adjustGate('walk', -1)">−</button>
+              <span class="gate-count" id="walkGateCount">1</span>
+              <button class="gate-btn" onclick="adjustGate('walk', 1)">+</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>Double/Drive Gates (8-12ft wide)</label>
+            <div class="gate-counter">
+              <button class="gate-btn" onclick="adjustGate('drive', -1)">−</button>
+              <span class="gate-count" id="driveGateCount">0</span>
+              <button class="gate-btn" onclick="adjustGate('drive', 1)">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Old Fence Removal -->
+      <div class="calc-section">
+        <h3>🗑️ Old Fence Removal</h3>
+        <div class="removal-toggle">
+          <div class="toggle-switch" id="removalToggle" onclick="toggleRemoval()"></div>
+          <span>I need my old fence removed</span>
+        </div>
+        <div class="removal-options" id="removalOptions">
+          <div class="input-row">
+            <div class="input-group">
+              <label for="removalFeet">Linear feet to remove</label>
+              <input type="number" id="removalFeet" placeholder="e.g., 150" min="0" value="0">
+            </div>
+            <div class="input-group">
+              <label for="removalType">Type of fence</label>
+              <select id="removalType">
+                <option value="3">Wood or Chain Link ($3/ft)</option>
+                <option value="6">Other/Heavy ($6/ft)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="results-card" id="resultsCard">
+        <h3>💰 Your Ballpark Estimate</h3>
+        <div class="price-display">
+          <div class="price-range" id="priceRange">$0 - $0</div>
+          <div class="price-note">Final price depends on property conditions, exact measurements, and selected options</div>
+        </div>
+        <div class="breakdown" id="breakdown">
+          <!-- Populated by JS -->
+        </div>
+        <div class="financing-options">
+          <h4>💳 Monthly Payment Options (0% Available)</h4>
+          <div class="financing-grid" id="financingGrid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+        <div class="cta-buttons">
+          <a href="#lead-form" class="btn btn-gold" onclick="scrollToForm()">📝 Get Exact Quote</a>
+          <a href="tel:4199028257" class="btn btn-white">📞 Call Now</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lead Capture Form -->
+    <div class="calc-card" id="lead-form" style="margin-top:32px">
+      <h3 style="text-align:center;margin-bottom:24px">📬 Get Your Exact Quote</h3>
+      <p style="text-align:center;color:var(--text-muted);margin-bottom:24px">We'll contact you within 24 hours to schedule a free on-site estimate.</p>
+      
+      <form name="ballpark-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/">
+        <input type="hidden" name="form-name" value="ballpark-quote">
+        <input type="hidden" name="quote-details" id="quoteDetails">
+        <p style="display:none"><input name="bot-field"></p>
+        
+        <div class="input-row">
+          <div class="input-group">
+            <label for="name">Your Name *</label>
+            <input type="text" id="name" name="name" required placeholder="John Smith">
+          </div>
+          <div class="input-group">
+            <label for="phone">Phone Number *</label>
+            <input type="tel" id="phone" name="phone" required placeholder="(419) 555-1234">
+          </div>
+        </div>
+        <div class="input-group">
+          <label for="email">Email Address *</label>
+          <input type="email" id="email" name="email" required placeholder="john@example.com">
+        </div>
+        <div class="input-group">
+          <label for="projectAddress">Project Address *</label>
+          <input type="text" id="projectAddress" name="address" required placeholder="123 Main St, Toledo, OH">
+        </div>
+        <div class="input-group">
+          <label for="notes">Additional Notes (Optional)</label>
+          <textarea id="notes" name="notes" rows="3" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);font-size:1rem;background:var(--bg-light);resize:vertical;box-sizing:border-box" placeholder="Any special requirements, questions, or details about your project..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:16px;font-size:1.1rem;border:none;cursor:pointer">
+          📩 Request Free Quote
+        </button>
+        <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:16px">No spam. We respect your privacy. Quotes are always free with no obligation.</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // Pricing data
+  const PRICING = {
+    wood: { base: 25, range: 8 },
+    cedar: { base: 45, range: 15 },
+    vinyl: { base: 50, range: 20 },
+    aluminum: { base: 40, range: 20 },
+    chainlink: { base: 18, range: 7 },
+    splitrail: { base: 15, range: 5 }
+  };
+
+  const GATE_PRICES = {
+    walk: { min: 200, max: 350 },
+    drive: { min: 450, max: 750 }
+  };
+
+  // State
+  let state = {
+    length: 0,
+    style: 'cedar',
+    height: 6,
+    heightMult: 1.0,
+    walkGates: 1,
+    driveGates: 0,
+    removal: false,
+    removalFeet: 0,
+    removalRate: 3
+  };
+
+  // Permit info by city
+  const PERMIT_INFO = {
+    'toledo': { text: 'Toledo requires a FREE Certificate of Zoning Compliance. Max 3.5ft front (open style), 6ft rear. We handle all permits!' },
+    'perrysburg': { text: 'Perrysburg requires a free Zoning Compliance Form. Max 4ft front (open style), 6ft rear. Quick approval process.' },
+    'sylvania': { text: 'Sylvania requires Zoning Review (free). Many HOAs in area - check your deed restrictions first.' },
+    'maumee': { text: 'Maumee requires free Zoning Approval. Historic district has additional design review.' },
+    'oregon': { text: 'Oregon requires a $25 Zoning Permit. Standard heights: 4ft front, 6ft rear.' },
+    'monroe': { text: 'Monroe MI requires a Building Permit ($50-$100). Standard heights: 4ft front, 6ft rear.' },
+    'temperance': { text: 'Great news! Bedford Township (Temperance) does NOT require a fence permit!' },
+    'lambertville': { text: 'Great news! Bedford Township (Lambertville) does NOT require a fence permit!' },
+    'default': { text: 'Permit requirements vary by municipality. We research and handle all permits for you!' }
+  };
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', function() {
+    // Style selection
+    document.querySelectorAll('.style-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+        this.classList.add('selected');
+        state.style = this.dataset.style;
+        calculate();
+      });
+    });
+
+    // Height selection
+    document.querySelectorAll('.height-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        document.querySelectorAll('.height-btn').forEach(b => b.classList.remove('selected'));
+        this.classList.add('selected');
+        state.height = parseInt(this.dataset.height);
+        state.heightMult = parseFloat(this.dataset.mult);
+        calculate();
+      });
+    });
+
+    // Length input
+    document.getElementById('fenceLength').addEventListener('input', function() {
+      state.length = parseInt(this.value) || 0;
+      calculate();
+    });
+
+    // Removal inputs
+    document.getElementById('removalFeet').addEventListener('input', function() {
+      state.removalFeet = parseInt(this.value) || 0;
+      calculate();
+    });
+    document.getElementById('removalType').addEventListener('change', function() {
+      state.removalRate = parseInt(this.value);
+      calculate();
+    });
+
+    // Address autocomplete
+    const addressInput = document.getElementById('address');
+    const suggestions = document.getElementById('addressSuggestions');
+    let debounceTimer;
+
+    addressInput.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      const query = this.value.trim();
+      if (query.length < 3) {
+        suggestions.classList.remove('show');
+        return;
+      }
+      debounceTimer = setTimeout(() => searchAddress(query), 300);
+    });
+
+    addressInput.addEventListener('blur', function() {
+      setTimeout(() => suggestions.classList.remove('show'), 200);
+    });
+
+    // Initial calculation
+    calculate();
+  });
+
+  function adjustGate(type, delta) {
+    if (type === 'walk') {
+      state.walkGates = Math.max(0, Math.min(10, state.walkGates + delta));
+      document.getElementById('walkGateCount').textContent = state.walkGates;
+    } else {
+      state.driveGates = Math.max(0, Math.min(5, state.driveGates + delta));
+      document.getElementById('driveGateCount').textContent = state.driveGates;
+    }
+    calculate();
+  }
+
+  function toggleRemoval() {
+    state.removal = !state.removal;
+    document.getElementById('removalToggle').classList.toggle('active', state.removal);
+    document.getElementById('removalOptions').classList.toggle('show', state.removal);
+    if (!state.removal) {
+      state.removalFeet = 0;
+      document.getElementById('removalFeet').value = 0;
+    }
+    calculate();
+  }
+
+  function calculate() {
+    if (state.length < 10) {
+      document.getElementById('priceRange').textContent = 'Enter fence length above';
+      document.getElementById('breakdown').innerHTML = '';
+      document.getElementById('financingGrid').innerHTML = '';
+      return;
+    }
+
+    const pricing = PRICING[state.style];
+    const baseLow = pricing.base * state.heightMult;
+    const baseHigh = (pricing.base + pricing.range) * state.heightMult;
+
+    // Fence cost
+    const fenceLow = Math.round(state.length * baseLow);
+    const fenceHigh = Math.round(state.length * baseHigh);
+
+    // Gates cost
+    const walkLow = state.walkGates * GATE_PRICES.walk.min;
+    const walkHigh = state.walkGates * GATE_PRICES.walk.max;
+    const driveLow = state.driveGates * GATE_PRICES.drive.min;
+    const driveHigh = state.driveGates * GATE_PRICES.drive.max;
+    const gatesLow = walkLow + driveLow;
+    const gatesHigh = walkHigh + driveHigh;
+
+    // Removal cost
+    const removalCost = state.removal ? state.removalFeet * state.removalRate : 0;
+
+    // Totals
+    const totalLow = fenceLow + gatesLow + removalCost;
+    const totalHigh = fenceHigh + gatesHigh + removalCost;
+
+    // Display
+    document.getElementById('priceRange').textContent = `$${totalLow.toLocaleString()} - $${totalHigh.toLocaleString()}`;
+
+    // Breakdown
+    let breakdown = `
+      <div class="breakdown-row"><span class="breakdown-label">📏 ${state.length} ft of ${state.style} fence (${state.height}ft tall)</span><span class="breakdown-value">$${fenceLow.toLocaleString()} - $${fenceHigh.toLocaleString()}</span></div>
+    `;
+    if (state.walkGates > 0) {
+      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🚪 ${state.walkGates} walk gate${state.walkGates > 1 ? 's' : ''}</span><span class="breakdown-value">$${walkLow.toLocaleString()} - $${walkHigh.toLocaleString()}</span></div>`;
+    }
+    if (state.driveGates > 0) {
+      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🚗 ${state.driveGates} drive gate${state.driveGates > 1 ? 's' : ''}</span><span class="breakdown-value">$${driveLow.toLocaleString()} - $${driveHigh.toLocaleString()}</span></div>`;
+    }
+    if (removalCost > 0) {
+      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🗑️ Remove ${state.removalFeet} ft old fence</span><span class="breakdown-value">$${removalCost.toLocaleString()}</span></div>`;
+    }
+    document.getElementById('breakdown').innerHTML = breakdown;
+
+    // Financing options (using midpoint)
+    const mid = Math.round((totalLow + totalHigh) / 2);
+    const financing = [
+      { term: '12 mo', amount: Math.round(mid / 12) },
+      { term: '24 mo', amount: Math.round(mid / 24) },
+      { term: '36 mo', amount: Math.round(mid / 36) },
+      { term: '48 mo', amount: Math.round(mid / 48) }
+    ];
+    document.getElementById('financingGrid').innerHTML = financing.map(f => `
+      <div class="financing-item">
+        <div class="financing-term">${f.term}</div>
+        <div class="financing-amount">$${f.amount}/mo</div>
+      </div>
+    `).join('');
+
+    // Update hidden form field
+    updateQuoteDetails();
+  }
+
+  function updateQuoteDetails() {
+    const details = `
+Style: ${state.style}
+Length: ${state.length} ft
+Height: ${state.height} ft
+Walk Gates: ${state.walkGates}
+Drive Gates: ${state.driveGates}
+Removal: ${state.removal ? state.removalFeet + ' ft' : 'No'}
+Estimate: ${document.getElementById('priceRange').textContent}
+    `.trim();
+    document.getElementById('quoteDetails').value = details;
+  }
+
+  async function searchAddress(query) {
+    const suggestions = document.getElementById('addressSuggestions');
+    suggestions.innerHTML = '<div class="address-suggestion">🔍 Searching...</div>';
+    suggestions.classList.add('show');
+
+    try {
+      const url = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?' + new URLSearchParams({
+        f: 'json',
+        singleLine: query,
+        outFields: 'Addr_type,StAddr,City,Region,Postal',
+        maxLocations: '5',
+        countryCode: 'USA',
+        searchExtent: '-84.5,41.2,-83.0,42.1'
+      });
+
+      const resp = await fetch(url);
+      const data = await resp.json();
+
+      if (data.candidates && data.candidates.length > 0) {
+        const filtered = data.candidates.filter(c => {
+          const region = (c.attributes?.Region || '').toUpperCase();
+          return region === 'OHIO' || region === 'OH' || region === 'MICHIGAN' || region === 'MI';
+        }).slice(0, 5);
+
+        if (filtered.length > 0) {
+          suggestions.innerHTML = filtered.map(c => {
+            const addr = c.attributes || {};
+            const main = addr.StAddr || c.address.split(',')[0];
+            const sub = [addr.City, addr.Region, addr.Postal].filter(Boolean).join(', ');
+            return `<div class="address-suggestion" data-full="${c.address}" data-city="${(addr.City || '').toLowerCase()}">
+              <div><div class="addr-main">${main}</div><div class="addr-sub">${sub}</div></div>
+            </div>`;
+          }).join('');
+
+          suggestions.querySelectorAll('.address-suggestion').forEach(el => {
+            el.addEventListener('click', function() {
+              document.getElementById('address').value = this.dataset.full;
+              document.getElementById('projectAddress').value = this.dataset.full;
+              suggestions.classList.remove('show');
+              showPermitInfo(this.dataset.city);
+            });
+          });
+        } else {
+          suggestions.innerHTML = '<div class="address-suggestion">No addresses found in our service area</div>';
+        }
+      } else {
+        suggestions.innerHTML = '<div class="address-suggestion">No results found</div>';
+      }
+    } catch (e) {
+      suggestions.innerHTML = '<div class="address-suggestion">Search error - please try again</div>';
+    }
+  }
+
+  function showPermitInfo(city) {
+    const info = PERMIT_INFO[city] || PERMIT_INFO.default;
+    document.getElementById('permitText').textContent = info.text;
+    document.getElementById('permitInfo').classList.add('show');
+  }
+
+  function scrollToForm() {
+    document.getElementById('lead-form').scrollIntoView({ behavior: 'smooth' });
+  }
+  </script>
+</BaseLayout>

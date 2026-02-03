@@ -1,0 +1,20 @@
+{
+  "meta": {
+    "title": "Contact Ghareeb Fencing Solutions | Toledo Fence Contractor",
+    "description": "Contact us for free fence installation quotes in Toledo. Call (419) 902-8257 or fill out our contact form."
+  },
+  "hero": {
+    "headline": "Contact Us",
+    "description": "Ready to discuss your fence project? We're here to help."
+  },
+  "contact": {
+    "phone": "(419) 902-8257",
+    "email": "info@ghareebfencingsolutions.com",
+    "hours": "Monday - Friday: 8am - 6pm\nSaturday: 9am - 3pm\nSunday: Closed",
+    "address": "Serving Toledo, OH and surrounding areas"
+  },
+  "form": {
+    "headline": "Send Us a Message",
+    "fields": ["name", "email", "phone", "message"]
+  }
+}

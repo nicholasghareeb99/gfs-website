@@ -1,0 +1,132 @@
+{
+  "meta": {
+    "title": "Cedar Fence Installation Toledo OH | Natural Privacy | Ghareeb Fencing",
+    "description": "Premium Northern White Cedar fence installation in Toledo. Natural rot resistance, 30-40 year lifespan. Privacy, shadowbox & lattice styles. Free quotes."
+  },
+  "hero": {
+    "badge": "Michigan Cedar",
+    "headline": "Cedar Privacy Fence Installation",
+    "description": "Premium Northern White Cedar from Michigan. Natural rot resistance without chemicals. The beautiful, long-lasting choice for discerning homeowners."
+  },
+  "intro": {
+    "headline": "Why Choose Cedar Fencing?",
+    "content": "Cedar is nature's perfect fencing material. Northern White Cedar contains natural oils that resist rot, decay, and insects without any chemical treatment. It's the premium choice for homeowners who want a beautiful fence that lasts 30-40 years.",
+    "content2": "We source our cedar directly from Michigan mills - the finest Northern White Cedar available. Every board is hand-selected for quality and appearance.",
+    "benefits": [
+      "Natural rot & insect resistance - no chemicals needed",
+      "30-40 year lifespan with minimal maintenance",
+      "Beautiful natural grain that weathers to silver-gray",
+      "Lightweight yet incredibly strong",
+      "Environmentally sustainable choice"
+    ],
+    "image": "/images/gallery/cedar-full-yard.jpg"
+  },
+  "gallery": {
+    "headline": "Cedar Fence Installation Gallery",
+    "images": [
+      { "src": "/images/gallery/cedar-full-yard.jpg", "alt": "Cedar privacy fence full yard" },
+      { "src": "/images/gallery/cedar-detail.jpg", "alt": "Cedar fence detail" },
+      { "src": "/images/gallery/cedar-shadowbox.jpg", "alt": "Cedar shadowbox fence" },
+      { "src": "/images/gallery/cedar-gate-detail.jpg", "alt": "Cedar fence gate" },
+      { "src": "/images/gallery/cedar-lattice-detail.jpg", "alt": "Cedar fence with lattice" },
+      { "src": "/images/gallery/cedar-gate-closeup.jpg", "alt": "Cedar gate closeup" }
+    ]
+  },
+  "styles": {
+    "headline": "Cedar Fence Styles We Install",
+    "subheadline": "All styles available in 6' or 8' heights. Custom heights available.",
+    "items": [
+      {
+        "name": "Solid Privacy",
+        "description": "Full privacy with tight-fitting boards. Classic look, maximum seclusion.",
+        "image": "/images/gallery/cedar-full-yard.jpg"
+      },
+      {
+        "name": "Shadowbox",
+        "description": "Alternating boards on each side. Looks great from both sides, allows airflow.",
+        "image": "/images/gallery/cedar-shadowbox.jpg"
+      },
+      {
+        "name": "Privacy with Lattice",
+        "description": "Solid privacy with decorative lattice top. Elegant traditional style.",
+        "image": "/images/gallery/cedar-lattice-detail.jpg"
+      }
+    ]
+  },
+  "comparison": {
+    "headline": "Cedar Fence Options: Good / Better / Best",
+    "subheadline": "Choose the style that fits your needs and budget",
+    "tiers": [
+      {
+        "name": "Good",
+        "subtitle": "Western Red Cedar Privacy",
+        "description": "Classic 6ft solid privacy fence with dog-ear pickets. Great value with 20-25 year lifespan.",
+        "image": "/images/gallery/cedar-full-yard.jpg"
+      },
+      {
+        "name": "Better",
+        "subtitle": "Northern White Cedar Privacy",
+        "description": "Premium Michigan-sourced cedar with superior rot resistance. 30-40+ year lifespan with decorative post caps.",
+        "image": "/images/gallery/cedar-shadowbox.jpg",
+        "featured": true
+      },
+      {
+        "name": "Best",
+        "subtitle": "NWC with Lattice Top",
+        "description": "Premium privacy fence with elegant lattice accent. Custom framed panels and premium gate hardware.",
+        "image": "/images/gallery/cedar-lattice-detail.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Ready for Your Cedar Fence?",
+    "description": "Get a free quote for cedar fence installation. We'll help you choose the perfect style for your property.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  },
+  "materialComparison": {
+    "headline": "Cedar vs. Pressure Treated Pine",
+    "subheadline": "Why we recommend cedar for homeowners who want the best",
+    "materials": [
+      {
+        "name": "Pressure Treated Pine",
+        "features": [
+          "Chemical preservatives add longevity",
+          "Sealed/stained in 90 days when dry",
+          "Prone to shrink, twist & warp",
+          "Prone to warping and splitting",
+          "Good but not great longevity",
+          "Requires re-sealing every 2-3 years",
+          "10-20 year lifespan",
+          "Can rot if not maintained"
+        ],
+        "icon": "⚠️",
+        "verdict": "Budget-friendly option"
+      },
+      {
+        "name": "Cedar (Any Grade)",
+        "features": [
+          "100% natural preservatives",
+          "Beautiful warm tone from day one",
+          "Lightweight + easy installation",
+          "Dimensionally stable - rarely twists/warps",
+          "Resists rot, decay, and splitting",
+          "Can be sealed or left to weather naturally",
+          "30-40+ year lifespan",
+          "Eco-friendly, sustainable choice"
+        ],
+        "icon": "✓",
+        "verdict": "Premium long-term value"
+      }
+    ],
+    "bottomLine": {
+      "text": "We Source from Michigan",
+      "stats": [
+        { "value": "7", "label": "Cedar Options" },
+        { "value": "4x6", "label": "Gate Posts" },
+        { "value": "3 Year", "label": "Warranty" },
+        { "value": "Michigan", "label": "Cedar Available" }
+      ]
+    }
+  }
+}

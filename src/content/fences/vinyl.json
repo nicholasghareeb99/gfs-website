@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "title": "Vinyl Fence Installation Toledo OH | Maintenance-Free Privacy | Ghareeb Fencing",
+    "description": "Premium vinyl fence installation in Toledo OH. Homeland Vinyl with lifetime warranty, zero maintenance, won't rot or fade. Privacy, semi-privacy, and decorative styles. Free quotes."
+  },
+  "hero": {
+    "badge": "Zero Maintenance",
+    "headline": "Vinyl Privacy Fence Installation",
+    "description": "Premium Homeland Vinyl fencing with lifetime warranty. Never paint, stain, or seal again. Won't rot, warp, or fade. The ultimate maintenance-free privacy solution.",
+    "image": "/images/gallery/vinyl-hero.jpg"
+  },
+  "intro": {
+    "headline": "Why Choose Vinyl Fencing?",
+    "content": "Vinyl fencing is the ultimate low-maintenance choice for homeowners who want beautiful privacy without the work. Unlike wood, vinyl won't rot, warp, split, or require painting. It stays looking new for decades with just occasional cleaning.",
+    "content2": "We exclusively install Homeland Premium Vinyl - a top-tier American-made product with a lifetime limited warranty that's transferable to future homeowners.",
+    "benefits": [
+      "Zero maintenance - never paint, stain, or seal",
+      "Won't rot, warp, or splinter like wood",
+      "UV-resistant - won't yellow or fade",
+      "Lifetime warranty included",
+      "Multiple colors - white, tan, gray available"
+    ],
+    "image": "/images/gallery/vinyl-privacy-white.jpg"
+  },
+  "gallery": {
+    "headline": "Vinyl Fence Installation Gallery",
+    "images": [
+      { "src": "/images/gallery/vinyl-privacy-white.jpg", "alt": "White vinyl privacy fence" },
+      { "src": "/images/gallery/vinyl-privacy-tan.jpg", "alt": "Tan vinyl privacy fence" },
+      { "src": "/images/gallery/vinyl-privacy-yard.jpg", "alt": "Vinyl privacy fence backyard" },
+      { "src": "/images/gallery/vinyl-privacy-detail.jpg", "alt": "Vinyl fence detail" },
+      { "src": "/images/gallery/vinyl-brown-gate.jpg", "alt": "Vinyl fence with gate" },
+      { "src": "/images/gallery/vinyl-hero.jpg", "alt": "Homeland vinyl fence installation" }
+    ]
+  },
+  "styles": {
+    "headline": "Vinyl Fence Styles We Install",
+    "subheadline": "All Homeland Premium Vinyl products. Available in white, tan, and gray.",
+    "items": [
+      {
+        "name": "Solid Privacy",
+        "description": "Complete privacy with no gaps. 6ft height standard. Our most popular vinyl style.",
+        "image": "/images/gallery/vinyl-privacy-white.jpg"
+      },
+      {
+        "name": "Privacy with Lattice Top",
+        "description": "Decorative lattice accent adds elegance. Great for gardens and traditional homes.",
+        "image": "/images/gallery/vinyl-privacy-tan.jpg"
+      },
+      {
+        "name": "Ranch Rail",
+        "description": "Open style for property boundaries. 2, 3, or 4-rail options. Perfect for acreage.",
+        "image": "/images/gallery/vinyl-ranch-white.jpg"
+      }
+    ]
+  },
+  "comparison": {
+    "headline": "Vinyl Fence Options: Good / Better / Best",
+    "subheadline": "All options include lifetime material warranty",
+    "tiers": [
+      {
+        "name": "Good",
+        "subtitle": "Standard Privacy",
+        "description": "6ft solid privacy panels in white. Standard thickness vinyl with lifetime warranty. Great value.",
+        "image": "/images/gallery/vinyl-privacy-white.jpg"
+      },
+      {
+        "name": "Better",
+        "subtitle": "Premium Privacy",
+        "description": "Heavy-duty panels in white, tan, or gray. Aluminum-reinforced posts. Wind-rated to 75+ mph.",
+        "image": "/images/gallery/vinyl-tan-privacy.jpg",
+        "featured": true
+      },
+      {
+        "name": "Best",
+        "subtitle": "Premium with Lattice",
+        "description": "Heavy-duty panels with elegant lattice accent. Multiple color combinations. Custom gate options.",
+        "image": "/images/gallery/vinyl-combo-yard.jpg"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Ready for Your Maintenance-Free Fence?",
+    "description": "Get a free quote for vinyl fence installation. We'll help you choose the perfect style and color for your property.",
+    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
+    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  }
+}

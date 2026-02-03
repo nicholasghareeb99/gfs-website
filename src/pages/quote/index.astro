@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import quote from '../../content/quote.json';
+import site from '../../content/site.json';
+---
+
+<BaseLayout title={quote.meta.title} description={quote.meta.description}>
+    
+    <section class="hero quote-hero">
+        <div class="container">
+            <h1>{quote.hero.headline}</h1>
+            <p class="hero-description">{quote.hero.description}</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="quote-options">
+                {quote.options.map(option => (
+                    <a href={option.href} class="quote-option-card">
+                        <div class="option-icon">
+                            {option.icon === 'calculator' && '🧮'}
+                            {option.icon === 'calendar' && '📅'}
+                            {option.icon === 'phone' && '📞'}
+                        </div>
+                        <h2>{option.title}</h2>
+                        <p>{option.description}</p>
+                        <span class="option-btn">{option.buttonText} →</span>
+                    </a>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <section class="section section-alt">
+        <div class="container">
+            <h2 class="section-title">{quote.process.headline}</h2>
+            <div class="process-steps">
+                {quote.process.steps.map((step, i) => (
+                    <div class="process-step">
+                        <div class="step-number">{i + 1}</div>
+                        <h3>{step.title}</h3>
+                        <p>{step.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+</BaseLayout>
+
+<style>
+    .quote-hero {
+        background: linear-gradient(135deg, #1e3a5f, #0f172a);
+        padding: 140px 0 80px;
+        text-align: center;
+    }
+    .quote-hero h1 {
+        color: white;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 16px;
+    }
+    .hero-description {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.2rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .quote-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: -60px;
+        position: relative;
+        z-index: 10;
+    }
+    .quote-option-card {
+        background: var(--dark-card);
+        border-radius: 16px;
+        padding: 40px 32px;
+        text-align: center;
+        text-decoration: none;
+        border: 2px solid var(--border);
+        transition: all 0.3s;
+    }
+    .quote-option-card:hover {
+        border-color: var(--accent);
+        transform: translateY(-4px);
+    }
+    .option-icon {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    .quote-option-card h2 {
+        color: white;
+        margin-bottom: 12px;
+    }
+    .quote-option-card p {
+        color: var(--text-sub);
+        margin-bottom: 20px;
+    }
+    .option-btn {
+        display: inline-block;
+        color: var(--accent);
+        font-weight: 600;
+    }
+    
+    .section-alt { background: var(--dark-card); margin-top: 60px; }
+    
+    .process-steps {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 24px;
+        margin-top: 40px;
+    }
+    .process-step {
+        text-align: center;
+    }
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: var(--accent);
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 auto 16px;
+    }
+    .process-step h3 {
+        color: white;
+        margin-bottom: 8px;
+    }
+    .process-step p {
+        color: var(--text-sub);
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .process-steps { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+        .process-steps { grid-template-columns: 1fr; }
+    }
+</style>

@@ -1,0 +1,178 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import contact from '../../content/contact.json';
+import site from '../../content/site.json';
+---
+
+<BaseLayout title={contact.meta.title} description={contact.meta.description}>
+    
+    <section class="hero contact-hero">
+        <div class="container">
+            <h1>{contact.hero.headline}</h1>
+            <p class="hero-description">{contact.hero.description}</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h2>Get In Touch</h2>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div>
+                            <h3>Phone</h3>
+                            <a href={`tel:${site.company.phoneRaw}`}>{contact.contact.phone}</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">✉️</div>
+                        <div>
+                            <h3>Email</h3>
+                            <a href={`mailto:${contact.contact.email}`}>{contact.contact.email}</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">🕐</div>
+                        <div>
+                            <h3>Hours</h3>
+                            <p style="white-space: pre-line;">{contact.contact.hours}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div>
+                            <h3>Service Area</h3>
+                            <p>{contact.contact.address}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-wrapper">
+                    <h2>{contact.form.headline}</h2>
+                    <form class="contact-form" name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/">
+                        <input type="hidden" name="form-name" value="contact">
+                        <p style="display:none"><input name="bot-field"></p>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" rows="5" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</BaseLayout>
+
+<style>
+    .contact-hero {
+        background: linear-gradient(135deg, #1e3a5f, #0f172a);
+        padding: 140px 0 80px;
+        text-align: center;
+    }
+    .contact-hero h1 {
+        color: white;
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 16px;
+    }
+    .hero-description {
+        color: rgba(255,255,255,0.9);
+        font-size: 1.2rem;
+    }
+    
+    .contact-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+    }
+    
+    .contact-info h2 {
+        margin-bottom: 32px;
+    }
+    .contact-item {
+        display: flex;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    .contact-icon {
+        font-size: 1.5rem;
+        width: 40px;
+    }
+    .contact-item h3 {
+        color: var(--accent);
+        margin-bottom: 4px;
+        font-size: 1rem;
+    }
+    .contact-item a {
+        color: var(--text);
+        text-decoration: none;
+    }
+    .contact-item a:hover {
+        color: var(--accent);
+    }
+    .contact-item p {
+        color: var(--text-sub);
+    }
+    
+    .contact-form-wrapper {
+        background: var(--dark-card);
+        padding: 40px;
+        border-radius: 16px;
+    }
+    .contact-form-wrapper h2 {
+        margin-bottom: 24px;
+    }
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text-sub);
+    }
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--dark);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: white;
+        font-size: 1rem;
+    }
+    .form-group input:focus,
+    .form-group textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+    
+    @media (max-width: 768px) {
+        .contact-grid { grid-template-columns: 1fr; }
+        .form-row { grid-template-columns: 1fr; }
+    }
+</style>

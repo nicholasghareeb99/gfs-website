@@ -1,0 +1,48 @@
+{
+  "company": {
+    "name": "Ghareeb Fencing Solutions",
+    "shortName": "GF",
+    "phone": "(419) 902-8257",
+    "phoneRaw": "4199028257",
+    "email": "info@ghareebfencingsolutions.com",
+    "address": "Toledo, OH",
+    "tagline": "Toledo's Premier Fence Contractor"
+  },
+  "trustBar": {
+    "rating": "4.9",
+    "reviewCount": "127",
+    "items": [
+      { "icon": "shield", "text": "Licensed & Insured" },
+      { "icon": "check", "text": "3-Year Warranty" },
+      { "icon": "dollar", "text": "0% Financing Available" }
+    ]
+  },
+  "nav": {
+    "links": [
+      { "text": "Home", "href": "/" },
+      { "text": "Permits & Zoning", "href": "/permits/" },
+      { "text": "Reviews", "href": "/reviews/" },
+      { "text": "About", "href": "/about/" },
+      { "text": "Contact", "href": "/contact/" }
+    ],
+    "fenceStyles": [
+      { "text": "Cedar Privacy", "href": "/fences/cedar/", "icon": "cedar" },
+      { "text": "Wood Privacy", "href": "/fences/wood/", "icon": "wood" },
+      { "text": "Vinyl Privacy", "href": "/fences/vinyl/", "icon": "vinyl" },
+      { "text": "Ornamental Aluminum", "href": "/fences/aluminum/", "icon": "aluminum" },
+      { "text": "Chain Link", "href": "/fences/chainlink/", "icon": "chainlink" },
+      { "text": "Split Rail", "href": "/fences/split-rail/", "icon": "splitrail" }
+    ]
+  },
+  "footer": {
+    "copyright": "© 2025 Ghareeb Fencing Solutions. Professional fence installation in Toledo, Lucas County, Ohio.",
+    "socialLinks": []
+  },
+  "financing": {
+    "url": "https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr",
+    "text": "0% Financing"
+  },
+  "analytics": {
+    "gaId": "G-30R7SKG69Y"
+  }
+}
