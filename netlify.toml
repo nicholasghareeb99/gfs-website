@@ -1,0 +1,61 @@
+# Netlify Configuration for GFS Astro Site
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+
+# Redirects for trailing slashes
+[[redirects]]
+  from = "/fences/vinyl"
+  to = "/fences/vinyl/"
+  status = 301
+
+[[redirects]]
+  from = "/fences/cedar"
+  to = "/fences/cedar/"
+  status = 301
+
+[[redirects]]
+  from = "/fences/wood"
+  to = "/fences/wood/"
+  status = 301
+
+[[redirects]]
+  from = "/fences/aluminum"
+  to = "/fences/aluminum/"
+  status = 301
+
+[[redirects]]
+  from = "/fences/chainlink"
+  to = "/fences/chainlink/"
+  status = 301
+
+[[redirects]]
+  from = "/fences/split-rail"
+  to = "/fences/split-rail/"
+  status = 301
+
+# Handle 404
+[[redirects]]
+  from = "/*"
+  to = "/404.html"
+  status = 404
+
+# Headers for caching
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/images/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000"
