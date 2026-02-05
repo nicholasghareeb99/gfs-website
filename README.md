@@ -1,102 +1,14 @@
-# GFS Website - Astro Version
+# Ghareeb Fencing Solutions - Astro Website
 
-A modern, editable website for Ghareeb Fencing Solutions built with Astro.
+A modern, fast, and SEO-optimized website for Ghareeb Fencing Solutions built with Astro 5.0.
 
-## Key Features
-
-- **All content is editable** via JSON files in `src/content/`
-- **Fast static site** - Astro generates pure HTML/CSS
-- **Same design** as your current site
-- **Simple admin panel** at `/admin` for editing
-- **Automatic rebuild** when content changes
-
-## Project Structure
-
-```
-gfs-astro/
-├── src/
-│   ├── content/           # ← EDIT THESE FILES
-│   │   ├── site.json      # Company info, nav, footer
-│   │   ├── home.json      # Homepage content
-│   │   ├── about.json     # About page content
-│   │   ├── quote.json     # Quote page content
-│   │   └── fences/        # Fence page content
-│   │       ├── vinyl.json
-│   │       ├── cedar.json
-│   │       └── ...
-│   ├── layouts/
-│   │   └── BaseLayout.astro
-│   └── pages/
-│       ├── index.astro
-│       ├── about/
-│       ├── quote/
-│       └── fences/
-├── public/
-│   ├── css/styles.css
-│   └── images/
-└── netlify.toml
-```
-
-## How to Edit Content
-
-### Option 1: Edit JSON Files Directly
-
-1. Open any file in `src/content/`
-2. Edit the text/image URLs
-3. Commit & push to GitHub
-4. Netlify automatically rebuilds
-
-### Option 2: Use the Admin Panel
-
-1. Go to `yoursite.com/admin`
-2. Login with: `admin` / `gfs2024!`
-3. Edit content in the forms
-4. Click "Save & Publish"
-
-## Deployment to Netlify
-
-### First Time Setup
-
-1. Push this code to a new GitHub repository:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin https://github.com/YOUR_USERNAME/gfs-website.git
-   git push -u origin main
-   ```
-
-2. Go to [Netlify](https://app.netlify.com)
-
-3. Click "Add new site" → "Import an existing project"
-
-4. Connect your GitHub account and select the repo
-
-5. Build settings (should auto-detect):
-   - Build command: `npm run build`
-   - Publish directory: `dist`
-
-6. Click "Deploy site"
-
-### Connect Your Domain
-
-1. In Netlify, go to Site settings → Domain management
-
-2. Click "Add custom domain"
-
-3. Enter: `ghareebfencingsolutions.com`
-
-4. Update your domain's DNS:
-   - Add CNAME record: `www` → `your-site-name.netlify.app`
-   - Or use Netlify DNS for automatic setup
-
-## Local Development
+## 🚀 Quick Start
 
 ```bash
 # Install dependencies
 npm install
 
-# Start dev server
+# Start development server
 npm run dev
 
 # Build for production
@@ -106,44 +18,252 @@ npm run build
 npm run preview
 ```
 
-## Adding New Pages
+## 📁 Project Structure
 
-### New Fence Type
+```
+gfs-astro/
+├── public/
+│   ├── images/gallery/       # Project photos
+│   └── robots.txt
+├── src/
+│   ├── content/              # JSON data files
+│   │   ├── fences.json       # Fence types & specs
+│   │   ├── permits.json      # Municipality permit info
+│   │   ├── reviews.json      # Customer reviews
+│   │   ├── service-areas.json
+│   │   └── site.json         # Site config & Firebase keys
+│   ├── layouts/
+│   │   └── BaseLayout.astro
+│   ├── pages/
+│   │   ├── admin/            # 🔐 Admin dashboard
+│   │   ├── fences/[slug]     # Dynamic fence pages
+│   │   ├── service-areas/[slug]
+│   │   ├── quote/ballpark/   # Interactive calculator
+│   │   └── index.astro
+├── firebase/                 # 🔒 Security rules
+│   ├── firestore.rules
+│   └── storage.rules
+├── netlify.toml              # Deployment config
+└── astro.config.mjs
+```
 
-1. Create `src/content/fences/newtype.json` (copy from vinyl.json)
-2. Edit the content
-3. Add to `getStaticPaths()` in `src/pages/fences/[fence].astro`
-4. Commit & push
+## 🔐 Admin Dashboard
 
-### New Service Area
+### Access
+- **URL:** `/admin/`
+- **Default Credentials:** `admin` / `admin11`
+- **⚠️ CHANGE PASSWORD IMMEDIATELY after first login!**
 
-1. Create `src/content/service-areas/cityname.json`
-2. Create `src/pages/service-areas/cityname.astro`
-3. Commit & push
+### Features
+| Feature | Description |
+|---------|-------------|
+| **Dashboard** | View leads, jobs, stats at a glance |
+| **Leads** | Manage website leads from ballpark calculator |
+| **Page Builder** | Drag-and-drop editor for page content |
+| **Gallery** | Upload and manage project photos |
+| **Pricing** | Edit fence pricing (syncs to ballpark calculator) |
+| **Security** | Change username/password, view security logs |
 
-## Images
+### Page Builder
+The admin panel includes a visual page builder with:
+- **Drag & Drop Components:** Heading, Text, Image, Button, Divider, CTA
+- **Reorder Content:** Drag blocks up/down to rearrange
+- **Edit In-Place:** Click any text to edit directly
+- **Image Upload:** Upload images directly to Firebase Storage
+- **Multi-Page:** Edit Home, About, Services pages
 
-- Add images to `public/images/gallery/`
-- Reference them as `/images/gallery/filename.jpg`
-- Recommended: Use a CDN like Cloudinary for better performance
+## 💰 Ballpark Quote Calculator
 
-## Troubleshooting
+The interactive calculator at `/quote/ballpark/` features:
+- **Map Drawing:** Draw fence lines on satellite view
+- **Real-time Pricing:** Pulls prices from Firebase `settings/global.pricing`
+- **Lead Capture:** Saves leads to Firebase `websiteLeads` collection
+- **Mobile Friendly:** Works on all devices
 
-### Changes not showing up?
-- Clear your browser cache (Ctrl+Shift+R)
-- Check Netlify deploy status
-- Verify JSON syntax is valid
+### Pricing Format (in Admin > Pricing)
+```
+Style Name : price per foot : single gate : double gate
+Cedar Privacy : 42 : 375 : 695
+White Vinyl Privacy : 45 : 425 : 795
+Black Chain Link : 22 : 275 : 495
+```
 
-### Build failing?
-- Check for JSON syntax errors
-- Make sure all image paths exist
-- Check Netlify build logs
+## 🔒 Security Features
 
-## Support
+### Authentication
+- SHA-256 password hashing (client-side)
+- Session tokens with 30-minute timeout
+- Account lockout after 5 failed attempts (15 min)
+- Security event logging
+- XSS prevention with input sanitization
 
-For website issues, contact your developer.
-For fencing inquiries: (419) 902-8257
+### HTTP Headers (via Netlify)
+- `X-Frame-Options: DENY` - Prevents clickjacking
+- `X-XSS-Protection: 1; mode=block` - XSS filtering
+- `X-Content-Type-Options: nosniff` - MIME sniffing prevention
+- `Strict-Transport-Security` - Force HTTPS
+- `Content-Security-Policy` - Restricts resource loading
+- `Permissions-Policy` - Restricts browser features
 
----
+### Firebase Security Rules
+Deploy the rules in `/firebase/` to your Firebase project:
 
-Built with ❤️ using [Astro](https://astro.build)
+1. Go to Firebase Console > Firestore Database > Rules
+2. Copy contents of `firebase/firestore.rules`
+3. Click "Publish"
+
+4. Go to Firebase Console > Storage > Rules
+5. Copy contents of `firebase/storage.rules`
+6. Click "Publish"
+
+**Key protections:**
+- Public can only CREATE leads (not read/update/delete)
+- Only admins can access leads and jobs
+- Settings are public read (for pricing) but admin-only write
+- Lead data is validated for proper structure
+- Image uploads limited to 5MB, images only
+
+## 🚀 Deployment
+
+### Deploy to Netlify
+
+1. **Push to GitHub:**
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin https://github.com/yourusername/gfs-astro.git
+   git push -u origin main
+   ```
+
+2. **Connect Netlify:**
+   - Go to [netlify.com](https://netlify.com)
+   - Click "Add new site" > "Import an existing project"
+   - Select your GitHub repo
+   - Settings are auto-detected from `netlify.toml`
+   - Click "Deploy site"
+
+3. **Add Custom Domain:**
+   - Site settings > Domain management > Add custom domain
+   - Add `ghareebfencing.com`
+   - Configure DNS as instructed
+
+### Deploy Firebase Rules
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login
+firebase login
+
+# Initialize (select Firestore and Storage)
+firebase init
+
+# Deploy rules
+firebase deploy --only firestore:rules,storage:rules
+```
+
+## 🔥 Firebase Setup
+
+### Required Collections
+| Collection | Purpose |
+|------------|---------|
+| `admin/credentials` | Admin login (auto-created on first visit) |
+| `settings/global` | Pricing data (create in admin panel) |
+| `settings/site` | Site settings (hero text, stats) |
+| `websiteLeads` | Quote requests from calculator |
+| `jobs` | Synced with Executive app |
+| `gallery` | Uploaded images metadata |
+| `pageContent` | Page builder content |
+| `securityLogs` | Login attempts, changes |
+
+### Firebase Config Location
+Update Firebase keys in `/src/content/site.json`:
+
+```json
+{
+  "firebase": {
+    "apiKey": "your-api-key",
+    "authDomain": "your-project.firebaseapp.com",
+    "projectId": "your-project",
+    "storageBucket": "your-project.appspot.com",
+    "messagingSenderId": "123456789",
+    "appId": "1:123456789:web:abc123"
+  }
+}
+```
+
+## 📄 Pages Overview
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Home | `/` | Hero, services, trust signals |
+| About | `/about/` | Company story, team |
+| Fences | `/fences/` | All fence types |
+| Fence Detail | `/fences/[slug]/` | Individual fence pages |
+| Gallery | `/gallery/` | Project photos |
+| Reviews | `/reviews/` | Customer testimonials |
+| Service Areas | `/service-areas/` | Coverage map |
+| Area Detail | `/service-areas/[slug]/` | City-specific pages |
+| Permits | `/permits/` | Permit lookup tool |
+| Quote | `/quote/` | Quote options |
+| Ballpark | `/quote/ballpark/` | Interactive calculator |
+| Contact | `/contact/` | Contact form |
+| Admin | `/admin/` | Dashboard (protected) |
+
+**Total: 43 pages generated**
+
+## 🎨 Design System
+
+### Colors
+- **Primary:** `#1e3a5f` (Navy Blue)
+- **Accent:** `#d4af37` (Gold)
+- **Success:** `#10b981`
+- **Warning:** `#f59e0b`
+- **Error:** `#ef4444`
+
+### Fonts
+- **Headings:** Montserrat (600-800 weight)
+- **Body:** Open Sans (400-600 weight)
+
+## 📝 Content Updates
+
+### Edit Fence Types
+Edit `/src/content/fences.json` and rebuild.
+
+### Edit Service Areas
+Edit `/src/content/service-areas.json` and rebuild.
+
+### Edit Pricing (Live)
+Use Admin Panel > Pricing. Changes sync immediately to ballpark calculator.
+
+### Add Gallery Images
+1. **Static:** Add to `/public/images/gallery/` and rebuild
+2. **Dynamic:** Use Admin Panel > Gallery (uploads to Firebase)
+
+## 🛠 Troubleshooting
+
+### Build Fails
+```bash
+rm -rf node_modules .astro
+npm install
+npm run build
+```
+
+### Firebase Connection Issues
+- Verify API keys in `site.json`
+- Check Firebase Console for quota limits
+- Ensure Firestore/Storage rules are deployed
+
+### Admin Login Issues
+- Default: `admin` / `admin11`
+- Clear localStorage if locked out
+- Check `securityLogs` collection for events
+
+## 📞 Support
+
+For questions about this website:
+- **Developer:** Claude AI
+- **Business:** Ghareeb Fencing Solutions
+- **Phone:** (419) 902-8257

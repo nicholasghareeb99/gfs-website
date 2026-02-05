@@ -1,48 +1,172 @@
 {
-  "meta": {
-    "title": "About Ghareeb Fencing Solutions | Toledo's Trusted Fence Contractor",
-    "description": "Family-owned fence company serving Toledo since 2018. Meet Moe Ghareeb and learn why hundreds of homeowners trust us for their fence installation."
-  },
-  "hero": {
-    "headline": "About Ghareeb Fencing",
-    "description": "Family-owned. Locally operated. Committed to quality."
-  },
-  "story": {
-    "headline": "Our Story",
-    "content": "Ghareeb Fencing Solutions was founded in 2018 by Moe Ghareeb with a simple mission: provide Toledo-area homeowners with high-quality fence installation at fair prices, backed by exceptional service.",
-    "content2": "What started as a one-man operation has grown into a trusted local business, but our commitment to quality and customer satisfaction remains unchanged. Moe personally oversees every project to ensure it meets our high standards.",
-    "image": "/images/gallery/cedar-full-yard.jpg"
-  },
-  "values": {
-    "headline": "What Sets Us Apart",
-    "items": [
+  "company": {
+    "name": "Ghareeb Fencing Solutions",
+    "established": 2012,
+    "tagline": "Quality Fencing, Built to Last",
+    "mission": "To provide Northwest Ohio and Southeast Michigan with superior fencing solutions that combine exceptional craftsmanship, quality materials, and outstanding customer service at competitive prices.",
+    "vision": "To be the most trusted and respected fencing company in the region, known for our integrity, quality, and commitment to customer satisfaction.",
+    "values": [
       {
-        "title": "Quality Materials",
-        "description": "We only use premium materials from trusted suppliers - Homeland Vinyl, Ultra Aluminum, and Michigan-sourced cedar."
+        "title": "Quality Craftsmanship",
+        "description": "We take pride in every fence we build, using premium materials and expert installation techniques that stand the test of time.",
+        "icon": "fa-medal"
       },
       {
-        "title": "Expert Installation",
-        "description": "Our experienced crews follow industry best practices for every installation, ensuring your fence lasts for decades."
+        "title": "Customer First",
+        "description": "Your satisfaction is our top priority. We listen to your needs, provide honest recommendations, and deliver results that exceed expectations.",
+        "icon": "fa-handshake"
       },
       {
-        "title": "Honest Pricing",
-        "description": "No hidden fees or surprise charges. We provide detailed quotes upfront so you know exactly what to expect."
+        "title": "Integrity",
+        "description": "We conduct business with transparency and honesty. No hidden fees, no surprises—just straightforward pricing and reliable service.",
+        "icon": "fa-shield-halved"
       },
       {
-        "title": "Local Commitment",
-        "description": "We live and work in this community. Our reputation depends on your satisfaction."
+        "title": "Community",
+        "description": "As a family-owned business, we're proud to serve our neighbors throughout Northwest Ohio and Southeast Michigan.",
+        "icon": "fa-house-chimney"
       }
     ]
   },
-  "owner": {
-    "name": "Moe Ghareeb",
-    "title": "Owner & Lead Installer",
-    "bio": "Moe has been in the fencing industry for over a decade. His hands-on approach ensures every project receives personal attention and meets the highest quality standards."
+  "history": {
+    "headline": "Over a Decade of Fencing Excellence",
+    "summary": "What started as a small family operation in Toledo has grown into one of the region's most trusted fencing companies, with thousands of satisfied customers across Northwest Ohio and Southeast Michigan.",
+    "timeline": [
+      {
+        "year": 2012,
+        "title": "Company Founded",
+        "description": "Ghareeb Fencing Solutions was founded in Toledo, Ohio with a commitment to quality craftsmanship and customer service."
+      },
+      {
+        "year": 2014,
+        "title": "Expanded Service Area",
+        "description": "Due to growing demand, we expanded our service area to include all of Lucas and Wood counties."
+      },
+      {
+        "year": 2016,
+        "title": "100th Commercial Project",
+        "description": "Completed our 100th commercial fencing project, solidifying our reputation in the business community."
+      },
+      {
+        "year": 2018,
+        "title": "Michigan Expansion",
+        "description": "Extended services into Southeast Michigan, including Monroe County and surrounding areas."
+      },
+      {
+        "year": 2020,
+        "title": "Digital Innovation",
+        "description": "Launched our online ballpark quote tool and virtual consultation services to better serve customers during challenging times."
+      },
+      {
+        "year": 2022,
+        "title": "10 Year Anniversary",
+        "description": "Celebrated 10 years in business with over 3,000 fencing projects completed and a 4.9-star customer rating."
+      },
+      {
+        "year": 2024,
+        "title": "Continued Growth",
+        "description": "Added new team members and equipment to meet increasing demand while maintaining our commitment to quality."
+      }
+    ]
   },
-  "cta": {
-    "headline": "Ready to Work With Us?",
-    "description": "Get a free quote and see why hundreds of Toledo homeowners choose Ghareeb Fencing.",
-    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
-    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
+  "team": {
+    "headline": "Meet the Team",
+    "description": "Our experienced team brings decades of combined experience in fencing installation, customer service, and project management.",
+    "members": [
+      {
+        "name": "John Ghareeb",
+        "role": "Owner & Lead Estimator",
+        "bio": "With over 15 years of experience in the fencing industry, John founded Ghareeb Fencing Solutions with a vision of providing superior quality at fair prices. He personally oversees every estimate and major project.",
+        "image": "team-john.jpg"
+      },
+      {
+        "name": "Installation Team",
+        "role": "Expert Craftsmen",
+        "bio": "Our skilled installation crews have an average of 8+ years of fencing experience. Each team member is trained in proper installation techniques for all fence types and materials.",
+        "image": "team-installers.jpg"
+      },
+      {
+        "name": "Customer Service",
+        "role": "Your First Point of Contact",
+        "bio": "Our friendly office team is here to answer your questions, schedule appointments, and ensure your project runs smoothly from start to finish.",
+        "image": "team-office.jpg"
+      }
+    ]
+  },
+  "stats": [
+    {
+      "value": "3,500+",
+      "label": "Fences Installed",
+      "icon": "fa-fence"
+    },
+    {
+      "value": "12+",
+      "label": "Years Experience",
+      "icon": "fa-calendar-check"
+    },
+    {
+      "value": "4.9",
+      "label": "Star Rating",
+      "icon": "fa-star"
+    },
+    {
+      "value": "300+",
+      "label": "5-Star Reviews",
+      "icon": "fa-thumbs-up"
+    }
+  ],
+  "certifications": [
+    {
+      "name": "Licensed & Insured",
+      "description": "Fully licensed contractor with comprehensive liability and workers' compensation insurance.",
+      "icon": "fa-certificate"
+    },
+    {
+      "name": "BBB Accredited",
+      "description": "Proud A+ rated member of the Better Business Bureau.",
+      "icon": "fa-award"
+    },
+    {
+      "name": "Manufacturer Certified",
+      "description": "Certified installer for leading fence manufacturers including ActiveYards, Bufftech, and Simtek.",
+      "icon": "fa-check-circle"
+    }
+  ],
+  "whyChooseUs": [
+    {
+      "title": "Free On-Site Estimates",
+      "description": "No obligation quotes with accurate measurements and personalized recommendations for your property.",
+      "icon": "fa-clipboard-list"
+    },
+    {
+      "title": "Competitive Pricing",
+      "description": "Quality fencing at fair prices. We'll match or beat any comparable written estimate.",
+      "icon": "fa-dollar-sign"
+    },
+    {
+      "title": "Professional Installation",
+      "description": "Expert crews using proper techniques and quality materials for lasting results.",
+      "icon": "fa-tools"
+    },
+    {
+      "title": "Warranty Protection",
+      "description": "Workmanship warranties on all installations plus manufacturer warranties on materials.",
+      "icon": "fa-shield-alt"
+    },
+    {
+      "title": "Permit Assistance",
+      "description": "We handle permit research and can assist with the application process for your municipality.",
+      "icon": "fa-file-alt"
+    },
+    {
+      "title": "Clean Job Sites",
+      "description": "We treat your property with respect, cleaning up thoroughly after every project.",
+      "icon": "fa-broom"
+    }
+  ],
+  "seo": {
+    "title": "About Us | Ghareeb Fencing Solutions - Toledo's Trusted Fence Company",
+    "description": "Learn about Ghareeb Fencing Solutions, serving Northwest Ohio and Southeast Michigan since 2012. Family-owned, quality-focused, and committed to customer satisfaction.",
+    "keywords": ["Toledo fence company", "about Ghareeb Fencing", "Northwest Ohio fencing", "family-owned fence installer", "licensed fence contractor Toledo"]
   }
 }

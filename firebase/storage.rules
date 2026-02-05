@@ -1,0 +1,40 @@
+// Firebase Storage Security Rules for Ghareeb Fencing Solutions
+// Deploy these rules in Firebase Console > Storage > Rules
+// =====================================================================
+
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // =====================================================================
+    // GALLERY IMAGES - Public read, restricted write
+    // =====================================================================
+    match /gallery/{fileName} {
+      // Anyone can view gallery images
+      allow read: if true;
+      
+      // Allow upload with restrictions:
+      // - Must be an image
+      // - Max 5MB
+      allow write: if request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // =====================================================================
+    // PAGE IMAGES - Public read, restricted write
+    // =====================================================================
+    match /pages/{fileName} {
+      allow read: if true;
+      
+      allow write: if request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    
+    // =====================================================================
+    // ALL OTHER PATHS - Deny by default
+    // =====================================================================
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

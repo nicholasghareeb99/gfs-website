@@ -1,0 +1,524 @@
+<!-- Edit Mode: Only loads Firebase SDK when needed, activates for authenticated admins -->
+<div id="edit-toolbar" style="display:none;">
+  <div class="et-bar">
+    <div class="et-left">
+      <div class="et-logo">✏️ Edit Mode</div>
+      <span class="et-page" id="et-page-name"></span>
+    </div>
+    <div class="et-center">
+      <button id="et-toggle" class="et-btn et-btn-edit" title="Toggle editing">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Edit</span>
+      </button>
+      <button id="et-add-section" class="et-btn" title="Add content" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span>Add</span>
+      </button>
+    </div>
+    <div class="et-right">
+      <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
+      <button id="et-save" class="et-btn et-btn-save" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+        Save Changes
+      </button>
+      <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
+      <button id="et-logout" class="et-btn et-btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Image upload modal -->
+<div id="et-image-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content">
+    <h3>Replace Image</h3>
+    <div class="et-upload-zone" id="et-upload-zone">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+      <p>Drag & drop an image or click to browse</p>
+      <input type="file" id="et-file-input" accept="image/*" style="display:none;" />
+    </div>
+    <div class="et-upload-preview" id="et-upload-preview" style="display:none;">
+      <img id="et-preview-img" src="" alt="Preview" />
+    </div>
+    <div class="et-modal-url">
+      <label>Or enter image URL:</label>
+      <input type="url" id="et-image-url" placeholder="https://..." />
+    </div>
+    <div class="et-modal-actions">
+      <button id="et-image-cancel" class="et-btn">Cancel</button>
+      <button id="et-image-apply" class="et-btn et-btn-save">Apply</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  #edit-toolbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  .et-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    background: #1a1a2e; color: white; padding: 8px 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3); gap: 12px;
+  }
+  .et-left, .et-center, .et-right { display: flex; align-items: center; gap: 10px; }
+  .et-logo { font-weight: 700; font-size: 14px; }
+  .et-page { font-size: 12px; color: rgba(255,255,255,0.6); }
+  .et-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 14px; border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 6px; background: transparent; color: white;
+    font-size: 13px; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .et-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+  .et-btn-edit { background: #3b82f6; border-color: #3b82f6; }
+  .et-btn-edit:hover { background: #2563eb; }
+  .et-btn-edit.active { background: #ef4444; border-color: #ef4444; }
+  .et-btn-edit.active:hover { background: #dc2626; }
+  .et-btn-save { background: #10b981; border-color: #10b981; }
+  .et-btn-save:hover { background: #059669; }
+  .et-btn-ghost { border-color: transparent; }
+  .et-changes { font-size: 12px; color: #fbbf24; font-weight: 600; }
+
+  /* Edit mode active styles */
+  body.edit-mode-active { padding-top: 48px !important; }
+  body.edit-mode-active [data-editable] {
+    outline: 2px dashed transparent; cursor: text; transition: outline 0.2s;
+    min-height: 1em; position: relative;
+  }
+  body.edit-mode-active [data-editable]:hover { outline: 2px dashed #3b82f6; }
+  body.edit-mode-active [data-editable]:focus { outline: 2px solid #3b82f6; background: rgba(59,130,246,0.05); }
+  body.edit-mode-active [data-editable-image] { position: relative; cursor: pointer; }
+  body.edit-mode-active [data-editable-image]::after {
+    content: '📷 Click to replace'; position: absolute; bottom: 8px; right: 8px;
+    background: rgba(0,0,0,0.8); color: white; padding: 4px 10px; border-radius: 4px;
+    font-size: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none;
+  }
+  body.edit-mode-active [data-editable-image]:hover::after { opacity: 1; }
+  body.edit-mode-active [data-editable-image]:hover { outline: 2px dashed #f59e0b; }
+
+  /* Sortable sections */
+  body.edit-mode-active [data-sortable] { position: relative; }
+  body.edit-mode-active [data-sortable-item] { position: relative; }
+  body.edit-mode-active [data-sortable-item]:hover { outline: 2px dashed #8b5cf6; }
+  .et-drag-handle {
+    position: absolute; top: 4px; left: -32px; width: 24px; height: 24px;
+    background: #8b5cf6; color: white; border-radius: 4px; border: none;
+    cursor: grab; display: none; align-items: center; justify-content: center; z-index: 10;
+  }
+  body.edit-mode-active [data-sortable-item]:hover .et-drag-handle { display: flex; }
+
+  /* Item controls (delete, duplicate) */
+  .et-item-controls {
+    position: absolute; top: 4px; right: 4px; display: none; gap: 4px; z-index: 10;
+  }
+  body.edit-mode-active [data-sortable-item]:hover .et-item-controls { display: flex; }
+  .et-item-btn {
+    width: 28px; height: 28px; border-radius: 4px; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 14px;
+  }
+  .et-item-btn-del { background: #ef4444; color: white; }
+  .et-item-btn-dup { background: #3b82f6; color: white; }
+
+  /* Modal */
+  .et-modal {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .et-modal-content {
+    background: white; border-radius: 12px; padding: 32px; max-width: 500px;
+    width: 100%; color: #1a1a2e;
+  }
+  .et-modal-content h3 { margin: 0 0 20px; }
+  .et-upload-zone {
+    border: 2px dashed #d1d5db; border-radius: 8px; padding: 40px; text-align: center;
+    cursor: pointer; transition: all 0.2s; color: #6b7280;
+  }
+  .et-upload-zone:hover { border-color: #3b82f6; background: #f0f9ff; }
+  .et-upload-zone p { margin: 12px 0 0; }
+  .et-upload-preview { margin: 16px 0; text-align: center; }
+  .et-upload-preview img { max-width: 100%; max-height: 200px; border-radius: 8px; }
+  .et-modal-url { margin: 16px 0; }
+  .et-modal-url label { display: block; margin-bottom: 6px; font-size: 14px; color: #6b7280; }
+  .et-modal-url input { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+  .et-modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+  .et-modal-actions .et-btn { color: #1a1a2e; border-color: #d1d5db; }
+  .et-modal-actions .et-btn-save { color: white; }
+
+  @media (max-width: 768px) {
+    .et-bar { flex-wrap: wrap; padding: 6px 10px; }
+    .et-left .et-page { display: none; }
+    .et-btn span:not(:only-child) { display: none; }
+  }
+</style>
+
+<script is:inline>
+(function() {
+  // Firebase config
+  const FB_CFG = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+
+  let auth, db, storage, user = null;
+  let editActive = false;
+  let changes = new Map(); // doc_path -> { field: newValue }
+  let originalContent = new Map(); // element -> original innerHTML/src
+
+  // =============================================
+  // 1. Check auth state — only load SDK if cookie hint exists
+  // =============================================
+  if (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin')) {
+    loadFirebaseAndInit();
+  }
+
+  async function loadFirebaseAndInit() {
+    // Load Firebase SDKs
+    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
+    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js');
+    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js');
+    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js');
+
+    if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
+    auth = firebase.auth();
+    db = firebase.firestore();
+    storage = firebase.storage();
+
+    auth.onAuthStateChanged(u => {
+      user = u;
+      if (u) {
+        document.cookie = 'gfs_admin=1;path=/;max-age=86400';
+        showToolbar();
+      } else {
+        document.cookie = 'gfs_admin=;path=/;max-age=0';
+        hideToolbar();
+      }
+    });
+  }
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+      const s = document.createElement('script');
+      s.src = src; s.onload = resolve; s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+
+  // =============================================
+  // 2. Toolbar controls
+  // =============================================
+  function showToolbar() {
+    const toolbar = document.getElementById('edit-toolbar');
+    if (toolbar) {
+      toolbar.style.display = 'block';
+      document.body.style.paddingTop = '48px';
+      document.getElementById('et-page-name').textContent = document.title.split('|')[0].trim();
+      bindToolbarEvents();
+    }
+  }
+
+  function hideToolbar() {
+    const toolbar = document.getElementById('edit-toolbar');
+    if (toolbar) toolbar.style.display = 'none';
+    document.body.style.paddingTop = '';
+    deactivateEditing();
+  }
+
+  function bindToolbarEvents() {
+    const toggleBtn = document.getElementById('et-toggle');
+    const saveBtn = document.getElementById('et-save');
+    const discardBtn = document.getElementById('et-discard');
+    const logoutBtn = document.getElementById('et-logout');
+
+    toggleBtn.onclick = () => {
+      if (editActive) deactivateEditing();
+      else activateEditing();
+    };
+    saveBtn.onclick = saveChanges;
+    discardBtn.onclick = discardChanges;
+    logoutBtn.onclick = () => {
+      if (auth) auth.signOut();
+      window.location.href = '/';
+    };
+  }
+
+  // =============================================
+  // 3. Activate / Deactivate editing
+  // =============================================
+  function activateEditing() {
+    editActive = true;
+    document.body.classList.add('edit-mode-active');
+    const btn = document.getElementById('et-toggle');
+    btn.classList.add('active');
+    btn.querySelector('span').textContent = 'Stop Editing';
+    document.getElementById('et-add-section').style.display = 'inline-flex';
+
+    // Make all [data-editable] contenteditable
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      el.contentEditable = 'true';
+      originalContent.set(el, el.innerHTML);
+      el.addEventListener('input', onContentEdit);
+      el.addEventListener('blur', onContentBlur);
+    });
+
+    // Bind image click handlers
+    document.querySelectorAll('[data-editable-image]').forEach(el => {
+      el._editClick = () => openImageModal(el);
+      el.addEventListener('click', el._editClick);
+    });
+
+    // Add item controls to sortable items
+    document.querySelectorAll('[data-sortable-item]').forEach(el => {
+      if (!el.querySelector('.et-item-controls')) {
+        const controls = document.createElement('div');
+        controls.className = 'et-item-controls';
+        controls.innerHTML = '<button class="et-item-btn et-item-btn-del" title="Delete">✕</button>';
+        controls.querySelector('.et-item-btn-del').onclick = (e) => { e.stopPropagation(); deleteItem(el); };
+        el.style.position = 'relative';
+        el.appendChild(controls);
+      }
+    });
+  }
+
+  function deactivateEditing() {
+    editActive = false;
+    document.body.classList.remove('edit-mode-active');
+    const btn = document.getElementById('et-toggle');
+    if (btn) {
+      btn.classList.remove('active');
+      btn.querySelector('span').textContent = 'Edit';
+    }
+    const addBtn = document.getElementById('et-add-section');
+    if (addBtn) addBtn.style.display = 'none';
+
+    document.querySelectorAll('[data-editable]').forEach(el => {
+      el.contentEditable = 'false';
+      el.removeEventListener('input', onContentEdit);
+      el.removeEventListener('blur', onContentBlur);
+    });
+    document.querySelectorAll('[data-editable-image]').forEach(el => {
+      if (el._editClick) { el.removeEventListener('click', el._editClick); delete el._editClick; }
+    });
+  }
+
+  // =============================================
+  // 4. Track changes
+  // =============================================
+  function onContentEdit(e) {
+    const el = e.target.closest('[data-editable]');
+    if (!el) return;
+    trackChange(el);
+  }
+
+  function onContentBlur(e) {
+    const el = e.target.closest('[data-editable]');
+    if (!el) return;
+    trackChange(el);
+  }
+
+  function trackChange(el) {
+    const doc = el.dataset.editDoc;
+    const field = el.dataset.editField;
+    if (!doc || !field) return;
+
+    if (!changes.has(doc)) changes.set(doc, {});
+    const isHTML = el.dataset.editType === 'html' || el.dataset.editType === 'richtext';
+    changes.get(doc)[field] = isHTML ? el.innerHTML : el.textContent.trim();
+    updateChangesCount();
+  }
+
+  function trackImageChange(el, newSrc) {
+    const doc = el.dataset.editDoc;
+    const field = el.dataset.editField || el.dataset.editImageField;
+    if (!doc || !field) return;
+    if (!changes.has(doc)) changes.set(doc, {});
+    changes.get(doc)[field] = newSrc;
+    updateChangesCount();
+  }
+
+  function updateChangesCount() {
+    let count = 0;
+    changes.forEach(fields => { count += Object.keys(fields).length; });
+    const el = document.getElementById('et-changes');
+    const saveBtn = document.getElementById('et-save');
+    const discardBtn = document.getElementById('et-discard');
+    if (count > 0) {
+      el.style.display = 'inline'; el.textContent = count + ' change' + (count !== 1 ? 's' : '');
+      saveBtn.style.display = 'inline-flex'; discardBtn.style.display = 'inline-flex';
+    } else {
+      el.style.display = 'none'; saveBtn.style.display = 'none'; discardBtn.style.display = 'none';
+    }
+  }
+
+  // =============================================
+  // 5. Save changes to Firestore
+  // =============================================
+  async function saveChanges() {
+    if (!db || changes.size === 0) return;
+    const saveBtn = document.getElementById('et-save');
+    saveBtn.innerHTML = '⏳ Saving...'; saveBtn.disabled = true;
+
+    try {
+      const batch = db.batch();
+      changes.forEach((fields, docPath) => {
+        const ref = db.doc(docPath);
+        // Build nested field updates using dot notation
+        const update = {};
+        for (const [field, value] of Object.entries(fields)) {
+          update[field] = value;
+        }
+        batch.set(ref, update, { merge: true });
+      });
+      await batch.commit();
+
+      changes.clear();
+      updateChangesCount();
+
+      // Flash green on toolbar
+      saveBtn.innerHTML = '✅ Saved!';
+      setTimeout(() => {
+        saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
+        saveBtn.disabled = false;
+      }, 2000);
+
+      // Update original content map
+      document.querySelectorAll('[data-editable]').forEach(el => {
+        originalContent.set(el, el.innerHTML);
+      });
+    } catch (e) {
+      console.error('Save error:', e);
+      saveBtn.innerHTML = '❌ Error — try again';
+      saveBtn.disabled = false;
+      alert('Save failed: ' + e.message);
+    }
+  }
+
+  function discardChanges() {
+    if (!confirm('Discard all unsaved changes?')) return;
+    // Restore original content
+    originalContent.forEach((html, el) => { el.innerHTML = html; });
+    changes.clear();
+    updateChangesCount();
+  }
+
+  // =============================================
+  // 6. Image editing
+  // =============================================
+  let currentImageEl = null;
+
+  function openImageModal(el) {
+    currentImageEl = el;
+    const modal = document.getElementById('et-image-modal');
+    modal.style.display = 'flex';
+    document.getElementById('et-image-url').value = '';
+    document.getElementById('et-upload-preview').style.display = 'none';
+
+    document.getElementById('et-upload-zone').onclick = () => document.getElementById('et-file-input').click();
+    document.getElementById('et-file-input').onchange = handleFileSelect;
+    document.getElementById('et-image-cancel').onclick = () => { modal.style.display = 'none'; currentImageEl = null; };
+    document.getElementById('et-image-apply').onclick = applyImage;
+  }
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('et-preview-img').src = ev.target.result;
+      document.getElementById('et-upload-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function applyImage() {
+    if (!currentImageEl) return;
+    const urlInput = document.getElementById('et-image-url');
+    const fileInput = document.getElementById('et-file-input');
+    let newSrc = '';
+
+    if (fileInput.files[0] && storage) {
+      // Upload to Firebase Storage
+      const file = fileInput.files[0];
+      const path = `website-images/${Date.now()}-${file.name}`;
+      const applyBtn = document.getElementById('et-image-apply');
+      applyBtn.innerHTML = '⏳ Uploading...'; applyBtn.disabled = true;
+      try {
+        const ref = storage.ref(path);
+        await ref.put(file);
+        newSrc = await ref.getDownloadURL();
+      } catch (e) {
+        alert('Upload failed: ' + e.message);
+        applyBtn.innerHTML = 'Apply'; applyBtn.disabled = false;
+        return;
+      }
+      applyBtn.innerHTML = 'Apply'; applyBtn.disabled = false;
+    } else if (urlInput.value.trim()) {
+      newSrc = urlInput.value.trim();
+    }
+
+    if (newSrc) {
+      // Update the image element
+      if (currentImageEl.tagName === 'IMG') {
+        currentImageEl.src = newSrc;
+      } else {
+        // Background image
+        currentImageEl.style.backgroundImage = `url(${newSrc})`;
+      }
+      trackImageChange(currentImageEl, newSrc);
+    }
+
+    document.getElementById('et-image-modal').style.display = 'none';
+    currentImageEl = null;
+    fileInput.value = '';
+  }
+
+  // =============================================
+  // 7. Delete sortable items
+  // =============================================
+  function deleteItem(el) {
+    if (!confirm('Delete this item?')) return;
+    const doc = el.dataset.editDoc;
+    const index = el.dataset.editIndex;
+    if (doc && index !== undefined) {
+      // Mark for deletion — we'll handle array item removal on save
+      if (!changes.has(doc)) changes.set(doc, {});
+      const existing = changes.get(doc);
+      if (!existing._deletions) existing._deletions = [];
+      existing._deletions.push(parseInt(index));
+    }
+    el.style.transition = 'all 0.3s';
+    el.style.opacity = '0';
+    el.style.transform = 'scale(0.9)';
+    setTimeout(() => el.remove(), 300);
+    updateChangesCount();
+  }
+
+  // =============================================
+  // 8. Drag & drop upload on upload zone
+  // =============================================
+  document.addEventListener('DOMContentLoaded', () => {
+    const zone = document.getElementById('et-upload-zone');
+    if (zone) {
+      zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#3b82f6'; });
+      zone.addEventListener('dragleave', () => { zone.style.borderColor = '#d1d5db'; });
+      zone.addEventListener('drop', e => {
+        e.preventDefault(); zone.style.borderColor = '#d1d5db';
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+          const dt = new DataTransfer(); dt.items.add(file);
+          document.getElementById('et-file-input').files = dt.files;
+          const reader = new FileReader();
+          reader.onload = ev => {
+            document.getElementById('et-preview-img').src = ev.target.result;
+            document.getElementById('et-upload-preview').style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+  });
+
+  // Expose for login page
+  window.GFS_EditMode = { loadFirebaseAndInit };
+})();
+</script>

@@ -1,0 +1,99 @@
+{
+  "id": "ranch-rail",
+  "slug": "ranch-rail",
+  "name": "Wood Ranch & Split Rail",
+  "shortName": "Ranch Rail",
+  "icon": "🌾",
+  "tagline": "Country & Farm Fencing",
+  "heroTitle": "Wood Ranch Rail Fence Installation",
+  "heroSubtitle": "Traditional wood ranch fencing for large properties, horse farms, and rural estates. Post and rail, split rail, and custom farm fence solutions.",
+  "seo": {
+    "title": "Ranch Rail Fence Installation Toledo OH | Farm & Horse Fence | Ghareeb Fencing",
+    "description": "Wood ranch rail and farm fence installation in Toledo OH. Post & rail, split rail, horse fence. Large property specialists. Call (419) 902-8257.",
+    "keywords": ["ranch rail fence Toledo", "horse fence Ohio", "farm fence Toledo", "post and rail fence", "large property fence"]
+  },
+  "overview": {
+    "title": "Fencing for Large Properties",
+    "content": "Ranch and farm properties need fencing that's practical, durable, and cost-effective over large areas. We specialize in post-and-rail, split rail, and board fencing for properties from 1 acre to 100+ acres.",
+    "additionalContent": "Whether you need horse-safe fencing, cattle containment, or simply a beautiful boundary for your rural estate, we have the expertise and materials to get it done right.",
+    "features": [
+      "Post & rail, split rail, board fence options",
+      "Horse-safe designs available",
+      "Cedar, locust, or treated pine materials",
+      "Wire mesh backing for smaller animals",
+      "Gate systems for equipment access",
+      "Cost-effective for large properties"
+    ]
+  },
+  "specs": {
+    "lifespan": "20-50 years (varies by material)",
+    "maintenance": "Minimal",
+    "warranty": "3-year workmanship warranty",
+    "heights": ["3 ft", "4 ft", "5 ft"],
+    "materials": ["Northern White Cedar", "Black Locust", "Pressure-Treated Pine"]
+  },
+  "styles": [
+    {
+      "name": "Post & Rail (2-Rail)",
+      "description": "Two horizontal rails mortised through posts. Classic ranch look, 3ft height. Most affordable for large areas.",
+      "image": "/images/gallery/split-rail-1.jpg"
+    },
+    {
+      "name": "Post & Rail (3-Rail)",
+      "description": "Three horizontal rails for 4ft height. Better visibility for livestock, more defined boundary.",
+      "image": "/images/gallery/split-rail-2.jpg"
+    },
+    {
+      "name": "Board Fence",
+      "description": "Horizontal boards nailed to posts. Traditional horse farm appearance. Various board widths available.",
+      "image": "/images/gallery/cedar-split-rail.jpg"
+    },
+    {
+      "name": "Split Rail",
+      "description": "Rustic split rails set into posts. Natural, weathered appearance. Cedar or locust options.",
+      "image": "/images/gallery/split-rail-4.jpg"
+    }
+  ],
+  "applications": [
+    {
+      "name": "Horse Properties",
+      "description": "Horse-safe fencing without sharp edges or gaps that could injure animals. We recommend 3-rail for better visibility."
+    },
+    {
+      "name": "Cattle Containment",
+      "description": "Strong board fencing for cattle. Can add wire mesh or electric wire for added security."
+    },
+    {
+      "name": "Property Lines",
+      "description": "Define large property boundaries cost-effectively. Split rail is ideal for 1+ acre lots."
+    },
+    {
+      "name": "Rural Estates",
+      "description": "Beautiful boundary fencing for country properties. Complements natural landscapes."
+    }
+  ],
+  "gallery": [
+    { "src": "/images/gallery/split-rail-1.jpg", "alt": "Post and rail fence", "caption": "2-Rail Cedar" },
+    { "src": "/images/gallery/split-rail-2.jpg", "alt": "Three rail fence", "caption": "3-Rail Style" },
+    { "src": "/images/gallery/cedar-split-rail.jpg", "alt": "Board fence", "caption": "Board Fence" },
+    { "src": "/images/gallery/cedar-split-rail-gate.jpg", "alt": "Ranch gate", "caption": "Farm Gate" }
+  ],
+  "faqs": [
+    {
+      "question": "What's the best fence for horses?",
+      "answer": "For horses, we recommend 3-rail post and rail with rounded top rail or board fencing. Avoid wire mesh alone as horses can catch legs. We can add a sight board at top for better visibility."
+    },
+    {
+      "question": "How do you price large property fencing?",
+      "answer": "Large property fencing is priced per linear foot. We offer volume discounts for properties over 1 acre. Split rail is most affordable, followed by post-and-rail, then board fence."
+    },
+    {
+      "question": "Can you add gates for equipment?",
+      "answer": "Yes, we install single, double, and wide farm gates for tractors, trucks, and equipment. Gate widths up to 20 feet available with proper bracing."
+    },
+    {
+      "question": "What wood lasts longest for ranch fencing?",
+      "answer": "Black locust is the longest-lasting (30-50 years) but most expensive. Cedar lasts 20-30 years and is mid-range. Treated pine is most affordable at 15-20 years."
+    }
+  ]
+}

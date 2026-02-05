@@ -1,535 +1,517 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-
-const pageTitle = "Instant Fence Quote Calculator | Ghareeb Fencing Solutions";
-const pageDescription = "Get an instant ballpark estimate for your fence project. Enter your fence length, style, and gates to see pricing. Toledo, NW Ohio & SE Michigan.";
+import { getSiteSettings } from '../../../lib/firestore.js';
+const site = await getSiteSettings();
 ---
 
-<BaseLayout title={pageTitle} description={pageDescription}>
-  <style>
-    .quote-hero{background:linear-gradient(135deg,var(--primary-dark),var(--primary));color:#fff;padding:140px 0 60px;text-align:center}
-    .quote-hero h1{color:#fff;font-size:clamp(2rem,5vw,2.8rem);margin-bottom:12px}
-    .quote-hero p{color:#94a3b8;font-size:1.1rem;max-width:600px;margin:0 auto}
-    .calculator-container{max-width:900px;margin:-40px auto 60px;padding:0 20px;position:relative;z-index:10}
-    .calc-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;box-shadow:var(--shadow-lg)}
-    .calc-section{margin-bottom:32px}
-    .calc-section h3{font-size:1.1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--primary)}
-    .input-group{margin-bottom:20px}
-    .input-group label{display:block;font-weight:600;margin-bottom:8px;color:var(--text-dark)}
-    .input-group input,.input-group select{width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);font-size:1rem;background:var(--bg-light);color:var(--text-dark);box-sizing:border-box}
-    .input-group input:focus,.input-group select:focus{border-color:var(--accent);outline:none}
-    .input-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-    .style-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
-    .style-option{padding:16px;border:2px solid var(--border);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all .2s;background:var(--bg-light)}
-    .style-option:hover{border-color:var(--accent)}
-    .style-option.selected{border-color:var(--accent);background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(212,175,55,0.2))}
-    .style-option .style-name{font-weight:700;margin-bottom:4px;color:var(--text-dark)}
-    .style-option .style-price{font-size:0.85rem;color:var(--text-muted)}
-    .gate-counter{display:flex;align-items:center;gap:12px}
-    .gate-btn{width:40px;height:40px;border:2px solid var(--border);border-radius:50%;background:var(--bg-light);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
-    .gate-btn:hover{border-color:var(--accent);background:var(--accent);color:var(--primary-dark)}
-    .gate-count{font-size:1.5rem;font-weight:700;min-width:40px;text-align:center}
-    .height-options{display:flex;gap:12px;flex-wrap:wrap}
-    .height-btn{padding:12px 24px;border:2px solid var(--border);border-radius:var(--radius-full);background:var(--bg-light);cursor:pointer;font-weight:600;transition:all .2s}
-    .height-btn:hover{border-color:var(--accent)}
-    .height-btn.selected{border-color:var(--accent);background:var(--accent);color:var(--primary-dark)}
-    .results-card{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-lg);padding:32px;color:#fff;margin-top:32px}
-    .results-card h3{color:#fff;margin-bottom:24px;text-align:center}
-    .price-display{text-align:center;margin-bottom:24px}
-    .price-range{font-size:2.5rem;font-weight:800;color:var(--accent)}
-    .price-note{font-size:0.9rem;opacity:0.8;margin-top:8px}
-    .breakdown{display:grid;gap:12px;margin-bottom:24px}
-    .breakdown-row{display:flex;justify-content:space-between;padding:12px 16px;background:rgba(255,255,255,0.1);border-radius:8px}
-    .breakdown-label{opacity:0.9}
-    .breakdown-value{font-weight:700}
-    .financing-options{background:rgba(255,255,255,0.1);border-radius:12px;padding:20px;margin-top:24px}
-    .financing-options h4{margin-bottom:16px;text-align:center}
-    .financing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
-    @media(max-width:600px){.financing-grid{grid-template-columns:repeat(2,1fr)}}
-    .financing-item{padding:12px;background:rgba(255,255,255,0.1);border-radius:8px}
-    .financing-term{font-size:0.8rem;opacity:0.8}
-    .financing-amount{font-weight:700;font-size:1.1rem}
-    .cta-buttons{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
-    .cta-buttons .btn{padding:14px 28px;border-radius:var(--radius-full);font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
-    .btn-gold{background:var(--accent);color:var(--primary-dark)}
-    .btn-white{background:#fff;color:var(--primary)}
-    .removal-toggle{display:flex;align-items:center;gap:12px;margin-top:16px}
-    .toggle-switch{position:relative;width:50px;height:28px;background:var(--border);border-radius:14px;cursor:pointer;transition:background .2s}
-    .toggle-switch.active{background:var(--accent)}
-    .toggle-switch::after{content:'';position:absolute;width:22px;height:22px;background:#fff;border-radius:50%;top:3px;left:3px;transition:transform .2s}
-    .toggle-switch.active::after{transform:translateX(22px)}
-    .removal-options{margin-top:16px;padding:16px;background:var(--bg-light);border-radius:var(--radius);display:none}
-    .removal-options.show{display:block}
-    .permit-info{margin-top:24px;padding:16px;background:rgba(59,130,246,0.1);border:2px solid rgba(59,130,246,0.3);border-radius:var(--radius);display:none}
-    .permit-info.show{display:block}
-    .permit-info h4{color:#2563eb;margin-bottom:8px}
-    .address-input-wrapper{position:relative}
-    .address-suggestions{position:absolute;top:100%;left:0;right:0;background:#fff;border:2px solid var(--accent);border-top:none;border-radius:0 0 12px 12px;max-height:300px;overflow-y:auto;z-index:100;display:none}
-    .address-suggestions.show{display:block}
-    .address-suggestion{padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
-    .address-suggestion:hover{background:rgba(212,175,55,0.1)}
-    .addr-main{font-weight:600}
-    .addr-sub{font-size:0.85rem;color:var(--text-muted)}
-    .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--primary);color:#fff;padding:12px 24px;border-radius:var(--radius-full);z-index:1000;display:none;align-items:center;gap:8px;box-shadow:var(--shadow-lg)}
-    .toast.show{display:flex}
-  </style>
-
-  <section class="quote-hero">
-    <div class="container">
-      <h1>⚡ Instant Fence Quote</h1>
-      <p>Get a ballpark estimate in seconds. No obligation, no pressure. Just honest pricing.</p>
-    </div>
-  </section>
-
-  <div class="calculator-container">
-    <div class="calc-card">
-      <!-- Address Section -->
-      <div class="calc-section">
-        <h3>📍 Your Location (Optional)</h3>
-        <div class="input-group">
-          <label for="address">Address - helps us check permit requirements</label>
-          <div class="address-input-wrapper">
-            <input type="text" id="address" placeholder="Enter your address..." autocomplete="off">
-            <div class="address-suggestions" id="addressSuggestions"></div>
-          </div>
-        </div>
-        <div class="permit-info" id="permitInfo">
-          <h4>📋 Permit Info for Your Area</h4>
-          <p id="permitText">We'll look up permit requirements based on your address.</p>
-        </div>
-      </div>
-
-      <!-- Fence Length -->
-      <div class="calc-section">
-        <h3>📏 Fence Length</h3>
-        <div class="input-group">
-          <label for="fenceLength">Total linear feet of fencing</label>
-          <input type="number" id="fenceLength" placeholder="e.g., 150" min="10" max="2000" value="">
-        </div>
-      </div>
-
-      <!-- Fence Style -->
-      <div class="calc-section">
-        <h3>🏠 Fence Style</h3>
-        <div class="style-grid" id="styleGrid">
-          <div class="style-option" data-style="wood" data-price="25">
-            <div class="style-name">Wood Privacy</div>
-            <div class="style-price">From $25/ft</div>
-          </div>
-          <div class="style-option selected" data-style="cedar" data-price="45">
-            <div class="style-name">Cedar Privacy</div>
-            <div class="style-price">From $45/ft</div>
-          </div>
-          <div class="style-option" data-style="vinyl" data-price="50">
-            <div class="style-name">Vinyl Privacy</div>
-            <div class="style-price">From $50/ft</div>
-          </div>
-          <div class="style-option" data-style="aluminum" data-price="40">
-            <div class="style-name">Aluminum</div>
-            <div class="style-price">From $40/ft</div>
-          </div>
-          <div class="style-option" data-style="chainlink" data-price="18">
-            <div class="style-name">Chain Link</div>
-            <div class="style-price">From $18/ft</div>
-          </div>
-          <div class="style-option" data-style="splitrail" data-price="15">
-            <div class="style-name">Split Rail</div>
-            <div class="style-price">From $15/ft</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Fence Height -->
-      <div class="calc-section">
-        <h3>📐 Fence Height</h3>
-        <div class="height-options" id="heightOptions">
-          <button class="height-btn" data-height="4" data-mult="0.7">4 ft</button>
-          <button class="height-btn" data-height="5" data-mult="0.85">5 ft</button>
-          <button class="height-btn selected" data-height="6" data-mult="1.0">6 ft</button>
-          <button class="height-btn" data-height="8" data-mult="1.35">8 ft</button>
-        </div>
-      </div>
-
-      <!-- Gates -->
-      <div class="calc-section">
-        <h3>🚪 Gates</h3>
-        <div class="input-row">
-          <div class="input-group">
-            <label>Walk Gates (3-4ft wide)</label>
-            <div class="gate-counter">
-              <button class="gate-btn" onclick="adjustGate('walk', -1)">−</button>
-              <span class="gate-count" id="walkGateCount">1</span>
-              <button class="gate-btn" onclick="adjustGate('walk', 1)">+</button>
+<BaseLayout 
+    title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions" 
+    description="Get an instant ballpark fence quote in 60 seconds. Draw on a map or enter measurements. See pricing for cedar, vinyl, chain link & more."
+    canonical="/quote/ballpark/"
+>
+    <section class="hero-mini">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/">Home</a> / <a href="/quote/">Quote</a> / <span>Ballpark Calculator</span>
             </div>
-          </div>
-          <div class="input-group">
-            <label>Double/Drive Gates (8-12ft wide)</label>
-            <div class="gate-counter">
-              <button class="gate-btn" onclick="adjustGate('drive', -1)">−</button>
-              <span class="gate-count" id="driveGateCount">0</span>
-              <button class="gate-btn" onclick="adjustGate('drive', 1)">+</button>
+            <h1>Instant Ballpark Quote</h1>
+            <p class="subtitle">Get a price estimate in 60 seconds — just tell us about your project</p>
+        </div>
+    </section>
+
+    <section class="calculator-section">
+        <div class="container">
+            <div class="calculator-grid">
+                <div class="calculator-main">
+                    <!-- Step 1: Location -->
+                    <div class="calc-step" id="step-1">
+                        <div class="step-header">
+                            <span class="step-number">1</span>
+                            <div><h3>Where's your property?</h3><p>Search your address to get started</p></div>
+                        </div>
+                        <div class="address-search">
+                            <input type="text" id="address-input" placeholder="Enter your address (e.g., 123 Main St, Toledo, OH)" />
+                            <button type="button" id="search-btn" class="btn btn-primary">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search
+                            </button>
+                        </div>
+                        <div id="map-container">
+                            <div id="map"></div>
+                            <div class="map-instructions" id="map-instructions">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                <span>Enter your address above to view your property</span>
+                            </div>
+                        </div>
+                        <div class="map-toolbar" id="map-toolbar" style="display: none;">
+                            <button type="button" id="draw-btn" class="toolbar-btn active">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                                Draw Fence Line
+                            </button>
+                            <button type="button" id="clear-btn" class="toolbar-btn">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Clear
+                            </button>
+                            <div class="toolbar-info"><strong>Total Length:</strong> <span id="total-length">0</span> ft</div>
+                        </div>
+                        <div class="manual-entry">
+                            <button type="button" id="manual-toggle" class="text-btn">Or enter measurements manually</button>
+                            <div id="manual-inputs" style="display: none;">
+                                <label><span>Linear Feet of Fence</span>
+                                    <input type="number" id="manual-feet" min="20" max="2000" placeholder="e.g., 150" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Fence Type -->
+                    <div class="calc-step" id="step-2">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <div><h3>Choose your fence style</h3><p>Select a material and style</p></div>
+                        </div>
+                        <div id="fence-styles-loading" class="loading-state"><div class="spinner"></div><span>Loading fence styles...</span></div>
+                        <div id="fence-styles-grid" class="fence-styles-grid" style="display: none;"></div>
+                    </div>
+
+                    <!-- Step 3: Options -->
+                    <div class="calc-step" id="step-3">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <div><h3>Customize your project</h3><p>Select height and additional options</p></div>
+                        </div>
+                        <div class="options-grid">
+                            <div class="option-group">
+                                <label for="fence-height">Fence Height</label>
+                                <select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select>
+                            </div>
+                            <div class="option-group">
+                                <label for="single-gates">Single Gates (Walk)</label>
+                                <select id="single-gates"><option value="0">None</option><option value="1" selected>1 Gate</option><option value="2">2 Gates</option><option value="3">3 Gates</option></select>
+                            </div>
+                            <div class="option-group">
+                                <label for="double-gates">Double Gates (Drive)</label>
+                                <select id="double-gates"><option value="0" selected>None</option><option value="1">1 Gate</option><option value="2">2 Gates</option></select>
+                            </div>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: LEAD WALL -->
+                    <div class="calc-step" id="step-4">
+                        <div class="step-header">
+                            <span class="step-number">4</span>
+                            <div><h3>See your instant quote</h3><p>Enter your info below — your ballpark price appears instantly</p></div>
+                        </div>
+                        <div id="lead-wall-form">
+                            <div class="form-row">
+                                <div class="form-group"><label for="lead-name">Full Name *</label><input type="text" id="lead-name" required placeholder="John Smith" /></div>
+                                <div class="form-group"><label for="lead-phone">Phone *</label><input type="tel" id="lead-phone" required placeholder="(419) 555-1234" /></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label for="lead-email">Email</label><input type="email" id="lead-email" placeholder="john@email.com" /></div>
+                                <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required placeholder="123 Main St, Toledo, OH" /></div>
+                            </div>
+                            <div class="form-group"><label for="lead-notes">Additional Notes</label><textarea id="lead-notes" rows="2" placeholder="Any special requirements or questions?"></textarea></div>
+                            <button type="button" id="unlock-quote-btn" class="btn btn-primary btn-block btn-lg" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                Unlock My Quote
+                            </button>
+                            <p class="form-disclaimer">By submitting, you agree to receive communications from Ghareeb Fencing Solutions. We respect your privacy and never share your information.</p>
+                        </div>
+                        <div id="lead-wall-success" style="display: none;">
+                            <div class="success-banner">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                                <div><strong>Quote unlocked!</strong><span>Check the quote panel for your estimate. We'll follow up within 24 hours.</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="calculator-sidebar">
+                    <div class="quote-summary">
+                        <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/></svg> Your Quote</h3>
+                        
+                        <!-- LOCKED state -->
+                        <div id="quote-locked">
+                            <div class="summary-placeholder" id="summary-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <p>Complete steps 1-4 to see your instant quote</p>
+                            </div>
+                            <div id="summary-preview" style="display: none;">
+                                <div class="summary-line"><span>Style</span><span id="preview-style">—</span></div>
+                                <div class="summary-line"><span>Length</span><span id="preview-feet">—</span></div>
+                                <div class="summary-line"><span>Height</span><span id="preview-height">—</span></div>
+                                <div class="summary-line"><span>Gates</span><span id="preview-gates">—</span></div>
+                                <div id="preview-removal-line" class="summary-line" style="display:none;"><span>Old Fence Removal</span><span>Yes</span></div>
+                                <hr>
+                                <div class="estimate-range locked-estimate">
+                                    <div class="range-label">Your Estimated Price</div>
+                                    <div class="locked-price">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                        <span>Enter your info in Step 4 to unlock</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UNLOCKED state -->
+                        <div id="quote-unlocked" style="display: none;">
+                            <div class="summary-line"><span>Style</span><span id="sum-style">—</span></div>
+                            <div class="summary-line"><span>Length</span><span id="sum-feet">—</span></div>
+                            <div class="summary-line"><span>Height</span><span id="sum-height">—</span></div>
+                            <div class="summary-line"><span>Gates</span><span id="sum-gates">—</span></div>
+                            <div id="removal-line" class="summary-line" style="display:none;"><span>Old Fence Removal</span><span>Included</span></div>
+                            <hr>
+                            <div class="estimate-range">
+                                <div class="range-label">Your Estimated Price</div>
+                                <div class="range-values">
+                                    <span class="range-low" id="range-low">$0</span>
+                                    <span class="range-separator">—</span>
+                                    <span class="range-high" id="range-high">$0</span>
+                                </div>
+                            </div>
+                            <p class="estimate-note">*Final price determined after free on-site measurement</p>
+                            <div class="summary-actions">
+                                <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                    Call to Schedule — {site.company.phone}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="trust-badges">
+                        <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>3-Year Warranty</span></div>
+                        <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg><span>4.9★ Rating</span></div>
+                        <div class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg><span>0% Financing</span></div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
+    </section>
+</BaseLayout>
 
-      <!-- Old Fence Removal -->
-      <div class="calc-section">
-        <h3>🗑️ Old Fence Removal</h3>
-        <div class="removal-toggle">
-          <div class="toggle-switch" id="removalToggle" onclick="toggleRemoval()"></div>
-          <span>I need my old fence removed</span>
-        </div>
-        <div class="removal-options" id="removalOptions">
-          <div class="input-row">
-            <div class="input-group">
-              <label for="removalFeet">Linear feet to remove</label>
-              <input type="number" id="removalFeet" placeholder="e.g., 150" min="0" value="0">
-            </div>
-            <div class="input-group">
-              <label for="removalType">Type of fence</label>
-              <select id="removalType">
-                <option value="3">Wood or Chain Link ($3/ft)</option>
-                <option value="6">Other/Heavy ($6/ft)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
+<script is:inline define:vars={{ mapsApiKey: site.googleMaps.apiKey }}>
+    const script = document.createElement('script');
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places&callback=initGoogleMaps`;
+    script.async = true; script.defer = true;
+    document.head.appendChild(script);
+    window.initGoogleMaps = function() {};
+</script>
 
-      <!-- Results -->
-      <div class="results-card" id="resultsCard">
-        <h3>💰 Your Ballpark Estimate</h3>
-        <div class="price-display">
-          <div class="price-range" id="priceRange">$0 - $0</div>
-          <div class="price-note">Final price depends on property conditions, exact measurements, and selected options</div>
-        </div>
-        <div class="breakdown" id="breakdown">
-          <!-- Populated by JS -->
-        </div>
-        <div class="financing-options">
-          <h4>💳 Monthly Payment Options (0% Available)</h4>
-          <div class="financing-grid" id="financingGrid">
-            <!-- Populated by JS -->
-          </div>
-        </div>
-        <div class="cta-buttons">
-          <a href="#lead-form" class="btn btn-gold" onclick="scrollToForm()">📝 Get Exact Quote</a>
-          <a href="tel:4199028257" class="btn btn-white">📞 Call Now</a>
-        </div>
-      </div>
-    </div>
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
-    <!-- Lead Capture Form -->
-    <div class="calc-card" id="lead-form" style="margin-top:32px">
-      <h3 style="text-align:center;margin-bottom:24px">📬 Get Your Exact Quote</h3>
-      <p style="text-align:center;color:var(--text-muted);margin-bottom:24px">We'll contact you within 24 hours to schedule a free on-site estimate.</p>
-      
-      <form name="ballpark-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/">
-        <input type="hidden" name="form-name" value="ballpark-quote">
-        <input type="hidden" name="quote-details" id="quoteDetails">
-        <p style="display:none"><input name="bot-field"></p>
-        
-        <div class="input-row">
-          <div class="input-group">
-            <label for="name">Your Name *</label>
-            <input type="text" id="name" name="name" required placeholder="John Smith">
-          </div>
-          <div class="input-group">
-            <label for="phone">Phone Number *</label>
-            <input type="tel" id="phone" name="phone" required placeholder="(419) 555-1234">
-          </div>
-        </div>
-        <div class="input-group">
-          <label for="email">Email Address *</label>
-          <input type="email" id="email" name="email" required placeholder="john@example.com">
-        </div>
-        <div class="input-group">
-          <label for="projectAddress">Project Address *</label>
-          <input type="text" id="projectAddress" name="address" required placeholder="123 Main St, Toledo, OH">
-        </div>
-        <div class="input-group">
-          <label for="notes">Additional Notes (Optional)</label>
-          <textarea id="notes" name="notes" rows="3" style="width:100%;padding:14px 16px;border:2px solid var(--border);border-radius:var(--radius);font-size:1rem;background:var(--bg-light);resize:vertical;box-sizing:border-box" placeholder="Any special requirements, questions, or details about your project..."></textarea>
-        </div>
-        <button type="submit" class="btn btn-gold" style="width:100%;justify-content:center;padding:16px;font-size:1.1rem;border:none;cursor:pointer">
-          📩 Request Free Quote
-        </button>
-        <p style="text-align:center;font-size:0.85rem;color:var(--text-muted);margin-top:16px">No spam. We respect your privacy. Quotes are always free with no obligation.</p>
-      </form>
-    </div>
-  </div>
+<script is:inline define:vars={{ firebaseConfig: site.firebase }}>
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  <div class="toast" id="toast"></div>
+let map = null, drawingManager = null, polylines = [], totalFeet = 0, selectedStyle = null, pricingData = [], userAddress = '', quoteUnlocked = false;
+const heightMultipliers = { '4': 0.85, '5': 0.92, '6': 1.0, '8': 1.25 };
+const removalCostPerFoot = 4;
 
-  <script>
-  // Pricing data
-  const PRICING = {
-    wood: { base: 25, range: 8 },
-    cedar: { base: 45, range: 15 },
-    vinyl: { base: 50, range: 20 },
-    aluminum: { base: 40, range: 20 },
-    chainlink: { base: 18, range: 7 },
-    splitrail: { base: 15, range: 5 }
-  };
+const $ = id => document.getElementById(id);
 
-  const GATE_PRICES = {
-    walk: { min: 200, max: 350 },
-    drive: { min: 450, max: 750 }
-  };
-
-  // State
-  let state = {
-    length: 0,
-    style: 'cedar',
-    height: 6,
-    heightMult: 1.0,
-    walkGates: 1,
-    driveGates: 0,
-    removal: false,
-    removalFeet: 0,
-    removalRate: 3
-  };
-
-  // Permit info by city
-  const PERMIT_INFO = {
-    'toledo': { text: 'Toledo requires a FREE Certificate of Zoning Compliance. Max 3.5ft front (open style), 6ft rear. We handle all permits!' },
-    'perrysburg': { text: 'Perrysburg requires a free Zoning Compliance Form. Max 4ft front (open style), 6ft rear. Quick approval process.' },
-    'sylvania': { text: 'Sylvania requires Zoning Review (free). Many HOAs in area - check your deed restrictions first.' },
-    'maumee': { text: 'Maumee requires free Zoning Approval. Historic district has additional design review.' },
-    'oregon': { text: 'Oregon requires a $25 Zoning Permit. Standard heights: 4ft front, 6ft rear.' },
-    'monroe': { text: 'Monroe MI requires a Building Permit ($50-$100). Standard heights: 4ft front, 6ft rear.' },
-    'temperance': { text: 'Great news! Bedford Township (Temperance) does NOT require a fence permit!' },
-    'lambertville': { text: 'Great news! Bedford Township (Lambertville) does NOT require a fence permit!' },
-    'default': { text: 'Permit requirements vary by municipality. We research and handle all permits for you!' }
-  };
-
-  // Initialize
-  document.addEventListener('DOMContentLoaded', function() {
-    // Style selection
-    document.querySelectorAll('.style-option').forEach(opt => {
-      opt.addEventListener('click', function() {
-        document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
-        this.classList.add('selected');
-        state.style = this.dataset.style;
-        calculate();
-      });
-    });
-
-    // Height selection
-    document.querySelectorAll('.height-btn').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.height-btn').forEach(b => b.classList.remove('selected'));
-        this.classList.add('selected');
-        state.height = parseInt(this.dataset.height);
-        state.heightMult = parseFloat(this.dataset.mult);
-        calculate();
-      });
-    });
-
-    // Length input
-    document.getElementById('fenceLength').addEventListener('input', function() {
-      state.length = parseInt(this.value) || 0;
-      calculate();
-    });
-
-    // Removal inputs
-    document.getElementById('removalFeet').addEventListener('input', function() {
-      state.removalFeet = parseInt(this.value) || 0;
-      calculate();
-    });
-    document.getElementById('removalType').addEventListener('change', function() {
-      state.removalRate = parseInt(this.value);
-      calculate();
-    });
-
-    // Address autocomplete
-    const addressInput = document.getElementById('address');
-    const suggestions = document.getElementById('addressSuggestions');
-    let debounceTimer;
-
-    addressInput.addEventListener('input', function() {
-      clearTimeout(debounceTimer);
-      const query = this.value.trim();
-      if (query.length < 3) {
-        suggestions.classList.remove('show');
-        return;
-      }
-      debounceTimer = setTimeout(() => searchAddress(query), 300);
-    });
-
-    addressInput.addEventListener('blur', function() {
-      setTimeout(() => suggestions.classList.remove('show'), 200);
-    });
-
-    // Initial calculation
-    calculate();
-  });
-
-  function adjustGate(type, delta) {
-    if (type === 'walk') {
-      state.walkGates = Math.max(0, Math.min(10, state.walkGates + delta));
-      document.getElementById('walkGateCount').textContent = state.walkGates;
-    } else {
-      state.driveGates = Math.max(0, Math.min(5, state.driveGates + delta));
-      document.getElementById('driveGateCount').textContent = state.driveGates;
+async function loadPricing() {
+    try {
+        const doc = await db.collection('settings').doc('global').get();
+        if (doc.exists && doc.data().pricing) {
+            const lines = doc.data().pricing.split('\n').filter(l => l.trim());
+            pricingData = lines.map(l => {
+                const p = l.split(':').map(s => s.trim());
+                return { name: p[0]||'Unknown', pricePerFoot: parseFloat(p[1])||0, singleGate: parseFloat(p[2])||350, doubleGate: parseFloat(p[3])||650 };
+            }).filter(i => i.pricePerFoot > 0);
+        }
+    } catch(e) { console.error('Pricing load error:', e); }
+    if (!pricingData.length) {
+        pricingData = [
+            { name:'Cedar Privacy', pricePerFoot:42, singleGate:375, doubleGate:695 },
+            { name:'Treated Wood Privacy', pricePerFoot:35, singleGate:325, doubleGate:595 },
+            { name:'White Vinyl Privacy', pricePerFoot:45, singleGate:425, doubleGate:795 },
+            { name:'Tan Vinyl Privacy', pricePerFoot:47, singleGate:425, doubleGate:795 },
+            { name:'Black Chain Link', pricePerFoot:22, singleGate:275, doubleGate:495 },
+            { name:'Galvanized Chain Link', pricePerFoot:18, singleGate:250, doubleGate:450 },
+            { name:'Black Aluminum', pricePerFoot:48, singleGate:450, doubleGate:850 },
+            { name:'Bronze Aluminum', pricePerFoot:50, singleGate:475, doubleGate:895 }
+        ];
     }
-    calculate();
-  }
+    renderFenceStyles();
+}
 
-  function toggleRemoval() {
-    state.removal = !state.removal;
-    document.getElementById('removalToggle').classList.toggle('active', state.removal);
-    document.getElementById('removalOptions').classList.toggle('show', state.removal);
-    if (!state.removal) {
-      state.removalFeet = 0;
-      document.getElementById('removalFeet').value = 0;
-    }
-    calculate();
-  }
+function renderFenceStyles() {
+    $('fence-styles-loading').style.display = 'none';
+    $('fence-styles-grid').style.display = 'grid';
+    $('fence-styles-grid').innerHTML = pricingData.map((s, i) => `<button type="button" class="fence-style-card" data-index="${i}"><div class="style-name">${s.name}</div></button>`).join('');
+    document.querySelectorAll('.fence-style-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('.fence-style-card').forEach(c => c.classList.remove('selected'));
+            card.classList.add('selected');
+            selectedStyle = pricingData[parseInt(card.dataset.index)];
+            updatePreview(); checkReady();
+        });
+    });
+}
 
-  function calculate() {
-    if (state.length < 10) {
-      document.getElementById('priceRange').textContent = 'Enter fence length above';
-      document.getElementById('breakdown').innerHTML = '';
-      document.getElementById('financingGrid').innerHTML = '';
-      return;
-    }
+function getFeet() { return $('manual-feet').value ? parseInt($('manual-feet').value) : totalFeet; }
 
-    const pricing = PRICING[state.style];
-    const baseLow = pricing.base * state.heightMult;
-    const baseHigh = (pricing.base + pricing.range) * state.heightMult;
+function updatePreview() {
+    const feet = getFeet();
+    if (feet < 20 || !selectedStyle) { $('summary-placeholder').style.display = 'flex'; $('summary-preview').style.display = 'none'; return; }
+    $('summary-placeholder').style.display = 'none';
+    $('summary-preview').style.display = 'block';
+    $('preview-style').textContent = selectedStyle.name;
+    $('preview-feet').textContent = feet + ' ft';
+    $('preview-height').textContent = $('fence-height').value + ' ft';
+    let g = [];
+    if (parseInt($('single-gates').value) > 0) g.push(parseInt($('single-gates').value) + ' single');
+    if (parseInt($('double-gates').value) > 0) g.push(parseInt($('double-gates').value) + ' double');
+    $('preview-gates').textContent = g.length ? g.join(', ') : 'None';
+    $('preview-removal-line').style.display = $('remove-old').checked ? 'flex' : 'none';
+    if (quoteUnlocked) updateUnlocked();
+}
 
-    // Fence cost
-    const fenceLow = Math.round(state.length * baseLow);
-    const fenceHigh = Math.round(state.length * baseHigh);
+function updateUnlocked() {
+    const feet = getFeet();
+    if (feet < 20 || !selectedStyle) return;
+    const hm = heightMultipliers[$('fence-height').value];
+    const sg = parseInt($('single-gates').value), dg = parseInt($('double-gates').value);
+    const rem = $('remove-old').checked;
+    const total = (feet * selectedStyle.pricePerFoot * hm) + (sg * selectedStyle.singleGate) + (dg * selectedStyle.doubleGate) + (rem ? feet * removalCostPerFoot : 0);
+    const lo = Math.round(total * 0.85), hi = Math.round(total * 1.15);
+    $('sum-style').textContent = selectedStyle.name;
+    $('sum-feet').textContent = feet + ' ft';
+    $('sum-height').textContent = $('fence-height').value + ' ft';
+    let g = [];
+    if (sg > 0) g.push(sg + ' single');
+    if (dg > 0) g.push(dg + ' double');
+    $('sum-gates').textContent = g.length ? g.join(', ') : 'None';
+    $('removal-line').style.display = rem ? 'flex' : 'none';
+    $('range-low').textContent = '$' + lo.toLocaleString();
+    $('range-high').textContent = '$' + hi.toLocaleString();
+}
 
-    // Gates cost
-    const walkLow = state.walkGates * GATE_PRICES.walk.min;
-    const walkHigh = state.walkGates * GATE_PRICES.walk.max;
-    const driveLow = state.driveGates * GATE_PRICES.drive.min;
-    const driveHigh = state.driveGates * GATE_PRICES.drive.max;
-    const gatesLow = walkLow + driveLow;
-    const gatesHigh = walkHigh + driveHigh;
+function checkReady() {
+    const feet = getFeet();
+    const ready = feet >= 20 && selectedStyle && $('lead-name').value.trim() && $('lead-phone').value.trim() && $('lead-address').value.trim();
+    $('unlock-quote-btn').disabled = !ready;
+}
 
-    // Removal cost
-    const removalCost = state.removal ? state.removalFeet * state.removalRate : 0;
+// Map
+function initMap(lat, lng) {
+    $('map-instructions').style.display = 'none';
+    $('map-toolbar').style.display = 'flex';
+    map = new google.maps.Map($('map'), { center:{lat,lng}, zoom:20, mapTypeId:'satellite', tilt:0, disableDefaultUI:true, zoomControl:true });
+    drawingManager = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.POLYLINE, drawingControl: false,
+        polylineOptions: { strokeColor:'#d4af37', strokeWeight:4, clickable:true, editable:true }
+    });
+    drawingManager.setMap(map);
+    google.maps.event.addListener(drawingManager, 'polylinecomplete', pl => {
+        polylines.push(pl); calcLength();
+        google.maps.event.addListener(pl.getPath(), 'set_at', calcLength);
+        google.maps.event.addListener(pl.getPath(), 'insert_at', calcLength);
+    });
+}
 
-    // Totals
-    const totalLow = fenceLow + gatesLow + removalCost;
-    const totalHigh = fenceHigh + gatesHigh + removalCost;
+function calcLength() {
+    totalFeet = 0;
+    polylines.forEach(pl => {
+        const path = pl.getPath();
+        for (let i = 0; i < path.getLength() - 1; i++) {
+            totalFeet += google.maps.geometry.spherical.computeDistanceBetween(path.getAt(i), path.getAt(i+1)) * 3.28084;
+        }
+    });
+    totalFeet = Math.round(totalFeet);
+    $('total-length').textContent = totalFeet;
+    updatePreview(); checkReady();
+}
 
-    // Display
-    document.getElementById('priceRange').textContent = `$${totalLow.toLocaleString()} - $${totalHigh.toLocaleString()}`;
+// Address search
+function searchAddress() {
+    const addr = $('address-input').value.trim();
+    if (!addr) return;
+    userAddress = addr;
+    $('lead-address').value = addr;
+    new google.maps.Geocoder().geocode({ address: addr }, (r, s) => {
+        if (s === 'OK' && r[0]) { const loc = r[0].geometry.location; initMap(loc.lat(), loc.lng()); }
+        else alert('Address not found. Please try a different address.');
+    });
+}
+$('search-btn').addEventListener('click', searchAddress);
+$('address-input').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); searchAddress(); } });
 
-    // Breakdown
-    let breakdown = `
-      <div class="breakdown-row"><span class="breakdown-label">📏 ${state.length} ft of ${state.style} fence (${state.height}ft tall)</span><span class="breakdown-value">$${fenceLow.toLocaleString()} - $${fenceHigh.toLocaleString()}</span></div>
-    `;
-    if (state.walkGates > 0) {
-      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🚪 ${state.walkGates} walk gate${state.walkGates > 1 ? 's' : ''}</span><span class="breakdown-value">$${walkLow.toLocaleString()} - $${walkHigh.toLocaleString()}</span></div>`;
-    }
-    if (state.driveGates > 0) {
-      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🚗 ${state.driveGates} drive gate${state.driveGates > 1 ? 's' : ''}</span><span class="breakdown-value">$${driveLow.toLocaleString()} - $${driveHigh.toLocaleString()}</span></div>`;
-    }
-    if (removalCost > 0) {
-      breakdown += `<div class="breakdown-row"><span class="breakdown-label">🗑️ Remove ${state.removalFeet} ft old fence</span><span class="breakdown-value">$${removalCost.toLocaleString()}</span></div>`;
-    }
-    document.getElementById('breakdown').innerHTML = breakdown;
+// Manual entry
+$('manual-toggle').addEventListener('click', () => {
+    const mi = $('manual-inputs');
+    mi.style.display = mi.style.display === 'none' ? 'block' : 'none';
+    $('manual-toggle').textContent = mi.style.display === 'none' ? 'Or enter measurements manually' : 'Hide manual entry';
+});
+$('manual-feet').addEventListener('input', () => {
+    if ($('manual-feet').value) $('total-length').textContent = $('manual-feet').value;
+    updatePreview(); checkReady();
+});
 
-    // Financing options (using midpoint)
-    const mid = Math.round((totalLow + totalHigh) / 2);
-    const financing = [
-      { term: '12 mo', amount: Math.round(mid / 12) },
-      { term: '24 mo', amount: Math.round(mid / 24) },
-      { term: '36 mo', amount: Math.round(mid / 36) },
-      { term: '48 mo', amount: Math.round(mid / 48) }
-    ];
-    document.getElementById('financingGrid').innerHTML = financing.map(f => `
-      <div class="financing-item">
-        <div class="financing-term">${f.term}</div>
-        <div class="financing-amount">$${f.amount}/mo</div>
-      </div>
-    `).join('');
+// Drawing controls
+$('draw-btn').addEventListener('click', () => { if (drawingManager) { drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYLINE); $('draw-btn').classList.add('active'); } });
+$('clear-btn').addEventListener('click', () => { polylines.forEach(p => p.setMap(null)); polylines = []; totalFeet = 0; $('total-length').textContent = '0'; updatePreview(); checkReady(); });
 
-    // Update hidden form field
-    updateQuoteDetails();
-  }
+// Option handlers
+['fence-height','single-gates','double-gates'].forEach(id => $(id).addEventListener('change', () => { updatePreview(); checkReady(); }));
+$('remove-old').addEventListener('change', () => { updatePreview(); checkReady(); });
 
-  function updateQuoteDetails() {
-    const details = `
-Style: ${state.style}
-Length: ${state.length} ft
-Height: ${state.height} ft
-Walk Gates: ${state.walkGates}
-Drive Gates: ${state.driveGates}
-Removal: ${state.removal ? state.removalFeet + ' ft' : 'No'}
-Estimate: ${document.getElementById('priceRange').textContent}
-    `.trim();
-    document.getElementById('quoteDetails').value = details;
-  }
+// Lead form handlers
+['lead-name','lead-phone','lead-email','lead-address'].forEach(id => $(id).addEventListener('input', checkReady));
 
-  async function searchAddress(query) {
-    const suggestions = document.getElementById('addressSuggestions');
-    suggestions.innerHTML = '<div class="address-suggestion">🔍 Searching...</div>';
-    suggestions.classList.add('show');
+// LEAD WALL SUBMIT - saves to websiteLeads, then reveals pricing
+$('unlock-quote-btn').addEventListener('click', async () => {
+    const feet = getFeet(), h = $('fence-height').value, hm = heightMultipliers[h];
+    const sg = parseInt($('single-gates').value), dg = parseInt($('double-gates').value), rem = $('remove-old').checked;
+    const total = (feet * selectedStyle.pricePerFoot * hm) + (sg * selectedStyle.singleGate) + (dg * selectedStyle.doubleGate) + (rem ? feet * removalCostPerFoot : 0);
+    const lo = Math.round(total * 0.85), hi = Math.round(total * 1.15);
+
+    const leadData = {
+        name: $('lead-name').value.trim(),
+        phone: $('lead-phone').value.trim(),
+        email: $('lead-email').value.trim() || '',
+        address: $('lead-address').value.trim(),
+        notes: $('lead-notes').value.trim() || '',
+        fenceStyle: selectedStyle.name,
+        linearFeet: feet,
+        height: parseInt(h),
+        singleGates: sg,
+        doubleGates: dg,
+        removeOldFence: rem,
+        pricePerFoot: selectedStyle.pricePerFoot,
+        estimateLow: lo,
+        estimateHigh: hi,
+        source: 'website-ballpark-calculator',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        status: 'new'
+    };
+
+    const btn = $('unlock-quote-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></div> Submitting...';
 
     try {
-      const url = 'https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates?' + new URLSearchParams({
-        f: 'json',
-        singleLine: query,
-        outFields: 'Addr_type,StAddr,City,Region,Postal',
-        maxLocations: '5',
-        countryCode: 'USA',
-        searchExtent: '-84.5,41.2,-83.0,42.1'
-      });
-
-      const resp = await fetch(url);
-      const data = await resp.json();
-
-      if (data.candidates && data.candidates.length > 0) {
-        const filtered = data.candidates.filter(c => {
-          const region = (c.attributes?.Region || '').toUpperCase();
-          return region === 'OHIO' || region === 'OH' || region === 'MICHIGAN' || region === 'MI';
-        }).slice(0, 5);
-
-        if (filtered.length > 0) {
-          suggestions.innerHTML = filtered.map(c => {
-            const addr = c.attributes || {};
-            const main = addr.StAddr || c.address.split(',')[0];
-            const sub = [addr.City, addr.Region, addr.Postal].filter(Boolean).join(', ');
-            return `<div class="address-suggestion" data-full="${c.address}" data-city="${(addr.City || '').toLowerCase()}">
-              <div><div class="addr-main">${main}</div><div class="addr-sub">${sub}</div></div>
-            </div>`;
-          }).join('');
-
-          suggestions.querySelectorAll('.address-suggestion').forEach(el => {
-            el.addEventListener('click', function() {
-              document.getElementById('address').value = this.dataset.full;
-              document.getElementById('projectAddress').value = this.dataset.full;
-              suggestions.classList.remove('show');
-              showPermitInfo(this.dataset.city);
-            });
-          });
-        } else {
-          suggestions.innerHTML = '<div class="address-suggestion">No addresses found in our service area</div>';
-        }
-      } else {
-        suggestions.innerHTML = '<div class="address-suggestion">No results found</div>';
-      }
-    } catch (e) {
-      suggestions.innerHTML = '<div class="address-suggestion">Search error - please try again</div>';
+        // Submit via server API (handles Firestore + email notification)
+        const res = await fetch('/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'lead',
+                name: leadData.name,
+                phone: leadData.phone,
+                email: leadData.email,
+                address: leadData.address,
+                notes: leadData.notes,
+                fenceType: leadData.fenceStyle,
+                fenceHeight: leadData.height,
+                fenceLength: leadData.linearFeet,
+                singleGates: leadData.singleGates,
+                doubleGates: leadData.doubleGates,
+                estimateLow: lo,
+                estimateHigh: hi,
+                estimatedRange: '$' + lo.toLocaleString() + ' - $' + hi.toLocaleString()
+            })
+        });
+        if (!res.ok) throw new Error('Submit failed');
+        quoteUnlocked = true;
+        $('lead-wall-form').style.display = 'none';
+        $('lead-wall-success').style.display = 'block';
+        $('quote-locked').style.display = 'none';
+        $('quote-unlocked').style.display = 'block';
+        updateUnlocked();
+        if (window.innerWidth <= 1024) document.querySelector('.calculator-sidebar').scrollIntoView({ behavior:'smooth', block:'start' });
+    } catch(e) {
+        console.error('Lead save error:', e);
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Unlock My Quote';
+        alert('Error submitting. Please call us directly at (419) 902-8257.');
     }
-  }
+});
 
-  function showPermitInfo(city) {
-    const info = PERMIT_INFO[city] || PERMIT_INFO.default;
-    document.getElementById('permitText').textContent = info.text;
-    document.getElementById('permitInfo').classList.add('show');
-  }
+loadPricing();
+</script>
 
-  function scrollToForm() {
-    document.getElementById('lead-form').scrollIntoView({ behavior: 'smooth' });
-  }
-  </script>
-</BaseLayout>
+<style>
+    .hero-mini { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 120px 0 40px; color: white; }
+    .hero-mini .breadcrumb { margin-bottom: 16px; font-size: 0.9rem; }
+    .hero-mini .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .hero-mini .breadcrumb a:hover { color: var(--accent); }
+    .hero-mini .breadcrumb span { color: white; }
+    .hero-mini h1 { font-size: clamp(2rem, 4vw, 2.5rem); margin-bottom: 8px; }
+    .hero-mini .subtitle { color: rgba(255,255,255,0.85); font-size: 1.1rem; }
+    .calculator-section { padding: 60px 0; background: var(--bg-light); }
+    .calculator-grid { display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: start; }
+    @media (max-width: 1024px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-sidebar { order: -1; } }
+    .calc-step { background: white; border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+    .step-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
+    .step-number { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+    .step-header h3 { margin: 0 0 4px; font-size: 1.2rem; }
+    .step-header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+    .address-search { display: flex; gap: 12px; margin-bottom: 20px; }
+    .address-search input { flex: 1; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
+    .address-search input:focus { border-color: var(--primary); outline: none; }
+    #map-container { position: relative; height: 350px; background: #1a1a2e; border-radius: var(--radius); overflow: hidden; }
+    #map { width: 100%; height: 100%; }
+    .map-instructions { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: rgba(255,255,255,0.7); text-align: center; padding: 20px; }
+    .map-toolbar { display: flex; gap: 12px; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+    .toolbar-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; background: white; border: 2px solid #e2e8f0; border-radius: var(--radius); cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+    .toolbar-btn:hover { border-color: var(--primary); }
+    .toolbar-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+    .toolbar-info { margin-left: auto; padding: 10px 16px; background: var(--accent); color: var(--primary-dark); border-radius: var(--radius); font-weight: 600; }
+    .manual-entry { margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0; }
+    .text-btn { background: none; border: none; color: var(--primary); cursor: pointer; text-decoration: underline; font-size: 0.95rem; }
+    #manual-inputs { margin-top: 16px; }
+    #manual-inputs label { display: block; }
+    #manual-inputs span { display: block; margin-bottom: 8px; font-weight: 500; }
+    #manual-inputs input { width: 100%; max-width: 200px; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
+    .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 40px; color: var(--text-muted); }
+    .spinner { width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .fence-styles-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .fence-style-card { padding: 20px 16px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: var(--radius); cursor: pointer; text-align: center; transition: all 0.2s; }
+    .fence-style-card:hover { border-color: var(--primary); background: white; }
+    .fence-style-card.selected { border-color: var(--accent); background: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
+    .style-name { font-weight: 600; color: var(--text); }
+    .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+    .option-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.95rem; }
+    .option-group select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; background: white; cursor: pointer; }
+    .checkbox-group { grid-column: 1 / -1; }
+    .checkbox-label { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+    .checkbox-label input { width: 20px; height: 20px; cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.95rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; }
+    .form-disclaimer { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
+    .success-banner { display: flex; gap: 16px; align-items: flex-start; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius); padding: 20px; color: #065f46; }
+    .success-banner svg { flex-shrink: 0; color: #10b981; margin-top: 2px; }
+    .success-banner strong { display: block; margin-bottom: 4px; font-size: 1.1rem; }
+    .success-banner span { font-size: 0.95rem; color: #047857; }
+    .calculator-sidebar { position: sticky; top: 100px; }
+    .quote-summary { background: white; border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-md); }
+    .quote-summary h3 { margin: 0 0 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
+    .summary-placeholder { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 30px 20px; color: var(--text-muted); }
+    .summary-placeholder svg { margin-bottom: 12px; opacity: 0.5; }
+    .summary-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.95rem; }
+    .summary-line span:first-child { color: var(--text-muted); }
+    #summary-preview hr, #quote-unlocked hr { margin: 16px 0; border: none; border-top: 1px solid #e2e8f0; }
+    .estimate-range { text-align: center; padding: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: var(--radius); color: white; }
+    .range-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 8px; }
+    .range-values { font-size: 1.8rem; font-weight: 700; }
+    .range-separator { margin: 0 8px; opacity: 0.5; }
+    .estimate-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 12px; margin-bottom: 0; }
+    .locked-estimate { background: linear-gradient(135deg, #64748b, #475569) !important; }
+    .locked-price { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; }
+    .locked-price span { font-size: 0.9rem; opacity: 0.9; }
+    .summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+    .btn-block { width: 100%; justify-content: center; }
+    .btn-lg { padding: 14px 24px; font-size: 1.05rem; }
+    .trust-badges { display: flex; justify-content: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+    .trust-badges .badge { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--text-muted); }
+</style>

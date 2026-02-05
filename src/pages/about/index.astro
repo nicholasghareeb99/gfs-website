@@ -1,40 +1,118 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import about from '../../content/about.json';
-import site from '../../content/site.json';
+import { getAboutInfo } from '../../lib/firestore.js';
+
+const aboutData = await getAboutInfo();
+const { company, history, team, stats, certifications, whyChooseUs, seo } = aboutData;
 ---
 
-<BaseLayout title={about.meta.title} description={about.meta.description}>
-    
-    <section class="hero about-hero">
+<BaseLayout 
+    title={seo.title}
+    description={seo.description}
+    canonical="/about/"
+>
+    <!-- Hero -->
+    <section class="about-hero">
         <div class="container">
-            <h1>{about.hero.headline}</h1>
-            <p class="hero-description">{about.hero.description}</p>
+            <nav class="breadcrumb">
+                <a href="/">Home</a>
+                <span>/</span>
+                <span>About Us</span>
+            </nav>
+            <h1 data-editable data-edit-doc="content/about" data-edit-field="seo.pageTitle">About Ghareeb Fencing Solutions</h1>
+            <p class="hero-subtitle" data-editable data-edit-doc="content/about" data-edit-field="company.tagline">{company.tagline}</p>
         </div>
     </section>
 
+    <!-- Stats -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                {stats.map(stat => (
+                    <div class="stat-item">
+                        <span class="stat-value">{stat.value}</span>
+                        <span class="stat-label">{stat.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Story -->
     <section class="section">
         <div class="container">
-            <div class="content-with-photo">
-                <div class="content-text">
-                    <h2>{about.story.headline}</h2>
-                    <p>{about.story.content}</p>
-                    <p>{about.story.content2}</p>
+            <div class="story-grid">
+                <div class="story-content">
+                    <h2 data-editable data-edit-doc="content/about" data-edit-field="history.headline">{history.headline}</h2>
+                    <p class="lead" data-editable data-edit-doc="content/about" data-edit-field="history.summary">{history.summary}</p>
+                    <div class="mission-box">
+                        <h3>Our Mission</h3>
+                        <p data-editable data-edit-doc="content/about" data-edit-field="company.mission">{company.mission}</p>
+                    </div>
                 </div>
-                <div class="content-photo">
-                    <img src={about.story.image} alt="Ghareeb Fencing work" loading="lazy">
+                <div class="story-image">
+                    <img src="/images/gallery/about-team.jpg" alt="Ghareeb Fencing Solutions team" data-editable-image data-edit-doc="content/about" data-edit-field="company.teamImage" />
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="section section-alt">
+    <!-- Values -->
+    <section class="section bg-light">
         <div class="container">
-            <h2 class="section-title">{about.values.headline}</h2>
+            <div class="section-header text-center">
+                <h2>Our Values</h2>
+                <p>The principles that guide everything we do</p>
+            </div>
             <div class="values-grid">
-                {about.values.items.map(item => (
+                {company.values.map(value => (
                     <div class="value-card">
-                        <h3>{item.title}</h3>
+                        <div class="value-icon">
+                            <i class={`fas ${value.icon}`}></i>
+                        </div>
+                        <h3>{value.title}</h3>
+                        <p>{value.description}</p>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Timeline -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Our Journey</h2>
+                <p>Key milestones in our growth</p>
+            </div>
+            <div class="timeline">
+                {history.timeline.map((item, index) => (
+                    <div class={`timeline-item ${index % 2 === 0 ? 'left' : 'right'}`}>
+                        <div class="timeline-content">
+                            <span class="timeline-year">{item.year}</span>
+                            <h4>{item.title}</h4>
+                            <p>{item.description}</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="section bg-light">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Why Choose Us</h2>
+                <p>What sets Ghareeb Fencing Solutions apart</p>
+            </div>
+            <div class="benefits-grid">
+                {whyChooseUs.map(item => (
+                    <div class="benefit-card">
+                        <div class="benefit-icon">
+                            <i class={`fas ${item.icon}`}></i>
+                        </div>
+                        <h4>{item.title}</h4>
                         <p>{item.description}</p>
                     </div>
                 ))}
@@ -42,66 +120,100 @@ import site from '../../content/site.json';
         </div>
     </section>
 
-    <section class="section cta-section">
-        <div class="container" style="text-align: center;">
-            <h2 class="section-title">{about.cta.headline}</h2>
-            <p class="section-subtitle">{about.cta.description}</p>
-            <div class="cta-buttons">
-                <a href={about.cta.primaryButton.href} class="btn btn-primary btn-lg">{about.cta.primaryButton.text}</a>
-                <a href={about.cta.secondaryButton.href} class="btn btn-secondary btn-lg">{about.cta.secondaryButton.text}</a>
+    <!-- Certifications -->
+    <section class="section">
+        <div class="container">
+            <div class="certs-grid">
+                {certifications.map(cert => (
+                    <div class="cert-item">
+                        <i class={`fas ${cert.icon}`}></i>
+                        <div>
+                            <h4>{cert.name}</h4>
+                            <p>{cert.description}</p>
+                        </div>
+                    </div>
+                ))}
             </div>
         </div>
     </section>
 
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Work With Us?</h2>
+            <p>Get a free estimate and see why our customers love us</p>
+            <div class="cta-buttons">
+                <a href="/quote/ballpark/" class="btn btn-accent btn-lg">Get Free Quote</a>
+                <a href="/contact/" class="btn btn-outline-light btn-lg">Contact Us</a>
+            </div>
+        </div>
+    </section>
 </BaseLayout>
 
 <style>
     .about-hero {
-        background: linear-gradient(135deg, #1e3a5f, #0f172a);
-        padding: 140px 0 80px;
-        text-align: center;
-    }
-    .about-hero h1 {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 140px 0 60px;
         color: white;
-        font-size: clamp(2.5rem, 5vw, 3.5rem);
-        margin-bottom: 16px;
     }
-    .hero-description {
-        color: rgba(255,255,255,0.9);
-        font-size: 1.2rem;
-    }
-    
-    .content-with-photo {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 40px;
-        align-items: center;
-    }
-    .content-text h2 { margin-bottom: 16px; }
-    .content-text p { color: var(--text-sub); margin-bottom: 16px; line-height: 1.7; }
-    .content-photo img { width: 100%; border-radius: 12px; height: 350px; object-fit: cover; }
-    
-    .section-alt { background: var(--dark-card); }
-    
-    .values-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 24px;
-        margin-top: 40px;
-    }
-    .value-card {
-        background: var(--dark);
-        padding: 32px;
-        border-radius: 12px;
-        border: 1px solid var(--border);
-    }
-    .value-card h3 { color: var(--accent); margin-bottom: 12px; }
-    .value-card p { color: var(--text-sub); }
-    
-    .cta-section { background: linear-gradient(135deg, var(--primary), #0f172a); }
-    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 32px; }
-    
+    .breadcrumb { display: flex; gap: 8px; margin-bottom: 20px; font-size: 0.9rem; }
+    .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .breadcrumb span { color: rgba(255,255,255,0.5); }
+    .breadcrumb span:last-child { color: white; }
+    .about-hero h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 12px; }
+    .hero-subtitle { font-size: 1.2rem; color: rgba(255,255,255,0.9); }
+
+    .stats-section { background: var(--primary-dark); padding: 40px 0; }
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-value { display: block; font-size: 2.5rem; font-weight: 700; color: var(--accent); }
+    .stat-label { color: rgba(255,255,255,0.8); }
+
+    .story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+    @media (max-width: 900px) { .story-grid { grid-template-columns: 1fr; } }
+    .story-content h2 { margin-bottom: 16px; }
+    .story-content .lead { color: var(--text-muted); line-height: 1.8; margin-bottom: 24px; }
+    .mission-box { background: var(--primary); color: white; padding: 24px; border-radius: var(--radius); }
+    .mission-box h3 { color: var(--accent); margin-bottom: 8px; }
+    .mission-box p { margin: 0; opacity: 0.95; }
+    .story-image img { width: 100%; border-radius: var(--radius); box-shadow: var(--shadow-lg); }
+
+    .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .value-card { background: white; padding: 32px; border-radius: var(--radius); text-align: center; }
+    .value-icon { width: 64px; height: 64px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 1.5rem; }
+    .value-card h3 { margin-bottom: 8px; }
+    .value-card p { color: var(--text-muted); margin: 0; }
+
+    .timeline { position: relative; max-width: 800px; margin: 0 auto; }
+    .timeline::before { content: ''; position: absolute; left: 50%; width: 2px; height: 100%; background: var(--accent); transform: translateX(-50%); }
+    .timeline-item { position: relative; width: 50%; padding: 20px 40px; }
+    .timeline-item.left { left: 0; text-align: right; }
+    .timeline-item.right { left: 50%; }
+    .timeline-content { background: white; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow-sm); }
+    .timeline-year { display: inline-block; background: var(--accent); color: var(--primary-dark); padding: 4px 12px; border-radius: 4px; font-weight: 700; margin-bottom: 8px; }
+    .timeline-content h4 { margin-bottom: 4px; }
+    .timeline-content p { color: var(--text-muted); margin: 0; font-size: 0.95rem; }
     @media (max-width: 768px) {
-        .content-with-photo { grid-template-columns: 1fr; }
+        .timeline::before { left: 20px; }
+        .timeline-item { width: 100%; left: 0 !important; padding-left: 60px; text-align: left !important; }
     }
+
+    .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+    .benefit-card { display: flex; gap: 16px; background: white; padding: 24px; border-radius: var(--radius); }
+    .benefit-icon { width: 48px; height: 48px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .benefit-card h4 { margin: 0 0 4px; }
+    .benefit-card p { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+
+    .certs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .cert-item { display: flex; gap: 16px; align-items: center; }
+    .cert-item i { font-size: 2rem; color: var(--accent); }
+    .cert-item h4 { margin: 0 0 4px; }
+    .cert-item p { color: var(--text-muted); margin: 0; font-size: 0.9rem; }
+
+    .cta-section { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 80px 0; text-align: center; color: white; }
+    .cta-section h2 { margin-bottom: 12px; }
+    .cta-section p { opacity: 0.9; margin-bottom: 32px; }
+    .cta-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-accent { background: var(--accent); color: var(--primary-dark); }
+    .btn-outline-light { background: transparent; border: 2px solid white; color: white; }
 </style>

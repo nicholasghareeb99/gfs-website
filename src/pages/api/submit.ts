@@ -1,0 +1,320 @@
+/**
+ * Server-side API for form submissions
+ * Writes to Firestore via REST + API key
+ * Data shapes match Executive App's expected format for websiteLeads
+ * Writes email doc to 'mail' collection for Firebase Trigger Email extension
+ */
+
+import type { APIRoute } from 'astro';
+
+const PROJECT_ID = 'ghareeb-fencing';
+const API_KEY = 'AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE';
+const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+// Notification email recipient
+const NOTIFY_EMAIL = 'nicholasghareeb99@gmail.com';
+
+// Convert JS value to Firestore REST value format
+function toFV(val: any): any {
+  if (val === null || val === undefined) return { nullValue: null };
+  if (typeof val === 'string') return { stringValue: val };
+  if (typeof val === 'number') return Number.isInteger(val) ? { integerValue: String(val) } : { doubleValue: val };
+  if (typeof val === 'boolean') return { booleanValue: val };
+  if (Array.isArray(val)) return { arrayValue: { values: val.map(toFV) } };
+  if (typeof val === 'object') {
+    const fields: Record<string, any> = {};
+    for (const [k, v] of Object.entries(val)) fields[k] = toFV(v);
+    return { mapValue: { fields } };
+  }
+  return { stringValue: String(val) };
+}
+
+// Write a document to Firestore via REST with API key
+async function writeDoc(collection: string, data: Record<string, any>): Promise<boolean> {
+  const fields: Record<string, any> = {};
+  for (const [k, v] of Object.entries(data)) fields[k] = toFV(v);
+  fields.createdAt = { timestampValue: new Date().toISOString() };
+
+  try {
+    const res = await fetch(`${BASE}/${collection}?key=${API_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields })
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error(`Firestore write to ${collection} failed (${res.status}):`, err);
+    }
+    return res.ok;
+  } catch (e: any) {
+    console.error(`Firestore write error (${collection}):`, e.message);
+    return false;
+  }
+}
+
+// Sanitize string input
+function clean(val: any, max = 500): string {
+  return val ? String(val).trim().slice(0, max) : '';
+}
+
+// Email wrapper template
+function emailWrap(title: string, icon: string, body: string): string {
+  return `
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;max-width:600px;margin:0 auto;background:#fff;">
+  <div style="background:#1e3a5f;padding:24px 30px;border-radius:8px 8px 0 0;">
+    <h1 style="margin:0;color:#fff;font-size:20px;">${icon} ${title}</h1>
+    <p style="margin:4px 0 0;color:#93c5fd;font-size:13px;">Ghareeb Fencing Solutions</p>
+  </div>
+  <div style="padding:24px 30px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">
+    ${body}
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0 16px;">
+    <p style="margin:0;font-size:12px;color:#94a3b8;">
+      Sent automatically from <a href="https://ghareebfencing.com" style="color:#3b82f6;">ghareebfencing.com</a>
+    </p>
+  </div>
+</div>`;
+}
+
+function row(label: string, value: string, highlight = false): string {
+  const bg = highlight ? 'background:#f8fafc;' : '';
+  return `<tr style="${bg}"><td style="padding:10px 12px;font-weight:600;color:#1e3a5f;white-space:nowrap;vertical-align:top;width:130px;">${label}</td><td style="padding:10px 12px;color:#334155;">${value || '<span style="color:#94a3b8;">—</span>'}</td></tr>`;
+}
+
+function table(rows: string): string {
+  return `<table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">${rows}</table>`;
+}
+
+function linkPhone(p: string): string { return p ? `<a href="tel:${p}" style="color:#3b82f6;text-decoration:none;">${p}</a>` : '—'; }
+function linkEmail(e: string): string { return e ? `<a href="mailto:${e}" style="color:#3b82f6;text-decoration:none;">${e}</a>` : '—'; }
+
+export const POST: APIRoute = async ({ request }) => {
+  try {
+    const body = await request.json();
+    const { type } = body;
+
+    if (!type) {
+      return new Response(JSON.stringify({ error: 'Missing submission type' }), {
+        status: 400, headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
+    let success = false;
+    let emailSubject = '';
+    let emailHtml = '';
+
+    switch (type) {
+      // =========================================================
+      // CONTACT FORM
+      // Exec app reads: name, phone, email, address, fenceType,
+      //   notes, source, status, createdAt
+      // =========================================================
+      case 'contact': {
+        const name = clean(body.name, 200);
+        const phone = clean(body.phone, 50);
+        const email = clean(body.email, 200);
+        const message = clean(body.message, 2000);
+        const fenceType = clean(body.fenceType || body.subject, 100);
+        const address = clean(body.address, 500);
+
+        if (!name || !phone) {
+          return new Response(JSON.stringify({ error: 'Name and phone required' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Write to websiteLeads — matches exec app field expectations
+        success = await writeDoc('websiteLeads', {
+          name,
+          phone,
+          email,
+          address,
+          fenceType,        // exec app reads this for lead card
+          notes: message,   // clean notes, no prefix
+          source: 'contact-form',
+          status: 'new'
+        });
+
+        emailSubject = `New Contact Form: ${name}`;
+        emailHtml = emailWrap('New Contact Submission', '📩', `
+          ${table(
+            row('Name', name) +
+            row('Phone', linkPhone(phone), true) +
+            row('Email', linkEmail(email)) +
+            row('Fence Interest', fenceType || '—', true) +
+            row('Message', message || '—')
+          )}
+        `);
+        break;
+      }
+
+      // =========================================================
+      // APPOINTMENT BOOKING
+      // Exec app reads: name, phone, email, address,
+      //   appointmentDate (ISO string), appointmentTime,
+      //   fenceType, notes, source, status, createdAt
+      // =========================================================
+      case 'booking': {
+        const name = clean(body.name, 200);
+        const phone = clean(body.phone, 50);
+        const email = clean(body.email, 200);
+        const address = clean(body.address, 500);
+        const date = clean(body.date, 20);
+        const time = clean(body.time, 20);
+        const project = clean(body.project, 200);
+        const notes = clean(body.notes, 2000);
+
+        if (!name || !phone || !date || !time) {
+          return new Response(JSON.stringify({ error: 'Name, phone, date, and time required' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Write to bookings collection (matches existing Firebase convention)
+        success = await writeDoc('bookings', {
+          name, phone, email, address, project, notes,
+          date, time,
+          source: 'website-booking',
+          status: 'pending'
+        });
+
+        // Write to websiteLeads WITH appointmentDate/appointmentTime
+        // so exec app shows the purple appointment card
+        if (success) {
+          await writeDoc('websiteLeads', {
+            name,
+            phone,
+            email,
+            address,
+            fenceType: project,           // exec app shows this
+            appointmentDate: date,        // exec app purple card reads this
+            appointmentTime: time,        // exec app purple card reads this
+            notes,
+            source: 'website-booking',
+            status: 'new'
+          });
+        }
+
+        emailSubject = `New Booking: ${name} — ${date} at ${time}`;
+        emailHtml = emailWrap('New Appointment Booking', '📅', `
+          <div style="background:#f0fdf4;border:2px solid #10b981;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:24px;font-weight:700;color:#059669;">📅 ${date}</div>
+            <div style="font-size:18px;color:#065f46;margin-top:4px;">at ${time}</div>
+          </div>
+          ${table(
+            row('Name', name) +
+            row('Phone', linkPhone(phone), true) +
+            row('Email', linkEmail(email)) +
+            row('Address', address, true) +
+            row('Project', project || '—') +
+            row('Notes', notes || '—', true)
+          )}
+        `);
+        break;
+      }
+
+      // =========================================================
+      // BALLPARK CALCULATOR LEAD
+      // Exec app reads: name, phone, email, address, fenceType,
+      //   ballparkQuote: { low, high, feet, type, height, sg, dg },
+      //   notes, source, status, createdAt
+      // =========================================================
+      case 'lead': {
+        const name = clean(body.name, 200);
+        const phone = clean(body.phone, 50);
+        const email = clean(body.email, 200);
+        const address = clean(body.address, 500);
+        const notes = clean(body.notes, 2000);
+        const fenceType = clean(body.fenceType, 100);
+        const fenceHeight = Number(body.fenceHeight) || 6;
+        const fenceLength = Number(body.fenceLength) || 0;
+        const singleGates = Number(body.singleGates) || 0;
+        const doubleGates = Number(body.doubleGates) || 0;
+        const estimateLow = Number(body.estimateLow) || 0;
+        const estimateHigh = Number(body.estimateHigh) || 0;
+        const estimatedRange = clean(body.estimatedRange, 50);
+
+        if (!name || !phone) {
+          return new Response(JSON.stringify({ error: 'Name and phone required' }), {
+            status: 400, headers: { 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Write to websiteLeads — exec app reads ballparkQuote object
+        // for the green quote card display
+        success = await writeDoc('websiteLeads', {
+          name,
+          phone,
+          email,
+          address,
+          fenceType,                      // exec app shows on lead card
+          ballparkQuote: {                // exec app green card reads this
+            low: estimateLow,
+            high: estimateHigh,
+            feet: fenceLength,
+            type: fenceType,
+            height: fenceHeight,
+            sg: singleGates,
+            dg: doubleGates
+          },
+          notes,
+          source: 'ballpark-calculator',
+          status: 'new'
+        });
+
+        emailSubject = `New Ballpark Lead: ${name} — ${fenceType}`;
+        emailHtml = emailWrap('New Ballpark Calculator Lead', '💰', `
+          <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center;">
+            <div style="font-size:14px;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">Estimated Range</div>
+            <div style="font-size:28px;font-weight:700;color:#1e3a5f;margin-top:4px;">${estimatedRange}</div>
+          </div>
+          <h3 style="color:#1e3a5f;margin:20px 0 10px;font-size:15px;">👤 Contact Info</h3>
+          ${table(
+            row('Name', name) +
+            row('Phone', linkPhone(phone), true) +
+            row('Email', linkEmail(email)) +
+            row('Address', address, true)
+          )}
+          <h3 style="color:#1e3a5f;margin:20px 0 10px;font-size:15px;">🏗️ Quote Details</h3>
+          ${table(
+            row('Fence Type', fenceType) +
+            row('Height', fenceHeight + ' ft', true) +
+            row('Length', fenceLength ? fenceLength + ' ft' : '—') +
+            row('Walk Gates', String(singleGates), true) +
+            row('Drive Gates', String(doubleGates)) +
+            row('Estimate', `<strong style="color:#059669;font-size:16px;">${estimatedRange}</strong>`, true)
+          )}
+          ${notes ? `<p style="margin:16px 0 0;color:#475569;"><strong>Notes:</strong> ${notes}</p>` : ''}
+        `);
+        break;
+      }
+
+      default:
+        return new Response(JSON.stringify({ error: 'Unknown submission type' }), {
+          status: 400, headers: { 'Content-Type': 'application/json' }
+        });
+    }
+
+    // Write email doc to 'mail' collection (Firebase Trigger Email extension)
+    if (success && emailSubject) {
+      const emailOk = await writeDoc('mail', {
+        to: NOTIFY_EMAIL,
+        message: { subject: emailSubject, html: emailHtml }
+      });
+      if (!emailOk) console.error('Failed to queue email notification');
+    }
+
+    return new Response(JSON.stringify({
+      success,
+      message: success ? 'Submission received' : 'Failed to save'
+    }), {
+      status: success ? 200 : 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+
+  } catch (err: any) {
+    console.error('Submit API error:', err);
+    return new Response(JSON.stringify({ error: err.message || 'Server error' }), {
+      status: 500, headers: { 'Content-Type': 'application/json' }
+    });
+  }
+};

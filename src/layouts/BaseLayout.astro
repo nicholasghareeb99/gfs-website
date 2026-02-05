@@ -1,134 +1,758 @@
 ---
-import site from '../content/site.json';
+import { getSiteSettings } from '../lib/firestore.js';
+import siteJson from '../content/site.json';
+import EditMode from '../components/EditMode.astro';
+
+// SSR: fetch site settings from Firestore (falls back to JSON)
+const site = await getSiteSettings();
 
 interface Props {
-  title: string;
+  title?: string;
   description?: string;
+  keywords?: string[];
+  ogImage?: string;
   canonicalUrl?: string;
+  noIndex?: boolean;
 }
 
-const { title, description = site.company.tagline, canonicalUrl } = Astro.props;
+const { 
+  title = site.seo.defaultTitle,
+  description = site.seo.defaultDescription,
+  keywords,
+  ogImage = '/images/og-default.jpg',
+  canonicalUrl,
+  noIndex = false
+} = Astro.props;
+
+const keywordsList = keywords ?? site.seo.defaultKeywords ?? [];
+const fullTitle = title === site.seo.defaultTitle ? title : `${title} | ${site.company.name}`;
+const siteUrl = site.company.website;
 ---
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Google Analytics -->
-    <script async src={`https://www.googletagmanager.com/gtag/js?id=${site.analytics.gaId}`}></script>
-    <script define:vars={{ gaId: site.analytics.gaId }}>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', gaId);
-    </script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231e3a5f' rx='15' width='100' height='100'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='45' fill='%23d4af37'>GF</text></svg>">
-    
-    <title>{title}</title>
-    <meta name="description" content={description}>
-    <meta name="robots" content="index, follow">
-    {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-    
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>{fullTitle}</title>
+  <meta name="description" content={description}>
+  <meta name="keywords" content={keywordsList.join(', ')}>
+  
+  {noIndex && <meta name="robots" content="noindex, nofollow">}
+  {canonicalUrl && <link rel="canonical" href={canonicalUrl}>}
+  
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content={fullTitle}>
+  <meta property="og:description" content={description}>
+  <meta property="og:image" content={`${siteUrl}${ogImage}`}>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231e3a5f' rx='15' width='100' height='100'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='45' fill='%23d4af37'>GF</text></svg>">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Schema.org -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": site.company.name,
+    "description": site.company.tagline,
+    "telephone": site.company.phone,
+    "email": site.company.email,
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": site.company.address.city,
+      "addressRegion": site.company.address.state
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": site.stats.rating,
+      "reviewCount": site.stats.reviews
+    }
+  })} />
 </head>
+
 <body>
-    <a href="#main-content" class="skip-link">Skip to main content</a>
-    
-    <!-- Trust Bar -->
-    <div class="trust-bar">
-        <div class="trust-bar-inner">
-            <div class="trust-item">
-                <span class="stars">★★★★★</span>
-                <span>{site.trustBar.rating} Rating ({site.trustBar.reviewCount} Reviews)</span>
-            </div>
-            <div class="trust-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-                <span>Licensed & Insured</span>
-            </div>
-            <div class="trust-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>3-Year Warranty</span>
-            </div>
-            <div class="trust-item">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span>0% Financing Available</span>
-            </div>
+  <!-- Header -->
+  <header class="site-header">
+    <div class="top-bar">
+      <div class="container">
+        <div class="top-bar-content">
+          <div class="top-bar-left">
+            <span class="top-bar-item">
+              <i class="fas fa-phone"></i>
+              <a href={`tel:${site.company.phone.replace(/[^0-9]/g, '')}`}>{site.company.phone}</a>
+            </span>
+            <span class="top-bar-item">
+              <i class="fas fa-envelope"></i>
+              <a href={`mailto:${site.company.email}`}>{site.company.email}</a>
+            </span>
+          </div>
+          <div class="top-bar-right">
+            <span class="top-bar-item">
+              <i class="fas fa-star"></i>
+              {site.stats.rating} Rating • {site.stats.reviews}+ Reviews
+            </span>
+          </div>
         </div>
+      </div>
     </div>
     
-    <!-- Navigation -->
-    <nav class="nav" id="mainNav">
-        <div class="nav-inner">
-            <a class="nav-brand" href="/">
-                <div class="nav-logo">{site.company.shortName}</div>
-                <div class="nav-brand-text">GHAREEB<br><span>FENCING</span></div>
-            </a>
-            <div class="nav-links" id="navLinks">
-                <a class="nav-link" href="/">Home</a>
-                <div class="nav-styles-dropdown">
-                    <button class="nav-styles-toggle">Fence Styles <span class="arrow">▼</span></button>
-                    <div class="nav-styles-menu">
-                        {site.nav.fenceStyles.map(style => (
-                            <a href={style.href} class="nav-styles-link">
-                                <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 4v16M12 4v16M17 4v16"/></svg></span>
-                                <span>{style.text}</span>
-                            </a>
-                        ))}
-                    </div>
-                </div>
-                {site.nav.links.slice(1).map(link => (
-                    <a class="nav-link" href={link.href}>{link.text}</a>
-                ))}
-                <a class="nav-link nav-quote-btn" href="/quote/">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Free Quote
-                </a>
-                <a class="nav-financing" href={site.financing.url} target="_blank">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> {site.financing.text}
-                </a>
+    <nav class="main-nav">
+      <div class="container">
+        <div class="nav-content">
+          <a href="/" class="logo">
+            <div class="logo-icon">GF</div>
+            <div class="logo-text">
+              <span class="company-name">Ghareeb Fencing</span>
+              <span class="company-tagline">Solutions</span>
             </div>
-            <button class="nav-toggle" id="navToggle" aria-label="Toggle menu"><span></span><span></span><span></span></button>
+          </a>
+          
+          <button class="mobile-menu-toggle" aria-label="Toggle menu">
+            <span class="hamburger"></span>
+          </button>
+          
+          <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li class="has-dropdown">
+              <a href="/fences/">Fence Types</a>
+              <ul class="dropdown">
+                <li><a href="/fences/wood-fence/">Wood Fences</a></li>
+                <li><a href="/fences/vinyl-fence/">Vinyl Fences</a></li>
+                <li><a href="/fences/chain-link-fence/">Chain Link</a></li>
+                <li><a href="/fences/aluminum-fence/">Aluminum</a></li>
+                <li><a href="/fences/composite-fence/">Composite</a></li>
+                <li><a href="/fences/steel-fence/">Steel</a></li>
+                <li><a href="/fences/farm-fence/">Farm & Ranch</a></li>
+                <li><a href="/fences/gates/">Gates</a></li>
+              </ul>
+            </li>
+            <li class="has-dropdown">
+              <a href="/service-areas/">Areas</a>
+              <ul class="dropdown">
+                <li><a href="/service-areas/toledo-oh/">Toledo</a></li>
+                <li><a href="/service-areas/perrysburg-oh/">Perrysburg</a></li>
+                <li><a href="/service-areas/maumee-oh/">Maumee</a></li>
+                <li><a href="/service-areas/sylvania-oh/">Sylvania</a></li>
+                <li><a href="/service-areas/">View All</a></li>
+              </ul>
+            </li>
+            <li><a href="/gallery/">Gallery</a></li>
+            <li><a href="/permits/">Permits</a></li>
+            <li><a href="/reviews/">Reviews</a></li>
+            <li><a href="/about/">About</a></li>
+            <li><a href="/contact/">Contact</a></li>
+            <li class="nav-cta">
+              <a href="/quote/ballpark/" class="btn btn-primary">Free Quote</a>
+            </li>
+          </ul>
         </div>
+      </div>
     </nav>
+  </header>
 
-    <main id="main-content">
-        <slot />
-    </main>
+  <main id="main-content">
+    <slot />
+  </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-bottom">
-                <p>{site.footer.copyright} <a href={`tel:${site.company.phoneRaw}`}>{site.company.phone}</a></p>
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-main">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-col footer-about">
+            <div class="footer-logo">
+              <div class="logo-icon">GF</div>
+              <span>Ghareeb Fencing Solutions</span>
             </div>
+            <p>{site.company.tagline}</p>
+            <div class="footer-contact">
+              <p><i class="fas fa-phone"></i> <a href={`tel:${site.company.phone.replace(/[^0-9]/g, '')}`}>{site.company.phone}</a></p>
+              <p><i class="fas fa-envelope"></i> <a href={`mailto:${site.company.email}`}>{site.company.email}</a></p>
+              <p><i class="fas fa-map-marker-alt"></i> {site.company.address.city}, {site.company.address.state}</p>
+            </div>
+            <div class="social-links">
+              <a href={site.social.facebook} aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+              <a href={site.social.instagram} aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+              <a href={site.social.google} aria-label="Google"><i class="fab fa-google"></i></a>
+            </div>
+          </div>
+          
+          <div class="footer-col">
+            <h4>Quick Links</h4>
+            <ul>
+              <li><a href="/">Home</a></li>
+              <li><a href="/about/">About Us</a></li>
+              <li><a href="/fences/">Fence Types</a></li>
+              <li><a href="/gallery/">Gallery</a></li>
+              <li><a href="/reviews/">Reviews</a></li>
+              <li><a href="/contact/">Contact</a></li>
+            </ul>
+          </div>
+          
+          <div class="footer-col">
+            <h4>Fence Types</h4>
+            <ul>
+              <li><a href="/fences/wood-fence/">Wood Fences</a></li>
+              <li><a href="/fences/vinyl-fence/">Vinyl Fences</a></li>
+              <li><a href="/fences/chain-link-fence/">Chain Link</a></li>
+              <li><a href="/fences/aluminum-fence/">Aluminum</a></li>
+              <li><a href="/fences/gates/">Gates</a></li>
+            </ul>
+          </div>
+          
+          <div class="footer-col">
+            <h4>Service Areas</h4>
+            <ul>
+              <li><a href="/service-areas/toledo-oh/">Toledo</a></li>
+              <li><a href="/service-areas/perrysburg-oh/">Perrysburg</a></li>
+              <li><a href="/service-areas/maumee-oh/">Maumee</a></li>
+              <li><a href="/service-areas/sylvania-oh/">Sylvania</a></li>
+              <li><a href="/service-areas/">All Areas</a></li>
+            </ul>
+          </div>
+          
+          <div class="footer-col">
+            <h4>Business Hours</h4>
+            <ul class="hours-list">
+              <li><span>Mon - Fri:</span> 8AM - 6PM</li>
+              <li><span>Saturday:</span> 9AM - 4PM</li>
+              <li><span>Sunday:</span> Closed</li>
+            </ul>
+          </div>
         </div>
-    </footer>
+      </div>
+    </div>
+    
+    <div class="footer-bottom">
+      <div class="container">
+        <div class="footer-bottom-content">
+          <p>&copy; {new Date().getFullYear()} {site.company.name}. All rights reserved.</p>
+          <div class="footer-legal">
+            <a href="/privacy/">Privacy</a>
+            <a href="/terms/">Terms</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
 
-    <script>
-        // Navigation toggle
-        const navToggle = document.getElementById('navToggle');
-        const navLinks = document.getElementById('navLinks');
-        navToggle?.addEventListener('click', () => navLinks?.classList.toggle('active'));
+  <div class="mobile-menu-overlay"></div>
+  
+  <button class="scroll-to-top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
 
-        // Scroll effects
-        window.addEventListener('scroll', () => {
-            const nav = document.getElementById('mainNav');
-            nav?.classList.toggle('scrolled', window.scrollY > 50);
-        });
+  <style is:global>
+    :root {
+      --color-primary: #1e3a5f;
+      --color-primary-dark: #152a45;
+      --color-primary-light: #2a4d7a;
+      --color-secondary: #d4af37;
+      --color-secondary-dark: #b8962e;
+      --color-secondary-light: #e5c55a;
+      --color-white: #ffffff;
+      --color-off-white: #f8f9fa;
+      --color-light-gray: #e9ecef;
+      --color-gray: #6c757d;
+      --color-dark-gray: #343a40;
+      --color-black: #212529;
+      --color-success: #28a745;
+      --color-error: #dc3545;
+      --font-heading: 'Montserrat', sans-serif;
+      --font-body: 'Open Sans', sans-serif;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+      --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+      --transition-base: 300ms ease;
+      --container-max: 1200px;
+    }
 
-        // Dropdown
-        document.querySelectorAll('.nav-styles-dropdown').forEach(dropdown => {
-            dropdown.addEventListener('click', (e) => {
-                if (e.target.closest('.nav-styles-toggle')) {
-                    dropdown.classList.toggle('active');
-                }
-            });
-        });
-    </script>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-body);
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--color-black);
+      background: var(--color-white);
+    }
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      line-height: 1.2;
+      color: var(--color-primary);
+    }
+    h1 { font-size: clamp(2rem, 5vw, 3rem); }
+    h2 { font-size: clamp(1.75rem, 4vw, 2.5rem); }
+    h3 { font-size: clamp(1.5rem, 3vw, 2rem); }
+    h4 { font-size: clamp(1.25rem, 2.5vw, 1.5rem); }
+    a { color: var(--color-primary); text-decoration: none; transition: color var(--transition-base); }
+    a:hover { color: var(--color-secondary); }
+    img { max-width: 100%; height: auto; display: block; }
+    ul, ol { list-style: none; }
+    .container { width: 100%; max-width: var(--container-max); margin: 0 auto; padding: 0 1rem; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-family: var(--font-heading);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+    }
+    .btn-primary {
+      background: var(--color-secondary);
+      color: var(--color-primary);
+    }
+    .btn-primary:hover {
+      background: var(--color-secondary-light);
+      color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .btn-secondary {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+    .btn-secondary:hover {
+      background: var(--color-primary-light);
+      color: var(--color-white);
+    }
+    .btn-outline {
+      background: transparent;
+      color: var(--color-primary);
+      border: 2px solid var(--color-primary);
+    }
+    .btn-outline:hover {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+    .btn-lg { padding: 1rem 2rem; font-size: 1.1rem; }
+
+    /* Top Bar */
+    .top-bar {
+      background: var(--color-primary);
+      color: var(--color-white);
+      padding: 0.5rem 0;
+      font-size: 0.875rem;
+    }
+    .top-bar-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .top-bar-left, .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .top-bar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .top-bar-item i { color: var(--color-secondary); }
+    .top-bar a { color: var(--color-white); }
+    .top-bar a:hover { color: var(--color-secondary); }
+
+    /* Navigation */
+    .main-nav {
+      background: var(--color-white);
+      box-shadow: var(--shadow-sm);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .logo-icon {
+      width: 45px;
+      height: 45px;
+      background: var(--color-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-heading);
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: var(--color-secondary);
+    }
+    .logo-text { display: flex; flex-direction: column; }
+    .company-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--color-primary);
+      line-height: 1.1;
+    }
+    .company-tagline {
+      font-size: 0.8rem;
+      color: var(--color-secondary);
+      font-weight: 600;
+    }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .nav-links > li > a {
+      display: block;
+      padding: 0.75rem 0.875rem;
+      font-weight: 500;
+      color: var(--color-dark-gray);
+      font-size: 0.95rem;
+    }
+    .nav-links > li > a:hover,
+    .nav-links > li > a.active {
+      color: var(--color-secondary);
+    }
+    .has-dropdown { position: relative; }
+    .dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: var(--color-white);
+      min-width: 200px;
+      box-shadow: var(--shadow-lg);
+      border-radius: 8px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(10px);
+      transition: all var(--transition-base);
+      z-index: 100;
+    }
+    .has-dropdown:hover .dropdown {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .dropdown li a {
+      display: block;
+      padding: 0.75rem 1.25rem;
+      color: var(--color-dark-gray);
+      border-bottom: 1px solid var(--color-light-gray);
+      font-size: 0.9rem;
+    }
+    .dropdown li:last-child a { border-bottom: none; }
+    .dropdown li a:hover {
+      background: var(--color-off-white);
+      color: var(--color-secondary);
+    }
+    .nav-cta .btn { margin-left: 0.5rem; }
+
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.5rem;
+    }
+    .hamburger {
+      display: block;
+      width: 25px;
+      height: 3px;
+      background: var(--color-primary);
+      position: relative;
+    }
+    .hamburger::before, .hamburger::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: var(--color-primary);
+      left: 0;
+      transition: all var(--transition-base);
+    }
+    .hamburger::before { top: -8px; }
+    .hamburger::after { bottom: -8px; }
+
+    /* Footer */
+    .site-footer {
+      background: var(--color-primary);
+      color: var(--color-white);
+    }
+    .footer-main { padding: 3rem 0; }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 2rem;
+    }
+    .footer-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .footer-logo .logo-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 1rem;
+    }
+    .footer-logo span {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+    .footer-col h4 {
+      color: var(--color-secondary);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+    .footer-col ul li { margin-bottom: 0.5rem; }
+    .footer-col a {
+      color: var(--color-white);
+      opacity: 0.9;
+    }
+    .footer-col a:hover {
+      opacity: 1;
+      color: var(--color-secondary);
+    }
+    .footer-about p {
+      margin-bottom: 1rem;
+      opacity: 0.9;
+    }
+    .footer-contact p {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .footer-contact i {
+      color: var(--color-secondary);
+      width: 18px;
+    }
+    .social-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      background: var(--color-primary-light);
+      border-radius: 50%;
+      color: var(--color-white);
+      transition: all var(--transition-base);
+    }
+    .social-links a:hover {
+      background: var(--color-secondary);
+      color: var(--color-primary);
+      transform: translateY(-3px);
+    }
+    .hours-list li {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      opacity: 0.9;
+    }
+    .hours-list span { font-weight: 600; }
+    .footer-bottom {
+      background: var(--color-primary-dark);
+      padding: 1rem 0;
+    }
+    .footer-bottom-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+    .footer-legal {
+      display: flex;
+      gap: 1.5rem;
+    }
+    .footer-legal a { color: var(--color-white); opacity: 0.9; }
+    .footer-legal a:hover { opacity: 1; color: var(--color-secondary); }
+
+    .scroll-to-top {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      width: 48px;
+      height: 48px;
+      background: var(--color-secondary);
+      color: var(--color-primary);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(20px);
+      transition: all var(--transition-base);
+      z-index: 99;
+      box-shadow: var(--shadow-md);
+    }
+    .scroll-to-top.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .scroll-to-top:hover {
+      background: var(--color-secondary-light);
+      transform: translateY(-3px);
+    }
+
+    .mobile-menu-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      opacity: 0;
+      visibility: hidden;
+      transition: all var(--transition-base);
+      z-index: 98;
+    }
+    .mobile-menu-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Section Utilities */
+    .section { padding: 4rem 0; }
+    .section-sm { padding: 2rem 0; }
+    .section-lg { padding: 6rem 0; }
+    .bg-light { background: var(--color-off-white); }
+    .bg-primary { background: var(--color-primary); color: var(--color-white); }
+    .text-center { text-align: center; }
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    .section-header h2 { margin-bottom: 1rem; }
+    .section-header p {
+      font-size: 1.1rem;
+      color: var(--color-gray);
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .nav-links > li > a { padding: 0.75rem 0.6rem; font-size: 0.9rem; }
+    }
+
+    @media (max-width: 768px) {
+      .top-bar-content { justify-content: center; text-align: center; }
+      .top-bar-left, .top-bar-right { flex-wrap: wrap; justify-content: center; gap: 1rem; }
+      .mobile-menu-toggle { display: block; }
+      .nav-links {
+        position: fixed;
+        top: 0;
+        right: -300px;
+        width: 300px;
+        height: 100vh;
+        background: var(--color-white);
+        flex-direction: column;
+        align-items: stretch;
+        padding: 5rem 1rem 2rem;
+        transition: right var(--transition-base);
+        z-index: 99;
+        overflow-y: auto;
+      }
+      .nav-links.active { right: 0; }
+      .nav-links > li > a {
+        padding: 1rem;
+        border-bottom: 1px solid var(--color-light-gray);
+      }
+      .has-dropdown .dropdown {
+        position: static;
+        box-shadow: none;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        display: none;
+        padding-left: 1rem;
+      }
+      .has-dropdown.active .dropdown { display: block; }
+      .nav-cta { margin-top: 1rem; }
+      .nav-cta .btn { width: 100%; margin-left: 0; }
+      .footer-grid { grid-template-columns: repeat(2, 1fr); }
+      .footer-about { grid-column: span 2; }
+      .footer-bottom-content { flex-direction: column; text-align: center; }
+      .section { padding: 3rem 0; }
+    }
+
+    @media (max-width: 480px) {
+      .footer-grid { grid-template-columns: 1fr; }
+      .footer-about { grid-column: span 1; }
+    }
+  </style>
+
+  <script>
+    // Mobile Menu
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinks = document.querySelector('.nav-links');
+    const overlay = document.querySelector('.mobile-menu-overlay');
+    
+    menuToggle?.addEventListener('click', () => {
+      navLinks?.classList.toggle('active');
+      overlay?.classList.toggle('active');
+      document.body.style.overflow = navLinks?.classList.contains('active') ? 'hidden' : '';
+    });
+    
+    overlay?.addEventListener('click', () => {
+      navLinks?.classList.remove('active');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+    });
+
+    // Mobile Dropdown
+    document.querySelectorAll('.has-dropdown > a').forEach(dropdown => {
+      dropdown.addEventListener('click', (e) => {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          dropdown.parentElement?.classList.toggle('active');
+        }
+      });
+    });
+
+    // Scroll to Top
+    const scrollBtn = document.querySelector('.scroll-to-top');
+    window.addEventListener('scroll', () => {
+      scrollBtn?.classList.toggle('visible', window.scrollY > 300);
+    });
+    scrollBtn?.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+  <EditMode />
 </body>
 </html>

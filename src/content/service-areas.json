@@ -1,0 +1,672 @@
+{
+  "regions": [
+    {
+      "name": "Lucas County",
+      "description": "Our home county and primary service area",
+      "areas": ["Toledo", "Maumee", "Sylvania", "Oregon", "Sylvania Township", "Holland", "Ottawa Hills", "Waterville"]
+    },
+    {
+      "name": "Wood County",
+      "description": "Extending south into Wood County",
+      "areas": ["Perrysburg", "Perrysburg Township", "Rossford", "Northwood", "Bowling Green", "Walbridge"]
+    },
+    {
+      "name": "Fulton County",
+      "description": "Serving western Lucas County neighbors",
+      "areas": ["Swanton", "Wauseon", "Delta", "Archbold"]
+    },
+    {
+      "name": "Henry County",
+      "description": "Rural communities west of Toledo",
+      "areas": ["Napoleon"]
+    },
+    {
+      "name": "Monroe County, MI",
+      "description": "Serving our Michigan neighbors",
+      "areas": ["Monroe", "Temperance", "Lambertville"]
+    },
+    {
+      "name": "Ottawa County",
+      "description": "Lake Erie communities",
+      "areas": ["Port Clinton", "Oak Harbor"]
+    }
+  ],
+  "serviceAreas": [
+    {
+      "id": "toledo",
+      "name": "Toledo",
+      "slug": "toledo-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43601", "43602", "43603", "43604", "43605", "43606", "43607", "43608", "43609", "43610", "43611", "43612", "43613", "43614", "43615", "43617", "43620", "43623"],
+      "population": 270871,
+      "description": "As Toledo's trusted fence contractor, Ghareeb Fencing Solutions has been serving the Glass City for over 15 years. From the historic Old West End to suburban Point Place, we install quality fences throughout Toledo.",
+      "highlights": [
+        "Toledo's most reviewed fence company",
+        "Same-day quotes available",
+        "Serving all Toledo neighborhoods",
+        "Licensed and insured"
+      ],
+      "neighborhoods": ["Old West End", "Ottawa", "Point Place", "West Toledo", "South Toledo", "East Toledo", "North Toledo", "Beverly", "Reynolds Corners", "Westgate"],
+      "nearbyAttractions": ["Toledo Zoo", "Toledo Museum of Art", "Metroparks", "Fifth Third Field"],
+      "testimonialId": "review-2",
+      "seo": {
+        "title": "Fence Installation Toledo OH | Toledo's #1 Fence Contractor",
+        "description": "Professional fence installation in Toledo OH. Wood, vinyl, aluminum, and chain link fences. 300+ five-star reviews. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Toledo OH", "fence contractor Toledo", "Toledo fence company", "fence builder Toledo Ohio"]
+      },
+      "featured": true,
+      "order": 1
+    },
+    {
+      "id": "perrysburg",
+      "name": "Perrysburg",
+      "slug": "perrysburg-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43551", "43552"],
+      "population": 21911,
+      "description": "Perrysburg homeowners trust Ghareeb Fencing for quality fence installation. From the historic downtown to newer developments, we enhance Perrysburg properties with beautiful, durable fencing.",
+      "highlights": [
+        "Trusted by Perrysburg homeowners",
+        "Quick turnaround times",
+        "All fence types available",
+        "Competitive pricing"
+      ],
+      "neighborhoods": ["Downtown Perrysburg", "Levis Commons", "French Quarter", "Carrington Woods"],
+      "nearbyAttractions": ["Fort Meigs", "Levis Commons", "Downtown Perrysburg", "Side Cut Metropark"],
+      "testimonialId": "review-1",
+      "seo": {
+        "title": "Fence Installation Perrysburg OH | Top-Rated Fence Company",
+        "description": "Quality fence installation in Perrysburg OH. Wood, vinyl, and aluminum fences. Trusted by Perrysburg homeowners. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Perrysburg OH", "Perrysburg fence company", "fence contractor Perrysburg", "fence builder Perrysburg Ohio"]
+      },
+      "featured": true,
+      "order": 2
+    },
+    {
+      "id": "maumee",
+      "name": "Maumee",
+      "slug": "maumee-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43537"],
+      "population": 13834,
+      "description": "Maumee residents choose Ghareeb Fencing for premium fence installation. Our team serves all Maumee neighborhoods with the same dedication to quality and customer service.",
+      "highlights": [
+        "Serving Maumee for 15+ years",
+        "Historic district expertise",
+        "Premium materials only",
+        "Full warranty coverage"
+      ],
+      "neighborhoods": ["Uptown Maumee", "Fallen Timbers", "Arrowhead", "Monclova"],
+      "nearbyAttractions": ["Fallen Timbers Battlefield", "Side Cut Metropark", "Shops at Fallen Timbers"],
+      "testimonialId": "review-4",
+      "seo": {
+        "title": "Fence Installation Maumee OH | Premium Fence Contractor",
+        "description": "Premium fence installation in Maumee OH. Expert fence contractors serving Maumee homeowners. Wood, vinyl, aluminum fences. Free quotes from Ghareeb Fencing.",
+        "keywords": ["fence installation Maumee OH", "Maumee fence company", "fence contractor Maumee", "fence builder Maumee Ohio"]
+      },
+      "featured": true,
+      "order": 3
+    },
+    {
+      "id": "sylvania",
+      "name": "Sylvania",
+      "slug": "sylvania-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43560"],
+      "population": 19349,
+      "description": "Sylvania's premier fence installation company. We understand Sylvania's aesthetic standards and HOA requirements, delivering fences that enhance your property's beauty and value.",
+      "highlights": [
+        "HOA-compliant installations",
+        "Upscale design options",
+        "Expert craftsmanship",
+        "Responsive customer service"
+      ],
+      "neighborhoods": ["Downtown Sylvania", "Sylvania Township", "Lourdes College Area", "Olander Park Area"],
+      "nearbyAttractions": ["Olander Park", "Fossil Park", "Downtown Sylvania", "Pacesetter Park"],
+      "testimonialId": "review-3",
+      "seo": {
+        "title": "Fence Installation Sylvania OH | Sylvania's Fence Experts",
+        "description": "Expert fence installation in Sylvania OH. HOA-compliant wood, vinyl, and aluminum fences. Trusted by Sylvania homeowners. Free estimates from Ghareeb Fencing.",
+        "keywords": ["fence installation Sylvania OH", "Sylvania fence company", "fence contractor Sylvania", "fence builder Sylvania Ohio"]
+      },
+      "featured": true,
+      "order": 4
+    },
+    {
+      "id": "oregon",
+      "name": "Oregon",
+      "slug": "oregon-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43616", "43618"],
+      "population": 20291,
+      "description": "Oregon, Ohio's reliable fence contractor. Whether you're near the lake or in town, Ghareeb Fencing delivers quality fence installation with outstanding customer service.",
+      "highlights": [
+        "Lakefront fence specialists",
+        "Commercial and residential",
+        "Storm-resistant designs",
+        "Fast installation times"
+      ],
+      "neighborhoods": ["Starr", "Harbor", "Bay Shore", "Lakeside"],
+      "nearbyAttractions": ["Maumee Bay State Park", "Pearson Metropark", "Oregon Branch Library"],
+      "testimonialId": "review-5",
+      "seo": {
+        "title": "Fence Installation Oregon OH | Quality Fence Contractor",
+        "description": "Quality fence installation in Oregon OH. Residential and commercial fencing. Chain link, wood, vinyl fences. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Oregon OH", "Oregon fence company", "fence contractor Oregon Ohio", "fence builder Oregon OH"]
+      },
+      "featured": false,
+      "order": 5
+    },
+    {
+      "id": "sylvania-township",
+      "name": "Sylvania Township",
+      "slug": "sylvania-township-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43560", "43617"],
+      "population": 48587,
+      "description": "Sylvania Township's trusted fence installation company. We serve this large, beautiful community with expert fence installation and repair services.",
+      "highlights": [
+        "Township's largest fence installer",
+        "Multi-acre property expertise",
+        "All fence styles available",
+        "Permit assistance included"
+      ],
+      "neighborhoods": ["Whiteford", "King Road", "Silica", "Centennial"],
+      "nearbyAttractions": ["Wildwood Preserve Metropark", "Oak Openings Preserve"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Sylvania Township OH | Trusted Contractor",
+        "description": "Trusted fence installation in Sylvania Township OH. Wood, vinyl, and aluminum fences for large properties. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Sylvania Township", "Sylvania Township fence company", "fence contractor Sylvania Township OH"]
+      },
+      "featured": false,
+      "order": 6
+    },
+    {
+      "id": "holland",
+      "name": "Holland",
+      "slug": "holland-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43528"],
+      "population": 1864,
+      "description": "Holland residents trust Ghareeb Fencing for quality fence installation. Our expert team serves this charming community with dedication and craftsmanship.",
+      "highlights": [
+        "Local expertise",
+        "Quick response times",
+        "Quality materials",
+        "Competitive pricing"
+      ],
+      "neighborhoods": ["Downtown Holland", "Springfield Township"],
+      "nearbyAttractions": ["Providence Metropark", "Secor Metropark"],
+      "testimonialId": "review-7",
+      "seo": {
+        "title": "Fence Installation Holland OH | Local Fence Contractor",
+        "description": "Professional fence installation in Holland OH. Wood, vinyl, chain link fences. Local contractor serving Holland. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Holland OH", "Holland fence company", "fence contractor Holland Ohio"]
+      },
+      "featured": false,
+      "order": 7
+    },
+    {
+      "id": "ottawa-hills",
+      "name": "Ottawa Hills",
+      "slug": "ottawa-hills-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43606", "43615"],
+      "population": 4540,
+      "description": "Ottawa Hills' premium fence installation service. We understand the high standards of this prestigious community and deliver fences that meet and exceed expectations.",
+      "highlights": [
+        "Premium materials only",
+        "Custom design services",
+        "Discrete, professional crews",
+        "HOA coordination"
+      ],
+      "neighborhoods": ["Old Ottawa Hills", "Ottawa Hills Estates"],
+      "nearbyAttractions": ["Wildwood Preserve", "Toledo Museum of Art", "Ottawa Park"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Ottawa Hills OH | Premium Fencing",
+        "description": "Premium fence installation in Ottawa Hills OH. Custom wood and aluminum fences for upscale properties. Free consultations from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Ottawa Hills", "Ottawa Hills fence company", "premium fence contractor Ottawa Hills"]
+      },
+      "featured": false,
+      "order": 8
+    },
+    {
+      "id": "waterville",
+      "name": "Waterville",
+      "slug": "waterville-oh",
+      "county": "Lucas County",
+      "state": "OH",
+      "zip": ["43566"],
+      "population": 5523,
+      "description": "Waterville's reliable fence contractor. From the historic downtown to surrounding areas, we install quality fences that complement this charming river town.",
+      "highlights": [
+        "Historic district knowledge",
+        "River property expertise",
+        "All fence types",
+        "Professional installation"
+      ],
+      "neighborhoods": ["Downtown Waterville", "Waterville Township", "Providence"],
+      "nearbyAttractions": ["Providence Metropark", "Farnsworth Metropark", "Historic Downtown"],
+      "testimonialId": "review-6",
+      "seo": {
+        "title": "Fence Installation Waterville OH | Reliable Fence Contractor",
+        "description": "Reliable fence installation in Waterville OH. Wood, vinyl, and aluminum fences. Serving Waterville and surrounding areas. Free estimates from Ghareeb Fencing.",
+        "keywords": ["fence installation Waterville OH", "Waterville fence company", "fence contractor Waterville Ohio"]
+      },
+      "featured": false,
+      "order": 9
+    },
+    {
+      "id": "perrysburg-township",
+      "name": "Perrysburg Township",
+      "slug": "perrysburg-township-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43551"],
+      "population": 12466,
+      "description": "Perrysburg Township fence installation specialists. We serve this growing community with professional fence installation for both residential and commercial properties.",
+      "highlights": [
+        "Growing community expertise",
+        "Large lot specialists",
+        "Permit coordination",
+        "Quality guaranteed"
+      ],
+      "neighborhoods": ["Hull Prairie", "Roachton", "Five Points"],
+      "nearbyAttractions": ["W.W. Knight Nature Preserve", "Fort Meigs"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Perrysburg Township OH | Expert Contractor",
+        "description": "Expert fence installation in Perrysburg Township OH. Residential and commercial fencing services. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Perrysburg Township", "Perrysburg Township fence company", "fence contractor Perrysburg Township OH"]
+      },
+      "featured": false,
+      "order": 10
+    },
+    {
+      "id": "rossford",
+      "name": "Rossford",
+      "slug": "rossford-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43460"],
+      "population": 6293,
+      "description": "Rossford's trusted fence installation company. We've been serving Rossford families and businesses with quality fence installation and excellent service.",
+      "highlights": [
+        "Trusted local contractor",
+        "Fast turnaround",
+        "Affordable pricing",
+        "All fence types"
+      ],
+      "neighborhoods": ["Downtown Rossford", "Eagle Point"],
+      "nearbyAttractions": ["Rossford Recreation Center", "Indian Hills Golf Course"],
+      "testimonialId": "review-8",
+      "seo": {
+        "title": "Fence Installation Rossford OH | Trusted Fence Contractor",
+        "description": "Trusted fence installation in Rossford OH. Wood, vinyl, chain link, and aluminum fences. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Rossford OH", "Rossford fence company", "fence contractor Rossford Ohio"]
+      },
+      "featured": false,
+      "order": 11
+    },
+    {
+      "id": "northwood",
+      "name": "Northwood",
+      "slug": "northwood-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43619"],
+      "population": 5265,
+      "description": "Northwood fence installation by Ghareeb Fencing Solutions. We provide quality fence installation services to this welcoming Wood County community.",
+      "highlights": [
+        "Local expertise",
+        "Competitive rates",
+        "Quality materials",
+        "Professional crews"
+      ],
+      "neighborhoods": ["Downtown Northwood", "Wales Road Area"],
+      "nearbyAttractions": ["Northwood Community Park"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Northwood OH | Quality Fence Contractor",
+        "description": "Quality fence installation in Northwood OH. Residential and commercial fencing. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Northwood OH", "Northwood fence company", "fence contractor Northwood Ohio"]
+      },
+      "featured": false,
+      "order": 12
+    },
+    {
+      "id": "bowling-green",
+      "name": "Bowling Green",
+      "slug": "bowling-green-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43402", "43403"],
+      "population": 31820,
+      "description": "Bowling Green's professional fence contractor. Home to BGSU, this vibrant college town trusts Ghareeb Fencing for quality fence installation and repair.",
+      "highlights": [
+        "Serving BGSU community",
+        "Rental property specialists",
+        "Quick installations",
+        "Affordable options"
+      ],
+      "neighborhoods": ["Downtown BG", "BGSU Area", "East Wooster", "North Main"],
+      "nearbyAttractions": ["Bowling Green State University", "Slippery Elm Trail", "Wood County Historical Center"],
+      "testimonialId": "review-10",
+      "seo": {
+        "title": "Fence Installation Bowling Green OH | Professional Contractor",
+        "description": "Professional fence installation in Bowling Green OH. Serving homeowners and landlords. Wood, vinyl, chain link fences. Free estimates from Ghareeb Fencing.",
+        "keywords": ["fence installation Bowling Green OH", "Bowling Green fence company", "fence contractor Bowling Green Ohio"]
+      },
+      "featured": false,
+      "order": 13
+    },
+    {
+      "id": "walbridge",
+      "name": "Walbridge",
+      "slug": "walbridge-oh",
+      "county": "Wood County",
+      "state": "OH",
+      "zip": ["43465"],
+      "population": 3091,
+      "description": "Walbridge fence installation services from Ghareeb Fencing Solutions. We provide this friendly community with professional fence installation at competitive prices.",
+      "highlights": [
+        "Community-focused service",
+        "Fair pricing",
+        "Quality workmanship",
+        "Friendly crews"
+      ],
+      "neighborhoods": ["Downtown Walbridge"],
+      "nearbyAttractions": ["Walbridge Park"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Walbridge OH | Local Fence Contractor",
+        "description": "Local fence installation in Walbridge OH. Affordable fencing solutions. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Walbridge OH", "Walbridge fence company", "fence contractor Walbridge Ohio"]
+      },
+      "featured": false,
+      "order": 14
+    },
+    {
+      "id": "swanton",
+      "name": "Swanton",
+      "slug": "swanton-oh",
+      "county": "Fulton County",
+      "state": "OH",
+      "zip": ["43558"],
+      "population": 3617,
+      "description": "Swanton fence installation by Ghareeb Fencing Solutions. We extend our quality service to this Fulton County community, providing the same excellence Toledo expects.",
+      "highlights": [
+        "Extended service area",
+        "Rural property expertise",
+        "All fence types",
+        "Reliable service"
+      ],
+      "neighborhoods": ["Downtown Swanton", "Swanton Township"],
+      "nearbyAttractions": ["Oak Openings Preserve", "Goll Woods State Nature Preserve"],
+      "testimonialId": "review-9",
+      "seo": {
+        "title": "Fence Installation Swanton OH | Reliable Fence Contractor",
+        "description": "Reliable fence installation in Swanton OH. Wood, vinyl, farm, and chain link fences. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Swanton OH", "Swanton fence company", "fence contractor Swanton Ohio"]
+      },
+      "featured": false,
+      "order": 15
+    },
+    {
+      "id": "wauseon",
+      "name": "Wauseon",
+      "slug": "wauseon-oh",
+      "county": "Fulton County",
+      "state": "OH",
+      "zip": ["43567"],
+      "population": 7236,
+      "description": "Wauseon fence installation services. As Fulton County's seat, Wauseon deserves quality fence contractors, and Ghareeb Fencing delivers excellence.",
+      "highlights": [
+        "County seat service",
+        "Farm fence specialists",
+        "Residential expertise",
+        "Quality guaranteed"
+      ],
+      "neighborhoods": ["Downtown Wauseon", "West Wauseon"],
+      "nearbyAttractions": ["Fulton County Fairgrounds", "Sauder Village"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Wauseon OH | Quality Fence Contractor",
+        "description": "Quality fence installation in Wauseon OH. Residential and farm fencing. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Wauseon OH", "Wauseon fence company", "fence contractor Wauseon Ohio"]
+      },
+      "featured": false,
+      "order": 16
+    },
+    {
+      "id": "delta",
+      "name": "Delta",
+      "slug": "delta-oh",
+      "county": "Fulton County",
+      "state": "OH",
+      "zip": ["43515"],
+      "population": 2834,
+      "description": "Delta fence installation by Ghareeb Fencing Solutions. We bring our quality fence services to this friendly Fulton County village.",
+      "highlights": [
+        "Village-friendly service",
+        "Farm fence options",
+        "Affordable pricing",
+        "Professional crews"
+      ],
+      "neighborhoods": ["Downtown Delta"],
+      "nearbyAttractions": ["Goll Woods", "Four County Joint Vocational School"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Delta OH | Professional Fence Contractor",
+        "description": "Professional fence installation in Delta OH. Residential and farm fencing services. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Delta OH", "Delta fence company", "fence contractor Delta Ohio"]
+      },
+      "featured": false,
+      "order": 17
+    },
+    {
+      "id": "archbold",
+      "name": "Archbold",
+      "slug": "archbold-oh",
+      "county": "Fulton County",
+      "state": "OH",
+      "zip": ["43502"],
+      "population": 4409,
+      "description": "Archbold fence installation services from Ghareeb Fencing. Home to Sauder Village, this historic community trusts us for quality fence installation.",
+      "highlights": [
+        "Historic area expertise",
+        "Farm fence specialists",
+        "Quality materials",
+        "Reliable service"
+      ],
+      "neighborhoods": ["Downtown Archbold"],
+      "nearbyAttractions": ["Sauder Village", "Archbold Community Theatre"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Archbold OH | Reliable Fence Contractor",
+        "description": "Reliable fence installation in Archbold OH. Residential and agricultural fencing. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Archbold OH", "Archbold fence company", "fence contractor Archbold Ohio"]
+      },
+      "featured": false,
+      "order": 18
+    },
+    {
+      "id": "napoleon",
+      "name": "Napoleon",
+      "slug": "napoleon-oh",
+      "county": "Henry County",
+      "state": "OH",
+      "zip": ["43545"],
+      "population": 8749,
+      "description": "Napoleon fence installation by Ghareeb Fencing Solutions. As Henry County's largest city, Napoleon residents deserve quality fence contractors.",
+      "highlights": [
+        "Henry County specialists",
+        "Residential and farm",
+        "Quality workmanship",
+        "Fair pricing"
+      ],
+      "neighborhoods": ["Downtown Napoleon", "East Napoleon"],
+      "nearbyAttractions": ["Napoleon City Pool", "Maumee River"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Napoleon OH | Quality Fence Contractor",
+        "description": "Quality fence installation in Napoleon OH. Residential, commercial, and farm fencing. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Napoleon OH", "Napoleon fence company", "fence contractor Napoleon Ohio"]
+      },
+      "featured": false,
+      "order": 19
+    },
+    {
+      "id": "monroe",
+      "name": "Monroe",
+      "slug": "monroe-mi",
+      "county": "Monroe County",
+      "state": "MI",
+      "zip": ["48161", "48162"],
+      "population": 20733,
+      "description": "Monroe, Michigan fence installation. Just across the state line, Monroe residents trust Ghareeb Fencing for the same quality service we provide in Ohio.",
+      "highlights": [
+        "Michigan licensed",
+        "Cross-border service",
+        "Lake Erie community",
+        "Quality guaranteed"
+      ],
+      "neighborhoods": ["Downtown Monroe", "West Monroe", "Raisinville Township"],
+      "nearbyAttractions": ["River Raisin Battlefield", "Sterling State Park"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Monroe MI | Toledo Area Fence Contractor",
+        "description": "Professional fence installation in Monroe MI. Ohio's top-rated fence company serving Michigan. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Monroe MI", "Monroe Michigan fence company", "fence contractor Monroe MI"]
+      },
+      "featured": false,
+      "order": 20
+    },
+    {
+      "id": "temperance",
+      "name": "Temperance",
+      "slug": "temperance-mi",
+      "county": "Monroe County",
+      "state": "MI",
+      "zip": ["48182"],
+      "population": 8815,
+      "description": "Temperance, Michigan fence installation. This Bedford Township community enjoys the same quality fence service we've provided Toledo area homeowners for years.",
+      "highlights": [
+        "Michigan certified",
+        "Near Ohio border",
+        "All fence types",
+        "Quality service"
+      ],
+      "neighborhoods": ["Temperance", "Bedford Township"],
+      "nearbyAttractions": ["Bedford Township Park", "Erie Metropark"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Temperance MI | Local Fence Contractor",
+        "description": "Local fence installation in Temperance MI. Quality fencing from Toledo's top-rated contractor. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Temperance MI", "Temperance Michigan fence company", "fence contractor Bedford Township"]
+      },
+      "featured": false,
+      "order": 21
+    },
+    {
+      "id": "lambertville",
+      "name": "Lambertville",
+      "slug": "lambertville-mi",
+      "county": "Monroe County",
+      "state": "MI",
+      "zip": ["48144"],
+      "population": 9953,
+      "description": "Lambertville fence installation services. This growing Bedford Township community trusts Ghareeb Fencing for professional fence installation.",
+      "highlights": [
+        "Growing community",
+        "New construction ready",
+        "All fence styles",
+        "Reliable service"
+      ],
+      "neighborhoods": ["Lambertville", "Bedford Township"],
+      "nearbyAttractions": ["Cabela's", "Bedford Township Parks"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Lambertville MI | Professional Contractor",
+        "description": "Professional fence installation in Lambertville MI. Serving Bedford Township. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Lambertville MI", "Lambertville fence company", "fence contractor Lambertville Michigan"]
+      },
+      "featured": false,
+      "order": 22
+    },
+    {
+      "id": "port-clinton",
+      "name": "Port Clinton",
+      "slug": "port-clinton-oh",
+      "county": "Ottawa County",
+      "state": "OH",
+      "zip": ["43452"],
+      "population": 5951,
+      "description": "Port Clinton fence installation. Known as the Walleye Capital of the World, this Lake Erie community trusts Ghareeb Fencing for quality installations.",
+      "highlights": [
+        "Lake Erie expertise",
+        "Storm-resistant fencing",
+        "Vacation property service",
+        "Quality materials"
+      ],
+      "neighborhoods": ["Downtown Port Clinton", "Lakeside"],
+      "nearbyAttractions": ["Put-in-Bay Ferry", "African Safari Wildlife Park", "Lake Erie Islands"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Port Clinton OH | Lake Erie Fencing",
+        "description": "Professional fence installation in Port Clinton OH. Lake Erie-ready fencing solutions. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Port Clinton OH", "Port Clinton fence company", "fence contractor Ottawa County Ohio"]
+      },
+      "featured": false,
+      "order": 23
+    },
+    {
+      "id": "oak-harbor",
+      "name": "Oak Harbor",
+      "slug": "oak-harbor-oh",
+      "county": "Ottawa County",
+      "state": "OH",
+      "zip": ["43449"],
+      "population": 2758,
+      "description": "Oak Harbor fence installation by Ghareeb Fencing Solutions. We provide this Ottawa County village with professional fence services.",
+      "highlights": [
+        "Ottawa County service",
+        "Lakefront property expertise",
+        "Farm fence options",
+        "Quality workmanship"
+      ],
+      "neighborhoods": ["Downtown Oak Harbor", "Rocky Ridge"],
+      "nearbyAttractions": ["Ottawa County Fairgrounds", "Magee Marsh Wildlife Area"],
+      "testimonialId": null,
+      "seo": {
+        "title": "Fence Installation Oak Harbor OH | Local Fence Contractor",
+        "description": "Local fence installation in Oak Harbor OH. Residential and farm fencing. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["fence installation Oak Harbor OH", "Oak Harbor fence company", "fence contractor Oak Harbor Ohio"]
+      },
+      "featured": false,
+      "order": 24
+    }
+  ],
+  "defaultRadius": 35,
+  "radiusUnit": "miles",
+  "headquartersLocation": {
+    "city": "Toledo",
+    "state": "OH",
+    "coordinates": {
+      "lat": 41.6528,
+      "lng": -83.5379
+    }
+  },
+  "ctaText": "Get a Free Quote in Your Area",
+  "ctaButton": "Request Free Estimate"
+}

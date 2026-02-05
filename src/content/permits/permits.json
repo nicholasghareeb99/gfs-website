@@ -1,0 +1,902 @@
+{
+  "metadata": {
+    "lastUpdated": "2025-02-01",
+    "disclaimer": "Permit requirements change. Always verify with your local municipality before installation.",
+    "note": "We handle all permits for you - included with every installation!"
+  },
+  "municipalities": {
+    "Toledo": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Certificate of Zoning Compliance",
+      "permitFee": "$50",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 3.5,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style required (50%+ open)",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Toledo Plan Commission",
+        "phone": "(419) 245-1200",
+        "address": "One Government Center, Suite 1620, Toledo, OH 43604"
+      },
+      "details": {
+        "setbacks": ["Property line (0\") allowed with survey", "2\" offset recommended to avoid disputes", "Survey strongly recommended"],
+        "sightTriangle": ["Corner lots: Max 3ft within 25ft of intersection", "Clear sight triangle required", "Fences cannot obstruct traffic view"],
+        "pool": ["4ft minimum height required by Ohio code", "Self-closing, self-latching gates mandatory", "Latch must be 54\" from ground or pool-side"],
+        "hoa": ["Many Toledo subdivisions have HOAs", "Always check your CC&Rs before installation", "We can help coordinate HOA approvals"]
+      },
+      "fullRules": "<p><strong>Toledo Municipal Code Chapter 1123 - Fences:</strong></p><p>All fences require a <strong>Certificate of Zoning Compliance</strong> from the Plan Commission BEFORE installation. Fee: $50.</p><p><strong>Height Limits:</strong> Front yard fences limited to 3.5 feet maximum and must be at least 50% open (picket, chain link, or ornamental - NO solid privacy in front). Side and rear yard fences may be up to 6 feet tall and may be solid/privacy style.</p><p><strong>Corner Lots:</strong> Within the sight triangle (25 feet from corner along each property line), fences cannot exceed 3 feet height.</p><p><strong>Construction Requirements:</strong> The \"finished\" or \"good\" side must face outward toward neighbors. Barbed wire and electric fences are prohibited in residential areas.</p>",
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> - Certificate of Zoning Compliance ($50)"},
+        {"type": "good", "text": "Front yard: max <strong>3.5 feet</strong>, must be 50%+ open"},
+        {"type": "good", "text": "Side/rear yards: max <strong>6 feet</strong>, privacy OK"},
+        {"type": "warn", "text": "Corner lots: max 3ft within 25ft sight triangle"},
+        {"type": "info", "text": "Good side of fence must face neighbors"},
+        {"type": "info", "text": "Call OUPS 811 at least 48 hours before digging"}
+      ],
+      "links": [
+        {"text": "Toledo Fence Requirements", "url": "https://toledo.oh.gov/residents/homeowners/remodeling-construction/fences", "type": "CODE"},
+        {"text": "Certificate of Zoning Compliance Application", "url": "https://cdn.toledo.oh.gov/uploads/documents/Plan-Commission/Forms/Certificate-of-Zoning-Compliance_20240926.pdf", "type": "PERMITS"},
+        {"text": "Toledo ePermit Portal", "url": "https://citizenaccess.toledo.oh.gov/citizenaccess/", "type": "PERMITS"},
+        {"text": "Toledo Plan Commission", "url": "https://toledo.oh.gov/services/development/plan-commission", "type": "DEPT"}
+      ]
+    },
+    "Maumee": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Approval",
+      "permitFee": "$0",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style preferred",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Maumee Building Department",
+        "phone": "(419) 897-7135",
+        "address": "400 Conant St, Maumee, OH 43537"
+      },
+      "details": {
+        "setbacks": ["Property line OK", "Must not encroach on easements"],
+        "sightTriangle": ["Standard corner visibility requirements"],
+        "pool": ["4ft required", "Self-closing gate"],
+        "hoa": ["Many HOAs in Maumee", "Check CC&Rs first"]
+      },
+      "fullRules": "<p><strong>City of Maumee Fence Requirements:</strong></p><p>Maumee requires <strong>zoning approval</strong> for fences. Historic district (Ford St to Key St, Anthony Wayne Trail to River) has additional design review requirements.</p><p><strong>Height Limits:</strong> 4 feet in front yards, 6 feet in side and rear yards.</p>",
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING APPROVAL REQUIRED</strong> (no fee)"},
+        {"type": "good", "text": "Front: max <strong>4 feet</strong>"},
+        {"type": "good", "text": "Side/rear: max <strong>6 feet</strong>, privacy OK"},
+        {"type": "warn", "text": "Historic district has additional requirements"}
+      ],
+      "links": [
+        {"text": "Maumee Building Department", "url": "https://www.maumee.org/197/Building-Zoning", "type": "DEPT"}
+      ]
+    },
+    "Perrysburg": {
+      "county": "Wood",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Compliance Form",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style required",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Perrysburg Building Department",
+        "phone": "(419) 872-8060",
+        "address": "201 W Indiana Ave, Perrysburg, OH 43551"
+      },
+      "details": {
+        "setbacks": ["Property line OK with survey", "Check for easements"],
+        "sightTriangle": ["Corner lots have sight triangle rules"],
+        "pool": ["4ft required by Ohio code"],
+        "hoa": ["Many HOAs in Perrysburg subdivisions"]
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Front: max <strong>4 feet</strong> (open style)"},
+        {"type": "good", "text": "Side/rear: max <strong>6 feet</strong>, privacy OK"},
+        {"type": "info", "text": "Historic downtown has design guidelines"}
+      ],
+      "links": [
+        {"text": "Perrysburg Building Department", "url": "https://www.ci.perrysburg.oh.us/departments/building_department/index.php", "type": "DEPT"}
+      ]
+    },
+    "Perrysburg Twp": {
+      "county": "Wood",
+      "state": "OH",
+      "permitType": "partial",
+      "permitText": "Partially Zoned - Call to verify",
+      "permitFee": "$25-$50",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 7,
+        "back": 7,
+        "frontNote": "Standard",
+        "sideNote": "Up to 7ft allowed!",
+        "backNote": "Up to 7ft allowed!"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Perrysburg Township Zoning",
+        "phone": "(419) 874-3551 ext 4005",
+        "address": "26609 Lime City Rd, Perrysburg, OH 43551"
+      },
+      "fullRules": "<p><strong>Perrysburg Township - PARTIALLY ZONED:</strong></p><p>Some areas require a Zoning Certificate and some do not. <strong>Call (419) 874-3551 ext 4005</strong> to verify if your property is in a zoned area.</p><p><strong>Good news:</strong> Fences may be up to <strong>7 feet</strong> in height - one of the more lenient areas!</p>",
+      "rules": [
+        {"type": "warn", "text": "<strong>CALL TO VERIFY</strong> - Partially zoned township"},
+        {"type": "good", "text": "Side/rear: max <strong>7 feet</strong> - Higher than most!"},
+        {"type": "info", "text": "Check deed restrictions for subdivisions"}
+      ],
+      "links": [
+        {"text": "Perrysburg Township", "url": "https://www.perrysburgtownship.us/", "type": "DEPT"}
+      ]
+    },
+    "Sylvania": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Review",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style preferred",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Sylvania Planning & Zoning",
+        "phone": "(419) 885-8985",
+        "address": "6730 Monroe St, Sylvania, OH 43560"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights: 4ft front, 6ft side/rear"},
+        {"type": "info", "text": "Many HOAs in this area"}
+      ],
+      "links": [
+        {"text": "City of Sylvania", "url": "https://www.cityofsylvania.com/", "type": "DEPT"}
+      ]
+    },
+    "Sylvania Twp": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Sylvania Township Zoning",
+        "phone": "(419) 882-0031",
+        "address": "4927 Holland-Sylvania Rd, Sylvania, OH 43560"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "Sylvania Township", "url": "https://www.sylvaniatownship.org/", "type": "DEPT"}
+      ]
+    },
+    "Oregon": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Compliance",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Oregon Building Department",
+        "phone": "(419) 698-7047",
+        "address": "5330 Seaman Rd, Oregon, OH 43616"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights: 4ft front, 6ft side/rear"}
+      ],
+      "links": [
+        {"text": "City of Oregon", "url": "https://www.oregonohio.org/", "type": "DEPT"}
+      ]
+    },
+    "Northwood": {
+      "county": "Wood",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Compliance",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Northwood Zoning",
+        "phone": "(419) 691-5633",
+        "address": "6000 Wales Rd, Northwood, OH 43619"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "City of Northwood", "url": "https://www.ci.northwood.oh.us/", "type": "DEPT"}
+      ]
+    },
+    "Rossford": {
+      "county": "Wood",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Fence Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Rossford Building Department",
+        "phone": "(419) 666-0210",
+        "address": "133 Osborn St, Rossford, OH 43460"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>FENCE PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights: 4ft front, 6ft side/rear"}
+      ],
+      "links": [
+        {"text": "City of Rossford", "url": "https://www.rossfordohio.com/", "type": "DEPT"}
+      ]
+    },
+    "Holland": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Village Zoning Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Holland Village Zoning",
+        "phone": "(419) 865-7104",
+        "address": "1245 Clarion Ave, Holland, OH 43528"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Quick approval - Village office"}
+      ],
+      "links": [
+        {"text": "Village of Holland", "url": "https://www.hollandohio.com/", "type": "DEPT"}
+      ]
+    },
+    "Waterville": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Review",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style required",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Waterville Zoning",
+        "phone": "(419) 878-8100",
+        "address": "25 N Second St, Waterville, OH 43566"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING REVIEW REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Open style required in front yard"}
+      ],
+      "links": [
+        {"text": "City of Waterville", "url": "https://www.waterville.org/", "type": "DEPT"}
+      ]
+    },
+    "Whitehouse": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Whitehouse Village",
+        "phone": "(419) 877-5383",
+        "address": "6925 Providence St, Whitehouse, OH 43571"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "Village of Whitehouse", "url": "https://www.whitehouse.oh.us/", "type": "DEPT"}
+      ]
+    },
+    "Swanton": {
+      "county": "Fulton",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Swanton Zoning",
+        "phone": "(419) 826-9515",
+        "address": "219 Chestnut St, Swanton, OH 43558"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "Village of Swanton", "url": "https://www.villageofswanton.com/", "type": "DEPT"}
+      ]
+    },
+    "Delta": {
+      "county": "Fulton",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Delta Village",
+        "phone": "(419) 822-3935",
+        "address": "401 Main St, Delta, OH 43515"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": []
+    },
+    "Wauseon": {
+      "county": "Fulton",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Wauseon Building Department",
+        "phone": "(419) 335-1280",
+        "address": "230 Clinton St, Wauseon, OH 43567"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "City of Wauseon", "url": "https://www.cityofwauseon.com/", "type": "DEPT"}
+      ]
+    },
+    "Bowling Green": {
+      "county": "Wood",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Review",
+      "permitFee": "$25",
+      "processing": "3-5 days",
+      "heights": {
+        "front": 3,
+        "side": 6,
+        "back": 6,
+        "frontNote": "LOWER - 3ft max only",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Bowling Green Building",
+        "phone": "(419) 354-6220",
+        "address": "304 N Church St, Bowling Green, OH 43402"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($25)"},
+        {"type": "warn", "text": "Front yard: max <strong>3 feet only</strong> - Lower than most!"},
+        {"type": "info", "text": "Historic areas have strict design requirements"}
+      ],
+      "links": [
+        {"text": "City of Bowling Green", "url": "https://www.bgohio.org/", "type": "DEPT"}
+      ]
+    },
+    "Findlay": {
+      "county": "Hancock",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Permit",
+      "permitFee": "$35",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Findlay Building Department",
+        "phone": "(419) 424-7106",
+        "address": "318 Dorney Plz, Findlay, OH 45840"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING PERMIT REQUIRED</strong> ($35)"},
+        {"type": "good", "text": "Standard heights apply"}
+      ],
+      "links": [
+        {"text": "City of Findlay", "url": "https://www.findlayohio.com/", "type": "DEPT"}
+      ]
+    },
+    "Ottawa Hills": {
+      "county": "Lucas",
+      "state": "OH",
+      "permitType": "zoning",
+      "permitText": "Zoning Review",
+      "permitFee": "$50",
+      "processing": "5-10 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Open style only",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Ottawa Hills Village",
+        "phone": "(419) 536-1111",
+        "address": "2125 Richards Rd, Ottawa Hills, OH 43606"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>ZONING REVIEW REQUIRED</strong> ($50)"},
+        {"type": "warn", "text": "Strict architectural review"},
+        {"type": "info", "text": "Front yard fences must be open style"}
+      ],
+      "links": [
+        {"text": "Ottawa Hills Village", "url": "https://www.ottawahills.org/", "type": "DEPT"}
+      ]
+    },
+    "Monroe": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50-$100",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Monroe Building Department",
+        "phone": "(734) 384-9106",
+        "address": "120 E First St, Monroe, MI 48161"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50-$100)"},
+        {"type": "info", "text": "Michigan requires BUILDING permits (not zoning)"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": [
+        {"text": "City of Monroe", "url": "https://www.monroemi.gov/", "type": "DEPT"}
+      ]
+    },
+    "Temperance": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$75",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Bedford Township Building",
+        "phone": "(734) 847-6791",
+        "address": "8100 Jackman Rd, Temperance, MI 48182"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($75)"},
+        {"type": "info", "text": "Bedford Township handles permits"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": [
+        {"text": "Bedford Township", "url": "https://www.bedfordmi.org/", "type": "DEPT"}
+      ]
+    },
+    "Lambertville": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$75",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Bedford Township Building",
+        "phone": "(734) 847-6791",
+        "address": "8100 Jackman Rd, Temperance, MI 48182"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($75)"},
+        {"type": "info", "text": "Bedford Township handles permits"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": [
+        {"text": "Bedford Township", "url": "https://www.bedfordmi.org/", "type": "DEPT"}
+      ]
+    },
+    "Ottawa Lake": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Whiteford Township",
+        "phone": "(734) 856-3536",
+        "address": "8000 Summerfield Rd, Ottawa Lake, MI 49267"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Whiteford Township handles permits"}
+      ],
+      "links": []
+    },
+    "Dundee": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Dundee Village",
+        "phone": "(734) 529-3430",
+        "address": "370 Park Pl, Dundee, MI 48131"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": []
+    },
+    "Ida": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Raisinville Township",
+        "phone": "(734) 269-2726",
+        "address": "96 Ida West Rd, Ida, MI 48140"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Raisinville Township handles permits"}
+      ],
+      "links": []
+    },
+    "Petersburg": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Summerfield Township",
+        "phone": "(734) 279-2700",
+        "address": "10970 Sylvania-Petersburg Rd, Petersburg, MI 49270"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Summerfield Township handles permits"}
+      ],
+      "links": []
+    },
+    "Luna Pier": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Luna Pier City",
+        "phone": "(734) 848-4919",
+        "address": "4357 Buckeye St, Luna Pier, MI 48157"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": []
+    },
+    "Erie": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Erie Township",
+        "phone": "(734) 848-4800",
+        "address": "2065 Erie Rd, Erie, MI 48133"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Erie Township handles permits"}
+      ],
+      "links": []
+    },
+    "Carleton": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$50",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Ash Township",
+        "phone": "(734) 654-8948",
+        "address": "8825 Ida South Rd, Carleton, MI 48117"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($50)"},
+        {"type": "info", "text": "Ash Township handles permits"}
+      ],
+      "links": []
+    },
+    "Flat Rock": {
+      "county": "Wayne",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$75",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Flat Rock Building Department",
+        "phone": "(734) 782-2496",
+        "address": "25500 Gibraltar Rd, Flat Rock, MI 48134"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($75)"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": [
+        {"text": "City of Flat Rock", "url": "https://www.flatrockmi.org/", "type": "DEPT"}
+      ]
+    },
+    "Bedford": {
+      "county": "Monroe",
+      "state": "MI",
+      "permitType": "building",
+      "permitText": "Building Permit",
+      "permitFee": "$75",
+      "processing": "5-7 days",
+      "heights": {
+        "front": 4,
+        "side": 6,
+        "back": 6,
+        "frontNote": "Standard",
+        "sideNote": "Privacy OK",
+        "backNote": "Privacy OK"
+      },
+      "setback": "0\"",
+      "contact": {
+        "department": "Bedford Township Building",
+        "phone": "(734) 847-6791",
+        "address": "8100 Jackman Rd, Temperance, MI 48182"
+      },
+      "rules": [
+        {"type": "warn", "text": "<strong>BUILDING PERMIT REQUIRED</strong> ($75)"},
+        {"type": "info", "text": "Call MISS DIG 811 before digging"}
+      ],
+      "links": [
+        {"text": "Bedford Township", "url": "https://www.bedfordmi.org/", "type": "DEPT"}
+      ]
+    }
+  }
+}

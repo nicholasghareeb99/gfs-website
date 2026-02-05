@@ -1,132 +1,139 @@
 {
-  "meta": {
-    "title": "Cedar Fence Installation Toledo OH | Natural Privacy | Ghareeb Fencing",
-    "description": "Premium Northern White Cedar fence installation in Toledo. Natural rot resistance, 30-40 year lifespan. Privacy, shadowbox & lattice styles. Free quotes."
+  "id": "cedar",
+  "slug": "cedar",
+  "name": "Cedar Privacy Fence",
+  "shortName": "Cedar",
+  "icon": "🌲",
+  "tagline": "Premium Natural Wood",
+  "heroTitle": "Cedar Fence Installation",
+  "heroSubtitle": "Naturally rot-resistant. No chemicals. 30-40 year lifespan. The premium choice for Toledo homeowners who want the best.",
+  "seo": {
+    "title": "Cedar Fence Installation Toledo OH | Northern Michigan Cedar | Ghareeb Fencing",
+    "description": "Premium Northern Michigan White Cedar fence installation in Toledo OH. 30-40+ year lifespan, naturally rot-resistant, no chemicals. Free quotes.",
+    "keywords": ["cedar fence Toledo", "Northern White Cedar fence", "cedar privacy fence Ohio", "natural wood fence Toledo"]
   },
-  "hero": {
-    "badge": "Michigan Cedar",
-    "headline": "Cedar Privacy Fence Installation",
-    "description": "Premium Northern White Cedar from Michigan. Natural rot resistance without chemicals. The beautiful, long-lasting choice for discerning homeowners."
-  },
-  "intro": {
-    "headline": "Why Choose Cedar Fencing?",
-    "content": "Cedar is nature's perfect fencing material. Northern White Cedar contains natural oils that resist rot, decay, and insects without any chemical treatment. It's the premium choice for homeowners who want a beautiful fence that lasts 30-40 years.",
-    "content2": "We source our cedar directly from Michigan mills - the finest Northern White Cedar available. Every board is hand-selected for quality and appearance.",
-    "benefits": [
-      "Natural rot & insect resistance - no chemicals needed",
-      "30-40 year lifespan with minimal maintenance",
-      "Beautiful natural grain that weathers to silver-gray",
-      "Lightweight yet incredibly strong",
-      "Environmentally sustainable choice"
-    ],
-    "image": "/images/gallery/cedar-full-yard.jpg"
-  },
-  "gallery": {
-    "headline": "Cedar Fence Installation Gallery",
-    "images": [
-      { "src": "/images/gallery/cedar-full-yard.jpg", "alt": "Cedar privacy fence full yard" },
-      { "src": "/images/gallery/cedar-detail.jpg", "alt": "Cedar fence detail" },
-      { "src": "/images/gallery/cedar-shadowbox.jpg", "alt": "Cedar shadowbox fence" },
-      { "src": "/images/gallery/cedar-gate-detail.jpg", "alt": "Cedar fence gate" },
-      { "src": "/images/gallery/cedar-lattice-detail.jpg", "alt": "Cedar fence with lattice" },
-      { "src": "/images/gallery/cedar-gate-closeup.jpg", "alt": "Cedar gate closeup" }
+  "overview": {
+    "title": "Why Northern White Cedar?",
+    "content": "Northern White Cedar (Thuja occidentalis) is nature's answer to the perfect fence material. Sourced from the forests of Northern Michigan, this remarkable wood contains natural oils called thujaplicins that make it resistant to rot, decay, and insects—without any chemical treatment.",
+    "additionalContent": "Unlike pressure-treated pine that relies on ACQ chemicals for protection, cedar is naturally equipped to withstand decades of exposure to rain, snow, and temperature swings. That's why our cedar fences last 30-40+ years while typical treated wood fences need replacement after 15-20 years.",
+    "features": [
+      "Natural decay resistance - No chemicals needed",
+      "Dimensional stability - Won't warp or twist like pine",
+      "Beautiful grain patterns - Ages to a distinguished silver-gray",
+      "Lightweight yet strong - Easier installation, less stress on posts"
     ]
   },
-  "styles": {
-    "headline": "Cedar Fence Styles We Install",
-    "subheadline": "All styles available in 6' or 8' heights. Custom heights available.",
-    "items": [
-      {
-        "name": "Solid Privacy",
-        "description": "Full privacy with tight-fitting boards. Classic look, maximum seclusion.",
-        "image": "/images/gallery/cedar-full-yard.jpg"
-      },
-      {
-        "name": "Shadowbox",
-        "description": "Alternating boards on each side. Looks great from both sides, allows airflow.",
-        "image": "/images/gallery/cedar-shadowbox.jpg"
-      },
-      {
-        "name": "Privacy with Lattice",
-        "description": "Solid privacy with decorative lattice top. Elegant traditional style.",
-        "image": "/images/gallery/cedar-lattice-detail.jpg"
-      }
-    ]
+  "specs": {
+    "lifespan": "30-40+ years",
+    "maintenance": "Optional sealing",
+    "warranty": "20+ year manufacturer warranty",
+    "heights": ["6 ft", "8 ft"],
+    "material": "Northern Michigan White Cedar"
   },
   "comparison": {
-    "headline": "Cedar Fence Options: Good / Better / Best",
-    "subheadline": "Choose the style that fits your needs and budget",
-    "tiers": [
+    "title": "Cedar vs. Other Wood Options",
+    "subtitle": "We carry all three wood types so you can compare them side-by-side at your estimate",
+    "items": [
       {
-        "name": "Good",
-        "subtitle": "Western Red Cedar Privacy",
-        "description": "Classic 6ft solid privacy fence with dog-ear pickets. Great value with 20-25 year lifespan.",
-        "image": "/images/gallery/cedar-full-yard.jpg"
+        "feature": "Lifespan",
+        "cedar": { "value": "30-40+ years", "rating": "good" },
+        "westernCedar": { "value": "20-25 years", "rating": "fair" },
+        "treatedPine": { "value": "15-20 years", "rating": "poor" }
       },
       {
-        "name": "Better",
-        "subtitle": "Northern White Cedar Privacy",
-        "description": "Premium Michigan-sourced cedar with superior rot resistance. 30-40+ year lifespan with decorative post caps.",
-        "image": "/images/gallery/cedar-shadowbox.jpg",
-        "featured": true
+        "feature": "Decay Resistance",
+        "cedar": { "value": "Exceptional (natural)", "rating": "good" },
+        "westernCedar": { "value": "Good (natural)", "rating": "fair" },
+        "treatedPine": { "value": "Chemical only", "rating": "poor" }
       },
       {
-        "name": "Best",
-        "subtitle": "NWC with Lattice Top",
-        "description": "Premium privacy fence with elegant lattice accent. Custom framed panels and premium gate hardware.",
-        "image": "/images/gallery/cedar-lattice-detail.jpg"
+        "feature": "Warping/Twisting",
+        "cedar": { "value": "Minimal (2.2% shrinkage)", "rating": "good" },
+        "westernCedar": { "value": "Some movement", "rating": "fair" },
+        "treatedPine": { "value": "Significant (4-8%)", "rating": "poor" }
+      },
+      {
+        "feature": "Maintenance",
+        "cedar": { "value": "Optional sealing", "rating": "good" },
+        "westernCedar": { "value": "Stain every 3-4 years", "rating": "fair" },
+        "treatedPine": { "value": "Stain every 2-3 years", "rating": "poor" }
+      },
+      {
+        "feature": "Ready to Finish",
+        "cedar": { "value": "Day one", "rating": "good" },
+        "westernCedar": { "value": "Day one", "rating": "good" },
+        "treatedPine": { "value": "Wait 6-12 months", "rating": "poor" }
+      },
+      {
+        "feature": "Chemical Free",
+        "cedar": { "value": "Yes", "rating": "good" },
+        "westernCedar": { "value": "Yes", "rating": "good" },
+        "treatedPine": { "value": "No (ACQ treatment)", "rating": "poor" }
       }
     ]
   },
-  "cta": {
-    "headline": "Ready for Your Cedar Fence?",
-    "description": "Get a free quote for cedar fence installation. We'll help you choose the perfect style for your property.",
-    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
-    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
-  },
-  "materialComparison": {
-    "headline": "Cedar vs. Pressure Treated Pine",
-    "subheadline": "Why we recommend cedar for homeowners who want the best",
-    "materials": [
+  "styles": [
+    {
+      "name": "Board-on-Board Privacy",
+      "description": "Overlapping 1×6 pickets with 1\" overlap—zero visibility gaps from any angle. Our most popular style for full privacy. Available in 6' or 8' heights.",
+      "image": "/images/gallery/cedar-shadowbox.jpg"
+    },
+    {
+      "name": "Shadowbox (Good Neighbor)",
+      "description": "Alternating boards on opposite sides create the same beautiful appearance from both yards. 1\" gap allows airflow while maintaining privacy.",
+      "image": "/images/gallery/cedar-shadowbox.jpg"
+    },
+    {
+      "name": "Lattice Top Privacy",
+      "description": "Solid privacy panels topped with decorative lattice for added elegance and airflow. A customer favorite in upscale Toledo neighborhoods.",
+      "image": "/images/gallery/cedar-lattice-shadowbox.jpg"
+    },
+    {
+      "name": "Dog Ear",
+      "description": "Classic pointed-top pickets for traditional American style. Clean, simple lines at an accessible price point.",
+      "image": "/images/gallery/cedar-detail.jpg"
+    }
+  ],
+  "maintenance": {
+    "title": "Cedar Fence Maintenance",
+    "sections": [
       {
-        "name": "Pressure Treated Pine",
-        "features": [
-          "Chemical preservatives add longevity",
-          "Sealed/stained in 90 days when dry",
-          "Prone to shrink, twist & warp",
-          "Prone to warping and splitting",
-          "Good but not great longevity",
-          "Requires re-sealing every 2-3 years",
-          "10-20 year lifespan",
-          "Can rot if not maintained"
-        ],
-        "icon": "⚠️",
-        "verdict": "Budget-friendly option"
+        "title": "Year 1-2",
+        "content": "Fresh cedar has natural golden-brown color. No treatment required. If you want to preserve the original color, apply a UV-protective clear sealer."
       },
       {
-        "name": "Cedar (Any Grade)",
-        "features": [
-          "100% natural preservatives",
-          "Beautiful warm tone from day one",
-          "Lightweight + easy installation",
-          "Dimensionally stable - rarely twists/warps",
-          "Resists rot, decay, and splitting",
-          "Can be sealed or left to weather naturally",
-          "30-40+ year lifespan",
-          "Eco-friendly, sustainable choice"
-        ],
-        "icon": "✓",
-        "verdict": "Premium long-term value"
+        "title": "Year 3+",
+        "content": "Cedar naturally weathers to a beautiful silver-gray. Many homeowners prefer this look. To restore original color, apply cedar-tone stain or bleach and reseal."
+      },
+      {
+        "title": "Annual Check",
+        "content": "Inspect for loose boards, hardware wear, and gate alignment. Our 3-year warranty covers workmanship issues."
       }
-    ],
-    "bottomLine": {
-      "text": "We Source from Michigan",
-      "stats": [
-        { "value": "7", "label": "Cedar Options" },
-        { "value": "4x6", "label": "Gate Posts" },
-        { "value": "3 Year", "label": "Warranty" },
-        { "value": "Michigan", "label": "Cedar Available" }
-      ]
+    ]
+  },
+  "gallery": [
+    { "src": "/images/gallery/cedar-shadowbox.jpg", "alt": "Cedar shadowbox fence Toledo", "caption": "Board-on-Board Privacy" },
+    { "src": "/images/gallery/cedar-lattice-shadowbox.jpg", "alt": "Cedar lattice top fence", "caption": "Lattice Top Design" },
+    { "src": "/images/gallery/cedar-gate-detail.jpg", "alt": "Cedar gate hardware", "caption": "Custom Gate" },
+    { "src": "/images/gallery/cedar-detail.jpg", "alt": "Cedar fence detail", "caption": "Premium Material" },
+    { "src": "/images/gallery/cedar-full-yard.jpg", "alt": "Full yard cedar fence", "caption": "Complete Installation" }
+  ],
+  "faqs": [
+    {
+      "question": "How long does a cedar fence last in Toledo weather?",
+      "answer": "Northern White Cedar fences typically last 30-40+ years in Toledo's climate. The natural oils (thujaplicins) in cedar make it extremely resistant to rot, decay, and insects without any chemical treatment."
+    },
+    {
+      "question": "Does cedar need to be sealed or stained?",
+      "answer": "No, cedar fences do not require sealing or staining. Left natural, cedar will weather to an attractive silver-gray color. If you prefer to maintain the original golden-brown color, you can apply a UV-protective sealer."
+    },
+    {
+      "question": "What's the difference between Northern White Cedar and Western Red Cedar?",
+      "answer": "Northern White Cedar (what we use) has superior rot resistance and dimensional stability compared to Western Red Cedar. It shrinks only 2.2% compared to 4-8% for other woods, meaning less warping and twisting over time."
+    },
+    {
+      "question": "Can I stain my cedar fence immediately after installation?",
+      "answer": "Yes! Unlike pressure-treated wood that requires 6-12 months to dry before staining, cedar can be finished immediately after installation."
     }
-  }
+  ]
 }

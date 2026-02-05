@@ -1,0 +1,245 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  county: string;
+  state: string;
+  description?: string;
+  population?: string;
+  highlights?: string[];
+  featured?: boolean;
+  compact?: boolean;
+}
+
+const { 
+  name, 
+  slug, 
+  county, 
+  state, 
+  description,
+  population,
+  highlights,
+  featured = false,
+  compact = false
+} = Astro.props;
+---
+
+<article class={`service-area-card ${featured ? 'service-area-card--featured' : ''} ${compact ? 'service-area-card--compact' : ''}`}>
+  <div class="service-area-card__header">
+    <div class="service-area-card__icon">
+      <i class="fas fa-map-marker-alt"></i>
+    </div>
+    <div class="service-area-card__title-group">
+      <h3 class="service-area-card__title">{name}</h3>
+      <span class="service-area-card__location">
+        {county}, {state}
+      </span>
+    </div>
+    {featured && (
+      <span class="service-area-card__badge">Popular Area</span>
+    )}
+  </div>
+  
+  {!compact && description && (
+    <p class="service-area-card__description">{description}</p>
+  )}
+  
+  {!compact && highlights && highlights.length > 0 && (
+    <ul class="service-area-card__highlights">
+      {highlights.slice(0, 3).map((highlight) => (
+        <li>
+          <i class="fas fa-check"></i>
+          {highlight}
+        </li>
+      ))}
+    </ul>
+  )}
+  
+  {population && (
+    <div class="service-area-card__stats">
+      <span class="service-area-card__stat">
+        <i class="fas fa-users"></i>
+        Pop. {population}
+      </span>
+    </div>
+  )}
+  
+  <a href={`/service-areas/${slug}`} class="service-area-card__link">
+    View Area Details <i class="fas fa-arrow-right"></i>
+  </a>
+</article>
+
+<style>
+  .service-area-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+  }
+
+  .service-area-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: var(--color-secondary);
+  }
+
+  .service-area-card--featured {
+    border-color: var(--color-secondary);
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+  }
+
+  .service-area-card--compact {
+    padding: 1rem;
+  }
+
+  .service-area-card__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    position: relative;
+  }
+
+  .service-area-card__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .service-area-card--compact .service-area-card__icon {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .service-area-card__title-group {
+    flex: 1;
+  }
+
+  .service-area-card__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 0.25rem;
+    line-height: 1.2;
+  }
+
+  .service-area-card--compact .service-area-card__title {
+    font-size: 1rem;
+  }
+
+  .service-area-card__location {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  .service-area-card__badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  .service-area-card__description {
+    color: #555;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0 0 1rem;
+  }
+
+  .service-area-card__highlights {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    flex: 1;
+  }
+
+  .service-area-card__highlights li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.4rem;
+  }
+
+  .service-area-card__highlights i {
+    color: var(--color-secondary);
+    margin-top: 0.15rem;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+  }
+
+  .service-area-card__stats {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 0;
+    border-top: 1px solid #eee;
+  }
+
+  .service-area-card__stat {
+    font-size: 0.8rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .service-area-card__stat i {
+    color: var(--color-primary);
+  }
+
+  .service-area-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-top: auto;
+  }
+
+  .service-area-card__link:hover {
+    color: var(--color-secondary);
+    gap: 0.75rem;
+  }
+
+  .service-area-card__link i {
+    transition: transform 0.2s ease;
+  }
+
+  .service-area-card__link:hover i {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .service-area-card {
+      padding: 1.25rem;
+    }
+
+    .service-area-card__badge {
+      position: static;
+      margin-left: auto;
+    }
+  }
+</style>

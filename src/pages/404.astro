@@ -1,33 +1,36 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import site from '../content/site.json';
 ---
 
-<BaseLayout title="Page Not Found | Ghareeb Fencing">
-    <section class="error-page">
-        <div class="container">
-            <h1>404</h1>
-            <p>Page not found</p>
-            <a href="/" class="btn btn-primary">Return Home</a>
+<BaseLayout title="Page Not Found | Ghareeb Fencing Solutions" description="The page you're looking for doesn't exist." canonical="/404/">
+    <section style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 120px 0 80px; background: linear-gradient(135deg, var(--primary), var(--primary-dark));">
+        <div class="container" style="text-align: center; max-width: 600px;">
+            <div style="font-size: 8rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 16px;">404</div>
+            <h1 style="color: white; font-size: 2rem; margin-bottom: 16px;">Page Not Found</h1>
+            <p style="color: rgba(255,255,255,0.8); font-size: 1.1rem; margin-bottom: 40px; line-height: 1.6;">
+                Sorry, the page you're looking for doesn't exist or has been moved. Let's get you back on track.
+            </p>
+            <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                <a href="/" class="btn btn-accent" style="background: var(--accent); color: var(--primary); padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem;">
+                    ← Back to Home
+                </a>
+                <a href="/quote/ballpark/" class="btn" style="background: rgba(255,255,255,0.15); color: white; padding: 16px 32px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 1.1rem; border: 2px solid rgba(255,255,255,0.3);">
+                    Get a Free Quote
+                </a>
+            </div>
+            <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.15);">
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.95rem; margin-bottom: 16px;">Looking for something specific?</p>
+                <div style="display: flex; gap: 24px; justify-content: center; flex-wrap: wrap;">
+                    <a href="/fences/" style="color: var(--accent); text-decoration: none;">Fence Types</a>
+                    <a href="/service-areas/" style="color: var(--accent); text-decoration: none;">Service Areas</a>
+                    <a href="/permits/" style="color: var(--accent); text-decoration: none;">Permit Info</a>
+                    <a href="/contact/" style="color: var(--accent); text-decoration: none;">Contact Us</a>
+                </div>
+            </div>
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 32px;">
+                Need help? Call us at <a href="tel:{site.company.phoneRaw}" style="color: var(--accent); text-decoration: none;">{site.company.phone}</a>
+            </p>
         </div>
     </section>
 </BaseLayout>
-
-<style>
-    .error-page {
-        min-height: 60vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-    }
-    .error-page h1 {
-        font-size: 8rem;
-        color: var(--accent);
-        margin-bottom: 16px;
-    }
-    .error-page p {
-        font-size: 1.5rem;
-        color: var(--text-sub);
-        margin-bottom: 32px;
-    }
-</style>

@@ -1,148 +1,83 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import quote from '../../content/quote.json';
-import site from '../../content/site.json';
+import { getSiteSettings } from '../../lib/firestore.js';
+const site = await getSiteSettings();
 ---
 
-<BaseLayout title={quote.meta.title} description={quote.meta.description}>
-    
-    <section class="hero quote-hero">
+<BaseLayout 
+    title="Get a Free Fence Quote | Ghareeb Fencing Solutions" 
+    description="Get your free fence quote in 60 seconds. Ballpark calculator, detailed quote form, or book a free consultation. Toledo's trusted fence contractor."
+    canonical="/quote/"
+>
+    <section class="hero" style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 140px 0 80px;">
         <div class="container">
-            <h1>{quote.hero.headline}</h1>
-            <p class="hero-description">{quote.hero.description}</p>
+            <div class="section-label" style="color: var(--accent);">⚡ Multiple Ways to Get Started</div>
+            <h1 style="color: white; font-size: clamp(2.5rem, 5vw, 3.5rem); margin-bottom: 16px;">Get Your Free Fence Quote</h1>
+            <p style="color: rgba(255,255,255,0.9); font-size: 1.2rem; max-width: 600px;">Choose how you'd like to get started. Instant ballpark, detailed quote, or talk to an expert.</p>
         </div>
     </section>
 
     <section class="section">
         <div class="container">
-            <div class="quote-options">
-                {quote.options.map(option => (
-                    <a href={option.href} class="quote-option-card">
-                        <div class="option-icon">
-                            {option.icon === 'calculator' && '🧮'}
-                            {option.icon === 'calendar' && '📅'}
-                            {option.icon === 'phone' && '📞'}
-                        </div>
-                        <h2>{option.title}</h2>
-                        <p>{option.description}</p>
-                        <span class="option-btn">{option.buttonText} →</span>
-                    </a>
-                ))}
-            </div>
-        </div>
-    </section>
-
-    <section class="section section-alt">
-        <div class="container">
-            <h2 class="section-title">{quote.process.headline}</h2>
-            <div class="process-steps">
-                {quote.process.steps.map((step, i) => (
-                    <div class="process-step">
-                        <div class="step-number">{i + 1}</div>
-                        <h3>{step.title}</h3>
-                        <p>{step.description}</p>
+            <div class="quote-options-grid">
+                <a href="/quote/ballpark/" class="card" style="text-decoration: none;">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                     </div>
-                ))}
+                    <h3 class="card-title">Instant Ballpark Quote</h3>
+                    <p class="card-text">Draw your fence on a satellite map or enter linear feet. Get a price range in 60 seconds.</p>
+                    <div style="margin-top: 16px;">
+                        <span class="btn btn-primary" style="display: inline-flex;">Build My Quote →</span>
+                    </div>
+                </a>
+                
+                <a href="/quote/form/" class="card" style="text-decoration: none;">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h3 class="card-title">Detailed Quote Form</h3>
+                    <p class="card-text">Tell us about your project and we'll prepare a detailed quote within 24 hours.</p>
+                    <div style="margin-top: 16px;">
+                        <span class="btn btn-secondary" style="display: inline-flex;">Submit Request →</span>
+                    </div>
+                </a>
+                
+                <a href="/quote/book/" class="card" style="text-decoration: none;">
+                    <div class="card-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <h3 class="card-title">Book Free Consultation</h3>
+                    <p class="card-text">Schedule a no-obligation on-site estimate. We'll measure, answer questions, and provide exact pricing.</p>
+                    <div style="margin-top: 16px;">
+                        <span class="btn btn-secondary" style="display: inline-flex;">Schedule Now →</span>
+                    </div>
+                </a>
+            </div>
+            
+            <div style="text-align: center; margin-top: 60px; padding: 40px; background: var(--bg-light); border-radius: var(--radius-lg);">
+                <h3>Prefer to Talk?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px;">Our team is ready to help with any questions.</p>
+                <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-lg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                    Call {site.company.phone}
+                </a>
             </div>
         </div>
     </section>
-
 </BaseLayout>
 
 <style>
-    .quote-hero {
-        background: linear-gradient(135deg, #1e3a5f, #0f172a);
-        padding: 140px 0 80px;
-        text-align: center;
-    }
-    .quote-hero h1 {
-        color: white;
-        font-size: clamp(2.5rem, 5vw, 3.5rem);
-        margin-bottom: 16px;
-    }
-    .hero-description {
-        color: rgba(255,255,255,0.9);
-        font-size: 1.2rem;
-        max-width: 600px;
-        margin: 0 auto;
-    }
-    
-    .quote-options {
+    .quote-options-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 24px;
-        margin-top: -60px;
-        position: relative;
-        z-index: 10;
     }
-    .quote-option-card {
-        background: var(--dark-card);
-        border-radius: 16px;
-        padding: 40px 32px;
+    .quote-options-grid .card {
         text-align: center;
-        text-decoration: none;
-        border: 2px solid var(--border);
-        transition: all 0.3s;
+        padding: 40px 30px;
     }
-    .quote-option-card:hover {
-        border-color: var(--accent);
-        transform: translateY(-4px);
-    }
-    .option-icon {
-        font-size: 3rem;
+    .quote-options-grid .card-icon {
         margin-bottom: 20px;
-    }
-    .quote-option-card h2 {
-        color: white;
-        margin-bottom: 12px;
-    }
-    .quote-option-card p {
-        color: var(--text-sub);
-        margin-bottom: 20px;
-    }
-    .option-btn {
-        display: inline-block;
         color: var(--accent);
-        font-weight: 600;
-    }
-    
-    .section-alt { background: var(--dark-card); margin-top: 60px; }
-    
-    .process-steps {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 24px;
-        margin-top: 40px;
-    }
-    .process-step {
-        text-align: center;
-    }
-    .step-number {
-        width: 50px;
-        height: 50px;
-        background: var(--accent);
-        color: var(--primary);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 0 auto 16px;
-    }
-    .process-step h3 {
-        color: white;
-        margin-bottom: 8px;
-    }
-    .process-step p {
-        color: var(--text-sub);
-        font-size: 0.9rem;
-    }
-    
-    @media (max-width: 768px) {
-        .process-steps { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 480px) {
-        .process-steps { grid-template-columns: 1fr; }
     }
 </style>

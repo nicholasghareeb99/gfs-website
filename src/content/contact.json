@@ -1,20 +1,237 @@
 {
-  "meta": {
-    "title": "Contact Ghareeb Fencing Solutions | Toledo Fence Contractor",
-    "description": "Contact us for free fence installation quotes in Toledo. Call (419) 902-8257 or fill out our contact form."
+  "pageTitle": "Contact Us",
+  "pageSubtitle": "Get in Touch with Ghareeb Fencing Solutions",
+  "intro": "Ready to start your fencing project? Have questions about our services? We're here to help! Contact us today for a free estimate or to discuss your fencing needs.",
+  
+  "contactInfo": {
+    "phone": {
+      "display": "(419) 356-9643",
+      "href": "tel:+14193569643",
+      "description": "Call us Monday-Friday 8am-6pm, Saturday 9am-2pm",
+      "icon": "fa-phone"
+    },
+    "email": {
+      "display": "info@ghareebfencing.com",
+      "href": "mailto:info@ghareebfencing.com",
+      "description": "We typically respond within 24 hours",
+      "icon": "fa-envelope"
+    },
+    "address": {
+      "street": "Toledo",
+      "city": "Toledo",
+      "state": "OH",
+      "zip": "43612",
+      "region": "Northwest Ohio",
+      "description": "Serving Toledo and surrounding areas within 35 miles",
+      "icon": "fa-map-marker-alt",
+      "googleMapsUrl": "https://maps.google.com/?q=Toledo,OH"
+    }
   },
-  "hero": {
-    "headline": "Contact Us",
-    "description": "Ready to discuss your fence project? We're here to help."
+  
+  "businessHours": {
+    "headline": "Business Hours",
+    "hours": [
+      { "days": "Monday - Friday", "time": "8:00 AM - 6:00 PM" },
+      { "days": "Saturday", "time": "9:00 AM - 2:00 PM" },
+      { "days": "Sunday", "time": "Closed" }
+    ],
+    "note": "Emergency services available for existing customers"
   },
-  "contact": {
-    "phone": "(419) 902-8257",
-    "email": "info@ghareebfencingsolutions.com",
-    "hours": "Monday - Friday: 8am - 6pm\nSaturday: 9am - 3pm\nSunday: Closed",
-    "address": "Serving Toledo, OH and surrounding areas"
+  
+  "serviceArea": {
+    "headline": "Our Service Area",
+    "description": "We proudly serve Northwest Ohio and Southeast Michigan, including all communities within approximately 35 miles of Toledo.",
+    "primaryCounties": ["Lucas County, OH", "Wood County, OH", "Fulton County, OH", "Henry County, OH", "Monroe County, MI", "Ottawa County, OH"],
+    "featuredCities": ["Toledo", "Perrysburg", "Maumee", "Sylvania", "Oregon", "Bowling Green", "Monroe", "Holland", "Waterville", "Rossford"],
+    "mapCenter": { "lat": 41.6528, "lng": -83.5379 },
+    "radius": 35
   },
-  "form": {
+  
+  "contactForm": {
     "headline": "Send Us a Message",
-    "fields": ["name", "email", "phone", "message"]
+    "description": "Fill out the form below and we'll get back to you as soon as possible.",
+    "fields": [
+      {
+        "name": "firstName",
+        "label": "First Name",
+        "type": "text",
+        "required": true,
+        "placeholder": "Your first name",
+        "width": "half"
+      },
+      {
+        "name": "lastName",
+        "label": "Last Name",
+        "type": "text",
+        "required": true,
+        "placeholder": "Your last name",
+        "width": "half"
+      },
+      {
+        "name": "email",
+        "label": "Email Address",
+        "type": "email",
+        "required": true,
+        "placeholder": "your.email@example.com",
+        "width": "half"
+      },
+      {
+        "name": "phone",
+        "label": "Phone Number",
+        "type": "tel",
+        "required": true,
+        "placeholder": "(419) 555-1234",
+        "width": "half"
+      },
+      {
+        "name": "address",
+        "label": "Property Address",
+        "type": "text",
+        "required": false,
+        "placeholder": "123 Main St, Toledo, OH 43612",
+        "width": "full"
+      },
+      {
+        "name": "projectType",
+        "label": "Project Type",
+        "type": "select",
+        "required": true,
+        "width": "half",
+        "options": [
+          { "value": "", "label": "Select project type..." },
+          { "value": "new-installation", "label": "New Fence Installation" },
+          { "value": "replacement", "label": "Fence Replacement" },
+          { "value": "repair", "label": "Fence Repair" },
+          { "value": "gate", "label": "Gate Installation" },
+          { "value": "commercial", "label": "Commercial Project" },
+          { "value": "other", "label": "Other" }
+        ]
+      },
+      {
+        "name": "fenceType",
+        "label": "Fence Type Interest",
+        "type": "select",
+        "required": false,
+        "width": "half",
+        "options": [
+          { "value": "", "label": "Select fence type..." },
+          { "value": "wood", "label": "Wood Fence" },
+          { "value": "vinyl", "label": "Vinyl Fence" },
+          { "value": "chain-link", "label": "Chain Link Fence" },
+          { "value": "aluminum", "label": "Aluminum Fence" },
+          { "value": "composite", "label": "Composite Fence" },
+          { "value": "steel", "label": "Steel/Iron Fence" },
+          { "value": "farm", "label": "Farm & Ranch Fence" },
+          { "value": "unsure", "label": "Not Sure - Need Advice" }
+        ]
+      },
+      {
+        "name": "timeline",
+        "label": "Project Timeline",
+        "type": "select",
+        "required": false,
+        "width": "half",
+        "options": [
+          { "value": "", "label": "When do you need this completed?" },
+          { "value": "asap", "label": "As Soon As Possible" },
+          { "value": "1-month", "label": "Within 1 Month" },
+          { "value": "1-3-months", "label": "1-3 Months" },
+          { "value": "3-6-months", "label": "3-6 Months" },
+          { "value": "planning", "label": "Just Planning / Getting Quotes" }
+        ]
+      },
+      {
+        "name": "howHeard",
+        "label": "How Did You Hear About Us?",
+        "type": "select",
+        "required": false,
+        "width": "half",
+        "options": [
+          { "value": "", "label": "Select one..." },
+          { "value": "google", "label": "Google Search" },
+          { "value": "facebook", "label": "Facebook" },
+          { "value": "referral", "label": "Friend/Family Referral" },
+          { "value": "neighbor", "label": "Saw Our Work in Neighborhood" },
+          { "value": "homeadvisor", "label": "HomeAdvisor" },
+          { "value": "repeat", "label": "Previous Customer" },
+          { "value": "other", "label": "Other" }
+        ]
+      },
+      {
+        "name": "message",
+        "label": "Project Details",
+        "type": "textarea",
+        "required": false,
+        "placeholder": "Tell us about your project. Include approximate fence length, any specific requirements, or questions you have.",
+        "width": "full",
+        "rows": 5
+      }
+    ],
+    "submitButton": {
+      "text": "Send Message",
+      "loadingText": "Sending..."
+    },
+    "successMessage": "Thank you for contacting us! We'll review your message and get back to you within 24 hours.",
+    "errorMessage": "There was an error sending your message. Please try again or call us directly at (419) 356-9643."
+  },
+  
+  "callToAction": {
+    "headline": "Prefer to Talk?",
+    "description": "If you'd rather speak with someone directly, give us a call. We're happy to answer questions and can often provide rough estimates over the phone.",
+    "buttonText": "Call (419) 356-9643",
+    "buttonHref": "tel:+14193569643"
+  },
+  
+  "quickQuote": {
+    "headline": "Want an Instant Ballpark Estimate?",
+    "description": "Try our online ballpark quote tool to get a rough estimate in minutes. Simply draw your fence line on the map and select your options.",
+    "buttonText": "Get Ballpark Quote",
+    "buttonHref": "/quote/ballpark"
+  },
+  
+  "faq": [
+    {
+      "question": "How quickly can you provide an estimate?",
+      "answer": "We typically schedule on-site estimates within 2-3 business days of your request. During busy seasons, it may take slightly longer, but we'll always communicate our timeline."
+    },
+    {
+      "question": "Is the estimate really free?",
+      "answer": "Yes! Our on-site estimates are completely free with no obligation. We'll measure your property, discuss your options, and provide a detailed written quote."
+    },
+    {
+      "question": "Do you offer financing?",
+      "answer": "Yes, we offer financing options for qualified customers. Ask about our payment plans when you receive your estimate."
+    },
+    {
+      "question": "How far do you travel for projects?",
+      "answer": "We serve all areas within approximately 35 miles of Toledo, including most of Northwest Ohio and Southeast Michigan. Contact us if you're unsure if we serve your area."
+    }
+  ],
+  
+  "socialMedia": {
+    "headline": "Connect With Us",
+    "platforms": [
+      {
+        "name": "Facebook",
+        "url": "https://www.facebook.com/ghareebfencing",
+        "icon": "fa-facebook-f"
+      },
+      {
+        "name": "Google Business",
+        "url": "https://g.page/ghareeb-fencing",
+        "icon": "fa-google"
+      },
+      {
+        "name": "Instagram",
+        "url": "https://www.instagram.com/ghareebfencing",
+        "icon": "fa-instagram"
+      }
+    ]
+  },
+  
+  "seo": {
+    "title": "Contact Us | Ghareeb Fencing Solutions - Free Fence Estimates Toledo",
+    "description": "Contact Ghareeb Fencing Solutions for a free fence estimate in Toledo and Northwest Ohio. Call (419) 356-9643 or fill out our contact form. We respond within 24 hours.",
+    "keywords": ["contact fence company Toledo", "free fence estimate Toledo", "fence quote Northwest Ohio", "Toledo fence installer contact"]
   }
 }

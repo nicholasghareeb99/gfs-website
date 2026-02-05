@@ -1,79 +1,154 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import home from '../content/home.json';
-import site from '../content/site.json';
+import { getHomepageContent } from '../lib/firestore.js';
+import siteJson from '../content/site.json';
+
+const { site: siteSettings, whyUs, reviews, gallery } = await getHomepageContent();
+const site = { ...siteJson, ...siteSettings };
 ---
 
-<BaseLayout title={home.meta.title} description={home.meta.description}>
-    
+<BaseLayout title={site.seo.defaultTitle} description={site.seo.defaultDescription} canonical="/">
     <!-- Hero Section -->
-    <section class="hero" style="min-height: 90vh;">
-        <div class="hero-bg" style={`background-image: url('${home.hero.backgroundImage}')`}></div>
-        <div class="hero-overlay"></div>
-        <div class="container hero-content">
-            <div class="section-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> {home.hero.badge}</div>
-            <h1 class="hero-headline">{home.hero.headline}<br><span class="gold">{home.hero.subheadline}</span></h1>
-            <p class="hero-text">{home.hero.description}</p>
-            <div class="hero-btns">
-                <a href={home.hero.ctaPrimary.href} class="btn btn-primary btn-lg">{home.hero.ctaPrimary.text}</a>
-                <a href={home.hero.ctaSecondary.href} class="btn btn-secondary btn-lg">{home.hero.ctaSecondary.text}</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section">
+    <section class="hero" style="padding-bottom: 40px;">
+        <div class="hero-bg"></div>
         <div class="container">
-            <div class="stats-grid">
-                {home.stats.map(stat => (
-                    <div class="stat-item">
-                        <span class="stat-number">{stat.number}</span>
-                        <span class="stat-label">{stat.label}</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+                <div class="hero-content">
+                    <div class="hero-badge" id="dyn-badge">
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span id="badge-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.badge">{site.hero.badge}</span>
                     </div>
-                ))}
+                    <h1 class="hero-title">
+                        <span id="hero-title-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.title">{site.hero.title}</span><br>
+                        <span class="highlight" id="hero-highlight-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.titleHighlight">{site.hero.titleHighlight}</span>
+                    </h1>
+                    <p class="hero-text" id="hero-subtitle-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.subtitle">{site.hero.subtitle}</p>
+                    <div class="hero-cta">
+                        <a href="/quote/" class="btn btn-primary btn-lg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Get Instant Quote
+                        </a>
+                        <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                            {site.company.phone}
+                        </a>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <div class="stat-value" id="stat-fences" data-editable data-edit-doc="settings/site" data-edit-field="stats.fencesInstalled">{site.stats.fencesInstalled}</div>
+                            <div class="stat-label">Fences Installed</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="stat-rating" data-editable data-edit-doc="settings/site" data-edit-field="stats.googleRating">{site.stats.googleRating}<span class="gold" style="font-size: 0.8em;">★</span></div>
+                            <div class="stat-label">Google Rating</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-value" id="stat-warranty" data-editable data-edit-doc="settings/site" data-edit-field="stats.warranty">{site.stats.warranty}</div>
+                            <div class="stat-label">Warranty</div>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/cedar-shadowbox.jpg" alt="Cedar privacy fence Toledo" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/vinyl-white.jpg" alt="Vinyl fence Perrysburg" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/aluminum-black.jpg" alt="Aluminum ornamental fence" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/pt-privacy.jpg" alt="Wood fence Maumee" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Fence Types Section -->
-    <section class="section">
+    <style>
+        @media (max-width: 900px) {
+            .hero .container > div { grid-template-columns: 1fr !important; }
+            .hero .container > div > div:last-child { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+        }
+    </style>
+
+    <!-- Featured Work Gallery — DYNAMIC from Firestore -->
+    <section class="section" style="padding: 50px 0; background: var(--bg-light);">
         <div class="container">
-            <h2 class="section-title">{home.fenceTypes.headline}</h2>
-            <p class="section-subtitle">{home.fenceTypes.subheadline}</p>
-            <div class="fence-grid">
-                {home.fenceTypes.items.map(fence => (
-                    <a href={fence.href} class="fence-card">
-                        <div class="fence-card-image">
-                            <img src={fence.image} alt={fence.name} loading="lazy">
-                        </div>
-                        <div class="fence-card-content">
-                            <h3>{fence.name}</h3>
-                            <p>{fence.description}</p>
-                            <span class="fence-price">{fence.price}</span>
-                        </div>
-                    </a>
-                ))}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h2 class="section-title" style="margin: 0;">Recent <span class="gold">Installations</span></h2>
+                    <p style="color: var(--text-muted); margin: 8px 0 0;">Real projects from Toledo and surrounding areas</p>
+                </div>
+                <a href="/gallery/" class="btn btn-secondary" style="white-space: nowrap;">View All Projects</a>
+            </div>
+            <div class="gallery-grid-6" id="dyn-gallery">
+                <!-- Static fallback — replaced by Firestore data on load -->
+                <div class="gallery-item"><img src="/images/gallery/cedar-lattice-shadowbox.jpg" alt="Cedar fence with lattice top"><div class="gallery-label">Cedar Lattice Top</div></div>
+                <div class="gallery-item"><img src="/images/gallery/vinyl-tan-privacy.jpg" alt="Tan vinyl fence"><div class="gallery-label">Vinyl Privacy Tan</div></div>
+                <div class="gallery-item"><img src="/images/gallery/aluminum-ornamental.jpg" alt="Aluminum pool fence"><div class="gallery-label">Aluminum Ornamental</div></div>
+                <div class="gallery-item"><img src="/images/gallery/pt-shadowbox-lattice.jpg" alt="Wood shadowbox fence"><div class="gallery-label">Wood Shadowbox</div></div>
+                <div class="gallery-item"><img src="/images/gallery/chainlink-1.jpg" alt="Chain link fence"><div class="gallery-label">Chain Link</div></div>
+                <div class="gallery-item"><img src="/images/gallery/split-rail-1.jpg" alt="Split rail fence"><div class="gallery-label">Split Rail</div></div>
             </div>
         </div>
     </section>
 
-    <!-- Why Choose Us Section -->
-    <section class="section section-dark">
+    <style>
+        .gallery-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+        .gallery-item { border-radius: 10px; overflow: hidden; aspect-ratio: 1; position: relative; }
+        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+        .gallery-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: var(--accent); font-weight: 600; font-size: 0.7rem; }
+        @media (max-width: 900px) { .gallery-grid-6 { grid-template-columns: repeat(3, 1fr); } }
+        @media (max-width: 600px) { .gallery-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+
+    <!-- Fence Styles Section -->
+    <section class="section section-light">
         <div class="container">
-            <h2 class="section-title">{home.whyChooseUs.headline}</h2>
-            <div class="features-grid">
-                {home.whyChooseUs.items.map(item => (
-                    <div class="feature-card">
-                        <div class="feature-icon">
-                            {item.icon === 'trophy' && <span>🏆</span>}
-                            {item.icon === 'star' && <span>⭐</span>}
-                            {item.icon === 'shield' && <span>🛡️</span>}
-                            {item.icon === 'clipboard' && <span>📋</span>}
-                            {item.icon === 'dollar' && <span>💰</span>}
-                            {item.icon === 'user' && <span>👨‍💼</span>}
+            <div class="section-header">
+                <div class="section-label">Our Services</div>
+                <h2 class="section-title">Professional Fence <span class="gold">Installation</span></h2>
+                <p class="section-text">Quality materials, expert craftsmanship, and lasting results for every fencing need</p>
+            </div>
+            <div class="grid-4" id="dyn-fence-types">
+                <a href="/fences/cedar/" class="card"><div class="card-icon">🌲</div><h3 class="card-title">Cedar Privacy</h3><p class="card-text">Natural beauty with 30-40+ year lifespan. The premium choice for privacy.</p></a>
+                <a href="/fences/vinyl/" class="card"><div class="card-icon">🏠</div><h3 class="card-title">Vinyl Privacy</h3><p class="card-text">Zero maintenance, lifetime warranty. Never paint or stain again.</p></a>
+                <a href="/fences/aluminum/" class="card"><div class="card-icon">✨</div><h3 class="card-title">Ornamental Aluminum</h3><p class="card-text">Elegant, rust-free beauty. Perfect for pools and upscale properties.</p></a>
+                <a href="/fences/chainlink/" class="card"><div class="card-icon">🔗</div><h3 class="card-title">Chain Link</h3><p class="card-text">Affordable security and durability. Great for pets and property lines.</p></a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Permit Check Banner -->
+    <section class="section section-warm" style="padding: 60px 0;">
+        <div class="container">
+            <div style="background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: var(--radius-lg); padding: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="color: white; font-size: 1.5rem; margin-bottom: 8px;">📋 Do You Need a Fence Permit?</h3>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0;">Check height limits, setback rules & permit requirements for 40+ cities in NW Ohio & SE Michigan.</p>
+                </div>
+                <a href="/permits/" class="btn btn-primary" style="white-space: nowrap;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    Check My City's Rules
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us — DYNAMIC from Firestore content/whyUs -->
+    <section class="section section-light">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Why Choose Us</div>
+                <h2 class="section-title">The Ghareeb <span class="gold">Difference</span></h2>
+                <p class="section-text">What sets us apart from other fence contractors</p>
+            </div>
+            <div class="quote-options-grid" id="dyn-why-us">
+                <!-- Static fallback — replaced by Firestore on load -->
+                {site.whyChooseUs.map((item) => (
+                    <div class="card">
+                        <div class="card-icon">
+                            {item.icon === 'user' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
+                            {item.icon === 'dollar' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
+                            {item.icon === 'shield' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>}
+                            {item.icon === 'credit-card' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>}
                         </div>
-                        <h3>{item.title}</h3>
-                        <p>{item.description}</p>
+                        <h3 class="card-title">{item.title}</h3>
+                        <p class="card-text">{item.description}</p>
                     </div>
                 ))}
             </div>
@@ -81,15 +156,18 @@ import site from '../content/site.json';
     </section>
 
     <!-- Process Section -->
-    <section class="section">
+    <section class="section section-warm">
         <div class="container">
-            <h2 class="section-title">{home.process.headline}</h2>
-            <p class="section-subtitle">{home.process.subheadline}</p>
+            <div class="section-header">
+                <div class="section-label">Our Process</div>
+                <h2 class="section-title">Simple <span class="gold">4-Step</span> Process</h2>
+                <p class="section-text">From quote to completion, we make fence installation easy</p>
+            </div>
             <div class="process-grid">
-                {home.process.steps.map(step => (
+                {site.process.map((step) => (
                     <div class="process-step">
-                        <div class="process-number">{step.number}</div>
-                        <h3>{step.title}</h3>
+                        <div class="process-number">{step.step}</div>
+                        <h4>{step.title}</h4>
                         <p>{step.description}</p>
                     </div>
                 ))}
@@ -97,320 +175,67 @@ import site from '../content/site.json';
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section class="section section-dark">
+    <!-- Testimonials — DYNAMIC from Firestore content/reviews -->
+    <section class="section section-light">
         <div class="container">
-            <h2 class="section-title">{home.testimonials.headline}</h2>
-            <div class="testimonials-grid">
-                {home.testimonials.items.map(testimonial => (
-                    <div class="testimonial-card">
-                        <div class="testimonial-stars">{'★'.repeat(testimonial.rating)}</div>
-                        <p class="testimonial-quote">"{testimonial.quote}"</p>
-                        <div class="testimonial-author">
-                            <strong>{testimonial.author}</strong>
-                            <span>{testimonial.location}</span>
-                        </div>
-                    </div>
-                ))}
+            <div class="section-header">
+                <div class="section-label">Customer Reviews</div>
+                <h2 class="section-title">What Our <span class="gold">Customers</span> Say</h2>
+            </div>
+            <div class="grid-3" id="dyn-reviews">
+                <!-- Static fallback — replaced by Firestore on load -->
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Best decision we made for our backyard. The crew was professional, finished in just 2 days, and the fence looks amazing. Highly recommend!"</p>
+                    <div class="testimonial-author"><div class="testimonial-avatar">SM</div><div class="testimonial-info"><h4>Sarah M.</h4><p>Perrysburg, OH • Cedar Privacy</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"Finally a contractor who shows up when they say they will! Great communication throughout the project. Our vinyl fence is perfect."</p>
+                    <div class="testimonial-author"><div class="testimonial-avatar">JR</div><div class="testimonial-info"><h4>James R.</h4><p>Sylvania, OH • Vinyl Privacy</p></div></div>
+                </div>
+                <div class="testimonial-card">
+                    <div class="testimonial-stars">★★★★★</div>
+                    <p class="testimonial-text">"The aluminum fence around our pool looks incredible. Quality work at a fair price. Would definitely use again for our front yard."</p>
+                    <div class="testimonial-author"><div class="testimonial-avatar">KL</div><div class="testimonial-info"><h4>Karen L.</h4><p>Maumee, OH • Aluminum</p></div></div>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 40px;"><a href="/reviews/" class="btn btn-secondary">Read All Reviews</a></div>
+        </div>
+    </section>
+
+    <!-- Service Areas -->
+    <section class="section section-warm">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Service Areas</div>
+                <h2 class="section-title">Serving <span class="gold">Northwest Ohio</span> & SE Michigan</h2>
+                <p class="section-text">Professional fence installation across 5+ counties</p>
+            </div>
+            <div class="areas-grid">
+                <a href="/service-areas/toledo/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Toledo</a>
+                <a href="/service-areas/perrysburg/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Perrysburg</a>
+                <a href="/service-areas/sylvania/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Sylvania</a>
+                <a href="/service-areas/maumee/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Maumee</a>
+                <a href="/service-areas/bowling-green/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bowling Green</a>
+                <a href="/service-areas/monroe/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Monroe, MI</a>
             </div>
         </div>
     </section>
 
-    <!-- Service Areas Section -->
-    <section class="section">
-        <div class="container">
-            <h2 class="section-title">{home.serviceAreas.headline}</h2>
-            <p class="section-subtitle">{home.serviceAreas.description}</p>
-            <div class="areas-list">
-                {home.serviceAreas.areas.map(area => (
-                    <span class="area-tag">{area}</span>
-                ))}
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA Section with Lead Form -->
+    <!-- CTA -->
     <section class="section cta-section">
         <div class="container">
-            <div class="cta-grid">
-                <div class="cta-content">
-                    <h2 class="section-title" style="text-align:left">{home.ctaSection.headline}</h2>
-                    <p class="section-subtitle" style="text-align:left">{home.ctaSection.description}</p>
-                    <div class="cta-buttons" style="justify-content:flex-start">
-                        <a href={home.ctaSection.ctaSecondary.href} class="btn btn-secondary btn-lg">📞 {home.ctaSection.ctaSecondary.text}</a>
-                    </div>
-                    <div class="trust-points">
-                        <span>✓ Free Estimates</span>
-                        <span>✓ 0% Financing Available</span>
-                        <span>✓ 3-Year Warranty</span>
-                    </div>
-                </div>
-                <div class="cta-form-wrapper">
-                    <h3>Get Your Free Quote</h3>
-                    <form name="homepage-quote" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thank-you/" class="quick-form">
-                        <input type="hidden" name="form-name" value="homepage-quote">
-                        <p style="display:none"><input name="bot-field"></p>
-                        <div class="form-row">
-                            <input type="text" name="name" placeholder="Your Name *" required>
-                            <input type="tel" name="phone" placeholder="Phone Number *" required>
-                        </div>
-                        <input type="email" name="email" placeholder="Email Address *" required>
-                        <input type="text" name="address" placeholder="Project Address *" required>
-                        <select name="fence-type" required>
-                            <option value="">What type of fence? *</option>
-                            <option value="cedar">Cedar Privacy</option>
-                            <option value="vinyl">Vinyl Privacy</option>
-                            <option value="wood">Wood Privacy</option>
-                            <option value="aluminum">Ornamental Aluminum</option>
-                            <option value="chainlink">Chain Link</option>
-                            <option value="split-rail">Split Rail</option>
-                            <option value="not-sure">Not Sure - Need Advice</option>
-                        </select>
-                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%">Request Free Quote →</button>
-                    </form>
+            <div class="cta-content">
+                <h2>Ready for Your New Fence?</h2>
+                <p>Get your free quote in 60 seconds or talk to an expert today.</p>
+                <div class="cta-buttons">
+                    <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
+                    <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
                 </div>
             </div>
         </div>
     </section>
-
 </BaseLayout>
 
-<style>
-    .stats-section {
-        background: var(--primary);
-        padding: 40px 0;
-    }
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
-        text-align: center;
-    }
-    .stat-number {
-        display: block;
-        font-size: 3rem;
-        font-weight: 800;
-        color: var(--accent);
-    }
-    .stat-label {
-        color: rgba(255,255,255,0.9);
-    }
-    
-    .fence-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 24px;
-        margin-top: 40px;
-    }
-    .fence-card {
-        background: var(--dark-card);
-        border-radius: 12px;
-        overflow: hidden;
-        text-decoration: none;
-        transition: transform 0.3s, box-shadow 0.3s;
-        border: 1px solid var(--border);
-    }
-    .fence-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-    }
-    .fence-card-image img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-    .fence-card-content {
-        padding: 24px;
-    }
-    .fence-card h3 {
-        color: white;
-        margin-bottom: 8px;
-    }
-    .fence-card p {
-        color: var(--text-sub);
-        margin-bottom: 12px;
-    }
-    .fence-price {
-        color: var(--accent);
-        font-weight: 600;
-    }
-    
-    .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 24px;
-        margin-top: 40px;
-    }
-    .feature-card {
-        background: var(--dark-card);
-        padding: 32px;
-        border-radius: 12px;
-        text-align: center;
-    }
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 16px;
-    }
-    .feature-card h3 {
-        color: var(--accent);
-        margin-bottom: 8px;
-    }
-    .feature-card p {
-        color: var(--text-sub);
-    }
-    
-    .process-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 32px;
-        margin-top: 40px;
-    }
-    .process-step {
-        text-align: center;
-    }
-    .process-number {
-        width: 60px;
-        height: 60px;
-        background: var(--accent);
-        color: var(--primary);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        font-weight: 800;
-        margin: 0 auto 16px;
-    }
-    .process-step h3 {
-        color: white;
-        margin-bottom: 8px;
-    }
-    .process-step p {
-        color: var(--text-sub);
-    }
-    
-    .testimonials-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 24px;
-        margin-top: 40px;
-    }
-    .testimonial-card {
-        background: var(--dark-card);
-        padding: 32px;
-        border-radius: 12px;
-    }
-    .testimonial-stars {
-        color: var(--accent);
-        font-size: 1.2rem;
-        margin-bottom: 16px;
-    }
-    .testimonial-quote {
-        color: var(--text);
-        font-style: italic;
-        margin-bottom: 16px;
-        line-height: 1.6;
-    }
-    .testimonial-author strong {
-        display: block;
-        color: white;
-    }
-    .testimonial-author span {
-        color: var(--text-sub);
-        font-size: 0.9rem;
-    }
-    
-    .areas-list {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: 12px;
-        margin-top: 32px;
-    }
-    .area-tag {
-        background: var(--dark-card);
-        padding: 10px 20px;
-        border-radius: 8px;
-        color: var(--text);
-        border: 1px solid var(--border);
-    }
-    
-    .cta-section {
-        background: linear-gradient(135deg, var(--primary), #0f172a);
-    }
-    .cta-buttons {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-        margin-top: 32px;
-    }
-    
-    .cta-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 60px;
-        align-items: center;
-    }
-    .cta-content .section-title { color: white; }
-    .cta-content .section-subtitle { color: rgba(255,255,255,0.8); }
-    .trust-points {
-        display: flex;
-        gap: 24px;
-        margin-top: 24px;
-        flex-wrap: wrap;
-    }
-    .trust-points span {
-        color: rgba(255,255,255,0.9);
-        font-size: 0.9rem;
-    }
-    .cta-form-wrapper {
-        background: var(--dark-card);
-        padding: 32px;
-        border-radius: 16px;
-        border: 1px solid var(--border);
-    }
-    .cta-form-wrapper h3 {
-        color: white;
-        margin-bottom: 24px;
-        text-align: center;
-    }
-    .quick-form input,
-    .quick-form select {
-        width: 100%;
-        padding: 14px 16px;
-        margin-bottom: 12px;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        background: var(--dark);
-        color: white;
-        font-size: 1rem;
-        box-sizing: border-box;
-    }
-    .quick-form input:focus,
-    .quick-form select:focus {
-        border-color: var(--accent);
-        outline: none;
-    }
-    .quick-form input::placeholder {
-        color: var(--text-sub);
-    }
-    .quick-form select {
-        cursor: pointer;
-    }
-    .quick-form select option {
-        background: var(--dark);
-    }
-    .quick-form .form-row {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 12px;
-    }
-    
-    @media (max-width: 768px) {
-        .stats-grid { grid-template-columns: repeat(2, 1fr); }
-        .process-grid { grid-template-columns: 1fr; }
-        .cta-grid { grid-template-columns: 1fr; }
-        .quick-form .form-row { grid-template-columns: 1fr; }
-    }
-</style>
+<!-- Content is now rendered server-side from Firestore -->

@@ -1,0 +1,324 @@
+---
+interface Props {
+  title: string;
+  subtitle?: string;
+  backgroundImage?: string;
+  overlay?: boolean;
+  height?: 'small' | 'medium' | 'large' | 'full';
+  alignment?: 'left' | 'center' | 'right';
+  ctaButton?: {
+    text: string;
+    href: string;
+    variant?: 'primary' | 'secondary' | 'outline';
+  };
+  secondaryButton?: {
+    text: string;
+    href: string;
+  };
+  breadcrumbs?: Array<{
+    label: string;
+    href?: string;
+  }>;
+}
+
+const {
+  title,
+  subtitle,
+  backgroundImage,
+  overlay = true,
+  height = 'medium',
+  alignment = 'center',
+  ctaButton,
+  secondaryButton,
+  breadcrumbs
+} = Astro.props;
+
+const heightClasses = {
+  small: 'hero--small',
+  medium: 'hero--medium',
+  large: 'hero--large',
+  full: 'hero--full'
+};
+
+const alignmentClasses = {
+  left: 'hero--left',
+  center: 'hero--center',
+  right: 'hero--right'
+};
+---
+
+<section 
+  class={`hero ${heightClasses[height]} ${alignmentClasses[alignment]} ${overlay ? 'hero--overlay' : ''}`}
+  style={backgroundImage ? `background-image: url('${backgroundImage}')` : ''}
+>
+  <div class="hero__container container">
+    {breadcrumbs && breadcrumbs.length > 0 && (
+      <nav class="hero__breadcrumbs" aria-label="Breadcrumb">
+        <ol class="breadcrumb-list">
+          {breadcrumbs.map((crumb, index) => (
+            <li class="breadcrumb-item">
+              {crumb.href ? (
+                <a href={crumb.href}>{crumb.label}</a>
+              ) : (
+                <span aria-current="page">{crumb.label}</span>
+              )}
+              {index < breadcrumbs.length - 1 && (
+                <span class="breadcrumb-separator">/</span>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
+    
+    <div class="hero__content">
+      <h1 class="hero__title">{title}</h1>
+      {subtitle && <p class="hero__subtitle">{subtitle}</p>}
+      
+      {(ctaButton || secondaryButton) && (
+        <div class="hero__buttons">
+          {ctaButton && (
+            <a 
+              href={ctaButton.href} 
+              class={`btn btn--${ctaButton.variant || 'primary'} btn--lg`}
+            >
+              {ctaButton.text}
+            </a>
+          )}
+          {secondaryButton && (
+            <a 
+              href={secondaryButton.href} 
+              class="btn btn--outline btn--lg"
+            >
+              {secondaryButton.text}
+            </a>
+          )}
+        </div>
+      )}
+    </div>
+    
+    <slot />
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--color-primary);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    color: #fff;
+  }
+
+  .hero--overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(30, 58, 95, 0.9) 0%, rgba(30, 58, 95, 0.7) 100%);
+    z-index: 1;
+  }
+
+  .hero__container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    padding: 2rem 1.5rem;
+  }
+
+  /* Heights */
+  .hero--small {
+    min-height: 200px;
+    padding: 2rem 0;
+  }
+
+  .hero--medium {
+    min-height: 350px;
+    padding: 3rem 0;
+  }
+
+  .hero--large {
+    min-height: 500px;
+    padding: 4rem 0;
+  }
+
+  .hero--full {
+    min-height: 100vh;
+    padding: 4rem 0;
+  }
+
+  /* Alignments */
+  .hero--left .hero__content {
+    text-align: left;
+  }
+
+  .hero--center .hero__content {
+    text-align: center;
+    margin: 0 auto;
+    max-width: 800px;
+  }
+
+  .hero--right .hero__content {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  /* Breadcrumbs */
+  .hero__breadcrumbs {
+    margin-bottom: 1.5rem;
+  }
+
+  .breadcrumb-list {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .hero--center .breadcrumb-list {
+    justify-content: center;
+  }
+
+  .breadcrumb-item {
+    display: flex;
+    align-items: center;
+  }
+
+  .breadcrumb-item a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+
+  .breadcrumb-item a:hover {
+    opacity: 0.8;
+  }
+
+  .breadcrumb-separator {
+    margin: 0 0.5rem;
+    opacity: 0.6;
+  }
+
+  /* Content */
+  .hero__title {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 700;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .hero__subtitle {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    margin: 0 0 2rem;
+    opacity: 0.95;
+    line-height: 1.6;
+    max-width: 600px;
+  }
+
+  .hero--center .hero__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Buttons */
+  .hero__buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .hero--center .hero__buttons {
+    justify-content: center;
+  }
+
+  .hero--right .hero__buttons {
+    justify-content: flex-end;
+  }
+
+  /* Button styles */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+
+  .btn--primary {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+  }
+
+  .btn--primary:hover {
+    background-color: #c9a432;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+  }
+
+  .btn--secondary {
+    background-color: #fff;
+    color: var(--color-primary);
+  }
+
+  .btn--secondary:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+  }
+
+  .btn--outline {
+    background-color: transparent;
+    color: #fff;
+    border-color: #fff;
+  }
+
+  .btn--outline:hover {
+    background-color: #fff;
+    color: var(--color-primary);
+  }
+
+  .btn--lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .hero--medium {
+      min-height: 280px;
+    }
+
+    .hero--large {
+      min-height: 400px;
+    }
+
+    .hero__buttons {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .hero--center .hero__buttons,
+    .hero--right .hero__buttons {
+      align-items: center;
+    }
+
+    .btn--lg {
+      width: 100%;
+      max-width: 280px;
+    }
+  }
+</style>

@@ -1,0 +1,156 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // LEADS & JOBS (Used by all apps)
+    // ============================================
+    
+    match /leads/{leadId} {
+      allow read, write: if true;
+    }
+    
+    match /jobs/{jobId} {
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // WEBSITE (Edit mode, contact forms, SSR)
+    // ============================================
+    
+    // Settings (stylePhotos config, pricing, etc.)
+    match /settings/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Site content (inline website editing via edit mode)
+    match /siteContent/{doc} {
+      allow read, write: if true;
+    }
+    
+    // SSR page content (Astro website fetches these server-side)
+    match /content/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Page content (legacy)
+    match /pageContent/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Website lead submissions (contact form, ballpark, booking)
+    match /websiteLeads/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Bookings/appointments
+    match /bookings/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Available time slots (exec app creates, website reads, booking marks used)
+    match /availableSlots/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Gallery images
+    match /gallery/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Email notification queue (Firebase Trigger Email extension)
+    match /mail/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Admin credentials
+    match /admin/{doc} {
+      allow read, write: if true;
+    }
+    
+    // Security logs
+    match /securityLogs/{doc} {
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // CONTRACTS & PAYMENTS (Customer Portal)
+    // ============================================
+    
+    match /contracts/{contractId} {
+      allow read, write: if true;
+    }
+    
+    match /payments/{paymentId} {
+      allow read, write: if true;
+    }
+    
+    match /invoices/{invoiceId} {
+      allow read, write: if true;
+    }
+    
+    match /signatures/{signatureId} {
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // CREW VIEW APP
+    // ============================================
+    
+    match /crew/{crewId} {
+      allow read, write: if true;
+    }
+    
+    match /users/{userId} {
+      allow read, write: if true;
+    }
+    
+    match /schedules/{scheduleId} {
+      allow read, write: if true;
+    }
+    
+    match /timeEntries/{entryId} {
+      allow read, write: if true;
+    }
+    
+    match /materials/{materialId} {
+      allow read, write: if true;
+    }
+    
+    match /inventory/{itemId} {
+      allow read, write: if true;
+    }
+    
+    match /jobNotes/{noteId} {
+      allow read, write: if true;
+    }
+    
+    match /progress/{progressId} {
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // CUSTOMER PORTAL
+    // ============================================
+    
+    match /customers/{customerId} {
+      allow read, write: if true;
+    }
+    
+    match /messages/{messageId} {
+      allow read, write: if true;
+    }
+    
+    match /projectUpdates/{updateId} {
+      allow read, write: if true;
+    }
+    
+    // ============================================
+    // CATCH-ALL (Allow read on everything else)
+    // ============================================
+    
+    match /{document=**} {
+      allow read: if true;
+    }
+  }
+}

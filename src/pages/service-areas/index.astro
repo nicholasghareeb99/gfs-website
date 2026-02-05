@@ -1,0 +1,393 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ServiceAreaCard from '../../components/ServiceAreaCard.astro';
+import { getServiceAreas } from '../../lib/firestore.js';
+
+const serviceAreasData = await getServiceAreas();
+const { serviceAreas, regions, defaultRadius } = serviceAreasData;
+
+// Group areas by county
+const areasByCounty = {};
+serviceAreas.forEach(area => {
+    if (!areasByCounty[area.county]) {
+        areasByCounty[area.county] = [];
+    }
+    areasByCounty[area.county].push(area);
+});
+
+// Featured areas
+const featuredAreas = serviceAreas.filter(a => a.featured);
+---
+
+<BaseLayout 
+    title="Service Areas | Fence Installation Toledo, Perrysburg & Northwest Ohio"
+    description="Ghareeb Fencing Solutions serves 28 communities across Northwest Ohio and Southeast Michigan. Free estimates in Toledo, Perrysburg, Maumee, Sylvania, and more."
+    canonical="/service-areas/"
+>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="/">Home</a>
+                <span>/</span>
+                <span>Service Areas</span>
+            </nav>
+            <h1 data-editable data-edit-doc="content/pages" data-edit-field="serviceAreas.title">Areas We Serve</h1>
+            <p class="hero-subtitle" data-editable data-edit-doc="content/pages" data-edit-field="serviceAreas.subtitle">Professional fence installation across Northwest Ohio & Southeast Michigan</p>
+            <div class="service-badge">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span>{defaultRadius}-mile service radius from Toledo</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Areas -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Featured Service Areas</h2>
+                <p>Our most active installation areas with hundreds of happy customers</p>
+            </div>
+            <div class="featured-grid">
+                {featuredAreas.slice(0, 6).map(area => (
+                    <ServiceAreaCard 
+                        name={area.name}
+                        slug={area.slug}
+                        county={area.county}
+                        state={area.state}
+                        description={area.description}
+                        population={area.population}
+                        featured={true}
+                    />
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- All Areas by Region -->
+    <section class="section bg-light">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>All Service Areas</h2>
+                <p>Browse our complete service area coverage</p>
+            </div>
+            
+            <div class="regions-container">
+                {Object.entries(areasByCounty).map(([countyName, countyAreas]) => (
+                    <div class="region-section">
+                        <h3 class="region-title">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            {countyName}
+                        </h3>
+                        <div class="region-grid">
+                            {countyAreas.map(area => (
+                                <a href={`/service-areas/${area.slug}/`} class="area-link">
+                                    <span class="area-name">{area.name}</span>
+                                    {area.featured && <span class="featured-badge">Popular</span>}
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="section">
+        <div class="container">
+            <div class="map-content">
+                <div class="map-info">
+                    <h2>Local Service, Expert Installation</h2>
+                    <p>Based in Toledo, Ghareeb Fencing Solutions provides professional fence installation throughout Northwest Ohio and Southeast Michigan. Our local presence means faster response times, knowledge of local permit requirements, and crews who understand the unique needs of our region.</p>
+                    <ul class="map-features">
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            Same-week estimates available
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            Local permit expertise
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            Community-focused service
+                        </li>
+                        <li>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            Your neighbors are our customers
+                        </li>
+                    </ul>
+                    <a href="/quote/ballpark/" class="btn btn-primary btn-lg">Get Your Free Quote</a>
+                </div>
+                <div class="map-placeholder">
+                    <div class="map-overlay">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <p>Serving {serviceAreas.length} communities</p>
+                        <p class="map-radius">{defaultRadius}-mile radius</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Not Listed CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Don't See Your City Listed?</h2>
+            <p>We may still be able to serve you! Contact us to check if your location is within our service area.</p>
+            <div class="cta-buttons">
+                <a href="/contact/" class="btn btn-accent btn-lg">Contact Us</a>
+                <a href="tel:4199028257" class="btn btn-outline-light btn-lg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                    (419) 902-8257
+                </a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 140px 0 60px;
+        color: white;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .breadcrumb span {
+        color: rgba(255,255,255,0.5);
+    }
+
+    .breadcrumb span:last-child {
+        color: white;
+    }
+
+    .hero-section h1 {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 12px;
+    }
+
+    .hero-subtitle {
+        font-size: 1.2rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 24px;
+    }
+
+    .service-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(255,255,255,0.15);
+        padding: 12px 20px;
+        border-radius: 50px;
+    }
+
+    .service-badge svg {
+        color: var(--accent);
+    }
+
+    /* Featured Grid */
+    .featured-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+    }
+
+    /* Regions */
+    .regions-container {
+        display: grid;
+        gap: 40px;
+    }
+
+    .region-section {
+        background: white;
+        border-radius: var(--radius-lg);
+        padding: 32px;
+    }
+
+    .region-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--accent);
+    }
+
+    .region-title svg {
+        color: var(--accent);
+    }
+
+    .region-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+
+    .area-link {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 18px;
+        background: #f8fafc;
+        border-radius: var(--radius);
+        text-decoration: none;
+        color: var(--text);
+        transition: all 0.2s;
+    }
+
+    .area-link:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .area-name {
+        font-weight: 500;
+    }
+
+    .featured-badge {
+        font-size: 0.75rem;
+        background: var(--accent);
+        color: var(--primary-dark);
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    /* Map Content */
+    .map-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    @media (max-width: 900px) {
+        .map-content {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+    }
+
+    .map-info h2 {
+        margin-bottom: 16px;
+    }
+
+    .map-info p {
+        color: var(--text-muted);
+        line-height: 1.8;
+        margin-bottom: 24px;
+    }
+
+    .map-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 32px;
+    }
+
+    .map-features li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+    }
+
+    .map-features svg {
+        color: var(--accent);
+    }
+
+    .map-placeholder {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border-radius: var(--radius-lg);
+        aspect-ratio: 4/3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .map-overlay {
+        text-align: center;
+        color: white;
+    }
+
+    .map-overlay svg {
+        color: var(--accent);
+        margin-bottom: 16px;
+    }
+
+    .map-overlay p {
+        margin: 4px 0;
+        font-size: 1.1rem;
+    }
+
+    .map-radius {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    /* CTA */
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 80px 0;
+        text-align: center;
+        color: white;
+    }
+
+    .cta-section h2 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        margin-bottom: 12px;
+    }
+
+    .cta-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 32px;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-accent {
+        background: var(--accent);
+        color: var(--primary-dark);
+    }
+
+    .btn-accent:hover {
+        background: #c9a431;
+    }
+
+    .btn-outline-light {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+    }
+
+    .btn-outline-light:hover {
+        background: white;
+        color: var(--primary);
+    }
+</style>

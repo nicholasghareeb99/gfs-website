@@ -1,0 +1,250 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../../../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout 
+    title="Request a Detailed Quote | Ghareeb Fencing Solutions" 
+    description="Submit a detailed fence quote request. Tell us about your project and we'll prepare a comprehensive estimate within 24 hours."
+    canonical="/quote/form/"
+>
+    <section class="hero-mini">
+        <div class="container">
+            <div class="breadcrumb">
+                <a href="/">Home</a> / <a href="/quote/">Quote</a> / <span>Detailed Quote</span>
+            </div>
+            <h1 data-editable data-edit-doc="content/pages" data-edit-field="quoteForm.title">Request a Detailed Quote</h1>
+            <p class="subtitle" data-editable data-edit-doc="content/pages" data-edit-field="quoteForm.subtitle">Tell us about your project and receive a comprehensive estimate within 24 hours</p>
+        </div>
+    </section>
+
+    <section class="form-section">
+        <div class="container">
+            <div class="form-grid">
+                <div class="form-main">
+                    <form id="quote-form" novalidate>
+                        <!-- Contact Info -->
+                        <div class="form-card">
+                            <h3>📋 Your Information</h3>
+                            <div class="form-row">
+                                <div class="form-group"><label for="q-name">Full Name *</label><input type="text" id="q-name" required placeholder="John Smith" /></div>
+                                <div class="form-group"><label for="q-phone">Phone *</label><input type="tel" id="q-phone" required placeholder="(419) 555-1234" /></div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group"><label for="q-email">Email *</label><input type="email" id="q-email" required placeholder="john@email.com" /></div>
+                                <div class="form-group"><label for="q-address">Property Address *</label><input type="text" id="q-address" required placeholder="123 Main St, Toledo, OH" /></div>
+                            </div>
+                        </div>
+
+                        <!-- Project Details -->
+                        <div class="form-card">
+                            <h3>🏗️ Project Details</h3>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="q-type">Fence Type *</label>
+                                    <select id="q-type" required>
+                                        <option value="">Select fence type...</option>
+                                        <option value="Cedar Privacy">Cedar Privacy Fence</option>
+                                        <option value="Pressure-Treated Privacy">Pressure-Treated Wood Privacy</option>
+                                        <option value="Wood Shadowbox">Wood Shadowbox Fence</option>
+                                        <option value="White Vinyl Privacy">White Vinyl Privacy</option>
+                                        <option value="Tan Vinyl Privacy">Tan Vinyl Privacy</option>
+                                        <option value="Black Chain Link">Black Chain Link</option>
+                                        <option value="Galvanized Chain Link">Galvanized Chain Link</option>
+                                        <option value="Black Aluminum">Black Aluminum Ornamental</option>
+                                        <option value="Bronze Aluminum">Bronze Aluminum Ornamental</option>
+                                        <option value="Split Rail">Split Rail / Farm Fence</option>
+                                        <option value="Not Sure">Not Sure - Need Advice</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="q-height">Preferred Height</label>
+                                    <select id="q-height">
+                                        <option value="">Not sure</option>
+                                        <option value="4 ft">4 feet</option>
+                                        <option value="5 ft">5 feet</option>
+                                        <option value="6 ft">6 feet (standard)</option>
+                                        <option value="8 ft">8 feet</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="q-length">Approximate Length (feet)</label>
+                                    <input type="number" id="q-length" min="10" placeholder="e.g., 150" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="q-timeline">Timeline</label>
+                                    <select id="q-timeline">
+                                        <option value="">When do you need this done?</option>
+                                        <option value="ASAP">As soon as possible</option>
+                                        <option value="1-2 weeks">Within 1-2 weeks</option>
+                                        <option value="1 month">Within a month</option>
+                                        <option value="2-3 months">2-3 months</option>
+                                        <option value="Just planning">Just planning / getting quotes</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="checkbox-row">
+                                <label class="checkbox-label"><input type="checkbox" id="q-gates" /> Need gate(s)</label>
+                                <label class="checkbox-label"><input type="checkbox" id="q-removal" /> Remove existing fence</label>
+                                <label class="checkbox-label"><input type="checkbox" id="q-pool" /> Pool area (code compliance needed)</label>
+                            </div>
+                        </div>
+
+                        <!-- Additional Info -->
+                        <div class="form-card">
+                            <h3>💬 Anything Else?</h3>
+                            <div class="form-group">
+                                <label for="q-notes">Additional Notes or Questions</label>
+                                <textarea id="q-notes" rows="4" placeholder="Describe your project, special requirements, questions, etc."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="q-heard">How did you hear about us?</label>
+                                <select id="q-heard">
+                                    <option value="">Select...</option>
+                                    <option value="Google">Google Search</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="Referral">Referral / Word of Mouth</option>
+                                    <option value="Yard Sign">Saw Our Yard Sign</option>
+                                    <option value="Repeat Customer">Repeat Customer</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="q-submit" class="btn btn-primary btn-block btn-lg">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
+                            Submit Quote Request
+                        </button>
+                        <p class="form-disclaimer">We'll review your request and send a detailed quote within 24 hours. No obligation.</p>
+                    </form>
+
+                    <div id="form-success" style="display:none;">
+                        <div class="success-card">
+                            <div class="success-icon">✅</div>
+                            <h2>Quote Request Submitted!</h2>
+                            <p>We'll review your project details and send you a comprehensive quote within 24 hours.</p>
+                            <p>Need faster answers? Call us at <a href={`tel:${site.company.phoneRaw}`}>{site.company.phone}</a></p>
+                            <div style="display:flex; gap: 12px; justify-content: center; margin-top: 20px;">
+                                <a href="/" class="btn btn-primary">Back to Home</a>
+                                <a href="/quote/ballpark/" class="btn btn-secondary">Try Instant Quote</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-sidebar">
+                    <div class="sidebar-card">
+                        <h4>⚡ Need a Quick Estimate?</h4>
+                        <p>Our ballpark calculator gives you a price range in 60 seconds.</p>
+                        <a href="/quote/ballpark/" class="btn btn-primary btn-block">Try Instant Quote</a>
+                    </div>
+                    <div class="sidebar-card">
+                        <h4>🤝 Our Promise</h4>
+                        <ul class="promise-list">
+                            <li>✓ Response within 24 hours</li>
+                            <li>✓ Detailed written estimate</li>
+                            <li>✓ No hidden fees</li>
+                            <li>✓ Price-match guarantee</li>
+                            <li>✓ 3-year workmanship warranty</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</BaseLayout>
+
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+<script is:inline>
+(function() {
+    const cfg = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+    if (!firebase.apps.length) firebase.initializeApp(cfg);
+    const db = firebase.firestore();
+    const $ = id => document.getElementById(id);
+
+    $('quote-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = $('q-name').value.trim();
+        const phone = $('q-phone').value.trim();
+        const email = $('q-email').value.trim();
+        const address = $('q-address').value.trim();
+        const fenceType = $('q-type').value;
+
+        if (!name || !phone || !email || !address || !fenceType) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        const btn = $('q-submit');
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Submitting...';
+
+        try {
+            await db.collection('websiteLeads').add({
+                name, phone, email, address,
+                fenceStyle: fenceType,
+                height: $('q-height').value || '',
+                linearFeet: $('q-length').value ? parseInt($('q-length').value) : null,
+                timeline: $('q-timeline').value || '',
+                needsGates: $('q-gates').checked,
+                removeOldFence: $('q-removal').checked,
+                poolArea: $('q-pool').checked,
+                notes: $('q-notes').value.trim() || '',
+                heardAboutUs: $('q-heard').value || '',
+                source: 'website-detailed-quote-form',
+                status: 'new',
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+
+            $('quote-form').style.display = 'none';
+            $('form-success').style.display = 'block';
+            $('form-success').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } catch(err) {
+            console.error('Form error:', err);
+            alert('Submission failed. Please call us at (419) 902-8257.');
+            btn.disabled = false;
+            btn.innerHTML = 'Submit Quote Request';
+        }
+    });
+})();
+</script>
+
+<style>
+    .hero-mini { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 120px 0 40px; color: white; }
+    .hero-mini .breadcrumb { margin-bottom: 16px; font-size: 0.9rem; }
+    .hero-mini .breadcrumb a { color: rgba(255,255,255,0.7); text-decoration: none; }
+    .hero-mini .breadcrumb span { color: white; }
+    .hero-mini h1 { font-size: clamp(2rem, 4vw, 2.5rem); margin-bottom: 8px; }
+    .hero-mini .subtitle { color: rgba(255,255,255,0.85); font-size: 1.1rem; }
+    .form-section { padding: 60px 0; background: var(--bg-light); }
+    .form-grid { display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
+    @media (max-width: 900px) { .form-grid { grid-template-columns: 1fr; } .form-sidebar { order: -1; } }
+    .form-card { background: white; border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+    .form-card h3 { margin: 0 0 24px; font-size: 1.2rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.95rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; }
+    .checkbox-row { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+    .checkbox-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.95rem; }
+    .checkbox-label input { width: 18px; height: 18px; }
+    .btn-block { width: 100%; justify-content: center; }
+    .btn-lg { padding: 14px 24px; font-size: 1.05rem; }
+    .form-disclaimer { text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 12px; }
+    .success-card { text-align: center; background: white; border-radius: var(--radius-lg); padding: 48px 32px; box-shadow: var(--shadow-md); }
+    .success-icon { font-size: 4rem; margin-bottom: 16px; }
+    .success-card h2 { color: #065f46; margin-bottom: 12px; }
+    .form-sidebar { position: sticky; top: 100px; }
+    .sidebar-card { background: white; border-radius: var(--radius-lg); padding: 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+    .sidebar-card h4 { margin: 0 0 12px; }
+    .sidebar-card p { color: var(--text-muted); margin-bottom: 16px; font-size: 0.95rem; }
+    .promise-list { list-style: none; padding: 0; margin: 0; }
+    .promise-list li { padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
+    .promise-list li:last-child { border-bottom: none; }
+</style>

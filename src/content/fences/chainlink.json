@@ -1,79 +1,93 @@
 {
-  "meta": {
-    "title": "Chain Link Fence Installation Toledo OH | Durable & Affordable | Ghareeb Fencing",
-    "description": "Professional chain link fence installation in Toledo. Most economical fencing option. Commercial and residential. Free quotes."
+  "id": "chainlink",
+  "slug": "chainlink",
+  "name": "Chain Link Fence",
+  "shortName": "Chain Link",
+  "icon": "🔗",
+  "tagline": "Durable & Affordable",
+  "heroTitle": "Chain Link Fence Installation",
+  "heroSubtitle": "The most cost-effective fencing solution for security, pet containment, and property lines. Galvanized or vinyl-coated options available.",
+  "seo": {
+    "title": "Chain Link Fence Installation Toledo OH | Galvanized & Vinyl Coated | Ghareeb Fencing",
+    "description": "Affordable chain link fence installation in Toledo OH. Galvanized or vinyl-coated, commercial grade available. Pet containment, security. Call (419) 902-8257.",
+    "keywords": ["chain link fence Toledo", "galvanized fence Ohio", "vinyl coated chain link", "security fence Toledo"]
   },
-  "hero": {
-    "badge": "Economy & Durability",
-    "headline": "Chain Link Fence Installation",
-    "description": "The most economical fencing solution. Chain link provides excellent security and durability at the lowest cost per foot. Perfect for property boundaries and pet containment."
-  },
-  "intro": {
-    "headline": "Why Choose Chain Link?",
-    "content": "Chain link fencing is the most cost-effective way to secure your property. Galvanized steel construction lasts for decades with zero maintenance. Available in traditional silver or vinyl-coated colors.",
-    "content2": "Ideal for large areas, commercial properties, pet enclosures, and anywhere budget is a primary concern.",
-    "benefits": [
-      "Lowest cost per linear foot",
-      "Zero maintenance required",
-      "25+ year lifespan",
-      "Galvanized steel won't rot",
-      "Optional vinyl coating for color"
-    ],
-    "image": "/images/gallery/chainlink-1.jpg"
-  },
-  "gallery": {
-    "headline": "Chain Link Fence Installation Gallery",
-    "images": [
-      { "src": "/images/gallery/chainlink-1.jpg", "alt": "Residential chain link fence" },
-      { "src": "/images/gallery/chainlink-2.jpg", "alt": "Chain link fence yard" },
-      { "src": "/images/gallery/chainlink-detail.jpg", "alt": "Chain link detail" }
+  "overview": {
+    "title": "Reliable & Cost-Effective",
+    "content": "Chain link fencing remains the most popular choice for pet containment, property delineation, and security applications. Its open design provides visibility while creating a clear boundary.",
+    "additionalContent": "We install residential and commercial grade chain link with galvanized or vinyl-coated options. Add privacy slats, top rails, or barbed wire (commercial) for customized solutions.",
+    "features": [
+      "Most affordable fencing option",
+      "Galvanized for 15-20 year rust protection",
+      "Vinyl coating available in black, green, brown",
+      "Commercial grade options for businesses",
+      "Privacy slats available",
+      "Ideal for large properties"
     ]
   },
-  "styles": {
-    "headline": "Chain Link Options We Install",
-    "subheadline": "Available in heights from 4ft to 8ft. Silver galvanized or vinyl-coated colors.",
-    "items": [
-      {
-        "name": "Galvanized",
-        "description": "Classic silver chain link. Most affordable option with excellent durability.",
-        "image": "/images/gallery/chainlink-1.jpg"
-      },
-      {
-        "name": "Vinyl Coated",
-        "description": "Black or green coating for better appearance. Blends into landscape.",
-        "image": "/images/gallery/chainlink-2.jpg"
-      }
-    ]
+  "specs": {
+    "lifespan": "15-35 years",
+    "maintenance": "None required",
+    "warranty": "15-35 year manufacturer warranty",
+    "heights": ["3 ft", "4 ft", "5 ft", "6 ft", "8 ft"],
+    "material": "Galvanized steel or vinyl-coated",
+    "gauges": ["11 gauge (residential)", "9 gauge (commercial)"]
   },
-  "comparison": {
-    "headline": "Chain Link Options: Good / Better / Best",
-    "subheadline": "All galvanized steel for rust resistance",
-    "tiers": [
-      {
-        "name": "Good",
-        "subtitle": "Economy Galvanized",
-        "description": "4ft galvanized chain link with standard gauge mesh. Terminal posts and basic hardware. 20+ year lifespan.",
-        "image": "/images/gallery/chainlink-1.jpg"
-      },
-      {
-        "name": "Better",
-        "subtitle": "Standard Galvanized",
-        "description": "4-6ft galvanized with heavy gauge mesh. Tension wire, top rail, and heavy-duty hardware included.",
-        "image": "/images/gallery/chainlink-2.jpg",
-        "featured": true
-      },
-      {
-        "name": "Best",
-        "subtitle": "Vinyl Coated",
-        "description": "Black or green vinyl-coated chain link. Commercial grade mesh with premium gate package. Privacy slats available.",
-        "image": "/images/gallery/chainlink-detail.jpg"
-      }
-    ]
-  },
-  "cta": {
-    "headline": "Ready for Your Chain Link Fence?",
-    "description": "Get a free quote for chain link fence installation. Most affordable fencing option available.",
-    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
-    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
-  }
+  "options": [
+    {
+      "name": "Galvanized",
+      "description": "Standard zinc-coated steel. Silver appearance. Most affordable option with excellent durability.",
+      "lifespan": "15-20 years"
+    },
+    {
+      "name": "Vinyl Coated",
+      "description": "PVC coating over galvanized steel. Available in black, green, brown. Premium appearance and longevity.",
+      "lifespan": "25-35 years"
+    },
+    {
+      "name": "Commercial Grade",
+      "description": "Heavier 9-gauge wire for maximum security. Top and bottom rail options. Barbed wire available.",
+      "lifespan": "30+ years"
+    }
+  ],
+  "styles": [
+    {
+      "name": "Standard Residential",
+      "description": "11-gauge galvanized mesh with top rail. Most common for backyards and pet containment.",
+      "image": "/images/gallery/chainlink-1.jpg"
+    },
+    {
+      "name": "Vinyl Coated",
+      "description": "Black or green coating blends with landscaping. Premium appearance and rust protection.",
+      "image": "/images/gallery/chainlink-detail.jpg"
+    },
+    {
+      "name": "Privacy Slats",
+      "description": "Vertical slats woven through mesh add privacy and wind protection. Available in multiple colors.",
+      "image": "/images/gallery/chainlink-2.jpg"
+    }
+  ],
+  "gallery": [
+    { "src": "/images/gallery/chainlink-1.jpg", "alt": "Chain link fence", "caption": "Residential Installation" },
+    { "src": "/images/gallery/chainlink-2.jpg", "alt": "Chain link with gate", "caption": "Walk Gate" },
+    { "src": "/images/gallery/chainlink-detail.jpg", "alt": "Chain link detail", "caption": "Quality Construction" }
+  ],
+  "faqs": [
+    {
+      "question": "How long does galvanized chain link last?",
+      "answer": "Standard galvanized chain link lasts 15-20 years. Vinyl-coated chain link extends this to 25-35 years due to the additional protective layer over the galvanization."
+    },
+    {
+      "question": "Is chain link good for dogs?",
+      "answer": "Yes, chain link is excellent for pet containment. The woven mesh prevents dogs from squeezing through, and we can add dig guards at the base for escape artists."
+    },
+    {
+      "question": "Can I add privacy to chain link fence?",
+      "answer": "Yes! We offer privacy slats that weave through the mesh, providing privacy and wind reduction. Available in tan, green, black, and other colors."
+    },
+    {
+      "question": "What gauge should I choose?",
+      "answer": "11-gauge is standard for residential use and handles normal wear well. 9-gauge (commercial grade) is recommended for high-traffic areas, large dogs, or security applications."
+    }
+  ]
 }

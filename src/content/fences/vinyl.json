@@ -1,88 +1,99 @@
 {
-  "meta": {
-    "title": "Vinyl Fence Installation Toledo OH | Maintenance-Free Privacy | Ghareeb Fencing",
-    "description": "Premium vinyl fence installation in Toledo OH. Homeland Vinyl with lifetime warranty, zero maintenance, won't rot or fade. Privacy, semi-privacy, and decorative styles. Free quotes."
+  "id": "vinyl",
+  "slug": "vinyl",
+  "name": "Vinyl Privacy Fence",
+  "shortName": "Vinyl",
+  "icon": "🏠",
+  "tagline": "Zero Maintenance Privacy",
+  "heroTitle": "Vinyl Fence Installation",
+  "heroSubtitle": "Lifetime warranty. Zero maintenance. Never paint, stain, or seal again. The ultimate low-maintenance privacy solution.",
+  "seo": {
+    "title": "Vinyl Fence Installation Toledo OH | Homeland Premium Vinyl | Ghareeb Fencing",
+    "description": "Premium Homeland vinyl fence installation in Toledo OH. Lifetime warranty, zero maintenance, won't rot, warp, or fade. Free quotes. Call (419) 902-8257.",
+    "keywords": ["vinyl fence Toledo", "vinyl privacy fence Ohio", "maintenance free fence Toledo", "Homeland vinyl fence"]
   },
-  "hero": {
-    "badge": "Zero Maintenance",
-    "headline": "Vinyl Privacy Fence Installation",
-    "description": "Premium Homeland Vinyl fencing with lifetime warranty. Never paint, stain, or seal again. Won't rot, warp, or fade. The ultimate maintenance-free privacy solution.",
-    "image": "/images/gallery/vinyl-hero.jpg"
-  },
-  "intro": {
-    "headline": "Why Choose Vinyl Fencing?",
-    "content": "Vinyl fencing is the ultimate low-maintenance choice for homeowners who want beautiful privacy without the work. Unlike wood, vinyl won't rot, warp, split, or require painting. It stays looking new for decades with just occasional cleaning.",
-    "content2": "We exclusively install Homeland Premium Vinyl - a top-tier American-made product with a lifetime limited warranty that's transferable to future homeowners.",
-    "benefits": [
+  "overview": {
+    "title": "Why Choose Vinyl?",
+    "content": "Our Homeland Premium vinyl fencing is the ultimate set-it-and-forget-it solution for homeowners who want beautiful privacy without ongoing maintenance. Unlike wood that requires regular staining and sealing, vinyl maintains its appearance for decades with nothing more than occasional cleaning.",
+    "additionalContent": "Homeland vinyl is engineered with UV inhibitors that prevent fading and yellowing, even after years of Ohio sun and weather exposure. The material won't rot, warp, crack, or splinter—and it comes with a transferable lifetime warranty.",
+    "features": [
+      "Lifetime manufacturer warranty (transferable)",
       "Zero maintenance - never paint, stain, or seal",
-      "Won't rot, warp, or splinter like wood",
-      "UV-resistant - won't yellow or fade",
-      "Lifetime warranty included",
-      "Multiple colors - white, tan, gray available"
-    ],
-    "image": "/images/gallery/vinyl-privacy-white.jpg"
-  },
-  "gallery": {
-    "headline": "Vinyl Fence Installation Gallery",
-    "images": [
-      { "src": "/images/gallery/vinyl-privacy-white.jpg", "alt": "White vinyl privacy fence" },
-      { "src": "/images/gallery/vinyl-privacy-tan.jpg", "alt": "Tan vinyl privacy fence" },
-      { "src": "/images/gallery/vinyl-privacy-yard.jpg", "alt": "Vinyl privacy fence backyard" },
-      { "src": "/images/gallery/vinyl-privacy-detail.jpg", "alt": "Vinyl fence detail" },
-      { "src": "/images/gallery/vinyl-brown-gate.jpg", "alt": "Vinyl fence with gate" },
-      { "src": "/images/gallery/vinyl-hero.jpg", "alt": "Homeland vinyl fence installation" }
+      "UV-resistant - won't fade, yellow, or chalk",
+      "Impact-resistant - withstands Ohio winters",
+      "Available in white, tan, gray, and woodgrain textures"
     ]
   },
-  "styles": {
-    "headline": "Vinyl Fence Styles We Install",
-    "subheadline": "All Homeland Premium Vinyl products. Available in white, tan, and gray.",
-    "items": [
+  "specs": {
+    "lifespan": "30+ years",
+    "maintenance": "None required",
+    "warranty": "Lifetime (transferable)",
+    "heights": ["4 ft", "5 ft", "6 ft", "8 ft"],
+    "material": "Homeland Premium Vinyl",
+    "colors": ["White", "Tan/Almond", "Gray", "Woodgrain"]
+  },
+  "styles": [
+    {
+      "name": "Solid Privacy",
+      "description": "Complete privacy with interlocking tongue-and-groove panels. Our most popular vinyl style for backyard enclosures.",
+      "image": "/images/gallery/vinyl-white-privacy.jpg"
+    },
+    {
+      "name": "Privacy with Lattice Top",
+      "description": "Solid privacy panels topped with decorative lattice for an elegant look that allows airflow.",
+      "image": "/images/gallery/vinyl-privacy-main.jpg"
+    },
+    {
+      "name": "Shadowbox",
+      "description": "Alternating panels on each side for a beautiful appearance from both directions while allowing airflow.",
+      "image": "/images/gallery/vinyl-combo-yard.jpg"
+    }
+  ],
+  "colors": [
+    { "name": "White", "description": "Classic bright white that stays clean and bright for decades", "popular": true },
+    { "name": "Tan/Almond", "description": "Warm earth tone that complements brick and stone exteriors", "popular": true },
+    { "name": "Gray", "description": "Modern neutral that pairs well with contemporary homes", "popular": false },
+    { "name": "Woodgrain", "description": "Realistic wood texture without the maintenance", "popular": false }
+  ],
+  "maintenance": {
+    "title": "Vinyl Fence Care",
+    "sections": [
       {
-        "name": "Solid Privacy",
-        "description": "Complete privacy with no gaps. 6ft height standard. Our most popular vinyl style.",
-        "image": "/images/gallery/vinyl-privacy-white.jpg"
+        "title": "Cleaning",
+        "content": "Rinse with garden hose to remove dirt. For stubborn stains, use mild soap and water with a soft brush. Power washing OK on low setting."
       },
       {
-        "name": "Privacy with Lattice Top",
-        "description": "Decorative lattice accent adds elegance. Great for gardens and traditional homes.",
-        "image": "/images/gallery/vinyl-privacy-tan.jpg"
+        "title": "Inspection",
+        "content": "Check gate hardware annually and adjust as needed. Our 3-year workmanship warranty covers installation issues."
       },
       {
-        "name": "Ranch Rail",
-        "description": "Open style for property boundaries. 2, 3, or 4-rail options. Perfect for acreage.",
-        "image": "/images/gallery/vinyl-ranch-white.jpg"
+        "title": "That's It!",
+        "content": "No painting, staining, sealing, or treating required—ever. Homeland vinyl is engineered to look great for decades."
       }
     ]
   },
-  "comparison": {
-    "headline": "Vinyl Fence Options: Good / Better / Best",
-    "subheadline": "All options include lifetime material warranty",
-    "tiers": [
-      {
-        "name": "Good",
-        "subtitle": "Standard Privacy",
-        "description": "6ft solid privacy panels in white. Standard thickness vinyl with lifetime warranty. Great value.",
-        "image": "/images/gallery/vinyl-privacy-white.jpg"
-      },
-      {
-        "name": "Better",
-        "subtitle": "Premium Privacy",
-        "description": "Heavy-duty panels in white, tan, or gray. Aluminum-reinforced posts. Wind-rated to 75+ mph.",
-        "image": "/images/gallery/vinyl-tan-privacy.jpg",
-        "featured": true
-      },
-      {
-        "name": "Best",
-        "subtitle": "Premium with Lattice",
-        "description": "Heavy-duty panels with elegant lattice accent. Multiple color combinations. Custom gate options.",
-        "image": "/images/gallery/vinyl-combo-yard.jpg"
-      }
-    ]
-  },
-  "cta": {
-    "headline": "Ready for Your Maintenance-Free Fence?",
-    "description": "Get a free quote for vinyl fence installation. We'll help you choose the perfect style and color for your property.",
-    "primaryButton": { "text": "Get Free Quote", "href": "/quote/" },
-    "secondaryButton": { "text": "Call (419) 902-8257", "href": "tel:4199028257" }
-  }
+  "gallery": [
+    { "src": "/images/gallery/vinyl-white-privacy.jpg", "alt": "White vinyl privacy fence", "caption": "Classic White Privacy" },
+    { "src": "/images/gallery/vinyl-tan-privacy.jpg", "alt": "Tan vinyl fence", "caption": "Tan/Almond Privacy" },
+    { "src": "/images/gallery/vinyl-privacy-main.jpg", "alt": "Vinyl fence installation", "caption": "Lattice Top Design" },
+    { "src": "/images/gallery/vinyl-hero.jpg", "alt": "Vinyl fence yard", "caption": "Complete Installation" }
+  ],
+  "faqs": [
+    {
+      "question": "Will vinyl fence yellow or fade over time?",
+      "answer": "No. Homeland Premium vinyl is manufactured with titanium dioxide UV stabilizers that prevent yellowing, fading, and chalking. The color is solid throughout the material, not just on the surface."
+    },
+    {
+      "question": "Can vinyl fences withstand Ohio winters?",
+      "answer": "Yes. Our vinyl fencing is engineered with impact modifiers that maintain flexibility even in sub-zero temperatures. The material won't crack or become brittle in cold weather."
+    },
+    {
+      "question": "How do I clean my vinyl fence?",
+      "answer": "Simply spray with a garden hose to remove dirt and debris. For tougher stains, use mild dish soap and water with a soft brush. You can also use a power washer on a low setting."
+    },
+    {
+      "question": "Is the warranty transferable if I sell my home?",
+      "answer": "Yes! Homeland's lifetime warranty transfers to new homeowners, which can be a selling point when you list your property."
+    }
+  ]
 }

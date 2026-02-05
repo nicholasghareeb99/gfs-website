@@ -1,0 +1,10 @@
+# Robots.txt for Ghareeb Fencing Solutions
+
+User-agent: *
+Allow: /
+
+# Disallow admin area
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://ghareebfencing.com/sitemap.xml
