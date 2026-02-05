@@ -53,17 +53,6 @@
   "analytics": {
     "googleAnalyticsId": "G-30R7SKG69Y"
   },
-  "firebase": {
-    "apiKey": "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
-    "authDomain": "ghareeb-fencing.firebaseapp.com",
-    "projectId": "ghareeb-fencing",
-    "storageBucket": "ghareeb-fencing.firebasestorage.app",
-    "messagingSenderId": "187837905206",
-    "appId": "1:187837905206:web:1e9a9bc33f745cbeeddb97"
-  },
-  "googleMaps": {
-    "apiKey": "AIzaSyBMPKBdKINEuAHCvCCMQDWQ9Y8PmUdHMNU"
-  },
   "whyChooseUs": [
     {
       "title": "Owner Supervised",
@@ -87,9 +76,25 @@
     }
   ],
   "process": [
-    { "step": 1, "title": "Get Your Quote", "description": "Use our instant quote tool or schedule a free on-site consultation" },
-    { "step": 2, "title": "Design Your Fence", "description": "Choose your style, height, and any custom features you need" },
-    { "step": 3, "title": "We Install", "description": "Our expert crew installs your fence, typically in 1-2 days" },
-    { "step": 4, "title": "Enjoy Your Yard", "description": "Love your new fence with our 3-year warranty for peace of mind" }
+    {
+      "step": 1,
+      "title": "Get Your Quote",
+      "description": "Use our instant quote tool or schedule a free on-site consultation"
+    },
+    {
+      "step": 2,
+      "title": "Design Your Fence",
+      "description": "Choose your style, height, and any custom features you need"
+    },
+    {
+      "step": 3,
+      "title": "We Install",
+      "description": "Our expert crew installs your fence, typically in 1-2 days"
+    },
+    {
+      "step": 4,
+      "title": "Enjoy Your Yard",
+      "description": "Love your new fence with our 3-year warranty for peace of mind"
+    }
   ]
 }

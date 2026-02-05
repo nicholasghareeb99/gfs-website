@@ -1,5 +1,13 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
 ---
 
 <BaseLayout title="Admin Login" description="Admin login for site editing" noIndex={true}>
@@ -41,9 +49,9 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-<script is:inline>
+<script is:inline define:vars={{ firebaseConfig }}>
 (function() {
-  const cfg = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+  const cfg = firebaseConfig;
   if (!firebase.apps.length) firebase.initializeApp(cfg);
   const auth = firebase.auth();
 
@@ -51,7 +59,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
     if (u) {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('logged-in').style.display = 'block';
-      document.cookie = 'gfs_admin=1;path=/;max-age=86400';
+      document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
     }
   });
 
@@ -68,7 +76,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
     try {
       await auth.signInWithEmailAndPassword(email, pass);
-      document.cookie = 'gfs_admin=1;path=/;max-age=86400';
+      document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('logged-in').style.display = 'block';
     } catch (err) {
@@ -85,7 +93,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
   document.getElementById('logout-btn')?.addEventListener('click', () => {
     auth.signOut();
-    document.cookie = 'gfs_admin=;path=/;max-age=0';
+    document.cookie = 'gfs_admin=;path=/;max-age=0;SameSite=Strict;Secure';
     document.getElementById('login-form').style.display = 'block';
     document.getElementById('logged-in').style.display = 'none';
   });

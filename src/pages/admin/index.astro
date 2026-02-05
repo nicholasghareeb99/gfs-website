@@ -2,6 +2,14 @@
 import site from '../../content/site.json';
 import fences from '../../content/fences.json';
 import reviews from '../../content/reviews.json';
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -222,12 +230,14 @@ import reviews from '../../content/reviews.json';
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
 
-    <script is:inline define:vars={{ firebaseConfig: site.firebase, defaultFences: fences.fenceTypes, defaultReviews: reviews }}>
+    <script is:inline define:vars={{ firebaseConfig, defaultFences: fences.fenceTypes, defaultReviews: reviews }}>
     firebase.initializeApp(firebaseConfig);
     const auth=firebase.auth(), db=firebase.firestore(), storage=firebase.storage();
     const toast=document.getElementById('toast');
+    // Sanitize strings before innerHTML insertion (strips dangerous tags)
+    function san(s){return s?String(s).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';}
     function showToast(m,t='info'){toast.textContent=m;toast.className='toast active '+t;setTimeout(()=>toast.classList.remove('active'),3000);}
-    function confirmAction(title,msg){return new Promise(r=>{const o=document.createElement('div');o.className='confirm-overlay';o.innerHTML='<div class="confirm-box"><h4>'+title+'</h4><p>'+msg+'</p><div class="confirm-actions"><button class="btn btn-sm btn-outline" id="cn">Cancel</button><button class="btn btn-sm btn-danger" id="cy">Confirm</button></div></div>';document.body.appendChild(o);o.querySelector('#cy').onclick=()=>{document.body.removeChild(o);r(true);};o.querySelector('#cn').onclick=()=>{document.body.removeChild(o);r(false);}});}
+    function confirmAction(title,msg){return new Promise(r=>{const o=document.createElement('div');o.className='confirm-overlay';o.innerHTML='<div class="confirm-box"><h4>'+san(title)+'</h4><p>'+san(msg)+'</p><div class="confirm-actions"><button class="btn btn-sm btn-outline" id="cn">Cancel</button><button class="btn btn-sm btn-danger" id="cy">Confirm</button></div></div>';document.body.appendChild(o);o.querySelector('#cy').onclick=()=>{document.body.removeChild(o);r(true);};o.querySelector('#cn').onclick=()=>{document.body.removeChild(o);r(false);}});}
     function slugify(t){return t.toLowerCase().trim().replace(/[^\w\s-]/g,'').replace(/[\s_]+/g,'-').replace(/-+/g,'-').replace(/^-+|-+$/g,'');}
     const titles={overview:'Dashboard',fences:'Fence Types',reviews:'Reviews',gallery:'Gallery','why-us':'Why Choose Us',pricing:'Pricing','site-settings':'Site Settings'};
     document.querySelectorAll('.nav-link,.quick-nav').forEach(l=>l.addEventListener('click',()=>{const p=l.dataset.panel;document.querySelectorAll('.nav-link').forEach(x=>x.classList.remove('active'));document.querySelector('.nav-link[data-panel="'+p+'"]')?.classList.add('active');document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));document.getElementById('panel-'+p).classList.add('active');document.getElementById('panel-title').textContent=titles[p]||'Dashboard';document.getElementById('sidebar').classList.remove('open');const L={fences:loadFences,reviews:loadReviews,gallery:loadGallery,'why-us':loadWhyUs,pricing:loadPricing,'site-settings':loadSiteSettings};if(L[p])L[p]();}));

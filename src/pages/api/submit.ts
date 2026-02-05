@@ -1,5 +1,6 @@
 /**
  * Server-side API for form submissions
+ * Security: rate limiting, CSRF, input validation, HTML escaping
  * Writes to Firestore via REST + API key
  * Data shapes match Executive App's expected format for websiteLeads
  * Writes email doc to 'mail' collection for Firebase Trigger Email extension
@@ -7,9 +8,42 @@
 
 import type { APIRoute } from 'astro';
 
-const PROJECT_ID = 'ghareeb-fencing';
-const API_KEY = 'AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE';
+const PROJECT_ID = import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || 'ghareeb-fencing';
+const API_KEY = import.meta.env.PUBLIC_FIREBASE_API_KEY;
 const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+
+// ============================================================
+// RATE LIMITING (in-memory, per IP — resets on cold start)
+// ============================================================
+const rateMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_WINDOW = 60_000;  // 1 minute window
+const RATE_LIMIT = 5;        // max 5 submissions per minute per IP
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateMap.set(ip, { count: 1, resetAt: now + RATE_WINDOW });
+    return false;
+  }
+  entry.count++;
+  if (entry.count > RATE_LIMIT) return true;
+  return false;
+}
+
+// Cleanup stale entries every 5 minutes
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of rateMap) {
+    if (now > entry.resetAt) rateMap.delete(ip);
+  }
+}, 300_000);
+
+// ============================================================
+// VALIDATION HELPERS
+// ============================================================
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const PHONE_RE = /^[\d\s()+-]{7,20}$/;
 
 // Notification email recipient
 const NOTIFY_EMAIL = 'nicholasghareeb99@gmail.com';
@@ -57,6 +91,16 @@ function clean(val: any, max = 500): string {
   return val ? String(val).trim().slice(0, max) : '';
 }
 
+// Escape HTML entities to prevent injection in email templates
+function esc(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // Email wrapper template
 function emailWrap(title: string, icon: string, body: string): string {
   return `
@@ -84,18 +128,42 @@ function table(rows: string): string {
   return `<table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden;">${rows}</table>`;
 }
 
-function linkPhone(p: string): string { return p ? `<a href="tel:${p}" style="color:#3b82f6;text-decoration:none;">${p}</a>` : '—'; }
-function linkEmail(e: string): string { return e ? `<a href="mailto:${e}" style="color:#3b82f6;text-decoration:none;">${e}</a>` : '—'; }
+function linkPhone(p: string): string { return p ? `<a href="tel:${esc(p)}" style="color:#3b82f6;text-decoration:none;">${esc(p)}</a>` : '—'; }
+function linkEmail(e: string): string { return e ? `<a href="mailto:${esc(e)}" style="color:#3b82f6;text-decoration:none;">${esc(e)}</a>` : '—'; }
 
 export const POST: APIRoute = async ({ request }) => {
+  const headers = { 'Content-Type': 'application/json' };
+
   try {
+    // ── CSRF: Check origin header ──
+    const origin = request.headers.get('origin') || '';
+    const host = request.headers.get('host') || '';
+    if (origin && !origin.includes(host) && !origin.includes('ghareebfencing.com') && !origin.includes('localhost')) {
+      console.error(`CSRF blocked: origin=${origin} host=${host}`);
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers });
+    }
+
+    // ── Rate limiting ──
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+             || request.headers.get('x-nf-client-connection-ip')
+             || 'unknown';
+    if (isRateLimited(ip)) {
+      console.error(`Rate limited: ${ip}`);
+      return new Response(JSON.stringify({ error: 'Too many requests. Please wait a minute.' }), { status: 429, headers });
+    }
+
     const body = await request.json();
     const { type } = body;
 
+    // ── Honeypot: reject if hidden field filled ──
+    // These fields are invisible to humans but bots auto-fill them
+    if (body.website || body.company_name) {
+      // Silently accept but don't process — bot doesn't know it failed
+      return new Response(JSON.stringify({ success: true, message: 'Submission received' }), { status: 200, headers });
+    }
+
     if (!type) {
-      return new Response(JSON.stringify({ error: 'Missing submission type' }), {
-        status: 400, headers: { 'Content-Type': 'application/json' }
-      });
+      return new Response(JSON.stringify({ error: 'Missing submission type' }), { status: 400, headers });
     }
 
     let success = false;
@@ -117,9 +185,13 @@ export const POST: APIRoute = async ({ request }) => {
         const address = clean(body.address, 500);
 
         if (!name || !phone) {
-          return new Response(JSON.stringify({ error: 'Name and phone required' }), {
-            status: 400, headers: { 'Content-Type': 'application/json' }
-          });
+          return new Response(JSON.stringify({ error: 'Name and phone required' }), { status: 400, headers });
+        }
+        if (!PHONE_RE.test(phone)) {
+          return new Response(JSON.stringify({ error: 'Invalid phone number' }), { status: 400, headers });
+        }
+        if (email && !EMAIL_RE.test(email)) {
+          return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
         // Write to websiteLeads — matches exec app field expectations
@@ -134,14 +206,14 @@ export const POST: APIRoute = async ({ request }) => {
           status: 'new'
         });
 
-        emailSubject = `New Contact Form: ${name}`;
+        emailSubject = `New Contact Form: ${esc(name)}`;
         emailHtml = emailWrap('New Contact Submission', '📩', `
           ${table(
-            row('Name', name) +
+            row('Name', esc(name)) +
             row('Phone', linkPhone(phone), true) +
             row('Email', linkEmail(email)) +
-            row('Fence Interest', fenceType || '—', true) +
-            row('Message', message || '—')
+            row('Fence Interest', esc(fenceType) || '—', true) +
+            row('Message', esc(message) || '—')
           )}
         `);
         break;
@@ -164,9 +236,13 @@ export const POST: APIRoute = async ({ request }) => {
         const notes = clean(body.notes, 2000);
 
         if (!name || !phone || !date || !time) {
-          return new Response(JSON.stringify({ error: 'Name, phone, date, and time required' }), {
-            status: 400, headers: { 'Content-Type': 'application/json' }
-          });
+          return new Response(JSON.stringify({ error: 'Name, phone, date, and time required' }), { status: 400, headers });
+        }
+        if (!PHONE_RE.test(phone)) {
+          return new Response(JSON.stringify({ error: 'Invalid phone number' }), { status: 400, headers });
+        }
+        if (email && !EMAIL_RE.test(email)) {
+          return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
         // Write to bookings collection (matches existing Firebase convention)
@@ -194,19 +270,19 @@ export const POST: APIRoute = async ({ request }) => {
           });
         }
 
-        emailSubject = `New Booking: ${name} — ${date} at ${time}`;
+        emailSubject = `New Booking: ${esc(name)} — ${esc(date)} at ${esc(time)}`;
         emailHtml = emailWrap('New Appointment Booking', '📅', `
           <div style="background:#f0fdf4;border:2px solid #10b981;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center;">
-            <div style="font-size:24px;font-weight:700;color:#059669;">📅 ${date}</div>
-            <div style="font-size:18px;color:#065f46;margin-top:4px;">at ${time}</div>
+            <div style="font-size:24px;font-weight:700;color:#059669;">📅 ${esc(date)}</div>
+            <div style="font-size:18px;color:#065f46;margin-top:4px;">at ${esc(time)}</div>
           </div>
           ${table(
-            row('Name', name) +
+            row('Name', esc(name)) +
             row('Phone', linkPhone(phone), true) +
             row('Email', linkEmail(email)) +
-            row('Address', address, true) +
-            row('Project', project || '—') +
-            row('Notes', notes || '—', true)
+            row('Address', esc(address), true) +
+            row('Project', esc(project) || '—') +
+            row('Notes', esc(notes) || '—', true)
           )}
         `);
         break;
@@ -234,9 +310,13 @@ export const POST: APIRoute = async ({ request }) => {
         const estimatedRange = clean(body.estimatedRange, 50);
 
         if (!name || !phone) {
-          return new Response(JSON.stringify({ error: 'Name and phone required' }), {
-            status: 400, headers: { 'Content-Type': 'application/json' }
-          });
+          return new Response(JSON.stringify({ error: 'Name and phone required' }), { status: 400, headers });
+        }
+        if (!PHONE_RE.test(phone)) {
+          return new Response(JSON.stringify({ error: 'Invalid phone number' }), { status: 400, headers });
+        }
+        if (email && !EMAIL_RE.test(email)) {
+          return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
         // Write to websiteLeads — exec app reads ballparkQuote object
@@ -261,29 +341,29 @@ export const POST: APIRoute = async ({ request }) => {
           status: 'new'
         });
 
-        emailSubject = `New Ballpark Lead: ${name} — ${fenceType}`;
+        emailSubject = `New Ballpark Lead: ${esc(name)} — ${esc(fenceType)}`;
         emailHtml = emailWrap('New Ballpark Calculator Lead', '💰', `
           <div style="background:#eff6ff;border:2px solid #3b82f6;border-radius:8px;padding:16px;margin-bottom:20px;text-align:center;">
             <div style="font-size:14px;color:#1e40af;text-transform:uppercase;letter-spacing:1px;">Estimated Range</div>
-            <div style="font-size:28px;font-weight:700;color:#1e3a5f;margin-top:4px;">${estimatedRange}</div>
+            <div style="font-size:28px;font-weight:700;color:#1e3a5f;margin-top:4px;">${esc(estimatedRange)}</div>
           </div>
           <h3 style="color:#1e3a5f;margin:20px 0 10px;font-size:15px;">👤 Contact Info</h3>
           ${table(
-            row('Name', name) +
+            row('Name', esc(name)) +
             row('Phone', linkPhone(phone), true) +
             row('Email', linkEmail(email)) +
-            row('Address', address, true)
+            row('Address', esc(address), true)
           )}
           <h3 style="color:#1e3a5f;margin:20px 0 10px;font-size:15px;">🏗️ Quote Details</h3>
           ${table(
-            row('Fence Type', fenceType) +
+            row('Fence Type', esc(fenceType)) +
             row('Height', fenceHeight + ' ft', true) +
             row('Length', fenceLength ? fenceLength + ' ft' : '—') +
             row('Walk Gates', String(singleGates), true) +
             row('Drive Gates', String(doubleGates)) +
-            row('Estimate', `<strong style="color:#059669;font-size:16px;">${estimatedRange}</strong>`, true)
+            row('Estimate', `<strong style="color:#059669;font-size:16px;">${esc(estimatedRange)}</strong>`, true)
           )}
-          ${notes ? `<p style="margin:16px 0 0;color:#475569;"><strong>Notes:</strong> ${notes}</p>` : ''}
+          ${notes ? `<p style="margin:16px 0 0;color:#475569;"><strong>Notes:</strong> ${esc(notes)}</p>` : ''}
         `);
         break;
       }
@@ -313,7 +393,7 @@ export const POST: APIRoute = async ({ request }) => {
 
   } catch (err: any) {
     console.error('Submit API error:', err);
-    return new Response(JSON.stringify({ error: err.message || 'Server error' }), {
+    return new Response(JSON.stringify({ error: 'Server error' }), {
       status: 500, headers: { 'Content-Type': 'application/json' }
     });
   }

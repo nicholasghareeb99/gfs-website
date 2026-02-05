@@ -3,7 +3,7 @@
  * No SDK needed — reads public Firestore data via REST
  */
 
-const PROJECT_ID = 'ghareeb-fencing';
+const PROJECT_ID = import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || 'ghareeb-fencing';
 const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 function parseValue(v) {

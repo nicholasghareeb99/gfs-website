@@ -23,8 +23,7 @@
     "@astrojs/netlify": "^6.6.4",
     "@astrojs/sitemap": "^3.7.0",
     "astro": "^5.17.1",
-    "firebase": "^12.8.0",
-    "firebase-admin": "^13.6.1"
+    "firebase": "^12.8.0"
   },
   "main": "index.js"
 }

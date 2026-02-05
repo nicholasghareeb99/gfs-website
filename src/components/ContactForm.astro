@@ -5,6 +5,10 @@ const { contactForm } = contactData;
 ---
 
 <form id="contact-form" class="contact-form" novalidate>
+  <!-- Honeypot: hidden from humans, bots fill it -->
+  <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
+    <input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" />
+  </div>
   <div class="contact-form__grid">
     {contactForm.fields.map((field) => (
       <div class={`contact-form__field contact-form__field--${field.width}`}>
@@ -263,7 +267,7 @@ const { contactForm } = contactData;
           body: JSON.stringify({
             type: 'contact',
             ...data,
-            url: window.location.href
+            website: document.getElementById('hp-website')?.value || ''
           })
         });
         

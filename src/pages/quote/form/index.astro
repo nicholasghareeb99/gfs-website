@@ -2,6 +2,14 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
 ---
 
 <BaseLayout 
@@ -24,6 +32,7 @@ const site = await getSiteSettings();
             <div class="form-grid">
                 <div class="form-main">
                     <form id="quote-form" novalidate>
+                        <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
                         <!-- Contact Info -->
                         <div class="form-card">
                             <h3>📋 Your Information</h3>
@@ -159,15 +168,19 @@ const site = await getSiteSettings();
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script is:inline>
+<script is:inline define:vars={{ firebaseConfig }}>
 (function() {
-    const cfg = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+    const cfg = firebaseConfig;
     if (!firebase.apps.length) firebase.initializeApp(cfg);
     const db = firebase.firestore();
     const $ = id => document.getElementById(id);
 
     $('quote-form').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        // Honeypot check
+        if ($('hp-website')?.value) return;
+
         const name = $('q-name').value.trim();
         const phone = $('q-phone').value.trim();
         const email = $('q-email').value.trim();
@@ -176,6 +189,14 @@ const site = await getSiteSettings();
 
         if (!name || !phone || !email || !address || !fenceType) {
             alert('Please fill in all required fields.');
+            return;
+        }
+        if (!/^[\d\s()+-]{7,20}$/.test(phone)) {
+            alert('Please enter a valid phone number.');
+            return;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+            alert('Please enter a valid email address.');
             return;
         }
 

@@ -1,3 +1,13 @@
+---
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
+---
 <!-- Edit Mode: Only loads Firebase SDK when needed, activates for authenticated admins -->
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
@@ -154,10 +164,10 @@
   }
 </style>
 
-<script is:inline>
+<script is:inline define:vars={{ firebaseConfig }}>
 (function() {
-  // Firebase config
-  const FB_CFG = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+  // Firebase config from environment variables
+  const FB_CFG = firebaseConfig;
 
   let auth, db, storage, user = null;
   let editActive = false;
@@ -186,10 +196,10 @@
     auth.onAuthStateChanged(u => {
       user = u;
       if (u) {
-        document.cookie = 'gfs_admin=1;path=/;max-age=86400';
+        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
         showToolbar();
       } else {
-        document.cookie = 'gfs_admin=;path=/;max-age=0';
+        document.cookie = 'gfs_admin=;path=/;max-age=0;SameSite=Strict;Secure';
         hideToolbar();
       }
     });
@@ -422,6 +432,8 @@
   function handleFileSelect(e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (!file.type.match(/^image\/(jpeg|png|webp|gif|svg\+xml)$/)) { alert('Only image files allowed'); e.target.value = ''; return; }
+    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); e.target.value = ''; return; }
     const reader = new FileReader();
     reader.onload = (ev) => {
       document.getElementById('et-preview-img').src = ev.target.result;
@@ -439,7 +451,10 @@
     if (fileInput.files[0] && storage) {
       // Upload to Firebase Storage
       const file = fileInput.files[0];
-      const path = `website-images/${Date.now()}-${file.name}`;
+      if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); return; }
+      if (!file.type.startsWith('image/')) { alert('Only image files allowed'); return; }
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `website-images/${Date.now()}-${safeName}`;
       const applyBtn = document.getElementById('et-image-apply');
       applyBtn.innerHTML = '⏳ Uploading...'; applyBtn.disabled = true;
       try {
@@ -505,6 +520,7 @@
         e.preventDefault(); zone.style.borderColor = '#d1d5db';
         const file = e.dataTransfer.files[0];
         if (file && file.type.startsWith('image/')) {
+          if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); return; }
           const dt = new DataTransfer(); dt.items.add(file);
           document.getElementById('et-file-input').files = dt.files;
           const reader = new FileReader();

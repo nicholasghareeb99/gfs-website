@@ -4,6 +4,14 @@ import { getSiteSettings, getAvailableSlots } from '../../../lib/firestore.js';
 
 const site = await getSiteSettings();
 const slots = await getAvailableSlots();
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
 ---
 
 <BaseLayout 
@@ -66,6 +74,7 @@ const slots = await getAvailableSlots();
                             <div><h3>Your Information</h3><p>Tell us about you and your project</p></div>
                         </div>
                         <form id="booking-form" novalidate>
+                            <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
                             <div class="form-row">
                                 <div class="form-group"><label for="book-name">Full Name *</label><input type="text" id="book-name" required placeholder="John Smith" /></div>
                                 <div class="form-group"><label for="book-phone">Phone *</label><input type="tel" id="book-phone" required placeholder="(419) 555-1234" /></div>
@@ -144,9 +153,9 @@ const slots = await getAvailableSlots();
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script is:inline>
+<script is:inline define:vars={{ firebaseConfig }}>
 (function() {
-    const cfg = {apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+    const cfg = firebaseConfig;
     if (!firebase.apps.length) firebase.initializeApp(cfg);
     const db = firebase.firestore();
 
@@ -305,7 +314,8 @@ const slots = await getAvailableSlots();
                     project: $('book-project').value,
                     notes: $('book-notes').value.trim(),
                     date: selectedDate,
-                    time: selectedTime
+                    time: selectedTime,
+                    website: $('hp-website')?.value || ''
                 })
             });
 

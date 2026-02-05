@@ -2,6 +2,15 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
+const firebaseConfig = {
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+};
+const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
 ---
 
 <BaseLayout 
@@ -104,6 +113,7 @@ const site = await getSiteSettings();
                             <div><h3>See your instant quote</h3><p>Enter your info below — your ballpark price appears instantly</p></div>
                         </div>
                         <div id="lead-wall-form">
+                            <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
                             <div class="form-row">
                                 <div class="form-group"><label for="lead-name">Full Name *</label><input type="text" id="lead-name" required placeholder="John Smith" /></div>
                                 <div class="form-group"><label for="lead-phone">Phone *</label><input type="tel" id="lead-phone" required placeholder="(419) 555-1234" /></div>
@@ -192,7 +202,7 @@ const site = await getSiteSettings();
     </section>
 </BaseLayout>
 
-<script is:inline define:vars={{ mapsApiKey: site.googleMaps.apiKey }}>
+<script is:inline define:vars={{ mapsApiKey }}>
     const script = document.createElement('script');
     script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places&callback=initGoogleMaps`;
     script.async = true; script.defer = true;
@@ -203,7 +213,7 @@ const site = await getSiteSettings();
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
-<script is:inline define:vars={{ firebaseConfig: site.firebase }}>
+<script is:inline define:vars={{ firebaseConfig }}>
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -413,7 +423,8 @@ $('unlock-quote-btn').addEventListener('click', async () => {
                 doubleGates: leadData.doubleGates,
                 estimateLow: lo,
                 estimateHigh: hi,
-                estimatedRange: '$' + lo.toLocaleString() + ' - $' + hi.toLocaleString()
+                estimatedRange: '$' + lo.toLocaleString() + ' - $' + hi.toLocaleString(),
+                website: $('hp-website')?.value || ''
             })
         });
         if (!res.ok) throw new Error('Submit failed');

@@ -1,156 +1,185 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // ============================================
-    // LEADS & JOBS (Used by all apps)
-    // ============================================
-    
-    match /leads/{leadId} {
-      allow read, write: if true;
+
+    // ============================================================
+    // HELPER FUNCTIONS
+    // ============================================================
+
+    function isAuth() {
+      return request.auth != null;
     }
-    
-    match /jobs/{jobId} {
-      allow read, write: if true;
+
+    function isValidString(val, maxLen) {
+      return val is string && val.size() > 0 && val.size() <= maxLen;
     }
-    
-    // ============================================
-    // WEBSITE (Edit mode, contact forms, SSR)
-    // ============================================
-    
-    // Settings (stylePhotos config, pricing, etc.)
-    match /settings/{doc} {
-      allow read, write: if true;
+
+    function isOptionalString(val, maxLen) {
+      return !(val is string) || val.size() <= maxLen;
     }
-    
-    // Site content (inline website editing via edit mode)
-    match /siteContent/{doc} {
-      allow read, write: if true;
-    }
-    
-    // SSR page content (Astro website fetches these server-side)
-    match /content/{doc} {
-      allow read, write: if true;
-    }
-    
-    // Page content (legacy)
-    match /pageContent/{doc} {
-      allow read, write: if true;
-    }
-    
-    // Website lead submissions (contact form, ballpark, booking)
+
+    // ============================================================
+    // TIER 1: WEBSITE PUBLIC CREATE (forms submit via REST API key)
+    //   - Public can CREATE with validation
+    //   - Only authenticated users can read/update/delete
+    // ============================================================
+
     match /websiteLeads/{doc} {
-      allow read, write: if true;
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'phone', 'status', 'source'])
+        && isValidString(request.resource.data.name, 200)
+        && isValidString(request.resource.data.phone, 50)
+        && isValidString(request.resource.data.source, 100)
+        && isValidString(request.resource.data.status, 50)
+        && isOptionalString(request.resource.data.get('email', ''), 200)
+        && isOptionalString(request.resource.data.get('address', ''), 500)
+        && isOptionalString(request.resource.data.get('notes', ''), 2000)
+        && isOptionalString(request.resource.data.get('fenceType', ''), 200);
+      allow read, update, delete: if isAuth();
     }
-    
-    // Bookings/appointments
+
     match /bookings/{doc} {
-      allow read, write: if true;
+      allow create: if
+        request.resource.data.keys().hasAll(['name', 'phone', 'date', 'time'])
+        && isValidString(request.resource.data.name, 200)
+        && isValidString(request.resource.data.phone, 50)
+        && isValidString(request.resource.data.date, 30)
+        && isValidString(request.resource.data.time, 30)
+        && isOptionalString(request.resource.data.get('email', ''), 200)
+        && isOptionalString(request.resource.data.get('address', ''), 500)
+        && isOptionalString(request.resource.data.get('notes', ''), 2000);
+      allow read, update, delete: if isAuth();
     }
-    
-    // Available time slots (exec app creates, website reads, booking marks used)
-    match /availableSlots/{doc} {
-      allow read, write: if true;
-    }
-    
-    // Gallery images
-    match /gallery/{doc} {
-      allow read, write: if true;
-    }
-    
-    // Email notification queue (Firebase Trigger Email extension)
+
     match /mail/{doc} {
-      allow read, write: if true;
+      allow create: if
+        request.resource.data.keys().hasAll(['to', 'message'])
+        && request.resource.data.to is string
+        && request.resource.data.message is map;
+      allow read, update, delete: if isAuth();
     }
-    
-    // Admin credentials
-    match /admin/{doc} {
-      allow read, write: if true;
-    }
-    
-    // Security logs
-    match /securityLogs/{doc} {
-      allow read, write: if true;
-    }
-    
-    // ============================================
-    // CONTRACTS & PAYMENTS (Customer Portal)
-    // ============================================
-    
-    match /contracts/{contractId} {
-      allow read, write: if true;
-    }
-    
-    match /payments/{paymentId} {
-      allow read, write: if true;
-    }
-    
-    match /invoices/{invoiceId} {
-      allow read, write: if true;
-    }
-    
-    match /signatures/{signatureId} {
-      allow read, write: if true;
-    }
-    
-    // ============================================
-    // CREW VIEW APP
-    // ============================================
-    
-    match /crew/{crewId} {
-      allow read, write: if true;
-    }
-    
-    match /users/{userId} {
-      allow read, write: if true;
-    }
-    
-    match /schedules/{scheduleId} {
-      allow read, write: if true;
-    }
-    
-    match /timeEntries/{entryId} {
-      allow read, write: if true;
-    }
-    
-    match /materials/{materialId} {
-      allow read, write: if true;
-    }
-    
-    match /inventory/{itemId} {
-      allow read, write: if true;
-    }
-    
-    match /jobNotes/{noteId} {
-      allow read, write: if true;
-    }
-    
-    match /progress/{progressId} {
-      allow read, write: if true;
-    }
-    
-    // ============================================
-    // CUSTOMER PORTAL
-    // ============================================
-    
-    match /customers/{customerId} {
-      allow read, write: if true;
-    }
-    
-    match /messages/{messageId} {
-      allow read, write: if true;
-    }
-    
-    match /projectUpdates/{updateId} {
-      allow read, write: if true;
-    }
-    
-    // ============================================
-    // CATCH-ALL (Allow read on everything else)
-    // ============================================
-    
-    match /{document=**} {
+
+    // ============================================================
+    // TIER 2: WEBSITE PUBLIC READ (SSR fetches content via REST)
+    //   - Public can READ
+    //   - Only authenticated users can WRITE
+    // ============================================================
+
+    match /settings/{doc} {
       allow read: if true;
+      allow write: if isAuth();
     }
+
+    match /content/{doc} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /siteContent/{doc} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /pageContent/{doc} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /gallery/{doc} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /availableSlots/{doc} {
+      allow read: if true;
+      allow update: if true;
+      allow create, delete: if isAuth();
+    }
+
+    // ============================================================
+    // TIER 3: AUTH REQUIRED (business data)
+    //   - Firebase Auth required for ALL operations
+    // ============================================================
+
+    match /admin/{doc} {
+      allow read: if true;
+      allow write: if isAuth();
+    }
+
+    match /securityLogs/{doc} {
+      allow create: if true;
+      allow read: if isAuth();
+      allow update, delete: if false;
+    }
+
+    match /leads/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /jobs/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /contracts/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /payments/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /invoices/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /signatures/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /crew/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /users/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /schedules/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /timeEntries/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /materials/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /inventory/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /jobNotes/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /progress/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /customers/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /messages/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /projectUpdates/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    // NO CATCH-ALL - Firestore denies unlisted collections by default
   }
 }
