@@ -6,31 +6,41 @@ service cloud.firestore {
     // HELPER FUNCTIONS
     // ============================================================
 
+    // Any Firebase-authenticated user (anonymous or email/password)
     function isAuth() {
       return request.auth != null;
     }
 
+    // Validate a required string with max length
     function isValidString(val, maxLen) {
       return val is string && val.size() > 0 && val.size() <= maxLen;
     }
 
+    // Validate an optional string (may be absent or empty)
     function isOptionalString(val, maxLen) {
       return !(val is string) || val.size() <= maxLen;
     }
 
+    // Limit document field count — prevent payload stuffing
+    function docUnder(maxFields) {
+      return request.resource.data.keys().size() <= maxFields;
+    }
+
     // ============================================================
-    // TIER 1: WEBSITE PUBLIC CREATE (forms submit via REST API key)
-    //   - Public can CREATE with validation
+    // TIER 1: PUBLIC CREATE (website forms)
+    //   - Anyone can CREATE with strict validation
     //   - Only authenticated users can read/update/delete
     // ============================================================
 
     match /websiteLeads/{doc} {
       allow create: if
-        request.resource.data.keys().hasAll(['name', 'phone', 'status', 'source'])
+        docUnder(20)
+        && request.resource.data.keys().hasAll(['name', 'phone', 'status', 'source'])
         && isValidString(request.resource.data.name, 200)
         && isValidString(request.resource.data.phone, 50)
         && isValidString(request.resource.data.source, 100)
         && isValidString(request.resource.data.status, 50)
+        && request.resource.data.status == 'new'
         && isOptionalString(request.resource.data.get('email', ''), 200)
         && isOptionalString(request.resource.data.get('address', ''), 500)
         && isOptionalString(request.resource.data.get('notes', ''), 2000)
@@ -40,7 +50,8 @@ service cloud.firestore {
 
     match /bookings/{doc} {
       allow create: if
-        request.resource.data.keys().hasAll(['name', 'phone', 'date', 'time'])
+        docUnder(15)
+        && request.resource.data.keys().hasAll(['name', 'phone', 'date', 'time'])
         && isValidString(request.resource.data.name, 200)
         && isValidString(request.resource.data.phone, 50)
         && isValidString(request.resource.data.date, 30)
@@ -53,16 +64,25 @@ service cloud.firestore {
 
     match /mail/{doc} {
       allow create: if
-        request.resource.data.keys().hasAll(['to', 'message'])
+        docUnder(5)
+        && request.resource.data.keys().hasAll(['to', 'message'])
         && request.resource.data.to is string
+        && request.resource.data.to.size() <= 200
         && request.resource.data.message is map;
       allow read, update, delete: if isAuth();
     }
 
+    match /securityLogs/{doc} {
+      allow create: if
+        docUnder(10)
+        && request.resource.data.keys().hasAll(['action'])
+        && isValidString(request.resource.data.action, 100);
+      allow read: if isAuth();
+      allow update, delete: if false;
+    }
+
     // ============================================================
-    // TIER 2: WEBSITE PUBLIC READ (SSR fetches content via REST)
-    //   - Public can READ
-    //   - Only authenticated users can WRITE
+    // TIER 2: PUBLIC READ (website SSR + client reads)
     // ============================================================
 
     match /settings/{doc} {
@@ -92,31 +112,44 @@ service cloud.firestore {
 
     match /availableSlots/{doc} {
       allow read: if true;
-      allow update: if true;
+      allow update: if
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['booked']);
       allow create, delete: if isAuth();
     }
 
     // ============================================================
-    // TIER 3: AUTH REQUIRED (business data)
-    //   - Firebase Auth required for ALL operations
+    // TIER 3: AUTH-ONLY (all apps require anonymous or email auth)
+    //   - Executive App, Crew App, Customer Portal all use
+    //     signInAnonymously() at startup — invisible to user
+    //   - Website Admin uses signInWithEmailAndPassword
+    //   - Random internet traffic has NO auth → denied
     // ============================================================
 
-    match /admin/{doc} {
-      allow read: if true;
-      allow write: if isAuth();
-    }
-
-    match /securityLogs/{doc} {
-      allow create: if true;
-      allow read: if isAuth();
-      allow update, delete: if false;
-    }
-
-    match /leads/{doc} {
+    match /jobs/{doc} {
       allow read, write: if isAuth();
     }
 
-    match /jobs/{doc} {
+    match /crewUsers/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /crewMembers/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /timeEntries/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /transactions/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /admin/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /leads/{doc} {
       allow read, write: if isAuth();
     }
 
@@ -148,15 +181,15 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
-    match /timeEntries/{doc} {
-      allow read, write: if isAuth();
-    }
-
     match /materials/{doc} {
       allow read, write: if isAuth();
     }
 
     match /inventory/{doc} {
+      allow read, write: if isAuth();
+    }
+
+    match /customers/{doc} {
       allow read, write: if isAuth();
     }
 
@@ -168,10 +201,6 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
-    match /customers/{doc} {
-      allow read, write: if isAuth();
-    }
-
     match /messages/{doc} {
       allow read, write: if isAuth();
     }
@@ -180,6 +209,8 @@ service cloud.firestore {
       allow read, write: if isAuth();
     }
 
-    // NO CATCH-ALL - Firestore denies unlisted collections by default
+    // ============================================================
+    // NO CATCH-ALL — unlisted collections denied by default
+    // ============================================================
   }
 }

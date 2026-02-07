@@ -2,6 +2,7 @@
 import { getSiteSettings } from '../lib/firestore.js';
 import siteJson from '../content/site.json';
 import EditMode from '../components/EditMode.astro';
+import '../styles/global.css';
 
 // SSR: fetch site settings from Firestore (falls back to JSON)
 const site = await getSiteSettings();
@@ -54,7 +55,7 @@ const siteUrl = site.company.website;
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -88,18 +89,26 @@ const siteUrl = site.company.website;
         <div class="top-bar-content">
           <div class="top-bar-left">
             <span class="top-bar-item">
-              <i class="fas fa-phone"></i>
-              <a href={`tel:${site.company.phone.replace(/[^0-9]/g, '')}`}>{site.company.phone}</a>
-            </span>
-            <span class="top-bar-item">
-              <i class="fas fa-envelope"></i>
-              <a href={`mailto:${site.company.email}`}>{site.company.email}</a>
+              <i class="fas fa-star" style="color: #fbbf24;"></i>
+              <i class="fas fa-star" style="color: #fbbf24;"></i>
+              <i class="fas fa-star" style="color: #fbbf24;"></i>
+              <i class="fas fa-star" style="color: #fbbf24;"></i>
+              <i class="fas fa-star" style="color: #fbbf24;"></i>
+              <span>{site.stats.rating} Rating ({site.stats.reviews} Reviews)</span>
             </span>
           </div>
           <div class="top-bar-right">
             <span class="top-bar-item">
-              <i class="fas fa-star"></i>
-              {site.stats.rating} Rating • {site.stats.reviews}+ Reviews
+              <i class="fas fa-shield-alt"></i>
+              Licensed & Insured
+            </span>
+            <span class="top-bar-item">
+              <i class="fas fa-certificate"></i>
+              {site.stats.warranty} Warranty
+            </span>
+            <span class="top-bar-item">
+              <i class="fas fa-percent"></i>
+              0% Financing Available
             </span>
           </div>
         </div>
@@ -124,35 +133,24 @@ const siteUrl = site.company.website;
           <ul class="nav-links">
             <li><a href="/">Home</a></li>
             <li class="has-dropdown">
-              <a href="/fences/">Fence Types</a>
+              <a href="/fences/">Fence Styles</a>
               <ul class="dropdown">
-                <li><a href="/fences/wood-fence/">Wood Fences</a></li>
-                <li><a href="/fences/vinyl-fence/">Vinyl Fences</a></li>
-                <li><a href="/fences/chain-link-fence/">Chain Link</a></li>
-                <li><a href="/fences/aluminum-fence/">Aluminum</a></li>
-                <li><a href="/fences/composite-fence/">Composite</a></li>
-                <li><a href="/fences/steel-fence/">Steel</a></li>
-                <li><a href="/fences/farm-fence/">Farm & Ranch</a></li>
-                <li><a href="/fences/gates/">Gates</a></li>
+                <li><a href="/fences/cedar/">Cedar Privacy</a></li>
+                <li><a href="/fences/wood/">Wood Privacy</a></li>
+                <li><a href="/fences/vinyl/">Vinyl Privacy</a></li>
+                <li><a href="/fences/aluminum/">Ornamental Aluminum</a></li>
+                <li><a href="/fences/chainlink/">Chain Link</a></li>
+                <li><a href="/fences/split-rail/">Split Rail</a></li>
               </ul>
             </li>
-            <li class="has-dropdown">
-              <a href="/service-areas/">Areas</a>
-              <ul class="dropdown">
-                <li><a href="/service-areas/toledo-oh/">Toledo</a></li>
-                <li><a href="/service-areas/perrysburg-oh/">Perrysburg</a></li>
-                <li><a href="/service-areas/maumee-oh/">Maumee</a></li>
-                <li><a href="/service-areas/sylvania-oh/">Sylvania</a></li>
-                <li><a href="/service-areas/">View All</a></li>
-              </ul>
-            </li>
-            <li><a href="/gallery/">Gallery</a></li>
-            <li><a href="/permits/">Permits</a></li>
             <li><a href="/reviews/">Reviews</a></li>
             <li><a href="/about/">About</a></li>
             <li><a href="/contact/">Contact</a></li>
             <li class="nav-cta">
-              <a href="/quote/ballpark/" class="btn btn-primary">Free Quote</a>
+              <a href="/quote/" class="btn btn-primary">Get Free Quote</a>
+            </li>
+            <li class="nav-cta">
+              <a href={site.financing.url} class="btn btn-secondary" target="_blank" rel="noopener">0% Financing</a>
             </li>
           </ul>
         </div>
@@ -172,61 +170,37 @@ const siteUrl = site.company.website;
           <div class="footer-col footer-about">
             <div class="footer-logo">
               <div class="logo-icon">GF</div>
-              <span>Ghareeb Fencing Solutions</span>
+              <span>Ghareeb Fencing</span>
             </div>
-            <p>{site.company.tagline}</p>
-            <div class="footer-contact">
-              <p><i class="fas fa-phone"></i> <a href={`tel:${site.company.phone.replace(/[^0-9]/g, '')}`}>{site.company.phone}</a></p>
-              <p><i class="fas fa-envelope"></i> <a href={`mailto:${site.company.email}`}>{site.company.email}</a></p>
-              <p><i class="fas fa-map-marker-alt"></i> {site.company.address.city}, {site.company.address.state}</p>
-            </div>
-            <div class="social-links">
-              <a href={site.social.facebook} aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-              <a href={site.social.instagram} aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-              <a href={site.social.google} aria-label="Google"><i class="fab fa-google"></i></a>
-            </div>
+            <p>Toledo's trusted fence contractor since 2022. Quality craftsmanship, honest pricing, and exceptional service on every project.</p>
           </div>
           
           <div class="footer-col">
-            <h4>Quick Links</h4>
+            <h4>Fence Styles</h4>
             <ul>
-              <li><a href="/">Home</a></li>
+              <li><a href="/fences/cedar/">Cedar Privacy</a></li>
+              <li><a href="/fences/vinyl/">Vinyl Privacy</a></li>
+              <li><a href="/fences/aluminum/">Ornamental Aluminum</a></li>
+              <li><a href="/fences/chainlink/">Chain Link</a></li>
+            </ul>
+          </div>
+          
+          <div class="footer-col">
+            <h4>Company</h4>
+            <ul>
               <li><a href="/about/">About Us</a></li>
-              <li><a href="/fences/">Fence Types</a></li>
-              <li><a href="/gallery/">Gallery</a></li>
               <li><a href="/reviews/">Reviews</a></li>
               <li><a href="/contact/">Contact</a></li>
+              <li><a href="/quote/">Get Quote</a></li>
             </ul>
           </div>
           
           <div class="footer-col">
-            <h4>Fence Types</h4>
+            <h4>Contact</h4>
             <ul>
-              <li><a href="/fences/wood-fence/">Wood Fences</a></li>
-              <li><a href="/fences/vinyl-fence/">Vinyl Fences</a></li>
-              <li><a href="/fences/chain-link-fence/">Chain Link</a></li>
-              <li><a href="/fences/aluminum-fence/">Aluminum</a></li>
-              <li><a href="/fences/gates/">Gates</a></li>
-            </ul>
-          </div>
-          
-          <div class="footer-col">
-            <h4>Service Areas</h4>
-            <ul>
-              <li><a href="/service-areas/toledo-oh/">Toledo</a></li>
-              <li><a href="/service-areas/perrysburg-oh/">Perrysburg</a></li>
-              <li><a href="/service-areas/maumee-oh/">Maumee</a></li>
-              <li><a href="/service-areas/sylvania-oh/">Sylvania</a></li>
-              <li><a href="/service-areas/">All Areas</a></li>
-            </ul>
-          </div>
-          
-          <div class="footer-col">
-            <h4>Business Hours</h4>
-            <ul class="hours-list">
-              <li><span>Mon - Fri:</span> 8AM - 6PM</li>
-              <li><span>Saturday:</span> 9AM - 4PM</li>
-              <li><span>Sunday:</span> Closed</li>
+              <li><a href={`tel:${site.company.phone.replace(/[^0-9]/g, '')}`}>{site.company.phone}</a></li>
+              <li><a href={`mailto:${site.company.email}`}>{site.company.email}</a></li>
+              <li><span>{site.company.address.city}, {site.company.address.state} Area</span></li>
             </ul>
           </div>
         </div>
@@ -237,10 +211,6 @@ const siteUrl = site.company.website;
       <div class="container">
         <div class="footer-bottom-content">
           <p>&copy; {new Date().getFullYear()} {site.company.name}. All rights reserved.</p>
-          <div class="footer-legal">
-            <a href="/privacy/">Privacy</a>
-            <a href="/terms/">Terms</a>
-          </div>
         </div>
       </div>
     </div>
@@ -268,13 +238,30 @@ const siteUrl = site.company.website;
       --color-black: #212529;
       --color-success: #28a745;
       --color-error: #dc3545;
-      --font-heading: 'Montserrat', sans-serif;
-      --font-body: 'Open Sans', sans-serif;
+      --font-heading: 'Playfair Display', Georgia, serif;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
       --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
       --transition-base: 300ms ease;
       --container-max: 1200px;
+      /* Shorthand aliases used by page styles */
+      --primary: #1e3a5f;
+      --primary-dark: #152a45;
+      --primary-light: #2a4d7a;
+      --accent: #d4af37;
+      --accent-light: #e5c55a;
+      --accent-dark: #b8962e;
+      --gold: #d4af37;
+      --bg-light: #f8f9fa;
+      --bg-warm: #faf8f3;
+      --text: #212529;
+      --text-muted: #6c757d;
+      --text-light: #868e96;
+      --radius: 8px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }

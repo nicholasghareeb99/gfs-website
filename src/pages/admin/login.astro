@@ -80,10 +80,9 @@ const firebaseConfig = {
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('logged-in').style.display = 'block';
     } catch (err) {
-      errEl.textContent = err.code === 'auth/wrong-password' ? 'Incorrect password' :
-        err.code === 'auth/user-not-found' ? 'Account not found' :
-        err.code === 'auth/invalid-email' ? 'Invalid email address' :
-        'Login failed: ' + err.message;
+      // ✅ SECURITY FIX: Generic error message prevents email enumeration
+      errEl.textContent = err.code === 'auth/invalid-email' ? 'Invalid email address' :
+        'Invalid email or password. Please try again.';
       errEl.style.display = 'block';
     }
     btn.querySelector('.btn-text').style.display = 'inline';

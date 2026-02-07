@@ -2,14 +2,6 @@
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
-const firebaseConfig = {
-  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
-  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
-};
 ---
 
 <BaseLayout 
@@ -166,13 +158,16 @@ const firebaseConfig = {
     </section>
 </BaseLayout>
 
-<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script is:inline define:vars={{ firebaseConfig }}>
+<!-- ✅ SECURITY FIX: Removed client-side Firebase SDK entirely.
+     Now routes through /api/submit which has:
+     - Server-side rate limiting (5 req/min/IP)
+     - CSRF origin checking
+     - Honeypot bot detection
+     - Input sanitization & validation
+     - Email notification via Firebase Trigger Email
+-->
+<script is:inline>
 (function() {
-    const cfg = firebaseConfig;
-    if (!firebase.apps.length) firebase.initializeApp(cfg);
-    const db = firebase.firestore();
     const $ = id => document.getElementById(id);
 
     $('quote-form').addEventListener('submit', async (e) => {
@@ -205,21 +200,45 @@ const firebaseConfig = {
         btn.innerHTML = '⏳ Submitting...';
 
         try {
-            await db.collection('websiteLeads').add({
-                name, phone, email, address,
-                fenceStyle: fenceType,
-                height: $('q-height').value || '',
-                linearFeet: $('q-length').value ? parseInt($('q-length').value) : null,
-                timeline: $('q-timeline').value || '',
-                needsGates: $('q-gates').checked,
-                removeOldFence: $('q-removal').checked,
-                poolArea: $('q-pool').checked,
-                notes: $('q-notes').value.trim() || '',
-                heardAboutUs: $('q-heard').value || '',
-                source: 'website-detailed-quote-form',
-                status: 'new',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            // Build notes from all project details
+            const details = [];
+            const height = $('q-height').value;
+            const length = $('q-length').value;
+            const timeline = $('q-timeline').value;
+            const gates = $('q-gates').checked;
+            const removal = $('q-removal').checked;
+            const pool = $('q-pool').checked;
+            const notes = $('q-notes').value.trim();
+            const heard = $('q-heard').value;
+
+            if (height) details.push('Height: ' + height);
+            if (length) details.push('Length: ~' + length + ' ft');
+            if (timeline) details.push('Timeline: ' + timeline);
+            if (gates) details.push('Needs gates');
+            if (removal) details.push('Remove existing fence');
+            if (pool) details.push('Pool area - code compliance');
+            if (heard) details.push('Heard about us: ' + heard);
+            if (notes) details.push('Notes: ' + notes);
+
+            const res = await fetch('/api/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'contact',
+                    name,
+                    phone,
+                    email,
+                    address,
+                    fenceType,
+                    message: details.join('\n'),
+                    website: $('hp-website')?.value || ''
+                })
             });
+
+            if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                throw new Error(data.error || 'Submission failed');
+            }
 
             $('quote-form').style.display = 'none';
             $('form-success').style.display = 'block';

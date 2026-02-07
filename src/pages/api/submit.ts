@@ -1,9 +1,13 @@
 /**
  * Server-side API for form submissions
- * Security: rate limiting, CSRF, input validation, HTML escaping
+ * Security: rate limiting, CSRF, input validation, HTML escaping, payload limit
  * Writes to Firestore via REST + API key
  * Data shapes match Executive App's expected format for websiteLeads
  * Writes email doc to 'mail' collection for Firebase Trigger Email extension
+ *
+ * ✅ SECURITY FIXES applied:
+ *   - Added payload size limit (50KB)
+ *   - Improved CSRF check with referer fallback
  */
 
 import type { APIRoute } from 'astro';
@@ -40,13 +44,19 @@ setInterval(() => {
 }, 300_000);
 
 // ============================================================
-// VALIDATION HELPERS
+// SECURITY CONSTANTS
 // ============================================================
+const MAX_PAYLOAD_BYTES = 50_000; // 50KB max request body
+const ALLOWED_ORIGINS = ['ghareebfencing.com', 'localhost', '127.0.0.1'];
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^[\d\s()+-]{7,20}$/;
 
 // Notification email recipient
 const NOTIFY_EMAIL = 'nicholasghareeb99@gmail.com';
+
+// ============================================================
+// VALIDATION HELPERS
+// ============================================================
 
 // Convert JS value to Firestore REST value format
 function toFV(val: any): any {
@@ -101,6 +111,28 @@ function esc(str: string): string {
     .replace(/'/g, '&#39;');
 }
 
+// ============================================================
+// CSRF VALIDATION (improved — checks origin + referer fallback)
+// ============================================================
+function isValidOrigin(request: Request): boolean {
+  const origin = request.headers.get('origin') || '';
+  const referer = request.headers.get('referer') || '';
+  const source = origin || referer;
+
+  // If no origin/referer at all, allow (same-origin requests may omit these)
+  if (!source) return true;
+
+  try {
+    const hostname = new URL(source).hostname;
+    return ALLOWED_ORIGINS.some(allowed =>
+      hostname === allowed || hostname.endsWith('.' + allowed)
+    );
+  } catch {
+    // Malformed URL in origin/referer header
+    return false;
+  }
+}
+
 // Email wrapper template
 function emailWrap(title: string, icon: string, body: string): string {
   return `
@@ -135,11 +167,15 @@ export const POST: APIRoute = async ({ request }) => {
   const headers = { 'Content-Type': 'application/json' };
 
   try {
-    // ── CSRF: Check origin header ──
-    const origin = request.headers.get('origin') || '';
-    const host = request.headers.get('host') || '';
-    if (origin && !origin.includes(host) && !origin.includes('ghareebfencing.com') && !origin.includes('localhost')) {
-      console.error(`CSRF blocked: origin=${origin} host=${host}`);
+    // ── Payload size limit ──
+    const contentLength = parseInt(request.headers.get('content-length') || '0');
+    if (contentLength > MAX_PAYLOAD_BYTES) {
+      return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413, headers });
+    }
+
+    // ── CSRF: Check origin/referer header ──
+    if (!isValidOrigin(request)) {
+      console.error(`CSRF blocked: origin=${request.headers.get('origin')} referer=${request.headers.get('referer')}`);
       return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers });
     }
 
@@ -156,9 +192,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { type } = body;
 
     // ── Honeypot: reject if hidden field filled ──
-    // These fields are invisible to humans but bots auto-fill them
     if (body.website || body.company_name) {
-      // Silently accept but don't process — bot doesn't know it failed
       return new Response(JSON.stringify({ success: true, message: 'Submission received' }), { status: 200, headers });
     }
 
@@ -173,8 +207,6 @@ export const POST: APIRoute = async ({ request }) => {
     switch (type) {
       // =========================================================
       // CONTACT FORM
-      // Exec app reads: name, phone, email, address, fenceType,
-      //   notes, source, status, createdAt
       // =========================================================
       case 'contact': {
         const name = clean(body.name, 200);
@@ -194,14 +226,10 @@ export const POST: APIRoute = async ({ request }) => {
           return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
-        // Write to websiteLeads — matches exec app field expectations
         success = await writeDoc('websiteLeads', {
-          name,
-          phone,
-          email,
-          address,
-          fenceType,        // exec app reads this for lead card
-          notes: message,   // clean notes, no prefix
+          name, phone, email, address,
+          fenceType,
+          notes: message,
           source: 'contact-form',
           status: 'new'
         });
@@ -221,9 +249,6 @@ export const POST: APIRoute = async ({ request }) => {
 
       // =========================================================
       // APPOINTMENT BOOKING
-      // Exec app reads: name, phone, email, address,
-      //   appointmentDate (ISO string), appointmentTime,
-      //   fenceType, notes, source, status, createdAt
       // =========================================================
       case 'booking': {
         const name = clean(body.name, 200);
@@ -245,7 +270,6 @@ export const POST: APIRoute = async ({ request }) => {
           return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
-        // Write to bookings collection (matches existing Firebase convention)
         success = await writeDoc('bookings', {
           name, phone, email, address, project, notes,
           date, time,
@@ -253,17 +277,12 @@ export const POST: APIRoute = async ({ request }) => {
           status: 'pending'
         });
 
-        // Write to websiteLeads WITH appointmentDate/appointmentTime
-        // so exec app shows the purple appointment card
         if (success) {
           await writeDoc('websiteLeads', {
-            name,
-            phone,
-            email,
-            address,
-            fenceType: project,           // exec app shows this
-            appointmentDate: date,        // exec app purple card reads this
-            appointmentTime: time,        // exec app purple card reads this
+            name, phone, email, address,
+            fenceType: project,
+            appointmentDate: date,
+            appointmentTime: time,
             notes,
             source: 'website-booking',
             status: 'new'
@@ -290,9 +309,6 @@ export const POST: APIRoute = async ({ request }) => {
 
       // =========================================================
       // BALLPARK CALCULATOR LEAD
-      // Exec app reads: name, phone, email, address, fenceType,
-      //   ballparkQuote: { low, high, feet, type, height, sg, dg },
-      //   notes, source, status, createdAt
       // =========================================================
       case 'lead': {
         const name = clean(body.name, 200);
@@ -319,15 +335,10 @@ export const POST: APIRoute = async ({ request }) => {
           return new Response(JSON.stringify({ error: 'Invalid email address' }), { status: 400, headers });
         }
 
-        // Write to websiteLeads — exec app reads ballparkQuote object
-        // for the green quote card display
         success = await writeDoc('websiteLeads', {
-          name,
-          phone,
-          email,
-          address,
-          fenceType,                      // exec app shows on lead card
-          ballparkQuote: {                // exec app green card reads this
+          name, phone, email, address,
+          fenceType,
+          ballparkQuote: {
             low: estimateLow,
             high: estimateHigh,
             feet: fenceLength,

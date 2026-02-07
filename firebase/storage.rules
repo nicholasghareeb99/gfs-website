@@ -1,38 +1,70 @@
-// Firebase Storage Security Rules for Ghareeb Fencing Solutions
-// Deploy these rules in Firebase Console > Storage > Rules
-// =====================================================================
-
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-    
-    // =====================================================================
-    // GALLERY IMAGES - Public read, restricted write
-    // =====================================================================
+
+    // WEBSITE — Public read, auth write
     match /gallery/{fileName} {
-      // Anyone can view gallery images
       allow read: if true;
-      
-      // Allow upload with restrictions:
-      // - Must be an image
-      // - Max 5MB
-      allow write: if request.resource.size < 5 * 1024 * 1024
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
     }
-    
-    // =====================================================================
-    // PAGE IMAGES - Public read, restricted write
-    // =====================================================================
     match /pages/{fileName} {
       allow read: if true;
-      
-      allow write: if request.resource.size < 5 * 1024 * 1024
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
                    && request.resource.contentType.matches('image/.*');
     }
-    
-    // =====================================================================
-    // ALL OTHER PATHS - Deny by default
-    // =====================================================================
+    match /website-images/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 5 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // EXECUTIVE APP — Job photos, style photos, contracts
+    match /photos/{jobId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    match /stylePhotos/{styleName}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+    match /contracts/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('application/pdf');
+    }
+    match /signatures/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 2 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // CREW APP — jobs/{jobId}/crew/{filename}.jpg
+    match /jobs/{jobId}/crew/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // CUSTOMER PORTAL — customerPhotos/{jobId}/{filename}.jpg
+    match /customerPhotos/{jobId}/{fileName} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null
+                   && request.resource.size < 10 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // CATCH-ALL — Deny everything else
     match /{allPaths=**} {
       allow read, write: if false;
     }

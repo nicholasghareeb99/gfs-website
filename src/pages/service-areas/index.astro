@@ -41,110 +41,172 @@ const featuredAreas = serviceAreas.filter(a => a.featured);
         </div>
     </section>
 
-    <!-- Featured Areas -->
-    <section class="section">
+    <!-- LEAD WALL — Gate content behind lead capture -->
+    <section class="leadwall-section" id="leadwall">
         <div class="container">
-            <div class="section-header text-center">
-                <h2>Featured Service Areas</h2>
-                <p>Our most active installation areas with hundreds of happy customers</p>
-            </div>
-            <div class="featured-grid">
-                {featuredAreas.slice(0, 6).map(area => (
-                    <ServiceAreaCard 
-                        name={area.name}
-                        slug={area.slug}
-                        county={area.county}
-                        state={area.state}
-                        description={area.description}
-                        population={area.population}
-                        featured={true}
-                    />
-                ))}
-            </div>
-        </div>
-    </section>
-
-    <!-- All Areas by Region -->
-    <section class="section bg-light">
-        <div class="container">
-            <div class="section-header text-center">
-                <h2>All Service Areas</h2>
-                <p>Browse our complete service area coverage</p>
-            </div>
-            
-            <div class="regions-container">
-                {Object.entries(areasByCounty).map(([countyName, countyAreas]) => (
-                    <div class="region-section">
-                        <h3 class="region-title">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            {countyName}
-                        </h3>
-                        <div class="region-grid">
-                            {countyAreas.map(area => (
-                                <a href={`/service-areas/${area.slug}/`} class="area-link">
-                                    <span class="area-name">{area.name}</span>
-                                    {area.featured && <span class="featured-badge">Popular</span>}
-                                </a>
-                            ))}
+            <div class="leadwall-card">
+                <div class="leadwall-left">
+                    <div class="leadwall-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="56" height="56"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <h2>See If We Serve Your Area</h2>
+                    <p>Enter your info below to unlock our full service area map, browse all {serviceAreas.length} communities we serve, and check availability in your neighborhood.</p>
+                    <div class="leadwall-benefits">
+                        <div class="leadwall-benefit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>View our complete service area map</span>
+                        </div>
+                        <div class="leadwall-benefit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Browse all {serviceAreas.length} communities</span>
+                        </div>
+                        <div class="leadwall-benefit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Get priority scheduling in your area</span>
                         </div>
                     </div>
-                ))}
+                </div>
+                <div class="leadwall-right">
+                    <form id="leadwall-form" class="leadwall-form">
+                        <h3>Unlock Service Area Info</h3>
+                        <div class="form-group">
+                            <label for="lead-name">Full Name <span class="required">*</span></label>
+                            <input type="text" id="lead-name" name="name" placeholder="John Smith" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="lead-email">Email <span class="required">*</span></label>
+                                <input type="email" id="lead-email" name="email" placeholder="john@example.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="lead-phone">Phone <span class="required">*</span></label>
+                                <input type="tel" id="lead-phone" name="phone" placeholder="(419) 555-1234" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="lead-city">City / Township</label>
+                            <input type="text" id="lead-city" name="city" placeholder="e.g. Perrysburg, Sylvania, Maumee...">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-full" id="leadwall-submit">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+                            Unlock Service Areas
+                        </button>
+                        <p class="form-disclaimer">We respect your privacy. No spam, ever.</p>
+                    </form>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Map Section -->
-    <section class="section">
-        <div class="container">
-            <div class="map-content">
-                <div class="map-info">
-                    <h2>Local Service, Expert Installation</h2>
-                    <p>Based in Toledo, Ghareeb Fencing Solutions provides professional fence installation throughout Northwest Ohio and Southeast Michigan. Our local presence means faster response times, knowledge of local permit requirements, and crews who understand the unique needs of our region.</p>
-                    <ul class="map-features">
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Same-week estimates available
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Local permit expertise
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Community-focused service
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Your neighbors are our customers
-                        </li>
-                    </ul>
-                    <a href="/quote/ballpark/" class="btn btn-primary btn-lg">Get Your Free Quote</a>
+    <!-- GATED CONTENT — Hidden until lead form submitted -->
+    <div id="gated-content" style="display: none;">
+
+        <!-- Featured Areas -->
+        <section class="section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Featured Service Areas</h2>
+                    <p>Our most active installation areas with hundreds of happy customers</p>
                 </div>
-                <div class="map-placeholder">
-                    <div class="map-overlay">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                        <p>Serving {serviceAreas.length} communities</p>
-                        <p class="map-radius">{defaultRadius}-mile radius</p>
+                <div class="featured-grid">
+                    {featuredAreas.slice(0, 6).map(area => (
+                        <ServiceAreaCard 
+                            name={area.name}
+                            slug={area.slug}
+                            county={area.county}
+                            state={area.state}
+                            description={area.description}
+                            population={area.population}
+                            featured={true}
+                        />
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        <!-- All Areas by Region -->
+        <section class="section bg-light">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>All Service Areas</h2>
+                    <p>Browse our complete service area coverage</p>
+                </div>
+                
+                <div class="regions-container">
+                    {Object.entries(areasByCounty).map(([countyName, countyAreas]) => (
+                        <div class="region-section">
+                            <h3 class="region-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                {countyName}
+                            </h3>
+                            <div class="region-grid">
+                                {countyAreas.map(area => (
+                                    <a href={`/service-areas/${area.slug}/`} class="area-link">
+                                        <span class="area-name">{area.name}</span>
+                                        {area.featured && <span class="featured-badge">Popular</span>}
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        <!-- Map Section -->
+        <section class="section">
+            <div class="container">
+                <div class="map-content">
+                    <div class="map-info">
+                        <h2>Local Service, Expert Installation</h2>
+                        <p>Based in Toledo, Ghareeb Fencing Solutions provides professional fence installation throughout Northwest Ohio and Southeast Michigan. Our local presence means faster response times, knowledge of local permit requirements, and crews who understand the unique needs of our region.</p>
+                        <ul class="map-features">
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                                Same-week estimates available
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                                Local permit expertise
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                                Community-focused service
+                            </li>
+                            <li>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                                Your neighbors are our customers
+                            </li>
+                        </ul>
+                        <a href="/quote/ballpark/" class="btn btn-primary btn-lg">Get Your Free Quote</a>
+                    </div>
+                    <div class="map-placeholder">
+                        <div class="map-overlay">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="64" height="64"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <p>Serving {serviceAreas.length} communities</p>
+                            <p class="map-radius">{defaultRadius}-mile radius</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Not Listed CTA -->
-    <section class="cta-section">
-        <div class="container">
-            <h2>Don't See Your City Listed?</h2>
-            <p>We may still be able to serve you! Contact us to check if your location is within our service area.</p>
-            <div class="cta-buttons">
-                <a href="/contact/" class="btn btn-accent btn-lg">Contact Us</a>
-                <a href="tel:4199028257" class="btn btn-outline-light btn-lg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                    (419) 902-8257
-                </a>
+        <!-- Not Listed CTA -->
+        <section class="cta-section">
+            <div class="container">
+                <h2>Don't See Your City Listed?</h2>
+                <p>We may still be able to serve you! Contact us to check if your location is within our service area.</p>
+                <div class="cta-buttons">
+                    <a href="/contact/" class="btn btn-accent btn-lg">Contact Us</a>
+                    <a href="tel:4199028257" class="btn btn-outline-light btn-lg">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                        (419) 902-8257
+                    </a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
+
+    </div><!-- end #gated-content -->
 </BaseLayout>
 
 <style>
@@ -201,6 +263,194 @@ const featuredAreas = serviceAreas.filter(a => a.featured);
     .service-badge svg {
         color: var(--accent);
     }
+
+    /* ===== LEADWALL STYLES ===== */
+    .leadwall-section {
+        padding: 60px 0 80px;
+        background: linear-gradient(180deg, #f0f4f8 0%, #ffffff 100%);
+    }
+
+    .leadwall-card {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .leadwall-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 24px;
+    }
+
+    .leadwall-icon svg {
+        color: var(--color-secondary);
+    }
+
+    .leadwall-left h2 {
+        font-size: 2rem;
+        margin-bottom: 16px;
+        color: var(--color-primary);
+    }
+
+    .leadwall-left p {
+        font-size: 1.1rem;
+        color: var(--color-gray);
+        line-height: 1.7;
+        margin-bottom: 28px;
+    }
+
+    .leadwall-benefits {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .leadwall-benefit {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 500;
+        color: var(--color-dark-gray);
+    }
+
+    .leadwall-benefit svg {
+        color: var(--color-success);
+        flex-shrink: 0;
+    }
+
+    .leadwall-right {
+        background: white;
+        border-radius: 16px;
+        padding: 36px;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.1);
+        border: 1px solid #e8ecf0;
+    }
+
+    .leadwall-form h3 {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+        text-align: center;
+        color: var(--color-primary);
+    }
+
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 6px;
+        color: var(--color-dark-gray);
+        font-family: var(--font-heading);
+    }
+
+    .required {
+        color: var(--color-error);
+    }
+
+    .form-group input {
+        width: 100%;
+        padding: 12px 16px;
+        border: 2px solid #e0e4e8;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: var(--font-body);
+        transition: border-color 0.2s;
+        background: #fafbfc;
+    }
+
+    .form-group input:focus {
+        outline: none;
+        border-color: var(--color-secondary);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+
+    .btn-full {
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+
+    .form-disclaimer {
+        text-align: center;
+        font-size: 0.8rem;
+        color: var(--color-gray);
+        margin-top: 12px;
+    }
+
+    /* Success state */
+    .leadwall-success {
+        text-align: center;
+        padding: 40px 20px;
+    }
+
+    .leadwall-success .success-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--color-success);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .leadwall-success .success-icon svg {
+        color: white;
+    }
+
+    .leadwall-success h3 {
+        color: var(--color-primary);
+        margin-bottom: 8px;
+    }
+
+    .leadwall-success p {
+        color: var(--color-gray);
+    }
+
+    /* Loading state on button */
+    .btn-loading {
+        opacity: 0.8;
+        pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+        .leadwall-card {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+        .leadwall-left {
+            text-align: center;
+        }
+        .leadwall-benefits {
+            align-items: center;
+        }
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        .leadwall-right {
+            padding: 24px;
+        }
+    }
+
+    /* ===== EXISTING STYLES ===== */
 
     /* Featured Grid */
     .featured-grid {
@@ -391,3 +641,89 @@ const featuredAreas = serviceAreas.filter(a => a.featured);
         color: var(--primary);
     }
 </style>
+
+<script>
+    // Check if user already submitted the leadwall
+    const hasAccess = sessionStorage.getItem('gfs_leadwall_passed');
+    
+    if (hasAccess) {
+        // Already submitted — hide wall, show content
+        const wall = document.getElementById('leadwall');
+        const gated = document.getElementById('gated-content');
+        if (wall) wall.style.display = 'none';
+        if (gated) gated.style.display = 'block';
+    }
+
+    // Handle form submission
+    const form = document.getElementById('leadwall-form');
+    form?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('leadwall-submit');
+        const name = document.getElementById('lead-name').value.trim();
+        const email = document.getElementById('lead-email').value.trim();
+        const phone = document.getElementById('lead-phone').value.trim();
+        const city = document.getElementById('lead-city').value.trim();
+
+        if (!name || !email || !phone) return;
+
+        // Disable button
+        submitBtn.classList.add('btn-loading');
+        submitBtn.textContent = 'Unlocking...';
+
+        try {
+            // Try to save lead to Firestore
+            const { initializeApp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js');
+            const { getFirestore, collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+            
+            const app = initializeApp({
+                apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+                authDomain: "ghareeb-fencing.firebaseapp.com",
+                projectId: "ghareeb-fencing",
+                storageBucket: "ghareeb-fencing.firebasestorage.app",
+                messagingSenderId: "187837905206",
+                appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97"
+            }, 'leadwall');
+            
+            const db = getFirestore(app);
+            await addDoc(collection(db, 'websiteLeads'), {
+                name,
+                email: email || '',
+                phone,
+                address: city || '',
+                source: 'service-areas-leadwall',
+                status: 'new',
+                notes: 'Lead from service areas page leadwall',
+                fenceType: ''
+            });
+        } catch (err) {
+            // If Firestore fails, still let them through
+            console.warn('Lead save failed:', err);
+        }
+
+        // Mark as passed and reveal content
+        sessionStorage.setItem('gfs_leadwall_passed', 'true');
+        
+        // Smooth transition
+        const wall = document.getElementById('leadwall');
+        const gated = document.getElementById('gated-content');
+        
+        if (wall) {
+            wall.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+            wall.style.opacity = '0';
+            wall.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                wall.style.display = 'none';
+                if (gated) {
+                    gated.style.display = 'block';
+                    gated.style.opacity = '0';
+                    gated.style.transition = 'opacity 0.5s ease';
+                    requestAnimationFrame(() => {
+                        gated.style.opacity = '1';
+                    });
+                }
+            }, 400);
+        }
+    });
+</script>
