@@ -17,6 +17,7 @@ serviceAreas.forEach(area => {
 
 // Featured areas
 const featuredAreas = serviceAreas.filter(a => a.featured);
+const fbKey = import.meta.env.PUBLIC_FIREBASE_API_KEY || '';
 ---
 
 <BaseLayout 
@@ -24,6 +25,7 @@ const featuredAreas = serviceAreas.filter(a => a.featured);
     description="Ghareeb Fencing Solutions serves 28 communities across Northwest Ohio and Southeast Michigan. Free estimates in Toledo, Perrysburg, Maumee, Sylvania, and more."
     canonical="/service-areas/"
 >
+    <meta name="fb-key" content={fbKey} />
     <!-- Hero Section -->
     <section class="hero-section">
         <div class="container">
@@ -677,7 +679,7 @@ const featuredAreas = serviceAreas.filter(a => a.featured);
             const { getFirestore, collection, addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
             
             const app = initializeApp({
-                apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+                apiKey: document.querySelector('meta[name="fb-key"]')?.content || '',
                 authDomain: "ghareeb-fencing.firebaseapp.com",
                 projectId: "ghareeb-fencing",
                 storageBucket: "ghareeb-fencing.firebasestorage.app",

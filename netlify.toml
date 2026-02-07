@@ -6,6 +6,9 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+
 # Redirect www to non-www
 [[redirects]]
   from = "https://www.ghareebfencing.com/*"
