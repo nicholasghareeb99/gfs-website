@@ -287,5 +287,33 @@ const {
     .fence-hero-title { font-size: 1.8rem; }
     .fence-gallery { grid-template-columns: repeat(2, 1fr); }
     .related-grid { grid-template-columns: repeat(2, 1fr); }
+    .gbb-grid { grid-template-columns: 1fr !important; }
+    .warranty-grid { grid-template-columns: 1fr !important; }
   }
+
+  /* Good / Better / Best Pricing */
+  .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
+  .gbb-card { background: var(--bg-white); border: 2px solid var(--border); border-radius: 16px; padding: 32px 24px; text-align: center; position: relative; transition: all 0.3s; }
+  .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
+  .gbb-card.featured { border-color: var(--accent); }
+  .gbb-card.featured::before { content: "RECOMMENDED"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--dark); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; }
+  .gbb-tier { font-family: var(--font-heading); font-size: 1.1rem; color: var(--dark); margin-bottom: 8px; }
+  .gbb-price { font-family: var(--font-heading); font-size: 2rem; color: var(--primary); margin-bottom: 4px; }
+  .gbb-price span { font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-body); }
+  .gbb-label { font-weight: 700; color: var(--dark); margin-bottom: 16px; font-size: 0.95rem; }
+  .gbb-features { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; }
+  .gbb-features li { padding: 6px 0; font-size: 0.85rem; color: var(--text-body); border-bottom: 1px solid var(--border); }
+  .gbb-features li:last-child { border-bottom: none; }
+  .gbb-btn { display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: background 0.2s; }
+  .gbb-btn:hover { background: var(--primary-light); color: white; }
+
+  /* Warranty Section */
+  .warranty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 800px; margin: 0 auto; }
+  .warranty-card { background: var(--bg-white); border: 2px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; }
+  .warranty-badge { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary); line-height: 1; }
+  .warranty-badge span { display: block; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-body); margin-top: 4px; }
+  .warranty-title { font-family: var(--font-heading); font-size: 1.1rem; margin: 16px 0 12px; color: var(--dark); }
+  .warranty-text { font-size: 0.85rem; color: var(--text-body); line-height: 1.6; }
+  .warranty-list { list-style: none; padding: 0; text-align: left; }
+  .warranty-list li { padding: 4px 0; font-size: 0.85rem; color: var(--text-body); }
 </style>
