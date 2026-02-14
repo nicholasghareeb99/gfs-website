@@ -1,0 +1,100 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../../lib/firestore.js';
+const site = await getSiteSettings();
+
+const areas = [
+  { slug: 'toledo', name: 'Toledo', state: 'OH', county: 'Lucas County' },
+  { slug: 'perrysburg', name: 'Perrysburg', state: 'OH', county: 'Wood County' },
+  { slug: 'sylvania', name: 'Sylvania', state: 'OH', county: 'Lucas County' },
+  { slug: 'maumee', name: 'Maumee', state: 'OH', county: 'Lucas County' },
+  { slug: 'bowling-green', name: 'Bowling Green', state: 'OH', county: 'Wood County' },
+  { slug: 'oregon', name: 'Oregon', state: 'OH', county: 'Lucas County' },
+  { slug: 'waterville', name: 'Waterville', state: 'OH', county: 'Lucas County' },
+  { slug: 'whitehouse', name: 'Whitehouse', state: 'OH', county: 'Lucas County' },
+  { slug: 'holland', name: 'Holland', state: 'OH', county: 'Lucas County' },
+  { slug: 'monroe', name: 'Monroe', state: 'MI', county: 'Monroe County' },
+  { slug: 'lambertville', name: 'Lambertville', state: 'MI', county: 'Monroe County' },
+  { slug: 'temperance', name: 'Temperance', state: 'MI', county: 'Monroe County' },
+];
+
+const ohioAreas = areas.filter(a => a.state === 'OH');
+const michiganAreas = areas.filter(a => a.state === 'MI');
+---
+
+<BaseLayout title="Service Areas | Fence Installation Toledo OH & SE Michigan" description="Ghareeb Fencing Solutions serves Toledo, Perrysburg, Sylvania, Maumee, Monroe and surrounding areas. Professional fence installation in NW Ohio & SE Michigan.">
+  <section class="section" style="padding-top: 60px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Where We Work</div>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Our Service <span class="gold">Areas</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: 12px auto 0;">Professional fence installation across Northwest Ohio and Southeast Michigan. Licensed and insured in both states.</p>
+      </div>
+
+      <div class="areas-section">
+        <h2 class="areas-state-title"><span class="state-icon">🌰</span> Northwest Ohio</h2>
+        <div class="areas-grid">
+          {ohioAreas.map(area => (
+            <a href={`/service-areas/${area.slug}/`} class="area-card">
+              <div class="area-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <h3>{area.name}, {area.state}</h3>
+                <p>{area.county}</p>
+              </div>
+              <svg class="area-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="areas-section">
+        <h2 class="areas-state-title"><span class="state-icon">🫎</span> Southeast Michigan</h2>
+        <div class="areas-grid">
+          {michiganAreas.map(area => (
+            <a href={`/service-areas/${area.slug}/`} class="area-card">
+              <div class="area-card-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <h3>{area.name}, {area.state}</h3>
+                <p>{area.county}</p>
+              </div>
+              <svg class="area-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="areas-cta">
+        <h2>Don't see your area?</h2>
+        <p>We may still be able to help! Give us a call and we'll let you know.</p>
+        <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-lg">
+          <i class="fas fa-phone"></i> Call {site.company.phone}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .areas-section { margin-bottom: 48px; }
+  .areas-state-title { font-family: var(--font-display); font-size: 1.6rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+  .state-icon { font-size: 1.4rem; }
+  .areas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+  .area-card {
+    display: flex; align-items: center; gap: 16px; padding: 20px 24px;
+    background: var(--bg-white); border: 1px solid var(--border); border-radius: var(--radius-lg);
+    text-decoration: none; color: inherit; transition: all 0.2s;
+  }
+  .area-card:hover { border-color: var(--accent); box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .area-card-icon { color: var(--primary); flex-shrink: 0; }
+  .area-card h3 { font-size: 1.05rem; margin: 0 0 2px; }
+  .area-card p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+  .area-arrow { margin-left: auto; color: var(--text-muted); flex-shrink: 0; transition: transform 0.2s; }
+  .area-card:hover .area-arrow { transform: translateX(4px); color: var(--accent); }
+  .areas-cta { text-align: center; padding: 48px 24px; background: var(--bg-warm); border-radius: var(--radius-lg); margin-top: 32px; }
+  .areas-cta h2 { font-family: var(--font-display); margin-bottom: 8px; }
+  .areas-cta p { color: var(--text-muted); margin-bottom: 20px; }
+</style>

@@ -15,7 +15,12 @@ const site = await getSiteSettings();
           <p>We are not a franchise. We are not a faceless corporation. When you call us, you talk to Nick — the owner — who will be on-site for every single installation. That is our promise, and that is what makes us different.</p>
         </div>
         <div class="about-image">
-          <img src="/images/about/team.jpg" alt="Ghareeb Fencing Solutions team" loading="eager" />
+          <img src="/images/about/team.jpg" alt="Ghareeb Fencing Solutions team" loading="eager" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" />
+          <div class="team-placeholder" style="display:none; height:400px; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius:var(--radius-lg); align-items:center; justify-content:center; flex-direction:column; gap:16px; color:white; text-align:center; padding:40px;">
+            <div style="font-size:4rem; font-weight:800; color:var(--accent);">GF</div>
+            <div style="font-size:1.2rem; font-weight:600;">Ghareeb Fencing Solutions</div>
+            <div style="font-size:0.95rem; opacity:0.8;">Toledo's Trusted Fence Contractor</div>
+          </div>
         </div>
       </div>
     </div>

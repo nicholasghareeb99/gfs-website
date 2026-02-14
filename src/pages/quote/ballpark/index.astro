@@ -100,7 +100,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
                                 <div id="map"></div>
                                 <div class="map-instructions" id="map-instructions">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    <span>Loading your property map...</span>
+                                    <span>Click "Search" to load your property on satellite view</span>
                                 </div>
                             </div>
                             <div class="map-toolbar" id="map-toolbar" style="display: none;">
@@ -220,16 +220,32 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
 </BaseLayout>
 
 <script is:inline define:vars={{ mapsApiKey }}>
-    const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places,geometry&callback=initGoogleMaps`;
-    script.async = true; script.defer = true;
-    document.head.appendChild(script);
-    window.initGoogleMaps = function() {
-        // If tool already unlocked and address available, auto-load map
-        if (window._toolUnlocked && window._leadAddress) {
-            searchAddress(window._leadAddress);
-        }
-    };
+    if (mapsApiKey && mapsApiKey !== 'undefined' && mapsApiKey !== '') {
+        const script = document.createElement('script');
+        script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places,geometry&callback=initGoogleMaps`;
+        script.async = true; script.defer = true;
+        script.onerror = function() { window._mapsUnavailable = true; showManualFallback(); };
+        document.head.appendChild(script);
+        window.initGoogleMaps = function() {
+            if (window._toolUnlocked && window._leadAddress) {
+                searchAddress(window._leadAddress);
+            }
+        };
+    } else {
+        window._mapsUnavailable = true;
+        document.addEventListener('DOMContentLoaded', function() { showManualFallback(); });
+    }
+    function showManualFallback() {
+        var mc = document.getElementById('map-container');
+        var mi = document.getElementById('manual-inputs');
+        var mt = document.getElementById('manual-toggle');
+        var ins = document.getElementById('map-instructions');
+        if (mc) mc.style.display = 'none';
+        if (document.getElementById('address-input')) document.getElementById('address-input').parentElement.style.display = 'none';
+        if (mi) mi.style.display = 'block';
+        if (mt) mt.style.display = 'none';
+        if (document.getElementById('map-toolbar')) document.getElementById('map-toolbar').style.display = 'none';
+    }
 </script>
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
