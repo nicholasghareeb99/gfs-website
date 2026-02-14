@@ -4,6 +4,17 @@ import contactData from '../content/contact.json';
 const { contactForm } = contactData;
 ---
 
+<!-- Hidden Netlify Form for backup lead capture -->
+<form name="contact-leads" netlify netlify-honeypot="bot-field" hidden>
+  <input type="text" name="bot-field" />
+  <input type="text" name="name" />
+  <input type="tel" name="phone" />
+  <input type="email" name="email" />
+  <input type="text" name="address" />
+  <input type="text" name="fenceType" />
+  <textarea name="message"></textarea>
+</form>
+
 <form id="contact-form" class="contact-form" novalidate>
   <!-- Honeypot: hidden from humans, bots fill it -->
   <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true">
@@ -260,7 +271,7 @@ const { contactForm } = contactData;
       btnLoading.style.display = 'inline-flex';
       
       try {
-        // Submit via server API (handles Firestore + email notification)
+        // Submit via server API (saves to Firestore jobs collection)
         const res = await fetch('/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -272,6 +283,14 @@ const { contactForm } = contactData;
         });
         
         if (!res.ok) throw new Error('Submission failed');
+
+        // Backup: submit to Netlify Forms
+        try {
+          const netlifyForm = new FormData();
+          netlifyForm.append('form-name', 'contact-leads');
+          Object.entries(data).forEach(([k, v]) => netlifyForm.append(k, v));
+          fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+        } catch(e) {}
         
         // Show success message
         messageEl.textContent = successMessage;

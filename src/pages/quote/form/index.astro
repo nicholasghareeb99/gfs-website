@@ -21,6 +21,16 @@ const site = await getSiteSettings();
 
     <section class="form-section">
         <div class="container">
+            <!-- Hidden Netlify Form for backup lead capture -->
+            <form name="detailed-quote-leads" netlify netlify-honeypot="bot-field" hidden>
+                <input type="text" name="bot-field" />
+                <input type="text" name="name" />
+                <input type="tel" name="phone" />
+                <input type="email" name="email" />
+                <input type="text" name="address" />
+                <input type="text" name="fenceType" />
+                <textarea name="message"></textarea>
+            </form>
             <div class="form-grid">
                 <div class="form-main">
                     <form id="quote-form" novalidate>
@@ -239,6 +249,19 @@ const site = await getSiteSettings();
                 const data = await res.json().catch(() => ({}));
                 throw new Error(data.error || 'Submission failed');
             }
+
+            // Backup: submit to Netlify Forms
+            try {
+                const netlifyForm = new FormData();
+                netlifyForm.append('form-name', 'detailed-quote-leads');
+                netlifyForm.append('name', name);
+                netlifyForm.append('phone', phone);
+                netlifyForm.append('email', email);
+                netlifyForm.append('address', address);
+                netlifyForm.append('fenceType', fenceType);
+                netlifyForm.append('message', details.join('\n'));
+                fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+            } catch(e) {}
 
             $('quote-form').style.display = 'none';
             $('form-success').style.display = 'block';

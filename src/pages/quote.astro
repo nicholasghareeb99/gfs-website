@@ -5,6 +5,18 @@ const site = await getSiteSettings();
 ---
 
 <BaseLayout title="Get a Free Fence Quote | Ghareeb Fencing Solutions Toledo OH" description="Get an instant fence quote in 60 seconds. Cedar, vinyl, aluminum, chain link fencing in Toledo OH. No pressure, no obligation.">
+  <!-- Hidden Netlify Form for backup lead capture -->
+  <form name="quote-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input type="text" name="bot-field" />
+    <input type="text" name="name" />
+    <input type="tel" name="phone" />
+    <input type="email" name="email" />
+    <input type="text" name="address" />
+    <input type="text" name="fenceType" />
+    <input type="text" name="footage" />
+    <input type="text" name="timeline" />
+    <textarea name="details"></textarea>
+  </form>
   <section class="quote-hero">
     <div class="container">
       <div class="quote-grid">
@@ -153,6 +165,14 @@ const site = await getSiteSettings();
         body: JSON.stringify({ type: 'quote', ...data })
       });
       if (!res.ok) throw new Error('Failed');
+
+      // Backup: submit to Netlify Forms
+      try {
+        const netlifyForm = new FormData();
+        netlifyForm.append('form-name', 'quote-leads');
+        Object.entries(data).forEach(([k, v]) => netlifyForm.append(k, v));
+        fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+      } catch(e) {}
       msg.textContent = '✅ Quote request received! We will get back to you within 24 hours.';
       msg.style.background = '#d1fae5'; msg.style.color = '#065f46';
       msg.style.display = 'block';

@@ -13,11 +13,26 @@ const firebaseConfig = {
 const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
 ---
 
-<BaseLayout 
-    title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions" 
+<BaseLayout
+    title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions"
     description="Get an instant ballpark fence quote in 60 seconds. Draw on a map or enter measurements. See pricing for cedar, vinyl, chain link & more."
     canonical="/quote/ballpark/"
 >
+    <!-- Hidden Netlify Form for backup lead capture (no JS needed) -->
+    <form name="ballpark-leads" netlify netlify-honeypot="bot-field" hidden>
+        <input type="text" name="bot-field" />
+        <input type="text" name="name" />
+        <input type="tel" name="phone" />
+        <input type="email" name="email" />
+        <input type="text" name="address" />
+        <input type="text" name="fenceStyle" />
+        <input type="text" name="linearFeet" />
+        <input type="text" name="height" />
+        <input type="text" name="gates" />
+        <input type="text" name="estimatedRange" />
+        <textarea name="notes"></textarea>
+    </form>
+
     <section class="hero-mini">
         <div class="container">
             <div class="breadcrumb">
@@ -32,85 +47,12 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
         <div class="container">
             <div class="calculator-grid">
                 <div class="calculator-main">
-                    <!-- Step 1: Location -->
+
+                    <!-- ========== STEP 1: LEAD WALL (FIRST) ========== -->
                     <div class="calc-step" id="step-1">
                         <div class="step-header">
                             <span class="step-number">1</span>
-                            <div><h3>Where's your property?</h3><p>Search your address to get started</p></div>
-                        </div>
-                        <div class="address-search">
-                            <input type="text" id="address-input" placeholder="Enter your address (e.g., 123 Main St, Toledo, OH)" />
-                            <button type="button" id="search-btn" class="btn btn-primary">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search
-                            </button>
-                        </div>
-                        <div id="map-container">
-                            <div id="map"></div>
-                            <div class="map-instructions" id="map-instructions">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                <span>Enter your address above to view your property</span>
-                            </div>
-                        </div>
-                        <div class="map-toolbar" id="map-toolbar" style="display: none;">
-                            <button type="button" id="draw-btn" class="toolbar-btn active">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-                                Draw Fence Line
-                            </button>
-                            <button type="button" id="clear-btn" class="toolbar-btn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Clear
-                            </button>
-                            <div class="toolbar-info"><strong>Total Length:</strong> <span id="total-length">0</span> ft</div>
-                        </div>
-                        <div class="manual-entry">
-                            <button type="button" id="manual-toggle" class="text-btn">Or enter measurements manually</button>
-                            <div id="manual-inputs" style="display: none;">
-                                <label><span>Linear Feet of Fence</span>
-                                    <input type="number" id="manual-feet" min="20" max="2000" placeholder="e.g., 150" />
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Fence Type -->
-                    <div class="calc-step" id="step-2">
-                        <div class="step-header">
-                            <span class="step-number">2</span>
-                            <div><h3>Choose your fence style</h3><p>Select a material and style</p></div>
-                        </div>
-                        <div id="fence-styles-loading" class="loading-state"><div class="spinner"></div><span>Loading fence styles...</span></div>
-                        <div id="fence-styles-grid" class="fence-styles-grid" style="display: none;"></div>
-                    </div>
-
-                    <!-- Step 3: Options -->
-                    <div class="calc-step" id="step-3">
-                        <div class="step-header">
-                            <span class="step-number">3</span>
-                            <div><h3>Customize your project</h3><p>Select height and additional options</p></div>
-                        </div>
-                        <div class="options-grid">
-                            <div class="option-group">
-                                <label for="fence-height">Fence Height</label>
-                                <select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select>
-                            </div>
-                            <div class="option-group">
-                                <label for="single-gates">Single Gates (Walk)</label>
-                                <select id="single-gates"><option value="0">None</option><option value="1" selected>1 Gate</option><option value="2">2 Gates</option><option value="3">3 Gates</option></select>
-                            </div>
-                            <div class="option-group">
-                                <label for="double-gates">Double Gates (Drive)</label>
-                                <select id="double-gates"><option value="0" selected>None</option><option value="1">1 Gate</option><option value="2">2 Gates</option></select>
-                            </div>
-                            <div class="checkbox-group">
-                                <label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 4: LEAD WALL -->
-                    <div class="calc-step" id="step-4">
-                        <div class="step-header">
-                            <span class="step-number">4</span>
-                            <div><h3>See your instant quote</h3><p>Enter your info below — your ballpark price appears instantly</p></div>
+                            <div><h3>Tell us about yourself</h3><p>Enter your info to unlock the instant quote tool</p></div>
                         </div>
                         <div id="lead-wall-form">
                             <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
@@ -122,27 +64,119 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
                                 <div class="form-group"><label for="lead-email">Email</label><input type="email" id="lead-email" placeholder="john@email.com" /></div>
                                 <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required placeholder="123 Main St, Toledo, OH" /></div>
                             </div>
-                            <div class="form-group"><label for="lead-notes">Additional Notes</label><textarea id="lead-notes" rows="2" placeholder="Any special requirements or questions?"></textarea></div>
-                            <button type="button" id="unlock-quote-btn" class="btn btn-primary btn-block btn-lg" disabled>
+                            <button type="button" id="unlock-tool-btn" class="btn btn-primary btn-block btn-lg" disabled>
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                Unlock My Quote
+                                Unlock Quote Tool
                             </button>
-                            <p class="form-disclaimer">By submitting, you agree to receive communications from Ghareeb Fencing Solutions. We respect your privacy and never share your information.</p>
+                            <p class="form-disclaimer">Your info is never shared. We'll follow up within 24 hours with a detailed estimate.</p>
                         </div>
+                        <!-- Success state after unlock -->
                         <div id="lead-wall-success" style="display: none;">
                             <div class="success-banner">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                                <div><strong>Quote unlocked!</strong><span>Check the quote panel for your estimate. We'll follow up within 24 hours.</span></div>
+                                <div><strong>Quote tool unlocked!</strong><span>Now configure your fence below to see instant pricing.</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== STEP 2: LOCATION / MAP (locked until Step 1 done) ========== -->
+                    <div class="calc-step locked-step" id="step-2">
+                        <div class="step-header">
+                            <span class="step-number">2</span>
+                            <div><h3>Measure your fence line</h3><p>Draw on the map or enter measurements manually</p></div>
+                        </div>
+                        <div class="locked-overlay" id="step-2-lock">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Complete Step 1 to unlock</span>
+                        </div>
+                        <div class="step-content" id="step-2-content" style="display:none;">
+                            <div class="address-search">
+                                <input type="text" id="address-input" placeholder="Search a different address (or we'll use the one above)" />
+                                <button type="button" id="search-btn" class="btn btn-primary">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> Search
+                                </button>
+                            </div>
+                            <div id="map-container">
+                                <div id="map"></div>
+                                <div class="map-instructions" id="map-instructions">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    <span>Loading your property map...</span>
+                                </div>
+                            </div>
+                            <div class="map-toolbar" id="map-toolbar" style="display: none;">
+                                <button type="button" id="draw-btn" class="toolbar-btn active">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+                                    Draw Fence Line
+                                </button>
+                                <button type="button" id="clear-btn" class="toolbar-btn">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Clear
+                                </button>
+                                <div class="toolbar-info"><strong>Total Length:</strong> <span id="total-length">0</span> ft</div>
+                            </div>
+                            <div class="manual-entry">
+                                <button type="button" id="manual-toggle" class="text-btn">Or enter measurements manually</button>
+                                <div id="manual-inputs" style="display: none;">
+                                    <label><span>Linear Feet of Fence</span>
+                                        <input type="number" id="manual-feet" min="20" max="2000" placeholder="e.g., 150" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========== STEP 3: FENCE TYPE (locked until Step 1 done) ========== -->
+                    <div class="calc-step locked-step" id="step-3">
+                        <div class="step-header">
+                            <span class="step-number">3</span>
+                            <div><h3>Choose your fence style</h3><p>Select a material and style</p></div>
+                        </div>
+                        <div class="locked-overlay" id="step-3-lock">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Complete Step 1 to unlock</span>
+                        </div>
+                        <div class="step-content" id="step-3-content" style="display:none;">
+                            <div id="fence-styles-loading" class="loading-state"><div class="spinner"></div><span>Loading fence styles...</span></div>
+                            <div id="fence-styles-grid" class="fence-styles-grid" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ========== STEP 4: OPTIONS (locked until Step 1 done) ========== -->
+                    <div class="calc-step locked-step" id="step-4">
+                        <div class="step-header">
+                            <span class="step-number">4</span>
+                            <div><h3>Customize your project</h3><p>Select height and additional options</p></div>
+                        </div>
+                        <div class="locked-overlay" id="step-4-lock">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Complete Step 1 to unlock</span>
+                        </div>
+                        <div class="step-content" id="step-4-content" style="display:none;">
+                            <div class="options-grid">
+                                <div class="option-group">
+                                    <label for="fence-height">Fence Height</label>
+                                    <select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select>
+                                </div>
+                                <div class="option-group">
+                                    <label for="single-gates">Single Gates (Walk)</label>
+                                    <select id="single-gates"><option value="0">None</option><option value="1" selected>1 Gate</option><option value="2">2 Gates</option><option value="3">3 Gates</option></select>
+                                </div>
+                                <div class="option-group">
+                                    <label for="double-gates">Double Gates (Drive)</label>
+                                    <select id="double-gates"><option value="0" selected>None</option><option value="1">1 Gate</option><option value="2">2 Gates</option></select>
+                                </div>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sidebar -->
+                <!-- ========== SIDEBAR: QUOTE SUMMARY ========== -->
                 <div class="calculator-sidebar">
                     <div class="quote-summary">
                         <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M16 3v4M8 3v4M2 11h20"/></svg> Your Quote</h3>
-                        
+
                         <!-- LOCKED state -->
                         <div id="quote-locked">
                             <div class="summary-placeholder" id="summary-placeholder">
@@ -156,38 +190,21 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
                                 <div class="summary-line"><span>Gates</span><span id="preview-gates">—</span></div>
                                 <div id="preview-removal-line" class="summary-line" style="display:none;"><span>Old Fence Removal</span><span>Yes</span></div>
                                 <hr>
-                                <div class="estimate-range locked-estimate">
+                                <div class="estimate-range">
                                     <div class="range-label">Your Estimated Price</div>
-                                    <div class="locked-price">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                                        <span>Enter your info in Step 4 to unlock</span>
+                                    <div class="range-values">
+                                        <span class="range-low" id="range-low">$0</span>
+                                        <span class="range-separator">—</span>
+                                        <span class="range-high" id="range-high">$0</span>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- UNLOCKED state -->
-                        <div id="quote-unlocked" style="display: none;">
-                            <div class="summary-line"><span>Style</span><span id="sum-style">—</span></div>
-                            <div class="summary-line"><span>Length</span><span id="sum-feet">—</span></div>
-                            <div class="summary-line"><span>Height</span><span id="sum-height">—</span></div>
-                            <div class="summary-line"><span>Gates</span><span id="sum-gates">—</span></div>
-                            <div id="removal-line" class="summary-line" style="display:none;"><span>Old Fence Removal</span><span>Included</span></div>
-                            <hr>
-                            <div class="estimate-range">
-                                <div class="range-label">Your Estimated Price</div>
-                                <div class="range-values">
-                                    <span class="range-low" id="range-low">$0</span>
-                                    <span class="range-separator">—</span>
-                                    <span class="range-high" id="range-high">$0</span>
+                                <p class="estimate-note">*Final price determined after free on-site measurement</p>
+                                <div class="summary-actions">
+                                    <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                                        Call to Schedule — {site.company.phone}
+                                    </a>
                                 </div>
-                            </div>
-                            <p class="estimate-note">*Final price determined after free on-site measurement</p>
-                            <div class="summary-actions">
-                                <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                                    Call to Schedule — {site.company.phone}
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -204,10 +221,15 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
 
 <script is:inline define:vars={{ mapsApiKey }}>
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places&callback=initGoogleMaps`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=drawing,places,geometry&callback=initGoogleMaps`;
     script.async = true; script.defer = true;
     document.head.appendChild(script);
-    window.initGoogleMaps = function() {};
+    window.initGoogleMaps = function() {
+        // If tool already unlocked and address available, auto-load map
+        if (window._toolUnlocked && window._leadAddress) {
+            searchAddress(window._leadAddress);
+        }
+    };
 </script>
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -217,12 +239,18 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-let map = null, drawingManager = null, polylines = [], totalFeet = 0, selectedStyle = null, pricingData = [], userAddress = '', quoteUnlocked = false;
+let map = null, drawingManager = null, polylines = [], totalFeet = 0, selectedStyle = null, pricingData = [];
 const heightMultipliers = { '4': 0.85, '5': 0.92, '6': 1.0, '8': 1.25 };
 const removalCostPerFoot = 4;
+window._toolUnlocked = false;
+window._leadAddress = '';
 
 const $ = id => document.getElementById(id);
 
+// ===========================
+// PRICING — synced from settings/global (same source as Executive App)
+// Format: "Style Name : pricePerFoot : singleGatePrice : doubleGatePrice"
+// ===========================
 async function loadPricing() {
     try {
         const doc = await db.collection('settings').doc('global').get();
@@ -234,6 +262,7 @@ async function loadPricing() {
             }).filter(i => i.pricePerFoot > 0);
         }
     } catch(e) { console.error('Pricing load error:', e); }
+    // Fallback defaults if Firestore has no pricing
     if (!pricingData.length) {
         pricingData = [
             { name:'Cedar Privacy', pricePerFoot:42, singleGate:375, doubleGate:695 },
@@ -252,20 +281,23 @@ async function loadPricing() {
 function renderFenceStyles() {
     $('fence-styles-loading').style.display = 'none';
     $('fence-styles-grid').style.display = 'grid';
-    $('fence-styles-grid').innerHTML = pricingData.map((s, i) => `<button type="button" class="fence-style-card" data-index="${i}"><div class="style-name">${s.name}</div></button>`).join('');
+    $('fence-styles-grid').innerHTML = pricingData.map((s, i) => `<button type="button" class="fence-style-card" data-index="${i}"><div class="style-name">${s.name}</div><div class="style-price">from $${s.pricePerFoot}/ft</div></button>`).join('');
     document.querySelectorAll('.fence-style-card').forEach(card => {
         card.addEventListener('click', () => {
             document.querySelectorAll('.fence-style-card').forEach(c => c.classList.remove('selected'));
             card.classList.add('selected');
             selectedStyle = pricingData[parseInt(card.dataset.index)];
-            updatePreview(); checkReady();
+            updateQuote();
         });
     });
 }
 
-function getFeet() { return $('manual-feet').value ? parseInt($('manual-feet').value) : totalFeet; }
+// ===========================
+// QUOTE CALCULATION — live updates
+// ===========================
+function getFeet() { return $('manual-feet') && $('manual-feet').value ? parseInt($('manual-feet').value) : totalFeet; }
 
-function updatePreview() {
+function updateQuote() {
     const feet = getFeet();
     if (feet < 20 || !selectedStyle) { $('summary-placeholder').style.display = 'flex'; $('summary-preview').style.display = 'none'; return; }
     $('summary-placeholder').style.display = 'none';
@@ -278,36 +310,93 @@ function updatePreview() {
     if (parseInt($('double-gates').value) > 0) g.push(parseInt($('double-gates').value) + ' double');
     $('preview-gates').textContent = g.length ? g.join(', ') : 'None';
     $('preview-removal-line').style.display = $('remove-old').checked ? 'flex' : 'none';
-    if (quoteUnlocked) updateUnlocked();
-}
 
-function updateUnlocked() {
-    const feet = getFeet();
-    if (feet < 20 || !selectedStyle) return;
+    // Calculate price
     const hm = heightMultipliers[$('fence-height').value];
     const sg = parseInt($('single-gates').value), dg = parseInt($('double-gates').value);
     const rem = $('remove-old').checked;
     const total = (feet * selectedStyle.pricePerFoot * hm) + (sg * selectedStyle.singleGate) + (dg * selectedStyle.doubleGate) + (rem ? feet * removalCostPerFoot : 0);
     const lo = Math.round(total * 0.85), hi = Math.round(total * 1.15);
-    $('sum-style').textContent = selectedStyle.name;
-    $('sum-feet').textContent = feet + ' ft';
-    $('sum-height').textContent = $('fence-height').value + ' ft';
-    let g = [];
-    if (sg > 0) g.push(sg + ' single');
-    if (dg > 0) g.push(dg + ' double');
-    $('sum-gates').textContent = g.length ? g.join(', ') : 'None';
-    $('removal-line').style.display = rem ? 'flex' : 'none';
     $('range-low').textContent = '$' + lo.toLocaleString();
     $('range-high').textContent = '$' + hi.toLocaleString();
 }
 
-function checkReady() {
-    const feet = getFeet();
-    const ready = feet >= 20 && selectedStyle && $('lead-name').value.trim() && $('lead-phone').value.trim() && $('lead-address').value.trim();
-    $('unlock-quote-btn').disabled = !ready;
+// ===========================
+// STEP 1: LEAD WALL — unlock tool
+// ===========================
+function checkLeadReady() {
+    const ready = $('lead-name').value.trim() && $('lead-phone').value.trim() && $('lead-address').value.trim();
+    $('unlock-tool-btn').disabled = !ready;
 }
+['lead-name','lead-phone','lead-email','lead-address'].forEach(id => $(id).addEventListener('input', checkLeadReady));
 
-// Map
+$('unlock-tool-btn').addEventListener('click', async () => {
+    const name = $('lead-name').value.trim();
+    const phone = $('lead-phone').value.trim();
+    const email = $('lead-email').value.trim();
+    const address = $('lead-address').value.trim();
+
+    if (!name || !phone || !address) return;
+
+    const btn = $('unlock-tool-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></div> Unlocking...';
+
+    try {
+        // Save lead via server API → goes to Firestore jobs collection
+        const res = await fetch('/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                type: 'lead',
+                name, phone, email, address,
+                notes: 'Started ballpark quote tool',
+                website: $('hp-website')?.value || ''
+            })
+        });
+
+        // Also submit to Netlify Forms as backup
+        try {
+            const netlifyForm = new FormData();
+            netlifyForm.append('form-name', 'ballpark-leads');
+            netlifyForm.append('name', name);
+            netlifyForm.append('phone', phone);
+            netlifyForm.append('email', email);
+            netlifyForm.append('address', address);
+            fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+        } catch(e) {}
+
+    } catch(e) {
+        console.error('Lead save error:', e);
+        // Don't block the tool — still unlock even if save fails
+    }
+
+    // Unlock the tool
+    window._toolUnlocked = true;
+    window._leadAddress = address;
+
+    // Show success, hide form
+    $('lead-wall-form').style.display = 'none';
+    $('lead-wall-success').style.display = 'block';
+
+    // Unlock steps 2-4
+    document.querySelectorAll('.locked-step').forEach(step => step.classList.remove('locked-step'));
+    ['step-2-lock','step-3-lock','step-4-lock'].forEach(id => $(id).style.display = 'none');
+    ['step-2-content','step-3-content','step-4-content'].forEach(id => $(id).style.display = 'block');
+
+    // Pre-fill address search and auto-geocode
+    $('address-input').value = address;
+    if (window.google && window.google.maps) {
+        searchAddress(address);
+    }
+
+    // Scroll to step 2
+    $('step-2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ===========================
+// STEP 2: MAP / DRAWING
+// ===========================
 function initMap(lat, lng) {
     $('map-instructions').style.display = 'none';
     $('map-toolbar').style.display = 'flex';
@@ -334,21 +423,19 @@ function calcLength() {
     });
     totalFeet = Math.round(totalFeet);
     $('total-length').textContent = totalFeet;
-    updatePreview(); checkReady();
+    updateQuote();
 }
 
-// Address search
-function searchAddress() {
-    const addr = $('address-input').value.trim();
+function searchAddress(addr) {
+    if (!addr) addr = $('address-input').value.trim();
     if (!addr) return;
-    userAddress = addr;
-    $('lead-address').value = addr;
     new google.maps.Geocoder().geocode({ address: addr }, (r, s) => {
         if (s === 'OK' && r[0]) { const loc = r[0].geometry.location; initMap(loc.lat(), loc.lng()); }
-        else alert('Address not found. Please try a different address.');
+        else { $('map-instructions').innerHTML = '<span>Could not find that address. Try drawing manually or enter feet below.</span>'; }
     });
 }
-$('search-btn').addEventListener('click', searchAddress);
+window.searchAddress = searchAddress;
+$('search-btn').addEventListener('click', () => searchAddress());
 $('address-input').addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); searchAddress(); } });
 
 // Manual entry
@@ -359,90 +446,22 @@ $('manual-toggle').addEventListener('click', () => {
 });
 $('manual-feet').addEventListener('input', () => {
     if ($('manual-feet').value) $('total-length').textContent = $('manual-feet').value;
-    updatePreview(); checkReady();
+    updateQuote();
 });
 
 // Drawing controls
 $('draw-btn').addEventListener('click', () => { if (drawingManager) { drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYLINE); $('draw-btn').classList.add('active'); } });
-$('clear-btn').addEventListener('click', () => { polylines.forEach(p => p.setMap(null)); polylines = []; totalFeet = 0; $('total-length').textContent = '0'; updatePreview(); checkReady(); });
+$('clear-btn').addEventListener('click', () => { polylines.forEach(p => p.setMap(null)); polylines = []; totalFeet = 0; $('total-length').textContent = '0'; updateQuote(); });
 
-// Option handlers
-['fence-height','single-gates','double-gates'].forEach(id => $(id).addEventListener('change', () => { updatePreview(); checkReady(); }));
-$('remove-old').addEventListener('change', () => { updatePreview(); checkReady(); });
+// ===========================
+// STEP 4: OPTIONS — live update
+// ===========================
+['fence-height','single-gates','double-gates'].forEach(id => $(id).addEventListener('change', updateQuote));
+$('remove-old').addEventListener('change', updateQuote);
 
-// Lead form handlers
-['lead-name','lead-phone','lead-email','lead-address'].forEach(id => $(id).addEventListener('input', checkReady));
-
-// LEAD WALL SUBMIT - saves to websiteLeads, then reveals pricing
-$('unlock-quote-btn').addEventListener('click', async () => {
-    const feet = getFeet(), h = $('fence-height').value, hm = heightMultipliers[h];
-    const sg = parseInt($('single-gates').value), dg = parseInt($('double-gates').value), rem = $('remove-old').checked;
-    const total = (feet * selectedStyle.pricePerFoot * hm) + (sg * selectedStyle.singleGate) + (dg * selectedStyle.doubleGate) + (rem ? feet * removalCostPerFoot : 0);
-    const lo = Math.round(total * 0.85), hi = Math.round(total * 1.15);
-
-    const leadData = {
-        name: $('lead-name').value.trim(),
-        phone: $('lead-phone').value.trim(),
-        email: $('lead-email').value.trim() || '',
-        address: $('lead-address').value.trim(),
-        notes: $('lead-notes').value.trim() || '',
-        fenceStyle: selectedStyle.name,
-        linearFeet: feet,
-        height: parseInt(h),
-        singleGates: sg,
-        doubleGates: dg,
-        removeOldFence: rem,
-        pricePerFoot: selectedStyle.pricePerFoot,
-        estimateLow: lo,
-        estimateHigh: hi,
-        source: 'website-ballpark-calculator',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        status: 'new'
-    };
-
-    const btn = $('unlock-quote-btn');
-    btn.disabled = true;
-    btn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;display:inline-block;"></div> Submitting...';
-
-    try {
-        // Submit via server API (handles Firestore + email notification)
-        const res = await fetch('/api/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: 'lead',
-                name: leadData.name,
-                phone: leadData.phone,
-                email: leadData.email,
-                address: leadData.address,
-                notes: leadData.notes,
-                fenceType: leadData.fenceStyle,
-                fenceHeight: leadData.height,
-                fenceLength: leadData.linearFeet,
-                singleGates: leadData.singleGates,
-                doubleGates: leadData.doubleGates,
-                estimateLow: lo,
-                estimateHigh: hi,
-                estimatedRange: '$' + lo.toLocaleString() + ' - $' + hi.toLocaleString(),
-                website: $('hp-website')?.value || ''
-            })
-        });
-        if (!res.ok) throw new Error('Submit failed');
-        quoteUnlocked = true;
-        $('lead-wall-form').style.display = 'none';
-        $('lead-wall-success').style.display = 'block';
-        $('quote-locked').style.display = 'none';
-        $('quote-unlocked').style.display = 'block';
-        updateUnlocked();
-        if (window.innerWidth <= 1024) document.querySelector('.calculator-sidebar').scrollIntoView({ behavior:'smooth', block:'start' });
-    } catch(e) {
-        console.error('Lead save error:', e);
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg> Unlock My Quote';
-        alert('Error submitting. Please call us directly at (419) 902-8257.');
-    }
-});
-
+// ===========================
+// INIT
+// ===========================
 loadPricing();
 </script>
 
@@ -457,11 +476,26 @@ loadPricing();
     .calculator-section { padding: 60px 0; background: var(--bg-light); }
     .calculator-grid { display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: start; }
     @media (max-width: 1024px) { .calculator-grid { grid-template-columns: 1fr; } .calculator-sidebar { order: -1; } }
-    .calc-step { background: white; border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+    .calc-step { background: white; border-radius: var(--radius-lg); padding: 32px; margin-bottom: 24px; box-shadow: var(--shadow-sm); position: relative; }
+    .locked-step .step-content { display: none; }
+    .locked-overlay { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px 20px; color: var(--text-muted); background: #f8fafc; border-radius: var(--radius); text-align: center; }
+    .locked-overlay svg { opacity: 0.4; }
+    .locked-overlay span { font-size: 0.95rem; }
     .step-header { display: flex; gap: 16px; align-items: flex-start; margin-bottom: 24px; }
     .step-number { width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
     .step-header h3 { margin: 0 0 4px; font-size: 1.2rem; }
     .step-header p { margin: 0; color: var(--text-muted); font-size: 0.95rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.95rem; }
+    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
+    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; }
+    .form-disclaimer { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
+    .success-banner { display: flex; gap: 16px; align-items: flex-start; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius); padding: 20px; color: #065f46; }
+    .success-banner svg { flex-shrink: 0; color: #10b981; margin-top: 2px; }
+    .success-banner strong { display: block; margin-bottom: 4px; font-size: 1.1rem; }
+    .success-banner span { font-size: 0.95rem; color: #047857; }
     .address-search { display: flex; gap: 12px; margin-bottom: 20px; }
     .address-search input { flex: 1; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
     .address-search input:focus { border-color: var(--primary); outline: none; }
@@ -487,23 +521,13 @@ loadPricing();
     .fence-style-card:hover { border-color: var(--primary); background: white; }
     .fence-style-card.selected { border-color: var(--accent); background: white; box-shadow: 0 0 0 3px rgba(212,175,55,0.2); }
     .style-name { font-weight: 600; color: var(--text); }
+    .style-price { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
     .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
     .option-group label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.95rem; }
     .option-group select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; background: white; cursor: pointer; }
     .checkbox-group { grid-column: 1 / -1; }
     .checkbox-label { display: flex; align-items: center; gap: 12px; cursor: pointer; }
     .checkbox-label input { width: 20px; height: 20px; cursor: pointer; }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
-    .form-group { margin-bottom: 16px; }
-    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 0.95rem; }
-    .form-group input, .form-group textarea { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: var(--radius); font-size: 1rem; }
-    .form-group input:focus, .form-group textarea:focus { border-color: var(--primary); outline: none; }
-    .form-disclaimer { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 12px; }
-    .success-banner { display: flex; gap: 16px; align-items: flex-start; background: #ecfdf5; border: 2px solid #10b981; border-radius: var(--radius); padding: 20px; color: #065f46; }
-    .success-banner svg { flex-shrink: 0; color: #10b981; margin-top: 2px; }
-    .success-banner strong { display: block; margin-bottom: 4px; font-size: 1.1rem; }
-    .success-banner span { font-size: 0.95rem; color: #047857; }
     .calculator-sidebar { position: sticky; top: 100px; }
     .quote-summary { background: white; border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-md); }
     .quote-summary h3 { margin: 0 0 20px; font-size: 1.3rem; display: flex; align-items: center; gap: 10px; }
@@ -511,15 +535,12 @@ loadPricing();
     .summary-placeholder svg { margin-bottom: 12px; opacity: 0.5; }
     .summary-line { display: flex; justify-content: space-between; padding: 8px 0; font-size: 0.95rem; }
     .summary-line span:first-child { color: var(--text-muted); }
-    #summary-preview hr, #quote-unlocked hr { margin: 16px 0; border: none; border-top: 1px solid #e2e8f0; }
+    #summary-preview hr { margin: 16px 0; border: none; border-top: 1px solid #e2e8f0; }
     .estimate-range { text-align: center; padding: 20px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: var(--radius); color: white; }
     .range-label { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; margin-bottom: 8px; }
     .range-values { font-size: 1.8rem; font-weight: 700; }
     .range-separator { margin: 0 8px; opacity: 0.5; }
     .estimate-note { font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 12px; margin-bottom: 0; }
-    .locked-estimate { background: linear-gradient(135deg, #64748b, #475569) !important; }
-    .locked-price { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px 0; }
-    .locked-price span { font-size: 0.9rem; opacity: 0.9; }
     .summary-actions { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
     .btn-block { width: 100%; justify-content: center; }
     .btn-lg { padding: 14px 24px; font-size: 1.05rem; }
