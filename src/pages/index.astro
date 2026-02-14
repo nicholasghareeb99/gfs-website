@@ -8,278 +8,324 @@ const site = { ...siteJson, ...siteSettings };
 ---
 
 <BaseLayout title={site.seo.defaultTitle} description={site.seo.defaultDescription} canonical="/">
-    <!-- Hero Section -->
-    <section class="hero" style="padding-bottom: 40px;">
-        <div class="hero-bg"></div>
-        <div class="container">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
-                <div class="hero-content">
-                    <div class="hero-badge" id="dyn-badge">
-                        <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <span id="badge-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.badge">{site.hero.badge}</span>
-                    </div>
-                    <h1 class="hero-title">
-                        <span id="hero-title-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.title">{site.hero.title}</span><br>
-                        <span class="highlight" id="hero-highlight-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.titleHighlight">{site.hero.titleHighlight}</span>
-                    </h1>
-                    <p class="hero-text" id="hero-subtitle-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.subtitle">{site.hero.subtitle}</p>
-                    <div class="hero-cta">
-                        <a href="/quote/" class="btn btn-primary btn-lg">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Get Instant Quote
-                        </a>
-                        <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                            {site.company.phone}
-                        </a>
-                    </div>
-                    <div class="hero-stats">
-                        <div class="stat">
-                            <div class="stat-value" id="stat-fences" data-editable data-edit-doc="settings/site" data-edit-field="stats.fencesInstalled">{site.stats.fencesInstalled}</div>
-                            <div class="stat-label">Fences Installed</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="stat-rating" data-editable data-edit-doc="settings/site" data-edit-field="stats.googleRating">{site.stats.googleRating}<span class="gold" style="font-size: 0.8em;">★</span></div>
-                            <div class="stat-label">Google Rating</div>
-                        </div>
-                        <div class="stat">
-                            <div class="stat-value" id="stat-warranty" data-editable data-edit-doc="settings/site" data-edit-field="stats.warranty">{site.stats.warranty}</div>
-                            <div class="stat-label">Warranty</div>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/cedar-shadowbox.jpg" alt="Cedar privacy fence Toledo" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/vinyl-white.jpg" alt="Vinyl fence Perrysburg" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/aluminum-black.jpg" alt="Aluminum ornamental fence" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/pt-privacy.jpg" alt="Wood fence Maumee" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                </div>
-            </div>
+
+<!-- Hero Section -->
+<section class="hero" style="padding-bottom: 40px;">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;">
+      <div class="hero-content">
+        <div class="hero-badge" id="dyn-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span id="badge-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.badge">{site.hero.badge}</span>
         </div>
-    </section>
-
-    <style>
-        @media (max-width: 900px) {
-            .hero .container > div { grid-template-columns: 1fr !important; }
-            .hero .container > div > div:last-child { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
-        }
-    </style>
-
-    <!-- Featured Work Gallery — DYNAMIC from Firestore -->
-    <section class="section" style="padding: 50px 0; background: var(--bg-light);">
-        <div class="container">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-                <div>
-                    <h2 class="section-title" style="margin: 0;">Recent <span class="gold">Installations</span></h2>
-                    <p style="color: var(--text-muted); margin: 8px 0 0;">Real projects from Toledo and surrounding areas</p>
-                </div>
-                <a href="/gallery/" class="btn btn-secondary" style="white-space: nowrap;">View All Projects</a>
-            </div>
-            <div class="gallery-grid-6" id="dyn-gallery">
-                <!-- Static fallback — replaced by Firestore data on load -->
-                <div class="gallery-item"><img src="/images/gallery/cedar-lattice-shadowbox.jpg" alt="Cedar fence with lattice top"><div class="gallery-label">Cedar Lattice Top</div></div>
-                <div class="gallery-item"><img src="/images/gallery/vinyl-tan-privacy.jpg" alt="Tan vinyl fence"><div class="gallery-label">Vinyl Privacy Tan</div></div>
-                <div class="gallery-item"><img src="/images/gallery/aluminum-black.jpg" alt="Black aluminum ornamental fence"><div class="gallery-label">Aluminum Ornamental - Sylvania</div></div>
-                <div class="gallery-item"><img src="/images/gallery/pt-shadowbox-lattice.jpg" alt="Wood shadowbox fence"><div class="gallery-label">Wood Shadowbox</div></div>
-                <div class="gallery-item"><img src="/images/gallery/aluminum-ornamental.jpg" alt="Aluminum pool fence"><div class="gallery-label">Aluminum Ornamental</div></div>
-                <div class="gallery-item"><img src="/images/gallery/cedar-split-rail.jpg" alt="Cedar split rail fence"><div class="gallery-label">Split Rail Cedar</div></div>
-                <div class="gallery-item"><img src="/images/gallery/vinyl-ranch-combo.jpg" alt="Ranch rail fence"><div class="gallery-label">Vinyl Ranch Rail</div></div>
-                <div class="gallery-item"><img src="/images/gallery/split-rail-4.jpg" alt="Split rail fence"><div class="gallery-label">Split Rail</div></div>
-                <div class="gallery-item"><img src="/images/gallery/chainlink-1.jpg" alt="Chain link fence"><div class="gallery-label">Chain Link</div></div>
-            </div>
+        <h1 class="hero-title">
+          <span id="hero-title-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.title">{site.hero.title}</span><br>
+          <span class="highlight" id="hero-highlight-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.titleHighlight">{site.hero.titleHighlight}</span>
+        </h1>
+        <p class="hero-text" id="hero-subtitle-text" data-editable data-edit-doc="settings/site" data-edit-field="hero.subtitle">{site.hero.subtitle}</p>
+        <div class="hero-cta">
+          <a href="/quote/" class="btn btn-primary btn-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            Get Instant Quote
+          </a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+            {site.company.phone}
+          </a>
         </div>
-    </section>
-
-    <style>
-        .gallery-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-        .gallery-item { border-radius: 10px; overflow: hidden; aspect-ratio: 1; position: relative; }
-        .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
-        .gallery-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,0.85)); color: var(--accent); font-weight: 600; font-size: 0.7rem; }
-        @media (max-width: 900px) { .gallery-grid-6 { grid-template-columns: repeat(3, 1fr); } }
-        @media (max-width: 600px) { .gallery-grid-6 { grid-template-columns: repeat(2, 1fr); } }
-    </style>
-
-    <!-- Fence Styles Section -->
-    <section class="section section-light">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Our Services</div>
-                <h2 class="section-title">Professional Fence <span class="gold">Installation</span></h2>
-                <p class="section-text">Quality materials, expert craftsmanship, and lasting results for every fencing need</p>
-            </div>
-            <div class="grid-4" id="dyn-fence-types">
-                <a href="/fences/cedar/" class="card"><div class="card-icon">🌲</div><h3 class="card-title">Cedar Privacy</h3><p class="card-text">Natural beauty with 30-40+ year lifespan. The premium choice for privacy.</p></a>
-                <a href="/fences/vinyl/" class="card"><div class="card-icon">🏠</div><h3 class="card-title">Vinyl Privacy</h3><p class="card-text">Zero maintenance, lifetime warranty. Never paint or stain again.</p></a>
-                <a href="/fences/aluminum/" class="card"><div class="card-icon">✨</div><h3 class="card-title">Ornamental Aluminum</h3><p class="card-text">Elegant, rust-free beauty. Perfect for pools and upscale properties.</p></a>
-                <a href="/fences/chainlink/" class="card"><div class="card-icon">🔗</div><h3 class="card-title">Chain Link</h3><p class="card-text">Affordable security and durability. Great for pets and property lines.</p></a>
-            </div>
-            <div style="text-align: center; margin-top: 24px;">
-                <a href="#comparison-tool" class="btn btn-outline">Compare Fence Styles</a>
-            </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <div class="stat-value" id="stat-fences" data-editable data-edit-doc="settings/site" data-edit-field="stats.fencesInstalled">{site.stats.fencesInstalled}</div>
+            <div class="stat-label">Fences Installed</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat-rating" data-editable data-edit-doc="settings/site" data-edit-field="stats.googleRating">{site.stats.googleRating}<span class="gold" style="font-size: 0.8em;">★</span></div>
+            <div class="stat-label">Google Rating</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="stat-warranty" data-editable data-edit-doc="settings/site" data-edit-field="stats.warranty">{site.stats.warranty}</div>
+            <div class="stat-label">Warranty</div>
+          </div>
         </div>
-    </section>
+      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/cedar-shadowbox.jpg" alt="Cedar privacy fence Toledo" style="width: 100%; height: 100%; object-fit: cover;"></div>
+        <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/vinyl-white.jpg" alt="Vinyl fence Perrysburg" style="width: 100%; height: 100%; object-fit: cover;"></div>
+        <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/aluminum-black.jpg" alt="Aluminum ornamental fence" style="width: 100%; height: 100%; object-fit: cover;"></div>
+        <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/pt-privacy.jpg" alt="Wood fence Maumee" style="width: 100%; height: 100%; object-fit: cover;"></div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Compare Fence Styles Tool -->
-    <section id="comparison-tool" class="section section-warm">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Comparison Tool</div>
-                <h2 class="section-title">Compare Fence <span class="gold">Styles</span></h2>
-                <p class="section-text">See how different fence types stack up on cost, durability, maintenance, and more</p>
-            </div>
-            <div class="comparison-wrapper" style="max-width: 800px; margin: 0 auto;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--color-dark-gray);">First Fence Style</label>
-                        <select id="compare-a" class="compare-select" style="width: 100%; padding: 12px 16px; border: 2px solid var(--color-light-gray); border-radius: 10px; font-size: 1rem; background: white;">
-                            <option value="">Select a style...</option>
-                            <option value="cedar">Cedar Privacy</option>
-                            <option value="vinyl">Vinyl Privacy</option>
-                            <option value="wood">Wood Privacy</option>
-                            <option value="aluminum">Ornamental Aluminum</option>
-                            <option value="chainlink">Chain Link</option>
-                            <option value="split-rail">Split Rail</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--color-dark-gray);">Compare With</label>
-                        <select id="compare-b" class="compare-select" style="width: 100%; padding: 12px 16px; border: 2px solid var(--color-light-gray); border-radius: 10px; font-size: 1rem; background: white;">
-                            <option value="">Select a style...</option>
-                            <option value="cedar">Cedar Privacy</option>
-                            <option value="vinyl">Vinyl Privacy</option>
-                            <option value="wood">Wood Privacy</option>
-                            <option value="aluminum">Ornamental Aluminum</option>
-                            <option value="chainlink">Chain Link</option>
-                            <option value="split-rail">Split Rail</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="comparison-result" style="min-height: 200px;"></div>
-                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 24px;">
-                    <a href="/quote/" class="btn btn-primary">Get Quote for Your Fence</a>
-                    <a href="tel:4199028257" class="btn btn-outline">Talk to an Expert</a>
-                </div>
-            </div>
+<style>
+  @media (max-width: 900px) {
+    .hero .container > div { grid-template-columns: 1fr !important; }
+    .hero .container > div > div:last-child { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 20px; }
+  }
+</style>
+
+<!-- Featured Work Gallery -->
+<section class="section" style="padding: 50px 0; background: var(--bg-light);">
+  <div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+      <div>
+        <h2 class="section-title" style="margin: 0;">Recent <span class="gold">Installations</span></h2>
+        <p style="color: var(--text-muted); margin: 8px 0 0;">Real projects from Toledo and surrounding areas</p>
+      </div>
+      <a href="/gallery/" class="btn btn-secondary" style="white-space: nowrap;">View All Projects</a>
+    </div>
+    <div class="gallery-grid-6" id="dyn-gallery">
+      <div class="gallery-item"><img src="/images/gallery/cedar-lattice-shadowbox.jpg" alt="Cedar fence with lattice top"><div class="gallery-label">Cedar Lattice Top</div></div>
+      <div class="gallery-item"><img src="/images/gallery/vinyl-tan-privacy.jpg" alt="Tan vinyl fence"><div class="gallery-label">Vinyl Privacy Tan</div></div>
+      <div class="gallery-item"><img src="/images/gallery/aluminum-ornamental.jpg" alt="Aluminum pool fence"><div class="gallery-label">Aluminum Ornamental</div></div>
+      <div class="gallery-item"><img src="/images/gallery/pt-shadowbox-lattice.jpg" alt="Wood shadowbox fence"><div class="gallery-label">Wood Shadowbox</div></div>
+      <div class="gallery-item"><img src="/images/gallery/aluminum-pool.jpg" alt="Aluminum pool fence"><div class="gallery-label">Pool Fence</div></div>
+      <div class="gallery-item"><img src="/images/gallery/cedar-split-rail-gate.jpg" alt="Split rail fence with gate"><div class="gallery-label">Split Rail Gate</div></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gallery-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
+  .gallery-item { border-radius: 10px; overflow: hidden; aspect-ratio: 1; position: relative; }
+  .gallery-item img { width: 100%; height: 100%; object-fit: cover; }
+  .gallery-label {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 10px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    color: var(--accent); font-weight: 600; font-size: 0.7rem;
+  }
+  @media (max-width: 900px) { .gallery-grid-6 { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 600px) { .gallery-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+</style>
+
+<!-- Fence Styles Section -->
+<section class="section section-light">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Our Services</div>
+      <h2 class="section-title">Professional Fence <span class="gold">Installation</span></h2>
+      <p class="section-text">Quality materials, expert craftsmanship, and lasting results for every fencing need</p>
+    </div>
+    <div class="grid-4" id="dyn-fence-types">
+      <a href="/fences/cedar/" class="card"><div class="card-icon">🌲</div><h3 class="card-title">Cedar Privacy</h3><p class="card-text">Natural beauty with 30-40+ year lifespan. The premium choice for privacy.</p></a>
+      <a href="/fences/vinyl/" class="card"><div class="card-icon">🏠</div><h3 class="card-title">Vinyl Privacy</h3><p class="card-text">Zero maintenance, lifetime warranty. Never paint or stain again.</p></a>
+      <a href="/fences/aluminum/" class="card"><div class="card-icon">✨</div><h3 class="card-title">Ornamental Aluminum</h3><p class="card-text">Elegant, rust-free beauty. Perfect for pools and upscale properties.</p></a>
+      <a href="/fences/chainlink/" class="card"><div class="card-icon">🔗</div><h3 class="card-title">Chain Link</h3><p class="card-text">Affordable security and durability. Great for pets and property lines.</p></a>
+    </div>
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="#comparison-tool" class="btn btn-outline">Compare Fence Styles</a>
+    </div>
+  </div>
+</section>
+
+<!-- Compare Fence Styles Interactive Section -->
+<section class="section section-warm" id="comparison-tool">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Compare Options</div>
+      <h2 class="section-title">Compare Fence <span class="gold">Styles</span></h2>
+      <p class="section-text">Select two fence types to see a side-by-side comparison</p>
+    </div>
+    <div class="compare-selectors">
+      <div class="compare-select-wrap">
+        <label for="fence-a">Fence Type A</label>
+        <select id="fence-a" class="compare-select">
+          <option value="cedar" selected>🌲 Cedar Privacy</option>
+          <option value="vinyl">🏠 Vinyl Privacy</option>
+          <option value="aluminum">✨ Ornamental Aluminum</option>
+          <option value="chainlink">🔗 Chain Link</option>
+          <option value="splitrail">🪵 Split Rail</option>
+        </select>
+      </div>
+      <div class="compare-vs">VS</div>
+      <div class="compare-select-wrap">
+        <label for="fence-b">Fence Type B</label>
+        <select id="fence-b" class="compare-select">
+          <option value="cedar">🌲 Cedar Privacy</option>
+          <option value="vinyl" selected>🏠 Vinyl Privacy</option>
+          <option value="aluminum">✨ Ornamental Aluminum</option>
+          <option value="chainlink">🔗 Chain Link</option>
+          <option value="splitrail">🪵 Split Rail</option>
+        </select>
+      </div>
+    </div>
+    <div class="compare-table-wrap">
+      <table class="compare-table" id="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th id="col-a-header">🌲 Cedar Privacy</th>
+            <th id="col-b-header">🏠 Vinyl Privacy</th>
+          </tr>
+        </thead>
+        <tbody id="compare-body"></tbody>
+      </table>
+    </div>
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="/quote/" class="btn btn-primary btn-lg">Get a Quote for Your Fence</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .compare-selectors { display: flex; align-items: flex-end; justify-content: center; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
+  .compare-select-wrap { display: flex; flex-direction: column; gap: 6px; }
+  .compare-select-wrap label { font-weight: 600; font-size: 0.9rem; color: var(--text-muted); }
+  .compare-select { padding: 12px 16px; border: 2px solid var(--color-light-gray); border-radius: 10px; font-size: 1rem; font-family: var(--font-body); background: white; cursor: pointer; min-width: 220px; transition: border-color 0.2s; }
+  .compare-select:focus { outline: none; border-color: var(--accent); }
+  .compare-vs { font-family: var(--font-heading); font-weight: 700; font-size: 1.3rem; color: var(--accent); padding-bottom: 10px; }
+  .compare-table-wrap { overflow-x: auto; border-radius: 12px; box-shadow: var(--shadow-md); }
+  .compare-table { width: 100%; border-collapse: collapse; background: white; font-size: 0.95rem; }
+  .compare-table th { background: var(--primary); color: white; padding: 14px 20px; text-align: left; font-weight: 600; white-space: nowrap; }
+  .compare-table th:first-child { border-radius: 12px 0 0 0; }
+  .compare-table th:last-child { border-radius: 0 12px 0 0; }
+  .compare-table td { padding: 12px 20px; border-bottom: 1px solid var(--color-light-gray); }
+  .compare-table tr:last-child td { border-bottom: none; }
+  .compare-table tr:nth-child(even) { background: var(--bg-light); }
+  .compare-table td:first-child { font-weight: 600; color: var(--primary); white-space: nowrap; }
+  @media (max-width: 600px) {
+    .compare-selectors { flex-direction: column; align-items: stretch; }
+    .compare-select { min-width: auto; width: 100%; }
+    .compare-vs { text-align: center; padding: 0; }
+    .compare-table { font-size: 0.85rem; }
+    .compare-table th, .compare-table td { padding: 10px 12px; }
+  }
+</style>
+
+<script>
+  const fenceData = {
+    cedar: { name: '🌲 Cedar Privacy', price: '$28–$45/ft', lifespan: '30–40+ years', maintenance: 'Stain every 2–3 yrs', privacy: '★★★★★', durability: '★★★★☆', appearance: 'Natural wood grain', warranty: '3-Year Workmanship', bestFor: 'Premium privacy & beauty', installation: '1–2 days', wind: '★★★★☆', roi: '★★★★★' },
+    vinyl: { name: '🏠 Vinyl Privacy', price: '$30–$50/ft', lifespan: '30–50 years', maintenance: 'None — just hose off', privacy: '★★★★★', durability: '★★★★★', appearance: 'Clean modern look', warranty: 'Lifetime Material', bestFor: 'Zero maintenance privacy', installation: '1–2 days', wind: '★★★☆☆', roi: '★★★★☆' },
+    aluminum: { name: '✨ Ornamental Aluminum', price: '$30–$55/ft', lifespan: '40–50+ years', maintenance: 'None', privacy: '★☆☆☆☆', durability: '★★★★★', appearance: 'Elegant wrought-iron look', warranty: 'Lifetime Material', bestFor: 'Pools, curb appeal, elegance', installation: '1–2 days', wind: '★★★★★', roi: '★★★★☆' },
+    chainlink: { name: '🔗 Chain Link', price: '$15–$25/ft', lifespan: '20–30 years', maintenance: 'Minimal', privacy: '★☆☆☆☆', durability: '★★★★☆', appearance: 'Functional/utilitarian', warranty: '3-Year Workmanship', bestFor: 'Budget, pets, boundaries', installation: '1 day', wind: '★★★★★', roi: '★★★☆☆' },
+    splitrail: { name: '🪵 Split Rail', price: '$12–$22/ft', lifespan: '20–30 years', maintenance: 'Minimal', privacy: '★☆☆☆☆', durability: '★★★☆☆', appearance: 'Rustic country charm', warranty: '3-Year Workmanship', bestFor: 'Large lots, rural, decorative', installation: '1 day', wind: '★★★★★', roi: '★★★☆☆' }
+  };
+  const featureLabels = { price: 'Price Range', lifespan: 'Lifespan', maintenance: 'Maintenance', privacy: 'Privacy Level', durability: 'Durability', appearance: 'Appearance', warranty: 'Warranty', bestFor: 'Best For', installation: 'Install Time', wind: 'Wind Resistance', roi: 'ROI / Value' };
+  function updateComparison() {
+    const a = document.getElementById('fence-a').value;
+    const b = document.getElementById('fence-b').value;
+    const dataA = fenceData[a], dataB = fenceData[b];
+    document.getElementById('col-a-header').textContent = dataA.name;
+    document.getElementById('col-b-header').textContent = dataB.name;
+    const tbody = document.getElementById('compare-body');
+    tbody.innerHTML = '';
+    for (const [key, label] of Object.entries(featureLabels)) {
+      const tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + label + '</td><td>' + dataA[key] + '</td><td>' + dataB[key] + '</td>';
+      tbody.appendChild(tr);
+    }
+  }
+  document.getElementById('fence-a').addEventListener('change', updateComparison);
+  document.getElementById('fence-b').addEventListener('change', updateComparison);
+  updateComparison();
+</script>
+
+<!-- Why Choose Us -->
+<section class="section section-light">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Why Choose Us</div>
+      <h2 class="section-title">The Ghareeb <span class="gold">Difference</span></h2>
+      <p class="section-text">What sets us apart from other fence contractors</p>
+    </div>
+    <div class="quote-options-grid" id="dyn-why-us">
+      {site.whyChooseUs.map((item) => (
+        <div class="card">
+          <div class="card-icon">
+            {item.icon === 'user' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
+            {item.icon === 'dollar' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
+            {item.icon === 'shield' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>}
+            {item.icon === 'credit-card' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>}
+          </div>
+          <h3 class="card-title">{item.title}</h3>
+          <p class="card-text">{item.description}</p>
         </div>
-    </section>
+      ))}
+    </div>
+  </div>
+</section>
 
-    <!-- Permit CTA -->
-    <section class="section" style="background: var(--color-primary); color: white; padding: 48px 0;">
-        <div class="container" style="text-align: center; max-width: 700px;">
-            <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 12px;">Do You Need a Fence Permit?</h3>
-            <p style="opacity: 0.9; margin-bottom: 24px;">Check height limits, setback rules & permit requirements for 40+ cities in NW Ohio & SE Michigan.</p>
-            <a href="/permits/" class="btn" style="background: white; color: var(--color-primary); font-weight: 700; border-radius: 9999px; padding: 14px 32px;">Check My City's Rules</a>
+<!-- Process Section -->
+<section class="section section-warm">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Our Process</div>
+      <h2 class="section-title">Simple <span class="gold">4-Step</span> Process</h2>
+      <p class="section-text">From quote to completion, we make fence installation easy</p>
+    </div>
+    <div class="process-grid">
+      {site.process.map((step) => (
+        <div class="process-step">
+          <div class="process-number">{step.step}</div>
+          <h4>{step.title}</h4>
+          <p>{step.description}</p>
         </div>
-    </section>
+      ))}
+    </div>
+  </div>
+</section>
 
+<!-- Testimonials -->
+<section class="section section-light">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Customer Reviews</div>
+      <h2 class="section-title">What Our <span class="gold">Customers</span> Say</h2>
+    </div>
+    <div class="grid-3" id="dyn-reviews">
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Best decision we made for our backyard. The crew was professional, finished in just 2 days, and the fence looks amazing. Highly recommend!"</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">SM</div><div class="testimonial-info"><h4>Sarah M.</h4><p>Perrysburg, OH • Cedar Privacy</p></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"Finally a contractor who shows up when they say they will! Great communication throughout the project. Our vinyl fence is perfect."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">JR</div><div class="testimonial-info"><h4>James R.</h4><p>Sylvania, OH • Vinyl Privacy</p></div></div>
+      </div>
+      <div class="testimonial-card">
+        <div class="testimonial-stars">★★★★★</div>
+        <p class="testimonial-text">"The aluminum fence around our pool looks incredible. Quality work at a fair price. Would definitely use again for our front yard."</p>
+        <div class="testimonial-author"><div class="testimonial-avatar">KL</div><div class="testimonial-info"><h4>Karen L.</h4><p>Maumee, OH • Aluminum</p></div></div>
+      </div>
+    </div>
+    <div style="text-align: center; margin-top: 40px;"><a href="/reviews/" class="btn btn-secondary">Read All Reviews</a></div>
+  </div>
+</section>
 
-    <!-- Why Choose Us — DYNAMIC from Firestore content/whyUs -->
-    <section class="section section-light">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Why Choose Us</div>
-                <h2 class="section-title">The Ghareeb <span class="gold">Difference</span></h2>
-                <p class="section-text">What sets us apart from other fence contractors</p>
-            </div>
-            <div class="quote-options-grid" id="dyn-why-us">
-                <!-- Static fallback — replaced by Firestore on load -->
-                {site.whyChooseUs.map((item) => (
-                    <div class="card">
-                        <div class="card-icon">
-                            {item.icon === 'user' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>}
-                            {item.icon === 'dollar' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>}
-                            {item.icon === 'shield' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>}
-                            {item.icon === 'credit-card' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>}
-                        </div>
-                        <h3 class="card-title">{item.title}</h3>
-                        <p class="card-text">{item.description}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </section>
+<!-- Service Areas -->
+<section class="section section-warm">
+  <div class="container">
+    <div class="section-header">
+      <div class="section-label">Service Areas</div>
+      <h2 class="section-title">Serving <span class="gold">Northwest Ohio</span> & SE Michigan</h2>
+      <p class="section-text">Professional fence installation across 5+ counties</p>
+    </div>
+    <div class="areas-grid">
+      <a href="/service-areas/toledo/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Toledo</a>
+      <a href="/service-areas/perrysburg/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Perrysburg</a>
+      <a href="/service-areas/sylvania/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Sylvania</a>
+      <a href="/service-areas/maumee/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Maumee</a>
+      <a href="/service-areas/bowling-green/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bowling Green</a>
+      <a href="/service-areas/monroe/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Monroe, MI</a>
+    </div>
+  </div>
+</section>
 
-    <!-- Process Section -->
-    <section class="section section-warm">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Our Process</div>
-                <h2 class="section-title">Simple <span class="gold">4-Step</span> Process</h2>
-                <p class="section-text">From quote to completion, we make fence installation easy</p>
-            </div>
-            <div class="process-grid">
-                {site.process.map((step) => (
-                    <div class="process-step">
-                        <div class="process-number">{step.step}</div>
-                        <h4>{step.title}</h4>
-                        <p>{step.description}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    </section>
+<!-- CTA -->
+<section class="section cta-section">
+  <div class="container">
+    <div class="cta-content">
+      <h2>Ready for Your New Fence?</h2>
+      <p>Get your free quote in 60 seconds or talk to an expert today.</p>
+      <div class="cta-buttons">
+        <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
+        <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Testimonials — DYNAMIC from Firestore content/reviews -->
-    <section class="section section-light">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Customer Reviews</div>
-                <h2 class="section-title">What Our <span class="gold">Customers</span> Say</h2>
-            </div>
-            <div class="grid-3" id="dyn-reviews">
-                <!-- Static fallback — replaced by Firestore on load -->
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"Best decision we made for our backyard. The crew was professional, finished in just 2 days, and the fence looks amazing. Highly recommend!"</p>
-                    <div class="testimonial-author"><div class="testimonial-avatar">SM</div><div class="testimonial-info"><h4>Sarah M.</h4><p>Perrysburg, OH • Cedar Privacy</p></div></div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"Finally a contractor who shows up when they say they will! Great communication throughout the project. Our vinyl fence is perfect."</p>
-                    <div class="testimonial-author"><div class="testimonial-avatar">JR</div><div class="testimonial-info"><h4>James R.</h4><p>Sylvania, OH • Vinyl Privacy</p></div></div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-stars">★★★★★</div>
-                    <p class="testimonial-text">"The aluminum fence around our pool looks incredible. Quality work at a fair price. Would definitely use again for our front yard."</p>
-                    <div class="testimonial-author"><div class="testimonial-avatar">KL</div><div class="testimonial-info"><h4>Karen L.</h4><p>Maumee, OH • Aluminum</p></div></div>
-                </div>
-            </div>
-            <div style="text-align: center; margin-top: 40px;"><a href="/reviews/" class="btn btn-secondary">Read All Reviews</a></div>
-        </div>
-    </section>
-
-    <!-- Service Areas -->
-    <section class="section section-warm">
-        <div class="container">
-            <div class="section-header">
-                <div class="section-label">Service Areas</div>
-                <h2 class="section-title">Serving <span class="gold">Northwest Ohio</span> & SE Michigan</h2>
-                <p class="section-text">Professional fence installation across 5+ counties</p>
-            </div>
-            <div class="areas-grid">
-                <a href="/service-areas/toledo/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Toledo</a>
-                <a href="/service-areas/perrysburg/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Perrysburg</a>
-                <a href="/service-areas/sylvania/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Sylvania</a>
-                <a href="/service-areas/maumee/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Maumee</a>
-                <a href="/service-areas/bowling-green/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Bowling Green</a>
-                <a href="/service-areas/monroe/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Monroe, MI</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA -->
-    <section class="section cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Transform Your Backyard?</h2>
-                <p>Get a free instant quote in 60 seconds or talk to a fence expert today.</p>
-                <div class="cta-buttons">
-                    <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
-                    <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
-                </div>
-            </div>
-        </div>
-    </section>
 </BaseLayout>
-
-<!-- Content is now rendered server-side from Firestore -->

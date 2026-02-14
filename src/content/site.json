@@ -1,31 +1,44 @@
 {
   "company": {
     "name": "Ghareeb Fencing Solutions",
-    "shortName": "GFS",
-    "tagline": "Professional Fence Installation - Toledo, OH",
+    "shortName": "GF",
     "phone": "(419) 902-8257",
     "phoneRaw": "4199028257",
-    "email": "ghareebfencing@gmail.com",
-    "website": "https://ghareebfencingsolutions.com",
+    "email": "ng.ghareebfencingsolutions@outlook.com",
+    "website": "https://www.ghareebfencingsolutions.com",
     "address": {
       "city": "Toledo",
       "state": "OH",
-      "zip": "43615"
-    },
-    "social": {
-      "facebook": "https://www.facebook.com/ghareebfencing",
-      "google": "https://g.page/ghareeb-fencing-solutions"
-    },
-    "hours": {
-      "weekdays": "7:00 AM - 6:00 PM",
-      "saturday": "8:00 AM - 2:00 PM",
-      "sunday": "Closed"
+      "region": "Northwest Ohio & Southeast Michigan"
     }
   },
-  "seo": {
-    "defaultTitle": "Fence Installation Toledo OH | Ghareeb Fencing Solutions",
-    "defaultDescription": "Professional fence installation in Toledo, OH & SE Michigan. Cedar, vinyl, aluminum, chain link & split rail fencing. 5-star rated, licensed & insured. Free quotes.",
-    "defaultKeywords": ["fence installation toledo oh", "fence company toledo", "cedar fence toledo", "vinyl fence perrysburg", "aluminum fence maumee", "fence contractor northwest ohio"]
+  "social": {
+    "facebook": "https://www.facebook.com/ghareebfencing",
+    "instagram": "https://www.instagram.com/ghareebfencing",
+    "google": "https://www.google.com/maps/place/Ghareeb+Fencing+Solutions"
+  },
+  "branding": {
+    "primaryColor": "#1e3a5f",
+    "primaryDark": "#0f2744",
+    "primaryLight": "#2d5a8a",
+    "accentColor": "#d4af37",
+    "accentLight": "#f4d03f"
+  },
+  "stats": {
+    "fencesInstalled": "500+",
+    "googleRating": "4.9",
+    "reviewCount": "127",
+    "warranty": "3 Year",
+    "rating": "4.9",
+    "reviews": "127"
+  },
+  "trustBar": {
+    "rating": "4.9",
+    "reviews": "127"
+  },
+  "financing": {
+    "url": "https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr",
+    "text": "0% Financing"
   },
   "hero": {
     "badge": "Toledo's #1 Rated Fence Contractor",
@@ -33,74 +46,55 @@
     "titleHighlight": "Beautiful, Safe Backyard",
     "subtitle": "Professional fence installation by local craftsmen who care. Get an instant quote in 60 seconds."
   },
-  "stats": {
-    "fencesInstalled": "500+",
-    "googleRating": "5.0",
-    "warranty": "3-Year",
-    "rating": "5.0",
-    "reviews": "50+"
+  "seo": {
+    "defaultTitle": "Fence Installation Toledo OH | Ghareeb Fencing Solutions",
+    "defaultDescription": "Toledo's top-rated fence contractor. Professional cedar, vinyl, aluminum & chain link installation. Free instant quotes, 3-year warranty. Call (419) 902-8257."
+  },
+  "analytics": {
+    "googleAnalyticsId": "G-30R7SKG69Y"
   },
   "whyChooseUs": [
     {
-      "icon": "user",
-      "title": "Owner On Every Job",
-      "description": "Nick personally oversees every installation. No subcontractors, no surprises — just quality craftsmanship from start to finish."
+      "title": "Owner Supervised",
+      "description": "Every project is personally overseen by the owner. You're never handed off to a subcontractor.",
+      "icon": "user"
     },
     {
-      "icon": "dollar",
-      "title": "Transparent Pricing",
-      "description": "Get your quote in 60 seconds online. No hidden fees, no pressure sales tactics. What we quote is what you pay."
+      "title": "Honest Pricing",
+      "description": "No hidden fees, no surprises, no pressure. What we quote is what you pay - guaranteed.",
+      "icon": "dollar"
     },
     {
-      "icon": "shield",
-      "title": "Built to Last",
-      "description": "Premium materials, proper post depth, and meticulous attention to detail. Every fence we build is one we'd put in our own yard."
+      "title": "3-Year Warranty",
+      "description": "Full workmanship warranty on every installation. We stand behind our work, period.",
+      "icon": "shield"
     },
     {
-      "icon": "credit-card",
       "title": "0% Financing",
-      "description": "Affordable monthly payments with 0% interest financing available. Get the fence you want today, pay over time."
+      "description": "Affordable payment plans to fit any budget. Get your fence now, pay over time.",
+      "icon": "credit-card"
     }
   ],
   "process": [
     {
-      "step": "1",
+      "step": 1,
       "title": "Get Your Quote",
-      "description": "Use our instant online quote tool or call us. We'll provide a detailed estimate within 24 hours."
+      "description": "Use our instant quote tool or schedule a free on-site consultation"
     },
     {
-      "step": "2",
-      "title": "Design & Plan",
-      "description": "We visit your property, verify measurements, discuss materials and styles, and finalize your project details."
+      "step": 2,
+      "title": "Design Your Fence",
+      "description": "Choose your style, height, and any custom features you need"
     },
     {
-      "step": "3",
-      "title": "Professional Install",
-      "description": "Our crew arrives on schedule with all materials. Most residential fences are completed in 1-2 days."
+      "step": 3,
+      "title": "We Install",
+      "description": "Our expert crew installs your fence, typically in 1-2 days"
     },
     {
-      "step": "4",
-      "title": "Final Walkthrough",
-      "description": "We walk the fence line together, ensure everything is perfect, and clean up completely before we leave."
+      "step": 4,
+      "title": "Enjoy Your Yard",
+      "description": "Love your new fence with our 3-year warranty for peace of mind"
     }
-  ],
-  "financing": {
-    "url": "https://app.gethearth.com/partners/ghareeb-fencing-solutions",
-    "provider": "Hearth",
-    "description": "0% APR financing available through Hearth. Affordable monthly payments with no money down."
-  },
-  "serviceAreas": [
-    { "name": "Toledo", "slug": "toledo", "state": "OH" },
-    { "name": "Perrysburg", "slug": "perrysburg", "state": "OH" },
-    { "name": "Sylvania", "slug": "sylvania", "state": "OH" },
-    { "name": "Maumee", "slug": "maumee", "state": "OH" },
-    { "name": "Bowling Green", "slug": "bowling-green", "state": "OH" },
-    { "name": "Monroe", "slug": "monroe", "state": "MI" },
-    { "name": "Oregon", "slug": "oregon", "state": "OH" },
-    { "name": "Waterville", "slug": "waterville", "state": "OH" },
-    { "name": "Whitehouse", "slug": "whitehouse", "state": "OH" },
-    { "name": "Holland", "slug": "holland", "state": "OH" },
-    { "name": "Lambertville", "slug": "lambertville", "state": "MI" },
-    { "name": "Temperance", "slug": "temperance", "state": "MI" }
   ]
 }
