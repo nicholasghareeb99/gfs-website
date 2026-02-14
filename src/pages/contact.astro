@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { getSiteSettings } from '../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout title="Contact Us | Ghareeb Fencing Solutions" description="Contact Ghareeb Fencing Solutions for a free fence quote in Toledo, OH. Call (419) 902-8257 or fill out our contact form.">
+  <section class="section" style="padding-top: 60px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Get In Touch</div>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Contact <span class="gold">Us</span></h1>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 12px auto 0;">Have a question or ready to get started? We would love to hear from you.</p>
+      </div>
+
+      <div class="contact-grid">
+        <div class="contact-info-col">
+          <div class="contact-card">
+            <div class="contact-card-icon"><i class="fas fa-phone"></i></div>
+            <h3>Call Us</h3>
+            <a href={`tel:${site.company.phoneRaw}`} class="contact-card-value">{site.company.phone}</a>
+            <p>Mon–Fri 7am–6pm, Sat 8am–2pm</p>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon"><i class="fas fa-envelope"></i></div>
+            <h3>Email Us</h3>
+            <a href={`mailto:${site.company.email}`} class="contact-card-value">{site.company.email}</a>
+            <p>We respond within 24 hours</p>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <h3>Service Area</h3>
+            <span class="contact-card-value">{site.company.address.city}, {site.company.address.state} Area</span>
+            <p>NW Ohio & SE Michigan</p>
+          </div>
+
+          <div class="contact-card">
+            <div class="contact-card-icon"><i class="fab fa-facebook"></i></div>
+            <h3>Follow Us</h3>
+            <a href={site.company.social.facebook} target="_blank" rel="noopener" class="contact-card-value">Facebook</a>
+            <p>See our latest projects</p>
+          </div>
+        </div>
+
+        <div class="contact-form-col">
+          <h2 style="font-family: var(--font-display); margin-bottom: 8px;">Send Us a Message</h2>
+          <p style="color: var(--text-muted); margin-bottom: 24px;">Fill out the form below and we will get back to you within 24 hours.</p>
+          <ContactForm />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .contact-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 40px; align-items: start; }
+  .contact-info-col { display: flex; flex-direction: column; gap: 16px; }
+  .contact-card {
+    background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border);
+  }
+  .contact-card-icon { width: 40px; height: 40px; background: rgba(30,58,95,0.08); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--primary); margin-bottom: 12px; }
+  .contact-card h3 { font-size: 1rem; margin-bottom: 4px; }
+  .contact-card-value { color: var(--accent); font-weight: 600; font-size: 1rem; display: block; margin-bottom: 4px; }
+  .contact-card p { color: var(--text-muted); font-size: 0.85rem; }
+  .contact-form-col { background: var(--bg-white); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); }
+  @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } }
+</style>

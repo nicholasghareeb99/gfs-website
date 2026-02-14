@@ -1,0 +1,52 @@
+---
+import FencePage from '../../components/FencePage.astro';
+
+const benefits = [
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Rustic Charm', text: 'Classic American farmstead look that complements rural and suburban properties beautifully.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', title: 'Budget Friendly', text: 'One of the most affordable fence types per linear foot. Ideal for large property boundaries.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: 'Quick Install', text: 'Simple post-and-rail construction means faster installation and lower labor costs.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Pet Containment', text: 'Add wire mesh to keep dogs in while maintaining the rustic aesthetic. Popular upgrade.' },
+];
+
+const specs = [
+  { label: 'Material', value: 'Pressure-Treated Pine / Cedar' },
+  { label: 'Rails', value: '2-Rail or 3-Rail' },
+  { label: 'Post Size', value: '5" Line Posts' },
+  { label: 'Rail Length', value: '10 or 11 Foot' },
+  { label: 'Warranty', value: '3 Year Craftsmanship' },
+  { label: 'Add-ons', value: 'Wire Mesh for Pets' },
+];
+
+const faqs = [
+  { question: 'Is split rail good for keeping dogs in?', answer: 'Split rail alone has large gaps between rails, so small dogs can slip through. However, we can add welded wire mesh to the inside of the fence to contain pets while keeping the rustic split rail look on the outside.' },
+  { question: 'How long does split rail fencing last?', answer: 'Pressure-treated split rail typically lasts 15-20 years. Cedar split rail can last longer due to natural rot resistance. Both are excellent long-term investments for property boundaries.' },
+  { question: 'Is split rail cheaper than privacy fencing?', answer: 'Yes, significantly. Split rail uses less material and installs faster, making it typically 50-70% less expensive per foot than a full privacy fence. It is ideal for larger properties where privacy is not the primary goal.' },
+];
+
+const galleryImages = [
+  { src: '/images/gallery/split-rail-1.jpg', alt: 'Split rail fence Toledo', label: '2-Rail Split Rail' },
+  { src: '/images/gallery/split-rail-3rail.jpg', alt: '3-rail split rail fence', label: '3-Rail' },
+  { src: '/images/gallery/split-rail-mesh.jpg', alt: 'Split rail with wire mesh', label: 'With Wire Mesh' },
+];
+
+const relatedTypes = [
+  { name: 'Chain Link', href: '/fences/chainlink/', image: '/images/gallery/chainlink-1.jpg' },
+  { name: 'Cedar Privacy', href: '/fences/cedar/', image: '/images/gallery/cedar-shadowbox.jpg' },
+  { name: 'Wood Privacy', href: '/fences/wood/', image: '/images/gallery/pt-privacy.jpg' },
+];
+---
+
+<FencePage
+  title="Split Rail Fence Installation Toledo OH | Rustic Fencing"
+  description="Split rail fence installation in Toledo OH. Rustic charm, budget-friendly, pet containment with wire mesh. Free quotes."
+  keywords={['split rail fence toledo', 'split rail fence installation', 'rustic fence ohio', 'farm fence toledo']}
+  heroTitle="Split Rail"
+  heroHighlight="Fencing"
+  heroText="Classic rustic charm at an unbeatable price. Perfect for property boundaries, large lots, and rural aesthetics. Add wire mesh for pet containment while keeping the farmstead look."
+  heroImage="/images/gallery/split-rail-1.jpg"
+  benefits={benefits}
+  specs={specs}
+  faqs={faqs}
+  galleryImages={galleryImages}
+  relatedTypes={relatedTypes}
+/>

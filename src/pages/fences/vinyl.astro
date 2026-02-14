@@ -1,0 +1,59 @@
+---
+import FencePage from '../../components/FencePage.astro';
+
+const benefits = [
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', title: 'Zero Maintenance', text: 'Never paint, stain, or seal. Just rinse with a garden hose. Vinyl stays like-new for decades.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Lifetime Warranty', text: 'Homeland vinyl comes with a lifetime manufacturer warranty. The last fence you will ever need.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>', title: 'UV Protected', text: 'TiO₂ UV inhibitors built into every board prevent yellowing, chalking, and fading from sun exposure.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.24 12.24a6 6 0 00-8.49-8.49L5 10.5V19h8.5z"/></svg>', title: 'Michigan Made', text: 'Manufactured by RAFAB Inc. in Michigan. Premium quality with shorter supply chain = better prices.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>', title: 'Aluminum Reinforced', text: 'Gate frames and post stiffeners are aluminum reinforced. No sagging gates, no leaning posts.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '30+ Year Lifespan', text: 'Premium vinyl easily outlasts wood fencing. Most vinyl fences look great for 30+ years with zero work.' },
+];
+
+const specs = [
+  { label: 'Material', value: 'Virgin PVC Vinyl' },
+  { label: 'UV Protection', value: 'TiO₂ Inhibitors' },
+  { label: 'Reinforcement', value: 'Aluminum Inserts' },
+  { label: 'Standard Height', value: '6 Foot' },
+  { label: 'Warranty', value: 'Lifetime Mfg + 3yr Labor' },
+  { label: 'Colors', value: 'White, Tan, Adobe, Mocha' },
+];
+
+const faqs = [
+  { question: 'How long does vinyl fencing last?', answer: 'Premium vinyl fencing from Homeland typically lasts 30+ years with zero maintenance. The material does not rot, rust, or decay, and the built-in UV protection prevents fading and yellowing.' },
+  { question: 'What colors are available?', answer: 'We offer White, Tan, Adobe, Mocha Walnut, and Green Teak through the Homeland vinyl line. White and Tan are the most popular choices. All colors are consistent throughout the material — not just surface coatings.' },
+  { question: 'Is vinyl fencing more expensive than wood?', answer: 'Vinyl has a higher upfront cost than wood, but when you factor in zero maintenance costs over 30+ years (no staining, painting, or replacing boards), vinyl is often cheaper in the long run.' },
+  { question: 'What is the difference between cheap vinyl and premium vinyl?', answer: 'Cheap vinyl (big box stores) uses recycled PVC, thinner walls, no UV protection, and no aluminum reinforcement. It yellows, cracks, and sags within 5-10 years. Premium Homeland vinyl uses virgin PVC, TiO₂ UV protection, thick walls, and aluminum reinforcement.' },
+  { question: 'Can vinyl fencing handle Ohio winters?', answer: 'Absolutely. Premium vinyl is engineered for cold climates. The material flexes under impact rather than cracking, and the aluminum post stiffeners prevent wind damage. Michigan-made means it is built for our weather.' },
+];
+
+const galleryImages = [
+  { src: '/images/gallery/vinyl-white.jpg', alt: 'White vinyl privacy fence', label: 'White Privacy' },
+  { src: '/images/gallery/vinyl-tan-privacy.jpg', alt: 'Tan vinyl fence', label: 'Tan Privacy' },
+  { src: '/images/gallery/vinyl-gate.jpg', alt: 'Vinyl gate', label: 'Custom Gate' },
+  { src: '/images/gallery/vinyl-arched.jpg', alt: 'Vinyl fence with arch', label: 'Arched Gate' },
+  { src: '/images/gallery/vinyl-two-tone.jpg', alt: 'Two tone vinyl fence', label: 'Two-Tone' },
+  { src: '/images/gallery/vinyl-terrain.jpg', alt: 'Vinyl fence on slope', label: 'Terrain Following' },
+];
+
+const relatedTypes = [
+  { name: 'Cedar Privacy', href: '/fences/cedar/', image: '/images/gallery/cedar-shadowbox.jpg' },
+  { name: 'Ornamental Aluminum', href: '/fences/aluminum/', image: '/images/gallery/aluminum-black.jpg' },
+  { name: 'Wood Privacy', href: '/fences/wood/', image: '/images/gallery/pt-privacy.jpg' },
+];
+---
+
+<FencePage
+  title="Vinyl Fence Installation Toledo OH | Homeland Premium Vinyl"
+  description="Premium vinyl fence installation in Toledo, OH. Lifetime warranty, zero maintenance, Michigan-made Homeland vinyl. Free quotes."
+  keywords={['vinyl fence toledo', 'vinyl privacy fence ohio', 'homeland vinyl fence', 'vinyl fence installation']}
+  heroTitle="Premium Vinyl"
+  heroHighlight="Privacy Fencing"
+  heroText="Zero maintenance. Lifetime warranty. Michigan-made Homeland premium vinyl with TiO₂ UV protection, aluminum-reinforced gates, and a 30+ year lifespan. The last fence you'll ever buy."
+  heroImage="/images/gallery/vinyl-white.jpg"
+  benefits={benefits}
+  specs={specs}
+  faqs={faqs}
+  galleryImages={galleryImages}
+  relatedTypes={relatedTypes}
+/>

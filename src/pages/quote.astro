@@ -1,0 +1,168 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout title="Get a Free Fence Quote | Ghareeb Fencing Solutions Toledo OH" description="Get an instant fence quote in 60 seconds. Cedar, vinyl, aluminum, chain link fencing in Toledo OH. No pressure, no obligation.">
+  <section class="quote-hero">
+    <div class="container">
+      <div class="quote-grid">
+        <div class="quote-info">
+          <div class="section-label">Free Estimate</div>
+          <h1>Get Your <span class="gold">Free Quote</span> in 60 Seconds</h1>
+          <p>Tell us about your project and we will provide a detailed estimate. No pressure, no obligation — just honest pricing.</p>
+          <div class="quote-features">
+            <div class="qf"><i class="fas fa-check-circle"></i> No obligation</div>
+            <div class="qf"><i class="fas fa-check-circle"></i> Response within 24 hours</div>
+            <div class="qf"><i class="fas fa-check-circle"></i> Transparent pricing</div>
+            <div class="qf"><i class="fas fa-check-circle"></i> 0% financing available</div>
+          </div>
+          <div class="quote-or">
+            <span>Or call us directly:</span>
+            <a href={`tel:${site.company.phoneRaw}`} class="quote-phone">
+              <i class="fas fa-phone"></i> {site.company.phone}
+            </a>
+          </div>
+        </div>
+
+        <div class="quote-form-wrap">
+          <form id="quote-form" class="quote-form" novalidate>
+            <div style="position:absolute;left:-9999px;" aria-hidden="true">
+              <input type="text" name="website" tabindex="-1" autocomplete="off" />
+            </div>
+
+            <div class="qf-row">
+              <div class="qf-field">
+                <label for="q-name">Full Name <span class="req">*</span></label>
+                <input type="text" id="q-name" name="name" placeholder="John Smith" required />
+              </div>
+              <div class="qf-field">
+                <label for="q-phone">Phone <span class="req">*</span></label>
+                <input type="tel" id="q-phone" name="phone" placeholder="(419) 555-1234" required />
+              </div>
+            </div>
+
+            <div class="qf-row">
+              <div class="qf-field">
+                <label for="q-email">Email <span class="req">*</span></label>
+                <input type="email" id="q-email" name="email" placeholder="john@example.com" required />
+              </div>
+              <div class="qf-field">
+                <label for="q-address">Property Address</label>
+                <input type="text" id="q-address" name="address" placeholder="123 Main St, Toledo, OH" />
+              </div>
+            </div>
+
+            <div class="qf-field">
+              <label for="q-type">Fence Type <span class="req">*</span></label>
+              <select id="q-type" name="fenceType" required>
+                <option value="">Select fence type...</option>
+                <option value="cedar">Cedar Privacy</option>
+                <option value="wood">Wood Privacy (Pressure Treated)</option>
+                <option value="vinyl">Vinyl Privacy</option>
+                <option value="aluminum">Ornamental Aluminum</option>
+                <option value="chainlink">Chain Link</option>
+                <option value="split-rail">Split Rail</option>
+                <option value="other">Not Sure / Other</option>
+              </select>
+            </div>
+
+            <div class="qf-row">
+              <div class="qf-field">
+                <label for="q-footage">Estimated Linear Feet</label>
+                <input type="number" id="q-footage" name="footage" placeholder="e.g. 150" min="10" />
+              </div>
+              <div class="qf-field">
+                <label for="q-timeline">Timeline</label>
+                <select id="q-timeline" name="timeline">
+                  <option value="">When do you need it?</option>
+                  <option value="asap">As soon as possible</option>
+                  <option value="1month">Within 1 month</option>
+                  <option value="3months">Within 3 months</option>
+                  <option value="planning">Just planning ahead</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="qf-field">
+              <label for="q-details">Project Details</label>
+              <textarea id="q-details" name="details" rows="3" placeholder="Tell us about your project — gates needed, terrain, special requirements..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+              <span class="btn-text"><i class="fas fa-bolt"></i> Get My Free Quote</span>
+              <span class="btn-loading" style="display:none;"><i class="fas fa-spinner fa-spin"></i> Submitting...</span>
+            </button>
+
+            <div id="quote-message" style="display:none; margin-top: 16px; padding: 16px; border-radius: 8px; text-align: center;"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .quote-hero { padding: 60px 0; background: var(--bg-light); min-height: calc(100vh - 140px); display: flex; align-items: center; }
+  .quote-grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 50px; align-items: start; }
+  .quote-info h1 { font-size: 2.2rem; margin-bottom: 16px; line-height: 1.2; }
+  .quote-info > p { color: var(--text-muted); font-size: 1.05rem; line-height: 1.7; margin-bottom: 24px; }
+  .quote-features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 28px; }
+  .qf { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--text-body); }
+  .qf i { color: var(--success); }
+  .quote-or { padding-top: 20px; border-top: 1px solid var(--border); }
+  .quote-or span { color: var(--text-muted); font-size: 0.9rem; display: block; margin-bottom: 8px; }
+  .quote-phone { display: inline-flex; align-items: center; gap: 8px; font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+  .quote-form-wrap { background: var(--bg-white); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); box-shadow: var(--shadow-lg); }
+  .quote-form { display: flex; flex-direction: column; gap: 16px; }
+  .qf-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .qf-field { display: flex; flex-direction: column; }
+  .qf-field label { font-weight: 600; font-size: 0.85rem; margin-bottom: 6px; color: var(--primary); }
+  .req { color: var(--error); }
+  .qf-field input, .qf-field select, .qf-field textarea {
+    padding: 12px 14px; border: 2px solid var(--border); border-radius: 8px;
+    font-size: 0.95rem; font-family: inherit; transition: border-color 0.2s;
+  }
+  .qf-field input:focus, .qf-field select:focus, .qf-field textarea:focus {
+    outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+  }
+  .qf-field textarea { resize: vertical; }
+  @media (max-width: 768px) {
+    .quote-grid { grid-template-columns: 1fr; }
+    .qf-row { grid-template-columns: 1fr; }
+    .quote-features { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  const form = document.getElementById('quote-form');
+  const msg = document.getElementById('quote-message');
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const btnText = btn.querySelector('.btn-text');
+    const btnLoad = btn.querySelector('.btn-loading');
+    btn.disabled = true; btnText.style.display = 'none'; btnLoad.style.display = 'inline-flex';
+
+    const data = Object.fromEntries(new FormData(form).entries());
+    try {
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'quote', ...data })
+      });
+      if (!res.ok) throw new Error('Failed');
+      msg.textContent = '✅ Quote request received! We will get back to you within 24 hours.';
+      msg.style.background = '#d1fae5'; msg.style.color = '#065f46';
+      msg.style.display = 'block';
+      form.reset();
+    } catch (err) {
+      msg.textContent = '❌ Something went wrong. Please call us at (419) 902-8257.';
+      msg.style.background = '#fee2e2'; msg.style.color = '#991b1b';
+      msg.style.display = 'block';
+    } finally {
+      btn.disabled = false; btnText.style.display = 'inline-flex'; btnLoad.style.display = 'none';
+    }
+  });
+</script>

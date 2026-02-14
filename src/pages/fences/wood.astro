@@ -1,0 +1,58 @@
+---
+import FencePage from '../../components/FencePage.astro';
+
+const benefits = [
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', title: 'Best Value Privacy', text: 'Pressure-treated wood delivers full privacy at the most affordable price point for solid-board fencing.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Treated for Longevity', text: 'ACQ pressure treatment protects against rot, decay, and insects. Rated for ground contact.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Complete Privacy', text: '6-foot solid board construction. Shadowbox and lattice-top options available.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Stain & Paint Ready', text: 'After a 3-6 month drying period, PT wood accepts stain and paint beautifully for any color you want.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts on every project. No sagging gates — built to last.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '15-20 Year Lifespan', text: 'With proper care, pressure-treated fences last 15-20 years. Great ROI for privacy on a budget.' },
+];
+
+const specs = [
+  { label: 'Material', value: 'ACQ Pressure-Treated Pine' },
+  { label: 'Post Size', value: '4x4 Line / 4x6 Gate' },
+  { label: 'Board Size', value: '1x6 Dog-Eared' },
+  { label: 'Standard Height', value: '6 Foot' },
+  { label: 'Post Depth', value: '36" Minimum' },
+  { label: 'Warranty', value: '3 Year Craftsmanship' },
+];
+
+const faqs = [
+  { question: 'What is the difference between cedar and pressure-treated wood?', answer: 'Cedar is naturally rot-resistant, lighter, and has a premium appearance — but costs more. Pressure-treated wood is chemically treated to resist rot at a lower price point. Both make great fences; it comes down to budget and aesthetics.' },
+  { question: 'When can I stain my pressure-treated fence?', answer: 'Wait 3-6 months for the wood to dry before staining. A simple water test tells you when it is ready — sprinkle water on the wood. If it beads up, wait longer. If it soaks in, you are good to stain.' },
+  { question: 'Will pressure-treated wood warp?', answer: 'Some movement is normal as the wood dries. We minimize warping by using properly graded lumber, installing with the right fasteners, and allowing proper spacing. Premium-grade lumber warps less than economy boards.' },
+  { question: 'How much does a wood privacy fence cost?', answer: 'Wood privacy fencing is the most affordable solid-board option, typically less than cedar or vinyl. Use our instant quote tool for pricing specific to your project.' },
+];
+
+const galleryImages = [
+  { src: '/images/gallery/pt-privacy.jpg', alt: 'Pressure treated privacy fence', label: 'Solid Privacy' },
+  { src: '/images/gallery/pt-shadowbox-lattice.jpg', alt: 'Wood shadowbox fence', label: 'Shadowbox with Lattice' },
+  { src: '/images/gallery/pt-dog-ear.jpg', alt: 'Dog ear wood fence', label: 'Dog Ear Style' },
+  { src: '/images/gallery/pt-stained.jpg', alt: 'Stained wood fence', label: 'Stained' },
+  { src: '/images/gallery/pt-gate.jpg', alt: 'Wood fence gate', label: 'Custom Gate' },
+  { src: '/images/gallery/pt-cap-rail.jpg', alt: 'Wood fence with cap rail', label: 'Cap Rail Upgrade' },
+];
+
+const relatedTypes = [
+  { name: 'Cedar Privacy', href: '/fences/cedar/', image: '/images/gallery/cedar-shadowbox.jpg' },
+  { name: 'Vinyl Privacy', href: '/fences/vinyl/', image: '/images/gallery/vinyl-white.jpg' },
+  { name: 'Chain Link', href: '/fences/chainlink/', image: '/images/gallery/chainlink-1.jpg' },
+];
+---
+
+<FencePage
+  title="Wood Privacy Fence Installation Toledo OH | Affordable Privacy"
+  description="Affordable wood privacy fence installation in Toledo OH. Pressure-treated pine, 4x6 gate posts, 3-year warranty. Free quotes."
+  keywords={['wood fence toledo', 'privacy fence installation ohio', 'pressure treated fence', 'affordable fence toledo']}
+  heroTitle="Wood"
+  heroHighlight="Privacy Fencing"
+  heroText="Full privacy at the best value. Our pressure-treated wood fences feature quality lumber, oversized 4x6 gate posts, and solid construction. The smart choice for privacy on a budget."
+  heroImage="/images/gallery/pt-privacy.jpg"
+  benefits={benefits}
+  specs={specs}
+  faqs={faqs}
+  galleryImages={galleryImages}
+  relatedTypes={relatedTypes}
+/>

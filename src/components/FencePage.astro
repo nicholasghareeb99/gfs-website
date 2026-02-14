@@ -1,0 +1,262 @@
+---
+/**
+ * FencePage.astro — Reusable layout for individual fence-type pages
+ * Props: title, description, keywords, heroTitle, heroHighlight, heroText,
+ *        benefits[], specs[], faqs[], galleryImages[], relatedTypes[]
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import siteJson from '../content/site.json';
+import { getSiteSettings } from '../lib/firestore.js';
+
+const site = await getSiteSettings();
+
+interface Benefit { icon: string; title: string; text: string; }
+interface Spec { label: string; value: string; }
+interface FAQ { question: string; answer: string; }
+interface GalleryImage { src: string; alt: string; label?: string; }
+interface RelatedType { name: string; href: string; image: string; }
+
+interface Props {
+  title: string;
+  description: string;
+  keywords?: string[];
+  heroTitle: string;
+  heroHighlight: string;
+  heroText: string;
+  heroImage: string;
+  benefits: Benefit[];
+  specs: Spec[];
+  faqs: FAQ[];
+  galleryImages: GalleryImage[];
+  relatedTypes: RelatedType[];
+  ctaText?: string;
+}
+
+const {
+  title, description, keywords, heroTitle, heroHighlight, heroText, heroImage,
+  benefits, specs, faqs, galleryImages, relatedTypes, ctaText
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} keywords={keywords}>
+  <!-- Hero -->
+  <section class="fence-hero">
+    <div class="container">
+      <div class="fence-hero-grid">
+        <div class="fence-hero-content">
+          <a href="/fences/" class="fence-breadcrumb">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+            All Fence Styles
+          </a>
+          <h1 class="fence-hero-title">{heroTitle} <span class="highlight">{heroHighlight}</span></h1>
+          <p class="fence-hero-text">{heroText}</p>
+          <div class="fence-hero-cta">
+            <a href="/quote/" class="btn btn-primary btn-lg">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Get Free Quote
+            </a>
+            <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+          </div>
+        </div>
+        <div class="fence-hero-image">
+          <img src={heroImage} alt={title} loading="eager" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits -->
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Key Benefits</div>
+        <h2 class="section-title">Why Choose <span class="gold">{heroHighlight}</span>?</h2>
+      </div>
+      <div class="benefits-grid">
+        {benefits.map((b) => (
+          <div class="benefit-card">
+            <div class="benefit-icon" set:html={b.icon} />
+            <h3>{b.title}</h3>
+            <p>{b.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery -->
+  {galleryImages.length > 0 && (
+    <section class="section section-warm">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Our Work</div>
+          <h2 class="section-title">Recent <span class="gold">Installations</span></h2>
+        </div>
+        <div class="fence-gallery">
+          {galleryImages.map((img) => (
+            <div class="fence-gallery-item">
+              <img src={img.src} alt={img.alt} loading="lazy" />
+              {img.label && <div class="fence-gallery-label">{img.label}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Slot for page-specific content (comparisons, options, etc.) -->
+  <slot />
+
+  <!-- Specs -->
+  {specs.length > 0 && (
+    <section class="section section-light">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Specifications</div>
+          <h2 class="section-title">Material <span class="gold">Details</span></h2>
+        </div>
+        <div class="specs-grid">
+          {specs.map((s) => (
+            <div class="spec-item">
+              <div class="spec-label">{s.label}</div>
+              <div class="spec-value">{s.value}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- FAQs -->
+  {faqs.length > 0 && (
+    <section class="section section-warm">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Common Questions</div>
+          <h2 class="section-title">Frequently <span class="gold">Asked</span></h2>
+        </div>
+        <div class="faq-list">
+          {faqs.map((faq) => (
+            <details class="faq-item">
+              <summary>{faq.question}</summary>
+              <p>{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Related Fence Types -->
+  {relatedTypes.length > 0 && (
+    <section class="section section-light">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Explore More</div>
+          <h2 class="section-title">Other Fence <span class="gold">Styles</span></h2>
+        </div>
+        <div class="related-grid">
+          {relatedTypes.map((rt) => (
+            <a href={rt.href} class="related-card">
+              <img src={rt.image} alt={rt.name} loading="lazy" />
+              <div class="related-overlay">
+                <h4>{rt.name}</h4>
+                <span class="related-link">Learn More →</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA -->
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>{ctaText || `Ready for Your New ${heroHighlight}?`}</h2>
+        <p>Get your free quote in 60 seconds or talk to an expert today.</p>
+        <div class="cta-buttons">
+          <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .fence-hero { padding: 60px 0 40px; background: var(--bg-light); }
+  .fence-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .fence-breadcrumb {
+    display: inline-flex; align-items: center; gap: 4px;
+    color: var(--text-muted); font-size: 0.85rem; margin-bottom: 16px;
+    text-decoration: none;
+  }
+  .fence-breadcrumb:hover { color: var(--accent); }
+  .fence-hero-title { font-family: var(--font-display); font-size: 2.5rem; line-height: 1.2; margin-bottom: 16px; }
+  .fence-hero-text { color: var(--text-muted); font-size: 1.1rem; margin-bottom: 24px; line-height: 1.7; }
+  .fence-hero-cta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .fence-hero-image { border-radius: 16px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+  .fence-hero-image img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4/3; }
+
+  .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
+  .benefit-card {
+    background: var(--bg-white); border-radius: var(--radius); padding: 28px;
+    border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .benefit-icon { width: 48px; height: 48px; background: rgba(30,58,95,0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--primary); }
+  .benefit-icon :global(svg) { width: 24px; height: 24px; }
+  .benefit-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
+  .benefit-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  .fence-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .fence-gallery-item { border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
+  .fence-gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .fence-gallery-item:hover img { transform: scale(1.05); }
+  .fence-gallery-label {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,0.8));
+    color: var(--accent); font-weight: 600; font-size: 0.8rem;
+  }
+
+  .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
+  .spec-item { background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center; }
+  .spec-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
+  .spec-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+
+  .faq-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+  .faq-item {
+    background: var(--bg-white); border-radius: var(--radius); border: 1px solid var(--border);
+    overflow: hidden; transition: box-shadow 0.2s;
+  }
+  .faq-item[open] { box-shadow: var(--shadow); }
+  .faq-item summary {
+    padding: 20px 24px; font-weight: 600; cursor: pointer; list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq-item summary::after { content: '+'; font-size: 1.3rem; color: var(--accent); transition: transform 0.2s; }
+  .faq-item[open] summary::after { content: '−'; }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item p { padding: 0 24px 20px; color: var(--text-muted); line-height: 1.7; }
+
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+  .related-card { border-radius: var(--radius); overflow: hidden; position: relative; aspect-ratio: 3/2; display: block; }
+  .related-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .related-card:hover img { transform: scale(1.08); }
+  .related-overlay {
+    position: absolute; bottom: 0; left: 0; right: 0; padding: 20px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.85));
+    color: white;
+  }
+  .related-overlay h4 { font-size: 1.1rem; margin-bottom: 4px; }
+  .related-link { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+
+  @media (max-width: 768px) {
+    .fence-hero-grid { grid-template-columns: 1fr; }
+    .fence-hero-title { font-size: 1.8rem; }
+    .fence-gallery { grid-template-columns: repeat(2, 1fr); }
+    .related-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

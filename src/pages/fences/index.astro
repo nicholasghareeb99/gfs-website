@@ -1,126 +1,49 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import Hero from '../../components/Hero.astro';
-import FenceCard from '../../components/FenceCard.astro';
-import { getFences } from '../../lib/firestore.js';
+import { getSiteSettings } from '../../lib/firestore.js';
+const site = await getSiteSettings();
 
-const fenceTypes = await getFences();
-const featuredFences = fenceTypes.filter(f => f.featured);
-const otherFences = fenceTypes.filter(f => !f.featured);
+const fenceTypes = [
+  { name: 'Cedar Privacy', slug: 'cedar', image: '/images/gallery/cedar-shadowbox.jpg', desc: 'Natural beauty with premium Michigan-sourced cedar. The gold standard for privacy fencing.' },
+  { name: 'Wood Privacy', slug: 'wood', image: '/images/gallery/pt-privacy.jpg', desc: 'Affordable pressure-treated wood fencing. Solid privacy at an unbeatable value.' },
+  { name: 'Vinyl Privacy', slug: 'vinyl', image: '/images/gallery/vinyl-white.jpg', desc: 'Zero maintenance, lifetime warranty. Premium Homeland vinyl made in Michigan.' },
+  { name: 'Ornamental Aluminum', slug: 'aluminum', image: '/images/gallery/aluminum-black.jpg', desc: 'Elegant pool-code-compliant fencing. Rust-free, maintenance-free, timeless style.' },
+  { name: 'Chain Link', slug: 'chainlink', image: '/images/gallery/chainlink-1.jpg', desc: 'Practical, versatile, and budget-friendly. Galvanized or vinyl-coated options.' },
+  { name: 'Split Rail', slug: 'split-rail', image: '/images/gallery/split-rail-1.jpg', desc: 'Rustic charm for large properties. Perfect for boundaries and keeping pets in.' },
+];
 ---
 
-<BaseLayout 
-  title="Fence Types | Wood, Vinyl, Chain Link & More | Ghareeb Fencing Solutions"
-  description="Explore our complete selection of fence types including wood, vinyl, chain link, aluminum, composite, and steel fencing. Quality materials and expert installation in Toledo & Northwest Ohio."
->
-  <Hero
-    title="Fence Types & Materials"
-    subtitle="From classic wood privacy fencing to low-maintenance vinyl and durable aluminum, we offer the perfect fencing solution for every property and budget."
-    backgroundImage="/images/gallery/fence-types-hero.jpg"
-    height="medium"
-    ctaButton={{ text: "Get Free Estimate", href: "/quote" }}
-    secondaryButton={{ text: "Compare Fences", href: "#comparison" }}
-    breadcrumbs={[
-      { label: "Home", href: "/" },
-      { label: "Fence Types" }
-    ]}
-  />
-
-  <!-- Popular Fence Types -->
-  <section class="section">
+<BaseLayout title="Fence Styles | Professional Fence Installation" description="Explore our fence styles: cedar, vinyl, aluminum, chain link, split rail, and wood privacy fencing. Quality materials, expert installation in Toledo OH.">
+  <section class="section" style="padding-top: 60px;">
     <div class="container">
       <div class="section-header">
-        <h2 data-editable data-edit-doc="content/pages" data-edit-field="fences.popularTitle">Popular Fence Types</h2>
-        <p data-editable data-edit-doc="content/pages" data-edit-field="fences.popularSubtitle">Our most requested fencing options for residential and commercial properties</p>
+        <div class="section-label">Our Services</div>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Professional Fence <span class="gold">Installation</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 650px; margin: 12px auto 0;">Quality materials, expert craftsmanship, and lasting results for every fencing need in Northwest Ohio and Southeast Michigan.</p>
       </div>
-      
-      <div class="fence-grid">
-        {featuredFences.map((fence) => (
-          <FenceCard
-            name={fence.name}
-            slug={fence.slug}
-            tagline={fence.tagline}
-            image={fence.image}
-            priceRange={fence.priceRange}
-            features={fence.features}
-            featured={true}
-          />
+      <div class="fence-types-grid">
+        {fenceTypes.map((ft) => (
+          <a href={`/fences/${ft.slug}/`} class="fence-type-card">
+            <div class="fence-type-img"><img src={ft.image} alt={ft.name} loading="lazy" /></div>
+            <div class="fence-type-info">
+              <h3>{ft.name}</h3>
+              <p>{ft.desc}</p>
+              <span class="fence-type-link">Learn More →</span>
+            </div>
+          </a>
         ))}
       </div>
     </div>
   </section>
 
-  <!-- All Fence Types -->
-  <section class="section bg-light">
-    <div class="container">
-      <div class="section-header">
-        <h2>All Fence Options</h2>
-        <p>Explore our complete range of fencing materials and styles</p>
-      </div>
-      
-      <div class="fence-grid">
-        {otherFences.map((fence) => (
-          <FenceCard
-            name={fence.name}
-            slug={fence.slug}
-            tagline={fence.tagline}
-            image={fence.image}
-            priceRange={fence.priceRange}
-            features={fence.features}
-          />
-        ))}
-      </div>
-    </div>
-  </section>
-
-  <!-- Comparison Section -->
-  <section id="comparison" class="section">
-    <div class="container">
-      <div class="section-header">
-        <h2>Fence Comparison Guide</h2>
-        <p>Compare materials to find the best fit for your needs and budget</p>
-      </div>
-      
-      <div class="comparison-table-wrapper">
-        <table class="comparison-table">
-          <thead>
-            <tr>
-              <th>Fence Type</th>
-              <th>Price Range</th>
-              <th>Lifespan</th>
-              <th>Maintenance</th>
-              <th>Best For</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fenceTypes.map((fence) => (
-              <tr>
-                <td data-label="Type">
-                  <a href={`/fences/${fence.slug}`}>{fence.name}</a>
-                </td>
-                <td data-label="Price">{fence.priceRange}</td>
-                <td data-label="Lifespan">{fence.comparison?.lifespan || 'Varies'}</td>
-                <td data-label="Maintenance">{fence.comparison?.maintenance || 'Medium'}</td>
-                <td data-label="Best For">{fence.comparison?.bestFor || fence.tagline}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- CTA Section -->
   <section class="section cta-section">
     <div class="container">
       <div class="cta-content">
-        <h2>Not Sure Which Fence is Right for You?</h2>
-        <p>Our experts can help you choose the perfect fencing solution for your property, needs, and budget. Schedule a free consultation today.</p>
+        <h2>Not Sure Which Fence Is Right?</h2>
+        <p>Call us for a free consultation — we'll help you pick the perfect fence for your property and budget.</p>
         <div class="cta-buttons">
-          <a href="/quote" class="btn btn--primary btn--lg">Get Free Quote</a>
-          <a href="tel:+14193569643" class="btn btn--outline btn--lg">
-            <i class="fas fa-phone"></i> (419) 356-9643
-          </a>
+          <a href="/quote/" class="btn btn-primary btn-lg">Get Free Quote</a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
         </div>
       </div>
     </div>
@@ -128,182 +51,19 @@ const otherFences = fenceTypes.filter(f => !f.featured);
 </BaseLayout>
 
 <style>
-  .section {
-    padding: 4rem 0;
+  .fence-types-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px; }
+  .fence-type-card {
+    display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden;
+    background: var(--bg-white); border: 1px solid var(--border); transition: transform 0.3s, box-shadow 0.3s;
+    text-decoration: none; color: inherit;
   }
-
-  .bg-light {
-    background: #f8f9fa;
-  }
-
-  .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  .section-header {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-
-  .section-header h2 {
-    color: var(--color-primary);
-    font-size: 2rem;
-    margin: 0 0 0.75rem;
-  }
-
-  .section-header p {
-    color: #666;
-    font-size: 1.1rem;
-    max-width: 600px;
-    margin: 0 auto;
-  }
-
-  .fence-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-  }
-
-  /* Comparison Table */
-  .comparison-table-wrapper {
-    overflow-x: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  }
-
-  .comparison-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: #fff;
-    font-size: 0.95rem;
-  }
-
-  .comparison-table th,
-  .comparison-table td {
-    padding: 1rem 1.25rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
-
-  .comparison-table th {
-    background: var(--color-primary);
-    color: #fff;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-
-  .comparison-table tbody tr:hover {
-    background: #f8f9fa;
-  }
-
-  .comparison-table td a {
-    color: var(--color-primary);
-    font-weight: 600;
-    text-decoration: none;
-  }
-
-  .comparison-table td a:hover {
-    color: var(--color-secondary);
-  }
-
-  /* CTA Section */
-  .cta-section {
-    background: linear-gradient(135deg, var(--color-primary) 0%, #2a4a6f 100%);
-    color: #fff;
-  }
-
-  .cta-content {
-    text-align: center;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-
-  .cta-content h2 {
-    color: #fff;
-    margin: 0 0 1rem;
-  }
-
-  .cta-content p {
-    font-size: 1.1rem;
-    opacity: 0.95;
-    margin: 0 0 2rem;
-  }
-
-  .cta-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    text-decoration: none;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-  }
-
-  .btn--primary {
-    background: var(--color-secondary);
-    color: var(--color-primary);
-  }
-
-  .btn--primary:hover {
-    background: #c9a432;
-    transform: translateY(-2px);
-  }
-
-  .btn--outline {
-    background: transparent;
-    color: #fff;
-    border: 2px solid #fff;
-  }
-
-  .btn--outline:hover {
-    background: #fff;
-    color: var(--color-primary);
-  }
-
-  .btn--lg {
-    padding: 1rem 2rem;
-    font-size: 1.1rem;
-  }
-
-  @media (max-width: 768px) {
-    .section {
-      padding: 3rem 0;
-    }
-
-    .fence-grid {
-      grid-template-columns: 1fr;
-      gap: 1.5rem;
-    }
-
-    .comparison-table th,
-    .comparison-table td {
-      padding: 0.75rem;
-    }
-
-    .comparison-table {
-      font-size: 0.85rem;
-    }
-
-    .cta-buttons {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .btn--lg {
-      width: 100%;
-      max-width: 280px;
-      justify-content: center;
-    }
-  }
+  .fence-type-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+  .fence-type-img { aspect-ratio: 16/10; overflow: hidden; }
+  .fence-type-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .fence-type-card:hover .fence-type-img img { transform: scale(1.05); }
+  .fence-type-info { padding: 24px; }
+  .fence-type-info h3 { font-size: 1.25rem; margin-bottom: 8px; }
+  .fence-type-info p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 12px; }
+  .fence-type-link { color: var(--accent); font-weight: 600; font-size: 0.9rem; }
+  @media (max-width: 768px) { .fence-types-grid { grid-template-columns: 1fr; } }
 </style>

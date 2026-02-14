@@ -1,0 +1,83 @@
+---
+import FencePage from '../../components/FencePage.astro';
+
+const benefits = [
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Natural Rot Resistance', text: 'Cedar contains natural oils that resist decay, insects, and moisture — no chemical treatment needed.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Beautiful Natural Look', text: 'Rich warm tones that age gracefully to a distinguished silver patina, or stain it to preserve the original color.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '20+ Year Lifespan', text: 'With minimal care, cedar fences easily last 20-30 years. Much longer than pressure-treated pine alternatives.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Complete Privacy', text: '6-foot solid board construction with no gaps. Board-on-board and shadowbox options available for airflow.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Michigan Sourced', text: 'We use premium Northern White Cedar sourced from Michigan mills — supporting local and getting the best quality.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts prevent sagging and keep your gates swinging true for years to come.' },
+];
+
+const specs = [
+  { label: 'Post Size', value: '4x4 Line / 4x6 Gate' },
+  { label: 'Board Thickness', value: '1" Full Dimension' },
+  { label: 'Standard Height', value: '6 Foot' },
+  { label: 'Post Depth', value: '36" Minimum' },
+  { label: 'Warranty', value: '3 Year Craftsmanship' },
+  { label: 'Lifespan', value: '20-30 Years' },
+];
+
+const faqs = [
+  { question: 'How long does a cedar fence last?', answer: 'With proper care, a cedar fence can last 20-30 years or more. Cedar naturally resists rot, decay, and insects. You can extend its life by applying a sealant or stain every 3-5 years, though many homeowners love the natural silver patina that develops over time.' },
+  { question: 'Should I stain my cedar fence?', answer: 'It depends on your preference. Left natural, cedar will age to a beautiful silver-gray patina within 1-2 years. If you prefer to maintain the warm honey color, apply a UV-protectant stain within the first year. Either way, cedar looks great.' },
+  { question: 'What is the difference between cedar and pressure-treated wood?', answer: 'Cedar is naturally rot-resistant without chemical treatment, has a more attractive appearance, is lighter weight, and lasts longer. Pressure-treated wood is cheaper upfront but contains chemical preservatives, is heavier, more prone to warping, and typically needs replacing sooner.' },
+  { question: 'How much does a cedar fence cost in Toledo?', answer: 'Cedar fence pricing varies based on linear footage, height, style (solid, shadowbox, board-on-board), and terrain. Use our instant quote tool for a detailed estimate, or call us for a free on-site consultation.' },
+  { question: 'Do you use Northern White Cedar or Western Red Cedar?', answer: 'We primarily use premium Northern White Cedar sourced from Michigan mills. It performs exceptionally well in our Ohio/Michigan climate and supports local industry. Western Red Cedar is available by request for specific applications.' },
+];
+
+const galleryImages = [
+  { src: '/images/gallery/cedar-shadowbox.jpg', alt: 'Cedar shadowbox fence Toledo', label: 'Cedar Shadowbox' },
+  { src: '/images/gallery/cedar-lattice-shadowbox.jpg', alt: 'Cedar fence with lattice top', label: 'Lattice Top Cedar' },
+  { src: '/images/gallery/cedar-privacy.jpg', alt: 'Cedar privacy fence Perrysburg', label: 'Solid Cedar Privacy' },
+  { src: '/images/gallery/cedar-board-on-board.jpg', alt: 'Board on board cedar fence', label: 'Board on Board' },
+  { src: '/images/gallery/cedar-gate.jpg', alt: 'Custom cedar gate', label: 'Custom Gate' },
+  { src: '/images/gallery/cedar-stained.jpg', alt: 'Stained cedar fence', label: 'Stained Cedar' },
+];
+
+const relatedTypes = [
+  { name: 'Vinyl Privacy', href: '/fences/vinyl/', image: '/images/gallery/vinyl-white.jpg' },
+  { name: 'Wood Privacy', href: '/fences/wood/', image: '/images/gallery/pt-privacy.jpg' },
+  { name: 'Ornamental Aluminum', href: '/fences/aluminum/', image: '/images/gallery/aluminum-black.jpg' },
+];
+---
+
+<FencePage
+  title="Cedar Fence Installation Toledo OH | Ghareeb Fencing"
+  description="Premium cedar fence installation in Toledo, OH. Michigan-sourced Northern White Cedar, 4x6 gate posts, 3-year warranty. Free quotes."
+  keywords={['cedar fence toledo', 'cedar privacy fence', 'cedar fence installation ohio', 'northern white cedar fence']}
+  heroTitle="Premium Cedar"
+  heroHighlight="Privacy Fencing"
+  heroText="The gold standard for privacy fencing. Our Michigan-sourced Northern White Cedar is naturally rot-resistant, beautifully warm, and built to last decades. Every fence features oversized 4x6 gate posts and meticulous craftsmanship."
+  heroImage="/images/gallery/cedar-shadowbox.jpg"
+  benefits={benefits}
+  specs={specs}
+  faqs={faqs}
+  galleryImages={galleryImages}
+  relatedTypes={relatedTypes}
+>
+  <!-- Cedar-specific: Style options -->
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Style Options</div>
+        <h2 class="section-title">Choose Your <span class="gold">Cedar Style</span></h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto;">
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
+          <h4 style="margin-bottom: 8px;">Solid Board</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Maximum privacy with boards tight together. The most popular choice for backyards.</p>
+        </div>
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
+          <h4 style="margin-bottom: 8px;">Shadowbox</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Alternating boards on each side. Looks great from both sides with some airflow.</p>
+        </div>
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
+          <h4 style="margin-bottom: 8px;">Board on Board</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">Overlapping boards for complete privacy with a dimensional, layered appearance.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</FencePage>

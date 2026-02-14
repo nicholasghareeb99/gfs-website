@@ -1,0 +1,83 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout title="Fence Permits & Zoning | Toledo OH | Ghareeb Fencing Solutions" description="Do you need a fence permit in Toledo? Learn about local fencing regulations, setback requirements, HOA rules, and how we handle permits for you.">
+  <section class="section" style="padding-top: 60px;">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Helpful Info</div>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Fence Permits & <span class="gold">Zoning</span></h1>
+        <p style="color: var(--text-muted); max-width: 650px; margin: 12px auto 0;">Everything you need to know about fence permits in Northwest Ohio and Southeast Michigan. We handle the headaches so you don't have to.</p>
+      </div>
+
+      <div class="permit-grid">
+        <div class="permit-card highlight">
+          <h3>We Handle Permits For You</h3>
+          <p>Don't stress about permits. In most cases, we handle the entire permit process as part of your project — pulling permits, scheduling inspections, and ensuring everything is code-compliant. It is included in our service at no extra charge.</p>
+        </div>
+
+        <div class="permit-card">
+          <h3>Do I Need a Permit?</h3>
+          <p>In most Toledo-area municipalities, a fence permit is required for any new fence installation. Requirements vary by city and township. Some areas require permits for fences over 4 feet, while others require them for any height. We know the rules for every municipality in our service area.</p>
+        </div>
+
+        <div class="permit-card">
+          <h3>Common Requirements</h3>
+          <ul>
+            <li>Fence must be set back from property lines (typically 1-3 feet depending on municipality)</li>
+            <li>Maximum height of 6 feet for backyard fences, 4 feet for front yard</li>
+            <li>Gates must not swing into public right-of-way</li>
+            <li>Pool fences must meet specific safety codes (self-closing, self-latching gates)</li>
+            <li>Corner lot visibility triangle restrictions</li>
+          </ul>
+        </div>
+
+        <div class="permit-card">
+          <h3>HOA Considerations</h3>
+          <p>If you live in an HOA community, there may be additional restrictions on fence materials, colors, heights, and styles. We can review your HOA guidelines and help you choose a fence that meets all requirements while still looking great.</p>
+        </div>
+
+        <div class="permit-card">
+          <h3>Property Line & Survey</h3>
+          <p>We recommend having a recent property survey before installation. If you do not have one, we can help you locate property pins and work with your surveyor. We always install fences inside property lines to avoid disputes.</p>
+        </div>
+
+        <div class="permit-card">
+          <h3>Utility Locates</h3>
+          <p>Before any digging begins, we call 811 (OUPS in Ohio / MISS DIG in Michigan) to have underground utilities marked. This is free, required by law, and keeps everyone safe. We handle this as part of every project.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Have Questions About Permits?</h2>
+        <p>Call us and we will walk you through the process for your specific area.</p>
+        <div class="cta-buttons">
+          <a href="/quote/" class="btn btn-primary btn-lg">Get Free Quote</a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .permit-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto; }
+  .permit-card { background: var(--bg-white); border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); }
+  .permit-card.highlight { background: var(--primary); color: white; border-color: var(--primary); grid-column: 1 / -1; }
+  .permit-card.highlight h3 { color: var(--accent); }
+  .permit-card.highlight p { opacity: 0.9; }
+  .permit-card h3 { font-size: 1.15rem; margin-bottom: 12px; }
+  .permit-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.7; }
+  .permit-card.highlight p { color: rgba(255,255,255,0.9); }
+  .permit-card ul { list-style: none; padding: 0; }
+  .permit-card ul li { padding: 6px 0 6px 24px; position: relative; color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+  .permit-card ul li::before { content: '✓'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+  @media (max-width: 768px) { .permit-grid { grid-template-columns: 1fr; } }
+</style>

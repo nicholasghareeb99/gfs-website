@@ -1,656 +1,107 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getServiceAreas, getPermits, getSiteSettings } from '../../lib/firestore.js';
-
-const serviceAreasData = await getServiceAreas();
-const permitsData = await getPermits();
+import { getSiteSettings } from '../../lib/firestore.js';
 const site = await getSiteSettings();
 
 const { slug } = Astro.params;
-const area = serviceAreasData.serviceAreas.find(a => a.slug === slug);
-if (!area) return Astro.redirect('/service-areas/');
 
-// Get permit info for this area
-const areaPermit = permitsData.municipalities?.find(
-    m => m.name.toLowerCase() === area.name.toLowerCase()
-);
+// Service area data
+const areas = {
+  'toledo': { name: 'Toledo', state: 'OH', county: 'Lucas County', pop: '270,000+', desc: 'As Toledo\'s top-rated fence contractor, we\'ve installed hundreds of fences across all neighborhoods — from Old Orchard to Ottawa Hills, West Toledo to Point Place. We know the local permit requirements, HOA guidelines, and soil conditions throughout the Toledo area.' },
+  'perrysburg': { name: 'Perrysburg', state: 'OH', county: 'Wood County', pop: '22,000+', desc: 'Perrysburg\'s beautiful neighborhoods deserve beautiful fences. From the historic downtown to newer developments like Riverbend and Woodlands of Perrysburg, we\'ve installed cedar, vinyl, and aluminum fences across town.' },
+  'sylvania': { name: 'Sylvania', state: 'OH', county: 'Lucas County', pop: '19,000+', desc: 'Sylvania residents love their backyards, and we love making them better. Our premium cedar and vinyl fences are popular throughout Sylvania Township and the city\'s tree-lined neighborhoods.' },
+  'maumee': { name: 'Maumee', state: 'OH', county: 'Lucas County', pop: '14,000+', desc: 'From the Maumee River corridor to the newer subdivisions, we\'ve built fences across Maumee. Aluminum pool fences and cedar privacy fences are our most popular installs here.' },
+  'bowling-green': { name: 'Bowling Green', state: 'OH', county: 'Wood County', pop: '32,000+', desc: 'We proudly serve Bowling Green and the surrounding Wood County area. Whether you\'re near the university or out in the rural areas, we deliver the same quality craftsmanship and honest pricing.' },
+  'monroe': { name: 'Monroe', state: 'MI', county: 'Monroe County', pop: '20,000+', desc: 'Just across the Michigan border, Monroe is a key part of our service area. We\'re licensed and insured for both Ohio and Michigan, making us the easy choice for Monroe County homeowners.' },
+  'oregon': { name: 'Oregon', state: 'OH', county: 'Lucas County', pop: '20,000+', desc: 'Oregon\'s growing neighborhoods need quality fencing. We\'ve installed everything from chain link dog runs to premium cedar privacy fences throughout the Oregon area.' },
+  'waterville': { name: 'Waterville', state: 'OH', county: 'Lucas County', pop: '5,500+', desc: 'Waterville\'s charming community and larger lots are perfect for split rail, cedar, and vinyl fencing. We love working in this area.' },
+  'whitehouse': { name: 'Whitehouse', state: 'OH', county: 'Lucas County', pop: '4,500+', desc: 'Whitehouse properties often feature larger yards, making fencing a significant investment. We help you choose the right material and style for your specific needs and budget.' },
+  'holland': { name: 'Holland', state: 'OH', county: 'Lucas County', pop: '1,800+', desc: 'The Holland and Springfield Township area is one of our most active service zones. We\'ve built many fences here and know the area well.' },
+  'lambertville': { name: 'Lambertville', state: 'MI', county: 'Monroe County', pop: '10,000+', desc: 'Lambertville and Bedford Township residents enjoy easy access to our services. Being right on the state line, we\'re perfectly positioned to serve this growing community.' },
+  'temperance': { name: 'Temperance', state: 'MI', county: 'Monroe County', pop: '8,000+', desc: 'Temperance is another key Michigan community we serve. Many of our Toledo-area customers have recommended us to friends and family across the border.' },
+};
 
-// Get nearby areas
-const nearbyAreas = serviceAreasData.serviceAreas
-    .filter(a => a.county === area.county && a.slug !== area.slug)
-    .slice(0, 4);
+const area = areas[slug];
+if (!area) return Astro.redirect('/');
+
+const stateLabel = area.state === 'MI' ? 'Michigan' : 'Ohio';
+const title = `Fence Installation ${area.name}, ${area.state} | Ghareeb Fencing Solutions`;
+const desc = `Professional fence installation in ${area.name}, ${area.state}. Cedar, vinyl, aluminum, chain link fencing. 5-star rated, licensed & insured. Free quotes.`;
+
+const fenceTypes = [
+  { name: 'Cedar Privacy', href: '/fences/cedar/', icon: '🌲' },
+  { name: 'Vinyl Privacy', href: '/fences/vinyl/', icon: '🏠' },
+  { name: 'Ornamental Aluminum', href: '/fences/aluminum/', icon: '✨' },
+  { name: 'Chain Link', href: '/fences/chainlink/', icon: '🔗' },
+  { name: 'Split Rail', href: '/fences/split-rail/', icon: '🪵' },
+  { name: 'Wood Privacy', href: '/fences/wood/', icon: '🪚' },
+];
 ---
 
-<BaseLayout 
-    title={area.seo?.title || `Fence Installation ${area.name}, ${area.state} | Ghareeb Fencing Solutions`}
-    description={area.seo?.description || `Professional fence installation in ${area.name}, ${area.state}. Quality wood, vinyl & chain link fencing. Free estimates, 3-year warranty.`}
-    canonical={`/service-areas/${area.slug}/`}
->
-    <!-- Hero Section -->
-    <section class="area-hero">
-        <div class="container">
-            <nav class="breadcrumb">
-                <a href="/">Home</a>
-                <span>/</span>
-                <a href="/service-areas/">Service Areas</a>
-                <span>/</span>
-                <span>{area.name}</span>
-            </nav>
-            <div class="hero-content">
-                <div class="location-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                    {area.county}, {area.state}
-                </div>
-                <h1>Fence Installation in {area.name}</h1>
-                <p class="hero-description">{area.description}</p>
-                <div class="hero-actions">
-                    <a href="/quote/ballpark/" class="btn btn-primary btn-lg">Get Free Quote</a>
-                    <a href="tel:4199028257" class="btn btn-outline-light btn-lg">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                        {site.company.phone}
-                    </a>
-                </div>
-            </div>
+<BaseLayout title={title} description={desc} keywords={[`fence installation ${area.name.toLowerCase()}`, `fence company ${area.name.toLowerCase()} ${area.state.toLowerCase()}`, `fence contractor ${area.county.toLowerCase()}`]}>
+  <section class="section" style="padding-top: 60px;">
+    <div class="container">
+      <div class="sa-header">
+        <a href="/about/#service-areas" class="fence-breadcrumb" style="display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); font-size: 0.85rem; margin-bottom: 12px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="15 18 9 12 15 6"/></svg>
+          All Service Areas
+        </a>
+        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Fence Installation in <span class="gold">{area.name}, {area.state}</span></h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; max-width: 700px; margin: 16px auto 0; line-height: 1.7;">{area.desc}</p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 40px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Location</div>
+          <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--primary);">{area.county}</div>
         </div>
-    </section>
-
-    <!-- Area Info -->
-    <section class="section">
-        <div class="container">
-            <div class="area-grid">
-                <div class="area-main">
-                    <h2>Fence Services in {area.name}</h2>
-                    <p>Ghareeb Fencing Solutions is proud to serve the {area.name} community with professional fence installation services. Whether you need a privacy fence for your backyard, a decorative fence to enhance curb appeal, or a durable chain link fence for your commercial property, our experienced team delivers quality craftsmanship and exceptional customer service.</p>
-                    
-                    <h3>Our {area.name} Services Include:</h3>
-                    <ul class="services-list">
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Residential fence installation
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Commercial fencing solutions
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Wood, vinyl, chain link & aluminum fencing
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Gate installation & automation
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Pool fence installation (code-compliant)
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Old fence removal & disposal
-                        </li>
-                        <li>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
-                            Permit assistance
-                        </li>
-                    </ul>
-
-                    {area.highlights && area.highlights.length > 0 && (
-                        <div class="area-highlights">
-                            <h3>Why {area.name} Residents Choose Us</h3>
-                            <ul>
-                                {area.highlights.map(highlight => (
-                                    <li>{highlight}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
-                </div>
-                
-                <div class="area-sidebar">
-                    <!-- Quick Facts -->
-                    <div class="sidebar-card">
-                        <h4>Quick Facts</h4>
-                        <ul class="facts-list">
-                            <li>
-                                <span class="fact-label">Location</span>
-                                <span class="fact-value">{area.county}, {area.state}</span>
-                            </li>
-                            {area.population && (
-                                <li>
-                                    <span class="fact-label">Population</span>
-                                    <span class="fact-value">{area.population.toLocaleString()}</span>
-                                </li>
-                            )}
-                            <li>
-                                <span class="fact-label">Service Status</span>
-                                <span class="fact-value status-active">Active Service Area</span>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <!-- Contact Card -->
-                    <div class="sidebar-card contact-card">
-                        <h4>Get a Free Quote</h4>
-                        <p>Schedule your free on-site estimate in {area.name}</p>
-                        <a href="/quote/ballpark/" class="btn btn-primary btn-block">Instant Quote</a>
-                        <div class="divider">or</div>
-                        <a href={`tel:${site.company.phoneRaw}`} class="phone-link">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-                            {site.company.phone}
-                        </a>
-                    </div>
-                </div>
-            </div>
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Population</div>
+          <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--primary);">{area.pop}</div>
         </div>
-    </section>
-
-    <!-- Permit Information -->
-    {areaPermit && (
-        <section class="section bg-light">
-            <div class="container">
-                <div class="permit-section">
-                    <div class="permit-header">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="32" height="32"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                        <div>
-                            <h2>Fence Permits in {area.name}</h2>
-                            <p>What you need to know before installing a fence</p>
-                        </div>
-                    </div>
-                    
-                    <div class="permit-content">
-                        <div class="permit-details">
-                            {areaPermit.requiresPermit !== undefined && (
-                                <div class="permit-item">
-                                    <span class="permit-label">Permit Required</span>
-                                    <span class={`permit-value ${areaPermit.requiresPermit ? 'yes' : 'no'}`}>
-                                        {areaPermit.requiresPermit ? 'Yes' : 'Contact City'}
-                                    </span>
-                                </div>
-                            )}
-                            {areaPermit.fee && (
-                                <div class="permit-item">
-                                    <span class="permit-label">Permit Fee</span>
-                                    <span class="permit-value">{areaPermit.fee}</span>
-                                </div>
-                            )}
-                            {areaPermit.heightRestrictions && (
-                                <div class="permit-item">
-                                    <span class="permit-label">Height Restrictions</span>
-                                    <span class="permit-value">
-                                        Front: {areaPermit.heightRestrictions.front} | 
-                                        Side/Rear: {areaPermit.heightRestrictions.sideRear}
-                                    </span>
-                                </div>
-                            )}
-                            {areaPermit.contact && (
-                                <div class="permit-item">
-                                    <span class="permit-label">Contact</span>
-                                    <span class="permit-value">
-                                        {areaPermit.contact.phone && (
-                                            <a href={`tel:${areaPermit.contact.phone.replace(/[^0-9]/g, '')}`}>
-                                                {areaPermit.contact.phone}
-                                            </a>
-                                        )}
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                        
-                        <div class="permit-note">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                            <p>Requirements may change. We handle permit research and assist with applications for all our customers.</p>
-                        </div>
-                        
-                        <a href="/permits/" class="btn btn-secondary">View All Permit Info</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-    )}
-
-    <!-- Neighborhoods -->
-    {area.neighborhoods && area.neighborhoods.length > 0 && (
-        <section class="section">
-            <div class="container">
-                <h2>Neighborhoods We Serve in {area.name}</h2>
-                <div class="neighborhoods-grid">
-                    {area.neighborhoods.map(neighborhood => (
-                        <div class="neighborhood-tag">{neighborhood}</div>
-                    ))}
-                </div>
-            </div>
-        </section>
-    )}
-
-    <!-- Nearby Areas -->
-    {nearbyAreas.length > 0 && (
-        <section class="section bg-light">
-            <div class="container">
-                <div class="section-header text-center">
-                    <h2>Nearby Service Areas</h2>
-                    <p>We also serve these neighboring communities</p>
-                </div>
-                <div class="nearby-grid">
-                    {nearbyAreas.map(nearby => (
-                        <a href={`/service-areas/${nearby.slug}/`} class="nearby-card">
-                            <h4>{nearby.name}</h4>
-                            <span>{nearby.county}, {nearby.state}</span>
-                        </a>
-                    ))}
-                </div>
-            </div>
-        </section>
-    )}
-
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <h2>Ready to Start Your {area.name} Fence Project?</h2>
-            <p>Get a free, no-obligation quote from your local fence experts</p>
-            <div class="cta-buttons">
-                <a href="/quote/ballpark/" class="btn btn-accent btn-lg">Get Instant Quote</a>
-                <a href="/contact/" class="btn btn-outline-light btn-lg">Schedule Consultation</a>
-            </div>
+        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center;">
+          <div style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Our Rating</div>
+          <div style="font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--primary);">{site.stats.googleRating} ★</div>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Our Services</div>
+        <h2 class="section-title">Fence Styles Available in <span class="gold">{area.name}</span></h2>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto;">
+        {fenceTypes.map((ft) => (
+          <a href={ft.href} style="display: flex; align-items: center; gap: 14px; padding: 20px; background: var(--bg-white); border-radius: var(--radius); border: 1px solid var(--border); text-decoration: none; color: inherit; transition: box-shadow 0.2s;">
+            <span style="font-size: 1.5rem;">{ft.icon}</span>
+            <div>
+              <div style="font-weight: 600;">{ft.name}</div>
+              <span style="color: var(--accent); font-size: 0.85rem;">Learn More →</span>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready for Your {area.name} Fence Project?</h2>
+        <p>Get a free quote in 60 seconds or call us today.</p>
+        <div class="cta-buttons">
+          <a href="/quote/" class="btn btn-primary btn-lg">Get Free Quote</a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 
 <style>
-    .area-hero {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        padding: 140px 0 60px;
-        color: white;
-    }
-
-    .breadcrumb {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 20px;
-        font-size: 0.9rem;
-    }
-
-    .breadcrumb a {
-        color: rgba(255,255,255,0.7);
-        text-decoration: none;
-    }
-
-    .breadcrumb a:hover {
-        color: var(--accent);
-    }
-
-    .breadcrumb span {
-        color: rgba(255,255,255,0.5);
-    }
-
-    .breadcrumb span:last-child {
-        color: white;
-    }
-
-    .location-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        background: rgba(255,255,255,0.15);
-        padding: 8px 16px;
-        border-radius: 50px;
-        font-size: 0.9rem;
-        margin-bottom: 16px;
-    }
-
-    .location-badge svg {
-        color: var(--accent);
-    }
-
-    .area-hero h1 {
-        font-size: clamp(2rem, 4vw, 3rem);
-        margin-bottom: 16px;
-    }
-
-    .hero-description {
-        font-size: 1.15rem;
-        color: rgba(255,255,255,0.9);
-        max-width: 600px;
-        margin-bottom: 32px;
-        line-height: 1.7;
-    }
-
-    .hero-actions {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
-    }
-
-    .btn-outline-light {
-        background: transparent;
-        border: 2px solid white;
-        color: white;
-    }
-
-    .btn-outline-light:hover {
-        background: white;
-        color: var(--primary);
-    }
-
-    /* Area Grid */
-    .area-grid {
-        display: grid;
-        grid-template-columns: 1fr 360px;
-        gap: 48px;
-        align-items: start;
-    }
-
-    @media (max-width: 900px) {
-        .area-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    .area-main h2 {
-        margin-bottom: 16px;
-    }
-
-    .area-main > p {
-        color: var(--text-muted);
-        line-height: 1.8;
-        margin-bottom: 32px;
-    }
-
-    .area-main h3 {
-        font-size: 1.1rem;
-        margin-bottom: 16px;
-    }
-
-    .services-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 32px;
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 12px;
-    }
-
-    .services-list li {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        padding: 12px 16px;
-        background: #f8fafc;
-        border-radius: var(--radius);
-    }
-
-    .services-list svg {
-        color: var(--accent);
-        flex-shrink: 0;
-    }
-
-    .area-highlights {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        color: white;
-        padding: 28px;
-        border-radius: var(--radius);
-    }
-
-    .area-highlights h3 {
-        color: var(--accent);
-        margin-bottom: 16px;
-    }
-
-    .area-highlights ul {
-        margin: 0;
-        padding-left: 20px;
-    }
-
-    .area-highlights li {
-        padding: 6px 0;
-        opacity: 0.95;
-    }
-
-    /* Sidebar */
-    .sidebar-card {
-        background: white;
-        border-radius: var(--radius);
-        padding: 24px;
-        margin-bottom: 20px;
-        box-shadow: var(--shadow-sm);
-    }
-
-    .sidebar-card h4 {
-        margin: 0 0 16px;
-        font-size: 1.1rem;
-    }
-
-    .facts-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .facts-list li {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px 0;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .facts-list li:last-child {
-        border-bottom: none;
-    }
-
-    .fact-label {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-    }
-
-    .fact-value {
-        font-weight: 600;
-    }
-
-    .status-active {
-        color: #10b981;
-    }
-
-    .contact-card {
-        text-align: center;
-    }
-
-    .contact-card p {
-        color: var(--text-muted);
-        margin-bottom: 16px;
-    }
-
-    .divider {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-        margin: 12px 0;
-    }
-
-    .phone-link {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        color: var(--primary);
-        font-weight: 600;
-        text-decoration: none;
-    }
-
-    .phone-link:hover {
-        color: var(--accent);
-    }
-
-    /* Permit Section */
-    .permit-section {
-        background: white;
-        border-radius: var(--radius-lg);
-        padding: 36px;
-    }
-
-    .permit-header {
-        display: flex;
-        gap: 16px;
-        align-items: flex-start;
-        margin-bottom: 24px;
-        padding-bottom: 24px;
-        border-bottom: 1px solid #e2e8f0;
-    }
-
-    .permit-header svg {
-        color: var(--primary);
-        flex-shrink: 0;
-    }
-
-    .permit-header h2 {
-        margin: 0 0 4px;
-        font-size: 1.4rem;
-    }
-
-    .permit-header p {
-        margin: 0;
-        color: var(--text-muted);
-    }
-
-    .permit-details {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 16px;
-        margin-bottom: 20px;
-    }
-
-    .permit-item {
-        background: #f8fafc;
-        padding: 16px;
-        border-radius: var(--radius);
-    }
-
-    .permit-label {
-        display: block;
-        font-size: 0.85rem;
-        color: var(--text-muted);
-        margin-bottom: 4px;
-    }
-
-    .permit-value {
-        font-weight: 600;
-    }
-
-    .permit-value.yes {
-        color: #f59e0b;
-    }
-
-    .permit-value.no {
-        color: #10b981;
-    }
-
-    .permit-value a {
-        color: var(--primary);
-        text-decoration: none;
-    }
-
-    .permit-value a:hover {
-        text-decoration: underline;
-    }
-
-    .permit-note {
-        display: flex;
-        gap: 12px;
-        align-items: flex-start;
-        padding: 16px;
-        background: #fef3c7;
-        border-radius: var(--radius);
-        margin-bottom: 20px;
-    }
-
-    .permit-note svg {
-        color: #f59e0b;
-        flex-shrink: 0;
-        margin-top: 2px;
-    }
-
-    .permit-note p {
-        margin: 0;
-        font-size: 0.9rem;
-        color: #92400e;
-    }
-
-    /* Neighborhoods */
-    .neighborhoods-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 20px;
-    }
-
-    .neighborhood-tag {
-        padding: 10px 18px;
-        background: #f1f5f9;
-        border-radius: 50px;
-        font-size: 0.95rem;
-    }
-
-    /* Nearby */
-    .nearby-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 16px;
-    }
-
-    .nearby-card {
-        display: block;
-        padding: 24px;
-        background: white;
-        border-radius: var(--radius);
-        text-decoration: none;
-        color: inherit;
-        box-shadow: var(--shadow-sm);
-        transition: all 0.2s;
-    }
-
-    .nearby-card:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
-    }
-
-    .nearby-card h4 {
-        margin: 0 0 4px;
-    }
-
-    .nearby-card span {
-        color: var(--text-muted);
-        font-size: 0.9rem;
-    }
-
-    /* CTA */
-    .cta-section {
-        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-        padding: 80px 0;
-        text-align: center;
-        color: white;
-    }
-
-    .cta-section h2 {
-        font-size: clamp(1.8rem, 4vw, 2.5rem);
-        margin-bottom: 12px;
-    }
-
-    .cta-section p {
-        font-size: 1.1rem;
-        opacity: 0.9;
-        margin-bottom: 32px;
-    }
-
-    .cta-buttons {
-        display: flex;
-        gap: 16px;
-        justify-content: center;
-        flex-wrap: wrap;
-    }
-
-    .btn-accent {
-        background: var(--accent);
-        color: var(--primary-dark);
-    }
-
-    .btn-accent:hover {
-        background: #c9a431;
-    }
+  .sa-header { text-align: center; }
+  .fence-breadcrumb:hover { color: var(--accent); }
 </style>

@@ -1,0 +1,59 @@
+---
+import FencePage from '../../components/FencePage.astro';
+
+const benefits = [
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Rust-Free Guarantee', text: 'Unlike iron or steel, ornamental aluminum never rusts. Powder-coated finish withstands Ohio weather year after year.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Pool Code Compliant', text: 'Self-closing, self-latching gates meet local pool safety codes. Protect your family and stay compliant.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: 'Lifetime Material', text: 'Aluminum fencing lasts 50+ years with virtually zero maintenance. Just rinse occasionally.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Multiple Styles', text: 'Flat top, staggered spear, pressed spear, and puppy picket options. Heights from 3 to 6 feet.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Curb Appeal', text: 'Elegant, timeless look that increases property value. The premium choice for front yards and pools.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>', title: 'Zero Maintenance', text: 'No painting, staining, or rust treatment ever needed. Just enjoy the fence.' },
+];
+
+const specs = [
+  { label: 'Material', value: 'Powder-Coated Aluminum' },
+  { label: 'Heights', value: '3ft, 4ft, 5ft, 6ft' },
+  { label: 'Colors', value: 'Black, Bronze, White' },
+  { label: 'Pool Compliant', value: 'Yes — Self-closing Gates' },
+  { label: 'Warranty', value: 'Lifetime Mfg + 3yr Labor' },
+  { label: 'Manufacturer', value: 'Ultra Fence (Michigan)' },
+];
+
+const faqs = [
+  { question: 'Is aluminum fencing strong enough for security?', answer: 'Yes. Modern ornamental aluminum is manufactured with heavy-gauge aluminum alloy that is remarkably strong. It is not the flimsy aluminum of decades past. The pickets are welded (not screwed) to the rails for maximum strength.' },
+  { question: 'What colors are available?', answer: 'The most popular color is black, which provides the classic wrought-iron look without the rust. Bronze and white are also available. The powder-coat finish is baked on and extremely durable.' },
+  { question: 'Can aluminum fencing go on a slope?', answer: 'Absolutely. Aluminum panels can be racked (angled) to follow the contour of your yard. For steeper slopes, we use stair-stepping with custom-cut panels.' },
+  { question: 'How does aluminum compare to wrought iron?', answer: 'Aluminum gives you the same elegant look as wrought iron but without the rust, at a lower weight, and at a better price point. Wrought iron requires regular painting and rust treatment — aluminum never does.' },
+  { question: 'Is aluminum fencing good for dogs?', answer: 'Yes, especially with the puppy picket option which adds smaller pickets at the bottom to prevent small dogs from squeezing through. Standard spacing is about 3.5 inches between pickets.' },
+];
+
+const galleryImages = [
+  { src: '/images/gallery/aluminum-black.jpg', alt: 'Black aluminum ornamental fence', label: 'Black Flat Top' },
+  { src: '/images/gallery/aluminum-ornamental.jpg', alt: 'Aluminum pool fence', label: 'Pool Enclosure' },
+  { src: '/images/gallery/aluminum-gate.jpg', alt: 'Aluminum arched gate', label: 'Arched Gate' },
+  { src: '/images/gallery/aluminum-spear.jpg', alt: 'Staggered spear aluminum', label: 'Staggered Spear' },
+  { src: '/images/gallery/aluminum-bronze.jpg', alt: 'Bronze aluminum fence', label: 'Bronze Finish' },
+  { src: '/images/gallery/aluminum-landscape.jpg', alt: 'Aluminum fence with landscaping', label: 'With Landscaping' },
+];
+
+const relatedTypes = [
+  { name: 'Chain Link', href: '/fences/chainlink/', image: '/images/gallery/chainlink-1.jpg' },
+  { name: 'Vinyl Privacy', href: '/fences/vinyl/', image: '/images/gallery/vinyl-white.jpg' },
+  { name: 'Cedar Privacy', href: '/fences/cedar/', image: '/images/gallery/cedar-shadowbox.jpg' },
+];
+---
+
+<FencePage
+  title="Ornamental Aluminum Fence Toledo OH | Pool-Code Compliant"
+  description="Ornamental aluminum fence installation in Toledo OH. Rust-free, pool-code compliant, lifetime warranty. Ultra Fence Michigan-made. Free quotes."
+  keywords={['aluminum fence toledo', 'ornamental aluminum fence', 'pool fence toledo oh', 'aluminum fence installation']}
+  heroTitle="Ornamental"
+  heroHighlight="Aluminum Fencing"
+  heroText="Elegant, rust-free, and virtually maintenance-free. Our Ultra Fence aluminum is manufactured in Michigan, pool-code compliant, and comes with a lifetime warranty. The premium choice for curb appeal."
+  heroImage="/images/gallery/aluminum-black.jpg"
+  benefits={benefits}
+  specs={specs}
+  faqs={faqs}
+  galleryImages={galleryImages}
+  relatedTypes={relatedTypes}
+/>

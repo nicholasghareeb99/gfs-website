@@ -1,0 +1,145 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout title="About Us | Ghareeb Fencing Solutions" description="Family-owned fence company serving Toledo, OH since 2022. Meet the team, learn our story, and see why we're 5-star rated on Google.">
+  <section class="about-hero">
+    <div class="container">
+      <div class="about-hero-grid">
+        <div>
+          <div class="section-label">Our Story</div>
+          <h1>Family-Owned. <span class="gold">Community-Driven.</span></h1>
+          <p class="about-lead">Ghareeb Fencing Solutions is a family-owned and operated fence company proudly serving Northwest Ohio and Southeast Michigan since 2022. What started as a commitment to building better fences has grown into the region's highest-rated fencing contractor.</p>
+          <p>We are not a franchise. We are not a faceless corporation. When you call us, you talk to Nick — the owner — who will be on-site for every single installation. That is our promise, and that is what makes us different.</p>
+        </div>
+        <div class="about-image">
+          <img src="/images/about/team.jpg" alt="Ghareeb Fencing Solutions team" loading="eager" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">What Sets Us Apart</div>
+        <h2 class="section-title">The Ghareeb <span class="gold">Difference</span></h2>
+      </div>
+      <div class="values-grid">
+        <div class="value-card">
+          <div class="value-number">01</div>
+          <h3>Owner On Every Job</h3>
+          <p>Nick personally oversees every single installation from start to finish. No subcontractors, no project managers relaying messages. You deal directly with the person responsible for your fence.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-number">02</div>
+          <h3>Honest, Transparent Pricing</h3>
+          <p>No high-pressure sales tactics. No bait-and-switch pricing. We give you a clear, detailed quote and stick to it. What we quote is what you pay — period.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-number">03</div>
+          <h3>Premium Materials Only</h3>
+          <p>We source Michigan-made cedar, Homeland premium vinyl, and Ultra Fence aluminum. Every material we use is one we would put in our own backyard.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-number">04</div>
+          <h3>Technology-Driven Service</h3>
+          <p>Custom-built quoting tools, client portals for project tracking, aerial property views for accurate measurements, and digital signatures for convenience. We run a modern operation.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-number">05</div>
+          <h3>Clean Jobsites</h3>
+          <p>We treat your property with respect. Every job ends with a thorough cleanup — no debris, no mess, no leftover materials. Your yard looks better than when we arrived.</p>
+        </div>
+        <div class="value-card">
+          <div class="value-number">06</div>
+          <h3>3-Year Warranty</h3>
+          <p>Every fence we build comes with a 3-year craftsmanship warranty on top of manufacturer material warranties. We stand behind our work completely.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-warm">
+    <div class="container">
+      <div class="about-stats">
+        <div class="about-stat">
+          <div class="about-stat-value">{site.stats.fencesInstalled}</div>
+          <div class="about-stat-label">Fences Installed</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-value">{site.stats.googleRating}<span class="gold">★</span></div>
+          <div class="about-stat-label">Google Rating</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-value">100%</div>
+          <div class="about-stat-label">Satisfaction Rate</div>
+        </div>
+        <div class="about-stat">
+          <div class="about-stat-value">Since 2022</div>
+          <div class="about-stat-label">Serving the Community</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-light">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-label">Service Area</div>
+        <h2 class="section-title">Where We <span class="gold">Work</span></h2>
+        <p style="color: var(--text-muted); max-width: 600px; margin: 12px auto 0;">We serve all of Northwest Ohio and Southeast Michigan, including Lucas, Wood, Fulton, Henry, Ottawa, and Monroe counties.</p>
+      </div>
+      <div class="areas-grid" style="max-width: 800px; margin: 0 auto;">
+        {site.serviceAreas.map((area) => (
+          <a href={`/service-areas/${area.slug}/`} class="area-tag">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {area.name}{area.state === 'MI' ? ', MI' : ''}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-section">
+    <div class="container">
+      <div class="cta-content">
+        <h2>Ready to Work With Us?</h2>
+        <p>Get your free quote or call to chat about your project.</p>
+        <div class="cta-buttons">
+          <a href="/quote/" class="btn btn-primary btn-lg">Get Free Quote</a>
+          <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .about-hero { padding: 60px 0 40px; background: var(--bg-light); }
+  .about-hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+  .about-hero h1 { font-size: 2.5rem; margin-bottom: 20px; }
+  .about-lead { font-size: 1.1rem; color: var(--text-body); line-height: 1.7; margin-bottom: 16px; }
+  .about-hero p { color: var(--text-muted); line-height: 1.7; }
+  .about-image { border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-lg); }
+  .about-image img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+
+  .values-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; }
+  .value-card { background: var(--bg-white); border-radius: var(--radius); padding: 28px; border: 1px solid var(--border); }
+  .value-number { font-family: var(--font-display); font-size: 2rem; font-weight: 700; color: var(--accent); opacity: 0.4; margin-bottom: 8px; }
+  .value-card h3 { margin-bottom: 10px; font-size: 1.15rem; }
+  .value-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
+
+  .about-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; text-align: center; }
+  .about-stat-value { font-family: var(--font-display); font-size: 2.2rem; font-weight: 700; color: var(--primary); }
+  .about-stat-label { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+  @media (max-width: 768px) {
+    .about-hero-grid { grid-template-columns: 1fr; }
+    .about-hero h1 { font-size: 1.8rem; }
+    .about-stats { grid-template-columns: repeat(2, 1fr); }
+    .values-grid { grid-template-columns: 1fr; }
+  }
+</style>
