@@ -11,8 +11,8 @@
 
 # Redirect www to non-www
 [[redirects]]
-  from = "https://www.ghareebfencing.com/*"
-  to = "https://ghareebfencing.com/:splat"
+  from = "https://www.ghareebfencingsolutions.com/*"
+  to = "https://ghareebfencingsolutions.com/:splat"
   status = 301
   force = true
 
