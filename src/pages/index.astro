@@ -79,10 +79,13 @@ const site = { ...siteJson, ...siteSettings };
                 <!-- Static fallback — replaced by Firestore data on load -->
                 <div class="gallery-item"><img src="/images/gallery/cedar-lattice-shadowbox.jpg" alt="Cedar fence with lattice top"><div class="gallery-label">Cedar Lattice Top</div></div>
                 <div class="gallery-item"><img src="/images/gallery/vinyl-tan-privacy.jpg" alt="Tan vinyl fence"><div class="gallery-label">Vinyl Privacy Tan</div></div>
-                <div class="gallery-item"><img src="/images/gallery/aluminum-ornamental.jpg" alt="Aluminum pool fence"><div class="gallery-label">Aluminum Ornamental</div></div>
+                <div class="gallery-item"><img src="/images/gallery/aluminum-black.jpg" alt="Black aluminum ornamental fence"><div class="gallery-label">Aluminum Ornamental - Sylvania</div></div>
                 <div class="gallery-item"><img src="/images/gallery/pt-shadowbox-lattice.jpg" alt="Wood shadowbox fence"><div class="gallery-label">Wood Shadowbox</div></div>
+                <div class="gallery-item"><img src="/images/gallery/aluminum-ornamental.jpg" alt="Aluminum pool fence"><div class="gallery-label">Aluminum Ornamental</div></div>
+                <div class="gallery-item"><img src="/images/gallery/cedar-split-rail.jpg" alt="Cedar split rail fence"><div class="gallery-label">Split Rail Cedar</div></div>
+                <div class="gallery-item"><img src="/images/gallery/vinyl-ranch-combo.jpg" alt="Ranch rail fence"><div class="gallery-label">Vinyl Ranch Rail</div></div>
+                <div class="gallery-item"><img src="/images/gallery/split-rail-4.jpg" alt="Split rail fence"><div class="gallery-label">Split Rail</div></div>
                 <div class="gallery-item"><img src="/images/gallery/chainlink-1.jpg" alt="Chain link fence"><div class="gallery-label">Chain Link</div></div>
-                <div class="gallery-item"><img src="/images/gallery/split-rail-1.jpg" alt="Split rail fence"><div class="gallery-label">Split Rail</div></div>
             </div>
         </div>
     </section>
@@ -116,6 +119,58 @@ const site = { ...siteJson, ...siteSettings };
         </div>
     </section>
 
+    <!-- Compare Fence Styles Tool -->
+    <section id="comparison-tool" class="section section-warm">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-label">Comparison Tool</div>
+                <h2 class="section-title">Compare Fence <span class="gold">Styles</span></h2>
+                <p class="section-text">See how different fence types stack up on cost, durability, maintenance, and more</p>
+            </div>
+            <div class="comparison-wrapper" style="max-width: 800px; margin: 0 auto;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--color-dark-gray);">First Fence Style</label>
+                        <select id="compare-a" class="compare-select" style="width: 100%; padding: 12px 16px; border: 2px solid var(--color-light-gray); border-radius: 10px; font-size: 1rem; background: white;">
+                            <option value="">Select a style...</option>
+                            <option value="cedar">Cedar Privacy</option>
+                            <option value="vinyl">Vinyl Privacy</option>
+                            <option value="wood">Wood Privacy</option>
+                            <option value="aluminum">Ornamental Aluminum</option>
+                            <option value="chainlink">Chain Link</option>
+                            <option value="split-rail">Split Rail</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display: block; font-weight: 600; margin-bottom: 8px; color: var(--color-dark-gray);">Compare With</label>
+                        <select id="compare-b" class="compare-select" style="width: 100%; padding: 12px 16px; border: 2px solid var(--color-light-gray); border-radius: 10px; font-size: 1rem; background: white;">
+                            <option value="">Select a style...</option>
+                            <option value="cedar">Cedar Privacy</option>
+                            <option value="vinyl">Vinyl Privacy</option>
+                            <option value="wood">Wood Privacy</option>
+                            <option value="aluminum">Ornamental Aluminum</option>
+                            <option value="chainlink">Chain Link</option>
+                            <option value="split-rail">Split Rail</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="comparison-result" style="min-height: 200px;"></div>
+                <div style="display: flex; gap: 16px; justify-content: center; margin-top: 24px;">
+                    <a href="/quote/" class="btn btn-primary">Get Quote for Your Fence</a>
+                    <a href="tel:4199028257" class="btn btn-outline">Talk to an Expert</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Permit CTA -->
+    <section class="section" style="background: var(--color-primary); color: white; padding: 48px 0;">
+        <div class="container" style="text-align: center; max-width: 700px;">
+            <h3 style="font-family: var(--font-heading); font-size: 1.5rem; margin-bottom: 12px;">Do You Need a Fence Permit?</h3>
+            <p style="opacity: 0.9; margin-bottom: 24px;">Check height limits, setback rules & permit requirements for 40+ cities in NW Ohio & SE Michigan.</p>
+            <a href="/permits/" class="btn" style="background: white; color: var(--color-primary); font-weight: 700; border-radius: 9999px; padding: 14px 32px;">Check My City's Rules</a>
+        </div>
+    </section>
 
 
     <!-- Why Choose Us — DYNAMIC from Firestore content/whyUs -->
@@ -216,8 +271,8 @@ const site = { ...siteJson, ...siteSettings };
     <section class="section cta-section">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready for Your New Fence?</h2>
-                <p>Get your free quote in 60 seconds or talk to an expert today.</p>
+                <h2>Ready to Transform Your Backyard?</h2>
+                <p>Get a free instant quote in 60 seconds or talk to a fence expert today.</p>
                 <div class="cta-buttons">
                     <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
                     <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
