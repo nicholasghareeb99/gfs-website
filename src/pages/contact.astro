@@ -44,7 +44,7 @@ const site = await getSiteSettings();
           <div class="contact-card">
             <div class="contact-card-icon"><i class="fab fa-facebook"></i></div>
             <h3>Follow Us</h3>
-            <a href={site.company.social.facebook} target="_blank" rel="noopener" class="contact-card-value">Facebook</a>
+            <a href={site.company?.social?.facebook || 'https://www.facebook.com/ghareebfencing'} target="_blank" rel="noopener" class="contact-card-value">Facebook</a>
             <p>See our latest projects</p>
           </div>
         </div>
