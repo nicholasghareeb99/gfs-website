@@ -188,6 +188,7 @@ const firebaseConfig = {
 <script is:inline define:vars={{ firebaseConfig }}>
 (function() {
   const FB_CFG = firebaseConfig;
+  const hasFirebaseConfig = FB_CFG && FB_CFG.projectId && FB_CFG.apiKey;
   let auth, db, storage, user = null;
   let editActive = false;
   let changes = new Map();
@@ -206,6 +207,12 @@ const firebaseConfig = {
   });
 
   async function handleEditShortcut() {
+    // Check if Firebase is configured
+    if (!hasFirebaseConfig) {
+      alert('Edit Mode requires Firebase configuration.\n\nSet these environment variables on Netlify:\n• PUBLIC_FIREBASE_API_KEY\n• PUBLIC_FIREBASE_AUTH_DOMAIN\n• PUBLIC_FIREBASE_PROJECT_ID\n• PUBLIC_FIREBASE_STORAGE_BUCKET\n• PUBLIC_FIREBASE_MESSAGING_SENDER_ID\n• PUBLIC_FIREBASE_APP_ID\n\nGet these from Firebase Console → Project Settings → Web App.');
+      return;
+    }
+
     // If toolbar is already visible and user is logged in, toggle edit mode
     if (user && document.getElementById('edit-toolbar').style.display !== 'none') {
       if (editActive) {
@@ -313,13 +320,16 @@ const firebaseConfig = {
   }
 
   // =============================================
-  // 1. Check auth state — load SDK if cookie hint exists
+  // 1. Check auth state — load SDK if cookie hint exists AND config is available
   // =============================================
-  if (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin')) {
+  if (hasFirebaseConfig && (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin'))) {
     loadFirebaseAndInit();
   }
 
   async function loadFirebaseSDK() {
+    if (!hasFirebaseConfig) {
+      throw new Error('Firebase configuration missing. Set environment variables on Netlify.');
+    }
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js');
@@ -332,6 +342,7 @@ const firebaseConfig = {
   }
 
   async function loadFirebaseAndInit() {
+    if (!hasFirebaseConfig) return;
     firebaseLoading = true;
     try {
       await loadFirebaseSDK();
