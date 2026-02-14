@@ -6,13 +6,17 @@ const site = await getSiteSettings();
 ---
 
 <BaseLayout canonical="/contact/" title="Contact Us | Ghareeb Fencing Solutions" description="Contact Ghareeb Fencing Solutions for a free fence quote in Toledo, OH. Call (419) 902-8257 or fill out our contact form.">
-  <section class="section" style="padding-top: 60px;">
+  <section class="page-hero">
     <div class="container">
-      <div class="section-header">
-        <div class="section-label">Get In Touch</div>
-        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">Contact <span class="gold">Us</span></h1>
-        <p style="color: var(--text-muted); max-width: 600px; margin: 12px auto 0;">Have a question or ready to get started? We would love to hear from you.</p>
-      </div>
+      <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.3); background: rgba(212,175,55,0.1);">📞 Get In Touch</div>
+      <h1 style="font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); color: white;">Contact <span class="gold">Us</span></h1>
+      <p style="color: rgba(255,255,255,0.8); max-width: 600px; margin: 12px auto 0;">Ready to start your fence project? Call us today or fill out our form for a free quote.</p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 40px;">
+    <div class="container">
+      <div class="service-area-badge">🌍 Serving Toledo, Maumee, Perrysburg, Sylvania &amp; surrounding areas</div>
 
       <div class="contact-grid">
         <div class="contact-info-col">
@@ -67,4 +71,6 @@ const site = await getSiteSettings();
   .contact-card p { color: var(--text-muted); font-size: 0.85rem; }
   .contact-form-col { background: var(--bg-white); border-radius: var(--radius-lg); padding: 32px; border: 1px solid var(--border); }
   @media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; } }
+  .page-hero { background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%); padding: 140px 0 80px; text-align: center; color: white; }
+  .service-area-badge { display: inline-block; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); color: #d4af37; padding: 10px 24px; border-radius: 9999px; font-size: 0.9rem; margin-bottom: 32px; }
 </style>

@@ -4,20 +4,21 @@ import { getSiteSettings, getAllReviews } from '../lib/firestore.js';
 const site = await getSiteSettings();
 const dynamicReviews = await getAllReviews();
 
-// Static fallback reviews (real reviews from Google, BBB, Facebook)
 const staticReviews = [
-  { name: 'Roy Gene Palmer III', source: 'Facebook', date: 'June 2025', rating: 5, text: 'Nick did an outstanding job installing our traditional cedar picket fence. From the start, he was incredibly patient in working through the details of our project and offered several creative solutions when we encountered challenges with our property layout. What impressed me most was how he worked within our budget constraints to find the best possible option without compromising on quality. The finished fence looks fantastic — the craftsmanship is top-notch and you can tell Nick takes pride in his work.', type: 'Cedar' },
-  { name: 'Josh Smith', source: 'Facebook', date: 'April 2025', rating: 5, text: 'We opted for a cedar privacy fence. Nick knocked it out of the park. Price was very competitive and the job was completed on budget and on schedule. They left the yard in clean state and were happy to talk to the neighbors about what to expect with the install. 10/10 would recommend again. The fence has been up for about 6 months through winter and looks as good as when he installed it.', type: 'Cedar' },
-  { name: 'Jason F.', source: 'BBB', date: '2025', rating: 5, text: 'Great group of people to work with. Went up fast and they did a fantastic job.', type: 'General' },
-  { name: 'Jim L.', source: 'BBB', date: '2025', rating: 5, text: 'Nicholas and his fencing workers did a fine job of installing our yard fencing project. They were exactly what we needed and they went above and beyond.', type: 'General' },
-  { name: 'Darnell A.', source: 'BBB', date: '2025', rating: 5, text: 'I thoroughly recommend this contractor to do business with. The owner is very professional and he knows how to mediate with the customer and he provides excellent customer service.', type: 'General' },
-  { name: 'Sarah M.', source: 'Google', date: '2025', rating: 5, text: 'Best decision we made for our backyard. The crew was professional, finished in just 2 days, and the fence looks amazing. Highly recommend!', type: 'Cedar' },
-  { name: 'James R.', source: 'Google', date: '2024', rating: 5, text: 'Finally a contractor who shows up when they say they will! Great communication throughout the project. Our vinyl fence is perfect.', type: 'Vinyl' },
-  { name: 'Karen L.', source: 'Google', date: '2024', rating: 5, text: 'The aluminum fence around our pool looks incredible. Quality work at a fair price. Would definitely use again for our front yard.', type: 'Aluminum' },
-  { name: 'Mike D.', source: 'Google', date: '2024', rating: 5, text: 'Had a chain link fence installed for our dog run. Quick, affordable, and looks great. Nick was responsive and easy to work with from start to finish.', type: 'Chain Link' },
-  { name: 'Jennifer W.', source: 'Google', date: '2025', rating: 5, text: 'Nick and his team installed a beautiful vinyl privacy fence for us. The quality is outstanding and they were very professional throughout the entire process. Cleaned up everything when they were done.', type: 'Vinyl' },
-  { name: 'David H.', source: 'Facebook', date: '2024', rating: 5, text: 'Excellent experience from start to finish. Got quotes from 5 companies and Ghareeb had the best combination of price, materials, and professionalism. Our cedar shadowbox fence turned out beautiful.', type: 'Cedar' },
-  { name: 'Lisa T.', source: 'Google', date: '2025', rating: 5, text: 'We needed a fence fast for our new puppy and Nick made it happen. From quote to installation in under 2 weeks. The fence is solid and exactly what we wanted. Thank you!', type: 'Wood' },
+  { name: 'Jenny Wilhelm Pfeiffer', source: 'Facebook', date: 'October 2025', rating: 5, text: 'Nicholas was amazing to work with! Nicholas was very knowledgeable and patient with us with our decision. Our fence looks gorgeous!' },
+  { name: 'Roy Gene Palmer III', source: 'Facebook', date: 'June 2025', rating: 5, text: 'Nick did an outstanding job installing our traditional cedar picket fence. From the start, he was incredibly patient in working through the details of our project and offered several creative solutions when we encountered challenges with our property layout.' },
+  { name: 'Josh Smith', source: 'Facebook', date: 'April 2025', rating: 5, text: 'We opted for a cedar privacy fence. Nick knocked it out of the park. Price was very competitive and the job was completed on budget and on schedule. They left the yard in clean state and were happy to talk to the neighbors about what to expect with the install.' },
+  { name: 'Theresa C.', source: 'Google', date: 'June 2025', rating: 5, text: 'Had around 230 linear feet of white vinyl fence installed. They finished the job the next day. Nicholas was very personable, professional and fair. Definitely recommend!' },
+  { name: 'Dashawn Nickson', source: 'Google', date: 'June 2025', rating: 5, text: 'I just got my fence done today and let me say this is a five star Fencing service. They completed my 170ft fence in just 2 days and it looks amazing.' },
+  { name: 'Jenna Spetz', source: 'Google', date: 'May 2025', rating: 5, text: 'We have nothing but amazing things to say about Ghareeb Fencing! We were so undecided about what we wanted but Nick was patient with us and helped us pick the perfect fence for our yard.' },
+  { name: 'Marissa Barnes', source: 'Facebook', date: 'March 2025', rating: 5, text: 'Amazing to work with! Gave a great quote and were able to get our fence up quickly. Even thought of things we did not think of. Highly recommend!' },
+  { name: 'Nathan Gullette', source: 'Google', date: 'January 2025', rating: 5, text: 'Competitive price. Super easy to work with. Completed my project in the middle of winter and in a timely manner. Would definitely use them again.' },
+  { name: 'Rachael Easterwood', source: 'Google', date: 'October 2024', rating: 5, text: 'Very professional and quick service. He communicated very well with overall project. Went above and beyond when installing fence.' },
+  { name: 'Frank Powell', source: 'Google', date: 'September 2024', rating: 5, text: 'Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the backyard!' },
+  { name: 'Karen Faziani', source: 'Google', date: 'August 2024', rating: 5, text: 'What a GREAT company. A beautiful job, by some awesome people! Highly recommend for ANY fencing! Thank you Ghareeb Fencing Solutions!!' },
+  { name: 'Brian Hammond', source: 'Google', date: 'June 2024', rating: 5, text: "He installed new fence around back yard. Did a great job and price was very competitive. They didn't leave any mess behind." },
+  { name: 'Cindy Hill Wielfaert', source: 'Facebook', date: 'August 2024', rating: 5, text: 'This is one of the most trusted, knowledgeable, respectful, professional & friendly company I have ever dealt with.' },
+  { name: 'Megan Ward', source: 'Google', date: 'October 2022', rating: 5, text: 'Very professional, kind, hard-working, responsive and did an excellent job.' },
 ];
 
 const reviews = dynamicReviews.length > 0 ? dynamicReviews : staticReviews;
@@ -27,21 +28,60 @@ function getInitials(name) {
 }
 ---
 
-<BaseLayout canonical="/reviews/" title="Customer Reviews | Ghareeb Fencing Solutions Toledo OH" description="Read real customer reviews for Ghareeb Fencing Solutions. 5-star rated on Google, BBB, and Facebook. See why we're Toledo's top-rated fence contractor.">
-  <section class="section" style="padding-top: 60px;">
+<BaseLayout canonical="/reviews/" title="Customer Reviews | Ghareeb Fencing Solutions Toledo OH" description="Read real customer reviews. 5-star rated on Google, Facebook, BBB. Toledo's top-rated fence contractor.">
+
+  <!-- Dark Hero -->
+  <section class="reviews-hero">
+    <div class="container">
+      <div class="hero-badge">★★★★★ 5-Star Rated</div>
+      <h1>What Our Customers <span class="gold">Say</span></h1>
+      <p>Real reviews from real homeowners across Northwest Ohio and Southeast Michigan. See why families trust Ghareeb Fencing Solutions.</p>
+    </div>
+  </section>
+
+  <!-- Platform Score Cards -->
+  <div class="platform-cards">
+    <div class="platform-card">
+      <div class="platform-icon google">G</div>
+      <div class="platform-score">5.0</div>
+      <div class="platform-stars">★★★★★</div>
+      <div class="platform-name">Google Reviews</div>
+      <div class="platform-count">Based on 60+ reviews</div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-icon facebook">f</div>
+      <div class="platform-score">5.0</div>
+      <div class="platform-stars">★★★★★</div>
+      <div class="platform-name">Facebook Reviews</div>
+      <div class="platform-count">Based on 40+ reviews</div>
+    </div>
+    <div class="platform-card">
+      <div class="platform-icon bbb">BBB</div>
+      <div class="platform-score">A+</div>
+      <div class="platform-stars">★★★★★</div>
+      <div class="platform-name">BBB Rating</div>
+      <div class="platform-count">Accredited Business</div>
+    </div>
+  </div>
+
+  <!-- Stats Bar -->
+  <section class="stats-bar">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-num">5.0</div><div class="stat-label">Average Rating</div></div>
+        <div class="stat"><div class="stat-num">100+</div><div class="stat-label">Happy Customers</div></div>
+        <div class="stat"><div class="stat-num">7+</div><div class="stat-label">Years Experience</div></div>
+        <div class="stat"><div class="stat-num">0</div><div class="stat-label">Complaints</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Review Cards -->
+  <section class="section">
     <div class="container">
       <div class="section-header">
-        <div class="section-label">Real Customer Reviews</div>
-        <h1 style="font-family: var(--font-display); font-size: 2.5rem;">What Our <span class="gold">Customers</span> Say</h1>
-        <p style="color: var(--text-muted); max-width: 600px; margin: 12px auto 0;">Verified reviews from Google, Facebook, and the BBB. We are proud to be 5-star rated across every platform.</p>
-        <div class="review-summary">
-          <div class="review-stars">★★★★★</div>
-          <span>{site.stats.googleRating} out of 5</span>
-          <span class="review-divider">•</span>
-          <span>{site.stats.reviews} Reviews</span>
-        </div>
+        <h2 class="section-title">Customer <span class="gold">Testimonials</span></h2>
       </div>
-
       <div class="reviews-grid">
         {reviews.map((review) => (
           <div class="review-card">
@@ -49,13 +89,24 @@ function getInitials(name) {
               <div class="review-avatar">{getInitials(review.name)}</div>
               <div>
                 <div class="review-name">{review.name}</div>
-                <div class="review-meta">{review.source} • {review.date}{review.type && review.type !== 'General' ? ` • ${review.type}` : ''}</div>
+                <div class="review-source">{review.source} Review</div>
               </div>
               <div class="review-rating">★★★★★</div>
             </div>
             <p class="review-text">{review.text}</p>
+            <div class="review-date">{review.date}</div>
           </div>
         ))}
+      </div>
+
+      <!-- Leave a Review -->
+      <div class="leave-review">
+        <h3>Love Your New Fence?</h3>
+        <p>We'd be honored if you shared your experience with other homeowners!</p>
+        <div class="leave-review-links">
+          <a href="https://g.page/r/YOUR_GOOGLE_REVIEW_LINK/review" target="_blank" rel="noopener" class="review-link google">Review on Google</a>
+          <a href="https://facebook.com/ghareebfencing/reviews" target="_blank" rel="noopener" class="review-link facebook">Review on Facebook</a>
+        </div>
       </div>
     </div>
   </section>
@@ -63,8 +114,8 @@ function getInitials(name) {
   <section class="section cta-section">
     <div class="container">
       <div class="cta-content">
-        <h2>Join Our Happy Customers</h2>
-        <p>Get a free quote and see why we are Toledo's highest-rated fence contractor.</p>
+        <h2>Ready to Join Our <span class="gold">Happy Customers</span>?</h2>
+        <p>Get your free quote today and see why Toledo families trust Ghareeb Fencing Solutions.</p>
         <div class="cta-buttons">
           <a href="/quote/" class="btn btn-primary btn-lg">Get Free Quote</a>
           <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
@@ -75,21 +126,50 @@ function getInitials(name) {
 </BaseLayout>
 
 <style>
-  .review-summary { display: flex; align-items: center; gap: 10px; justify-content: center; margin-top: 20px; font-size: 1rem; }
-  .review-stars { color: #fbbf24; font-size: 1.3rem; }
-  .review-divider { color: var(--text-light); }
+  .reviews-hero { background: linear-gradient(135deg, #1e3a5f 0%, #0f2744 100%); padding: 140px 0 100px; text-align: center; color: white; }
+  .hero-badge { display: inline-block; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 10px 24px; border-radius: 9999px; font-size: 0.9rem; margin-bottom: 24px; color: #d4af37; }
+  .reviews-hero h1 { font-family: var(--font-display); font-size: clamp(2rem, 5vw, 3rem); margin-bottom: 16px; }
+  .reviews-hero p { color: rgba(255,255,255,0.8); max-width: 600px; margin: 0 auto; font-size: 1.05rem; line-height: 1.6; }
+
+  .platform-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 900px; margin: -60px auto 40px; padding: 0 20px; position: relative; z-index: 10; }
+  .platform-card { background: white; border-radius: 16px; padding: 32px 24px; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+  .platform-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; font-weight: 800; font-size: 1.2rem; color: white; }
+  .platform-icon.google { background: #4285f4; }
+  .platform-icon.facebook { background: #1877f2; }
+  .platform-icon.bbb { background: #005a8c; font-size: 0.75rem; }
+  .platform-score { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: #1e3a5f; }
+  .platform-stars { color: #fbbf24; font-size: 1.1rem; margin-bottom: 8px; }
+  .platform-name { font-weight: 600; font-size: 0.95rem; color: #1e3a5f; }
+  .platform-count { font-size: 0.8rem; color: #64748b; margin-top: 4px; }
+
+  .stats-bar { background: #f8fafc; padding: 40px 0; }
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; text-align: center; }
+  .stat-num { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: #1e3a5f; }
+  .stat-label { font-size: 0.85rem; color: #64748b; margin-top: 4px; }
+
   .reviews-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
-  .review-card { background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); transition: box-shadow 0.2s; }
-  .review-card:hover { box-shadow: var(--shadow-md); }
+  .review-card { background: white; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; transition: box-shadow 0.2s; }
+  .review-card:hover { box-shadow: 0 8px 25px rgba(0,0,0,0.08); }
   .review-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
-  .review-avatar {
-    width: 44px; height: 44px; border-radius: 50%; background: var(--primary);
-    color: white; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; font-size: 0.8rem; flex-shrink: 0;
-  }
+  .review-avatar { width: 44px; height: 44px; border-radius: 50%; background: #1e3a5f; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem; flex-shrink: 0; }
   .review-name { font-weight: 600; font-size: 0.95rem; }
-  .review-meta { font-size: 0.8rem; color: var(--text-muted); }
+  .review-source { font-size: 0.8rem; color: #64748b; }
   .review-rating { margin-left: auto; color: #fbbf24; font-size: 0.9rem; }
-  .review-text { color: var(--text-body); font-size: 0.9rem; line-height: 1.7; }
-  @media (max-width: 768px) { .reviews-grid { grid-template-columns: 1fr; } }
+  .review-text { color: #475569; font-size: 0.9rem; line-height: 1.7; }
+  .review-date { font-size: 0.8rem; color: #94a3b8; margin-top: 12px; }
+
+  .leave-review { text-align: center; padding: 48px 0; margin-top: 40px; border-top: 1px solid #e2e8f0; }
+  .leave-review h3 { font-family: var(--font-heading); font-size: 1.4rem; color: #1e3a5f; margin-bottom: 8px; }
+  .leave-review p { color: #64748b; margin-bottom: 20px; }
+  .leave-review-links { display: flex; gap: 16px; justify-content: center; }
+  .review-link { padding: 12px 24px; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.9rem; }
+  .review-link.google { background: #4285f4; color: white; }
+  .review-link.facebook { background: #1877f2; color: white; }
+  .review-link:hover { opacity: 0.9; }
+
+  @media (max-width: 768px) {
+    .platform-cards { grid-template-columns: 1fr; max-width: 350px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .reviews-grid { grid-template-columns: 1fr; }
+  }
 </style>
