@@ -12,7 +12,7 @@ interface Props {
   description?: string;
   keywords?: string[];
   ogImage?: string;
-  canonicalUrl?: string;
+  canonical?: string;
   noIndex?: boolean;
 }
 
@@ -20,8 +20,8 @@ const {
   title = site.seo.defaultTitle,
   description = site.seo.defaultDescription,
   keywords,
-  ogImage = '/images/og-default.jpg',
-  canonicalUrl,
+  ogImage = '/images/og-default.png',
+  canonical,
   noIndex = false
 } = Astro.props;
 
@@ -41,13 +41,21 @@ const siteUrl = site.company.website;
   <meta name="keywords" content={keywordsList.join(', ')}>
   
   {noIndex && <meta name="robots" content="noindex, nofollow">}
-  {canonicalUrl && <link rel="canonical" href={canonicalUrl}>}
+  {canonical && <link rel="canonical" href={`${siteUrl}${canonical}`}>}
   
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:title" content={fullTitle}>
   <meta property="og:description" content={description}>
   <meta property="og:image" content={`${siteUrl}${ogImage}`}>
+  {canonical && <meta property="og:url" content={`${siteUrl}${canonical}`}>}
+  <meta property="og:site_name" content={site.company.name}>
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content={fullTitle}>
+  <meta name="twitter:description" content={description}>
+  <meta name="twitter:image" content={`${siteUrl}${ogImage}`}>
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%231e3a5f' rx='15' width='100' height='100'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-weight='bold' font-size='45' fill='%23d4af37'>GF</text></svg>">

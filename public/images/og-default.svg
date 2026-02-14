@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e3a5f"/>
+      <stop offset="100%" style="stop-color:#0f2744"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="40" y="40" width="1120" height="550" rx="20" fill="none" stroke="#d4af37" stroke-width="3" opacity="0.3"/>
+  <text x="600" y="220" text-anchor="middle" font-family="Georgia,serif" font-size="100" font-weight="bold" fill="#d4af37">GF</text>
+  <text x="600" y="320" text-anchor="middle" font-family="Arial,sans-serif" font-size="48" font-weight="bold" fill="white">Ghareeb Fencing Solutions</text>
+  <text x="600" y="380" text-anchor="middle" font-family="Arial,sans-serif" font-size="28" fill="rgba(255,255,255,0.8)">Professional Fence Installation • Toledo, OH</text>
+  <line x1="450" y1="420" x2="750" y2="420" stroke="#d4af37" stroke-width="2"/>
+  <text x="600" y="470" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" fill="rgba(255,255,255,0.7)">Cedar • Vinyl • Aluminum • Chain Link • Split Rail</text>
+  <text x="600" y="530" text-anchor="middle" font-family="Arial,sans-serif" font-size="24" font-weight="bold" fill="#d4af37">★ 5.0 Rating • (419) 902-8257 • Free Quotes</text>
+</svg>

@@ -7,4 +7,4 @@ Allow: /
 Disallow: /admin/
 
 # Sitemap
-Sitemap: https://ghareebfencing.com/sitemap.xml
+Sitemap: https://ghareebfencingsolutions.com/sitemap.xml
