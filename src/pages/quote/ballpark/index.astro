@@ -508,3 +508,711 @@ loadPricing();
     .trust-badges{display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap}
     .trust-badges .badge{font-size:0.85rem;color:#64748b}
 </style>
+
+<script is:inline define:vars={{ firebaseConfig }}>
+let db=null;
+try{if(firebaseConfig&&firebaseConfig.projectId){firebase.initializeApp(firebaseConfig);db=firebase.firestore();}}catch(e){}
+
+const $=id=>document.getElementById(id);
+const heightMult={'4':0.85,'5':0.92,'6':1.0,'8':1.25};
+window._toolUnlocked=false; window._leadAddress='';
+let leadData={}, leadDocId=null;
+
+// ===== PRICING DATA =====
+let pricingData=[];
+const defaultPricing=[
+    {name:'Cedar Privacy',ppf:42,sg:375,dg:695,color:'#c0813d'},
+    {name:'Treated Wood',ppf:35,sg:325,dg:595,color:'#8B7355'},
+    {name:'White Vinyl',ppf:45,sg:425,dg:795,color:'#e8e8e8'},
+    {name:'Tan Vinyl',ppf:47,sg:425,dg:795,color:'#d4c5a0'},
+    {name:'Vinyl Picket',ppf:32,sg:350,dg:650,color:'#f0f0f0'},
+    {name:'Black Chain Link',ppf:22,sg:275,dg:495,color:'#333333'},
+    {name:'Galv. Chain Link',ppf:18,sg:250,dg:450,color:'#999999'},
+    {name:'Black Aluminum',ppf:48,sg:450,dg:850,color:'#1a1a2e'},
+    {name:'Bronze Aluminum',ppf:50,sg:475,dg:895,color:'#7B5B3A'},
+    {name:'Split Rail',ppf:16,sg:200,dg:400,color:'#A0784C'},
+    {name:'Ranch Rail',ppf:28,sg:300,dg:550,color:'#6B4226'}
+];
+
+async function loadPricing(){
+    if(db){try{
+        const doc=await db.collection('settings').doc('global').get();
+        if(doc.exists&&doc.data().pricing){
+            let i=0;
+            pricingData=doc.data().pricing.split('\n').filter(l=>l.trim()).map(l=>{
+                const p=l.split(':').map(s=>s.trim());
+                const def=defaultPricing[i]||{color:'#666'};i++;
+                return{name:p[0]||'Unknown',ppf:parseFloat(p[1])||0,sg:parseFloat(p[2])||350,dg:parseFloat(p[3])||650,color:def.color};
+            }).filter(x=>x.ppf>0);
+        }
+    }catch(e){}}
+    if(!pricingData.length) pricingData=[...defaultPricing];
+    selectedFenceType=pricingData[0];
+    renderFenceTypeBar();
+}
+
+function renderFenceTypeBar(){
+    const bar=$('ftb-options');
+    bar.innerHTML=pricingData.map((s,i)=>`<button type="button" class="ftb-btn${i===0?' active':''}" data-idx="${i}"><span class="ftb-color" style="background:${s.color}"></span>${s.name}</button>`).join('');
+    bar.querySelectorAll('.ftb-btn').forEach(b=>b.addEventListener('click',()=>{
+        bar.querySelectorAll('.ftb-btn').forEach(x=>x.classList.remove('active'));
+        b.classList.add('active');
+        selectedFenceType=pricingData[parseInt(b.dataset.idx)];
+    }));
+}
+
+// ===== DRAWING STATE =====
+let canvas, ctx, gridCellSize=20, gridScale=5;
+let currentTool='fence';
+let selectedFenceType=null;
+let drawingObjects=[]; // All objects on canvas
+let currentFencePoints=[]; // Points being drawn for current fence line
+let dragStart=null; // For house drawing
+let hoveredObject=null;
+let undoStack=[];
+
+// Object types: 
+// {type:'fence', points:[{x,y},...], fenceType:{name,ppf,sg,dg,color}, segments:[{dist},...]}
+// {type:'gate-walk', x, y}
+// {type:'gate-drive', x, y}
+// {type:'house', x, y, w, h, label:'House'}
+// {type:'tree', x, y}
+// {type:'text', x, y, text:'...'}
+
+// ===== CANVAS INIT =====
+function initCanvas(){
+    canvas=$('grid-canvas');
+    if(!canvas) return;
+    ctx=canvas.getContext('2d');
+    const w=Math.min(canvas.parentElement.clientWidth-4, 800);
+    canvas.width=w; canvas.height=Math.round(w*0.625);
+    gridCellSize=Math.max(14, Math.floor(w/40));
+    
+    canvas.addEventListener('click', onCanvasClick);
+    canvas.addEventListener('mousemove', onCanvasMove);
+    canvas.addEventListener('mousedown', onCanvasDown);
+    canvas.addEventListener('mouseup', onCanvasUp);
+    canvas.addEventListener('dblclick', onCanvasDblClick);
+    canvas.addEventListener('contextmenu', e=>{e.preventDefault(); finishCurrentFence();});
+    
+    redraw();
+}
+
+function snap(v){ return Math.round(v/gridCellSize)*gridCellSize; }
+function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
+function ftDist(a,b){ const dx=Math.abs(b.x-a.x)/gridCellSize, dy=Math.abs(b.y-a.y)/gridCellSize; return Math.round(Math.sqrt(dx*dx+dy*dy)*gridScale); }
+
+// ===== TOOL SELECTION =====
+document.querySelectorAll('.draw-tool').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        finishCurrentFence();
+        document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        currentTool=btn.dataset.tool;
+        $('fence-type-bar').style.display=(currentTool==='fence')?'flex':'none';
+        canvas.style.cursor=currentTool==='select'?'default':currentTool==='erase'?'crosshair':'crosshair';
+    });
+});
+
+// ===== CANVAS EVENTS =====
+function onCanvasClick(e){
+    const r=canvas.getBoundingClientRect();
+    const x=snap(e.clientX-r.left), y=snap(e.clientY-r.top);
+    
+    if(currentTool==='fence'){
+        currentFencePoints.push({x,y});
+        redraw();
+        return;
+    }
+    if(currentTool==='gate-walk'||currentTool==='gate-drive'){
+        saveUndo();
+        drawingObjects.push({type:currentTool, x, y});
+        redraw(); updateQuote(); autoSaveDrawing();
+        return;
+    }
+    if(currentTool==='tree'){
+        saveUndo();
+        drawingObjects.push({type:'tree', x, y});
+        redraw(); autoSaveDrawing();
+        return;
+    }
+    if(currentTool==='text'){
+        openTextModal(x,y);
+        return;
+    }
+    if(currentTool==='erase'){
+        const obj=findObjectAt(e.clientX-r.left, e.clientY-r.top);
+        if(obj){ saveUndo(); drawingObjects.splice(drawingObjects.indexOf(obj),1); redraw(); updateQuote(); autoSaveDrawing(); }
+        return;
+    }
+    if(currentTool==='select'){
+        // future: drag to move
+        return;
+    }
+}
+
+function onCanvasDown(e){
+    if(currentTool==='house'){
+        const r=canvas.getBoundingClientRect();
+        dragStart={x:snap(e.clientX-r.left), y:snap(e.clientY-r.top)};
+    }
+}
+
+function onCanvasUp(e){
+    if(currentTool==='house' && dragStart){
+        const r=canvas.getBoundingClientRect();
+        const ex=snap(e.clientX-r.left), ey=snap(e.clientY-r.top);
+        const w=Math.abs(ex-dragStart.x), h=Math.abs(ey-dragStart.y);
+        if(w>=gridCellSize && h>=gridCellSize){
+            saveUndo();
+            const lbl=prompt('Label this structure (e.g., House, Garage, Shed):')||'House';
+            drawingObjects.push({type:'house', x:Math.min(dragStart.x,ex), y:Math.min(dragStart.y,ey), w, h, label:lbl});
+            redraw(); autoSaveDrawing();
+        }
+        dragStart=null;
+    }
+}
+
+function onCanvasMove(e){
+    const r=canvas.getBoundingClientRect();
+    const mx=e.clientX-r.left, my=e.clientY-r.top;
+    const sx=snap(mx), sy=snap(my);
+    
+    redraw();
+    
+    // Show ghost for current tool
+    if(currentTool==='fence' && currentFencePoints.length>0){
+        const last=currentFencePoints[currentFencePoints.length-1];
+        ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(sx,sy);
+        ctx.strokeStyle='rgba(212,175,55,0.5)'; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
+        const d=ftDist(last,{x:sx,y:sy});
+        if(d>0){ctx.font='bold 12px sans-serif';ctx.fillStyle='#d4af37';ctx.fillText(d+'ft',(last.x+sx)/2+5,(last.y+sy)/2-8);}
+        drawSnapPoint(sx,sy,'rgba(212,175,55,0.5)');
+    }
+    if(currentTool==='house' && dragStart){
+        const w=Math.abs(sx-dragStart.x), h=Math.abs(sy-dragStart.y);
+        ctx.fillStyle='rgba(100,130,180,0.3)'; ctx.strokeStyle='#4682B4'; ctx.lineWidth=2;
+        ctx.fillRect(Math.min(dragStart.x,sx),Math.min(dragStart.y,sy),w,h);
+        ctx.strokeRect(Math.min(dragStart.x,sx),Math.min(dragStart.y,sy),w,h);
+        const fw=Math.round(w/gridCellSize*gridScale), fh=Math.round(h/gridCellSize*gridScale);
+        ctx.font='11px sans-serif';ctx.fillStyle='#4682B4';ctx.fillText(fw+'×'+fh+'ft',Math.min(dragStart.x,sx)+4,Math.min(dragStart.y,sy)-4);
+    }
+    if(currentTool==='gate-walk'||currentTool==='gate-drive'){drawSnapPoint(sx,sy,'rgba(16,185,129,0.5)');}
+    if(currentTool==='tree'){
+        ctx.beginPath();ctx.arc(sx,sy,gridCellSize*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();
+    }
+    if(currentTool==='erase'){
+        const obj=findObjectAt(mx,my);
+        if(obj){canvas.style.cursor='pointer';}else{canvas.style.cursor='crosshair';}
+    }
+}
+
+function onCanvasDblClick(e){
+    if(currentTool==='fence' && currentFencePoints.length>=2){
+        finishCurrentFence();
+    }
+}
+
+function finishCurrentFence(){
+    if(currentFencePoints.length>=2){
+        saveUndo();
+        const segs=[];
+        for(let i=0;i<currentFencePoints.length-1;i++){
+            segs.push({dist:ftDist(currentFencePoints[i],currentFencePoints[i+1])});
+        }
+        drawingObjects.push({
+            type:'fence', points:[...currentFencePoints], 
+            fenceType:{...selectedFenceType}, segments:segs
+        });
+        updateQuote(); autoSaveDrawing();
+    }
+    currentFencePoints=[];
+    redraw();
+}
+
+function findObjectAt(mx,my){
+    // Check in reverse order (top-most first)
+    for(let i=drawingObjects.length-1;i>=0;i--){
+        const o=drawingObjects[i];
+        if(o.type==='fence'){
+            for(let j=0;j<o.points.length-1;j++){
+                if(distToSegment(mx,my,o.points[j],o.points[j+1])<10) return o;
+            }
+        }
+        if(o.type==='gate-walk'||o.type==='gate-drive'){if(dist({x:mx,y:my},o)<gridCellSize)return o;}
+        if(o.type==='tree'){if(dist({x:mx,y:my},o)<gridCellSize)return o;}
+        if(o.type==='house'){if(mx>=o.x&&mx<=o.x+o.w&&my>=o.y&&my<=o.y+o.h)return o;}
+        if(o.type==='text'){if(mx>=o.x-5&&mx<=o.x+100&&my>=o.y-15&&my<=o.y+5)return o;}
+    }
+    return null;
+}
+
+function distToSegment(px,py,a,b){
+    const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+    if(len2===0)return dist({x:px,y:py},a);
+    let t=((px-a.x)*dx+(py-a.y)*dy)/len2;
+    t=Math.max(0,Math.min(1,t));
+    return dist({x:px,y:py},{x:a.x+t*dx,y:a.y+t*dy});
+}
+
+// ===== DRAWING =====
+function drawGrid(){
+    ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#e8ecf0';ctx.lineWidth=0.5;
+    for(let x=0;x<=canvas.width;x+=gridCellSize){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+    for(let y=0;y<=canvas.height;y+=gridCellSize){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    ctx.font='10px sans-serif';ctx.fillStyle='#b0b8c4';ctx.fillText('1 sq = '+gridScale+' ft',4,canvas.height-4);
+}
+
+function drawSnapPoint(x,y,color){
+    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+}
+
+function redraw(){
+    if(!ctx)return;
+    drawGrid();
+    
+    // Draw all objects
+    drawingObjects.forEach(o=>{
+        if(o.type==='house') drawHouse(o);
+    });
+    drawingObjects.forEach(o=>{
+        if(o.type==='fence') drawFenceLine(o);
+    });
+    drawingObjects.forEach(o=>{
+        if(o.type==='gate-walk') drawGate(o,'Walk Gate','#10b981');
+        if(o.type==='gate-drive') drawGate(o,'Drive Gate','#3b82f6');
+        if(o.type==='tree') drawTree(o);
+        if(o.type==='text') drawText(o);
+    });
+    
+    // Draw current fence being drawn
+    if(currentFencePoints.length>0){
+        ctx.beginPath();ctx.moveTo(currentFencePoints[0].x,currentFencePoints[0].y);
+        for(let i=1;i<currentFencePoints.length;i++) ctx.lineTo(currentFencePoints[i].x,currentFencePoints[i].y);
+        ctx.strokeStyle=selectedFenceType?.color||'#d4af37';ctx.lineWidth=4;ctx.stroke();
+        currentFencePoints.forEach((p,i)=>{
+            drawSnapPoint(p.x,p.y,i===0?'#10b981':selectedFenceType?.color||'#d4af37');
+        });
+        // Show segment distances
+        for(let i=0;i<currentFencePoints.length-1;i++){
+            const a=currentFencePoints[i],b=currentFencePoints[i+1];
+            const d=ftDist(a,b);
+            ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';
+            ctx.fillText(d+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);
+        }
+    }
+}
+
+function drawFenceLine(o){
+    if(o.points.length<2)return;
+    ctx.beginPath();ctx.moveTo(o.points[0].x,o.points[0].y);
+    for(let i=1;i<o.points.length;i++) ctx.lineTo(o.points[i].x,o.points[i].y);
+    ctx.strokeStyle=o.fenceType.color;ctx.lineWidth=4;ctx.stroke();
+    // Dashes for certain types
+    if(o.fenceType.name.includes('Chain')){ctx.setLineDash([6,4]);ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);}
+    // Points
+    o.points.forEach(p=>{drawSnapPoint(p.x,p.y,o.fenceType.color);});
+    // Distances
+    for(let i=0;i<o.points.length-1;i++){
+        const a=o.points[i],b=o.points[i+1];
+        ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';
+        ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);
+    }
+    // Type label on first segment
+    const mid={x:(o.points[0].x+o.points[1].x)/2, y:(o.points[0].y+o.points[1].y)/2};
+    ctx.font='9px sans-serif';ctx.fillStyle='rgba(30,58,95,0.7)';ctx.fillText(o.fenceType.name,mid.x+4,mid.y+14);
+}
+
+function drawGate(o,label,color){
+    ctx.beginPath();ctx.arc(o.x,o.y,gridCellSize*0.6,0,Math.PI*2);
+    ctx.fillStyle=color+'33';ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+    ctx.font='bold 9px sans-serif';ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(label,o.x,o.y+gridCellSize+8);ctx.textAlign='left';
+}
+
+function drawTree(o){
+    ctx.beginPath();ctx.arc(o.x,o.y,gridCellSize*0.8,0,Math.PI*2);
+    ctx.fillStyle='rgba(34,139,34,0.35)';ctx.fill();ctx.strokeStyle='#228B22';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(o.x,o.y,3,0,Math.PI*2);ctx.fillStyle='#5C4033';ctx.fill();
+}
+
+function drawHouse(o){
+    ctx.fillStyle='rgba(70,100,140,0.15)';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='#4682B4';ctx.lineWidth=2;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    // Diagonal lines
+    ctx.strokeStyle='rgba(70,130,180,0.2)';ctx.lineWidth=1;
+    for(let d=-o.h;d<o.w;d+=gridCellSize){
+        ctx.beginPath();ctx.moveTo(Math.max(o.x,o.x+d),d<0?o.y-d+o.y:o.y);
+        ctx.lineTo(Math.min(o.x+o.w,o.x+d+o.h),d+o.h<o.w?o.y+o.h:o.y+o.w-d);ctx.stroke();
+    }
+    ctx.font='bold 11px sans-serif';ctx.fillStyle='#4682B4';ctx.textAlign='center';
+    ctx.fillText(o.label||'House',o.x+o.w/2,o.y+o.h/2+4);ctx.textAlign='left';
+    const fw=Math.round(o.w/gridCellSize*gridScale), fh=Math.round(o.h/gridCellSize*gridScale);
+    ctx.font='9px sans-serif';ctx.fillStyle='rgba(70,130,180,0.6)';
+    ctx.fillText(fw+'×'+fh+'ft',o.x+4,o.y+14);
+}
+
+function drawText(o){
+    ctx.font='bold 12px sans-serif';ctx.fillStyle='#6b21a8';ctx.fillText(o.text,o.x,o.y);
+    ctx.beginPath();ctx.arc(o.x-4,o.y-4,2,0,Math.PI*2);ctx.fillStyle='#6b21a8';ctx.fill();
+}
+
+// ===== TEXT MODAL =====
+let pendingTextPos=null;
+function openTextModal(x,y){
+    pendingTextPos={x,y};
+    $('text-modal').style.display='flex';
+    $('text-modal-input').value='';
+    $('text-modal-input').focus();
+}
+$('text-modal-cancel').addEventListener('click',()=>{$('text-modal').style.display='none';pendingTextPos=null;});
+$('text-modal-ok').addEventListener('click',()=>{
+    const txt=$('text-modal-input').value.trim();
+    if(txt&&pendingTextPos){saveUndo();drawingObjects.push({type:'text',x:pendingTextPos.x,y:pendingTextPos.y,text:txt});redraw();autoSaveDrawing();}
+    $('text-modal').style.display='none';pendingTextPos=null;
+});
+$('text-modal-input').addEventListener('keypress',e=>{if(e.key==='Enter')$('text-modal-ok').click();});
+
+// ===== UNDO =====
+function saveUndo(){undoStack.push(JSON.stringify(drawingObjects));}
+$('grid-undo').addEventListener('click',()=>{
+    if(currentFencePoints.length>0){currentFencePoints.pop();redraw();return;}
+    if(undoStack.length){drawingObjects=JSON.parse(undoStack.pop());redraw();updateQuote();autoSaveDrawing();}
+});
+$('grid-clear').addEventListener('click',()=>{
+    if(!confirm('Clear entire drawing?'))return;
+    saveUndo();drawingObjects=[];currentFencePoints=[];redraw();updateQuote();autoSaveDrawing();
+});
+
+// ===== QUOTE CALCULATION =====
+function updateQuote(){
+    const fences={}, gates={walk:0,drive:0};
+    let totalFt=0;
+    drawingObjects.forEach(o=>{
+        if(o.type==='fence'){
+            const ft=o.segments.reduce((s,seg)=>s+seg.dist,0);
+            const key=o.fenceType.name;
+            if(!fences[key])fences[key]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};
+            fences[key].ft+=ft;
+            totalFt+=ft;
+        }
+        if(o.type==='gate-walk') gates.walk++;
+        if(o.type==='gate-drive') gates.drive++;
+    });
+    
+    const manualFt=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;
+    if(manualFt>0) totalFt=manualFt;
+    
+    if(totalFt<10&&Object.keys(fences).length===0){
+        $('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';
+        $('drawing-legend').style.display='none';
+        return;
+    }
+    $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';
+    
+    // Fence breakdown
+    const hm=heightMult[$('fence-height').value];
+    const rem=$('remove-old').checked;
+    let grandTotal=0;
+    let breakdownHTML='';
+    
+    if(Object.keys(fences).length>0){
+        for(const[name,f]of Object.entries(fences)){
+            const cost=f.ft*f.ppf*hm;
+            grandTotal+=cost;
+            breakdownHTML+=`<div class="summary-line"><span><span class="swatch" style="background:${f.color}"></span>${name}</span><span>${f.ft} ft</span></div>`;
+        }
+    }else if(manualFt>0 && selectedFenceType){
+        grandTotal=manualFt*selectedFenceType.ppf*hm;
+        breakdownHTML=`<div class="summary-line"><span><span class="swatch" style="background:${selectedFenceType.color}"></span>${selectedFenceType.name}</span><span>${manualFt} ft</span></div>`;
+    }
+    $('fence-breakdown').innerHTML=breakdownHTML;
+    
+    // Gates
+    let gateHTML='';
+    if(gates.walk>0){
+        const firstFence=Object.values(fences)[0]||selectedFenceType||pricingData[0];
+        const cost=gates.walk*(firstFence.sg||350);
+        grandTotal+=cost;
+        gateHTML+=`<div class="summary-line"><span>🚪 Walk Gates ×${gates.walk}</span><span>$${cost.toLocaleString()}</span></div>`;
+    }
+    if(gates.drive>0){
+        const firstFence=Object.values(fences)[0]||selectedFenceType||pricingData[0];
+        const cost=gates.drive*(firstFence.dg||650);
+        grandTotal+=cost;
+        gateHTML+=`<div class="summary-line"><span>🚗 Drive Gates ×${gates.drive}</span><span>$${cost.toLocaleString()}</span></div>`;
+    }
+    $('gate-breakdown').innerHTML=gateHTML;
+    
+    // Removal
+    if(rem && totalFt>0){
+        const remCost=totalFt*4;
+        grandTotal+=remCost;
+        $('preview-removal-line').style.display='flex';
+        $('removal-cost').textContent='+$'+remCost.toLocaleString();
+    }else{$('preview-removal-line').style.display='none';}
+    
+    $('total-feet').innerHTML='<strong>'+totalFt+' ft</strong>';
+    
+    const lo=Math.round(grandTotal*0.85), hi=Math.round(grandTotal*1.15);
+    $('range-low').textContent='$'+lo.toLocaleString();
+    $('range-high').textContent='$'+hi.toLocaleString();
+    
+    leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:rem};
+    
+    // Legend
+    updateLegend(fences,gates);
+}
+
+function updateLegend(fences,gates){
+    const leg=$('drawing-legend');
+    const items=$('legend-items');
+    const objs=drawingObjects;
+    const hasStuff=objs.length>0;
+    leg.style.display=hasStuff?'block':'none';
+    if(!hasStuff)return;
+    let html='';
+    for(const[name,f]of Object.entries(fences)){
+        html+=`<div class="legend-row"><span class="swatch" style="background:${f.color}"></span><span>${name}: ${f.ft}ft</span></div>`;
+    }
+    if(gates.walk>0) html+=`<div class="legend-row">🚪 Walk Gates: ${gates.walk}</div>`;
+    if(gates.drive>0) html+=`<div class="legend-row">🚗 Drive Gates: ${gates.drive}</div>`;
+    const houses=objs.filter(o=>o.type==='house');
+    houses.forEach(h=>{html+=`<div class="legend-row">🏠 ${h.label}</div>`;});
+    const trees=objs.filter(o=>o.type==='tree').length;
+    if(trees) html+=`<div class="legend-row">🌳 Trees: ${trees}</div>`;
+    items.innerHTML=html;
+}
+
+// ===== SAVE DRAWING TO FIRESTORE =====
+let saveTimeout=null;
+function autoSaveDrawing(){
+    clearTimeout(saveTimeout);
+    saveTimeout=setTimeout(()=>saveDrawingToFirestore(),2000);
+}
+
+async function saveDrawingToFirestore(){
+    if(!db||!leadDocId) return;
+    try{
+        // Serialize drawing objects (strip functions, keep data)
+        const drawingData=drawingObjects.map(o=>{
+            if(o.type==='fence') return{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments};
+            return{...o};
+        });
+        // Save canvas as image too
+        const imageData=canvas.toDataURL('image/png',0.7);
+        
+        await db.collection('jobs').doc(leadDocId).update({
+            drawing: JSON.stringify(drawingData),
+            drawingImage: imageData,
+            drawingUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log('[Drawing] Saved to Firestore');
+    }catch(e){console.warn('[Drawing] Save error:',e.message);}
+}
+
+// ===== LEAD SUBMISSION =====
+async function submitLead(d,notes){
+    try{
+        const f=new FormData();f.append('form-name','ballpark-leads');
+        f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');
+        f.append('address',d.address||'');f.append('notes',notes||'');
+        await fetch('/__forms.html',{method:'POST',body:f});
+    }catch(e){}
+    try{
+        const res=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+            type:'lead',name:d.name,phone:d.phone,email:d.email,address:d.address,
+            fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):'',
+            fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',
+            singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,
+            estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,
+            estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',
+            notes:notes||'',website:$('hp-website')?.value||''
+        })});
+        const result=await res.json();
+        // Try to get the doc ID for drawing saves
+        if(result.success&&result.id) leadDocId=result.id;
+    }catch(e){}
+    // Also try direct Firestore save to get doc ID
+    if(!leadDocId&&db){
+        try{
+            const ref=await db.collection('jobs').add({
+                cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,
+                status:'Lead',source:'website-ballpark',
+                notes:notes+'\n[Website lead — '+new Date().toLocaleDateString()+']',
+                createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+                websiteLead:true
+            });
+            leadDocId=ref.id;
+            console.log('[Lead] Saved directly to Firestore, ID:',leadDocId);
+        }catch(e){console.warn('[Lead] Direct save error:',e);}
+    }
+}
+
+// ===== STEP 1: UNLOCK =====
+function checkReady(){$('unlock-tool-btn').disabled=!($('lead-name').value.trim()&&$('lead-phone').value.trim()&&$('lead-address').value.trim());}
+['lead-name','lead-phone','lead-email','lead-address'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',checkReady);});
+
+$('unlock-tool-btn').addEventListener('click',async()=>{
+    const name=$('lead-name').value.trim(),phone=$('lead-phone').value.trim(),email=$('lead-email').value.trim(),address=$('lead-address').value.trim();
+    if(!name||!phone||!address)return;
+    const btn=$('unlock-tool-btn');btn.disabled=true;btn.textContent='⏳ Unlocking...';
+    leadData={name,phone,email,address};
+    await submitLead(leadData,'Started property planner');
+    window._toolUnlocked=true;window._leadAddress=address;
+    $('lead-wall-form').style.display='none';$('lead-wall-success').style.display='block';
+    document.querySelectorAll('.locked-step').forEach(s=>s.classList.remove('locked-step'));
+    ['step-2-lock','step-3-lock'].forEach(id=>$(id).style.display='none');
+    ['step-2-content','step-3-content'].forEach(id=>$(id).style.display='block');
+    if($('address-input'))$('address-input').value=address;
+    initCanvas();
+    if(!window._mapsUnavailable&&window._mapsApiKey){
+        const s=document.createElement('script');
+        s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
+        s.async=true;s.onerror=function(){window._mapsUnavailable=true;};
+        document.head.appendChild(s);
+    }
+    $('step-2').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+// ===== MANUAL + OPTIONS =====
+if($('manual-feet'))$('manual-feet').addEventListener('input',updateQuote);
+document.querySelectorAll('.quick-ft').forEach(b=>b.addEventListener('click',()=>{$('manual-feet').value=b.dataset.ft;updateQuote();}));
+['fence-height'].forEach(id=>$(id).addEventListener('change',updateQuote));
+$('remove-old').addEventListener('change',updateQuote);
+
+// ===== MAP =====
+let map=null,drawingManager=null,polylines=[];
+window.searchMapAddress=function(addr){
+    if(!addr)addr=$('address-input')?.value?.trim();
+    if(!addr||!window.google)return;
+    new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
+        if(s==='OK'&&r[0]){
+            const loc=r[0].geometry.location;
+            $('map-instructions').style.display='none';
+            map=new google.maps.Map($('map'),{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});
+        }else{$('map-status-text').textContent='Address not found.';}
+    });
+};
+if($('search-btn'))$('search-btn').addEventListener('click',()=>window.searchMapAddress());
+if($('address-input'))$('address-input').addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();window.searchMapAddress();}});
+
+// ===== INIT =====
+loadPricing();
+</script>
+
+<style>
+    .hero-mini{background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:120px 0 40px;color:white}
+    .hero-mini .breadcrumb{margin-bottom:16px;font-size:0.9rem}.hero-mini .breadcrumb a{color:rgba(255,255,255,0.7);text-decoration:none}
+    .hero-mini .breadcrumb a:hover{color:var(--accent)}.hero-mini .breadcrumb span{color:white}
+    .hero-mini h1{font-size:clamp(2rem,4vw,2.5rem);margin-bottom:8px}.hero-mini .subtitle{color:rgba(255,255,255,0.85);font-size:1.1rem}
+    .calculator-section{padding:60px 0;background:var(--bg-light)}
+    .calculator-grid{display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:start}
+    @media(max-width:1024px){.calculator-grid{grid-template-columns:1fr}.calculator-sidebar{order:-1}}
+    .calc-step{background:white;border-radius:12px;padding:32px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.1);position:relative}
+    .locked-step .step-content{display:none}
+    .locked-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;color:#64748b;background:#f8fafc;border-radius:8px;text-align:center;font-size:1.1rem}
+    .step-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
+    .step-number{width:36px;height:36px;background:var(--primary,#1e3a5f);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+    .step-header h3{margin:0 0 4px;font-size:1.2rem}.step-header p{margin:0;color:#64748b;font-size:0.95rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:500px){.form-row{grid-template-columns:1fr}}
+    .form-group{margin-bottom:16px}.form-group label{display:block;margin-bottom:6px;font-weight:500;font-size:0.95rem}
+    .form-group input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
+    .form-group input:focus{border-color:var(--primary);outline:none}
+    .form-disclaimer{font-size:0.8rem;color:#64748b;text-align:center;margin-top:12px}
+    .success-banner{display:flex;gap:16px;align-items:flex-start;background:#ecfdf5;border:2px solid #10b981;border-radius:8px;padding:20px;color:#065f46;font-size:1.1rem}
+    .success-banner strong{display:block;margin-bottom:4px}.success-banner span{font-size:0.95rem;color:#047857}
+
+    /* Drawing toolbar */
+    .draw-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:12px;background:#f1f5f9;border-radius:10px 10px 0 0;border:2px solid #e2e8f0;border-bottom:none}
+    .tool-group{display:flex;gap:4px}
+    .tool-divider{width:1px;height:28px;background:#cbd5e1;margin:0 4px}
+    .draw-tool{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border:2px solid transparent;border-radius:8px;background:white;cursor:pointer;transition:all 0.15s;min-width:56px}
+    .draw-tool:hover{border-color:var(--primary);background:#f0f4ff}
+    .draw-tool.active{border-color:var(--primary);background:var(--primary);color:white}
+    .draw-tool.active .tool-label{color:white}
+    .tool-icon{font-size:1.1rem;line-height:1}.tool-label{font-size:0.65rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
+
+    /* Fence type bar */
+    .fence-type-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fefce8;border:2px solid #e2e8f0;border-top:none;overflow-x:auto;flex-wrap:wrap}
+    .ftb-label{font-size:0.8rem;color:#64748b;white-space:nowrap;font-weight:500}
+    .ftb-options{display:flex;gap:4px;flex-wrap:wrap}
+    .ftb-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1.5px solid #e2e8f0;border-radius:6px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s;white-space:nowrap}
+    .ftb-btn:hover{border-color:var(--primary)}.ftb-btn.active{border-color:var(--accent);background:#fffbeb;font-weight:700}
+    .ftb-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
+
+    /* Canvas */
+    .grid-wrapper{border:2px solid #e2e8f0;border-top:none;overflow:hidden;cursor:crosshair;background:#f8fafc}
+    .grid-wrapper canvas{display:block;width:100%}
+    .grid-controls{display:flex;gap:12px;align-items:center;padding:10px 12px;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;flex-wrap:wrap}
+    .grid-legend{margin-left:auto;display:flex;gap:8px;font-size:0.8rem;color:#64748b}
+    .toolbar-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1.5px solid #e2e8f0;border-radius:6px;cursor:pointer;font-size:0.85rem;transition:all 0.15s}
+    .toolbar-btn:hover{border-color:var(--primary)}
+
+    /* Manual fallback */
+    .manual-fallback{margin-top:16px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+    .manual-fallback summary{padding:12px 16px;background:#f8fafc;cursor:pointer;font-size:0.95rem;font-weight:500;color:#475569}
+    .manual-fallback summary:hover{background:#f1f5f9}
+    .manual-fallback > div{padding:16px}
+    .manual-input-group label{display:block;margin-bottom:8px;font-weight:500}
+    .input-with-unit{display:flex;align-items:center;max-width:250px}
+    .input-with-unit input{flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:8px 0 0 8px;font-size:1.1rem;border-right:none}
+    .input-with-unit input:focus{border-color:var(--primary);outline:none}
+    .input-with-unit .unit{padding:12px 14px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:0 8px 8px 0;font-weight:600;color:#64748b}
+    .footage-helpers{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
+    .quick-ft{padding:5px 12px;border:1px solid #e2e8f0;border-radius:20px;background:white;cursor:pointer;font-size:0.85rem;transition:all 0.15s}
+    .quick-ft:hover{border-color:var(--accent);background:#fffbeb}
+
+    /* Map */
+    .address-search{display:flex;gap:10px;margin-bottom:12px}
+    .address-search input{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95rem}
+    .address-search input:focus{border-color:var(--primary);outline:none}
+    #map-container{position:relative;height:300px;background:#1a1a2e;border-radius:8px;overflow:hidden}
+    #map{width:100%;height:100%}
+    .map-instructions{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);text-align:center;padding:20px}
+
+    /* Options */
+    .options-grid{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+    .option-group label{display:block;margin-bottom:6px;font-weight:500;font-size:0.95rem}
+    .option-group select{padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;background:white;cursor:pointer}
+    .checkbox-group{display:flex;align-items:center}.checkbox-label{display:flex;align-items:center;gap:10px;cursor:pointer}
+    .checkbox-label input{width:18px;height:18px;cursor:pointer}
+
+    /* Sidebar */
+    .calculator-sidebar{position:sticky;top:100px}
+    .quote-summary{background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    .quote-summary h3{margin:0 0 16px;font-size:1.2rem}
+    .summary-placeholder{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;color:#64748b}
+    .summary-line{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:0.9rem}
+    .summary-line span:first-child{color:#475569;display:flex;align-items:center;gap:6px}
+    .total-line{padding:10px 0;border-top:1px solid #e2e8f0;margin-top:4px}
+    .swatch{width:10px;height:10px;border-radius:50%;flex-shrink:0;display:inline-block;border:1px solid rgba(0,0,0,0.15)}
+    #summary-preview hr{margin:12px 0;border:none;border-top:1px solid #e2e8f0}
+    .estimate-range{text-align:center;padding:16px;background:linear-gradient(135deg,#1e3a5f,#0f2744);border-radius:8px;color:white;margin-top:8px}
+    .range-label{font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;opacity:0.9;margin-bottom:6px}
+    .range-values{font-size:1.6rem;font-weight:700}.range-sep{margin:0 6px;opacity:0.5}
+    .estimate-note{font-size:0.75rem;color:#64748b;text-align:center;margin-top:10px;margin-bottom:0}
+    .summary-actions{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+    .btn-block{width:100%;text-align:center}
+    .btn-outline{background:white;border:2px solid var(--primary,#1e3a5f);color:var(--primary);padding:10px 16px;border-radius:8px;font-weight:600;text-decoration:none;display:block;transition:all 0.15s}
+    .btn-outline:hover{background:var(--primary);color:white}
+
+    /* Drawing legend */
+    .drawing-legend{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-top:16px}
+    .drawing-legend h4{margin:0 0 12px;font-size:1rem}
+    .legend-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;color:#475569}
+
+    /* Text modal */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
+    .modal-box{background:white;border-radius:12px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
+    .modal-box h3{margin:0 0 16px}.modal-box input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
+    .modal-box input:focus{border-color:var(--primary);outline:none}
+    .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+
+    @media(max-width:600px){
+        .draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}
+        .fence-type-bar{padding:6px 8px}.ftb-btn{font-size:0.7rem;padding:4px 7px}
+        .tool-divider{height:24px}
+    }
+</style>

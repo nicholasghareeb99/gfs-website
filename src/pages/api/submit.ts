@@ -88,16 +88,21 @@ export const POST: APIRoute = async ({ request }) => {
         websiteLead: true,
       };
 
-      await addDoc(collection(db, 'jobs'), jobDoc);
+      const docRef = await addDoc(collection(db, 'jobs'), jobDoc);
+
+      return new Response(JSON.stringify({ success: true, id: docRef.id }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
 
     } catch (fbError) {
       console.error('[API] Firestore save error:', fbError);
+      // Still return success since lead was captured
+      return new Response(JSON.stringify({ success: true, id: null }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
-
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' }
-    });
 
   } catch (error) {
     console.error('[API] Submit error:', error);
