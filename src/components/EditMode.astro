@@ -200,7 +200,7 @@ const firebaseConfig = {
   // 0. Ctrl+Shift+E keyboard shortcut
   // =============================================
   document.addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
       e.preventDefault();
       handleEditShortcut();
     }
