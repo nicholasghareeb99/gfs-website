@@ -272,7 +272,7 @@ async function submitLead(d,notes){
         f.append('removal',d.estimate?.removal?'Yes':'No');
         f.append('estimatedRange',d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'');
         f.append('notes',notes||'');
-        await fetch('/',{method:'POST',body:f});
+        await fetch('/__forms.html',{method:'POST',body:f});
     }catch(e){}
     // Firestore API
     try{

@@ -289,7 +289,7 @@ const { contactForm } = contactData;
           const netlifyForm = new FormData();
           netlifyForm.append('form-name', 'contact-leads');
           Object.entries(data).forEach(([k, v]) => netlifyForm.append(k, v));
-          fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+          fetch('/__forms.html', { method: 'POST', body: netlifyForm }).catch(() => {});
         } catch(e) {}
         
         // Show success message

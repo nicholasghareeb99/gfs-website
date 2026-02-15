@@ -260,7 +260,7 @@ const site = await getSiteSettings();
                 netlifyForm.append('address', address);
                 netlifyForm.append('fenceType', fenceType);
                 netlifyForm.append('message', details.join('\n'));
-                fetch('/', { method: 'POST', body: netlifyForm }).catch(() => {});
+                fetch('/__forms.html', { method: 'POST', body: netlifyForm }).catch(() => {});
             } catch(e) {}
 
             $('quote-form').style.display = 'none';
