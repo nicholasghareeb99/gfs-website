@@ -296,9 +296,25 @@ const firebaseConfig = {
       errorDiv.style.display = 'none';
 
       try {
-        await auth.signInWithEmailAndPassword(email, pass);
+        const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+        user = userCredential.user;
         modal.style.display = 'none';
-        // Auth state listener will handle showing toolbar
+        // Set cookie for future visits
+        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
+        // Set up auth listener for future state changes
+        auth.onAuthStateChanged(u => {
+          user = u;
+          if (u) {
+            document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
+            showToolbar();
+          } else {
+            document.cookie = 'gfs_admin=;path=/;max-age=0;SameSite=Strict;Secure';
+            hideToolbar();
+          }
+        });
+        // Show toolbar immediately
+        showToolbar();
+        activateEditing();
       } catch (err) {
         let msg = 'Login failed.';
         if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
