@@ -1,0 +1,27 @@
+<!-- This file exists solely for Netlify form detection. SSR pages render forms server-side, 
+     but Netlify needs to see them at build/deploy time in static HTML. -->
+<html><body>
+  <form name="ballpark-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" /><input name="name" /><input name="phone" /><input name="email" />
+    <input name="address" /><input name="fenceStyle" /><input name="linearFeet" /><input name="height" />
+    <input name="gates" /><input name="removal" /><input name="estimatedRange" /><textarea name="notes"></textarea>
+  </form>
+  <form name="contact-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" /><input name="name" /><input name="phone" /><input name="email" />
+    <input name="address" /><input name="fenceType" /><input name="timeline" /><input name="heard" />
+    <textarea name="message"></textarea>
+  </form>
+  <form name="quote-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" /><input name="name" /><input name="phone" /><input name="email" />
+    <input name="address" /><input name="fenceType" /><input name="footage" /><input name="timeline" />
+    <textarea name="details"></textarea>
+  </form>
+  <form name="detailed-quote-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" /><input name="name" /><input name="phone" /><input name="email" />
+    <input name="address" /><input name="fenceType" /><textarea name="message"></textarea>
+  </form>
+  <form name="booking-leads" netlify netlify-honeypot="bot-field" hidden>
+    <input name="bot-field" /><input name="name" /><input name="phone" /><input name="email" />
+    <input name="address" /><input name="date" /><input name="time" /><textarea name="notes"></textarea>
+  </form>
+</body></html>
