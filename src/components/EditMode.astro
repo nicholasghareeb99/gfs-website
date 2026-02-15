@@ -390,8 +390,35 @@ const firebaseConfig = {
   }
 
   // =============================================
-  // 2. Toolbar controls
+  // 2. Toolbar controls + Content override loader
   // =============================================
+
+  // Load saved page content overrides from Firestore (for admins with Firebase loaded)
+  async function loadPageOverrides() {
+    if (!db) return;
+    try {
+      const pagePath = getPageDocPath(); // e.g., 'pageEdits/fences-cedar'
+      const snap = await db.doc(pagePath).get();
+      if (snap.exists) {
+        const data = snap.data();
+        Object.entries(data).forEach(([key, value]) => {
+          if (!value || key === 'updatedAt' || key === 'updatedBy') return;
+          const el = document.querySelector(`[data-editable="${key}"]`);
+          if (el) {
+            if (el.dataset.editType === 'html' || el.dataset.editType === 'richtext') el.innerHTML = value;
+            else el.textContent = value;
+          }
+          const imgEl = document.querySelector(`[data-editable-image="${key}"]`);
+          if (imgEl && value) {
+            const img = imgEl.querySelector('img') || imgEl;
+            if (img.tagName === 'IMG') img.src = value;
+            else imgEl.style.backgroundImage = `url(${value})`;
+          }
+        });
+        console.log('[EditMode] Applied', Object.keys(data).length, 'overrides for', pagePath);
+      }
+    } catch(e) { console.warn('[EditMode] Page overrides:', e.message); }
+  }
   function showToolbar() {
     const toolbar = document.getElementById('edit-toolbar');
     if (toolbar) {
@@ -481,22 +508,30 @@ const firebaseConfig = {
   function onContentEdit(e) { const el = e.target.closest('[data-editable]'); if (el) trackChange(el); }
   function onContentBlur(e) { const el = e.target.closest('[data-editable]'); if (el) trackChange(el); }
 
+  // Derive a page-level Firestore doc path from the URL
+  // Uses collection 'pageEdits', doc = page slug
+  function getPageDocPath() {
+    const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
+    return 'pageEdits/' + path.replace(/\//g, '-');
+  }
+
   function trackChange(el) {
-    const doc = el.dataset.editDoc;
-    const field = el.dataset.editField;
-    if (!doc || !field) return;
-    if (!changes.has(doc)) changes.set(doc, {});
+    // Use explicit doc/field if set, otherwise default to page doc + editable name
+    const docPath = el.dataset.editDoc || getPageDocPath();
+    const field = el.dataset.editField || el.getAttribute('data-editable');
+    if (!docPath || !field) return;
+    if (!changes.has(docPath)) changes.set(docPath, {});
     const isHTML = el.dataset.editType === 'html' || el.dataset.editType === 'richtext';
-    changes.get(doc)[field] = isHTML ? el.innerHTML : el.textContent.trim();
+    changes.get(docPath)[field] = isHTML ? el.innerHTML : el.textContent.trim();
     updateChangesCount();
   }
 
   function trackImageChange(el, newSrc) {
-    const doc = el.dataset.editDoc;
-    const field = el.dataset.editField || el.dataset.editImageField;
-    if (!doc || !field) return;
-    if (!changes.has(doc)) changes.set(doc, {});
-    changes.get(doc)[field] = newSrc;
+    const docPath = el.dataset.editDoc || getPageDocPath();
+    const field = el.dataset.editField || el.dataset.editImageField || el.getAttribute('data-editable-image');
+    if (!docPath || !field) return;
+    if (!changes.has(docPath)) changes.set(docPath, {});
+    changes.get(docPath)[field] = newSrc;
     updateChangesCount();
   }
 
