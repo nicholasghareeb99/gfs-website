@@ -100,5 +100,82 @@
       "title": "Enjoy Your Yard",
       "description": "Love your new fence with our 3-year warranty for peace of mind"
     }
+  ],
+  "serviceAreas": [
+    {
+      "name": "Toledo",
+      "slug": "toledo",
+      "state": "OH"
+    },
+    {
+      "name": "Perrysburg",
+      "slug": "perrysburg",
+      "state": "OH"
+    },
+    {
+      "name": "Sylvania",
+      "slug": "sylvania",
+      "state": "OH"
+    },
+    {
+      "name": "Maumee",
+      "slug": "maumee",
+      "state": "OH"
+    },
+    {
+      "name": "Bowling Green",
+      "slug": "bowling-green",
+      "state": "OH"
+    },
+    {
+      "name": "Oregon",
+      "slug": "oregon",
+      "state": "OH"
+    },
+    {
+      "name": "Waterville",
+      "slug": "waterville",
+      "state": "OH"
+    },
+    {
+      "name": "Whitehouse",
+      "slug": "whitehouse",
+      "state": "OH"
+    },
+    {
+      "name": "Holland",
+      "slug": "holland",
+      "state": "OH"
+    },
+    {
+      "name": "Swanton",
+      "slug": "swanton",
+      "state": "OH"
+    },
+    {
+      "name": "Northwood",
+      "slug": "northwood",
+      "state": "OH"
+    },
+    {
+      "name": "Rossford",
+      "slug": "rossford",
+      "state": "OH"
+    },
+    {
+      "name": "Monroe",
+      "slug": "monroe",
+      "state": "MI"
+    },
+    {
+      "name": "Temperance",
+      "slug": "temperance",
+      "state": "MI"
+    },
+    {
+      "name": "Lambertville",
+      "slug": "lambertville",
+      "state": "MI"
+    }
   ]
 }

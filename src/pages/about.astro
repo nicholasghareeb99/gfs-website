@@ -98,7 +98,7 @@ const site = await getSiteSettings();
         <p style="color: var(--text-muted); max-width: 600px; margin: 12px auto 0;">We serve all of Northwest Ohio and Southeast Michigan, including Lucas, Wood, Fulton, Henry, Ottawa, and Monroe counties.</p>
       </div>
       <div class="areas-grid" style="max-width: 800px; margin: 0 auto;">
-        {site.serviceAreas.map((area) => (
+        {(site.serviceAreas || []).map((area) => (
           <a href={`/service-areas/${area.slug}/`} class="area-tag">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
             {area.name}{area.state === 'MI' ? ', MI' : ''}
