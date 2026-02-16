@@ -250,7 +250,7 @@ async function loadPricing(){
 
 function renderDropdown(){
     const dd=$('fence-style-dropdown');if(!dd)return;
-    dd.innerHTML=pricingData.map((s,i)=>`<option value="${i}">${s.name} — ~$${s.ppf}/ft</option>`).join('');
+    dd.innerHTML=pricingData.map((s,i)=>`<option value="${i}">${s.name}</option>`).join('');
     dd.addEventListener('change',()=>{selFence=pricingData[+dd.value];showPreview(selFence);updateQ();});
     showPreview(selFence);
 }
@@ -463,7 +463,7 @@ function updateQ(){
 }
 
 /* ======== COMPARE ======== */
-$('compare-btn').addEventListener('click',()=>{const s=$('compare-section');s.style.display=s.style.display==='none'?'block':'none';if(s.style.display==='block')renderCompare();});
+$('compare-btn').addEventListener('click',()=>{const s=$('compare-section');s.style.display=s.style.display==='none'?'block':'none';if(s.style.display==='block'){renderCompare();s.scrollIntoView({behavior:'smooth',block:'start'});}});
 function renderCompare(){
     let tf=0;objs.forEach(o=>{if(o.type==='fence')o.segments.forEach(s=>tf+=s.dist);});
     const mf=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;if(mf>0&&!tf)tf=mf;if(tf<10)tf=150;
@@ -475,7 +475,7 @@ function renderCompare(){
         if(s.img)h+=`<img src="${s.img}" alt="${s.name}" class="compare-img" />`;
         h+=`<div class="compare-name">${s.name}</div><div class="compare-price">$${lo.toLocaleString()} — $${hi.toLocaleString()}</div>`;
         h+=`<div class="compare-ppf">~$${s.ppf}/ft · ${tf}ft</div>`;
-        if(!isSel)h+=`<button class="compare-select-btn" onclick="document.getElementById('fence-style-dropdown').value='${idx}';document.getElementById('fence-style-dropdown').dispatchEvent(new Event('change'));">Select</button>`;
+        if(!isSel)h+=`<button class="compare-select-btn" onclick="document.getElementById('fence-style-dropdown').value='${idx}';document.getElementById('fence-style-dropdown').dispatchEvent(new Event('change'));document.getElementById('compare-section').style.display='none';">Select</button>`;
         else h+=`<span class="compare-current">✓ Selected</span>`;
         h+=`</div>`;});
     h+='</div>';$('compare-cards').innerHTML=h;
@@ -529,7 +529,8 @@ $('remove-old').addEventListener('change',updateQ);
 /* ======== MAP ======== */
 let gmap=null;
 window.searchMapAddress=function(addr){
-    if(!addr)addr=$('map-address-input')?.value?.trim();if(!addr||!window.google){$('map-status-text').textContent='Google Maps not loaded yet';return;}
+    if(!addr)addr=$('map-address-input')?.value?.trim();if(!addr){$('map-status-text').textContent='Enter an address to search';return;}
+    if(!window.google||!window.google.maps){$('map-status-text').textContent='⚠️ Satellite view requires Maps API setup. Use Grid Drawing to design your fence.';return;}
     $('map-status-text').textContent='🔍 Searching...';
     new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
         if(s==='OK'&&r[0]){const loc=r[0].geometry.location;$('map-instructions').style.display='none';gmap=new google.maps.Map($('map'),{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});}
