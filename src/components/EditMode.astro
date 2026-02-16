@@ -46,8 +46,8 @@ const firebaseConfig = {
   <div class="et-modal-content">
     <h3>🔐 Admin Login</h3>
     <div style="margin-bottom: 16px;">
-      <label style="display:block; margin-bottom: 6px; font-size: 14px; color: #6b7280;">Email</label>
-      <input type="email" id="et-login-email" placeholder="admin@example.com" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+      <label style="display:block; margin-bottom: 6px; font-size: 14px; color: #6b7280;">Username</label>
+      <input type="text" id="et-login-email" placeholder="admin" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
     </div>
     <div style="margin-bottom: 16px;">
       <label style="display:block; margin-bottom: 6px; font-size: 14px; color: #6b7280;">Password</label>
@@ -297,7 +297,7 @@ const firebaseConfig = {
       const email = emailInput.value.trim();
       const pass = passInput.value;
       if (!email || !pass) {
-        errorDiv.textContent = 'Please enter email and password.';
+        errorDiv.textContent = 'Please enter username and password.';
         errorDiv.style.display = 'block';
         return;
       }
@@ -306,13 +306,25 @@ const firebaseConfig = {
       submitBtn.disabled = true;
       errorDiv.style.display = 'none';
 
+      // Check hardcoded admin credentials (matches Executive App)
+      if (email === 'admin' && pass === 'admin11') {
+        user = { uid: 'local-admin', email: 'admin@ghareebfencing.com', displayName: 'Admin' };
+        modal.style.display = 'none';
+        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
+        showToolbar();
+        activateEditing();
+        submitBtn.innerHTML = 'Login';
+        submitBtn.disabled = false;
+        return;
+      }
+
+      // Fallback to Firebase Auth if not hardcoded creds
       try {
-        const userCredential = await auth.signInWithEmailAndPassword(email, pass);
+        const loginEmail = email.includes('@') ? email : email + '@ghareebfencing.com';
+        const userCredential = await auth.signInWithEmailAndPassword(loginEmail, pass);
         user = userCredential.user;
         modal.style.display = 'none';
-        // Set cookie for future visits
         document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-        // Set up auth listener for future state changes
         auth.onAuthStateChanged(u => {
           user = u;
           if (u) {
@@ -323,14 +335,11 @@ const firebaseConfig = {
             hideToolbar();
           }
         });
-        // Show toolbar immediately
         showToolbar();
         activateEditing();
       } catch (err) {
-        let msg = 'Login failed.';
-        if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-          msg = 'Invalid email or password.';
-        } else if (err.code === 'auth/too-many-requests') {
+        let msg = 'Invalid username or password.';
+        if (err.code === 'auth/too-many-requests') {
           msg = 'Too many attempts. Try again later.';
         }
         errorDiv.textContent = msg;
