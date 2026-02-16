@@ -69,35 +69,166 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   </div>
 </section>
 
-<script is:inline src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script is:inline src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 <script is:inline>
 const fbCfg={apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
 let db;try{if(!firebase.apps.length)firebase.initializeApp(fbCfg);db=firebase.firestore();}catch(e){}
 let curDate=new Date(),selDate=null,selTime=null;
-const times=['9:00 AM','10:00 AM','11:00 AM','1:00 PM','2:00 PM','3:00 PM','4:00 PM'];
-function renderCal(){const y=curDate.getFullYear(),m=curDate.getMonth(),today=new Date();document.getElementById('calTitle').textContent=curDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();let h='';for(let i=0;i<fd;i++)h+='<div class="cal-day empty"></div>';for(let d=1;d<=dim;d++){const dt=new Date(y,m,d),past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate()),sun=dt.getDay()===0,isTod=dt.toDateString()===today.toDateString(),isSel=selDate&&dt.toDateString()===selDate.toDateString();let c='cal-day';if(past||sun)c+=' disabled';if(isTod)c+=' today';if(isSel)c+=' selected';const oc=(past||sun)?'':`onclick="pickDate(${y},${m},${d})"`;h+=`<div class="${c}" ${oc}>${d}</div>`;}document.getElementById('calDays').innerHTML=h;}
+
+/* Default availability - overridden by Firebase settings/booking */
+const DAY_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+let availDays=[
+    {enabled:false,start:'',end:''},
+    {enabled:true,start:'08:00',end:'17:00'},
+    {enabled:true,start:'08:00',end:'17:00'},
+    {enabled:true,start:'08:00',end:'17:00'},
+    {enabled:true,start:'08:00',end:'17:00'},
+    {enabled:true,start:'08:00',end:'17:00'},
+    {enabled:true,start:'08:00',end:'14:00'}
+];
+let blockedDates=[];
+let existingBookings=[];
+let estimateDuration=60;
+let maxPerDay=6;
+
+/* Load availability from Firebase */
+async function loadAvailability(){
+    if(!db)return;
+    try{
+        const doc=await db.collection('settings').doc('booking').get();
+        if(doc.exists){
+            const data=doc.data();
+            if(data.days&&Array.isArray(data.days))availDays=data.days;
+            if(data.blockedDates&&Array.isArray(data.blockedDates))blockedDates=data.blockedDates.map(b=>typeof b==='string'?{date:b}:b);
+            if(data.estimateDuration)estimateDuration=data.estimateDuration;
+            if(data.maxPerDay)maxPerDay=data.maxPerDay;
+        }
+        /* Also check settings/global for bookingAvailability (legacy) */
+        const gdoc=await db.collection('settings').doc('global').get();
+        if(gdoc.exists){
+            const gdata=gdoc.data();
+            if(gdata.bookingAvailability){
+                const ba=typeof gdata.bookingAvailability==='string'?JSON.parse(gdata.bookingAvailability):gdata.bookingAvailability;
+                if(ba.days&&Array.isArray(ba.days))availDays=ba.days;
+                if(ba.blockedDates&&Array.isArray(ba.blockedDates))blockedDates=ba.blockedDates;
+            }
+        }
+    }catch(e){console.log('Using default availability');}
+
+    /* Load existing bookings to prevent double-booking */
+    try{
+        const today=new Date().toISOString().split('T')[0];
+        const snap=await db.collection('bookings').where('date','>=',today).get();
+        snap.forEach(doc=>{const d=doc.data();if(d.date&&d.time&&d.status!=='cancelled')existingBookings.push({date:d.date,time:d.time});});
+    }catch(e){}
+    renderCal();
+}
+
+function generateTimeSlots(dayIdx){
+    const day=availDays[dayIdx];
+    if(!day||!day.enabled)return[];
+    const start=day.start||'08:00';const end=day.end||'17:00';
+    const [sh,sm]=start.split(':').map(Number);const [eh,em]=end.split(':').map(Number);
+    const slots=[];let h=sh,m=sm;
+    while(h<eh||(h===eh&&m<em)){
+        const ampm=h>=12?'PM':'AM';const h12=h===0?12:(h>12?h-12:h);
+        const mStr=m===0?'00':String(m).padStart(2,'0');
+        slots.push(h12+':'+mStr+' '+ampm);
+        m+=estimateDuration;if(m>=60){h+=Math.floor(m/60);m=m%60;}
+    }
+    return slots;
+}
+
+function isDateBlocked(dateStr){return blockedDates.some(b=>(typeof b==='string'?b:b.date)===dateStr);}
+
+function getBookingCountForDate(dateStr){return existingBookings.filter(b=>b.date===dateStr).length;}
+
+function isSlotBooked(dateStr,time){return existingBookings.some(b=>b.date===dateStr&&b.time===time);}
+
+function renderCal(){
+    const y=curDate.getFullYear(),m=curDate.getMonth(),today=new Date();
+    document.getElementById('calTitle').textContent=curDate.toLocaleDateString('en-US',{month:'long',year:'numeric'});
+    const fd=new Date(y,m,1).getDay(),dim=new Date(y,m+1,0).getDate();
+    let h='';
+    for(let i=0;i<fd;i++)h+='<div class="cal-day empty"></div>';
+    for(let d=1;d<=dim;d++){
+        const dt=new Date(y,m,d);
+        const dayIdx=dt.getDay();
+        const dateStr=dt.toISOString().split('T')[0];
+        const past=dt<new Date(today.getFullYear(),today.getMonth(),today.getDate());
+        const dayDisabled=!availDays[dayIdx]||!availDays[dayIdx].enabled;
+        const blocked=isDateBlocked(dateStr);
+        const full=getBookingCountForDate(dateStr)>=maxPerDay;
+        const disabled=past||dayDisabled||blocked||full;
+        const isTod=dt.toDateString()===today.toDateString();
+        const isSel=selDate&&dt.toDateString()===selDate.toDateString();
+        let c='cal-day';
+        if(disabled)c+=' disabled';
+        if(isTod)c+=' today';
+        if(isSel)c+=' selected';
+        const oc=disabled?'':`onclick="pickDate(${y},${m},${d})"`;
+        let label=''+d;
+        if(blocked)label+=' 🚫';
+        if(full&&!past&&!dayDisabled&&!blocked)label+=' ✗';
+        h+=`<div class="${c}" ${oc}>${label}</div>`;
+    }
+    document.getElementById('calDays').innerHTML=h;
+}
+
 window.pickDate=function(y,m,d){selDate=new Date(y,m,d);selTime=null;renderCal();showTimes();updateSel();};
-function showTimes(){document.getElementById('timeSection').style.display='block';let h='';times.forEach(t=>{h+=`<div class="time-slot${selTime===t?' selected':''}" onclick="pickTime('${t}')">${t}</div>`;});document.getElementById('timeSlots').innerHTML=h;}
+
+function showTimes(){
+    if(!selDate){document.getElementById('timeSection').style.display='none';return;}
+    document.getElementById('timeSection').style.display='block';
+    const dayIdx=selDate.getDay();
+    const dateStr=selDate.toISOString().split('T')[0];
+    const slots=generateTimeSlots(dayIdx);
+    if(slots.length===0){
+        document.getElementById('timeSlots').innerHTML='<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:20px;">No available times for this day</div>';
+        return;
+    }
+    let h='';
+    slots.forEach(t=>{
+        const booked=isSlotBooked(dateStr,t);
+        if(booked){
+            h+=`<div class="time-slot" style="opacity:0.4;cursor:not-allowed;text-decoration:line-through;" title="Already booked">${t}</div>`;
+        }else{
+            h+=`<div class="time-slot${selTime===t?' selected':''}" onclick="pickTime('${t}')">${t}</div>`;
+        }
+    });
+    document.getElementById('timeSlots').innerHTML=h;
+}
+
 window.pickTime=function(t){selTime=t;showTimes();updateSel();};
-function updateSel(){const d=document.getElementById('selDisplay'),tx=document.getElementById('selText'),btn=document.getElementById('bookBtn');if(selDate&&selTime){tx.textContent=`${selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} at ${selTime}`;d.style.display='block';btn.textContent='Book Appointment →';btn.disabled=false;}else{d.style.display='none';btn.textContent='Select a Date & Time';btn.disabled=true;}}
+
+function updateSel(){
+    const d=document.getElementById('selDisplay'),tx=document.getElementById('selText'),btn=document.getElementById('bookBtn');
+    if(selDate&&selTime){
+        tx.textContent=selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' at '+selTime;
+        d.style.display='block';btn.textContent='Book Appointment →';btn.disabled=false;
+    }else{d.style.display='none';btn.textContent='Select a Date & Time';btn.disabled=true;}
+}
+
 window.prevMonth=function(){curDate.setMonth(curDate.getMonth()-1);renderCal();};
 window.nextMonth=function(){curDate.setMonth(curDate.getMonth()+1);renderCal();};
+
 document.getElementById('bookingForm').addEventListener('submit',async function(e){
   e.preventDefault();if(!selDate||!selTime){alert('Please select a date and time');return;}
   const btn=document.getElementById('bookBtn');btn.disabled=true;btn.textContent='⏳ Booking...';
   const booking={name:document.getElementById('bName').value.trim(),phone:document.getElementById('bPhone').value.trim(),email:document.getElementById('bEmail').value.trim(),address:document.getElementById('bAddr').value.trim(),date:selDate.toISOString().split('T')[0],time:selTime,source:'website-booking',status:'pending',createdAt:new Date().toISOString()};
   try{
     if(db){
-      await db.collection('bookings').add(booking);
+      await db.collection('bookings').add({...booking,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
       const np=booking.name.split(' ');
-      await db.collection('leads').add({firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',phone:booking.phone,email:booking.email,address:booking.address,source:'website-booking',status:'booked',bookingDate:booking.date,bookingTime:booking.time,createdAt:new Date().toISOString()});
-      await db.collection('jobs').add({cName:booking.name,cEmail:booking.email,cPhone:booking.phone,cAddress:booking.address,status:'Lead',priority:'normal',source:'Website - Booking',notes:`Appointment: ${booking.date} at ${booking.time}`,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),isWebsiteLead:true});
+      await db.collection('websiteLeads').add({firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',name:booking.name,phone:booking.phone,email:booking.email,address:booking.address,source:'website-booking',status:'booked',bookingDate:booking.date,bookingTime:booking.time,createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+      await db.collection('jobs').add({cName:booking.name,cEmail:booking.email,cPhone:booking.phone,cAddress:booking.address,status:'Lead',priority:'normal',source:'Website - Booking',notes:'Appointment: '+booking.date+' at '+booking.time,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),isWebsiteLead:true,websiteLead:true});
       if(typeof gtag==='function')gtag('event','generate_lead',{event_category:'Conversions',event_label:'Booking',value:100,currency:'USD'});
     }
-    document.querySelector('.booking-grid').innerHTML=`<div class="card" style="text-align:center;padding:60px 40px;grid-column:1/-1;"><div style="font-size:4rem;margin-bottom:20px;">✅</div><h2>Appointment <span class="gold">Requested!</span></h2><p style="color:#475569;margin:15px 0 10px;">We've received your booking for:</p><p style="font-size:1.3rem;font-weight:700;color:#1e3a5f;margin-bottom:30px;">${selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})} at ${selTime}</p><p style="color:#475569;margin-bottom:30px;">We'll confirm within 24 hours.</p><a href="/" class="btn btn-primary">Return to Home</a></div>`;
+    document.querySelector('.booking-grid').innerHTML='<div class="card" style="text-align:center;padding:60px 40px;grid-column:1/-1;"><div style="font-size:4rem;margin-bottom:20px;">✅</div><h2>Appointment <span class="gold">Requested!</span></h2><p style="color:#475569;margin:15px 0 10px;">We\'ve received your booking for:</p><p style="font-size:1.3rem;font-weight:700;color:#1e3a5f;margin-bottom:30px;">'+selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' at '+selTime+'</p><p style="color:#475569;margin-bottom:30px;">We\'ll confirm within 24 hours.</p><a href="/" class="btn btn-primary">Return to Home</a></div>';
   }catch(err){console.error(err);alert('Error. Please call (419) 902-8257.');btn.disabled=false;btn.textContent='Book Appointment →';}
 });
-renderCal();
+
+loadAvailability();
 </script>
 </BaseLayout>
