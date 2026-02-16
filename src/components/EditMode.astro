@@ -41,7 +41,7 @@ const firebaseConfig = {
   </div>
 </div>
 
-<!-- Login modal for Ctrl+Shift+E -->
+<!-- Login modal for Ctrl+Shift+E (Win) or Cmd+Shift+. (Mac) or ?edit URL -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>🔐 Admin Login</h3>
@@ -197,23 +197,29 @@ const firebaseConfig = {
   let firebaseLoading = false;
 
   // =============================================
-  // 0. Ctrl+Shift+E keyboard shortcut
+  // 0. Keyboard shortcut to enter Edit Mode
   // =============================================
-  // Keyboard shortcut: Ctrl+Shift+E (Windows) or Cmd+Shift+L (Mac — Cmd+Shift+E opens Chrome Extensions)
+  // Mac: Cmd+Shift+. (period) or Cmd+Shift+L or Cmd+Shift+K
+  // Windows/Linux: Ctrl+Shift+E
+  // URL: add ?edit to any page URL
   document.addEventListener('keydown', function(e) {
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0 || navigator.userAgent.indexOf('Mac') >= 0;
+    const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
+                  (navigator.platform && /Mac/i.test(navigator.platform)) ||
+                  (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
+    // Ctrl+Shift+E works on ALL platforms (Mac has Ctrl key too)
+    if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e' || e.code === 'KeyE')) {
+      e.preventDefault(); e.stopPropagation(); handleEditShortcut(); return;
+    }
     if (isMac) {
-      // Mac: Cmd+Shift+L
-      if (e.metaKey && e.shiftKey && (e.key === 'L' || e.key === 'l')) { e.preventDefault(); handleEditShortcut(); }
-    } else {
-      // Windows/Linux: Ctrl+Shift+E
-      if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e')) { e.preventDefault(); handleEditShortcut(); }
+      // Mac: Cmd+Shift+. or Cmd+Shift+L or Cmd+Shift+K or Cmd+Shift+A
+      if (e.metaKey && e.shiftKey && (e.key === '.' || e.key === 'L' || e.key === 'l' || e.key === 'K' || e.key === 'k' || e.key === 'A' || e.key === 'a' || e.code === 'Period' || e.code === 'KeyL' || e.code === 'KeyK' || e.code === 'KeyA')) {
+        e.preventDefault(); e.stopPropagation(); handleEditShortcut();
+      }
     }
   });
   // URL trigger: add ?edit to any page URL
   if (window.location.search.includes('edit')) {
     window.addEventListener('DOMContentLoaded', function() { setTimeout(handleEditShortcut, 500); });
-    // Also try immediately in case DOMContentLoaded already fired
     if (document.readyState !== 'loading') { setTimeout(handleEditShortcut, 500); }
   }
 
