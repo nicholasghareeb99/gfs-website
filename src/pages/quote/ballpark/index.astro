@@ -10,11 +10,10 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
 };
-const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
+const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 ---
 
-<BaseLayout title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions" description="Get an instant ballpark fence quote in 60 seconds. Draw on a grid or enter measurements." canonical="/quote/ballpark/">
-    <!-- Hidden Netlify Form -->
+<BaseLayout title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions" description="Get an instant ballpark fence quote in 60 seconds. Draw fence lines, add gates, and see pricing instantly." canonical="/quote/ballpark/">
     <form name="ballpark-leads" netlify netlify-honeypot="bot-field" hidden>
         <input type="text" name="bot-field" /><input type="text" name="name" /><input type="tel" name="phone" />
         <input type="email" name="email" /><input type="text" name="address" /><input type="text" name="fenceStyle" />
@@ -22,1044 +21,395 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY;
         <input type="text" name="removal" /><input type="text" name="estimatedRange" /><textarea name="notes"></textarea>
     </form>
 
-    <section class="hero-mini">
-        <div class="container">
-            <div class="breadcrumb"><a href="/">Home</a> / <a href="/quote/">Quote</a> / <span>Ballpark Calculator</span></div>
-            <h1>Instant Ballpark Quote</h1>
-            <p class="subtitle">Get a price estimate in 60 seconds — just tell us about your project</p>
-        </div>
-    </section>
+    <section class="hero-mini"><div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> / <a href="/quote/">Quote</a> / <span>Ballpark Calculator</span></div>
+        <h1>Instant Ballpark Quote</h1>
+        <p class="subtitle">Get a price estimate in 60 seconds — just tell us about your project</p>
+    </div></section>
 
-    <section class="calculator-section">
-        <div class="container">
-            <div class="calculator-grid">
-                <div class="calculator-main">
+    <section class="calculator-section"><div class="container"><div class="calculator-grid">
+        <div class="calculator-main">
 
-                    <!-- STEP 1: LEAD CAPTURE -->
-                    <div class="calc-step" id="step-1">
-                        <div class="step-header"><span class="step-number">1</span><div><h3>Tell us about yourself</h3><p>Enter your info to unlock the instant quote tool</p></div></div>
-                        <div id="lead-wall-form">
-                            <div style="position:absolute;left:-9999px;top:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
-                            <div class="form-row">
-                                <div class="form-group"><label for="lead-name">Full Name *</label><input type="text" id="lead-name" required placeholder="John Smith" /></div>
-                                <div class="form-group"><label for="lead-phone">Phone *</label><input type="tel" id="lead-phone" required placeholder="(419) 555-1234" /></div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group"><label for="lead-email">Email</label><input type="email" id="lead-email" placeholder="john@email.com" /></div>
-                                <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required placeholder="123 Main St, Toledo, OH" /></div>
-                            </div>
-                            <button type="button" id="unlock-tool-btn" class="btn btn-primary btn-block btn-lg" disabled>🔓 Unlock Quote Tool</button>
-                            <p class="form-disclaimer">Your info is never shared. We'll follow up within 24 hours with a detailed estimate.</p>
-                        </div>
-                        <div id="lead-wall-success" style="display:none;">
-                            <div class="success-banner">✅ <div><strong>Quote tool unlocked!</strong><span>Now configure your fence below to see instant pricing.</span></div></div>
-                        </div>
+            <!-- STEP 1: LEAD CAPTURE -->
+            <div class="calc-step" id="step-1">
+                <div class="step-header"><span class="step-number">1</span><div><h3>Tell us about yourself</h3><p>Enter your info to unlock the instant quote tool</p></div></div>
+                <div id="lead-wall-form">
+                    <div style="position:absolute;left:-9999px;" aria-hidden="true"><input type="text" name="website" id="hp-website" tabindex="-1" autocomplete="off" /></div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="lead-name">Full Name *</label><input type="text" id="lead-name" required placeholder="John Smith" /></div>
+                        <div class="form-group"><label for="lead-phone">Phone *</label><input type="tel" id="lead-phone" required placeholder="(419) 555-1234" /></div>
                     </div>
-
-                    <!-- STEP 2: MEASURE -->
-                    <div class="calc-step locked-step" id="step-2">
-                        <div class="step-header"><span class="step-number">2</span><div><h3>Measure your fence line</h3><p>Choose how you want to measure</p></div></div>
-                        <div class="locked-overlay" id="step-2-lock">🔒 <span>Complete Step 1 to unlock</span></div>
-                        <div class="step-content" id="step-2-content" style="display:none;">
-                            <div class="measure-tabs">
-                                <button type="button" class="measure-tab active" data-tab="grid">📐 Draw on Grid</button>
-                                <button type="button" class="measure-tab" data-tab="manual">✏️ Enter Feet</button>
-                                <button type="button" class="measure-tab" data-tab="map">🗺️ Draw on Map</button>
-                            </div>
-
-                            <!-- GRID DRAWING -->
-                            <div class="measure-panel active" id="panel-grid">
-                                <p class="panel-hint">Click to place fence corners on the grid. Each square = 5 ft. Lines are drawn between consecutive clicks.</p>
-                                <div class="grid-wrapper"><canvas id="grid-canvas" width="700" height="400"></canvas></div>
-                                <div class="grid-controls">
-                                    <button type="button" id="grid-undo" class="toolbar-btn">↩ Undo</button>
-                                    <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear</button>
-                                    <div class="toolbar-info"><strong>Total:</strong> <span id="grid-total">0</span> ft</div>
-                                </div>
-                            </div>
-
-                            <!-- MANUAL ENTRY -->
-                            <div class="measure-panel" id="panel-manual">
-                                <p class="panel-hint">Don't worry about being exact — this is a ballpark estimate.</p>
-                                <div class="manual-input-group">
-                                    <label for="manual-feet"><strong>Total Linear Feet of Fence</strong></label>
-                                    <div class="input-with-unit"><input type="number" id="manual-feet" min="10" max="2000" placeholder="e.g., 150" /><span class="unit">ft</span></div>
-                                    <div class="footage-helpers">
-                                        <span class="helper-label">Quick:</span>
-                                        <button type="button" class="quick-ft" data-ft="100">100 ft</button>
-                                        <button type="button" class="quick-ft" data-ft="150">150 ft</button>
-                                        <button type="button" class="quick-ft" data-ft="200">200 ft</button>
-                                        <button type="button" class="quick-ft" data-ft="300">300 ft</button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- MAP DRAWING -->
-                            <div class="measure-panel" id="panel-map">
-                                <div class="address-search">
-                                    <input type="text" id="address-input" placeholder="Search address for satellite view" />
-                                    <button type="button" id="search-btn" class="btn btn-primary">🔍 Search</button>
-                                </div>
-                                <div id="map-container">
-                                    <div id="map"></div>
-                                    <div class="map-instructions" id="map-instructions"><span id="map-status-text">Click "Search" to load your property on satellite view</span></div>
-                                </div>
-                                <div class="map-toolbar" id="map-toolbar" style="display:none;">
-                                    <button type="button" id="draw-btn" class="toolbar-btn active">✏️ Draw</button>
-                                    <button type="button" id="clear-map-btn" class="toolbar-btn">🗑 Clear</button>
-                                    <div class="toolbar-info"><strong>Total:</strong> <span id="map-total">0</span> ft</div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="form-row">
+                        <div class="form-group"><label for="lead-email">Email</label><input type="email" id="lead-email" placeholder="john@email.com" /></div>
+                        <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required placeholder="123 Main St, Toledo, OH" /></div>
                     </div>
-
-                    <!-- STEP 3: FENCE STYLE -->
-                    <div class="calc-step locked-step" id="step-3">
-                        <div class="step-header"><span class="step-number">3</span><div><h3>Choose your fence style</h3><p>Select a material</p></div></div>
-                        <div class="locked-overlay" id="step-3-lock">🔒 <span>Complete Step 1 to unlock</span></div>
-                        <div class="step-content" id="step-3-content" style="display:none;">
-                            <div id="fence-styles-loading" class="loading-state"><div class="spinner"></div><span>Loading styles...</span></div>
-                            <div id="fence-styles-grid" class="fence-styles-grid" style="display:none;"></div>
-                        </div>
-                    </div>
-
-                    <!-- STEP 4: OPTIONS -->
-                    <div class="calc-step locked-step" id="step-4">
-                        <div class="step-header"><span class="step-number">4</span><div><h3>Customize your project</h3><p>Height, gates, and extras</p></div></div>
-                        <div class="locked-overlay" id="step-4-lock">🔒 <span>Complete Step 1 to unlock</span></div>
-                        <div class="step-content" id="step-4-content" style="display:none;">
-                            <div class="options-grid">
-                                <div class="option-group"><label for="fence-height">Fence Height</label><select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select></div>
-                                <div class="option-group"><label for="single-gates">Walk Gates</label><select id="single-gates"><option value="0">None</option><option value="1" selected>1 Gate</option><option value="2">2 Gates</option><option value="3">3 Gates</option></select></div>
-                                <div class="option-group"><label for="double-gates">Drive Gates (Double)</label><select id="double-gates"><option value="0" selected>None</option><option value="1">1 Gate</option><option value="2">2 Gates</option></select></div>
-                                <div class="checkbox-group"><label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label></div>
-                            </div>
-                        </div>
-                    </div>
+                    <button type="button" id="unlock-tool-btn" class="btn btn-primary btn-block btn-lg" disabled>🔓 Unlock Quote Tool</button>
+                    <p class="form-disclaimer">Your info is never shared. We'll follow up within 24 hours with a detailed estimate.</p>
                 </div>
+                <div id="lead-wall-success" style="display:none;">
+                    <div class="success-banner">✅ <div><strong>Quote tool unlocked!</strong><span>Now design your fence below to see instant pricing.</span></div></div>
+                </div>
+            </div>
 
-                <!-- SIDEBAR -->
-                <div class="calculator-sidebar">
-                    <div class="quote-summary">
-                        <h3>📋 Your Quote</h3>
-                        <div id="summary-placeholder" class="summary-placeholder">
-                            <p>🔒 Complete the steps to see your instant estimate</p>
+            <!-- STEP 2: PROPERTY PLANNER -->
+            <div class="calc-step locked-step" id="step-2">
+                <div class="step-header"><span class="step-number">2</span><div><h3>Design your fence</h3><p>Draw fence lines, add gates, mark structures</p></div></div>
+                <div class="locked-overlay" id="step-2-lock">🔒 <span>Complete Step 1 to unlock</span></div>
+                <div class="step-content" id="step-2-content" style="display:none;">
+                    <div class="draw-toolbar">
+                        <div class="tool-group">
+                            <button type="button" class="draw-tool active" data-tool="fence"><span class="tool-icon">✏️</span><span class="tool-label">Fence</span></button>
+                            <button type="button" class="draw-tool" data-tool="gate-walk"><span class="tool-icon">🚪</span><span class="tool-label">Gate</span></button>
+                            <button type="button" class="draw-tool" data-tool="gate-drive"><span class="tool-icon">🚗</span><span class="tool-label">Dbl Gate</span></button>
                         </div>
-                        <div id="summary-preview" style="display:none;">
-                            <div class="summary-line"><span>Style</span><span id="preview-style">—</span></div>
-                            <div class="summary-line"><span>Length</span><span id="preview-feet">—</span></div>
-                            <div class="summary-line"><span>Height</span><span id="preview-height">—</span></div>
-                            <div class="summary-line"><span>Gates</span><span id="preview-gates">—</span></div>
-                            <div id="preview-removal-line" class="summary-line" style="display:none;"><span>Removal</span><span>Yes (+$4/ft)</span></div>
-                            <hr>
-                            <div class="estimate-range">
-                                <div class="range-label">Estimated Price Range</div>
-                                <div class="range-values"><span id="range-low">$0</span> <span class="range-sep">—</span> <span id="range-high">$0</span></div>
-                            </div>
-                            <p class="estimate-note">*Ballpark only. Final price after free on-site measurement.</p>
-                            <div class="summary-actions">
-                                <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">📞 Call — {site.company.phone}</a>
-                                <a href="/quote/book/" class="btn btn-outline btn-block">📅 Book Free Consultation</a>
-                            </div>
+                        <div class="tool-divider"></div>
+                        <div class="tool-group">
+                            <button type="button" class="draw-tool" data-tool="house"><span class="tool-icon">🏠</span><span class="tool-label">House</span></button>
+                            <button type="button" class="draw-tool" data-tool="tree"><span class="tool-icon">🌳</span><span class="tool-label">Tree</span></button>
+                            <button type="button" class="draw-tool" data-tool="text"><span class="tool-icon">💬</span><span class="tool-label">Text</span></button>
                         </div>
+                        <div class="tool-divider"></div>
+                        <button type="button" class="draw-tool" data-tool="erase"><span class="tool-icon">🗑</span><span class="tool-label">Erase</span></button>
                     </div>
-                    <div class="trust-badges">
-                        <div class="badge">🛡️ 3-Year Warranty</div>
-                        <div class="badge">⭐ 4.9★ Rating</div>
-                        <div class="badge">💳 0% Financing</div>
+                    <div class="fence-type-bar" id="fence-type-bar"><span class="ftb-label">Fence style:</span><div class="ftb-options" id="ftb-options"></div></div>
+                    <div class="grid-wrapper"><canvas id="grid-canvas" width="800" height="500"></canvas></div>
+                    <div class="grid-controls">
+                        <button type="button" id="grid-undo" class="toolbar-btn">↩ Undo</button>
+                        <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear</button>
+                        <div class="grid-legend"><span>Double-click or right-click to finish a fence line</span></div>
+                    </div>
+                    <div class="map-section">
+                        <div class="map-header"><span>📍 Satellite Reference</span></div>
+                        <div class="address-search"><input type="text" id="address-input" placeholder="Search your address for satellite view" /><button type="button" id="search-btn" class="btn btn-primary btn-sm">🔍 Search</button></div>
+                        <div id="map-container"><div id="map"></div><div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div></div>
+                    </div>
+                    <details class="manual-fallback"><summary>✏️ Or just enter total feet manually</summary><div>
+                        <div class="manual-input-group">
+                            <label for="manual-feet"><strong>Total Linear Feet</strong></label>
+                            <div class="input-with-unit"><input type="number" id="manual-feet" min="10" max="2000" placeholder="e.g., 150" /><span class="unit">ft</span></div>
+                            <div class="footage-helpers">
+                                <button type="button" class="quick-ft" data-ft="100">100 ft</button>
+                                <button type="button" class="quick-ft" data-ft="150">150 ft</button>
+                                <button type="button" class="quick-ft" data-ft="200">200 ft</button>
+                                <button type="button" class="quick-ft" data-ft="300">300 ft</button>
+                            </div>
+                        </div>
+                    </div></details>
+                </div>
+            </div>
+
+            <!-- STEP 3: OPTIONS -->
+            <div class="calc-step locked-step" id="step-3">
+                <div class="step-header"><span class="step-number">3</span><div><h3>Project options</h3><p>Height and extras</p></div></div>
+                <div class="locked-overlay" id="step-3-lock">🔒 <span>Complete Step 1 to unlock</span></div>
+                <div class="step-content" id="step-3-content" style="display:none;">
+                    <div class="options-grid">
+                        <div class="option-group"><label for="fence-height">Fence Height</label><select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select></div>
+                        <div class="checkbox-group"><label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label></div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+
+        <!-- SIDEBAR -->
+        <div class="calculator-sidebar">
+            <div class="quote-summary">
+                <h3>📋 Your Quote</h3>
+                <div id="summary-placeholder" class="summary-placeholder"><p>🔒 Complete the steps to see your instant estimate</p></div>
+                <div id="summary-preview" style="display:none;">
+                    <div id="fence-breakdown"></div>
+                    <div id="gate-breakdown"></div>
+                    <div id="preview-removal-line" class="summary-line" style="display:none;"><span>Removal</span><span id="removal-cost">+$0</span></div>
+                    <div class="summary-line total-line"><span><strong>Total Fence</strong></span><span id="total-feet">0 ft</span></div>
+                    <div class="estimate-range">
+                        <div class="range-label">Estimated Price Range</div>
+                        <div class="range-values"><span id="range-low">$0</span> <span class="range-sep">—</span> <span id="range-high">$0</span></div>
+                    </div>
+                    <p class="estimate-note">*Ballpark only. Final price after free on-site measurement.</p>
+                    <div class="summary-actions">
+                        <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">📞 Call — {site.company.phone}</a>
+                        <a href="/quote/book/" class="btn btn-outline btn-block">📅 Book Free Consultation</a>
+                    </div>
+                </div>
+            </div>
+            <div id="drawing-legend" class="drawing-legend" style="display:none;"><h4>📐 Drawing Legend</h4><div id="legend-items"></div></div>
+            <div class="trust-badges"><div class="badge">🛡️ 3-Year Warranty</div><div class="badge">⭐ 4.9★ Rating</div><div class="badge">💳 0% Financing</div></div>
+        </div>
+    </div></div></section>
+
+    <div id="text-modal" class="modal-overlay" style="display:none;"><div class="modal-box">
+        <h3>Add Label</h3>
+        <input type="text" id="text-modal-input" placeholder="e.g., Neighbor's fence, Slope here..." maxlength="50" />
+        <div class="modal-btns"><button type="button" id="text-modal-cancel" class="toolbar-btn">Cancel</button><button type="button" id="text-modal-ok" class="btn btn-primary btn-sm">Add</button></div>
+    </div></div>
 </BaseLayout>
 
 <script is:inline define:vars={{ mapsApiKey }}>
-window._mapsApiKey = mapsApiKey;
-if (mapsApiKey && mapsApiKey !== 'undefined' && mapsApiKey !== '') {
-    window.initGoogleMaps = function() { if (window._toolUnlocked && window._leadAddress) window.searchMapAddress(window._leadAddress); };
-} else { window._mapsUnavailable = true; }
+window._mapsApiKey=mapsApiKey||'';
+if(mapsApiKey&&mapsApiKey!=='undefined'&&mapsApiKey!==''){
+    window.initGoogleMaps=function(){if(window._toolUnlocked&&window._leadAddress)window.searchMapAddress(window._leadAddress);};
+}else{window._mapsUnavailable=true;}
 </script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
 <script is:inline define:vars={{ firebaseConfig }}>
-let db = null;
-try { if (firebaseConfig && firebaseConfig.projectId) { firebase.initializeApp(firebaseConfig); db = firebase.firestore(); } } catch(e) {}
-
-let map=null, drawingManager=null, polylines=[], mapFeet=0;
-let gridPoints=[], gridLines=[], gridFeet=0;
-let selectedStyle=null, pricingData=[];
-const heightMult={'4':0.85,'5':0.92,'6':1.0,'8':1.25};
-window._toolUnlocked=false; window._leadAddress='';
-let leadData={}, quoteSubmitted=false;
-const $=id=>document.getElementById(id);
-
-// ===== PRICING (no price/ft shown) =====
-async function loadPricing(){
-    if(db){try{
-        const doc=await db.collection('settings').doc('global').get();
-        if(doc.exists&&doc.data().pricing){
-            pricingData=doc.data().pricing.split('\n').filter(l=>l.trim()).map(l=>{
-                const p=l.split(':').map(s=>s.trim());
-                return{name:p[0]||'Unknown',ppf:parseFloat(p[1])||0,sg:parseFloat(p[2])||350,dg:parseFloat(p[3])||650};
-            }).filter(i=>i.ppf>0);
-        }
-    }catch(e){}}
-    if(!pricingData.length){
-        pricingData=[
-            {name:'Cedar Privacy',ppf:42,sg:375,dg:695},
-            {name:'Treated Wood Privacy',ppf:35,sg:325,dg:595},
-            {name:'White Vinyl Privacy',ppf:45,sg:425,dg:795},
-            {name:'Tan Vinyl Privacy',ppf:47,sg:425,dg:795},
-            {name:'Vinyl Picket',ppf:32,sg:350,dg:650},
-            {name:'Vinyl Ranch Rail',ppf:28,sg:300,dg:550},
-            {name:'Black Chain Link',ppf:22,sg:275,dg:495},
-            {name:'Galvanized Chain Link',ppf:18,sg:250,dg:450},
-            {name:'Black Aluminum',ppf:48,sg:450,dg:850},
-            {name:'Bronze Aluminum',ppf:50,sg:475,dg:895},
-            {name:'Cedar Split Rail',ppf:16,sg:200,dg:400}
-        ];
-    }
-    $('fence-styles-loading').style.display='none';
-    $('fence-styles-grid').style.display='grid';
-    $('fence-styles-grid').innerHTML=pricingData.map((s,i)=>`<button type="button" class="fence-style-card" data-index="${i}"><div class="style-name">${s.name}</div></button>`).join('');
-    document.querySelectorAll('.fence-style-card').forEach(card=>{
-        card.addEventListener('click',()=>{
-            document.querySelectorAll('.fence-style-card').forEach(c=>c.classList.remove('selected'));
-            card.classList.add('selected');
-            selectedStyle=pricingData[parseInt(card.dataset.index)];
-            updateQuote();
-        });
-    });
-}
-
-// ===== QUOTE CALC =====
-function getFeet(){
-    const m=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;
-    if(m>0)return m; if(gridFeet>0)return gridFeet; return mapFeet;
-}
-function updateQuote(){
-    const feet=getFeet();
-    if(feet<10||!selectedStyle){$('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';return;}
-    $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';
-    $('preview-style').textContent=selectedStyle.name;
-    $('preview-feet').textContent=feet+' ft';
-    $('preview-height').textContent=$('fence-height').value+' ft';
-    const sg=parseInt($('single-gates').value),dg=parseInt($('double-gates').value);
-    let g=[];if(sg>0)g.push(sg+' walk');if(dg>0)g.push(dg+' drive');
-    $('preview-gates').textContent=g.length?g.join(', '):'None';
-    $('preview-removal-line').style.display=$('remove-old').checked?'flex':'none';
-    const hm=heightMult[$('fence-height').value];
-    const rem=$('remove-old').checked;
-    const total=(feet*selectedStyle.ppf*hm)+(sg*selectedStyle.sg)+(dg*selectedStyle.dg)+(rem?feet*4:0);
-    const lo=Math.round(total*0.85),hi=Math.round(total*1.15);
-    $('range-low').textContent='$'+lo.toLocaleString();
-    $('range-high').textContent='$'+hi.toLocaleString();
-    leadData.estimate={low:lo,high:hi,style:selectedStyle.name,feet,height:$('fence-height').value,sg,dg,removal:rem};
-    if(!quoteSubmitted&&lo>0){quoteSubmitted=true;submitLead(leadData,'Completed ballpark: '+selectedStyle.name+', '+feet+'ft, $'+lo+'-$'+hi);}
-}
-
-// ===== LEAD SUBMISSION =====
-async function submitLead(d,notes){
-    // Netlify Forms
-    try{
-        const f=new FormData();f.append('form-name','ballpark-leads');
-        f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');
-        f.append('address',d.address||'');f.append('fenceStyle',d.estimate?.style||'');
-        f.append('linearFeet',String(d.estimate?.feet||''));f.append('height',d.estimate?.height||'');
-        f.append('gates',(d.estimate?.sg||0)+' walk, '+(d.estimate?.dg||0)+' drive');
-        f.append('removal',d.estimate?.removal?'Yes':'No');
-        f.append('estimatedRange',d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'');
-        f.append('notes',notes||'');
-        await fetch('/__forms.html',{method:'POST',body:f});
-    }catch(e){}
-    // Firestore API
-    try{
-        await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-            type:'lead',name:d.name,phone:d.phone,email:d.email,address:d.address,
-            fenceType:d.estimate?.style||'',fenceLength:d.estimate?.feet||0,fenceHeight:d.estimate?.height||'6',
-            singleGates:d.estimate?.sg||0,doubleGates:d.estimate?.dg||0,
-            estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,
-            estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',
-            notes:notes||'',website:$('hp-website')?.value||''
-        })});
-    }catch(e){}
-}
-
-// ===== STEP 1: UNLOCK =====
-function checkReady(){$('unlock-tool-btn').disabled=!($('lead-name').value.trim()&&$('lead-phone').value.trim()&&$('lead-address').value.trim());}
-['lead-name','lead-phone','lead-email','lead-address'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',checkReady);});
-
-$('unlock-tool-btn').addEventListener('click',async()=>{
-    const name=$('lead-name').value.trim(),phone=$('lead-phone').value.trim(),email=$('lead-email').value.trim(),address=$('lead-address').value.trim();
-    if(!name||!phone||!address)return;
-    const btn=$('unlock-tool-btn');btn.disabled=true;btn.textContent='⏳ Unlocking...';
-    leadData={name,phone,email,address};
-    await submitLead(leadData,'Started ballpark quote tool');
-    window._toolUnlocked=true;window._leadAddress=address;
-    $('lead-wall-form').style.display='none';$('lead-wall-success').style.display='block';
-    document.querySelectorAll('.locked-step').forEach(s=>s.classList.remove('locked-step'));
-    ['step-2-lock','step-3-lock','step-4-lock'].forEach(id=>$(id).style.display='none');
-    ['step-2-content','step-3-content','step-4-content'].forEach(id=>$(id).style.display='block');
-    if($('address-input'))$('address-input').value=address;
-    initGrid();
-    // Load maps if available
-    if(!window._mapsUnavailable&&window._mapsApiKey){
-        const s=document.createElement('script');
-        s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
-        s.async=true;s.onerror=function(){window._mapsUnavailable=true;$('map-status-text').textContent='Map unavailable — use grid or enter feet';};
-        document.head.appendChild(s);
-    }else{if($('map-status-text'))$('map-status-text').textContent='Map not available — use grid or enter feet';}
-    $('step-2').scrollIntoView({behavior:'smooth',block:'start'});
-});
-
-// ===== TABS =====
-document.querySelectorAll('.measure-tab').forEach(tab=>{
-    tab.addEventListener('click',()=>{
-        document.querySelectorAll('.measure-tab').forEach(t=>t.classList.remove('active'));
-        document.querySelectorAll('.measure-panel').forEach(p=>p.classList.remove('active'));
-        tab.classList.add('active');
-        const p=$('panel-'+tab.dataset.tab);if(p)p.classList.add('active');
-        if(tab.dataset.tab==='grid')initGrid();
-    });
-});
-
-// ===== GRID DRAWING =====
-let canvas,ctx,gridCellSize=20,gridScale=5;
-function initGrid(){
-    canvas=$('grid-canvas');if(!canvas||canvas._init)return;canvas._init=true;
-    ctx=canvas.getContext('2d');
-    const w=Math.min(canvas.parentElement.clientWidth,700);
-    canvas.width=w;canvas.height=400;
-    gridCellSize=Math.floor(w/35);
-    drawGrid();
-    canvas.addEventListener('click',e=>{
-        const r=canvas.getBoundingClientRect();
-        const sx=Math.round((e.clientX-r.left)/gridCellSize)*gridCellSize;
-        const sy=Math.round((e.clientY-r.top)/gridCellSize)*gridCellSize;
-        gridPoints.push({x:sx,y:sy});
-        if(gridPoints.length>=2){
-            const a=gridPoints[gridPoints.length-2],b=gridPoints[gridPoints.length-1];
-            const dx=Math.abs(b.x-a.x)/gridCellSize,dy=Math.abs(b.y-a.y)/gridCellSize;
-            const d=Math.round(Math.sqrt(dx*dx+dy*dy)*gridScale);
-            gridLines.push({p1:a,p2:b,dist:d});
-            gridFeet=gridLines.reduce((s,l)=>s+l.dist,0);
-            $('grid-total').textContent=gridFeet;
-            updateQuote();
-        }
-        redrawGrid();
-    });
-    canvas.addEventListener('mousemove',e=>{
-        if(gridPoints.length<1)return;
-        redrawGrid();
-        const r=canvas.getBoundingClientRect();
-        const sx=Math.round((e.clientX-r.left)/gridCellSize)*gridCellSize;
-        const sy=Math.round((e.clientY-r.top)/gridCellSize)*gridCellSize;
-        const last=gridPoints[gridPoints.length-1];
-        ctx.beginPath();ctx.moveTo(last.x,last.y);ctx.lineTo(sx,sy);
-        ctx.strokeStyle='rgba(212,175,55,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
-        const dx=Math.abs(sx-last.x)/gridCellSize,dy=Math.abs(sy-last.y)/gridCellSize;
-        const d=Math.round(Math.sqrt(dx*dx+dy*dy)*gridScale);
-        if(d>0){ctx.font='12px sans-serif';ctx.fillStyle='#d4af37';ctx.fillText(d+' ft',(last.x+sx)/2+5,(last.y+sy)/2-5);}
-        ctx.beginPath();ctx.arc(sx,sy,4,0,Math.PI*2);ctx.fillStyle='rgba(212,175,55,0.5)';ctx.fill();
-    });
-}
-function drawGrid(){
-    ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle='#e2e8f0';ctx.lineWidth=0.5;
-    for(let x=0;x<=canvas.width;x+=gridCellSize){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-    for(let y=0;y<=canvas.height;y+=gridCellSize){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
-    ctx.font='11px sans-serif';ctx.fillStyle='#94a3b8';ctx.fillText('1 square = '+gridScale+' ft',8,canvas.height-8);
-}
-function redrawGrid(){
-    drawGrid();
-    gridLines.forEach(l=>{
-        ctx.beginPath();ctx.moveTo(l.p1.x,l.p1.y);ctx.lineTo(l.p2.x,l.p2.y);
-        ctx.strokeStyle='#d4af37';ctx.lineWidth=3;ctx.stroke();
-        ctx.font='bold 11px sans-serif';ctx.fillStyle='#1e3a5f';
-        ctx.fillText(l.dist+' ft',(l.p1.x+l.p2.x)/2+4,(l.p1.y+l.p2.y)/2-6);
-    });
-    gridPoints.forEach((p,i)=>{
-        ctx.beginPath();ctx.arc(p.x,p.y,5,0,Math.PI*2);
-        ctx.fillStyle=i===0?'#10b981':'#d4af37';ctx.fill();
-        ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
-    });
-}
-$('grid-undo').addEventListener('click',()=>{if(gridPoints.length)gridPoints.pop();if(gridLines.length)gridLines.pop();gridFeet=gridLines.reduce((s,l)=>s+l.dist,0);$('grid-total').textContent=gridFeet;redrawGrid();updateQuote();});
-$('grid-clear').addEventListener('click',()=>{gridPoints=[];gridLines=[];gridFeet=0;$('grid-total').textContent='0';redrawGrid();updateQuote();});
-
-// ===== MAP =====
-function initMapView(lat,lng){
-    $('map-instructions').style.display='none';$('map-toolbar').style.display='flex';
-    map=new google.maps.Map($('map'),{center:{lat,lng},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});
-    drawingManager=new google.maps.drawing.DrawingManager({drawingMode:google.maps.drawing.OverlayType.POLYLINE,drawingControl:false,polylineOptions:{strokeColor:'#d4af37',strokeWeight:4,clickable:true,editable:true}});
-    drawingManager.setMap(map);
-    google.maps.event.addListener(drawingManager,'polylinecomplete',pl=>{
-        polylines.push(pl);calcMapLen();
-        google.maps.event.addListener(pl.getPath(),'set_at',calcMapLen);
-        google.maps.event.addListener(pl.getPath(),'insert_at',calcMapLen);
-    });
-}
-function calcMapLen(){
-    mapFeet=0;polylines.forEach(pl=>{const path=pl.getPath();for(let i=0;i<path.getLength()-1;i++)mapFeet+=google.maps.geometry.spherical.computeDistanceBetween(path.getAt(i),path.getAt(i+1))*3.28084;});
-    mapFeet=Math.round(mapFeet);$('map-total').textContent=mapFeet;updateQuote();
-}
-window.searchMapAddress=function(addr){
-    if(!addr)addr=$('address-input')?.value?.trim();
-    if(!addr||!window.google)return;
-    new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
-        if(s==='OK'&&r[0])initMapView(r[0].geometry.location.lat(),r[0].geometry.location.lng());
-        else $('map-status-text').textContent='Address not found. Try grid or enter feet.';
-    });
-};
-if($('search-btn'))$('search-btn').addEventListener('click',()=>window.searchMapAddress());
-if($('address-input'))$('address-input').addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();window.searchMapAddress();}});
-if($('draw-btn'))$('draw-btn').addEventListener('click',()=>{if(drawingManager)drawingManager.setDrawingMode(google.maps.drawing.OverlayType.POLYLINE);});
-if($('clear-map-btn'))$('clear-map-btn').addEventListener('click',()=>{polylines.forEach(p=>p.setMap(null));polylines=[];mapFeet=0;$('map-total').textContent='0';updateQuote();});
-
-// ===== MANUAL + QUICK BUTTONS =====
-$('manual-feet').addEventListener('input',updateQuote);
-document.querySelectorAll('.quick-ft').forEach(b=>b.addEventListener('click',()=>{$('manual-feet').value=b.dataset.ft;updateQuote();}));
-
-// ===== STEP 4 =====
-['fence-height','single-gates','double-gates'].forEach(id=>$(id).addEventListener('change',updateQuote));
-$('remove-old').addEventListener('change',updateQuote);
-
-// ===== INIT =====
-loadPricing();
-</script>
-
-<style>
-    .hero-mini{background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:120px 0 40px;color:white}
-    .hero-mini .breadcrumb{margin-bottom:16px;font-size:0.9rem}.hero-mini .breadcrumb a{color:rgba(255,255,255,0.7);text-decoration:none}
-    .hero-mini .breadcrumb a:hover{color:var(--accent)}.hero-mini .breadcrumb span{color:white}
-    .hero-mini h1{font-size:clamp(2rem,4vw,2.5rem);margin-bottom:8px}.hero-mini .subtitle{color:rgba(255,255,255,0.85);font-size:1.1rem}
-    .calculator-section{padding:60px 0;background:var(--bg-light)}
-    .calculator-grid{display:grid;grid-template-columns:1fr 380px;gap:40px;align-items:start}
-    @media(max-width:1024px){.calculator-grid{grid-template-columns:1fr}.calculator-sidebar{order:-1}}
-    .calc-step{background:white;border-radius:12px;padding:32px;margin-bottom:24px;box-shadow:0 1px 3px rgba(0,0,0,0.1);position:relative}
-    .locked-step .step-content{display:none}
-    .locked-overlay{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:40px 20px;color:#64748b;background:#f8fafc;border-radius:8px;text-align:center;font-size:1.1rem}
-    .step-header{display:flex;gap:16px;align-items:flex-start;margin-bottom:24px}
-    .step-number{width:36px;height:36px;background:var(--primary,#1e3a5f);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
-    .step-header h3{margin:0 0 4px;font-size:1.2rem}.step-header p{margin:0;color:#64748b;font-size:0.95rem}
-    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}@media(max-width:500px){.form-row{grid-template-columns:1fr}}
-    .form-group{margin-bottom:16px}.form-group label{display:block;margin-bottom:6px;font-weight:500;font-size:0.95rem}
-    .form-group input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
-    .form-group input:focus{border-color:var(--primary);outline:none}
-    .form-disclaimer{font-size:0.8rem;color:#64748b;text-align:center;margin-top:12px}
-    .success-banner{display:flex;gap:16px;align-items:flex-start;background:#ecfdf5;border:2px solid #10b981;border-radius:8px;padding:20px;color:#065f46;font-size:1.1rem}
-    .success-banner strong{display:block;margin-bottom:4px}.success-banner span{font-size:0.95rem;color:#047857}
-    .measure-tabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
-    .measure-tab{padding:10px 18px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:0.9rem;font-weight:500;transition:all 0.2s}
-    .measure-tab:hover{border-color:var(--primary)}.measure-tab.active{background:var(--primary,#1e3a5f);color:white;border-color:var(--primary)}
-    .measure-panel{display:none}.measure-panel.active{display:block}
-    .panel-hint{font-size:0.9rem;color:#64748b;margin-bottom:16px}
-    .grid-wrapper{border:2px solid #e2e8f0;border-radius:8px;overflow:hidden;cursor:crosshair}.grid-wrapper canvas{display:block;width:100%}
-    .grid-controls{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
-    .address-search{display:flex;gap:12px;margin-bottom:16px}
-    .address-search input{flex:1;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem}
-    .address-search input:focus{border-color:var(--primary);outline:none}
-    #map-container{position:relative;height:350px;background:#1a1a2e;border-radius:8px;overflow:hidden}
-    #map{width:100%;height:100%}
-    .map-instructions{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);text-align:center;padding:20px}
-    .map-toolbar{display:flex;gap:12px;align-items:center;margin-top:12px;flex-wrap:wrap}
-    .toolbar-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;background:white;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;font-size:0.9rem;transition:all 0.2s}
-    .toolbar-btn:hover{border-color:var(--primary)}.toolbar-btn.active{background:var(--primary);color:white;border-color:var(--primary)}
-    .toolbar-info{margin-left:auto;padding:8px 16px;background:var(--accent,#d4af37);color:#0f2744;border-radius:8px;font-weight:700}
-    .manual-input-group label{display:block;margin-bottom:8px}
-    .input-with-unit{display:flex;align-items:center;max-width:250px}
-    .input-with-unit input{flex:1;padding:14px;border:2px solid #e2e8f0;border-radius:8px 0 0 8px;font-size:1.1rem;border-right:none}
-    .input-with-unit input:focus{border-color:var(--primary);outline:none}
-    .input-with-unit .unit{padding:14px 16px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:0 8px 8px 0;font-weight:600;color:#64748b}
-    .footage-helpers{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-    .helper-label{font-size:0.85rem;color:#64748b}
-    .quick-ft{padding:6px 14px;border:1px solid #e2e8f0;border-radius:20px;background:white;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
-    .quick-ft:hover{border-color:var(--accent);background:#fffbeb}
-    .loading-state{display:flex;align-items:center;justify-content:center;gap:12px;padding:40px;color:#64748b}
-    .spinner{width:24px;height:24px;border:3px solid #e2e8f0;border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .fence-styles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
-    .fence-style-card{padding:16px 12px;background:#f8fafc;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;text-align:center;transition:all 0.2s}
-    .fence-style-card:hover{border-color:var(--primary);background:white}
-    .fence-style-card.selected{border-color:var(--accent);background:white;box-shadow:0 0 0 3px rgba(212,175,55,0.2)}
-    .style-name{font-weight:600;color:#1e293b;font-size:0.95rem}
-    .options-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px}
-    .option-group label{display:block;margin-bottom:8px;font-weight:500;font-size:0.95rem}
-    .option-group select{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;background:white;cursor:pointer}
-    .checkbox-group{grid-column:1/-1}.checkbox-label{display:flex;align-items:center;gap:12px;cursor:pointer}
-    .checkbox-label input{width:20px;height:20px;cursor:pointer}
-    .calculator-sidebar{position:sticky;top:100px}
-    .quote-summary{background:white;border-radius:12px;padding:28px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
-    .quote-summary h3{margin:0 0 20px;font-size:1.3rem}
-    .summary-placeholder{display:flex;flex-direction:column;align-items:center;text-align:center;padding:30px 20px;color:#64748b}
-    .summary-line{display:flex;justify-content:space-between;padding:8px 0;font-size:0.95rem}
-    .summary-line span:first-child{color:#64748b}
-    #summary-preview hr{margin:16px 0;border:none;border-top:1px solid #e2e8f0}
-    .estimate-range{text-align:center;padding:20px;background:linear-gradient(135deg,#1e3a5f,#0f2744);border-radius:8px;color:white}
-    .range-label{font-size:0.85rem;text-transform:uppercase;letter-spacing:1px;opacity:0.9;margin-bottom:8px}
-    .range-values{font-size:1.8rem;font-weight:700}.range-sep{margin:0 8px;opacity:0.5}
-    .estimate-note{font-size:0.8rem;color:#64748b;text-align:center;margin-top:12px;margin-bottom:0}
-    .summary-actions{margin-top:20px;display:flex;flex-direction:column;gap:10px}
-    .btn-block{width:100%;text-align:center}
-    .btn-outline{background:white;border:2px solid var(--primary,#1e3a5f);color:var(--primary);padding:12px 20px;border-radius:8px;font-weight:600;text-decoration:none;display:block;transition:all 0.2s}
-    .btn-outline:hover{background:var(--primary);color:white}
-    .trust-badges{display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap}
-    .trust-badges .badge{font-size:0.85rem;color:#64748b}
-</style>
-
-<script is:inline define:vars={{ firebaseConfig }}>
+(function(){
 let db=null;
-try{if(firebaseConfig&&firebaseConfig.projectId){firebase.initializeApp(firebaseConfig);db=firebase.firestore();}}catch(e){}
+try{if(firebaseConfig&&firebaseConfig.projectId){if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);db=firebase.firestore();}}catch(e){}
 
 const $=id=>document.getElementById(id);
-const heightMult={'4':0.85,'5':0.92,'6':1.0,'8':1.25};
-window._toolUnlocked=false; window._leadAddress='';
-let leadData={}, leadDocId=null;
+const HM={'4':0.85,'5':0.92,'6':1.0,'8':1.25};
+window._toolUnlocked=false;window._leadAddress='';
+let leadData={},leadDocId=null;
 
-// ===== PRICING DATA =====
+/* ======== PRICING ======== */
 let pricingData=[];
-const defaultPricing=[
+const DEF=[
     {name:'Cedar Privacy',ppf:42,sg:375,dg:695,color:'#c0813d'},
     {name:'Treated Wood',ppf:35,sg:325,dg:595,color:'#8B7355'},
     {name:'White Vinyl',ppf:45,sg:425,dg:795,color:'#e8e8e8'},
     {name:'Tan Vinyl',ppf:47,sg:425,dg:795,color:'#d4c5a0'},
     {name:'Vinyl Picket',ppf:32,sg:350,dg:650,color:'#f0f0f0'},
-    {name:'Black Chain Link',ppf:22,sg:275,dg:495,color:'#333333'},
-    {name:'Galv. Chain Link',ppf:18,sg:250,dg:450,color:'#999999'},
+    {name:'Black Chain Link',ppf:22,sg:275,dg:495,color:'#333'},
+    {name:'Galv. Chain Link',ppf:18,sg:250,dg:450,color:'#999'},
     {name:'Black Aluminum',ppf:48,sg:450,dg:850,color:'#1a1a2e'},
     {name:'Bronze Aluminum',ppf:50,sg:475,dg:895,color:'#7B5B3A'},
     {name:'Split Rail',ppf:16,sg:200,dg:400,color:'#A0784C'},
     {name:'Ranch Rail',ppf:28,sg:300,dg:550,color:'#6B4226'}
 ];
+let selFence=null;
 
 async function loadPricing(){
-    if(db){try{
-        const doc=await db.collection('settings').doc('global').get();
-        if(doc.exists&&doc.data().pricing){
-            let i=0;
-            pricingData=doc.data().pricing.split('\n').filter(l=>l.trim()).map(l=>{
-                const p=l.split(':').map(s=>s.trim());
-                const def=defaultPricing[i]||{color:'#666'};i++;
-                return{name:p[0]||'Unknown',ppf:parseFloat(p[1])||0,sg:parseFloat(p[2])||350,dg:parseFloat(p[3])||650,color:def.color};
-            }).filter(x=>x.ppf>0);
-        }
+    if(db){try{const d=await db.collection('settings').doc('global').get();
+        if(d.exists&&d.data().pricing){let i=0;pricingData=d.data().pricing.split('\n').filter(l=>l.trim()).map(l=>{const p=l.split(':').map(s=>s.trim());const df=DEF[i]||{color:'#666'};i++;return{name:p[0]||'Unknown',ppf:parseFloat(p[1])||0,sg:parseFloat(p[2])||350,dg:parseFloat(p[3])||650,color:df.color};}).filter(x=>x.ppf>0);}
     }catch(e){}}
-    if(!pricingData.length) pricingData=[...defaultPricing];
-    selectedFenceType=pricingData[0];
-    renderFenceTypeBar();
+    if(!pricingData.length)pricingData=[...DEF];
+    selFence=pricingData[0];
+    renderFTB();
 }
 
-function renderFenceTypeBar(){
-    const bar=$('ftb-options');
+function renderFTB(){
+    const bar=$('ftb-options');if(!bar)return;
     bar.innerHTML=pricingData.map((s,i)=>`<button type="button" class="ftb-btn${i===0?' active':''}" data-idx="${i}"><span class="ftb-color" style="background:${s.color}"></span>${s.name}</button>`).join('');
     bar.querySelectorAll('.ftb-btn').forEach(b=>b.addEventListener('click',()=>{
         bar.querySelectorAll('.ftb-btn').forEach(x=>x.classList.remove('active'));
-        b.classList.add('active');
-        selectedFenceType=pricingData[parseInt(b.dataset.idx)];
+        b.classList.add('active');selFence=pricingData[+b.dataset.idx];
     }));
 }
 
-// ===== DRAWING STATE =====
-let canvas, ctx, gridCellSize=20, gridScale=5;
-let currentTool='fence';
-let selectedFenceType=null;
-let drawingObjects=[]; // All objects on canvas
-let currentFencePoints=[]; // Points being drawn for current fence line
-let dragStart=null; // For house drawing
-let hoveredObject=null;
-let undoStack=[];
+/* ======== DRAWING STATE ======== */
+let canvas,ctx,GCS=20,GS=5;
+let tool='fence',objs=[],cfp=[],dragS=null,undo=[];
 
-// Object types: 
-// {type:'fence', points:[{x,y},...], fenceType:{name,ppf,sg,dg,color}, segments:[{dist},...]}
-// {type:'gate-walk', x, y}
-// {type:'gate-drive', x, y}
-// {type:'house', x, y, w, h, label:'House'}
-// {type:'tree', x, y}
-// {type:'text', x, y, text:'...'}
-
-// ===== CANVAS INIT =====
 function initCanvas(){
-    canvas=$('grid-canvas');
-    if(!canvas) return;
-    ctx=canvas.getContext('2d');
-    const w=Math.min(canvas.parentElement.clientWidth-4, 800);
-    canvas.width=w; canvas.height=Math.round(w*0.625);
-    gridCellSize=Math.max(14, Math.floor(w/40));
-    
-    canvas.addEventListener('click', onCanvasClick);
-    canvas.addEventListener('mousemove', onCanvasMove);
-    canvas.addEventListener('mousedown', onCanvasDown);
-    canvas.addEventListener('mouseup', onCanvasUp);
-    canvas.addEventListener('dblclick', onCanvasDblClick);
-    canvas.addEventListener('contextmenu', e=>{e.preventDefault(); finishCurrentFence();});
-    
+    canvas=$('grid-canvas');if(!canvas)return;ctx=canvas.getContext('2d');
+    const w=Math.min(canvas.parentElement.clientWidth-4,800);
+    canvas.width=w;canvas.height=Math.round(w*0.625);
+    GCS=Math.max(14,Math.floor(w/40));
+    canvas.addEventListener('click',onClick);
+    canvas.addEventListener('mousemove',onMove);
+    canvas.addEventListener('mousedown',onDown);
+    canvas.addEventListener('mouseup',onUp);
+    canvas.addEventListener('dblclick',()=>{if(tool==='fence'&&cfp.length>=2)finFence();});
+    canvas.addEventListener('contextmenu',e=>{e.preventDefault();finFence();});
+    canvas.addEventListener('touchstart',onTS,{passive:false});
+    canvas.addEventListener('touchmove',onTM,{passive:false});
+    canvas.addEventListener('touchend',onTE,{passive:false});
     redraw();
 }
 
-function snap(v){ return Math.round(v/gridCellSize)*gridCellSize; }
-function dist(a,b){ return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2); }
-function ftDist(a,b){ const dx=Math.abs(b.x-a.x)/gridCellSize, dy=Math.abs(b.y-a.y)/gridCellSize; return Math.round(Math.sqrt(dx*dx+dy*dy)*gridScale); }
+function sn(v){return Math.round(v/GCS)*GCS;}
+function di(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
+function fd(a,b){const dx=Math.abs(b.x-a.x)/GCS,dy=Math.abs(b.y-a.y)/GCS;return Math.round(Math.sqrt(dx*dx+dy*dy)*GS);}
 
-// ===== TOOL SELECTION =====
+/* ======== TOUCH ======== */
+let lastTap=0;
+function tp(e){const r=canvas.getBoundingClientRect();const t=e.touches[0]||e.changedTouches[0];return{x:t.clientX-r.left,y:t.clientY-r.top};}
+function onTS(e){e.preventDefault();if(tool==='house'){const p=tp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
+function onTM(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);redraw();
+    if(tool==='fence'&&cfp.length>0){const l=cfp[cfp.length-1];ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(sx,sy);ctx.strokeStyle='rgba(212,175,55,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);}
+    if(tool==='house'&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillStyle='rgba(100,130,180,0.3)';ctx.strokeStyle='#4682B4';ctx.lineWidth=2;ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);ctx.strokeRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
+}
+function onTE(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);const now=Date.now();
+    if(now-lastTap<300&&tool==='fence'&&cfp.length>=2){finFence();lastTap=0;return;}
+    lastTap=now;
+    if(tool==='house'&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);
+        if(w>=GCS&&h>=GCS){su();const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,sx),y:Math.min(dragS.y,sy),w,h,label:lb});redraw();updateQ();asd();}
+        dragS=null;return;}
+    doClick(sx,sy);
+}
+function doClick(x,y){
+    if(tool==='fence'){cfp.push({x,y});redraw();return;}
+    if(tool==='gate-walk'||tool==='gate-drive'){su();objs.push({type:tool,x,y});redraw();updateQ();asd();return;}
+    if(tool==='tree'){su();objs.push({type:'tree',x,y});redraw();asd();return;}
+    if(tool==='text'){openTM(x,y);return;}
+    if(tool==='erase'){const o=findAt(x,y);if(o){su();objs.splice(objs.indexOf(o),1);redraw();updateQ();asd();}return;}
+}
+
+/* ======== TOOLS ======== */
 document.querySelectorAll('.draw-tool').forEach(btn=>{
     btn.addEventListener('click',()=>{
-        finishCurrentFence();
+        finFence();
         document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));
-        btn.classList.add('active');
-        currentTool=btn.dataset.tool;
-        $('fence-type-bar').style.display=(currentTool==='fence')?'flex':'none';
-        canvas.style.cursor=currentTool==='select'?'default':currentTool==='erase'?'crosshair':'crosshair';
+        btn.classList.add('active');tool=btn.dataset.tool;
+        const fb=$('fence-type-bar');if(fb)fb.style.display=tool==='fence'?'flex':'none';
     });
 });
 
-// ===== CANVAS EVENTS =====
-function onCanvasClick(e){
-    const r=canvas.getBoundingClientRect();
-    const x=snap(e.clientX-r.left), y=snap(e.clientY-r.top);
-    
-    if(currentTool==='fence'){
-        currentFencePoints.push({x,y});
-        redraw();
-        return;
-    }
-    if(currentTool==='gate-walk'||currentTool==='gate-drive'){
-        saveUndo();
-        drawingObjects.push({type:currentTool, x, y});
-        redraw(); updateQuote(); autoSaveDrawing();
-        return;
-    }
-    if(currentTool==='tree'){
-        saveUndo();
-        drawingObjects.push({type:'tree', x, y});
-        redraw(); autoSaveDrawing();
-        return;
-    }
-    if(currentTool==='text'){
-        openTextModal(x,y);
-        return;
-    }
-    if(currentTool==='erase'){
-        const obj=findObjectAt(e.clientX-r.left, e.clientY-r.top);
-        if(obj){ saveUndo(); drawingObjects.splice(drawingObjects.indexOf(obj),1); redraw(); updateQuote(); autoSaveDrawing(); }
-        return;
-    }
-    if(currentTool==='select'){
-        // future: drag to move
-        return;
-    }
+/* ======== MOUSE EVENTS ======== */
+function onClick(e){const r=canvas.getBoundingClientRect();doClick(sn(e.clientX-r.left),sn(e.clientY-r.top));}
+function onDown(e){if(tool==='house'){const r=canvas.getBoundingClientRect();dragS={x:sn(e.clientX-r.left),y:sn(e.clientY-r.top)};}}
+function onUp(e){
+    if(tool==='house'&&dragS){const r=canvas.getBoundingClientRect();const ex=sn(e.clientX-r.left),ey=sn(e.clientY-r.top);
+        const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
+        if(w>=GCS&&h>=GCS){su();const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h,label:lb});redraw();asd();}
+        dragS=null;}
 }
-
-function onCanvasDown(e){
-    if(currentTool==='house'){
-        const r=canvas.getBoundingClientRect();
-        dragStart={x:snap(e.clientX-r.left), y:snap(e.clientY-r.top)};
-    }
-}
-
-function onCanvasUp(e){
-    if(currentTool==='house' && dragStart){
-        const r=canvas.getBoundingClientRect();
-        const ex=snap(e.clientX-r.left), ey=snap(e.clientY-r.top);
-        const w=Math.abs(ex-dragStart.x), h=Math.abs(ey-dragStart.y);
-        if(w>=gridCellSize && h>=gridCellSize){
-            saveUndo();
-            const lbl=prompt('Label this structure (e.g., House, Garage, Shed):')||'House';
-            drawingObjects.push({type:'house', x:Math.min(dragStart.x,ex), y:Math.min(dragStart.y,ey), w, h, label:lbl});
-            redraw(); autoSaveDrawing();
-        }
-        dragStart=null;
-    }
-}
-
-function onCanvasMove(e){
-    const r=canvas.getBoundingClientRect();
-    const mx=e.clientX-r.left, my=e.clientY-r.top;
-    const sx=snap(mx), sy=snap(my);
-    
+function onMove(e){
+    const r=canvas.getBoundingClientRect();const mx=e.clientX-r.left,my=e.clientY-r.top;const sx=sn(mx),sy=sn(my);
     redraw();
-    
-    // Show ghost for current tool
-    if(currentTool==='fence' && currentFencePoints.length>0){
-        const last=currentFencePoints[currentFencePoints.length-1];
-        ctx.beginPath(); ctx.moveTo(last.x,last.y); ctx.lineTo(sx,sy);
-        ctx.strokeStyle='rgba(212,175,55,0.5)'; ctx.lineWidth=2; ctx.setLineDash([5,5]); ctx.stroke(); ctx.setLineDash([]);
-        const d=ftDist(last,{x:sx,y:sy});
-        if(d>0){ctx.font='bold 12px sans-serif';ctx.fillStyle='#d4af37';ctx.fillText(d+'ft',(last.x+sx)/2+5,(last.y+sy)/2-8);}
-        drawSnapPoint(sx,sy,'rgba(212,175,55,0.5)');
+    if(tool==='fence'&&cfp.length>0){
+        const l=cfp[cfp.length-1];ctx.beginPath();ctx.moveTo(l.x,l.y);ctx.lineTo(sx,sy);
+        ctx.strokeStyle='rgba(212,175,55,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
+        const d=fd(l,{x:sx,y:sy});if(d>0){ctx.font='bold 12px sans-serif';ctx.fillStyle='#d4af37';ctx.fillText(d+'ft',(l.x+sx)/2+5,(l.y+sy)/2-8);}
+        drawSP(sx,sy,'rgba(212,175,55,0.5)');
     }
-    if(currentTool==='house' && dragStart){
-        const w=Math.abs(sx-dragStart.x), h=Math.abs(sy-dragStart.y);
-        ctx.fillStyle='rgba(100,130,180,0.3)'; ctx.strokeStyle='#4682B4'; ctx.lineWidth=2;
-        ctx.fillRect(Math.min(dragStart.x,sx),Math.min(dragStart.y,sy),w,h);
-        ctx.strokeRect(Math.min(dragStart.x,sx),Math.min(dragStart.y,sy),w,h);
-        const fw=Math.round(w/gridCellSize*gridScale), fh=Math.round(h/gridCellSize*gridScale);
-        ctx.font='11px sans-serif';ctx.fillStyle='#4682B4';ctx.fillText(fw+'×'+fh+'ft',Math.min(dragStart.x,sx)+4,Math.min(dragStart.y,sy)-4);
-    }
-    if(currentTool==='gate-walk'||currentTool==='gate-drive'){drawSnapPoint(sx,sy,'rgba(16,185,129,0.5)');}
-    if(currentTool==='tree'){
-        ctx.beginPath();ctx.arc(sx,sy,gridCellSize*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();
-    }
-    if(currentTool==='erase'){
-        const obj=findObjectAt(mx,my);
-        if(obj){canvas.style.cursor='pointer';}else{canvas.style.cursor='crosshair';}
-    }
+    if(tool==='house'&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillStyle='rgba(100,130,180,0.3)';ctx.strokeStyle='#4682B4';ctx.lineWidth=2;
+        ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);ctx.strokeRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);
+        const fw=Math.round(w/GCS*GS),fh=Math.round(h/GCS*GS);ctx.font='11px sans-serif';ctx.fillStyle='#4682B4';ctx.fillText(fw+'×'+fh+'ft',Math.min(dragS.x,sx)+4,Math.min(dragS.y,sy)-4);}
+    if(tool==='gate-walk'||tool==='gate-drive')drawSP(sx,sy,'rgba(16,185,129,0.5)');
+    if(tool==='tree'){ctx.beginPath();ctx.arc(sx,sy,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();}
+    if(tool==='erase')canvas.style.cursor=findAt(mx,my)?'pointer':'crosshair';
 }
 
-function onCanvasDblClick(e){
-    if(currentTool==='fence' && currentFencePoints.length>=2){
-        finishCurrentFence();
-    }
+function finFence(){
+    if(cfp.length>=2){su();const segs=[];for(let i=0;i<cfp.length-1;i++)segs.push({dist:fd(cfp[i],cfp[i+1])});
+        objs.push({type:'fence',points:[...cfp],fenceType:{...selFence},segments:segs});updateQ();asd();}
+    cfp=[];redraw();
 }
 
-function finishCurrentFence(){
-    if(currentFencePoints.length>=2){
-        saveUndo();
-        const segs=[];
-        for(let i=0;i<currentFencePoints.length-1;i++){
-            segs.push({dist:ftDist(currentFencePoints[i],currentFencePoints[i+1])});
-        }
-        drawingObjects.push({
-            type:'fence', points:[...currentFencePoints], 
-            fenceType:{...selectedFenceType}, segments:segs
-        });
-        updateQuote(); autoSaveDrawing();
-    }
-    currentFencePoints=[];
-    redraw();
-}
-
-function findObjectAt(mx,my){
-    // Check in reverse order (top-most first)
-    for(let i=drawingObjects.length-1;i>=0;i--){
-        const o=drawingObjects[i];
-        if(o.type==='fence'){
-            for(let j=0;j<o.points.length-1;j++){
-                if(distToSegment(mx,my,o.points[j],o.points[j+1])<10) return o;
-            }
-        }
-        if(o.type==='gate-walk'||o.type==='gate-drive'){if(dist({x:mx,y:my},o)<gridCellSize)return o;}
-        if(o.type==='tree'){if(dist({x:mx,y:my},o)<gridCellSize)return o;}
+function findAt(mx,my){
+    for(let i=objs.length-1;i>=0;i--){const o=objs[i];
+        if(o.type==='fence'){for(let j=0;j<o.points.length-1;j++){if(dts(mx,my,o.points[j],o.points[j+1])<10)return o;}}
+        if(o.type==='gate-walk'||o.type==='gate-drive'){if(di({x:mx,y:my},o)<GCS)return o;}
+        if(o.type==='tree'){if(di({x:mx,y:my},o)<GCS)return o;}
         if(o.type==='house'){if(mx>=o.x&&mx<=o.x+o.w&&my>=o.y&&my<=o.y+o.h)return o;}
         if(o.type==='text'){if(mx>=o.x-5&&mx<=o.x+100&&my>=o.y-15&&my<=o.y+5)return o;}
-    }
-    return null;
+    }return null;
 }
+function dts(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;if(l2===0)return di({x:px,y:py},a);let t=((px-a.x)*dx+(py-a.y)*dy)/l2;t=Math.max(0,Math.min(1,t));return di({x:px,y:py},{x:a.x+t*dx,y:a.y+t*dy});}
 
-function distToSegment(px,py,a,b){
-    const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
-    if(len2===0)return dist({x:px,y:py},a);
-    let t=((px-a.x)*dx+(py-a.y)*dy)/len2;
-    t=Math.max(0,Math.min(1,t));
-    return dist({x:px,y:py},{x:a.x+t*dx,y:a.y+t*dy});
-}
+/* ======== RENDER ======== */
+function drawGrid(){ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.strokeStyle='#e8ecf0';ctx.lineWidth=0.5;
+    for(let x=0;x<=canvas.width;x+=GCS){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
+    for(let y=0;y<=canvas.height;y+=GCS){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
+    ctx.font='10px sans-serif';ctx.fillStyle='#b0b8c4';ctx.fillText('1 sq = '+GS+' ft',4,canvas.height-4);}
+function drawSP(x,y,c){ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
 
-// ===== DRAWING =====
-function drawGrid(){
-    ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.strokeStyle='#e8ecf0';ctx.lineWidth=0.5;
-    for(let x=0;x<=canvas.width;x+=gridCellSize){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke();}
-    for(let y=0;y<=canvas.height;y+=gridCellSize){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke();}
-    ctx.font='10px sans-serif';ctx.fillStyle='#b0b8c4';ctx.fillText('1 sq = '+gridScale+' ft',4,canvas.height-4);
-}
-
-function drawSnapPoint(x,y,color){
-    ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
-}
-
-function redraw(){
-    if(!ctx)return;
-    drawGrid();
-    
-    // Draw all objects
-    drawingObjects.forEach(o=>{
-        if(o.type==='house') drawHouse(o);
+function redraw(){if(!ctx)return;drawGrid();
+    objs.forEach(o=>{if(o.type==='house')drawHouse(o);});
+    objs.forEach(o=>{if(o.type==='fence')drawFL(o);});
+    objs.forEach(o=>{
+        if(o.type==='gate-walk')drawG(o,'Walk Gate','#10b981');
+        if(o.type==='gate-drive')drawG(o,'Drive Gate','#3b82f6');
+        if(o.type==='tree')drawTr(o);
+        if(o.type==='text')drawTx(o);
     });
-    drawingObjects.forEach(o=>{
-        if(o.type==='fence') drawFenceLine(o);
-    });
-    drawingObjects.forEach(o=>{
-        if(o.type==='gate-walk') drawGate(o,'Walk Gate','#10b981');
-        if(o.type==='gate-drive') drawGate(o,'Drive Gate','#3b82f6');
-        if(o.type==='tree') drawTree(o);
-        if(o.type==='text') drawText(o);
-    });
-    
-    // Draw current fence being drawn
-    if(currentFencePoints.length>0){
-        ctx.beginPath();ctx.moveTo(currentFencePoints[0].x,currentFencePoints[0].y);
-        for(let i=1;i<currentFencePoints.length;i++) ctx.lineTo(currentFencePoints[i].x,currentFencePoints[i].y);
-        ctx.strokeStyle=selectedFenceType?.color||'#d4af37';ctx.lineWidth=4;ctx.stroke();
-        currentFencePoints.forEach((p,i)=>{
-            drawSnapPoint(p.x,p.y,i===0?'#10b981':selectedFenceType?.color||'#d4af37');
-        });
-        // Show segment distances
-        for(let i=0;i<currentFencePoints.length-1;i++){
-            const a=currentFencePoints[i],b=currentFencePoints[i+1];
-            const d=ftDist(a,b);
-            ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';
-            ctx.fillText(d+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);
-        }
+    if(cfp.length>0){ctx.beginPath();ctx.moveTo(cfp[0].x,cfp[0].y);for(let i=1;i<cfp.length;i++)ctx.lineTo(cfp[i].x,cfp[i].y);
+        ctx.strokeStyle=selFence?.color||'#d4af37';ctx.lineWidth=4;ctx.stroke();
+        cfp.forEach((p,i)=>drawSP(p.x,p.y,i===0?'#10b981':selFence?.color||'#d4af37'));
+        for(let i=0;i<cfp.length-1;i++){const a=cfp[i],b=cfp[i+1];ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';ctx.fillText(fd(a,b)+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);}
     }
 }
 
-function drawFenceLine(o){
-    if(o.points.length<2)return;
-    ctx.beginPath();ctx.moveTo(o.points[0].x,o.points[0].y);
-    for(let i=1;i<o.points.length;i++) ctx.lineTo(o.points[i].x,o.points[i].y);
-    ctx.strokeStyle=o.fenceType.color;ctx.lineWidth=4;ctx.stroke();
-    // Dashes for certain types
+function drawFL(o){if(o.points.length<2)return;ctx.beginPath();ctx.moveTo(o.points[0].x,o.points[0].y);
+    for(let i=1;i<o.points.length;i++)ctx.lineTo(o.points[i].x,o.points[i].y);ctx.strokeStyle=o.fenceType.color;ctx.lineWidth=4;ctx.stroke();
     if(o.fenceType.name.includes('Chain')){ctx.setLineDash([6,4]);ctx.strokeStyle='rgba(255,255,255,0.4)';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);}
-    // Points
-    o.points.forEach(p=>{drawSnapPoint(p.x,p.y,o.fenceType.color);});
-    // Distances
-    for(let i=0;i<o.points.length-1;i++){
-        const a=o.points[i],b=o.points[i+1];
-        ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';
-        ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);
-    }
-    // Type label on first segment
-    const mid={x:(o.points[0].x+o.points[1].x)/2, y:(o.points[0].y+o.points[1].y)/2};
-    ctx.font='9px sans-serif';ctx.fillStyle='rgba(30,58,95,0.7)';ctx.fillText(o.fenceType.name,mid.x+4,mid.y+14);
-}
+    o.points.forEach(p=>drawSP(p.x,p.y,o.fenceType.color));
+    for(let i=0;i<o.points.length-1;i++){const a=o.points[i],b=o.points[i+1];ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);}
+    const m={x:(o.points[0].x+o.points[1].x)/2,y:(o.points[0].y+o.points[1].y)/2};ctx.font='9px sans-serif';ctx.fillStyle='rgba(30,58,95,0.7)';ctx.fillText(o.fenceType.name,m.x+4,m.y+14);}
 
-function drawGate(o,label,color){
-    ctx.beginPath();ctx.arc(o.x,o.y,gridCellSize*0.6,0,Math.PI*2);
-    ctx.fillStyle=color+'33';ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
-    ctx.font='bold 9px sans-serif';ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(label,o.x,o.y+gridCellSize+8);ctx.textAlign='left';
-}
+function drawG(o,label,color){ctx.beginPath();ctx.arc(o.x,o.y,GCS*0.6,0,Math.PI*2);ctx.fillStyle=color+'33';ctx.fill();ctx.strokeStyle=color;ctx.lineWidth=2;ctx.stroke();
+    ctx.font='bold 9px sans-serif';ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(label,o.x,o.y+GCS+8);ctx.textAlign='left';}
 
-function drawTree(o){
-    ctx.beginPath();ctx.arc(o.x,o.y,gridCellSize*0.8,0,Math.PI*2);
-    ctx.fillStyle='rgba(34,139,34,0.35)';ctx.fill();ctx.strokeStyle='#228B22';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.beginPath();ctx.arc(o.x,o.y,3,0,Math.PI*2);ctx.fillStyle='#5C4033';ctx.fill();
-}
+function drawTr(o){ctx.beginPath();ctx.arc(o.x,o.y,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.35)';ctx.fill();ctx.strokeStyle='#228B22';ctx.lineWidth=1.5;ctx.stroke();
+    ctx.beginPath();ctx.arc(o.x,o.y,3,0,Math.PI*2);ctx.fillStyle='#5C4033';ctx.fill();}
 
-function drawHouse(o){
-    ctx.fillStyle='rgba(70,100,140,0.15)';ctx.fillRect(o.x,o.y,o.w,o.h);
-    ctx.strokeStyle='#4682B4';ctx.lineWidth=2;ctx.strokeRect(o.x,o.y,o.w,o.h);
-    // Diagonal lines
-    ctx.strokeStyle='rgba(70,130,180,0.2)';ctx.lineWidth=1;
-    for(let d=-o.h;d<o.w;d+=gridCellSize){
-        ctx.beginPath();ctx.moveTo(Math.max(o.x,o.x+d),d<0?o.y-d+o.y:o.y);
-        ctx.lineTo(Math.min(o.x+o.w,o.x+d+o.h),d+o.h<o.w?o.y+o.h:o.y+o.w-d);ctx.stroke();
-    }
-    ctx.font='bold 11px sans-serif';ctx.fillStyle='#4682B4';ctx.textAlign='center';
-    ctx.fillText(o.label||'House',o.x+o.w/2,o.y+o.h/2+4);ctx.textAlign='left';
-    const fw=Math.round(o.w/gridCellSize*gridScale), fh=Math.round(o.h/gridCellSize*gridScale);
-    ctx.font='9px sans-serif';ctx.fillStyle='rgba(70,130,180,0.6)';
-    ctx.fillText(fw+'×'+fh+'ft',o.x+4,o.y+14);
-}
+function drawHouse(o){ctx.fillStyle='rgba(70,100,140,0.15)';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.strokeStyle='#4682B4';ctx.lineWidth=2;ctx.strokeRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='rgba(70,130,180,0.2)';ctx.lineWidth=1;for(let d=-o.h;d<o.w;d+=GCS){ctx.beginPath();ctx.moveTo(Math.max(o.x,o.x+d),d<0?o.y-d+o.y:o.y);ctx.lineTo(Math.min(o.x+o.w,o.x+d+o.h),d+o.h<o.w?o.y+o.h:o.y+o.w-d);ctx.stroke();}
+    ctx.font='bold 11px sans-serif';ctx.fillStyle='#4682B4';ctx.textAlign='center';ctx.fillText(o.label||'House',o.x+o.w/2,o.y+o.h/2+4);ctx.textAlign='left';
+    const fw=Math.round(o.w/GCS*GS),fh=Math.round(o.h/GCS*GS);ctx.font='9px sans-serif';ctx.fillStyle='rgba(70,130,180,0.6)';ctx.fillText(fw+'×'+fh+'ft',o.x+4,o.y+14);}
 
-function drawText(o){
-    ctx.font='bold 12px sans-serif';ctx.fillStyle='#6b21a8';ctx.fillText(o.text,o.x,o.y);
-    ctx.beginPath();ctx.arc(o.x-4,o.y-4,2,0,Math.PI*2);ctx.fillStyle='#6b21a8';ctx.fill();
-}
+function drawTx(o){ctx.font='bold 12px sans-serif';ctx.fillStyle='#6b21a8';ctx.fillText(o.text,o.x,o.y);ctx.beginPath();ctx.arc(o.x-4,o.y-4,2,0,Math.PI*2);ctx.fillStyle='#6b21a8';ctx.fill();}
 
-// ===== TEXT MODAL =====
-let pendingTextPos=null;
-function openTextModal(x,y){
-    pendingTextPos={x,y};
-    $('text-modal').style.display='flex';
-    $('text-modal-input').value='';
-    $('text-modal-input').focus();
-}
-$('text-modal-cancel').addEventListener('click',()=>{$('text-modal').style.display='none';pendingTextPos=null;});
-$('text-modal-ok').addEventListener('click',()=>{
-    const txt=$('text-modal-input').value.trim();
-    if(txt&&pendingTextPos){saveUndo();drawingObjects.push({type:'text',x:pendingTextPos.x,y:pendingTextPos.y,text:txt});redraw();autoSaveDrawing();}
-    $('text-modal').style.display='none';pendingTextPos=null;
-});
+/* ======== TEXT MODAL ======== */
+let tPos=null;
+function openTM(x,y){tPos={x,y};$('text-modal').style.display='flex';$('text-modal-input').value='';$('text-modal-input').focus();}
+$('text-modal-cancel').addEventListener('click',()=>{$('text-modal').style.display='none';tPos=null;});
+$('text-modal-ok').addEventListener('click',()=>{const t=$('text-modal-input').value.trim();if(t&&tPos){su();objs.push({type:'text',x:tPos.x,y:tPos.y,text:t});redraw();asd();}$('text-modal').style.display='none';tPos=null;});
 $('text-modal-input').addEventListener('keypress',e=>{if(e.key==='Enter')$('text-modal-ok').click();});
 
-// ===== UNDO =====
-function saveUndo(){undoStack.push(JSON.stringify(drawingObjects));}
-$('grid-undo').addEventListener('click',()=>{
-    if(currentFencePoints.length>0){currentFencePoints.pop();redraw();return;}
-    if(undoStack.length){drawingObjects=JSON.parse(undoStack.pop());redraw();updateQuote();autoSaveDrawing();}
-});
-$('grid-clear').addEventListener('click',()=>{
-    if(!confirm('Clear entire drawing?'))return;
-    saveUndo();drawingObjects=[];currentFencePoints=[];redraw();updateQuote();autoSaveDrawing();
-});
+/* ======== UNDO ======== */
+function su(){undo.push(JSON.stringify(objs));}
+$('grid-undo').addEventListener('click',()=>{if(cfp.length>0){cfp.pop();redraw();return;}if(undo.length){objs=JSON.parse(undo.pop());redraw();updateQ();asd();}});
+$('grid-clear').addEventListener('click',()=>{if(!confirm('Clear entire drawing?'))return;su();objs=[];cfp=[];redraw();updateQ();asd();});
 
-// ===== QUOTE CALCULATION =====
-function updateQuote(){
-    const fences={}, gates={walk:0,drive:0};
-    let totalFt=0;
-    drawingObjects.forEach(o=>{
-        if(o.type==='fence'){
-            const ft=o.segments.reduce((s,seg)=>s+seg.dist,0);
-            const key=o.fenceType.name;
-            if(!fences[key])fences[key]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};
-            fences[key].ft+=ft;
-            totalFt+=ft;
-        }
-        if(o.type==='gate-walk') gates.walk++;
-        if(o.type==='gate-drive') gates.drive++;
-    });
-    
-    const manualFt=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;
-    if(manualFt>0) totalFt=manualFt;
-    
-    if(totalFt<10&&Object.keys(fences).length===0){
-        $('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';
-        $('drawing-legend').style.display='none';
-        return;
-    }
+/* ======== QUOTE CALC ======== */
+function updateQ(){
+    const fences={},gates={walk:0,drive:0};let totalFt=0;
+    objs.forEach(o=>{if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
+        if(o.type==='gate-walk')gates.walk++;if(o.type==='gate-drive')gates.drive++;});
+    const mf=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;if(mf>0)totalFt=mf;
+    if(totalFt<10&&!Object.keys(fences).length){$('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';$('drawing-legend').style.display='none';return;}
     $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';
-    
-    // Fence breakdown
-    const hm=heightMult[$('fence-height').value];
-    const rem=$('remove-old').checked;
-    let grandTotal=0;
-    let breakdownHTML='';
-    
-    if(Object.keys(fences).length>0){
-        for(const[name,f]of Object.entries(fences)){
-            const cost=f.ft*f.ppf*hm;
-            grandTotal+=cost;
-            breakdownHTML+=`<div class="summary-line"><span><span class="swatch" style="background:${f.color}"></span>${name}</span><span>${f.ft} ft</span></div>`;
-        }
-    }else if(manualFt>0 && selectedFenceType){
-        grandTotal=manualFt*selectedFenceType.ppf*hm;
-        breakdownHTML=`<div class="summary-line"><span><span class="swatch" style="background:${selectedFenceType.color}"></span>${selectedFenceType.name}</span><span>${manualFt} ft</span></div>`;
-    }
-    $('fence-breakdown').innerHTML=breakdownHTML;
-    
-    // Gates
-    let gateHTML='';
-    if(gates.walk>0){
-        const firstFence=Object.values(fences)[0]||selectedFenceType||pricingData[0];
-        const cost=gates.walk*(firstFence.sg||350);
-        grandTotal+=cost;
-        gateHTML+=`<div class="summary-line"><span>🚪 Walk Gates ×${gates.walk}</span><span>$${cost.toLocaleString()}</span></div>`;
-    }
-    if(gates.drive>0){
-        const firstFence=Object.values(fences)[0]||selectedFenceType||pricingData[0];
-        const cost=gates.drive*(firstFence.dg||650);
-        grandTotal+=cost;
-        gateHTML+=`<div class="summary-line"><span>🚗 Drive Gates ×${gates.drive}</span><span>$${cost.toLocaleString()}</span></div>`;
-    }
-    $('gate-breakdown').innerHTML=gateHTML;
-    
-    // Removal
-    if(rem && totalFt>0){
-        const remCost=totalFt*4;
-        grandTotal+=remCost;
-        $('preview-removal-line').style.display='flex';
-        $('removal-cost').textContent='+$'+remCost.toLocaleString();
-    }else{$('preview-removal-line').style.display='none';}
-    
+    const hm=HM[$('fence-height').value];const rem=$('remove-old').checked;let gt=0,bh='';
+    if(Object.keys(fences).length>0){for(const[n,f]of Object.entries(fences)){gt+=f.ft*f.ppf*hm;bh+=`<div class="summary-line"><span><span class="swatch" style="background:${f.color}"></span>${n}</span><span>${f.ft} ft</span></div>`;}}
+    else if(mf>0&&selFence){gt=mf*selFence.ppf*hm;bh=`<div class="summary-line"><span><span class="swatch" style="background:${selFence.color}"></span>${selFence.name}</span><span>${mf} ft</span></div>`;}
+    $('fence-breakdown').innerHTML=bh;
+    let gh='';
+    if(gates.walk>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.walk*(ff.sg||350);gt+=c;gh+=`<div class="summary-line"><span>🚪 Walk Gates ×${gates.walk}</span><span>$${c.toLocaleString()}</span></div>`;}
+    if(gates.drive>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.drive*(ff.dg||650);gt+=c;gh+=`<div class="summary-line"><span>🚗 Drive Gates ×${gates.drive}</span><span>$${c.toLocaleString()}</span></div>`;}
+    $('gate-breakdown').innerHTML=gh;
+    if(rem&&totalFt>0){const rc=totalFt*4;gt+=rc;$('preview-removal-line').style.display='flex';$('removal-cost').textContent='+$'+rc.toLocaleString();}else $('preview-removal-line').style.display='none';
     $('total-feet').innerHTML='<strong>'+totalFt+' ft</strong>';
-    
-    const lo=Math.round(grandTotal*0.85), hi=Math.round(grandTotal*1.15);
-    $('range-low').textContent='$'+lo.toLocaleString();
-    $('range-high').textContent='$'+hi.toLocaleString();
-    
+    const lo=Math.round(gt*0.85),hi=Math.round(gt*1.15);
+    $('range-low').textContent='$'+lo.toLocaleString();$('range-high').textContent='$'+hi.toLocaleString();
     leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:rem};
-    
-    // Legend
-    updateLegend(fences,gates);
+    updateLeg(fences,gates);
+    if(lo>0&&leadData.name){clearTimeout(window._qst);window._qst=setTimeout(()=>submitLead(leadData,'Ballpark: '+Object.keys(fences).join(', ')+', '+totalFt+'ft, $'+lo+'-$'+hi),3000);}
 }
 
-function updateLegend(fences,gates){
-    const leg=$('drawing-legend');
-    const items=$('legend-items');
-    const objs=drawingObjects;
-    const hasStuff=objs.length>0;
-    leg.style.display=hasStuff?'block':'none';
-    if(!hasStuff)return;
-    let html='';
-    for(const[name,f]of Object.entries(fences)){
-        html+=`<div class="legend-row"><span class="swatch" style="background:${f.color}"></span><span>${name}: ${f.ft}ft</span></div>`;
-    }
-    if(gates.walk>0) html+=`<div class="legend-row">🚪 Walk Gates: ${gates.walk}</div>`;
-    if(gates.drive>0) html+=`<div class="legend-row">🚗 Drive Gates: ${gates.drive}</div>`;
-    const houses=objs.filter(o=>o.type==='house');
-    houses.forEach(h=>{html+=`<div class="legend-row">🏠 ${h.label}</div>`;});
-    const trees=objs.filter(o=>o.type==='tree').length;
-    if(trees) html+=`<div class="legend-row">🌳 Trees: ${trees}</div>`;
-    items.innerHTML=html;
-}
+function updateLeg(fences,gates){const leg=$('drawing-legend'),items=$('legend-items');const has=objs.length>0;leg.style.display=has?'block':'none';if(!has)return;
+    let h='';for(const[n,f]of Object.entries(fences))h+=`<div class="legend-row"><span class="swatch" style="background:${f.color}"></span><span>${n}: ${f.ft}ft</span></div>`;
+    if(gates.walk>0)h+=`<div class="legend-row">🚪 Walk Gates: ${gates.walk}</div>`;
+    if(gates.drive>0)h+=`<div class="legend-row">🚗 Drive Gates: ${gates.drive}</div>`;
+    objs.filter(o=>o.type==='house').forEach(x=>{h+=`<div class="legend-row">🏠 ${x.label}</div>`;});
+    const tr=objs.filter(o=>o.type==='tree').length;if(tr)h+=`<div class="legend-row">🌳 Trees: ${tr}</div>`;
+    items.innerHTML=h;}
 
-// ===== SAVE DRAWING TO FIRESTORE =====
-let saveTimeout=null;
-function autoSaveDrawing(){
-    clearTimeout(saveTimeout);
-    saveTimeout=setTimeout(()=>saveDrawingToFirestore(),2000);
-}
+/* ======== SAVE DRAWING ======== */
+let svT=null;function asd(){clearTimeout(svT);svT=setTimeout(()=>saveDraw(),2000);}
+async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>o.type==='fence'?{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments}:{...o});
+    const img=canvas.toDataURL('image/png',0.7);await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
 
-async function saveDrawingToFirestore(){
-    if(!db||!leadDocId) return;
-    try{
-        // Serialize drawing objects (strip functions, keep data)
-        const drawingData=drawingObjects.map(o=>{
-            if(o.type==='fence') return{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments};
-            return{...o};
-        });
-        // Save canvas as image too
-        const imageData=canvas.toDataURL('image/png',0.7);
-        
-        await db.collection('jobs').doc(leadDocId).update({
-            drawing: JSON.stringify(drawingData),
-            drawingImage: imageData,
-            drawingUpdatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        console.log('[Drawing] Saved to Firestore');
-    }catch(e){console.warn('[Drawing] Save error:',e.message);}
-}
-
-// ===== LEAD SUBMISSION =====
+/* ======== LEAD SUBMIT ======== */
 async function submitLead(d,notes){
-    try{
-        const f=new FormData();f.append('form-name','ballpark-leads');
-        f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');
-        f.append('address',d.address||'');f.append('notes',notes||'');
-        await fetch('/__forms.html',{method:'POST',body:f});
-    }catch(e){}
-    try{
-        const res=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
-            type:'lead',name:d.name,phone:d.phone,email:d.email,address:d.address,
-            fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):'',
-            fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',
-            singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,
-            estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,
-            estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',
-            notes:notes||'',website:$('hp-website')?.value||''
-        })});
-        const result=await res.json();
-        // Try to get the doc ID for drawing saves
-        if(result.success&&result.id) leadDocId=result.id;
-    }catch(e){}
-    // Also try direct Firestore save to get doc ID
-    if(!leadDocId&&db){
-        try{
-            const ref=await db.collection('jobs').add({
-                cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,
-                status:'Lead',source:'website-ballpark',
-                notes:notes+'\n[Website lead — '+new Date().toLocaleDateString()+']',
-                createdAt:firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
-                websiteLead:true
-            });
-            leadDocId=ref.id;
-            console.log('[Lead] Saved directly to Firestore, ID:',leadDocId);
-        }catch(e){console.warn('[Lead] Direct save error:',e);}
-    }
+    try{const f=new FormData();f.append('form-name','ballpark-leads');f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');f.append('address',d.address||'');f.append('notes',notes||'');await fetch('/__forms.html',{method:'POST',body:f});}catch(e){}
+    try{const r=await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'lead',name:d.name,phone:d.phone,email:d.email,address:d.address,fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):'',fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',website:$('hp-website')?.value||''})});
+        const res=await r.json();if(res.success&&res.id)leadDocId=res.id;}catch(e){}
+    if(!leadDocId&&db){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'website-ballpark',notes:notes+'\n[Website — '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),websiteLead:true});leadDocId=ref.id;}catch(e){}}
 }
 
-// ===== STEP 1: UNLOCK =====
-function checkReady(){$('unlock-tool-btn').disabled=!($('lead-name').value.trim()&&$('lead-phone').value.trim()&&$('lead-address').value.trim());}
-['lead-name','lead-phone','lead-email','lead-address'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',checkReady);});
+/* ======== STEP 1 UNLOCK ======== */
+function checkR(){$('unlock-tool-btn').disabled=!($('lead-name').value.trim()&&$('lead-phone').value.trim()&&$('lead-address').value.trim());}
+['lead-name','lead-phone','lead-email','lead-address'].forEach(id=>{const el=$(id);if(el)el.addEventListener('input',checkR);});
 
 $('unlock-tool-btn').addEventListener('click',async()=>{
     const name=$('lead-name').value.trim(),phone=$('lead-phone').value.trim(),email=$('lead-email').value.trim(),address=$('lead-address').value.trim();
     if(!name||!phone||!address)return;
     const btn=$('unlock-tool-btn');btn.disabled=true;btn.textContent='⏳ Unlocking...';
-    leadData={name,phone,email,address};
-    await submitLead(leadData,'Started property planner');
+    leadData={name,phone,email,address};await submitLead(leadData,'Started property planner');
     window._toolUnlocked=true;window._leadAddress=address;
     $('lead-wall-form').style.display='none';$('lead-wall-success').style.display='block';
     document.querySelectorAll('.locked-step').forEach(s=>s.classList.remove('locked-step'));
@@ -1067,39 +417,33 @@ $('unlock-tool-btn').addEventListener('click',async()=>{
     ['step-2-content','step-3-content'].forEach(id=>$(id).style.display='block');
     if($('address-input'))$('address-input').value=address;
     initCanvas();
-    if(!window._mapsUnavailable&&window._mapsApiKey){
-        const s=document.createElement('script');
-        s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
-        s.async=true;s.onerror=function(){window._mapsUnavailable=true;};
-        document.head.appendChild(s);
-    }
+    if(!window._mapsUnavailable&&window._mapsApiKey){const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';s.async=true;s.onerror=function(){window._mapsUnavailable=true;$('map-status-text').textContent='Satellite view unavailable';};document.head.appendChild(s);}
+    else{$('map-status-text').textContent='Satellite view not configured — use the drawing grid above';}
     $('step-2').scrollIntoView({behavior:'smooth',block:'start'});
 });
 
-// ===== MANUAL + OPTIONS =====
-if($('manual-feet'))$('manual-feet').addEventListener('input',updateQuote);
-document.querySelectorAll('.quick-ft').forEach(b=>b.addEventListener('click',()=>{$('manual-feet').value=b.dataset.ft;updateQuote();}));
-['fence-height'].forEach(id=>$(id).addEventListener('change',updateQuote));
-$('remove-old').addEventListener('change',updateQuote);
+/* ======== MANUAL + OPTIONS ======== */
+if($('manual-feet'))$('manual-feet').addEventListener('input',updateQ);
+document.querySelectorAll('.quick-ft').forEach(b=>b.addEventListener('click',()=>{$('manual-feet').value=b.dataset.ft;updateQ();}));
+$('fence-height').addEventListener('change',updateQ);
+$('remove-old').addEventListener('change',updateQ);
 
-// ===== MAP =====
-let map=null,drawingManager=null,polylines=[];
+/* ======== MAP ======== */
+let map=null;
 window.searchMapAddress=function(addr){
-    if(!addr)addr=$('address-input')?.value?.trim();
-    if(!addr||!window.google)return;
+    if(!addr)addr=$('address-input')?.value?.trim();if(!addr||!window.google)return;
+    $('map-status-text').textContent='🔍 Searching...';
     new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
-        if(s==='OK'&&r[0]){
-            const loc=r[0].geometry.location;
-            $('map-instructions').style.display='none';
-            map=new google.maps.Map($('map'),{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});
-        }else{$('map-status-text').textContent='Address not found.';}
+        if(s==='OK'&&r[0]){const loc=r[0].geometry.location;$('map-instructions').style.display='none';
+            map=new google.maps.Map($('map'),{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});}
+        else $('map-status-text').textContent='Address not found';
     });
 };
 if($('search-btn'))$('search-btn').addEventListener('click',()=>window.searchMapAddress());
 if($('address-input'))$('address-input').addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();window.searchMapAddress();}});
 
-// ===== INIT =====
 loadPricing();
+})();
 </script>
 
 <style>
@@ -1123,34 +467,33 @@ loadPricing();
     .form-disclaimer{font-size:0.8rem;color:#64748b;text-align:center;margin-top:12px}
     .success-banner{display:flex;gap:16px;align-items:flex-start;background:#ecfdf5;border:2px solid #10b981;border-radius:8px;padding:20px;color:#065f46;font-size:1.1rem}
     .success-banner strong{display:block;margin-bottom:4px}.success-banner span{font-size:0.95rem;color:#047857}
-
-    /* Drawing toolbar */
     .draw-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:12px;background:#f1f5f9;border-radius:10px 10px 0 0;border:2px solid #e2e8f0;border-bottom:none}
-    .tool-group{display:flex;gap:4px}
-    .tool-divider{width:1px;height:28px;background:#cbd5e1;margin:0 4px}
+    .tool-group{display:flex;gap:4px}.tool-divider{width:1px;height:28px;background:#cbd5e1;margin:0 4px}
     .draw-tool{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border:2px solid transparent;border-radius:8px;background:white;cursor:pointer;transition:all 0.15s;min-width:56px}
     .draw-tool:hover{border-color:var(--primary);background:#f0f4ff}
     .draw-tool.active{border-color:var(--primary);background:var(--primary);color:white}
     .draw-tool.active .tool-label{color:white}
     .tool-icon{font-size:1.1rem;line-height:1}.tool-label{font-size:0.65rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
-
-    /* Fence type bar */
     .fence-type-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:#fefce8;border:2px solid #e2e8f0;border-top:none;overflow-x:auto;flex-wrap:wrap}
     .ftb-label{font-size:0.8rem;color:#64748b;white-space:nowrap;font-weight:500}
     .ftb-options{display:flex;gap:4px;flex-wrap:wrap}
     .ftb-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border:1.5px solid #e2e8f0;border-radius:6px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500;transition:all 0.15s;white-space:nowrap}
     .ftb-btn:hover{border-color:var(--primary)}.ftb-btn.active{border-color:var(--accent);background:#fffbeb;font-weight:700}
     .ftb-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,0.15)}
-
-    /* Canvas */
     .grid-wrapper{border:2px solid #e2e8f0;border-top:none;overflow:hidden;cursor:crosshair;background:#f8fafc}
     .grid-wrapper canvas{display:block;width:100%}
     .grid-controls{display:flex;gap:12px;align-items:center;padding:10px 12px;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;flex-wrap:wrap}
-    .grid-legend{margin-left:auto;display:flex;gap:8px;font-size:0.8rem;color:#64748b}
+    .grid-legend{margin-left:auto;display:flex;gap:12px;font-size:0.8rem;color:#94a3b8}
     .toolbar-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:white;border:1.5px solid #e2e8f0;border-radius:6px;cursor:pointer;font-size:0.85rem;transition:all 0.15s}
     .toolbar-btn:hover{border-color:var(--primary)}
-
-    /* Manual fallback */
+    .map-section{margin-top:20px;border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc}
+    .map-header{padding:10px 12px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;font-size:0.9rem;font-weight:600;color:#475569}
+    .address-search{display:flex;gap:10px;padding:12px}
+    .address-search input{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95rem}
+    .address-search input:focus{border-color:var(--primary);outline:none}
+    #map-container{position:relative;height:300px;background:#1a1a2e}
+    #map{width:100%;height:100%}
+    .map-instructions{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);text-align:center;padding:20px;font-size:0.95rem}
     .manual-fallback{margin-top:16px;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
     .manual-fallback summary{padding:12px 16px;background:#f8fafc;cursor:pointer;font-size:0.95rem;font-weight:500;color:#475569}
     .manual-fallback summary:hover{background:#f1f5f9}
@@ -1163,23 +506,11 @@ loadPricing();
     .footage-helpers{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap}
     .quick-ft{padding:5px 12px;border:1px solid #e2e8f0;border-radius:20px;background:white;cursor:pointer;font-size:0.85rem;transition:all 0.15s}
     .quick-ft:hover{border-color:var(--accent);background:#fffbeb}
-
-    /* Map */
-    .address-search{display:flex;gap:10px;margin-bottom:12px}
-    .address-search input{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95rem}
-    .address-search input:focus{border-color:var(--primary);outline:none}
-    #map-container{position:relative;height:300px;background:#1a1a2e;border-radius:8px;overflow:hidden}
-    #map{width:100%;height:100%}
-    .map-instructions{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);text-align:center;padding:20px}
-
-    /* Options */
     .options-grid{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
     .option-group label{display:block;margin-bottom:6px;font-weight:500;font-size:0.95rem}
     .option-group select{padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;background:white;cursor:pointer}
     .checkbox-group{display:flex;align-items:center}.checkbox-label{display:flex;align-items:center;gap:10px;cursor:pointer}
     .checkbox-label input{width:18px;height:18px;cursor:pointer}
-
-    /* Sidebar */
     .calculator-sidebar{position:sticky;top:100px}
     .quote-summary{background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
     .quote-summary h3{margin:0 0 16px;font-size:1.2rem}
@@ -1197,22 +528,15 @@ loadPricing();
     .btn-block{width:100%;text-align:center}
     .btn-outline{background:white;border:2px solid var(--primary,#1e3a5f);color:var(--primary);padding:10px 16px;border-radius:8px;font-weight:600;text-decoration:none;display:block;transition:all 0.15s}
     .btn-outline:hover{background:var(--primary);color:white}
-
-    /* Drawing legend */
     .drawing-legend{background:white;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);margin-top:16px}
     .drawing-legend h4{margin:0 0 12px;font-size:1rem}
     .legend-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;color:#475569}
-
-    /* Text modal */
+    .trust-badges{display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap}
+    .trust-badges .badge{font-size:0.85rem;color:#64748b}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
     .modal-box{background:white;border-radius:12px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
     .modal-box h3{margin:0 0 16px}.modal-box input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
     .modal-box input:focus{border-color:var(--primary);outline:none}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-
-    @media(max-width:600px){
-        .draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}
-        .fence-type-bar{padding:6px 8px}.ftb-btn{font-size:0.7rem;padding:4px 7px}
-        .tool-divider{height:24px}
-    }
+    @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.fence-type-bar{padding:6px 8px}.ftb-btn{font-size:0.7rem;padding:4px 7px}.tool-divider{height:24px}.grid-legend{display:none}}
 </style>
