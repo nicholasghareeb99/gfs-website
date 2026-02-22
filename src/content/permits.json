@@ -1,6 +1,6 @@
 {
-  "disclaimer": "Permit requirements change frequently. This information is provided as a general guide only. Always verify requirements with your local building department before starting any fence project. Ghareeb Fencing Solutions handles all permit applications as part of our service.",
-  "lastUpdated": "2024-12-15",
+  "disclaimer": "Permit requirements change frequently. This information is provided as a general guide only. Always verify current requirements with your local building/zoning department before starting any fence project. Ghareeb Fencing Solutions handles all permit research and applications as part of our installation service.",
+  "lastUpdated": "2026-02-16",
   "defaultNote": "Contact your local building department to verify current requirements before starting your fence project.",
   "municipalities": [
     {
@@ -10,88 +10,28 @@
       "state": "OH",
       "permitRequired": true,
       "permitType": "Certificate of Zoning Compliance",
-      "permitFee": "$50.00",
-      "applicationProcess": "Apply online through the City of Toledo Building Inspection Division or in person at One Government Center",
+      "permitFee": "$50",
+      "applicationProcess": "Apply online at toledo.oh.gov or in person at One Government Center",
       "heightRestrictions": {
-        "frontYard": "3.5 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
-        "cornerLot": "Sight triangle rules apply - reduced height near intersections"
+        "frontYard": "3.5 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
+        "cornerLot": "Sight triangle \u2014 reduced height near intersections. Corner lots have two front yards."
       },
-      "setbackRequirements": "Fences must be placed on or behind property lines. Survey may be required.",
-      "materialRestrictions": "Barbed wire and electrified fences prohibited in residential zones. Chain link must have closed loops facing inward.",
-      "additionalNotes": "Corner lots have special visibility requirements at intersections. Swimming pool fences have additional requirements.",
+      "setbackRequirements": "Fences on or behind property lines. No part of fence in public right-of-way. Survey recommended.",
+      "materialRestrictions": "No barbed wire or electrified fences in residential zones. No used/discarded materials (pallets, doors, tires, corrugated metal). Finished side must face adjacent property. Posts must be treated lumber.",
+      "additionalNotes": "ALL fences require Certificate of Zoning Compliance regardless of height. Repairs under 100 sq ft matching existing material are exempt. Fences under 6 ft do NOT need a building permit, only the zoning certificate.",
       "processingTime": "Several business days",
       "contactInfo": {
         "department": "Building Inspection Division",
         "address": "One Government Center, Suite 1600, Toledo, OH 43604",
         "phone": "(419) 245-1220",
         "website": "https://toledo.oh.gov/certificate-of-zoning-compliance",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "City of Toledo Official Website",
+      "source": "Toledo Municipal Code 1105.0301, toledo.oh.gov",
       "verified": true,
-      "verifiedDate": "2024-12-15"
-    },
-    {
-      "id": "perrysburg",
-      "name": "Perrysburg",
-      "county": "Wood County",
-      "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "City contracts with Wood County Building Inspection for permits",
-      "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
-        "cornerLot": "Special requirements apply"
-      },
-      "setbackRequirements": "Fences must be on property line or within property boundaries",
-      "materialRestrictions": "Check with zoning department for approved materials",
-      "additionalNotes": "Historic district may have additional requirements. HOA rules may also apply.",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "City of Perrysburg / Wood County Building Inspection",
-        "address": "201 Indiana Avenue, Perrysburg, OH 43551",
-        "phone": "(419) 872-8010",
-        "website": "https://www.ci.perrysburg.oh.us",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
-      },
-      "source": "City of Perrysburg",
-      "verified": true,
-      "verifiedDate": "2024-12-15"
-    },
-    {
-      "id": "perrysburg-township",
-      "name": "Perrysburg Township",
-      "county": "Wood County",
-      "state": "OH",
-      "permitRequired": "Varies by area",
-      "permitType": "Zoning Permit (where applicable)",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Township is partially zoned. Some areas require permits, others do not. Call to verify for your specific property.",
-      "heightRestrictions": {
-        "frontYard": "Varies",
-        "sideYard": "7 feet maximum in zoned areas",
-        "rearYard": "7 feet maximum in zoned areas",
-        "cornerLot": "Contact for requirements"
-      },
-      "setbackRequirements": "Varies by zoning status of property",
-      "materialRestrictions": "Contact for current restrictions",
-      "additionalNotes": "IMPORTANT: Perrysburg Township is PARTIALLY ZONED. Call the township office with your property address to determine if permits are required for your specific location.",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "Perrysburg Township Zoning",
-        "address": "26609 Lime City Road, Perrysburg, OH 43551",
-        "phone": "(419) 874-3551",
-        "website": "https://www.perrysburgtownship.us",
-        "hours": "Monday-Friday 8:30 AM - 4:30 PM"
-      },
-      "source": "Perrysburg Township",
-      "verified": true,
-      "verifiedDate": "2024-12-15"
+      "verifiedDate": "2026-02-16"
     },
     {
       "id": "maumee",
@@ -101,27 +41,27 @@
       "permitRequired": true,
       "permitType": "Zoning Permit",
       "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Maumee Building Department",
+      "applicationProcess": "Apply through Maumee Building Department. Zoning questions: Gina Schell (419) 897-7171",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
-        "cornerLot": "Special visibility requirements"
+        "frontYard": "4 ft max (open style)",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
+        "cornerLot": "Sight clearance triangles per Section 1145.06"
       },
-      "setbackRequirements": "Must be within property boundaries",
-      "materialRestrictions": "Contact building department for approved materials",
-      "additionalNotes": "Historic Uptown district may have additional architectural requirements",
+      "setbackRequirements": "Fences may be placed on property line outside public right-of-way. New fence within 5 ft of existing fence requires removal of old fence first.",
+      "materialRestrictions": "Contact building department for approved materials. Fence posts cannot exceed fence height by more than 4 inches.",
+      "additionalNotes": "Historic Uptown district (Ford St to Key St, Anthony Wayne Trail to Maumee River) requires Design Review Board approval before permits.",
       "processingTime": "Typically 3-5 business days",
       "contactInfo": {
         "department": "Maumee Building Department",
         "address": "400 Conant Street, Maumee, OH 43537",
-        "phone": "(419) 897-7100",
-        "website": "https://www.maumee.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "phone": "(419) 897-7171",
+        "website": "https://maumee.org/building-and-inspection/",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "City of Maumee",
-      "verified": false,
-      "verifiedDate": null
+      "source": "Maumee Codified Ordinances Ch. 1142",
+      "verified": true,
+      "verifiedDate": "2026-02-16"
     },
     {
       "id": "sylvania",
@@ -131,27 +71,27 @@
       "permitRequired": true,
       "permitType": "Zoning Permit",
       "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Sylvania Building Department",
+      "applicationProcess": "Zoning permit from City of Sylvania required before obtaining building permit from Lucas County",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
-        "cornerLot": "Sight triangle requirements"
+        "frontYard": "3.5 ft max",
+        "sideYard": "4 ft max (adjacent to main building); 7 ft max elsewhere",
+        "rearYard": "7 ft max",
+        "cornerLot": "No obstruction within 80 ft of intersection centerlines"
       },
       "setbackRequirements": "Fences on or behind property lines",
-      "materialRestrictions": "Certain materials may require approval",
-      "additionalNotes": "Many neighborhoods have HOAs with additional requirements",
+      "materialRestrictions": "Contact zoning administrator for approved materials",
+      "additionalNotes": "Many neighborhoods have HOAs with additional requirements. Pool fences: public pools require 6 ft fencing; private pools require 4 ft fencing with self-closing/locking gates.",
       "processingTime": "Typically 3-5 business days",
       "contactInfo": {
-        "department": "Sylvania Building Department",
+        "department": "Sylvania Zoning Department",
         "address": "6730 Monroe Street, Sylvania, OH 43560",
-        "phone": "(419) 885-8985",
-        "website": "https://www.cityofsylvania.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "phone": "(419) 885-8948",
+        "website": "https://www.cityofsylvania.com/government/zoning/zoning-permits-licenses/",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "City of Sylvania",
-      "verified": false,
-      "verifiedDate": null
+      "source": "Sylvania Codified Ordinances 1125.13",
+      "verified": true,
+      "verifiedDate": "2026-02-16"
     },
     {
       "id": "sylvania-township",
@@ -163,21 +103,21 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Sylvania Township Zoning Department",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
         "cornerLot": "Contact for specific requirements"
       },
       "setbackRequirements": "Contact zoning department",
       "materialRestrictions": "Contact for approved materials list",
-      "additionalNotes": "Separate jurisdiction from City of Sylvania",
+      "additionalNotes": "Separate jurisdiction from City of Sylvania. Properties with well/septic need Lucas County Health Dept approval first.",
       "processingTime": "Varies",
       "contactInfo": {
         "department": "Sylvania Township Zoning",
         "address": "4927 Holland-Sylvania Road, Sylvania, OH 43560",
         "phone": "(419) 882-0011",
-        "website": "https://www.sylvaniatownship.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "website": "https://www.sylvaniatownship.com/permits",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "Sylvania Township",
       "verified": false,
@@ -193,12 +133,12 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Oregon Building Department",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
         "cornerLot": "Special requirements may apply"
       },
-      "setbackRequirements": "Must be on property boundaries",
+      "setbackRequirements": "Must be within property boundaries",
       "materialRestrictions": "Contact building department",
       "additionalNotes": "Waterfront properties may have additional requirements",
       "processingTime": "Typically 3-5 business days",
@@ -207,39 +147,9 @@
         "address": "5330 Seaman Road, Oregon, OH 43616",
         "phone": "(419) 698-7047",
         "website": "https://www.oregonohio.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "City of Oregon",
-      "verified": false,
-      "verifiedDate": null
-    },
-    {
-      "id": "holland",
-      "name": "Holland",
-      "county": "Lucas County",
-      "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Springfield Township (Holland is within Springfield Township)",
-      "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
-      },
-      "setbackRequirements": "Contact township zoning",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Part of Springfield Township jurisdiction",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "Springfield Township Zoning",
-        "address": "7617 Angola Road, Holland, OH 43528",
-        "phone": "(419) 865-2821",
-        "website": "https://www.springfieldtwp.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
-      },
-      "source": "Springfield Township",
       "verified": false,
       "verifiedDate": null
     },
@@ -253,13 +163,13 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Ottawa Hills Village Hall",
       "heightRestrictions": {
-        "frontYard": "Contact village for specific requirements",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
+        "frontYard": "Contact village",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
         "cornerLot": "Contact for requirements"
       },
       "setbackRequirements": "Contact village administration",
-      "materialRestrictions": "May have aesthetic requirements given community standards",
+      "materialRestrictions": "Upscale community \u2014 may have aesthetic requirements",
       "additionalNotes": "Small, upscale community with potentially stricter aesthetic guidelines",
       "processingTime": "Varies",
       "contactInfo": {
@@ -267,7 +177,7 @@
         "address": "2125 Richards Road, Ottawa Hills, OH 43606",
         "phone": "(419) 536-1111",
         "website": "https://ottawahills.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "Village of Ottawa Hills",
       "verified": false,
@@ -283,9 +193,9 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Waterville Building Department",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
         "cornerLot": "Contact for requirements"
       },
       "setbackRequirements": "Contact building department",
@@ -297,9 +207,249 @@
         "address": "25 N Second Street, Waterville, OH 43566",
         "phone": "(419) 878-8100",
         "website": "https://www.waterville.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "City of Waterville",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "holland",
+      "name": "Holland",
+      "county": "Lucas County",
+      "state": "OH",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply at Village offices, 1245 Clarion Avenue. Building permits through Lucas County Building Regulations.",
+      "heightRestrictions": {
+        "frontYard": "Contact village",
+        "sideYard": "Contact village",
+        "rearYard": "Contact village",
+        "cornerLot": "Contact village"
+      },
+      "setbackRequirements": "Submit drawing showing residence, accessory buildings, fences with distances from street and property lines",
+      "materialRestrictions": "Contact zoning administrator",
+      "additionalNotes": "Large Holland mailing address area \u2014 only some addresses are actually under Village jurisdiction. Verify your address is in the Village before applying. Pool fences: min 42 inches, self-locking gate required.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Village of Holland Zoning",
+        "address": "1245 Clarion Avenue, Holland, OH 43528",
+        "phone": "(419) 865-7104",
+        "website": "https://www.hollandohio.com/zoning-faq/",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Village of Holland website",
+      "verified": true,
+      "verifiedDate": "2026-02-16"
+    },
+    {
+      "id": "springfield-twp",
+      "name": "Springfield Twp",
+      "county": "Lucas County",
+      "state": "OH",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required in unincorporated areas. Always call 811 before digging.",
+      "heightRestrictions": {
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility at intersections"
+      },
+      "setbackRequirements": "No zoning setback requirements \u2014 property line rules apply. Survey recommended.",
+      "materialRestrictions": "No specific restrictions in unincorporated areas",
+      "additionalNotes": "Unincorporated township \u2014 generally no fence permit required. HOA rules may still apply. Note: Holland Village (within Springfield Twp) DOES require a zoning permit.",
+      "processingTime": "N/A",
+      "contactInfo": {
+        "department": "Springfield Township",
+        "address": "7617 Angola Road, Holland, OH 43528",
+        "phone": "(419) 865-2821",
+        "website": "https://www.springfieldtwp.org",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Springfield Township",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "washington-twp",
+      "name": "Washington Twp",
+      "county": "Lucas County",
+      "state": "OH",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
+      "heightRestrictions": {
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
+      },
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required. HOA rules may still apply.",
+      "processingTime": "N/A",
+      "contactInfo": {
+        "department": "Washington Township",
+        "address": "Washington Township Hall",
+        "phone": "(419) 726-6621",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Washington Township",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "jerusalem-twp",
+      "name": "Jerusalem Twp",
+      "county": "Lucas County",
+      "state": "OH",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
+      "heightRestrictions": {
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
+      },
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required.",
+      "processingTime": "N/A",
+      "contactInfo": {
+        "department": "Jerusalem Township",
+        "address": "9501 Jerusalem Road, Curtice, OH 43412",
+        "phone": "(419) 836-8921",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Jerusalem Township",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "monclova-twp",
+      "name": "Monclova Twp",
+      "county": "Lucas County",
+      "state": "OH",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
+      "heightRestrictions": {
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
+      },
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required. HOA rules may still apply.",
+      "processingTime": "N/A",
+      "contactInfo": {
+        "department": "Monclova Township",
+        "address": "4335 Albon Road, Monclova, OH 43542",
+        "phone": "(419) 865-7862",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Monclova Township",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "perrysburg",
+      "name": "Perrysburg",
+      "county": "Wood County",
+      "state": "OH",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "City contracts with Wood County Building Inspection for permits",
+      "heightRestrictions": {
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
+        "cornerLot": "Special requirements apply"
+      },
+      "setbackRequirements": "Fences on property line or within property boundaries",
+      "materialRestrictions": "Check with zoning department",
+      "additionalNotes": "Historic district may have additional requirements. HOA rules may also apply.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "City of Perrysburg / Wood County Building Inspection",
+        "address": "201 Indiana Avenue, Perrysburg, OH 43551",
+        "phone": "(419) 872-8010",
+        "website": "https://www.ci.perrysburg.oh.us",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "City of Perrysburg",
+      "verified": true,
+      "verifiedDate": "2024-12-15"
+    },
+    {
+      "id": "perrysburg-township",
+      "name": "Perrysburg Twp",
+      "county": "Wood County",
+      "state": "OH",
+      "permitRequired": "Varies",
+      "permitType": "Zoning Permit (where applicable)",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Township is PARTIALLY ZONED. Call with your property address to determine if permits are required.",
+      "heightRestrictions": {
+        "frontYard": "Varies by zoning status",
+        "sideYard": "7 ft max in zoned areas",
+        "rearYard": "7 ft max in zoned areas",
+        "cornerLot": "Contact for requirements"
+      },
+      "setbackRequirements": "Varies by zoning status of property",
+      "materialRestrictions": "Contact for current restrictions",
+      "additionalNotes": "IMPORTANT: Perrysburg Township is PARTIALLY ZONED. Some areas require permits, others do not. Call the township office with your property address.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Perrysburg Township Zoning",
+        "address": "26609 Lime City Road, Perrysburg, OH 43551",
+        "phone": "(419) 874-3551",
+        "website": "https://www.perrysburgtownship.us",
+        "hours": "Mon-Fri 8:30 AM - 4:30 PM"
+      },
+      "source": "Perrysburg Township",
+      "verified": true,
+      "verifiedDate": "2024-12-15"
+    },
+    {
+      "id": "bowling-green",
+      "name": "Bowling Green",
+      "county": "Wood County",
+      "state": "OH",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Bowling Green Building Division",
+      "heightRestrictions": {
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
+        "cornerLot": "Sight triangle requirements"
+      },
+      "setbackRequirements": "Contact building division",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Rental properties may have additional requirements",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Bowling Green Building Division",
+        "address": "304 N Church Street, Bowling Green, OH 43402",
+        "phone": "(419) 354-6218",
+        "website": "https://www.bgohio.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Bowling Green",
       "verified": false,
       "verifiedDate": null
     },
@@ -313,9 +463,9 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Rossford Building Department",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
+        "frontYard": "4 ft max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
         "cornerLot": "Contact for requirements"
       },
       "setbackRequirements": "Contact building department",
@@ -327,7 +477,7 @@
         "address": "133 Osborn Street, Rossford, OH 43460",
         "phone": "(419) 666-0210",
         "website": "https://www.rossfordohio.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "City of Rossford",
       "verified": false,
@@ -343,10 +493,10 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Northwood Building Department",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact city",
+        "sideYard": "Contact city",
+        "rearYard": "Contact city",
+        "cornerLot": "Contact city"
       },
       "setbackRequirements": "Contact building department",
       "materialRestrictions": "Contact for approved materials",
@@ -357,99 +507,69 @@
         "address": "6000 Wales Road, Northwood, OH 43619",
         "phone": "(419) 693-9444",
         "website": "https://www.ci.northwood.oh.us",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "City of Northwood",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "bowling-green",
-      "name": "Bowling Green",
+      "id": "lake-twp",
+      "name": "Lake Twp",
       "county": "Wood County",
       "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Bowling Green Building Division",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
       "heightRestrictions": {
-        "frontYard": "4 feet maximum",
-        "sideYard": "6 feet maximum",
-        "rearYard": "6 feet maximum",
-        "cornerLot": "Sight triangle requirements"
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
       },
-      "setbackRequirements": "Contact building division",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Rental properties may have additional requirements",
-      "processingTime": "Varies",
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required. HOA rules may still apply.",
+      "processingTime": "N/A",
       "contactInfo": {
-        "department": "Bowling Green Building Division",
-        "address": "304 N Church Street, Bowling Green, OH 43402",
-        "phone": "(419) 354-6218",
-        "website": "https://www.bgohio.org",
-        "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        "department": "Lake Township",
+        "address": "27975 Cummings Road, Millbury, OH 43447",
+        "phone": "(419) 837-5653",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "City of Bowling Green",
+      "source": "Lake Township",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "walbridge",
-      "name": "Walbridge",
+      "id": "middleton-twp",
+      "name": "Middleton Twp",
       "county": "Wood County",
       "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Walbridge Village Hall",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
       },
-      "setbackRequirements": "Contact village administration",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Contact village for current requirements",
-      "processingTime": "Varies",
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required.",
+      "processingTime": "N/A",
       "contactInfo": {
-        "department": "Walbridge Village Hall",
-        "address": "705 N Main Street, Walbridge, OH 43465",
-        "phone": "(419) 666-1830",
-        "website": "https://walbridgevillage.org",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "department": "Middleton Township",
+        "address": "22371 Pemberville Road, Luckey, OH 43443",
+        "phone": "(419) 833-3261",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "Village of Walbridge",
-      "verified": false,
-      "verifiedDate": null
-    },
-    {
-      "id": "swanton",
-      "name": "Swanton",
-      "county": "Fulton County",
-      "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Swanton Village Hall",
-      "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
-      },
-      "setbackRequirements": "Contact village zoning",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Contact village for current requirements",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "Swanton Village Hall",
-        "address": "219 Chestnut Street, Swanton, OH 43558",
-        "phone": "(419) 826-1929",
-        "website": "https://www.villageofswanton.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
-      },
-      "source": "Village of Swanton",
+      "source": "Middleton Township",
       "verified": false,
       "verifiedDate": null
     },
@@ -463,10 +583,10 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Wauseon Building Department",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact city",
+        "sideYard": "Contact city",
+        "rearYard": "Contact city",
+        "cornerLot": "Contact city"
       },
       "setbackRequirements": "Contact building department",
       "materialRestrictions": "Contact for approved materials",
@@ -477,9 +597,39 @@
         "address": "230 Clinton Street, Wauseon, OH 43567",
         "phone": "(419) 335-1441",
         "website": "https://www.wauseonoh.org",
-        "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
       "source": "City of Wauseon",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "swanton",
+      "name": "Swanton",
+      "county": "Fulton County",
+      "state": "OH",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Swanton Village Hall",
+      "heightRestrictions": {
+        "frontYard": "Contact village",
+        "sideYard": "Contact village",
+        "rearYard": "Contact village",
+        "cornerLot": "Contact village"
+      },
+      "setbackRequirements": "Contact village zoning",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Contact village for current requirements",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Swanton Village Hall",
+        "address": "219 Chestnut Street, Swanton, OH 43558",
+        "phone": "(419) 826-1929",
+        "website": "https://www.villageofswanton.com",
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
+      },
+      "source": "Village of Swanton",
       "verified": false,
       "verifiedDate": null
     },
@@ -490,24 +640,24 @@
       "state": "OH",
       "permitRequired": "Contact village",
       "permitType": "Zoning Permit (if required)",
-      "permitFee": "Contact for fee information",
+      "permitFee": "Contact village",
       "applicationProcess": "Contact Delta Village Hall for requirements",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact village",
+        "sideYard": "Contact village",
+        "rearYard": "Contact village",
+        "cornerLot": "Contact village"
       },
       "setbackRequirements": "Contact village",
       "materialRestrictions": "Contact village",
-      "additionalNotes": "Small village - requirements may vary",
+      "additionalNotes": "Small village \u2014 contact for current requirements",
       "processingTime": "Varies",
       "contactInfo": {
         "department": "Delta Village Hall",
         "address": "401 Main Street, Delta, OH 43515",
         "phone": "(419) 822-3232",
         "website": null,
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "Village of Delta",
       "verified": false,
@@ -523,10 +673,10 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Archbold Zoning Department",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact village",
+        "sideYard": "Contact village",
+        "rearYard": "Contact village",
+        "cornerLot": "Contact village"
       },
       "setbackRequirements": "Contact zoning department",
       "materialRestrictions": "Contact for approved materials",
@@ -537,39 +687,39 @@
         "address": "305 Stryker Street, Archbold, OH 43502",
         "phone": "(419) 445-2691",
         "website": "https://www.archbold.com",
-        "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
       "source": "Village of Archbold",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "napoleon",
-      "name": "Napoleon",
-      "county": "Henry County",
+      "id": "fulton-twp",
+      "name": "Fulton Twp",
+      "county": "Fulton County",
       "state": "OH",
-      "permitRequired": true,
-      "permitType": "Zoning Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Napoleon Building Department",
+      "permitRequired": false,
+      "permitType": "None (unincorporated)",
+      "permitFee": "N/A",
+      "applicationProcess": "No fence permit typically required. Always call 811 before digging.",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "No zoning restrictions",
+        "sideYard": "No zoning restrictions",
+        "rearYard": "No zoning restrictions",
+        "cornerLot": "Maintain safe visibility"
       },
-      "setbackRequirements": "Contact building department",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Contact city for current requirements",
-      "processingTime": "Varies",
+      "setbackRequirements": "No zoning setback requirements. Survey recommended.",
+      "materialRestrictions": "No specific restrictions",
+      "additionalNotes": "Unincorporated township \u2014 no fence permit generally required.",
+      "processingTime": "N/A",
       "contactInfo": {
-        "department": "Napoleon Building Department",
-        "address": "255 W Riverview Avenue, Napoleon, OH 43545",
-        "phone": "(419) 592-4010",
-        "website": "https://www.napoleonohio.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "department": "Fulton County",
+        "address": "Fulton County Courthouse, Wauseon, OH 43567",
+        "phone": "(419) 337-9255",
+        "website": null,
+        "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
-      "source": "City of Napoleon",
+      "source": "Fulton County",
       "verified": false,
       "verifiedDate": null
     },
@@ -579,33 +729,33 @@
       "county": "Monroe County",
       "state": "MI",
       "permitRequired": true,
-      "permitType": "Building Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Monroe Building Department",
+      "permitType": "Fence Installation Permit",
+      "permitFee": "Set by city council resolution",
+      "applicationProcess": "Apply through Monroe Building Department at City Hall. Submit site plan with property dimensions, building locations, fence location/amount/style/height.",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "6 feet typical maximum",
-        "rearYard": "6 feet typical maximum",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "42 inches (3.5 ft) max",
+        "sideYard": "6 ft max",
+        "rearYard": "6 ft max",
+        "cornerLot": "No sight obstruction at intersections or driveways per city engineer"
       },
-      "setbackRequirements": "Contact building department",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Michigan regulations apply. Requirements differ from Ohio.",
+      "setbackRequirements": "Fences/hedges may be in city right-of-way up to sidewalk, but owner assumes risk. Height measured from ground on which fence stands.",
+      "materialRestrictions": "No electric fences (except for agricultural nonconforming use). No barbed wire except with city engineer approval for security. Lots 1+ acre may have 6 ft max anywhere if no sight obstruction.",
+      "additionalNotes": "Michigan building codes apply \u2014 different from Ohio. Contractor must be State of Michigan licensed. Fence on retaining wall measured from uphill side.",
       "processingTime": "Varies",
       "contactInfo": {
         "department": "Monroe Building Department",
         "address": "120 E First Street, Monroe, MI 48161",
-        "phone": "(734) 384-9171",
-        "website": "https://www.monroemi.gov",
-        "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        "phone": "(734) 384-9186",
+        "website": "https://www.monroemi.gov/c_i_t_y_h_a_l_l/departments/building",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
-      "source": "City of Monroe, MI",
-      "verified": false,
-      "verifiedDate": null
+      "source": "Monroe Municipal Code 15.08.020",
+      "verified": true,
+      "verifiedDate": "2026-02-16"
     },
     {
-      "id": "temperance-mi",
-      "name": "Temperance (Bedford Township)",
+      "id": "bedford-twp",
+      "name": "Bedford Twp",
       "county": "Monroe County",
       "state": "MI",
       "permitRequired": true,
@@ -613,83 +763,623 @@
       "permitFee": "Contact for current fee",
       "applicationProcess": "Apply through Bedford Township Building Department",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
       },
       "setbackRequirements": "Contact township",
       "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Michigan regulations apply. Part of Bedford Township.",
+      "additionalNotes": "Michigan regulations apply. Includes Temperance and Lambertville communities.",
       "processingTime": "Varies",
       "contactInfo": {
         "department": "Bedford Township Building Department",
         "address": "8100 Jackman Road, Temperance, MI 48182",
         "phone": "(734) 847-6791",
         "website": "https://www.bedfordmi.org",
-        "hours": "Monday-Friday 8:00 AM - 5:00 PM"
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
       "source": "Bedford Township, MI",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "port-clinton",
-      "name": "Port Clinton",
-      "county": "Ottawa County",
-      "state": "OH",
+      "id": "erie-twp",
+      "name": "Erie Twp",
+      "county": "Monroe County",
+      "state": "MI",
       "permitRequired": true,
       "permitType": "Zoning Permit",
       "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Port Clinton Building Department",
+      "applicationProcess": "Apply through Erie Township",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
       },
-      "setbackRequirements": "Contact building department",
+      "setbackRequirements": "Contact township",
       "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Lakefront properties may have additional coastal requirements",
+      "additionalNotes": "Michigan regulations apply.",
       "processingTime": "Varies",
       "contactInfo": {
-        "department": "Port Clinton Building Department",
-        "address": "1868 E Perry Street, Port Clinton, OH 43452",
-        "phone": "(419) 734-5522",
-        "website": "https://www.portclinton.com",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "department": "Erie Township",
+        "address": "2065 Erie Road, Erie, MI 48133",
+        "phone": "(734) 848-4015",
+        "website": null,
+        "hours": "Mon-Fri 9:00 AM - 4:00 PM"
       },
-      "source": "City of Port Clinton",
+      "source": "Erie Township, MI",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "oak-harbor",
-      "name": "Oak Harbor",
-      "county": "Ottawa County",
-      "state": "OH",
-      "permitRequired": "Contact village",
-      "permitType": "Zoning Permit (if required)",
-      "permitFee": "Contact for fee information",
-      "applicationProcess": "Contact Oak Harbor Village Hall",
+      "id": "lasalle-twp",
+      "name": "LaSalle Twp",
+      "county": "Monroe County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through LaSalle Township",
       "heightRestrictions": {
-        "frontYard": "Contact for requirements",
-        "sideYard": "Contact for requirements",
-        "rearYard": "Contact for requirements",
-        "cornerLot": "Contact for requirements"
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
       },
-      "setbackRequirements": "Contact village",
-      "materialRestrictions": "Contact village",
-      "additionalNotes": "Contact village for current requirements",
+      "setbackRequirements": "Contact township",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan regulations apply.",
       "processingTime": "Varies",
       "contactInfo": {
-        "department": "Oak Harbor Village Hall",
-        "address": "146 N Church Street, Oak Harbor, OH 43449",
-        "phone": "(419) 898-5561",
-        "website": "https://www.oakharbor.oh.us",
-        "hours": "Monday-Friday 8:00 AM - 4:30 PM"
+        "department": "LaSalle Township",
+        "address": "3401 Lewis Avenue, Temperance, MI 48182",
+        "phone": "(734) 243-3368",
+        "website": null,
+        "hours": "Mon-Fri 8:30 AM - 4:30 PM"
       },
-      "source": "Village of Oak Harbor",
+      "source": "LaSalle Township, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "temperance",
+      "name": "Temperance",
+      "county": "Monroe County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Zoning Permit (via Bedford Twp)",
+      "permitFee": "Contact Bedford Township",
+      "applicationProcess": "Temperance is within Bedford Township \u2014 apply through Bedford Township Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
+      },
+      "setbackRequirements": "Contact Bedford Township",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Temperance is a community within Bedford Township. Michigan regulations apply.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Bedford Township Building Department",
+        "address": "8100 Jackman Road, Temperance, MI 48182",
+        "phone": "(734) 847-6791",
+        "website": "https://www.bedfordmi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "Bedford Township, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "lambertville",
+      "name": "Lambertville",
+      "county": "Monroe County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Zoning Permit (via Bedford Twp)",
+      "permitFee": "Contact Bedford Township",
+      "applicationProcess": "Lambertville is within Bedford Township \u2014 apply through Bedford Township Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
+      },
+      "setbackRequirements": "Contact Bedford Township",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Lambertville is a community within Bedford Township. Michigan regulations apply.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Bedford Township Building Department",
+        "address": "8100 Jackman Road, Temperance, MI 48182",
+        "phone": "(734) 847-6791",
+        "website": "https://www.bedfordmi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "Bedford Township, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "ottawa-lake",
+      "name": "Ottawa Lake",
+      "county": "Monroe County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Zoning Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Contact Whiteford Township for requirements",
+      "heightRestrictions": {
+        "frontYard": "Contact township",
+        "sideYard": "Contact township",
+        "rearYard": "Contact township",
+        "cornerLot": "Contact township"
+      },
+      "setbackRequirements": "Contact township",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Ottawa Lake is within Whiteford Township. Michigan regulations apply.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Whiteford Township",
+        "address": "8000 Summerfield Road, Ottawa Lake, MI 49267",
+        "phone": "(734) 856-3773",
+        "website": null,
+        "hours": "Mon-Fri 9:00 AM - 4:00 PM"
+      },
+      "source": "Whiteford Township, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "flat-rock",
+      "name": "Flat Rock",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Flat Rock Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Flat Rock Building Department",
+        "address": null,
+        "phone": "(734) 782-2401",
+        "website": "https://www.flatrockmi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Flat Rock, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "woodhaven",
+      "name": "Woodhaven",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Woodhaven Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Woodhaven Building Department",
+        "address": null,
+        "phone": "(734) 675-4905",
+        "website": "https://www.woodhaven.mi.us",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Woodhaven, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "brownstown-twp",
+      "name": "Brownstown Twp",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Brownstown Twp Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Brownstown Twp Building Department",
+        "address": null,
+        "phone": "(734) 675-0390",
+        "website": "https://www.brownstown-mi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Brownstown Twp, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "rockwood",
+      "name": "Rockwood",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Rockwood Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Rockwood Building Department",
+        "address": null,
+        "phone": "(734) 379-9466",
+        "website": "https://www.rockwoodmi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Rockwood, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "trenton",
+      "name": "Trenton",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Trenton Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Trenton Building Department",
+        "address": null,
+        "phone": "(734) 675-8235",
+        "website": "https://www.trenton-mi.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Trenton, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "gibraltar",
+      "name": "Gibraltar",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Gibraltar Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Gibraltar Building Department",
+        "address": null,
+        "phone": "(734) 676-3278",
+        "website": "https://www.cityofgibraltar.net",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Gibraltar, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "grosse-ile-twp",
+      "name": "Grosse Ile Twp",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Grosse Ile Twp Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Grosse Ile Twp Building Department",
+        "address": null,
+        "phone": "(734) 676-4422",
+        "website": "https://www.grosseile.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Grosse Ile Twp, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "huron-twp",
+      "name": "Huron Twp",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Huron Twp Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Huron Twp Building Department",
+        "address": null,
+        "phone": "(734) 753-4466",
+        "website": "https://www.hurontwp.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Huron Twp, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "romulus",
+      "name": "Romulus",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Romulus Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Romulus Building Department",
+        "address": null,
+        "phone": "(734) 942-7521",
+        "website": "https://www.romulusgov.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Romulus, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "taylor",
+      "name": "Taylor",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Taylor Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Taylor Building Department",
+        "address": null,
+        "phone": "(734) 374-1377",
+        "website": "https://www.cityoftaylor.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Taylor, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "southgate",
+      "name": "Southgate",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Southgate Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Southgate Building Department",
+        "address": null,
+        "phone": "(734) 258-3021",
+        "website": "https://www.southgatemi.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Southgate, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "wyandotte",
+      "name": "Wyandotte",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Wyandotte Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Wyandotte Building Department",
+        "address": null,
+        "phone": "(734) 324-4558",
+        "website": "https://www.wyandotte.net",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Wyandotte, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "riverview",
+      "name": "Riverview",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Riverview Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Riverview Building Department",
+        "address": null,
+        "phone": "(734) 281-4249",
+        "website": "https://www.cityofriverview.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Riverview, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "lincoln-park",
+      "name": "Lincoln Park",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Lincoln Park Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Lincoln Park Building Department",
+        "address": null,
+        "phone": "(313) 386-1800",
+        "website": "https://www.lincolnparkmi.gov",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Lincoln Park, MI",
+      "verified": false,
+      "verifiedDate": null
+    },
+    {
+      "id": "allen-park",
+      "name": "Allen Park",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Allen Park Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Allen Park Building Department",
+        "address": null,
+        "phone": "(313) 928-2400",
+        "website": "https://www.cityofallenpark.org",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      },
+      "source": "City of Allen Park, MI",
       "verified": false,
       "verifiedDate": null
     }
