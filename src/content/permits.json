@@ -1331,7 +1331,7 @@
       "permitRequired": true,
       "permitType": "Building Permit",
       "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Lincoln Park Building Department",
+      "applicationProcess": "Apply through tment",
       "heightRestrictions": {
         "frontYard": "Contact city",
         "sideYard": "6 ft typical max",
@@ -1343,25 +1343,25 @@
       "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
       "processingTime": "Varies",
       "contactInfo": {
-        "department": "Lincoln Park Building Department",
+        "department": "Gibraltar Building Department",
         "address": null,
-        "phone": "(313) 386-1800",
-        "website": "https://www.lincolnparkmi.gov",
+        "phone": "(734) 676-3278",
+        "website": "https://www.cityofgibraltar.net",
         "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
-      "source": "City of Lincoln Park, MI",
+      "source": "City of Gibraltar, MI",
       "verified": false,
       "verifiedDate": null
     },
     {
-      "id": "allen-park",
-      "name": "Allen Park",
+      "id": "grosse-ile-twp",
+      "name": "Grosse Ile Twp",
       "county": "Wayne County",
       "state": "MI",
       "permitRequired": true,
       "permitType": "Building Permit",
       "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Allen Park Building Department",
+      "applicationProcess": "Apply through Grosse Ile Twp Building Department",
       "heightRestrictions": {
         "frontYard": "Contact city",
         "sideYard": "6 ft typical max",
@@ -1373,35 +1373,42 @@
       "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
       "processingTime": "Varies",
       "contactInfo": {
-        "department": "Allen Park Building Department",
+        "department": "Grosse Ile Twp Building Department",
         "address": null,
-        "phone": "(313) 928-2400",
-        "website": "https://www.cityofallenpark.org",
+        "phone": "(734) 676-4422",
+        "website": "https://www.grosseile.com",
         "hours": "Mon-Fri 8:00 AM - 5:00 PM"
       },
-      "source": "City of Allen Park, MI",
+      "source": "City of Grosse Ile Twp, MI",
       "verified": false,
       "verifiedDate": null
-    }
-  ],
-  "poolFenceRequirements": {
-    "ohio": {
-      "description": "Ohio Building Code requires fencing around swimming pools",
-      "minimumHeight": "48 inches (4 feet)",
-      "gateRequirements": "Self-closing, self-latching gates that open outward",
-      "openings": "Maximum 4-inch openings to prevent child access",
-      "additionalNotes": "Local jurisdictions may have stricter requirements. Always verify with your local building department."
     },
-    "michigan": {
-      "description": "Michigan Building Code requires barriers around residential swimming pools",
-      "minimumHeight": "48 inches (4 feet)",
-      "gateRequirements": "Self-closing, self-latching gates",
-      "openings": "Maximum 4-inch openings",
-      "additionalNotes": "Bedford Township and Monroe may have local amendments. Verify with local building department."
-    }
-  },
-  "generalGuidelines": {
-    "propertyLines": "Always confirm your exact property lines before fence installation. A professional survey is recommended for any uncertainty.",
+    {
+      "id": "huron-twp",
+      "name": "Huron Twp",
+      "county": "Wayne County",
+      "state": "MI",
+      "permitRequired": true,
+      "permitType": "Building Permit",
+      "permitFee": "Contact for current fee",
+      "applicationProcess": "Apply through Huron Twp Building Department",
+      "heightRestrictions": {
+        "frontYard": "Contact city",
+        "sideYard": "6 ft typical max",
+        "rearYard": "6 ft typical max",
+        "cornerLot": "Contact city"
+      },
+      "setbackRequirements": "Contact building department",
+      "materialRestrictions": "Contact for approved materials",
+      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
+      "processingTime": "Varies",
+      "contactInfo": {
+        "department": "Huron Twp Building Department",
+        "address": null,
+        "phone": "(734) 753-4466",
+        "website": "https://www.hurontwp.com",
+        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
+      . A professional survey is recommended for any uncertainty.",
     "utilities": "Ohio law requires calling 811 before digging. We handle this as part of our installation process.",
     "hoa": "If you live in a neighborhood with a Homeowners Association, check with them for any additional restrictions or approval requirements.",
     "neighbors": "While not legally required in most cases, discussing your fence plans with neighbors can prevent disputes.",
