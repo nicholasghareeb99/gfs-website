@@ -1,67 +1,20 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../lib/firestore.js';
+import permitsData from '../content/permits.json';
 const site = await getSiteSettings();
 
-const cities = [
-  { name: 'Toledo', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Maumee', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Sylvania', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Sylvania Twp', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Oregon', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Ottawa Hills', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Waterville', county: 'Lucas', state: 'OH', permit: true },
-  { name: 'Holland', county: 'Lucas', state: 'OH', permit: false },
-  { name: 'Springfield Twp', county: 'Lucas', state: 'OH', permit: false },
-  { name: 'Washington Twp', county: 'Lucas', state: 'OH', permit: false },
-  { name: 'Jerusalem Twp', county: 'Lucas', state: 'OH', permit: false },
-  { name: 'Monclova Twp', county: 'Lucas', state: 'OH', permit: false },
-  { name: 'Perrysburg', county: 'Wood', state: 'OH', permit: true },
-  { name: 'Perrysburg Twp', county: 'Wood', state: 'OH', permit: true },
-  { name: 'Bowling Green', county: 'Wood', state: 'OH', permit: true },
-  { name: 'Rossford', county: 'Wood', state: 'OH', permit: true },
-  { name: 'Northwood', county: 'Wood', state: 'OH', permit: true },
-  { name: 'Lake Twp', county: 'Wood', state: 'OH', permit: false },
-  { name: 'Middleton Twp', county: 'Wood', state: 'OH', permit: false },
-  { name: 'Wauseon', county: 'Fulton', state: 'OH', permit: true },
-  { name: 'Swanton', county: 'Fulton', state: 'OH', permit: true },
-  { name: 'Delta', county: 'Fulton', state: 'OH', permit: true },
-  { name: 'Archbold', county: 'Fulton', state: 'OH', permit: true },
-  { name: 'Fulton Twp', county: 'Fulton', state: 'OH', permit: false },
-  { name: 'Monroe', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Bedford Twp', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Erie Twp', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'LaSalle Twp', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Temperance', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Lambertville', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Ottawa Lake', county: 'Monroe', state: 'MI', permit: true },
-  { name: 'Flat Rock', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Woodhaven', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Brownstown Twp', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Rockwood', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Trenton', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Gibraltar', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Grosse Ile Twp', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Huron Twp', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Romulus', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Taylor', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Southgate', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Wyandotte', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Riverview', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Lincoln Park', county: 'Wayne', state: 'MI', permit: true },
-  { name: 'Allen Park', county: 'Wayne', state: 'MI', permit: true },
-];
-
-const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton County, OH', 'Monroe County, MI', 'Wayne County, MI'];
+const { municipalities } = permitsData;
+const counties = ['All Areas', ...new Set(municipalities.map(m => `${m.county}, ${m.state}`))];
 ---
 
-<BaseLayout canonical="/permits/" title="Fence Permits & Zoning Rules | Toledo, NW Ohio & SE Michigan | Complete Guide 2025" description="Complete fence permit requirements for 50+ municipalities in Toledo, NW Ohio & SE Michigan. Height limits, setback rules, official links.">
+<BaseLayout canonical="/permits/" title="Fence Permits & Zoning Rules | Toledo, NW Ohio & SE Michigan | Complete Guide 2026" description="Complete fence permit requirements for 45+ municipalities in Toledo, NW Ohio & SE Michigan. Height limits, setback rules, official links & more.">
 
-  <!-- Dark Hero -->
+  <!-- Hero -->
   <section class="permits-hero">
     <div class="container">
-      <h1>Fence Permits & Zoning Guide <span class="gold">2025</span></h1>
-      <p>Complete fence regulations for <strong>50+ municipalities</strong> in Northwest Ohio & Southeast Michigan. Height limits, permit requirements, official links & more.</p>
+      <h1>Fence Permits & Zoning Guide <span class="gold">2026</span></h1>
+      <p>Complete fence regulations for <strong>{municipalities.length} municipalities</strong> in Northwest Ohio & Southeast Michigan. Height limits, permit requirements, official links & more.</p>
       <input type="text" id="city-search" class="city-search" placeholder="🔍 Search your city or township..." />
     </div>
   </section>
@@ -81,91 +34,57 @@ const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton Co
       </div>
 
       <div class="city-grid" id="city-grid">
-        {cities.map(city => (
-          <button class="city-tile" data-county={`${city.county} County, ${city.state}`} data-name={city.name.toLowerCase()}>
-            <span class="city-tile-name">{city.name}</span>
-            <span class="city-tile-county">{city.county}, {city.state}</span>
-            <span class={`dot ${city.permit ? 'dot-yellow' : 'dot-green'}`}></span>
-          </button>
-        ))}
+        {municipalities.map(m => {
+          const needsPermit = m.permitRequired === true || m.permitRequired === 'Varies' || (typeof m.permitRequired === 'string' && m.permitRequired !== 'false');
+          return (
+            <button class="city-tile" data-id={m.id} data-county={`${m.county}, ${m.state}`} data-name={m.name.toLowerCase()}>
+              <span class="city-tile-name">{m.name}</span>
+              <span class="city-tile-county">{m.county.replace(' County', '')}, {m.state}</span>
+              <span class={`dot ${needsPermit ? 'dot-yellow' : 'dot-green'}`}></span>
+            </button>
+          );
+        })}
       </div>
 
-      <!-- Toledo Detail Section -->
-      <div class="city-detail" id="city-detail">
+      <!-- Dynamic Detail Panel -->
+      <div class="city-detail" id="city-detail" style="display:none;">
+        <button class="detail-close" id="detail-close" aria-label="Close">✕</button>
         <div class="city-detail-header">
-          <h2>🏠 Toledo</h2>
-          <p>Lucas County, Ohio</p>
+          <h2 id="detail-name"></h2>
+          <p id="detail-location"></p>
         </div>
 
-        <div class="permit-badge">📋 ZONING PERMIT: Certificate of Zoning Compliance</div>
+        <div id="detail-permit-badge" class="permit-badge"></div>
+        <div id="detail-verified" class="verified-badge" style="display:none;"></div>
 
-        <div class="height-grid">
-          <div class="height-card">
-            <div class="height-label">🏡 Front Yard Max</div>
-            <div class="height-value">3.5'</div>
-            <div class="height-note">Open style required (50%+ open)</div>
-          </div>
-          <div class="height-card">
-            <div class="height-label">↔️ Side Yard Max</div>
-            <div class="height-value">6'</div>
-            <div class="height-note">Privacy OK</div>
-          </div>
-          <div class="height-card">
-            <div class="height-label">🌳 Rear Yard Max</div>
-            <div class="height-value">6'</div>
-            <div class="height-note">Privacy OK</div>
-          </div>
-        </div>
+        <div class="height-grid" id="detail-heights"></div>
 
-        <div class="detail-grid">
-          <div class="detail-card">
+        <div class="detail-grid" id="detail-info-grid">
+          <div class="detail-card" id="detail-setback-card">
             <h3>📐 Setback Requirements</h3>
-            <ul>
-              <li>Property line (0") allowed with survey</li>
-              <li>2" offset recommended to avoid disputes</li>
-              <li>Survey strongly recommended</li>
-            </ul>
+            <p id="detail-setbacks"></p>
           </div>
-          <div class="detail-card">
-            <h3>🚗 Corner Lot / Visibility</h3>
-            <ul>
-              <li>Corner lots: Max 3ft within 25ft of intersection</li>
-              <li>Clear sight triangle required</li>
-              <li>Fences cannot obstruct traffic view</li>
-            </ul>
-          </div>
-          <div class="detail-card">
-            <h3>🏊 Pool Fence Requirements</h3>
-            <ul>
-              <li>4ft minimum height required by Ohio code</li>
-              <li>Self-closing, self-latching gates mandatory</li>
-              <li>Latch must be 54" from ground or pool-side</li>
-            </ul>
-          </div>
-          <div class="detail-card">
-            <h3>🏘️ HOA & Deed Restrictions</h3>
-            <ul>
-              <li>Many Toledo subdivisions have HOAs</li>
-              <li>Always check your CC&Rs before installation</li>
-              <li>We can help coordinate HOA approvals</li>
-            </ul>
+          <div class="detail-card" id="detail-material-card">
+            <h3>🔧 Material Restrictions</h3>
+            <p id="detail-materials"></p>
           </div>
         </div>
 
-        <div class="resources-section">
-          <h3>📜 Official Resources & Links</h3>
-          <div class="resource-links">
-            <a href="https://toledo.oh.gov/residents/homeowners/remodeling-construction/fences" target="_blank" rel="noopener" class="resource-link"><span class="tag">CODE</span> Toledo Fence Requirements</a>
-            <a href="https://cdn.toledo.oh.gov/uploads/documents/Plan-Commission/Forms/Certificate-of-Zoning-Compliance_20240926.pdf" target="_blank" rel="noopener" class="resource-link"><span class="tag">PERMITS</span> Certificate of Zoning Compliance Application</a>
-            <a href="https://citizenaccess.toledo.oh.gov/citizenaccess/" target="_blank" rel="noopener" class="resource-link"><span class="tag">PERMITS</span> Toledo ePermit Portal</a>
-            <a href="https://toledo.oh.gov/services/development/plan-commission" target="_blank" rel="noopener" class="resource-link"><span class="tag">DEPT</span> Toledo Plan Commission</a>
-          </div>
+        <div class="detail-card detail-notes-card" id="detail-notes-card" style="display:none;">
+          <h3>📝 Important Notes</h3>
+          <p id="detail-notes"></p>
         </div>
 
-        <div class="dept-contact">
-          <h3>Building/Zoning Department Contact</h3>
-          <p>Toledo Plan Commission: <a href="tel:4192451200">(419) 245-1200</a></p>
-          <p>One Government Center, Suite 1620, Toledo, OH 43604</p>
+        <div class="detail-card detail-process-card" id="detail-process-card">
+          <h3>📋 How to Apply</h3>
+          <p id="detail-process"></p>
+          <p id="detail-processing-time" class="processing-time"></p>
+        </div>
+
+        <div class="dept-contact" id="detail-contact"></div>
+
+        <div class="detail-disclaimer">
+          <p>⚠️ This information is provided as a general guide. Requirements change — always verify with your local building/zoning department. <strong>We handle all permit research & applications as part of our installation service.</strong></p>
         </div>
       </div>
     </div>
@@ -192,11 +111,14 @@ const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton Co
         <h2 class="section-title">Fence Permit <span class="gold">FAQs</span></h2>
       </div>
       <div class="faq-list">
-        <details class="faq-item"><summary>Do I need a fence permit in Toledo, Ohio?</summary><p>Yes, Toledo requires a Certificate of Zoning Compliance (ZONING permit, not building permit) for ALL fences regardless of height. Front yard fences limited to 3.5 feet maximum and must be 50%+ open.</p></details>
-        <details class="faq-item"><summary>Zoning Permit vs Building Permit — What's the difference?</summary><p>A ZONING permit verifies your fence meets location, height, and setback rules. A BUILDING permit verifies construction meets safety codes. Most Ohio cities require zoning only; Michigan cities typically require building permits.</p></details>
-        <details class="faq-item"><summary>What is the maximum fence height in Ohio?</summary><p>Most Ohio municipalities allow 4 feet in front yards (open style, 50%+ open) and 6 feet in side/rear yards (privacy fences OK).</p></details>
-        <details class="faq-item"><summary>Do I need a fence permit in Monroe, Michigan?</summary><p>Yes, Monroe MI requires a BUILDING permit ($50-$100). This is different from Ohio where zoning permits are more common.</p></details>
-        <details class="faq-item"><summary>What are corner lot fence rules?</summary><p>Corner lots have a "sight triangle" — an area near intersections where fences must be shorter (usually 2.5-3ft) so drivers can see. The exact dimensions vary by city.</p></details>
+        <details class="faq-item"><summary>Do I need a fence permit in Toledo, Ohio?</summary><p>Yes, Toledo requires a Certificate of Zoning Compliance ($50) for ALL fences regardless of height. This is a zoning certificate, not a building permit — fences under 6 feet don't need a building permit. Front yard fences are limited to 3.5 feet maximum. Apply online or at One Government Center.</p></details>
+        <details class="faq-item"><summary>Zoning Permit vs Building Permit — What's the difference?</summary><p>A <strong>zoning permit</strong> verifies your fence meets location, height, and setback rules. A <strong>building permit</strong> verifies construction meets safety codes. Most Ohio cities require zoning permits for fences. Michigan cities typically require building permits. Toledo is unique — it requires a "Certificate of Zoning Compliance" which functions as a zoning permit.</p></details>
+        <details class="faq-item"><summary>What is the maximum fence height in my area?</summary><p>It varies by city, but common limits in our service area: Front yards range from 3.5 to 4 feet (open style typically required). Side and rear yards are usually 6 feet, though Sylvania allows up to 7 feet. Unincorporated Ohio townships generally have no height restrictions. Click any city tile above for specific limits.</p></details>
+        <details class="faq-item"><summary>Do I need a fence permit in Michigan?</summary><p>Most Michigan municipalities require a building permit for fence installation. Monroe requires a Fence Installation Permit with a site plan showing property dimensions, building locations, and fence details. Michigan law requires contractors to be State of Michigan licensed. Requirements differ from Ohio — we handle all of this for you.</p></details>
+        <details class="faq-item"><summary>What about unincorporated townships in Ohio?</summary><p>Unincorporated townships in Ohio (like Springfield Twp, Jerusalem Twp, Monclova Twp) generally do NOT require fence permits or have zoning restrictions for fences. However, HOA rules may still apply, and you should always know your property lines. We recommend a survey for any project.</p></details>
+        <details class="faq-item"><summary>What are corner lot fence rules?</summary><p>Corner lots have a "sight triangle" — an area near intersections where fences must be shorter so drivers can see. Toledo limits fences to reduced height near intersections and considers corner lots as having two front yards. Sylvania prohibits obstructions within 80 feet of intersection centerlines. Specifics vary by city.</p></details>
+        <details class="faq-item"><summary>Do I need a permit for a pool fence?</summary><p>Pool fences have separate, stricter requirements. Both Ohio and Michigan require a minimum 4-foot (48-inch) fence around pools with self-closing, self-latching gates and maximum 4-inch openings. Sylvania requires 6-foot fencing for public pools. Local jurisdictions may have additional requirements beyond the state codes.</p></details>
+        <details class="faq-item"><summary>Does Ghareeb Fencing handle permits?</summary><p>Yes! We handle ALL permit research, applications, and coordination as part of our full-service installation. We know the specific requirements for every municipality in our service area. You don't need to visit any offices or fill out any forms — we take care of everything.</p></details>
       </div>
     </div>
   </section>
@@ -224,41 +146,49 @@ const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton Co
   .city-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; margin-bottom: 48px; }
   .city-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 16px 12px; border: 1px solid #e2e8f0; border-radius: 10px; background: white; cursor: pointer; transition: all 0.2s; position: relative; text-align: center; }
   .city-tile:hover { border-color: #d4af37; box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-2px); }
+  .city-tile.active { border-color: #d4af37; border-width: 2px; box-shadow: 0 4px 16px rgba(212,175,55,0.3); }
   .city-tile .dot { position: absolute; top: 8px; right: 8px; }
   .city-tile-name { font-weight: 600; font-size: 0.9rem; color: #1e3a5f; }
   .city-tile-county { font-size: 0.75rem; color: #94a3b8; }
   .city-tile.hidden { display: none; }
 
-  .city-detail { max-width: 900px; margin: 0 auto; }
-  .city-detail-header { margin-bottom: 24px; }
-  .city-detail-header h2 { font-family: var(--font-display); font-size: 2rem; color: #1e3a5f; }
-  .city-detail-header p { color: #64748b; }
-  .permit-badge { background: #059669; color: white; padding: 12px 24px; border-radius: 9999px; display: inline-block; font-weight: 600; font-size: 0.9rem; margin-bottom: 32px; }
+  .city-detail { max-width: 900px; margin: 0 auto; position: relative; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  .detail-close { position: absolute; top: -12px; right: -12px; width: 36px; height: 36px; border-radius: 50%; background: #1e3a5f; color: white; border: 2px solid white; cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 10; transition: background 0.2s; }
+  .detail-close:hover { background: #d4af37; }
+  .city-detail-header { margin-bottom: 16px; }
+  .city-detail-header h2 { font-family: var(--font-display); font-size: 2rem; color: #1e3a5f; margin-bottom: 4px; }
+  .city-detail-header p { color: #64748b; margin: 0; }
+  .permit-badge { padding: 10px 24px; border-radius: 9999px; display: inline-block; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; }
+  .permit-badge.permit-yes { background: #fef3c7; color: #92400e; }
+  .permit-badge.permit-no { background: #d1fae5; color: #065f46; }
+  .permit-badge.permit-varies { background: #e0e7ff; color: #3730a3; }
+  .verified-badge { display: inline-block; padding: 6px 16px; border-radius: 9999px; font-size: 0.8rem; font-weight: 600; margin-bottom: 24px; margin-left: 12px; }
+  .verified-badge.is-verified { background: #d1fae5; color: #065f46; }
+  .verified-badge.not-verified { background: #f1f5f9; color: #64748b; }
 
-  .height-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+  .height-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 24px 0; }
   .height-card { background: #f8fafc; border-radius: 12px; padding: 20px; text-align: center; border: 1px solid #e2e8f0; }
   .height-label { font-size: 0.85rem; color: #64748b; margin-bottom: 8px; }
-  .height-value { font-family: var(--font-display); font-size: 2.5rem; font-weight: 800; color: #1e3a5f; }
-  .height-note { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; }
+  .height-value { font-family: var(--font-display); font-size: 2rem; font-weight: 800; color: #1e3a5f; line-height: 1.1; }
+  .height-note { font-size: 0.78rem; color: #94a3b8; margin-top: 6px; line-height: 1.3; }
 
-  .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 32px; }
-  .detail-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+  .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
+  .detail-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; margin-bottom: 16px; }
   .detail-card h3 { font-size: 1rem; margin-bottom: 12px; color: #1e3a5f; }
-  .detail-card ul { list-style: none; padding: 0; }
-  .detail-card li { padding: 4px 0 4px 20px; position: relative; font-size: 0.9rem; color: #475569; }
-  .detail-card li::before { content: '•'; position: absolute; left: 4px; color: #d4af37; }
+  .detail-card p { font-size: 0.9rem; color: #475569; line-height: 1.6; margin: 0; }
+  .detail-notes-card { background: #fffbeb; border-color: #fde68a; }
+  .detail-process-card { background: #f0fdf4; border-color: #bbf7d0; }
+  .processing-time { margin-top: 8px !important; font-weight: 600; color: #1e3a5f !important; }
 
-  .resources-section { margin-bottom: 32px; }
-  .resources-section h3 { font-family: var(--font-heading); margin-bottom: 16px; color: #1e3a5f; }
-  .resource-links { display: flex; flex-direction: column; gap: 10px; }
-  .resource-link { display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; text-decoration: none; color: #1e3a5f; font-weight: 500; transition: border-color 0.2s; }
-  .resource-link:hover { border-color: #d4af37; }
-  .tag { background: #1e3a5f; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; }
-
-  .dept-contact { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; margin-bottom: 32px; }
-  .dept-contact h3 { margin-bottom: 8px; color: #1e3a5f; }
-  .dept-contact p { color: #475569; font-size: 0.9rem; }
+  .dept-contact { background: #f8fafc; border-radius: 12px; padding: 24px; border: 1px solid #e2e8f0; margin-bottom: 16px; }
+  .dept-contact h3 { margin-bottom: 12px; color: #1e3a5f; font-size: 1rem; }
+  .dept-contact p { color: #475569; font-size: 0.9rem; margin: 4px 0; }
   .dept-contact a { color: #d4af37; font-weight: 600; }
+  .dept-contact .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 24px; }
+
+  .detail-disclaimer { background: #fff7ed; border: 1px solid #fed7aa; border-radius: 12px; padding: 16px 24px; margin-top: 16px; }
+  .detail-disclaimer p { font-size: 0.85rem; color: #9a3412; line-height: 1.5; margin: 0; }
 
   .faq-list { max-width: 800px; margin: 0 auto; }
   .faq-item { border: 1px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; overflow: hidden; }
@@ -270,10 +200,14 @@ const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton Co
     .height-grid { grid-template-columns: 1fr; }
     .detail-grid { grid-template-columns: 1fr; }
     .city-grid { grid-template-columns: repeat(2, 1fr); }
+    .dept-contact .contact-grid { grid-template-columns: 1fr; }
   }
 </style>
 
-<script>
+<script define:vars={{ municipalities: permitsData.municipalities }}>
+  const muniMap = {};
+  municipalities.forEach(m => { muniMap[m.id] = m; });
+
   // County tab filtering
   document.querySelectorAll('.county-tab').forEach(tab => {
     tab.addEventListener('click', () => {
@@ -281,24 +215,122 @@ const counties = ['All Areas', 'Lucas County, OH', 'Wood County, OH', 'Fulton Co
       tab.classList.add('active');
       const county = tab.dataset.county;
       document.querySelectorAll('.city-tile').forEach(tile => {
-        if (county === 'All Areas' || tile.dataset.county === county) {
-          tile.classList.remove('hidden');
-        } else {
-          tile.classList.add('hidden');
-        }
+        tile.classList.toggle('hidden', county !== 'All Areas' && tile.dataset.county !== county);
       });
     });
   });
 
   // Search filtering
   document.getElementById('city-search')?.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
+    const q = e.target.value.toLowerCase();
+    document.querySelectorAll('.county-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector('.county-tab[data-county="All Areas"]')?.classList.add('active');
     document.querySelectorAll('.city-tile').forEach(tile => {
-      if (tile.dataset.name.includes(query)) {
-        tile.classList.remove('hidden');
-      } else {
-        tile.classList.add('hidden');
-      }
+      tile.classList.toggle('hidden', q.length > 0 && !tile.dataset.name.includes(q));
     });
   });
+
+  // City tile click
+  document.querySelectorAll('.city-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const m = muniMap[tile.dataset.id];
+      if (!m) return;
+      showDetail(m);
+      document.querySelectorAll('.city-tile').forEach(t => t.classList.remove('active'));
+      tile.classList.add('active');
+    });
+  });
+
+  // Close detail
+  document.getElementById('detail-close')?.addEventListener('click', () => {
+    document.getElementById('city-detail').style.display = 'none';
+    document.querySelectorAll('.city-tile').forEach(t => t.classList.remove('active'));
+  });
+
+  function showDetail(m) {
+    const el = document.getElementById('city-detail');
+    el.style.display = 'block';
+
+    document.getElementById('detail-name').textContent = m.name;
+    document.getElementById('detail-location').textContent = `${m.county}, ${m.state === 'OH' ? 'Ohio' : 'Michigan'}`;
+
+    // Permit badge
+    const badge = document.getElementById('detail-permit-badge');
+    if (m.permitRequired === true) {
+      let txt = '📋 ' + (m.permitType || 'Permit Required');
+      if (m.permitFee && m.permitFee.startsWith('$')) txt += ' — Fee: ' + m.permitFee;
+      badge.textContent = txt;
+      badge.className = 'permit-badge permit-yes';
+    } else if (m.permitRequired === false) {
+      badge.textContent = '✅ No Permit Required';
+      badge.className = 'permit-badge permit-no';
+    } else {
+      badge.textContent = '⚠️ ' + (m.permitType || 'Varies — Call to Verify');
+      badge.className = 'permit-badge permit-varies';
+    }
+
+    // Verified
+    const vb = document.getElementById('detail-verified');
+    if (m.verified) {
+      vb.textContent = '✓ Verified ' + (m.verifiedDate || '');
+      vb.className = 'verified-badge is-verified';
+    } else {
+      vb.textContent = 'Unverified — call to confirm';
+      vb.className = 'verified-badge not-verified';
+    }
+    vb.style.display = 'inline-block';
+
+    // Heights
+    const hr = m.heightRestrictions || {};
+    document.getElementById('detail-heights').innerHTML = `
+      <div class="height-card">
+        <div class="height-label">🏡 Front Yard</div>
+        <div class="height-value">${extractHeight(hr.frontYard)}</div>
+        <div class="height-note">${hr.frontYard || 'Contact for info'}</div>
+      </div>
+      <div class="height-card">
+        <div class="height-label">↔️ Side Yard</div>
+        <div class="height-value">${extractHeight(hr.sideYard)}</div>
+        <div class="height-note">${hr.sideYard || 'Contact for info'}</div>
+      </div>
+      <div class="height-card">
+        <div class="height-label">🌳 Rear Yard</div>
+        <div class="height-value">${extractHeight(hr.rearYard)}</div>
+        <div class="height-note">${hr.rearYard || 'Contact for info'}</div>
+      </div>`;
+
+    document.getElementById('detail-setbacks').textContent = m.setbackRequirements || 'Contact for info';
+    document.getElementById('detail-materials').textContent = m.materialRestrictions || 'Contact for info';
+
+    const nc = document.getElementById('detail-notes-card');
+    if (m.additionalNotes) {
+      document.getElementById('detail-notes').textContent = m.additionalNotes;
+      nc.style.display = 'block';
+    } else { nc.style.display = 'none'; }
+
+    document.getElementById('detail-process').textContent = m.applicationProcess || 'Contact building department';
+    document.getElementById('detail-processing-time').textContent = m.processingTime && m.processingTime !== 'N/A' ? '⏱ Processing time: ' + m.processingTime : '';
+
+    // Contact
+    const ci = m.contactInfo || {};
+    let ch = '<h3>📞 Contact Information</h3><div class="contact-grid">';
+    if (ci.department) ch += '<p><strong>Department:</strong> ' + ci.department + '</p>';
+    if (ci.phone) ch += '<p><strong>Phone:</strong> <a href="tel:' + ci.phone.replace(/[^\d+]/g,'') + '">' + ci.phone + '</a></p>';
+    if (ci.address) ch += '<p><strong>Address:</strong> ' + ci.address + '</p>';
+    if (ci.hours) ch += '<p><strong>Hours:</strong> ' + ci.hours + '</p>';
+    ch += '</div>';
+    if (ci.website) ch += '<p style="margin-top:12px"><a href="' + ci.website + '" target="_blank" rel="noopener" style="color:#d4af37;font-weight:600">🔗 Visit Official Website →</a></p>';
+    document.getElementById('detail-contact').innerHTML = ch;
+
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function extractHeight(str) {
+    if (!str) return '—';
+    const m = str.match(/([\d.]+)\s*(?:ft|feet|inch|")/i);
+    if (m) return m[1] + (str.toLowerCase().includes('inch') ? '"' : "'");
+    if (str.toLowerCase().includes('no zoning') || str.toLowerCase().includes('no restriction')) return 'None';
+    if (str.toLowerCase().includes('contact') || str.toLowerCase().includes('varies')) return '—';
+    return '—';
+  }
 </script>
