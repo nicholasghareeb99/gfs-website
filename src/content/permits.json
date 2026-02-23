@@ -138,15 +138,15 @@
         "rearYard": "6 ft max",
         "cornerLot": "Special requirements may apply"
       },
-      "setbackRequirements": "Must be within property boundaries",
+      "setbackRequirements": "No survey required for fence installation per city FAQ. Finished side must face adjacent property.",
       "materialRestrictions": "Contact building department",
       "additionalNotes": "Waterfront properties may have additional requirements",
       "processingTime": "Typically 3-5 business days",
       "contactInfo": {
         "department": "Oregon Building Department",
         "address": "5330 Seaman Road, Oregon, OH 43616",
-        "phone": "(419) 698-7047",
-        "website": "https://www.oregonohio.org",
+        "phone": "(419) 698-7071",
+        "website": "https://oregonohio.org/departments/building-zoning/",
         "hours": "Mon-Fri 8:00 AM - 4:30 PM"
       },
       "source": "City of Oregon",
@@ -1352,63 +1352,10 @@
       "source": "City of Gibraltar, MI",
       "verified": false,
       "verifiedDate": null
-    },
-    {
-      "id": "grosse-ile-twp",
-      "name": "Grosse Ile Twp",
-      "county": "Wayne County",
-      "state": "MI",
-      "permitRequired": true,
-      "permitType": "Building Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Grosse Ile Twp Building Department",
-      "heightRestrictions": {
-        "frontYard": "Contact city",
-        "sideYard": "6 ft typical max",
-        "rearYard": "6 ft typical max",
-        "cornerLot": "Contact city"
-      },
-      "setbackRequirements": "Contact building department",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "Grosse Ile Twp Building Department",
-        "address": null,
-        "phone": "(734) 676-4422",
-        "website": "https://www.grosseile.com",
-        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
-      },
-      "source": "City of Grosse Ile Twp, MI",
-      "verified": false,
-      "verifiedDate": null
-    },
-    {
-      "id": "huron-twp",
-      "name": "Huron Twp",
-      "county": "Wayne County",
-      "state": "MI",
-      "permitRequired": true,
-      "permitType": "Building Permit",
-      "permitFee": "Contact for current fee",
-      "applicationProcess": "Apply through Huron Twp Building Department",
-      "heightRestrictions": {
-        "frontYard": "Contact city",
-        "sideYard": "6 ft typical max",
-        "rearYard": "6 ft typical max",
-        "cornerLot": "Contact city"
-      },
-      "setbackRequirements": "Contact building department",
-      "materialRestrictions": "Contact for approved materials",
-      "additionalNotes": "Michigan building codes apply. Contractor must be State of Michigan licensed.",
-      "processingTime": "Varies",
-      "contactInfo": {
-        "department": "Huron Twp Building Department",
-        "address": null,
-        "phone": "(734) 753-4466",
-        "website": "https://www.hurontwp.com",
-        "hours": "Mon-Fri 8:00 AM - 5:00 PM"
-      . A professional survey is recommended for any uncertainty.",
+    }
+  ],
+  "generalTips": {
+    "survey": "A professional survey is recommended for any uncertainty.",
     "utilities": "Ohio law requires calling 811 before digging. We handle this as part of our installation process.",
     "hoa": "If you live in a neighborhood with a Homeowners Association, check with them for any additional restrictions or approval requirements.",
     "neighbors": "While not legally required in most cases, discussing your fence plans with neighbors can prevent disputes.",
