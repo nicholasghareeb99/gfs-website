@@ -1,61 +1,67 @@
 ---
-const firebaseConfig = {
-  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
-  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
-};
+/**
+ * EditMode.astro — Squarespace-like visual editor for GFS website
+ * Features: Inline text editing, drag-and-drop, image replacement,
+ *           nav/topbar editing, per-element color/font, page toggle,
+ *           localStorage persistence
+ */
 ---
 
-<!-- Edit Mode Toolbar -->
+<!-- Edit Toolbar -->
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
     <div class="et-left">
-      <div class="et-logo">✏️ Edit Mode</div>
+      <div class="et-logo">✏️ GFS Editor</div>
       <span class="et-page" id="et-page-name"></span>
     </div>
     <div class="et-center">
       <button id="et-toggle" class="et-btn et-btn-edit" title="Toggle editing">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-        <span>Edit</span>
+        <span>Edit Page</span>
+      </button>
+      <button id="et-nav-btn" class="et-btn" title="Edit navigation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <span>Nav</span>
       </button>
       <button id="et-pages-btn" class="et-btn" title="Manage pages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span>Pages</span>
       </button>
-      <button id="et-colors-btn" class="et-btn" title="Edit colors">
+      <button id="et-colors-btn" class="et-btn" title="Brand colors">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10c0 2-1 3-3 3h-1.9c-.8 0-1.1.9-.5 1.4.5.4.8 1 .8 1.6 0 1.7-1.3 3-3 3z"/></svg>
         <span>Colors</span>
+      </button>
+      <button id="et-seo-btn" class="et-btn" title="SEO settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>SEO</span>
       </button>
     </div>
     <div class="et-right">
       <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
       <button id="et-save" class="et-btn et-btn-save" style="display:none;">💾 Save</button>
       <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
-      <button id="et-logout" class="et-btn et-btn-ghost">↪ Logout</button>
+      <button id="et-logout" class="et-btn et-btn-ghost">↪ Exit</button>
     </div>
   </div>
+</div>
+<!-- Element Style Popover -->
+<div id="et-style-popover" class="et-popover" style="display:none;">
+  <div class="et-pop-row"><label>Text Color</label><input type="color" id="et-pop-color" /></div>
+  <div class="et-pop-row"><label>Background</label><input type="color" id="et-pop-bg" /></div>
+  <div class="et-pop-row"><label>Font Size</label><input type="range" id="et-pop-size" min="10" max="72" value="16" /><span id="et-pop-size-val">16px</span></div>
+  <div class="et-pop-row"><label>Weight</label><select id="et-pop-weight"><option value="400">Normal</option><option value="500">Medium</option><option value="600">Semi-Bold</option><option value="700">Bold</option><option value="800">Extra Bold</option></select></div>
+  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">◀</button><button data-align="center">◆</button><button data-align="right">▶</button></div></div>
+  <div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">↕ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
 </div>
 
 <!-- Login Modal -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>🔐 Admin Login</h3>
-    <div style="margin-bottom:16px;">
-      <label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label>
-      <input type="text" id="et-login-email" placeholder="admin" autocomplete="off" />
-    </div>
-    <div style="margin-bottom:16px;">
-      <label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label>
-      <input type="password" id="et-login-password" placeholder="••••••••" />
-    </div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label><input type="text" id="et-login-email" placeholder="admin" autocomplete="username" /></div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="••••••••" autocomplete="current-password" /></div>
     <div id="et-login-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
-    <div class="et-modal-actions">
-      <button id="et-login-cancel" class="et-btn">Cancel</button>
-      <button id="et-login-submit" class="et-btn et-btn-save">Login</button>
-    </div>
+    <div class="et-modal-actions"><button id="et-login-cancel" class="et-btn">Cancel</button><button id="et-login-submit" class="et-btn et-btn-save">Login</button></div>
   </div>
 </div>
 
@@ -63,21 +69,10 @@ const firebaseConfig = {
 <div id="et-image-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>Replace Image</h3>
-    <div class="et-upload-zone" id="et-upload-zone">
-      <p>📷 Drag & drop or click to browse</p>
-      <input type="file" id="et-file-input" accept="image/*" style="display:none;" />
-    </div>
-    <div id="et-upload-preview" style="display:none;margin:12px 0;">
-      <img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" />
-    </div>
-    <div style="margin:12px 0;">
-      <label style="font-size:13px;color:#6b7280;">Or enter image URL:</label>
-      <input type="url" id="et-image-url" placeholder="https://..." style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;margin-top:4px;box-sizing:border-box;" />
-    </div>
-    <div class="et-modal-actions">
-      <button id="et-image-cancel" class="et-btn">Cancel</button>
-      <button id="et-image-apply" class="et-btn et-btn-save">Apply</button>
-    </div>
+    <div class="et-upload-zone" id="et-upload-zone"><p>📷 Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
+    <div id="et-upload-preview" style="display:none;margin:12px 0;"><img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" /></div>
+    <div style="margin:12px 0;"><label style="font-size:13px;color:#6b7280;">Or enter image URL:</label><input type="url" id="et-image-url" placeholder="https://..." /></div>
+    <div class="et-modal-actions"><button id="et-image-cancel" class="et-btn">Cancel</button><button id="et-image-apply" class="et-btn et-btn-save">Apply</button></div>
   </div>
 </div>
 
@@ -85,12 +80,9 @@ const firebaseConfig = {
 <div id="et-pages-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:500px;">
     <h3>📄 Page Manager</h3>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off to show or hide them from the navigation.</p>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off in the navigation.</p>
     <div id="et-pages-list"></div>
-    <div class="et-modal-actions" style="margin-top:16px;">
-      <button id="et-pages-close" class="et-btn">Close</button>
-      <button id="et-pages-save" class="et-btn et-btn-save">Save</button>
-    </div>
+    <div class="et-modal-actions" style="margin-top:16px;"><button id="et-pages-close" class="et-btn">Close</button><button id="et-pages-save" class="et-btn et-btn-save">Save</button></div>
   </div>
 </div>
 
@@ -98,372 +90,29 @@ const firebaseConfig = {
 <div id="et-colors-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:480px;">
     <h3>🎨 Brand Colors</h3>
-    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit brand colors. Changes preview live.</p>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Changes preview live.</p>
     <div id="et-colors-list"></div>
-    <div class="et-modal-actions" style="margin-top:16px;">
-      <button id="et-colors-close" class="et-btn">Close</button>
-      <button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button>
-    </div>
+    <div class="et-modal-actions" style="margin-top:16px;"><button id="et-colors-close" class="et-btn">Close</button><button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button></div>
   </div>
 </div>
 
-<style is:global>
-  #edit-toolbar{position:fixed;top:0;left:0;right:0;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-  .et-bar{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;color:#fff;padding:8px 16px;box-shadow:0 2px 12px rgba(0,0,0,.3);gap:8px;flex-wrap:wrap}
-  .et-left,.et-center,.et-right{display:flex;align-items:center;gap:8px}
-  .et-logo{font-weight:700;font-size:14px}.et-page{font-size:12px;color:rgba(255,255,255,.6)}
-  .et-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:0 0;color:#fff;cursor:pointer;font-size:13px;transition:.15s;white-space:nowrap}
-  .et-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
-  .et-btn svg{flex-shrink:0}
-  .et-btn-edit.active{background:#059669;border-color:#059669}
-  .et-btn-save{background:#059669!important;border-color:#059669!important}
-  .et-btn-save:hover{background:#047857!important}
-  .et-btn-ghost{border-color:transparent;opacity:.7}.et-btn-ghost:hover{opacity:1}
-  .et-changes{font-size:12px;color:#fbbf24;font-weight:600}
-  .et-modal{display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
-  .et-modal-content{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:420px;max-height:85vh;overflow-y:auto;color:#1f2937}
-  .et-modal-content h3{font-size:1.2rem;margin:0 0 16px;color:#1e3a5f}
-  .et-modal-content input[type="text"],.et-modal-content input[type="password"]{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;box-sizing:border-box}
-  .et-modal-actions{display:flex;gap:10px;justify-content:flex-end}
-  .et-modal-actions .et-btn{color:#374151;border-color:#d1d5db}.et-modal-actions .et-btn-save{color:#fff}
-  .et-upload-zone{border:2px dashed #d1d5db;border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:.2s}
-  .et-upload-zone:hover{border-color:#3b82f6}
+<!-- Nav Editor Modal -->
+<div id="et-nav-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content" style="max-width:600px;">
+    <h3>🧭 Navigation Editor</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit top bar text and nav links.</p>
+    <div id="et-nav-topbar" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Top Bar Items</h4><div id="et-topbar-items"></div></div>
+    <div id="et-nav-links" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Main Navigation</h4><div id="et-nav-items"></div></div>
+    <div class="et-modal-actions"><button id="et-nav-close" class="et-btn">Close</button><button id="et-nav-save" class="et-btn et-btn-save">Save Nav</button></div>
+  </div>
+</div>
 
-  .et-page-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px}
-  .et-page-item-name{font-weight:600;font-size:14px;color:#1f2937}
-  .et-page-item-path{font-size:12px;color:#9ca3af}
-  .et-page-toggle{position:relative;width:44px;height:24px;display:inline-block}
-  .et-page-toggle input{opacity:0;width:0;height:0}
-  .et-page-toggle .slider{position:absolute;inset:0;background:#d1d5db;border-radius:12px;cursor:pointer;transition:.3s}
-  .et-page-toggle .slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-  .et-page-toggle input:checked+.slider{background:#059669}
-  .et-page-toggle input:checked+.slider:before{transform:translateX(20px)}
-
-  .et-color-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
-  .et-color-item:last-child{border-bottom:none}
-  .et-color-swatch{width:40px;height:40px;border-radius:8px;border:2px solid #e5e7eb;overflow:hidden;position:relative;flex-shrink:0}
-  .et-color-swatch input[type="color"]{position:absolute;inset:-8px;width:60px;height:60px;border:none;cursor:pointer}
-  .et-color-label{flex:1}.et-color-label-name{font-weight:600;font-size:13px;color:#1f2937}
-  .et-color-label-var{font-size:11px;color:#9ca3af;font-family:monospace}
-  .et-color-hex{font-family:monospace;font-size:13px;color:#6b7280;width:80px;text-align:right}
-
-  body.edit-mode-active [data-et-editable]:hover{outline:2px dashed #3b82f6!important;outline-offset:2px;cursor:text}
-  body.edit-mode-active [data-et-editable]:focus{outline:2px solid #3b82f6!important;outline-offset:2px;background:rgba(59,130,246,.05)}
-  body.edit-mode-active [data-et-img]{cursor:pointer;position:relative;z-index:10}
-  body.edit-mode-active [data-et-img]:hover{outline:2px dashed #f59e0b!important;outline-offset:2px}
-  body.edit-mode-active .hero-bg,body.edit-mode-active .hero-overlay,body.edit-mode-active .hero-gradient{pointer-events:none!important}
-</style>
-
-<script define:vars={{ firebaseConfig }}>
-(function(){
-  'use strict';
-  const FB_CFG=firebaseConfig,hasFirebaseConfig=FB_CFG&&FB_CFG.projectId&&FB_CFG.projectId!=='',SP='gfs_edit_';
-  let user=null,auth=null,db=null,storage=null,firebaseLoaded=false,firebaseLoading=false,editActive=false;
-  let changes=new Map(),originalContent=new Map();
-
-  // === PAGE VISIBILITY (runs on every load) ===
-  function applyHiddenPages(){
-    try{
-      const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');
-      if(!h.length)return;
-      document.querySelectorAll('.nav-links>li').forEach(li=>{
-        const a=li.querySelector('a');if(!a)return;
-        const href=a.getAttribute('href');
-        if(h.includes(href)){li.style.display='none';li.setAttribute('data-page-hidden','true')}
-      });
-      document.querySelectorAll('.dropdown li').forEach(li=>{
-        const a=li.querySelector('a');if(!a)return;
-        if(h.includes(a.getAttribute('href')))li.style.display='none';
-      });
-    }catch(e){}
-  }
-
-  // === CONTENT OVERRIDES (localStorage) ===
-  function applyLocalOverrides(){
-    try{
-      const pk=getPageKey();
-      const saved=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');
-      if(!Object.keys(saved).length)return;
-      function apply(){
-        const textEls=getEditableTextElements(),imgs=getEditableImages();
-        Object.entries(saved).forEach(([k,v])=>{
-          try{
-            if(k.startsWith('img:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].src=v;}
-            else{const i=parseInt(k);if(textEls[i]){if(textEls[i].children.length>0)textEls[i].innerHTML=v;else textEls[i].textContent=v;}}
-          }catch(e){}
-        });
-      }
-      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
-    }catch(e){}
-  }
-
-  function applyColorOverrides(){
-    try{
-      const c=JSON.parse(localStorage.getItem(SP+'colors')||'{}');
-      Object.entries(c).forEach(([v,val])=>document.documentElement.style.setProperty(v,val));
-    }catch(e){}
-  }
-
-  const initOverrides=()=>{applyHiddenPages();applyLocalOverrides();applyColorOverrides();};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOverrides);else initOverrides();
-
-  // === HELPERS ===
-  function getPageKey(){return(window.location.pathname.replace(/^\/|\/$/g,'')||'home').replace(/\//g,'-')}
-
-  function getEditableTextElements(){
-    const sel='h1,h2,h3,h4,h5,h6,p:not(.et-page-item-path):not(.et-page-item-name),blockquote,figcaption,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,span.highlight,span.gold,.cta-content h2,.cta-content p,details summary,details p,[data-editable]';
-    const els=[];
-    document.querySelectorAll(sel).forEach(el=>{
-      if(el.closest('#edit-toolbar')||el.closest('.et-modal')||el.closest('nav')||el.closest('script')||el.closest('style'))return;
-      if(!el.textContent?.trim())return;
-      if(el.closest('[data-et-editable]')&&el.closest('[data-et-editable]')!==el)return;
-      els.push(el);
-    });
-    return els;
-  }
-
-  function getEditableImages(){
-    const imgs=[];
-    document.querySelectorAll('img').forEach(img=>{
-      if(img.closest('#edit-toolbar')||img.closest('.et-modal')||img.closest('nav'))return;
-      if(img.width<30||img.height<30)return;
-      imgs.push(img);
-    });
-    return imgs;
-  }
-
-  // === KEYBOARD / URL TRIGGER ===
-  document.addEventListener('keydown',function(e){
-    if(e.ctrlKey&&e.shiftKey&&(e.key==='E'||e.key==='e'||e.code==='KeyE')){e.preventDefault();e.stopPropagation();handleEditShortcut();return}
-    const isMac=/Mac|iPhone|iPad/i.test(navigator.userAgent);
-    if(isMac&&e.metaKey&&e.shiftKey&&(e.key==='.'||e.key==='L'||e.key==='l')){e.preventDefault();e.stopPropagation();handleEditShortcut()}
-  });
-  if(window.location.search.includes('edit')){
-    const fn=()=>setTimeout(handleEditShortcut,500);
-    if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',fn);else fn();
-  }
-
-  async function handleEditShortcut(){
-    if(user&&document.getElementById('edit-toolbar').style.display!=='none'){editActive?deactivateEditing():activateEditing();return}
-    if(user){showToolbar();activateEditing();return}
-    showLoginModal();
-  }
-
-  // === LOGIN ===
-  function showLoginModal(){
-    const modal=document.getElementById('et-login-modal'),ei=document.getElementById('et-login-email'),pi=document.getElementById('et-login-password'),err=document.getElementById('et-login-error');
-    modal.style.display='flex';err.style.display='none';ei.value='';pi.value='';ei.focus();
-    document.getElementById('et-login-cancel').onclick=()=>{modal.style.display='none'};
-    const enter=e=>{if(e.key==='Enter')doLogin()};
-    ei.addEventListener('keydown',enter);pi.addEventListener('keydown',enter);
-    document.getElementById('et-login-submit').onclick=doLogin;
-
-    async function doLogin(){
-      const email=ei.value.trim(),pass=pi.value;
-      if(!email||!pass){err.textContent='Enter username and password.';err.style.display='block';return}
-      const btn=document.getElementById('et-login-submit');btn.innerHTML='⏳ Logging in...';btn.disabled=true;err.style.display='none';
-
-      if(email==='admin'&&pass==='admin11'){
-        user={uid:'local-admin',email:'admin@ghareebfencing.com'};
-        modal.style.display='none';document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Strict';
-        showToolbar();activateEditing();btn.innerHTML='Login';btn.disabled=false;
-        if(hasFirebaseConfig&&!firebaseLoaded)loadFirebaseSDK().catch(()=>{});
-        return;
-      }
-
-      if(hasFirebaseConfig){
-        try{
-          if(!firebaseLoaded)await loadFirebaseSDK();
-          const le=email.includes('@')?email:email+'@ghareebfencing.com';
-          const c=await auth.signInWithEmailAndPassword(le,pass);user=c.user;
-          modal.style.display='none';document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Strict';
-          showToolbar();activateEditing();
-        }catch(e){err.textContent=e.code==='auth/too-many-requests'?'Too many attempts.':'Invalid credentials.';err.style.display='block'}
-      }else{err.textContent='Invalid username or password.';err.style.display='block'}
-      btn.innerHTML='Login';btn.disabled=false;
-    }
-  }
-
-  // === FIREBASE ===
-  function loadScript(s){return new Promise((r,j)=>{if(document.querySelector(`script[src="${s}"]`)){r();return}const el=document.createElement('script');el.src=s;el.onload=r;el.onerror=j;document.head.appendChild(el)})}
-  async function loadFirebaseSDK(){
-    if(!hasFirebaseConfig)throw new Error('No config');firebaseLoading=true;
-    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
-    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js');
-    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js');
-    await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js');
-    if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
-    auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();firebaseLoaded=true;firebaseLoading=false;
-  }
-
-  // Auto-init
-  if(document.cookie.includes('gfs_admin=1')){
-    if(hasFirebaseConfig){loadFirebaseSDK().then(()=>{auth.onAuthStateChanged(u=>{user=u;if(u)showToolbar()})}).catch(()=>{});}
-    else{user={uid:'local-admin'};const fn=()=>showToolbar();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn);else fn();}
-  }
-
-  // === TOOLBAR ===
-  function showToolbar(){
-    const t=document.getElementById('edit-toolbar');if(!t)return;
-    t.style.display='block';document.body.style.paddingTop='48px';
-    document.getElementById('et-page-name').textContent=document.title.split('|')[0].trim();
-    bindToolbarEvents();
-  }
-  function hideToolbar(){const t=document.getElementById('edit-toolbar');if(t)t.style.display='none';document.body.style.paddingTop='';deactivateEditing();}
-  function bindToolbarEvents(){
-    document.getElementById('et-toggle').onclick=()=>{editActive?deactivateEditing():activateEditing()};
-    document.getElementById('et-save').onclick=saveChanges;
-    document.getElementById('et-discard').onclick=discardChanges;
-    document.getElementById('et-logout').onclick=()=>{document.cookie='gfs_admin=;path=/;max-age=0';if(auth)auth.signOut();user=null;hideToolbar();window.location.href=window.location.pathname};
-    document.getElementById('et-pages-btn').onclick=showPageManager;
-    document.getElementById('et-colors-btn').onclick=showColorEditor;
-  }
-
-  // === ACTIVATE / DEACTIVATE ===
-  function activateEditing(){
-    editActive=true;document.body.classList.add('edit-mode-active');
-    const btn=document.getElementById('et-toggle');btn.classList.add('active');btn.querySelector('span').textContent='Stop Editing';
-    const textEls=getEditableTextElements();
-    textEls.forEach((el,i)=>{el.setAttribute('data-et-editable',i);el.contentEditable='true';originalContent.set(el,el.innerHTML);el.addEventListener('input',onTextEdit);el.addEventListener('blur',onTextEdit)});
-    const imgs=getEditableImages();
-    imgs.forEach((img,i)=>{img.setAttribute('data-et-img',i);img._editClick=e=>{e.preventDefault();e.stopPropagation();openImageModal(img,'img:'+i)};img.addEventListener('click',img._editClick)});
-    document.querySelectorAll('[data-page-hidden]').forEach(li=>{li.style.display='';li.style.opacity='0.4'});
-    showToast('✏️ Editing: '+textEls.length+' text, '+imgs.length+' images');
-  }
-
-  function deactivateEditing(){
-    editActive=false;document.body.classList.remove('edit-mode-active');
-    const btn=document.getElementById('et-toggle');if(btn){btn.classList.remove('active');btn.querySelector('span').textContent='Edit'}
-    document.querySelectorAll('[data-et-editable]').forEach(el=>{el.contentEditable='false';el.removeAttribute('data-et-editable');el.removeEventListener('input',onTextEdit);el.removeEventListener('blur',onTextEdit)});
-    document.querySelectorAll('[data-et-img]').forEach(img=>{if(img._editClick){img.removeEventListener('click',img._editClick);delete img._editClick}img.removeAttribute('data-et-img')});
-    applyHiddenPages();
-  }
-
-  // === TRACK CHANGES ===
-  function onTextEdit(e){
-    const el=e.target.closest('[data-et-editable]');if(!el)return;
-    const idx=el.getAttribute('data-et-editable'),pk=getPageKey();
-    if(!changes.has(pk))changes.set(pk,{});
-    changes.get(pk)[idx]=el.children.length>0?el.innerHTML:el.textContent.trim();
-    updateChangesCount();
-  }
-  function trackImageChange(key,src){const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)[key]=src;updateChangesCount();}
-  function updateChangesCount(){
-    let c=0;changes.forEach(f=>{c+=Object.keys(f).length});
-    const el=document.getElementById('et-changes'),sb=document.getElementById('et-save'),db2=document.getElementById('et-discard');
-    if(c>0){el.style.display='inline';el.textContent=c+' change'+(c!==1?'s':'');sb.style.display='inline-flex';db2.style.display='inline-flex';}
-    else{el.style.display='none';sb.style.display='none';db2.style.display='none';}
-  }
-
-  // === SAVE ===
-  async function saveChanges(){
-    if(changes.size===0)return;
-    const sb=document.getElementById('et-save');sb.innerHTML='⏳ Saving...';sb.disabled=true;
-    try{
-      changes.forEach((fields,pk)=>{
-        const existing=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');
-        Object.assign(existing,fields);
-        localStorage.setItem(SP+'content_'+pk,JSON.stringify(existing));
-      });
-      if(db){try{
-        const batch=db.batch();
-        changes.forEach((fields,pk)=>{batch.set(db.doc('pageEdits/'+pk),{...fields,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})});
-        await batch.commit();
-      }catch(e){console.warn('[Edit] Firestore save failed, localStorage OK:',e.message)}}
-      document.querySelectorAll('[data-et-editable]').forEach(el=>{originalContent.set(el,el.innerHTML)});
-      changes.clear();updateChangesCount();
-      sb.innerHTML='✅ Saved!';showToast('✅ Changes saved!');
-      setTimeout(()=>{sb.innerHTML='💾 Save';sb.disabled=false},2000);
-    }catch(e){sb.innerHTML='❌ Error';sb.disabled=false;showToast('❌ Save failed: '+e.message)}
-  }
-  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('🗑️ Discarded')}
-
-  // === IMAGE EDITING ===
-  let curImgEl=null,curImgKey=null;
-  function openImageModal(el,key){
-    curImgEl=el;curImgKey=key;
-    const m=document.getElementById('et-image-modal');m.style.display='flex';
-    document.getElementById('et-image-url').value='';document.getElementById('et-upload-preview').style.display='none';document.getElementById('et-file-input').value='';
-    document.getElementById('et-upload-zone').onclick=()=>document.getElementById('et-file-input').click();
-    document.getElementById('et-file-input').onchange=e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){alert('Images only');return}const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)};
-    document.getElementById('et-image-cancel').onclick=()=>{m.style.display='none'};
-    document.getElementById('et-image-apply').onclick=applyImage;
-    const z=document.getElementById('et-upload-zone');
-    z.ondragover=e=>{e.preventDefault();z.style.borderColor='#3b82f6'};z.ondragleave=()=>{z.style.borderColor='#d1d5db'};
-    z.ondrop=e=>{e.preventDefault();z.style.borderColor='#d1d5db';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){const dt=new DataTransfer();dt.items.add(f);document.getElementById('et-file-input').files=dt.files;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)}};
-  }
-
-  async function applyImage(){
-    if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';
-    if(fi.files[0]&&storage){
-      const f=fi.files[0],p='website-images/'+Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-      const ab=document.getElementById('et-image-apply');ab.innerHTML='⏳ Uploading...';ab.disabled=true;
-      try{const ref=storage.ref(p);await ref.put(f);src=await ref.getDownloadURL();}catch(e){src=document.getElementById('et-preview-img').src}
-      ab.innerHTML='Apply';ab.disabled=false;
-    }else if(fi.files[0]){src=document.getElementById('et-preview-img').src}
-    else if(ui.value.trim()){src=ui.value.trim()}
-    if(src){if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}
-    document.getElementById('et-image-modal').style.display='none';curImgEl=null;
-  }
-
-  // === PAGE MANAGER ===
-  function showPageManager(){
-    const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');
-    const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');
-    const pages=[
-      {name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},
-      {name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},
-      {name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},
-      {name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},
-      {name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},
-      {name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},
-      {name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},
-      {name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'}
-    ];
-    l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');
-    m.style.display='flex';
-    document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};
-    document.getElementById('et-pages-save').onclick=()=>{
-      const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});
-      localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));
-      if(db)db.doc('settings/navigation').set({hiddenPages:nh},{merge:true}).catch(()=>{});
-      m.style.display='none';applyHiddenPages();showToast('✅ Pages saved! Refresh to see changes.');
-    };
-  }
-
-  // === COLOR EDITOR ===
-  function showColorEditor(){
-    const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');
-    const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');
-    const vars=[
-      {name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},
-      {name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},
-      {name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},
-      {name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'}
-    ];
-    l.innerHTML=vars.map(c=>{
-      const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;
-      return '<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>';
-    }).join('');
-    l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});
-    m.style.display='flex';
-    document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};
-    document.getElementById('et-colors-save').onclick=()=>{
-      const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});
-      localStorage.setItem(SP+'colors',JSON.stringify(nc));
-      if(db)db.doc('settings/branding').set({colors:nc},{merge:true}).catch(()=>{});
-      m.style.display='none';showToast('✅ Colors saved!');
-    };
-  }
-
-  // === TOAST ===
-  function showToast(msg){
-    const ex=document.getElementById('et-toast');if(ex)ex.remove();
-    const t=document.createElement('div');t.id='et-toast';t.textContent=msg;
-    Object.assign(t.style,{position:'fixed',bottom:'20px',left:'50%',transform:'translateX(-50%)',background:'#1a1a2e',color:'#fff',padding:'10px 24px',borderRadius:'8px',fontSize:'14px',zIndex:'9999999',boxShadow:'0 4px 12px rgba(0,0,0,.3)',fontFamily:'-apple-system,sans-serif'});
-    document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000);
-  }
-
-  window.GFS_EditMode={loadFirebaseSDK:()=>hasFirebaseConfig?loadFirebaseSDK():Promise.resolve()};
-})();
-</script>
+<!-- SEO Editor Modal -->
+<div id="et-seo-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content" style="max-width:550px;">
+    <h3>🔍 Page SEO</h3>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Page Title</label><input type="text" id="et-seo-title" /><span id="et-seo-title-count" style="font-size:11px;color:#9ca3af;"></span></div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Meta Description</label><textarea id="et-seo-desc" rows="3" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box;"></textarea><span id="et-seo-desc-count" style="font-size:11px;color:#9ca3af;"></span></div>
+    <div class="et-modal-actions"><button id="et-seo-close" class="et-btn">Close</button><button id="et-seo-save" class="et-btn et-btn-save">Save SEO</button></div>
+  </div>
+</div>
