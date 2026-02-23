@@ -107,7 +107,7 @@ const firebaseConfig = {
   </div>
 </div>
 
-<style>
+<style is:global>
   #edit-toolbar{position:fixed;top:0;left:0;right:0;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
   .et-bar{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;color:#fff;padding:8px 16px;box-shadow:0 2px 12px rgba(0,0,0,.3);gap:8px;flex-wrap:wrap}
   .et-left,.et-center,.et-right{display:flex;align-items:center;gap:8px}
@@ -149,8 +149,9 @@ const firebaseConfig = {
 
   body.edit-mode-active [data-et-editable]:hover{outline:2px dashed #3b82f6!important;outline-offset:2px;cursor:text}
   body.edit-mode-active [data-et-editable]:focus{outline:2px solid #3b82f6!important;outline-offset:2px;background:rgba(59,130,246,.05)}
-  body.edit-mode-active [data-et-img]{cursor:pointer;position:relative}
+  body.edit-mode-active [data-et-img]{cursor:pointer;position:relative;z-index:10}
   body.edit-mode-active [data-et-img]:hover{outline:2px dashed #f59e0b!important;outline-offset:2px}
+  body.edit-mode-active .hero-bg,body.edit-mode-active .hero-overlay,body.edit-mode-active .hero-gradient{pointer-events:none!important}
 </style>
 
 <script define:vars={{ firebaseConfig }}>
