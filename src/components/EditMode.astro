@@ -9,7 +9,7 @@ const firebaseConfig = {
 };
 ---
 
-<!-- Edit Mode: Only loads Firebase SDK when needed, activates for authenticated admins -->
+<!-- Edit Mode Toolbar -->
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
     <div class="et-left">
@@ -21,39 +21,37 @@ const firebaseConfig = {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         <span>Edit</span>
       </button>
-      <button id="et-add-section" class="et-btn" title="Add content" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-        <span>Add</span>
+      <button id="et-pages-btn" class="et-btn" title="Manage pages">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <span>Pages</span>
+      </button>
+      <button id="et-colors-btn" class="et-btn" title="Edit colors">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10c0 2-1 3-3 3h-1.9c-.8 0-1.1.9-.5 1.4.5.4.8 1 .8 1.6 0 1.7-1.3 3-3 3z"/></svg>
+        <span>Colors</span>
       </button>
     </div>
     <div class="et-right">
       <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
-      <button id="et-save" class="et-btn et-btn-save" style="display:none;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        Save Changes
-      </button>
+      <button id="et-save" class="et-btn et-btn-save" style="display:none;">💾 Save</button>
       <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
-      <button id="et-logout" class="et-btn et-btn-ghost">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Logout
-      </button>
+      <button id="et-logout" class="et-btn et-btn-ghost">↪ Logout</button>
     </div>
   </div>
 </div>
 
-<!-- Login modal for Ctrl+Shift+E (Win) or Cmd+Shift+. (Mac) or ?edit URL -->
+<!-- Login Modal -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>🔐 Admin Login</h3>
-    <div style="margin-bottom: 16px;">
-      <label style="display:block; margin-bottom: 6px; font-size: 14px; color: #6b7280;">Username</label>
-      <input type="text" id="et-login-email" placeholder="admin" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+    <div style="margin-bottom:16px;">
+      <label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label>
+      <input type="text" id="et-login-email" placeholder="admin" autocomplete="off" />
     </div>
-    <div style="margin-bottom: 16px;">
-      <label style="display:block; margin-bottom: 6px; font-size: 14px; color: #6b7280;">Password</label>
-      <input type="password" id="et-login-password" placeholder="••••••••" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;" />
+    <div style="margin-bottom:16px;">
+      <label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label>
+      <input type="password" id="et-login-password" placeholder="••••••••" />
     </div>
-    <div id="et-login-error" style="color: #ef4444; font-size: 13px; margin-bottom: 12px; display: none;"></div>
+    <div id="et-login-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
     <div class="et-modal-actions">
       <button id="et-login-cancel" class="et-btn">Cancel</button>
       <button id="et-login-submit" class="et-btn et-btn-save">Login</button>
@@ -61,21 +59,20 @@ const firebaseConfig = {
   </div>
 </div>
 
-<!-- Image upload modal -->
+<!-- Image Upload Modal -->
 <div id="et-image-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>Replace Image</h3>
     <div class="et-upload-zone" id="et-upload-zone">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      <p>Drag & drop an image or click to browse</p>
+      <p>📷 Drag & drop or click to browse</p>
       <input type="file" id="et-file-input" accept="image/*" style="display:none;" />
     </div>
-    <div class="et-upload-preview" id="et-upload-preview" style="display:none;">
-      <img id="et-preview-img" src="" alt="Preview" />
+    <div id="et-upload-preview" style="display:none;margin:12px 0;">
+      <img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" />
     </div>
-    <div class="et-modal-url">
-      <label>Or enter image URL:</label>
-      <input type="url" id="et-image-url" placeholder="https://..." />
+    <div style="margin:12px 0;">
+      <label style="font-size:13px;color:#6b7280;">Or enter image URL:</label>
+      <input type="url" id="et-image-url" placeholder="https://..." style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;margin-top:4px;box-sizing:border-box;" />
     </div>
     <div class="et-modal-actions">
       <button id="et-image-cancel" class="et-btn">Cancel</button>
@@ -84,650 +81,388 @@ const firebaseConfig = {
   </div>
 </div>
 
+<!-- Page Manager Modal -->
+<div id="et-pages-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content" style="max-width:500px;">
+    <h3>📄 Page Manager</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off to show or hide them from the navigation.</p>
+    <div id="et-pages-list"></div>
+    <div class="et-modal-actions" style="margin-top:16px;">
+      <button id="et-pages-close" class="et-btn">Close</button>
+      <button id="et-pages-save" class="et-btn et-btn-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Color Editor Modal -->
+<div id="et-colors-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content" style="max-width:480px;">
+    <h3>🎨 Brand Colors</h3>
+    <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit brand colors. Changes preview live.</p>
+    <div id="et-colors-list"></div>
+    <div class="et-modal-actions" style="margin-top:16px;">
+      <button id="et-colors-close" class="et-btn">Close</button>
+      <button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button>
+    </div>
+  </div>
+</div>
+
 <style>
-  #edit-toolbar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 99999;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  }
-  .et-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    background: #1a1a2e; color: white; padding: 8px 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3); gap: 12px;
-  }
-  .et-left, .et-center, .et-right { display: flex; align-items: center; gap: 10px; }
-  .et-logo { font-weight: 700; font-size: 14px; }
-  .et-page { font-size: 12px; color: rgba(255,255,255,0.6); }
-  .et-btn {
-    display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-    border: 1px solid rgba(255,255,255,0.2); border-radius: 6px;
-    background: transparent; color: white; font-size: 13px; cursor: pointer;
-    transition: all 0.2s; white-space: nowrap;
-  }
-  .et-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
-  .et-btn-edit { background: #3b82f6; border-color: #3b82f6; }
-  .et-btn-edit:hover { background: #2563eb; }
-  .et-btn-edit.active { background: #ef4444; border-color: #ef4444; }
-  .et-btn-edit.active:hover { background: #dc2626; }
-  .et-btn-save { background: #10b981; border-color: #10b981; }
-  .et-btn-save:hover { background: #059669; }
-  .et-btn-ghost { border-color: transparent; }
-  .et-changes { font-size: 12px; color: #fbbf24; font-weight: 600; }
+  #edit-toolbar{position:fixed;top:0;left:0;right:0;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+  .et-bar{display:flex;align-items:center;justify-content:space-between;background:#1a1a2e;color:#fff;padding:8px 16px;box-shadow:0 2px 12px rgba(0,0,0,.3);gap:8px;flex-wrap:wrap}
+  .et-left,.et-center,.et-right{display:flex;align-items:center;gap:8px}
+  .et-logo{font-weight:700;font-size:14px}.et-page{font-size:12px;color:rgba(255,255,255,.6)}
+  .et-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,.15);background:0 0;color:#fff;cursor:pointer;font-size:13px;transition:.15s;white-space:nowrap}
+  .et-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3)}
+  .et-btn svg{flex-shrink:0}
+  .et-btn-edit.active{background:#059669;border-color:#059669}
+  .et-btn-save{background:#059669!important;border-color:#059669!important}
+  .et-btn-save:hover{background:#047857!important}
+  .et-btn-ghost{border-color:transparent;opacity:.7}.et-btn-ghost:hover{opacity:1}
+  .et-changes{font-size:12px;color:#fbbf24;font-weight:600}
+  .et-modal{display:none;position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.5);align-items:center;justify-content:center}
+  .et-modal-content{background:#fff;border-radius:12px;padding:28px;width:90%;max-width:420px;max-height:85vh;overflow-y:auto;color:#1f2937}
+  .et-modal-content h3{font-size:1.2rem;margin:0 0 16px;color:#1e3a5f}
+  .et-modal-content input[type="text"],.et-modal-content input[type="password"]{width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;box-sizing:border-box}
+  .et-modal-actions{display:flex;gap:10px;justify-content:flex-end}
+  .et-modal-actions .et-btn{color:#374151;border-color:#d1d5db}.et-modal-actions .et-btn-save{color:#fff}
+  .et-upload-zone{border:2px dashed #d1d5db;border-radius:8px;padding:24px;text-align:center;cursor:pointer;transition:.2s}
+  .et-upload-zone:hover{border-color:#3b82f6}
 
-  /* Edit mode active styles */
-  body.edit-mode-active { padding-top: 48px !important; }
-  body.edit-mode-active [data-editable] {
-    outline: 2px dashed transparent; cursor: text; transition: outline 0.2s;
-    min-height: 1em; position: relative;
-  }
-  body.edit-mode-active [data-editable]:hover { outline: 2px dashed #3b82f6; }
-  body.edit-mode-active [data-editable]:focus { outline: 2px solid #3b82f6; background: rgba(59,130,246,0.05); }
-  body.edit-mode-active [data-editable-image] { position: relative; cursor: pointer; }
-  body.edit-mode-active [data-editable-image]::after {
-    content: '📷 Click to replace'; position: absolute; bottom: 8px; right: 8px;
-    background: rgba(0,0,0,0.8); color: white; padding: 4px 10px; border-radius: 4px;
-    font-size: 12px; opacity: 0; transition: opacity 0.2s; pointer-events: none;
-  }
-  body.edit-mode-active [data-editable-image]:hover::after { opacity: 1; }
-  body.edit-mode-active [data-editable-image]:hover { outline: 2px dashed #f59e0b; }
+  .et-page-item{display:flex;align-items:center;justify-content:space-between;padding:12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px}
+  .et-page-item-name{font-weight:600;font-size:14px;color:#1f2937}
+  .et-page-item-path{font-size:12px;color:#9ca3af}
+  .et-page-toggle{position:relative;width:44px;height:24px;display:inline-block}
+  .et-page-toggle input{opacity:0;width:0;height:0}
+  .et-page-toggle .slider{position:absolute;inset:0;background:#d1d5db;border-radius:12px;cursor:pointer;transition:.3s}
+  .et-page-toggle .slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+  .et-page-toggle input:checked+.slider{background:#059669}
+  .et-page-toggle input:checked+.slider:before{transform:translateX(20px)}
 
-  /* Sortable sections */
-  body.edit-mode-active [data-sortable] { position: relative; }
-  body.edit-mode-active [data-sortable-item] { position: relative; }
-  body.edit-mode-active [data-sortable-item]:hover { outline: 2px dashed #8b5cf6; }
-  .et-drag-handle {
-    position: absolute; top: 4px; left: -32px; width: 24px; height: 24px;
-    background: #8b5cf6; color: white; border-radius: 4px; border: none;
-    cursor: grab; display: none; align-items: center; justify-content: center; z-index: 10;
-  }
-  body.edit-mode-active [data-sortable-item]:hover .et-drag-handle { display: flex; }
-  .et-item-controls {
-    position: absolute; top: 4px; right: 4px; display: none; gap: 4px; z-index: 10;
-  }
-  body.edit-mode-active [data-sortable-item]:hover .et-item-controls { display: flex; }
-  .et-item-btn {
-    width: 28px; height: 28px; border-radius: 4px; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; font-size: 14px;
-  }
-  .et-item-btn-del { background: #ef4444; color: white; }
-  .et-item-btn-dup { background: #3b82f6; color: white; }
+  .et-color-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #f3f4f6}
+  .et-color-item:last-child{border-bottom:none}
+  .et-color-swatch{width:40px;height:40px;border-radius:8px;border:2px solid #e5e7eb;overflow:hidden;position:relative;flex-shrink:0}
+  .et-color-swatch input[type="color"]{position:absolute;inset:-8px;width:60px;height:60px;border:none;cursor:pointer}
+  .et-color-label{flex:1}.et-color-label-name{font-weight:600;font-size:13px;color:#1f2937}
+  .et-color-label-var{font-size:11px;color:#9ca3af;font-family:monospace}
+  .et-color-hex{font-family:monospace;font-size:13px;color:#6b7280;width:80px;text-align:right}
 
-  /* Modal */
-  .et-modal {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100000;
-    display: flex; align-items: center; justify-content: center; padding: 20px;
-  }
-  .et-modal-content {
-    background: white; border-radius: 12px; padding: 32px;
-    max-width: 500px; width: 100%; color: #1a1a2e;
-  }
-  .et-modal-content h3 { margin: 0 0 20px; }
-  .et-upload-zone {
-    border: 2px dashed #d1d5db; border-radius: 8px; padding: 40px;
-    text-align: center; cursor: pointer; transition: all 0.2s; color: #6b7280;
-  }
-  .et-upload-zone:hover { border-color: #3b82f6; background: #f0f9ff; }
-  .et-upload-zone p { margin: 12px 0 0; }
-  .et-upload-preview { margin: 16px 0; text-align: center; }
-  .et-upload-preview img { max-width: 100%; max-height: 200px; border-radius: 8px; }
-  .et-modal-url { margin: 16px 0; }
-  .et-modal-url label { display: block; margin-bottom: 6px; font-size: 14px; color: #6b7280; }
-  .et-modal-url input {
-    width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;
-  }
-  .et-modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
-  .et-modal-actions .et-btn { color: #1a1a2e; border-color: #d1d5db; }
-  .et-modal-actions .et-btn-save { color: white; }
-
-  @media (max-width: 768px) {
-    .et-bar { flex-wrap: wrap; padding: 6px 10px; }
-    .et-left .et-page { display: none; }
-    .et-btn span:not(:only-child) { display: none; }
-  }
+  body.edit-mode-active [data-et-editable]:hover{outline:2px dashed #3b82f6!important;outline-offset:2px;cursor:text}
+  body.edit-mode-active [data-et-editable]:focus{outline:2px solid #3b82f6!important;outline-offset:2px;background:rgba(59,130,246,.05)}
+  body.edit-mode-active [data-et-img]{cursor:pointer;position:relative}
+  body.edit-mode-active [data-et-img]:hover{outline:2px dashed #f59e0b!important;outline-offset:2px}
 </style>
 
-<script is:inline define:vars={{ firebaseConfig }}>
-(function() {
-  const FB_CFG = firebaseConfig;
-  const hasFirebaseConfig = FB_CFG && FB_CFG.projectId && FB_CFG.apiKey;
-  let auth, db, storage, user = null;
-  let editActive = false;
-  let changes = new Map();
-  let originalContent = new Map();
-  let firebaseLoaded = false;
-  let firebaseLoading = false;
+<script define:vars={{ firebaseConfig }}>
+(function(){
+  'use strict';
+  const FB_CFG=firebaseConfig,hasFirebaseConfig=FB_CFG&&FB_CFG.projectId&&FB_CFG.projectId!=='',SP='gfs_edit_';
+  let user=null,auth=null,db=null,storage=null,firebaseLoaded=false,firebaseLoading=false,editActive=false;
+  let changes=new Map(),originalContent=new Map();
 
-  // =============================================
-  // 0. Keyboard shortcut to enter Edit Mode
-  // =============================================
-  // Mac: Cmd+Shift+. (period) or Cmd+Shift+L or Cmd+Shift+K
-  // Windows/Linux: Ctrl+Shift+E
-  // URL: add ?edit to any page URL
-  document.addEventListener('keydown', function(e) {
-    const isMac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent) || 
-                  (navigator.platform && /Mac/i.test(navigator.platform)) ||
-                  (navigator.userAgentData && navigator.userAgentData.platform === 'macOS');
-    // Ctrl+Shift+E works on ALL platforms (Mac has Ctrl key too)
-    if (e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e' || e.code === 'KeyE')) {
-      e.preventDefault(); e.stopPropagation(); handleEditShortcut(); return;
-    }
-    if (isMac) {
-      // Mac: Cmd+Shift+. or Cmd+Shift+L or Cmd+Shift+K or Cmd+Shift+A
-      if (e.metaKey && e.shiftKey && (e.key === '.' || e.key === 'L' || e.key === 'l' || e.key === 'K' || e.key === 'k' || e.key === 'A' || e.key === 'a' || e.code === 'Period' || e.code === 'KeyL' || e.code === 'KeyK' || e.code === 'KeyA')) {
-        e.preventDefault(); e.stopPropagation(); handleEditShortcut();
-      }
-    }
-  });
-  // URL trigger: add ?edit to any page URL
-  if (window.location.search.includes('edit')) {
-    window.addEventListener('DOMContentLoaded', function() { setTimeout(handleEditShortcut, 500); });
-    if (document.readyState !== 'loading') { setTimeout(handleEditShortcut, 500); }
+  // === PAGE VISIBILITY (runs on every load) ===
+  function applyHiddenPages(){
+    try{
+      const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');
+      if(!h.length)return;
+      document.querySelectorAll('.nav-links>li').forEach(li=>{
+        const a=li.querySelector('a');if(!a)return;
+        const href=a.getAttribute('href');
+        if(h.includes(href)){li.style.display='none';li.setAttribute('data-page-hidden','true')}
+      });
+      document.querySelectorAll('.dropdown li').forEach(li=>{
+        const a=li.querySelector('a');if(!a)return;
+        if(h.includes(a.getAttribute('href')))li.style.display='none';
+      });
+    }catch(e){}
   }
 
-  async function handleEditShortcut() {
-    // Check if Firebase is configured
-    if (!hasFirebaseConfig) {
-      alert('Edit Mode requires Firebase configuration.\n\nSet these environment variables on Netlify:\n• PUBLIC_FIREBASE_API_KEY\n• PUBLIC_FIREBASE_AUTH_DOMAIN\n• PUBLIC_FIREBASE_PROJECT_ID\n• PUBLIC_FIREBASE_STORAGE_BUCKET\n• PUBLIC_FIREBASE_MESSAGING_SENDER_ID\n• PUBLIC_FIREBASE_APP_ID\n\nGet these from Firebase Console → Project Settings → Web App.');
-      return;
-    }
-
-    // If toolbar is already visible and user is logged in, toggle edit mode
-    if (user && document.getElementById('edit-toolbar').style.display !== 'none') {
-      if (editActive) {
-        deactivateEditing();
-      } else {
-        activateEditing();
+  // === CONTENT OVERRIDES (localStorage) ===
+  function applyLocalOverrides(){
+    try{
+      const pk=getPageKey();
+      const saved=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');
+      if(!Object.keys(saved).length)return;
+      function apply(){
+        const textEls=getEditableTextElements(),imgs=getEditableImages();
+        Object.entries(saved).forEach(([k,v])=>{
+          try{
+            if(k.startsWith('img:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].src=v;}
+            else{const i=parseInt(k);if(textEls[i]){if(textEls[i].children.length>0)textEls[i].innerHTML=v;else textEls[i].textContent=v;}}
+          }catch(e){}
+        });
       }
-      return;
-    }
+      if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply();
+    }catch(e){}
+  }
 
-    // If Firebase not loaded yet, load it
-    if (!firebaseLoaded && !firebaseLoading) {
-      firebaseLoading = true;
-      try {
-        await loadFirebaseSDK();
-        firebaseLoaded = true;
-        firebaseLoading = false;
-      } catch (err) {
-        console.error('Failed to load Firebase:', err);
-        firebaseLoading = false;
-        return;
-      }
-    }
+  function applyColorOverrides(){
+    try{
+      const c=JSON.parse(localStorage.getItem(SP+'colors')||'{}');
+      Object.entries(c).forEach(([v,val])=>document.documentElement.style.setProperty(v,val));
+    }catch(e){}
+  }
 
-    // Wait for loading to finish if in progress
-    if (firebaseLoading) {
-      await new Promise(resolve => {
-        const check = setInterval(() => {
-          if (!firebaseLoading) { clearInterval(check); resolve(); }
-        }, 100);
-      });
-    }
+  const initOverrides=()=>{applyHiddenPages();applyLocalOverrides();applyColorOverrides();};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOverrides);else initOverrides();
 
-    // If user is already authenticated, show toolbar
-    if (user) {
-      showToolbar();
-      activateEditing();
-      return;
-    }
+  // === HELPERS ===
+  function getPageKey(){return(window.location.pathname.replace(/^\/|\/$/g,'')||'home').replace(/\//g,'-')}
 
-    // Show login modal
+  function getEditableTextElements(){
+    const sel='h1,h2,h3,h4,h5,h6,p:not(.et-page-item-path):not(.et-page-item-name),blockquote,figcaption,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,span.highlight,span.gold,.cta-content h2,.cta-content p,details summary,details p,[data-editable]';
+    const els=[];
+    document.querySelectorAll(sel).forEach(el=>{
+      if(el.closest('#edit-toolbar')||el.closest('.et-modal')||el.closest('nav')||el.closest('script')||el.closest('style'))return;
+      if(!el.textContent?.trim())return;
+      if(el.closest('[data-et-editable]')&&el.closest('[data-et-editable]')!==el)return;
+      els.push(el);
+    });
+    return els;
+  }
+
+  function getEditableImages(){
+    const imgs=[];
+    document.querySelectorAll('img').forEach(img=>{
+      if(img.closest('#edit-toolbar')||img.closest('.et-modal')||img.closest('nav'))return;
+      if(img.width<30||img.height<30)return;
+      imgs.push(img);
+    });
+    return imgs;
+  }
+
+  // === KEYBOARD / URL TRIGGER ===
+  document.addEventListener('keydown',function(e){
+    if(e.ctrlKey&&e.shiftKey&&(e.key==='E'||e.key==='e'||e.code==='KeyE')){e.preventDefault();e.stopPropagation();handleEditShortcut();return}
+    const isMac=/Mac|iPhone|iPad/i.test(navigator.userAgent);
+    if(isMac&&e.metaKey&&e.shiftKey&&(e.key==='.'||e.key==='L'||e.key==='l')){e.preventDefault();e.stopPropagation();handleEditShortcut()}
+  });
+  if(window.location.search.includes('edit')){
+    const fn=()=>setTimeout(handleEditShortcut,500);
+    if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',fn);else fn();
+  }
+
+  async function handleEditShortcut(){
+    if(user&&document.getElementById('edit-toolbar').style.display!=='none'){editActive?deactivateEditing():activateEditing();return}
+    if(user){showToolbar();activateEditing();return}
     showLoginModal();
   }
 
-  function showLoginModal() {
-    const modal = document.getElementById('et-login-modal');
-    const emailInput = document.getElementById('et-login-email');
-    const passInput = document.getElementById('et-login-password');
-    const errorDiv = document.getElementById('et-login-error');
-    const cancelBtn = document.getElementById('et-login-cancel');
-    const submitBtn = document.getElementById('et-login-submit');
+  // === LOGIN ===
+  function showLoginModal(){
+    const modal=document.getElementById('et-login-modal'),ei=document.getElementById('et-login-email'),pi=document.getElementById('et-login-password'),err=document.getElementById('et-login-error');
+    modal.style.display='flex';err.style.display='none';ei.value='';pi.value='';ei.focus();
+    document.getElementById('et-login-cancel').onclick=()=>{modal.style.display='none'};
+    const enter=e=>{if(e.key==='Enter')doLogin()};
+    ei.addEventListener('keydown',enter);pi.addEventListener('keydown',enter);
+    document.getElementById('et-login-submit').onclick=doLogin;
 
-    modal.style.display = 'flex';
-    errorDiv.style.display = 'none';
-    emailInput.value = '';
-    passInput.value = '';
-    emailInput.focus();
+    async function doLogin(){
+      const email=ei.value.trim(),pass=pi.value;
+      if(!email||!pass){err.textContent='Enter username and password.';err.style.display='block';return}
+      const btn=document.getElementById('et-login-submit');btn.innerHTML='⏳ Logging in...';btn.disabled=true;err.style.display='none';
 
-    cancelBtn.onclick = () => { modal.style.display = 'none'; };
-
-    // Allow Enter key to submit
-    const handleEnter = (e) => {
-      if (e.key === 'Enter') doLogin();
-    };
-    emailInput.addEventListener('keydown', handleEnter);
-    passInput.addEventListener('keydown', handleEnter);
-
-    submitBtn.onclick = doLogin;
-
-    async function doLogin() {
-      const email = emailInput.value.trim();
-      const pass = passInput.value;
-      if (!email || !pass) {
-        errorDiv.textContent = 'Please enter username and password.';
-        errorDiv.style.display = 'block';
+      if(email==='admin'&&pass==='admin11'){
+        user={uid:'local-admin',email:'admin@ghareebfencing.com'};
+        modal.style.display='none';document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Strict';
+        showToolbar();activateEditing();btn.innerHTML='Login';btn.disabled=false;
+        if(hasFirebaseConfig&&!firebaseLoaded)loadFirebaseSDK().catch(()=>{});
         return;
       }
 
-      submitBtn.innerHTML = '⏳ Logging in...';
-      submitBtn.disabled = true;
-      errorDiv.style.display = 'none';
-
-      // Check hardcoded admin credentials (matches Executive App)
-      if (email === 'admin' && pass === 'admin11') {
-        user = { uid: 'local-admin', email: 'admin@ghareebfencing.com', displayName: 'Admin' };
-        modal.style.display = 'none';
-        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-        showToolbar();
-        activateEditing();
-        submitBtn.innerHTML = 'Login';
-        submitBtn.disabled = false;
-        return;
-      }
-
-      // Fallback to Firebase Auth if not hardcoded creds
-      try {
-        const loginEmail = email.includes('@') ? email : email + '@ghareebfencing.com';
-        const userCredential = await auth.signInWithEmailAndPassword(loginEmail, pass);
-        user = userCredential.user;
-        modal.style.display = 'none';
-        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-        auth.onAuthStateChanged(u => {
-          user = u;
-          if (u) {
-            document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-            showToolbar();
-          } else {
-            document.cookie = 'gfs_admin=;path=/;max-age=0;SameSite=Strict;Secure';
-            hideToolbar();
-          }
-        });
-        showToolbar();
-        activateEditing();
-      } catch (err) {
-        let msg = 'Invalid username or password.';
-        if (err.code === 'auth/too-many-requests') {
-          msg = 'Too many attempts. Try again later.';
-        }
-        errorDiv.textContent = msg;
-        errorDiv.style.display = 'block';
-      }
-
-      submitBtn.innerHTML = 'Login';
-      submitBtn.disabled = false;
-
-      // Clean up enter key listeners
-      emailInput.removeEventListener('keydown', handleEnter);
-      passInput.removeEventListener('keydown', handleEnter);
+      if(hasFirebaseConfig){
+        try{
+          if(!firebaseLoaded)await loadFirebaseSDK();
+          const le=email.includes('@')?email:email+'@ghareebfencing.com';
+          const c=await auth.signInWithEmailAndPassword(le,pass);user=c.user;
+          modal.style.display='none';document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Strict';
+          showToolbar();activateEditing();
+        }catch(e){err.textContent=e.code==='auth/too-many-requests'?'Too many attempts.':'Invalid credentials.';err.style.display='block'}
+      }else{err.textContent='Invalid username or password.';err.style.display='block'}
+      btn.innerHTML='Login';btn.disabled=false;
     }
   }
 
-  // =============================================
-  // 1. Check auth state — load SDK if cookie hint exists AND config is available
-  // =============================================
-  if (hasFirebaseConfig && (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin'))) {
-    loadFirebaseAndInit();
-  }
-
-  async function loadFirebaseSDK() {
-    if (!hasFirebaseConfig) {
-      throw new Error('Firebase configuration missing. Set environment variables on Netlify.');
-    }
+  // === FIREBASE ===
+  function loadScript(s){return new Promise((r,j)=>{if(document.querySelector(`script[src="${s}"]`)){r();return}const el=document.createElement('script');el.src=s;el.onload=r;el.onerror=j;document.head.appendChild(el)})}
+  async function loadFirebaseSDK(){
+    if(!hasFirebaseConfig)throw new Error('No config');firebaseLoading=true;
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js');
     await loadScript('https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js');
-
-    if (!firebase.apps.length) firebase.initializeApp(FB_CFG);
-    auth = firebase.auth();
-    db = firebase.firestore();
-    storage = firebase.storage();
+    if(!firebase.apps.length)firebase.initializeApp(FB_CFG);
+    auth=firebase.auth();db=firebase.firestore();storage=firebase.storage();firebaseLoaded=true;firebaseLoading=false;
   }
 
-  async function loadFirebaseAndInit() {
-    if (!hasFirebaseConfig) return;
-    firebaseLoading = true;
-    try {
-      await loadFirebaseSDK();
-      firebaseLoaded = true;
-    } catch (err) {
-      console.error('Failed to load Firebase:', err);
-    }
-    firebaseLoading = false;
-
-    auth.onAuthStateChanged(u => {
-      user = u;
-      if (u) {
-        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-        showToolbar();
-      } else {
-        document.cookie = 'gfs_admin=;path=/;max-age=0;SameSite=Strict;Secure';
-        hideToolbar();
-      }
-    });
+  // Auto-init
+  if(document.cookie.includes('gfs_admin=1')){
+    if(hasFirebaseConfig){loadFirebaseSDK().then(()=>{auth.onAuthStateChanged(u=>{user=u;if(u)showToolbar()})}).catch(()=>{});}
+    else{user={uid:'local-admin'};const fn=()=>showToolbar();if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fn);else fn();}
   }
 
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-      const s = document.createElement('script');
-      s.src = src; s.onload = resolve; s.onerror = reject;
-      document.head.appendChild(s);
-    });
+  // === TOOLBAR ===
+  function showToolbar(){
+    const t=document.getElementById('edit-toolbar');if(!t)return;
+    t.style.display='block';document.body.style.paddingTop='48px';
+    document.getElementById('et-page-name').textContent=document.title.split('|')[0].trim();
+    bindToolbarEvents();
+  }
+  function hideToolbar(){const t=document.getElementById('edit-toolbar');if(t)t.style.display='none';document.body.style.paddingTop='';deactivateEditing();}
+  function bindToolbarEvents(){
+    document.getElementById('et-toggle').onclick=()=>{editActive?deactivateEditing():activateEditing()};
+    document.getElementById('et-save').onclick=saveChanges;
+    document.getElementById('et-discard').onclick=discardChanges;
+    document.getElementById('et-logout').onclick=()=>{document.cookie='gfs_admin=;path=/;max-age=0';if(auth)auth.signOut();user=null;hideToolbar();window.location.href=window.location.pathname};
+    document.getElementById('et-pages-btn').onclick=showPageManager;
+    document.getElementById('et-colors-btn').onclick=showColorEditor;
   }
 
-  // =============================================
-  // 2. Toolbar controls + Content override loader
-  // =============================================
-
-  // Load saved page content overrides from Firestore (for admins with Firebase loaded)
-  async function loadPageOverrides() {
-    if (!db) return;
-    try {
-      const pagePath = getPageDocPath(); // e.g., 'pageEdits/fences-cedar'
-      const snap = await db.doc(pagePath).get();
-      if (snap.exists) {
-        const data = snap.data();
-        Object.entries(data).forEach(([key, value]) => {
-          if (!value || key === 'updatedAt' || key === 'updatedBy') return;
-          const el = document.querySelector(`[data-editable="${key}"]`);
-          if (el) {
-            if (el.dataset.editType === 'html' || el.dataset.editType === 'richtext') el.innerHTML = value;
-            else el.textContent = value;
-          }
-          const imgEl = document.querySelector(`[data-editable-image="${key}"]`);
-          if (imgEl && value) {
-            const img = imgEl.querySelector('img') || imgEl;
-            if (img.tagName === 'IMG') img.src = value;
-            else imgEl.style.backgroundImage = `url(${value})`;
-          }
-        });
-        console.log('[EditMode] Applied', Object.keys(data).length, 'overrides for', pagePath);
-      }
-    } catch(e) { console.warn('[EditMode] Page overrides:', e.message); }
-  }
-  function showToolbar() {
-    const toolbar = document.getElementById('edit-toolbar');
-    if (toolbar) {
-      toolbar.style.display = 'block';
-      document.body.style.paddingTop = '48px';
-      document.getElementById('et-page-name').textContent = document.title.split('|')[0].trim();
-      bindToolbarEvents();
-    }
+  // === ACTIVATE / DEACTIVATE ===
+  function activateEditing(){
+    editActive=true;document.body.classList.add('edit-mode-active');
+    const btn=document.getElementById('et-toggle');btn.classList.add('active');btn.querySelector('span').textContent='Stop Editing';
+    const textEls=getEditableTextElements();
+    textEls.forEach((el,i)=>{el.setAttribute('data-et-editable',i);el.contentEditable='true';originalContent.set(el,el.innerHTML);el.addEventListener('input',onTextEdit);el.addEventListener('blur',onTextEdit)});
+    const imgs=getEditableImages();
+    imgs.forEach((img,i)=>{img.setAttribute('data-et-img',i);img._editClick=e=>{e.preventDefault();e.stopPropagation();openImageModal(img,'img:'+i)};img.addEventListener('click',img._editClick)});
+    document.querySelectorAll('[data-page-hidden]').forEach(li=>{li.style.display='';li.style.opacity='0.4'});
+    showToast('✏️ Editing: '+textEls.length+' text, '+imgs.length+' images');
   }
 
-  function hideToolbar() {
-    const toolbar = document.getElementById('edit-toolbar');
-    if (toolbar) toolbar.style.display = 'none';
-    document.body.style.paddingTop = '';
-    deactivateEditing();
+  function deactivateEditing(){
+    editActive=false;document.body.classList.remove('edit-mode-active');
+    const btn=document.getElementById('et-toggle');if(btn){btn.classList.remove('active');btn.querySelector('span').textContent='Edit'}
+    document.querySelectorAll('[data-et-editable]').forEach(el=>{el.contentEditable='false';el.removeAttribute('data-et-editable');el.removeEventListener('input',onTextEdit);el.removeEventListener('blur',onTextEdit)});
+    document.querySelectorAll('[data-et-img]').forEach(img=>{if(img._editClick){img.removeEventListener('click',img._editClick);delete img._editClick}img.removeAttribute('data-et-img')});
+    applyHiddenPages();
   }
 
-  function bindToolbarEvents() {
-    const toggleBtn = document.getElementById('et-toggle');
-    const saveBtn = document.getElementById('et-save');
-    const discardBtn = document.getElementById('et-discard');
-    const logoutBtn = document.getElementById('et-logout');
-
-    toggleBtn.onclick = () => { if (editActive) deactivateEditing(); else activateEditing(); };
-    saveBtn.onclick = saveChanges;
-    discardBtn.onclick = discardChanges;
-    logoutBtn.onclick = () => { if (auth) auth.signOut(); window.location.href = '/'; };
-  }
-
-  // =============================================
-  // 3. Activate / Deactivate editing
-  // =============================================
-  function activateEditing() {
-    editActive = true;
-    document.body.classList.add('edit-mode-active');
-    const btn = document.getElementById('et-toggle');
-    btn.classList.add('active');
-    btn.querySelector('span').textContent = 'Stop Editing';
-    document.getElementById('et-add-section').style.display = 'inline-flex';
-
-    document.querySelectorAll('[data-editable]').forEach(el => {
-      el.contentEditable = 'true';
-      originalContent.set(el, el.innerHTML);
-      el.addEventListener('input', onContentEdit);
-      el.addEventListener('blur', onContentBlur);
-    });
-
-    document.querySelectorAll('[data-editable-image]').forEach(el => {
-      el._editClick = () => openImageModal(el);
-      el.addEventListener('click', el._editClick);
-    });
-
-    document.querySelectorAll('[data-sortable-item]').forEach(el => {
-      if (!el.querySelector('.et-item-controls')) {
-        const controls = document.createElement('div');
-        controls.className = 'et-item-controls';
-        controls.innerHTML = '<button class="et-item-btn et-item-btn-del" title="Delete">✕</button>';
-        controls.querySelector('.et-item-btn-del').onclick = (e) => { e.stopPropagation(); deleteItem(el); };
-        el.style.position = 'relative';
-        el.appendChild(controls);
-      }
-    });
-  }
-
-  function deactivateEditing() {
-    editActive = false;
-    document.body.classList.remove('edit-mode-active');
-    const btn = document.getElementById('et-toggle');
-    if (btn) { btn.classList.remove('active'); btn.querySelector('span').textContent = 'Edit'; }
-    const addBtn = document.getElementById('et-add-section');
-    if (addBtn) addBtn.style.display = 'none';
-
-    document.querySelectorAll('[data-editable]').forEach(el => {
-      el.contentEditable = 'false';
-      el.removeEventListener('input', onContentEdit);
-      el.removeEventListener('blur', onContentBlur);
-    });
-
-    document.querySelectorAll('[data-editable-image]').forEach(el => {
-      if (el._editClick) { el.removeEventListener('click', el._editClick); delete el._editClick; }
-    });
-  }
-
-  // =============================================
-  // 4. Track changes
-  // =============================================
-  function onContentEdit(e) { const el = e.target.closest('[data-editable]'); if (el) trackChange(el); }
-  function onContentBlur(e) { const el = e.target.closest('[data-editable]'); if (el) trackChange(el); }
-
-  // Derive a page-level Firestore doc path from the URL
-  // Uses collection 'pageEdits', doc = page slug
-  function getPageDocPath() {
-    const path = window.location.pathname.replace(/^\/|\/$/g, '') || 'home';
-    return 'pageEdits/' + path.replace(/\//g, '-');
-  }
-
-  function trackChange(el) {
-    // Use explicit doc/field if set, otherwise default to page doc + editable name
-    const docPath = el.dataset.editDoc || getPageDocPath();
-    const field = el.dataset.editField || el.getAttribute('data-editable');
-    if (!docPath || !field) return;
-    if (!changes.has(docPath)) changes.set(docPath, {});
-    const isHTML = el.dataset.editType === 'html' || el.dataset.editType === 'richtext';
-    changes.get(docPath)[field] = isHTML ? el.innerHTML : el.textContent.trim();
+  // === TRACK CHANGES ===
+  function onTextEdit(e){
+    const el=e.target.closest('[data-et-editable]');if(!el)return;
+    const idx=el.getAttribute('data-et-editable'),pk=getPageKey();
+    if(!changes.has(pk))changes.set(pk,{});
+    changes.get(pk)[idx]=el.children.length>0?el.innerHTML:el.textContent.trim();
     updateChangesCount();
   }
-
-  function trackImageChange(el, newSrc) {
-    const docPath = el.dataset.editDoc || getPageDocPath();
-    const field = el.dataset.editField || el.dataset.editImageField || el.getAttribute('data-editable-image');
-    if (!docPath || !field) return;
-    if (!changes.has(docPath)) changes.set(docPath, {});
-    changes.get(docPath)[field] = newSrc;
-    updateChangesCount();
+  function trackImageChange(key,src){const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)[key]=src;updateChangesCount();}
+  function updateChangesCount(){
+    let c=0;changes.forEach(f=>{c+=Object.keys(f).length});
+    const el=document.getElementById('et-changes'),sb=document.getElementById('et-save'),db2=document.getElementById('et-discard');
+    if(c>0){el.style.display='inline';el.textContent=c+' change'+(c!==1?'s':'');sb.style.display='inline-flex';db2.style.display='inline-flex';}
+    else{el.style.display='none';sb.style.display='none';db2.style.display='none';}
   }
 
-  function updateChangesCount() {
-    let count = 0;
-    changes.forEach(fields => { count += Object.keys(fields).length; });
-    const el = document.getElementById('et-changes');
-    const saveBtn = document.getElementById('et-save');
-    const discardBtn = document.getElementById('et-discard');
-    if (count > 0) {
-      el.style.display = 'inline'; el.textContent = count + ' change' + (count !== 1 ? 's' : '');
-      saveBtn.style.display = 'inline-flex'; discardBtn.style.display = 'inline-flex';
-    } else {
-      el.style.display = 'none'; saveBtn.style.display = 'none'; discardBtn.style.display = 'none';
-    }
-  }
-
-  // =============================================
-  // 5. Save changes to Firestore
-  // =============================================
-  async function saveChanges() {
-    if (!db || changes.size === 0) return;
-    const saveBtn = document.getElementById('et-save');
-    saveBtn.innerHTML = '⏳ Saving...'; saveBtn.disabled = true;
-
-    try {
-      const batch = db.batch();
-      changes.forEach((fields, docPath) => {
-        const ref = db.doc(docPath);
-        const update = {};
-        for (const [field, value] of Object.entries(fields)) { update[field] = value; }
-        batch.set(ref, update, { merge: true });
+  // === SAVE ===
+  async function saveChanges(){
+    if(changes.size===0)return;
+    const sb=document.getElementById('et-save');sb.innerHTML='⏳ Saving...';sb.disabled=true;
+    try{
+      changes.forEach((fields,pk)=>{
+        const existing=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');
+        Object.assign(existing,fields);
+        localStorage.setItem(SP+'content_'+pk,JSON.stringify(existing));
       });
-      await batch.commit();
-      changes.clear();
-      updateChangesCount();
+      if(db){try{
+        const batch=db.batch();
+        changes.forEach((fields,pk)=>{batch.set(db.doc('pageEdits/'+pk),{...fields,updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})});
+        await batch.commit();
+      }catch(e){console.warn('[Edit] Firestore save failed, localStorage OK:',e.message)}}
+      document.querySelectorAll('[data-et-editable]').forEach(el=>{originalContent.set(el,el.innerHTML)});
+      changes.clear();updateChangesCount();
+      sb.innerHTML='✅ Saved!';showToast('✅ Changes saved!');
+      setTimeout(()=>{sb.innerHTML='💾 Save';sb.disabled=false},2000);
+    }catch(e){sb.innerHTML='❌ Error';sb.disabled=false;showToast('❌ Save failed: '+e.message)}
+  }
+  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('🗑️ Discarded')}
 
-      saveBtn.innerHTML = '✅ Saved!';
-      setTimeout(() => {
-        saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
-        saveBtn.disabled = false;
-      }, 2000);
-
-      document.querySelectorAll('[data-editable]').forEach(el => { originalContent.set(el, el.innerHTML); });
-    } catch (e) {
-      console.error('Save error:', e);
-      saveBtn.innerHTML = '❌ Error — try again'; saveBtn.disabled = false;
-      alert('Save failed: ' + e.message);
-    }
+  // === IMAGE EDITING ===
+  let curImgEl=null,curImgKey=null;
+  function openImageModal(el,key){
+    curImgEl=el;curImgKey=key;
+    const m=document.getElementById('et-image-modal');m.style.display='flex';
+    document.getElementById('et-image-url').value='';document.getElementById('et-upload-preview').style.display='none';document.getElementById('et-file-input').value='';
+    document.getElementById('et-upload-zone').onclick=()=>document.getElementById('et-file-input').click();
+    document.getElementById('et-file-input').onchange=e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/')){alert('Images only');return}const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)};
+    document.getElementById('et-image-cancel').onclick=()=>{m.style.display='none'};
+    document.getElementById('et-image-apply').onclick=applyImage;
+    const z=document.getElementById('et-upload-zone');
+    z.ondragover=e=>{e.preventDefault();z.style.borderColor='#3b82f6'};z.ondragleave=()=>{z.style.borderColor='#d1d5db'};
+    z.ondrop=e=>{e.preventDefault();z.style.borderColor='#d1d5db';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){const dt=new DataTransfer();dt.items.add(f);document.getElementById('et-file-input').files=dt.files;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)}};
   }
 
-  function discardChanges() {
-    if (!confirm('Discard all unsaved changes?')) return;
-    originalContent.forEach((html, el) => { el.innerHTML = html; });
-    changes.clear();
-    updateChangesCount();
+  async function applyImage(){
+    if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';
+    if(fi.files[0]&&storage){
+      const f=fi.files[0],p='website-images/'+Date.now()+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+      const ab=document.getElementById('et-image-apply');ab.innerHTML='⏳ Uploading...';ab.disabled=true;
+      try{const ref=storage.ref(p);await ref.put(f);src=await ref.getDownloadURL();}catch(e){src=document.getElementById('et-preview-img').src}
+      ab.innerHTML='Apply';ab.disabled=false;
+    }else if(fi.files[0]){src=document.getElementById('et-preview-img').src}
+    else if(ui.value.trim()){src=ui.value.trim()}
+    if(src){if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}
+    document.getElementById('et-image-modal').style.display='none';curImgEl=null;
   }
 
-  // =============================================
-  // 6. Image editing
-  // =============================================
-  let currentImageEl = null;
-
-  function openImageModal(el) {
-    currentImageEl = el;
-    const modal = document.getElementById('et-image-modal');
-    modal.style.display = 'flex';
-    document.getElementById('et-image-url').value = '';
-    document.getElementById('et-upload-preview').style.display = 'none';
-    document.getElementById('et-upload-zone').onclick = () => document.getElementById('et-file-input').click();
-    document.getElementById('et-file-input').onchange = handleFileSelect;
-    document.getElementById('et-image-cancel').onclick = () => { modal.style.display = 'none'; currentImageEl = null; };
-    document.getElementById('et-image-apply').onclick = applyImage;
-  }
-
-  function handleFileSelect(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!file.type.match(/^image\/(jpeg|png|webp|gif|svg\+xml)$/)) { alert('Only image files allowed'); e.target.value = ''; return; }
-    if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); e.target.value = ''; return; }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.getElementById('et-preview-img').src = ev.target.result;
-      document.getElementById('et-upload-preview').style.display = 'block';
+  // === PAGE MANAGER ===
+  function showPageManager(){
+    const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');
+    const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');
+    const pages=[
+      {name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},
+      {name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},
+      {name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},
+      {name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},
+      {name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},
+      {name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},
+      {name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},
+      {name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'}
+    ];
+    l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');
+    m.style.display='flex';
+    document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};
+    document.getElementById('et-pages-save').onclick=()=>{
+      const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});
+      localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));
+      if(db)db.doc('settings/navigation').set({hiddenPages:nh},{merge:true}).catch(()=>{});
+      m.style.display='none';applyHiddenPages();showToast('✅ Pages saved! Refresh to see changes.');
     };
-    reader.readAsDataURL(file);
   }
 
-  async function applyImage() {
-    if (!currentImageEl) return;
-    const urlInput = document.getElementById('et-image-url');
-    const fileInput = document.getElementById('et-file-input');
-    let newSrc = '';
-
-    if (fileInput.files[0] && storage) {
-      const file = fileInput.files[0];
-      if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); return; }
-      if (!file.type.startsWith('image/')) { alert('Only image files allowed'); return; }
-      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-      const path = `website-images/${Date.now()}-${safeName}`;
-      const applyBtn = document.getElementById('et-image-apply');
-      applyBtn.innerHTML = '⏳ Uploading...'; applyBtn.disabled = true;
-      try {
-        const ref = storage.ref(path);
-        await ref.put(file);
-        newSrc = await ref.getDownloadURL();
-      } catch (e) {
-        alert('Upload failed: ' + e.message);
-        applyBtn.innerHTML = 'Apply'; applyBtn.disabled = false; return;
-      }
-      applyBtn.innerHTML = 'Apply'; applyBtn.disabled = false;
-    } else if (urlInput.value.trim()) {
-      newSrc = urlInput.value.trim();
-    }
-
-    if (newSrc) {
-      if (currentImageEl.tagName === 'IMG') { currentImageEl.src = newSrc; }
-      else { currentImageEl.style.backgroundImage = `url(${newSrc})`; }
-      trackImageChange(currentImageEl, newSrc);
-    }
-
-    document.getElementById('et-image-modal').style.display = 'none';
-    currentImageEl = null; fileInput.value = '';
+  // === COLOR EDITOR ===
+  function showColorEditor(){
+    const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');
+    const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');
+    const vars=[
+      {name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},
+      {name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},
+      {name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},
+      {name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'}
+    ];
+    l.innerHTML=vars.map(c=>{
+      const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;
+      return '<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>';
+    }).join('');
+    l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});
+    m.style.display='flex';
+    document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};
+    document.getElementById('et-colors-save').onclick=()=>{
+      const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});
+      localStorage.setItem(SP+'colors',JSON.stringify(nc));
+      if(db)db.doc('settings/branding').set({colors:nc},{merge:true}).catch(()=>{});
+      m.style.display='none';showToast('✅ Colors saved!');
+    };
   }
 
-  // =============================================
-  // 7. Delete sortable items
-  // =============================================
-  function deleteItem(el) {
-    if (!confirm('Delete this item?')) return;
-    const doc = el.dataset.editDoc;
-    const index = el.dataset.editIndex;
-    if (doc && index !== undefined) {
-      if (!changes.has(doc)) changes.set(doc, {});
-      const existing = changes.get(doc);
-      if (!existing._deletions) existing._deletions = [];
-      existing._deletions.push(parseInt(index));
-    }
-    el.style.transition = 'all 0.3s'; el.style.opacity = '0'; el.style.transform = 'scale(0.9)';
-    setTimeout(() => el.remove(), 300);
-    updateChangesCount();
+  // === TOAST ===
+  function showToast(msg){
+    const ex=document.getElementById('et-toast');if(ex)ex.remove();
+    const t=document.createElement('div');t.id='et-toast';t.textContent=msg;
+    Object.assign(t.style,{position:'fixed',bottom:'20px',left:'50%',transform:'translateX(-50%)',background:'#1a1a2e',color:'#fff',padding:'10px 24px',borderRadius:'8px',fontSize:'14px',zIndex:'9999999',boxShadow:'0 4px 12px rgba(0,0,0,.3)',fontFamily:'-apple-system,sans-serif'});
+    document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000);
   }
 
-  // =============================================
-  // 8. Drag & drop upload on upload zone
-  // =============================================
-  document.addEventListener('DOMContentLoaded', () => {
-    const zone = document.getElementById('et-upload-zone');
-    if (zone) {
-      zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#3b82f6'; });
-      zone.addEventListener('dragleave', () => { zone.style.borderColor = '#d1d5db'; });
-      zone.addEventListener('drop', e => {
-        e.preventDefault(); zone.style.borderColor = '#d1d5db';
-        const file = e.dataTransfer.files[0];
-        if (file && file.type.startsWith('image/')) {
-          if (file.size > 5 * 1024 * 1024) { alert('Image must be under 5MB'); return; }
-          const dt = new DataTransfer(); dt.items.add(file);
-          document.getElementById('et-file-input').files = dt.files;
-          const reader = new FileReader();
-          reader.onload = ev => {
-            document.getElementById('et-preview-img').src = ev.target.result;
-            document.getElementById('et-upload-preview').style.display = 'block';
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    }
-  });
-
-  // Expose for login page
-  window.GFS_EditMode = { loadFirebaseAndInit };
+  window.GFS_EditMode={loadFirebaseSDK:()=>hasFirebaseConfig?loadFirebaseSDK():Promise.resolve()};
 })();
 </script>
