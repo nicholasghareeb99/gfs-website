@@ -1,6 +1,6 @@
 ---
 /**
- * FencePage.astro — Reusable layout for individual fence-type pages
+ * FencePage.astro â Reusable layout for individual fence-type pages
  * Props: title, description, keywords, heroTitle, heroHighlight, heroText,
  *        benefits[], specs[], faqs[], galleryImages[], relatedTypes[]
  */
@@ -44,7 +44,7 @@ const {
     <div class="fence-hero-overlay">
       <div class="container">
         <div class="fence-hero-content">
-          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">🏠 {heroTitle.split(' ')[0]} Beauty</div>
+          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">ð  {heroTitle.split(' ')[0]} Beauty</div>
           <h1 class="fence-hero-title">{heroTitle} <span class="highlight">{heroHighlight}</span></h1>
           <p class="fence-hero-text">{heroText}</p>
           <div class="fence-hero-cta">
@@ -152,7 +152,7 @@ const {
               <img src={rt.image} alt={rt.name} loading="lazy" />
               <div class="related-overlay">
                 <h4>{rt.name}</h4>
-                <span class="related-link">Learn More →</span>
+                <span class="related-link">Learn More â</span>
               </div>
             </a>
           ))}
@@ -176,7 +176,7 @@ const {
   </section>
 </BaseLayout>
 
-<style>
+<style is:global>
   .fence-hero {
     min-height: 70vh;
     background-size: cover;
@@ -266,7 +266,7 @@ const {
     display: flex; justify-content: space-between; align-items: center;
   }
   .faq-item summary::after { content: '+'; font-size: 1.3rem; color: var(--accent); transition: transform 0.2s; }
-  .faq-item[open] summary::after { content: '−'; }
+  .faq-item[open] summary::after { content: 'â'; }
   .faq-item summary::-webkit-details-marker { display: none; }
   .faq-item p { padding: 0 24px 20px; color: var(--text-muted); line-height: 1.7; }
 
@@ -291,21 +291,28 @@ const {
     .warranty-grid { grid-template-columns: 1fr !important; }
   }
 
-  /* Good / Better / Best Pricing */
-  .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 0 auto; }
-  .gbb-card { background: var(--bg-white); border: 2px solid var(--border); border-radius: 16px; padding: 32px 24px; text-align: center; position: relative; transition: all 0.3s; }
-  .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.1); }
-  .gbb-card.featured { border-color: var(--accent); }
-  .gbb-card.featured::before { content: "RECOMMENDED"; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--accent); color: var(--dark); padding: 4px 16px; border-radius: 20px; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; }
-  .gbb-tier { font-family: var(--font-heading); font-size: 1.1rem; color: var(--dark); margin-bottom: 8px; }
-  .gbb-price { font-family: var(--font-heading); font-size: 2rem; color: var(--primary); margin-bottom: 4px; }
-  .gbb-price span { font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-body); }
-  .gbb-label { font-weight: 700; color: var(--dark); margin-bottom: 16px; font-size: 0.95rem; }
-  .gbb-features { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; }
-  .gbb-features li { padding: 6px 0; font-size: 0.85rem; color: var(--text-body); border-bottom: 1px solid var(--border); }
+  /* Good / Better / Best — Premium Cards */
+  .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
+  .gbb-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 16px; padding: 0; text-align: left; position: relative; transition: all 0.3s; overflow: hidden; }
+  .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
+  .gbb-badge { display: block; padding: 10px 0; text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; background: var(--color-primary, #1e3a5f); }
+  .gbb-card.featured .gbb-badge { background: linear-gradient(135deg, var(--color-accent, #d4af37), #c5982e); color: #1a1a2e; }
+  .gbb-card.featured { border-color: var(--color-accent, #d4af37); box-shadow: 0 4px 20px rgba(212,175,55,0.15); }
+  .gbb-card-body { padding: 28px 24px; }
+  .gbb-tier { font-size: 1.4rem; font-weight: 800; color: var(--color-primary, #1e3a5f); margin-bottom: 4px; font-family: var(--font-heading, 'Playfair Display', serif); }
+  .gbb-label { font-size: 0.95rem; color: #6b7280; margin-bottom: 16px; }
+  .gbb-features { list-style: none; padding: 0; margin: 0; }
+  .gbb-features li { padding: 8px 0; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px; }
   .gbb-features li:last-child { border-bottom: none; }
-  .gbb-btn { display: inline-block; background: var(--primary); color: white; padding: 12px 24px; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; text-decoration: none; transition: background 0.2s; }
-  .gbb-btn:hover { background: var(--primary-light); color: white; }
+  .gbb-features li::before { content: "✓"; color: #059669; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .gbb-btn { display: block; text-align: center; padding: 12px 24px; margin: 20px 24px 24px; background: var(--color-primary, #1e3a5f); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; }
+  .gbb-btn:hover { background: var(--color-primary-dark, #0f2744); transform: translateY(-1px); }
+  .gbb-card.featured .gbb-btn { background: var(--color-accent, #d4af37); color: #1a1a2e; }
+  .gbb-card.featured .gbb-btn:hover { background: #c5982e; }
+  .gbb-price { display: none; }
+  @media (max-width: 768px) {
+    .gbb-grid { grid-template-columns: 1fr !important; max-width: 400px; }
+  }
 
   /* Warranty Section */
   .warranty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 800px; margin: 0 auto; }
