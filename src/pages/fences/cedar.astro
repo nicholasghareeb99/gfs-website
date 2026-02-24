@@ -2,11 +2,11 @@
 import FencePage from '../../components/FencePage.astro';
 
 const benefits = [
-  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Natural Rot Resistance', text: 'Cedar contains natural oils that resist decay, insects, and moisture — no chemical treatment needed.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Natural Rot Resistance', text: 'Cedar contains natural oils that resist decay, insects, and moisture â no chemical treatment needed.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Beautiful Natural Look', text: 'Rich warm tones that age gracefully to a distinguished silver patina, or stain it to preserve the original color.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '20+ Year Lifespan', text: 'With minimal care, cedar fences easily last 20-30 years. Much longer than pressure-treated pine alternatives.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Complete Privacy', text: '6-foot solid board construction with no gaps. Board-on-board and shadowbox options available for airflow.' },
-  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Michigan Sourced', text: 'We use premium Northern White Cedar sourced from Michigan mills — supporting local and getting the best quality.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Michigan Sourced', text: 'We use premium Northern White Cedar sourced from Michigan mills â supporting local and getting the best quality.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts prevent sagging and keep your gates swinging true for years to come.' },
 ];
 
@@ -82,57 +82,62 @@ const relatedTypes = [
   </section>
 
   <!-- Good / Better / Best -->
-  <section class="section section-warm">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-label">Pricing Tiers</div>
-        <h2 class="section-title">Cedar Fence Options: <span class="gold">Good / Better / Best</span></h2>
+  <section class="section" style="background:var(--bg-light,#f8f7f4)">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">Style Options</div>
+          <h2 class="section-title">Cedar Fencing: <span class="gold">Good / Better / Best</span></h2>
+          <p>Three wood options — one clear winner for dimensional stability and beauty</p>
+        </div>
+        <div class="gbb-grid">
+          <div class="gbb-card">
+            <div class="gbb-badge">Good</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Pressure Treated Pine</div>
+              <div class="gbb-label">Budget-friendly starting option</div>
+              <ul class="gbb-features">
+                <li>Chemical-dependent preservation</li>
+                <li>10–15 year lifespan</li>
+                <li>Prone to warping when drying</li>
+                <li>High maintenance required</li>
+                <li>Yellow-green chemical tint</li>
+              </ul>
+              <a href="/quote/" class="gbb-btn">Get Quote</a>
+            </div>
+          </div>
+          <div class="gbb-card">
+            <div class="gbb-badge">Better</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Western Red Cedar</div>
+              <div class="gbb-label">Natural oil resistance</div>
+              <ul class="gbb-features">
+                <li>Natural rot resistance</li>
+                <li>20–25 year lifespan</li>
+                <li>Good dimensional stability</li>
+                <li>Moderate maintenance</li>
+                <li>Rich warm reddish tones</li>
+              </ul>
+              <a href="/quote/" class="gbb-btn">Get Quote</a>
+            </div>
+          </div>
+          <div class="gbb-card featured">
+            <div class="gbb-badge">★ Recommended</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Northern White Cedar</div>
+              <div class="gbb-label">Michigan-sourced premium</div>
+              <ul class="gbb-features">
+                <li>Exceptional decay resistance</li>
+                <li>30–40+ year lifespan</li>
+                <li>Superior dimensional stability</li>
+                <li>Low maintenance</li>
+                <li>Lightweight yet incredibly strong</li>
+              </ul>
+              <a href="/quote/" class="gbb-btn">Get Quote</a>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="gbb-grid">
-        <div class="gbb-card">
-          <div class="gbb-tier">Good</div>
-          <div class="gbb-price">$38-48 <span>/linear ft</span></div>
-          <div class="gbb-label">Western Red Cedar</div>
-          <ul class="gbb-features">
-            <li>6ft solid privacy</li>
-            <li>4x4 cedar posts</li>
-            <li>2x4 cedar rails</li>
-            <li>1x6 dog-eared pickets</li>
-            <li>20-25 year lifespan</li>
-          </ul>
-          <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
-        <div class="gbb-card featured">
-          <div class="gbb-tier">Better</div>
-          <div class="gbb-price">$48-58 <span>/linear ft</span></div>
-          <div class="gbb-label">Northern White Cedar</div>
-          <ul class="gbb-features">
-            <li>6ft solid privacy</li>
-            <li>Michigan-sourced cedar</li>
-            <li>4x4 posts (6ft centers)</li>
-            <li>Premium hardware</li>
-            <li>30-40+ year lifespan</li>
-            <li>Decorative post caps</li>
-          </ul>
-          <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
-        <div class="gbb-card">
-          <div class="gbb-tier">Best</div>
-          <div class="gbb-price">$58-70 <span>/linear ft</span></div>
-          <div class="gbb-label">NWC with Lattice</div>
-          <ul class="gbb-features">
-            <li>Privacy with lattice accent</li>
-            <li>Northern White Cedar</li>
-            <li>Custom framed panels</li>
-            <li>Premium gate hardware</li>
-            <li>30-40+ year lifespan</li>
-            <li>Custom gate options</li>
-          </ul>
-          <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
   <!-- Warranty -->
   <section class="section section-light">
@@ -149,10 +154,10 @@ const relatedTypes = [
         <div class="warranty-card">
           <div class="warranty-badge">20-40+<span>YEARS Natural Cedar Lifespan</span></div>
           <ul class="warranty-list">
-            <li>✓ Western Red Cedar: 20-25 years</li>
-            <li>✓ Northern White Cedar: 30-40+ years</li>
-            <li>✓ Natural rot/insect resistance</li>
-            <li>✓ Can be sealed for longevity</li>
+            <li>â Western Red Cedar: 20-25 years</li>
+            <li>â Northern White Cedar: 30-40+ years</li>
+            <li>â Natural rot/insect resistance</li>
+            <li>â Can be sealed for longevity</li>
           </ul>
         </div>
       </div>
