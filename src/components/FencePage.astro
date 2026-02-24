@@ -1,6 +1,6 @@
 ---
 /**
- * FencePage.astro Ã¢ÂÂ Reusable layout for individual fence-type pages
+ * FencePage.astro ÃÂ¢ÃÂÃÂ Reusable layout for individual fence-type pages
  * Props: title, description, keywords, heroTitle, heroHighlight, heroText,
  *        benefits[], specs[], faqs[], galleryImages[], relatedTypes[]
  */
@@ -44,7 +44,7 @@ const {
     <div class="fence-hero-overlay">
       <div class="container">
         <div class="fence-hero-content">
-          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">Ã°ÂÂÂ  {heroTitle.split(' ')[0]} Beauty</div>
+          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">ÃÂ°ÃÂÃÂÃÂ  {heroTitle.split(' ')[0]} Beauty</div>
           <h1 class="fence-hero-title">{heroTitle} <span class="highlight">{heroHighlight}</span></h1>
           <p class="fence-hero-text">{heroText}</p>
           <div class="fence-hero-cta">
@@ -152,7 +152,7 @@ const {
               <img src={rt.image} alt={rt.name} loading="lazy" />
               <div class="related-overlay">
                 <h4>{rt.name}</h4>
-                <span class="related-link">Learn More Ã¢ÂÂ</span>
+                <span class="related-link">Learn More ÃÂ¢ÃÂÃÂ</span>
               </div>
             </a>
           ))}
@@ -266,7 +266,7 @@ const {
     display: flex; justify-content: space-between; align-items: center;
   }
   .faq-item summary::after { content: '+'; font-size: 1.3rem; color: var(--accent); transition: transform 0.2s; }
-  .faq-item[open] summary::after { content: 'Ã¢ÂÂ'; }
+  .faq-item[open] summary::after { content: 'ÃÂ¢ÃÂÃÂ'; }
   .faq-item summary::-webkit-details-marker { display: none; }
   .faq-item p { padding: 0 24px 20px; color: var(--text-muted); line-height: 1.7; }
 
@@ -291,25 +291,25 @@ const {
     .warranty-grid { grid-template-columns: 1fr !important; }
   }
 
-  /* Good / Better / Best Premium Cards */
+  /* Good / Better / Best — Premium Cards */
   .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
   .gbb-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 16px; padding: 0; text-align: left; position: relative; transition: all 0.3s; overflow: hidden; }
   .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
   .gbb-badge { display: block; padding: 10px 0; text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; background: var(--color-primary, #1e3a5f); }
-  .gbb-card.featured .gbb-badge { background: linear-gradient(135deg, #d4af37, #c5982e); color: #1a1a2e; }
-  .gbb-card.featured { border-color: #d4af37; box-shadow: 0 4px 20px rgba(212,175,55,0.15); }
+  .gbb-card.featured .gbb-badge { background: linear-gradient(135deg, var(--color-accent, #d4af37), #c5982e); color: #1a1a2e; }
+  .gbb-card.featured { border-color: var(--color-accent, #d4af37); box-shadow: 0 4px 20px rgba(212,175,55,0.15); }
   .gbb-card-body { padding: 28px 24px; }
-  .gbb-tier { font-size: 1.4rem; font-weight: 800; color: #1e3a5f; margin-bottom: 4px; }
+  .gbb-tier { font-size: 1.4rem; font-weight: 800; color: var(--color-primary, #1e3a5f); margin-bottom: 4px; font-family: var(--font-heading, 'Playfair Display', serif); }
   .gbb-label { font-size: 0.95rem; color: #6b7280; margin-bottom: 16px; }
+  .gbb-price { display: none; }
   .gbb-features { list-style: none; padding: 0; margin: 0; }
   .gbb-features li { padding: 8px 0; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px; }
   .gbb-features li:last-child { border-bottom: none; }
-  .gbb-features li::before { content: "\2713"; color: #059669; font-weight: 700; flex-shrink: 0; }
-  .gbb-btn { display: block; text-align: center; padding: 12px 24px; margin: 20px 24px 24px; background: #1e3a5f; color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; }
-  .gbb-btn:hover { background: #0f2744; }
-  .gbb-card.featured .gbb-btn { background: #d4af37; color: #1a1a2e; }
+  .gbb-features li::before { content: "\2713"; color: #059669; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+  .gbb-btn { display: block; text-align: center; padding: 12px 24px; margin: 20px 24px 24px; background: var(--color-primary, #1e3a5f); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; }
+  .gbb-btn:hover { background: #0f2744; transform: translateY(-1px); }
+  .gbb-card.featured .gbb-btn { background: var(--color-accent, #d4af37); color: #1a1a2e; }
   .gbb-card.featured .gbb-btn:hover { background: #c5982e; }
-  .gbb-price { display: none; }
   @media (max-width: 768px) { .gbb-grid { grid-template-columns: 1fr !important; max-width: 400px; } }
 
   /* Warranty Section */
