@@ -6,7 +6,7 @@ const benefits = [
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Treated for Longevity', text: 'ACQ pressure treatment protects against rot, decay, and insects. Rated for ground contact.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Complete Privacy', text: '6-foot solid board construction. Shadowbox and lattice-top options available.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Stain & Paint Ready', text: 'After a 3-6 month drying period, PT wood accepts stain and paint beautifully for any color you want.' },
-  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts on every project. No sagging gates — built to last.' },
+  { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts on every project. No sagging gates â built to last.' },
   { icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '15-20 Year Lifespan', text: 'With proper care, pressure-treated fences last 15-20 years. Great ROI for privacy on a budget.' },
 ];
 
@@ -20,8 +20,8 @@ const specs = [
 ];
 
 const faqs = [
-  { question: 'What is the difference between cedar and pressure-treated wood?', answer: 'Cedar is naturally rot-resistant, lighter, and has a premium appearance — but costs more. Pressure-treated wood is chemically treated to resist rot at a lower price point. Both make great fences; it comes down to budget and aesthetics.' },
-  { question: 'When can I stain my pressure-treated fence?', answer: 'Wait 3-6 months for the wood to dry before staining. A simple water test tells you when it is ready — sprinkle water on the wood. If it beads up, wait longer. If it soaks in, you are good to stain.' },
+  { question: 'What is the difference between cedar and pressure-treated wood?', answer: 'Cedar is naturally rot-resistant, lighter, and has a premium appearance â but costs more. Pressure-treated wood is chemically treated to resist rot at a lower price point. Both make great fences; it comes down to budget and aesthetics.' },
+  { question: 'When can I stain my pressure-treated fence?', answer: 'Wait 3-6 months for the wood to dry before staining. A simple water test tells you when it is ready â sprinkle water on the wood. If it beads up, wait longer. If it soaks in, you are good to stain.' },
   { question: 'Will pressure-treated wood warp?', answer: 'Some movement is normal as the wood dries. We minimize warping by using properly graded lumber, installing with the right fasteners, and allowing proper spacing. Premium-grade lumber warps less than economy boards.' },
   { question: 'How much does a wood privacy fence cost?', answer: 'Wood privacy fencing is the most affordable solid-board option, typically less than cedar or vinyl. Use our instant quote tool for pricing specific to your project.' },
 ];
@@ -65,8 +65,9 @@ const relatedTypes = [
       </div>
       <div class="gbb-grid">
         <div class="gbb-card">
-          <div class="gbb-tier">Good</div>
-          <div class="gbb-price">$28-35 <span>/linear ft</span></div>
+            <div class="gbb-badge">Good</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Good</div>
           <div class="gbb-label">Standard Privacy</div>
           <ul class="gbb-features">
             <li>6ft solid board on board</li>
@@ -76,10 +77,12 @@ const relatedTypes = [
             <li>Standard gate hardware</li>
           </ul>
           <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
+            </div>
+          </div>
         <div class="gbb-card featured">
-          <div class="gbb-tier">Better</div>
-          <div class="gbb-price">$35-45 <span>/linear ft</span></div>
+            <div class="gbb-badge">★ Recommended</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Better</div>
           <div class="gbb-label">Enhanced Privacy</div>
           <ul class="gbb-features">
             <li>6ft solid board construction</li>
@@ -90,10 +93,12 @@ const relatedTypes = [
             <li>More rigid construction</li>
           </ul>
           <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
+            </div>
+          </div>
         <div class="gbb-card">
-          <div class="gbb-tier">Best</div>
-          <div class="gbb-price">$45-55 <span>/linear ft</span></div>
+            <div class="gbb-badge">Best</div>
+            <div class="gbb-card-body">
+              <div class="gbb-tier">Best</div>
           <div class="gbb-label">Premium with Lattice</div>
           <ul class="gbb-features">
             <li>Privacy with lattice accent</li>
@@ -104,7 +109,8 @@ const relatedTypes = [
             <li>Custom gate options</li>
           </ul>
           <a href="/quote/" class="gbb-btn">Get Quote</a>
-        </div>
+            </div>
+          </div>
       </div>
     </div>
   </section>
@@ -124,9 +130,9 @@ const relatedTypes = [
         <div class="warranty-card">
           <div class="warranty-badge">15-20<span>YEARS Expected Material Lifespan</span></div>
           <ul class="warranty-list">
-            <li>✓ Pressure-treated for rot resistance</li>
-            <li>✓ Insect/termite resistant</li>
-            <li>✓ Can be stained/sealed</li>
+            <li>â Pressure-treated for rot resistance</li>
+            <li>â Insect/termite resistant</li>
+            <li>â Can be stained/sealed</li>
           </ul>
         </div>
       </div>
