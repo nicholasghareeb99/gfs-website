@@ -206,12 +206,15 @@
   function getPageKey(){return(window.location.pathname.replace(/^\/|\/$/g,'')||'home').replace(/\//g,'-')}
 
   function getEditableTextElements(){
-    const sel='h1,h2,h3,h4,h5,h6,p,blockquote,figcaption,span.highlight,span.gold,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,.cta-content h2,.cta-content p,.section-label,.section-title,details summary,details>p,[data-editable],a.cta-btn,.gbb-tier,.gbb-price,.gbb-label,.gbb-features li,.fence-hero-text,.fence-hero-title,.warranty-badge,.warranty-text,.top-bar-item,.footer-about p,.footer-col h4,.site-footer p,.city-search,.permits-hero p,.permits-hero h1,.detail-disclaimer p';
+    const sel='h1,h2,h3,h4,h5,h6,p,li,td,th,label,blockquote,figcaption,a,button,span.highlight,span.gold,span.company-name,span.company-tagline,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,.cta-content h2,.cta-content p,.section-label,.section-title,details summary,details>p,[data-editable],a.cta-btn,.gbb-tier,.gbb-price,.gbb-label,.gbb-features li,.fence-hero-text,.fence-hero-title,.warranty-badge,.warranty-text,.top-bar-item,.footer-about p,.footer-col h4,.site-footer p,.site-footer a,.city-search,.permits-hero p,.permits-hero h1,.detail-disclaimer p,.area-tag,.btn';
     const els=[];
     document.querySelectorAll(sel).forEach(el=>{
       if(el.closest('#edit-toolbar')||el.closest('.et-modal')||el.closest('.et-popover')||el.closest('script')||el.closest('style'))return;
       if(!el.textContent?.trim()&&!el.querySelector('img'))return;
       if(el.parentElement?.closest('[data-et-editable]'))return;
+      if(el.tagName==='A'&&el.closest('.nav-links'))return;
+      if(el.tagName==='A'&&el.closest('.dropdown'))return;
+      if(el.tagName==='LI'&&el.querySelector('a'))return;
       els.push(el);
     });
     return els;
