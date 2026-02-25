@@ -81,60 +81,100 @@ const relatedTypes = [
     </div>
   </section>
 
-  <!-- Good / Be<section class="content-section" style="background:var(--bg-light,#f8f6f0)">
+  <!-- Good / Be<!-- Good / Better / Best — Brochure-style horizontal cards -->
+    <section class="section gbb-section">
       <div class="container" style="text-align:center">
         <div class="section-label">Style Options</div>
-        <h2 class="section-title">Cedar Fencing: <span class="gold">Good / Better / Best</span></h2>
+        <h2 class="section-title">Cedar Fence Options: <span class="gold">Good / Better / Best</span></h2>
         <p>Three wood options — one clear winner for dimensional stability and beauty</p>
       </div>
+
       <div class="gbb-grid">
         <div class="gbb-card">
-          <div class="gbb-badge">Good</div>
-          <div class="gbb-card-body">
-            <div class="gbb-tier">Pressure Treated Pine</div>
-            <div class="gbb-label">Budget-friendly option</div>
-            <ul class="gbb-features">
-              <li>Chemical-dependent preservation</li>
-              <li>10–15 year lifespan</li>
-              <li>Prone to warping &amp; splitting</li>
-              <li>High maintenance required</li>
-              <li>Yellow-green chemical tint</li>
-            </ul>
-          </div>
+          <div class="gbb-badge gbb-good">GOOD</div>
+          <h3 class="gbb-name">Pressure Treated Pine</h3>
+          <ul class="gbb-features">
+            <li>Chemical-dependent preservation</li>
+            <li>10–15 year lifespan</li>
+            <li>Prone to warping &amp; splitting</li>
+            <li>High maintenance required</li>
+          </ul>
           <a href="/quote/" class="gbb-btn">Get Quote</a>
         </div>
+
         <div class="gbb-card">
-          <div class="gbb-badge">Better</div>
-          <div class="gbb-card-body">
-            <div class="gbb-tier">Western Red Cedar</div>
-            <div class="gbb-label">Natural beauty &amp; durability</div>
-            <ul class="gbb-features">
-              <li>Natural oil resistance</li>
-              <li>20–25 year lifespan</li>
-              <li>Good dimensional stability</li>
-              <li>Moderate maintenance</li>
-              <li>Rich warm wood tones</li>
-            </ul>
-          </div>
+          <div class="gbb-badge gbb-better">BETTER</div>
+          <h3 class="gbb-name">Western Red Cedar</h3>
+          <ul class="gbb-features">
+            <li>Natural oil resistance</li>
+            <li>20–25 year lifespan</li>
+            <li>Good dimensional stability</li>
+            <li>Moderate maintenance</li>
+          </ul>
           <a href="/quote/" class="gbb-btn">Get Quote</a>
         </div>
-        <div class="gbb-card featured">
-          <div class="gbb-badge">★ Recommended · Best</div>
-          <div class="gbb-card-body">
-            <div class="gbb-tier">Northern White Cedar</div>
-            <div class="gbb-label">Michigan-sourced premium</div>
-            <ul class="gbb-features">
-              <li>Exceptional decay resistance</li>
-              <li>30–40+ year lifespan</li>
-              <li>Superior dimensional stability</li>
-              <li>Low maintenance</li>
-              <li>Lightweight yet strong</li>
-            </ul>
-          </div>
-          <a href="/quote/" class="gbb-btn">Get Quote</a>
+
+        <div class="gbb-card gbb-card-best">
+          <div class="gbb-recommended">★ RECOMMENDED</div>
+          <div class="gbb-badge gbb-best">BEST</div>
+          <h3 class="gbb-name">Northern White Cedar</h3>
+          <ul class="gbb-features">
+            <li>Exceptional decay resistance</li>
+            <li>30–40+ year lifespan</li>
+            <li>Superior dimensional stability</li>
+            <li>Low maintenance</li>
+          </ul>
+          <a href="/quote/" class="gbb-btn gbb-btn-best">Get Quote</a>
         </div>
       </div>
-    </section>m</div>
+
+      <!-- Limitations vs Advantages -->
+      <div class="gbb-compare-row">
+        <div class="gbb-compare-card gbb-compare-bad">
+          <h3>PT Pine Limitations</h3>
+          <ul>
+            <li><span class="x-mark">✗</span> Chemical wears off over time</li>
+            <li><span class="x-mark">✗</span> Cracks and splits</li>
+            <li><span class="x-mark">✗</span> Warps when drying</li>
+            <li><span class="x-mark">✗</span> Frequent maintenance needed</li>
+            <li><span class="x-mark">✗</span> Shorter lifespan</li>
+          </ul>
+        </div>
+        <div class="gbb-compare-card gbb-compare-good">
+          <h3>Cedar Advantages</h3>
+          <ul>
+            <li><span class="check-mark">✓</span> Natural decay resistance</li>
+            <li><span class="check-mark">✓</span> Dimensionally stable</li>
+            <li><span class="check-mark">✓</span> Beautiful natural grain</li>
+            <li><span class="check-mark">✓</span> Lightweight &amp; strong</li>
+            <li><span class="check-mark">✓</span> Sustainable &amp; renewable</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Cedar Options Table -->
+      <div class="gbb-options-table">
+        <h3 class="gbb-table-title">Cedar Fence Options at a Glance</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Style</th>
+              <th>Material</th>
+              <th>Privacy</th>
+              <th>Lifespan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Cedar Privacy</td><td>WRC</td><td>100%</td><td>20–25 yrs</td></tr>
+            <tr><td>Cedar Shadowbox</td><td>WRC</td><td>85%</td><td>20–25 yrs</td></tr>
+            <tr><td>Lattice Top</td><td>WRC</td><td>75%</td><td>20–25 yrs</td></tr>
+            <tr><td>PT Frame + Cedar</td><td>Hybrid</td><td>100%</td><td>18–22 yrs</td></tr>
+            <tr class="gbb-table-highlight"><td>Premium White Cedar</td><td>N. White</td><td>100%</td><td>30–40+ yrs</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+m</div>
               <ul class="gbb-features">
                 <li>Exceptional decay resistance</li>
                 <li>30Ã¢ÂÂ40+ year lifespan</li>
@@ -174,3 +214,52 @@ const relatedTypes = [
     </div>
   </section>
 </FencePage>
+
+<style is:global>
+/* Good / Better / Best — Premium Brochure Style */
+  .gbb-section { padding: 80px 0; }
+  .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; max-width: 1000px; margin: 40px auto 0; }
+  .gbb-card { background: #fff; border: 2px solid #e8e8e8; border-radius: 16px; padding: 40px 28px 32px; text-align: center; position: relative; transition: all 0.3s ease; }
+  .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
+  .gbb-card-best { border-color: #c9a84c; box-shadow: 0 4px 20px rgba(201,168,76,0.15); }
+  .gbb-badge { display: inline-block; padding: 8px 28px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 20px; }
+  .gbb-good { background: #c9a84c; color: #fff; }
+  .gbb-better { background: #1b2d4f; color: #fff; }
+  .gbb-best { background: #c9a84c; color: #fff; }
+  .gbb-recommended { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: #c9a84c; color: #fff; padding: 4px 18px; border-radius: 50px; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px; white-space: nowrap; }
+  .gbb-name { font-size: 1.25rem; font-weight: 700; color: #1b2d4f; margin: 0 0 20px; font-family: 'Playfair Display', serif; }
+  .gbb-features { list-style: none; padding: 0; margin: 0 0 24px; text-align: left; }
+  .gbb-features li { padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 0.95rem; color: #444; }
+  .gbb-features li:last-child { border-bottom: none; }
+  .gbb-btn { display: inline-block; padding: 12px 28px; border: 2px solid #1b2d4f; color: #1b2d4f; border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 0.9rem; transition: all 0.3s; }
+  .gbb-btn:hover { background: #1b2d4f; color: #fff; }
+  .gbb-btn-best { background: #c9a84c; border-color: #c9a84c; color: #fff; }
+  .gbb-btn-best:hover { background: #b8943d; border-color: #b8943d; }
+
+  /* Limitations vs Advantages */
+  .gbb-compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 1000px; margin: 48px auto 0; }
+  .gbb-compare-card { background: #fff; border: 2px solid #e8e8e8; border-radius: 16px; padding: 32px; }
+  .gbb-compare-card h3 { font-size: 1.1rem; font-weight: 700; margin: 0 0 16px; font-family: 'Playfair Display', serif; }
+  .gbb-compare-bad h3 { color: #c0392b; }
+  .gbb-compare-good h3 { color: #1b2d4f; }
+  .gbb-compare-card ul { list-style: none; padding: 0; margin: 0; }
+  .gbb-compare-card li { padding: 6px 0; font-size: 0.95rem; color: #444; }
+  .x-mark { color: #c0392b; font-weight: 700; margin-right: 8px; }
+  .check-mark { color: #27ae60; font-weight: 700; margin-right: 8px; }
+
+  /* Options Table */
+  .gbb-options-table { max-width: 1000px; margin: 48px auto 0; }
+  .gbb-table-title { text-align: center; font-size: 1.1rem; color: #c9a84c; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; margin-bottom: 16px; }
+  .gbb-options-table table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .gbb-options-table thead { background: #1b2d4f; color: #fff; }
+  .gbb-options-table th { padding: 14px 20px; font-size: 0.85rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; text-align: left; }
+  .gbb-options-table td { padding: 14px 20px; font-size: 0.95rem; color: #444; border-bottom: 1px solid #f0f0f0; }
+  .gbb-options-table tr:last-child td { border-bottom: none; }
+  .gbb-table-highlight { background: #faf6eb; }
+  .gbb-table-highlight td { font-weight: 600; color: #1b2d4f; }
+
+  @media(max-width:768px){
+    .gbb-grid { grid-template-columns: 1fr; max-width: 400px; }
+    .gbb-compare-row { grid-template-columns: 1fr; }
+  }
+</style>
