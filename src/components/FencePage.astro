@@ -291,28 +291,7 @@ const {
     .warranty-grid { grid-template-columns: 1fr !important; }
   }
 
-  /* Good / Better / Best — Premium Cards */
-  .gbb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; max-width: 1100px; margin: 0 auto; }
-  .gbb-card { background: #fff; border: 2px solid #e5e7eb; border-radius: 16px; padding: 0; text-align: left; position: relative; transition: all 0.3s; overflow: hidden; }
-  .gbb-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
-  .gbb-badge { display: block; padding: 10px 0; text-align: center; font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #fff; background: var(--color-primary, #1e3a5f); }
-  .gbb-card.featured .gbb-badge { background: linear-gradient(135deg, var(--color-accent, #d4af37), #c5982e); color: #1a1a2e; }
-  .gbb-card.featured { border-color: var(--color-accent, #d4af37); box-shadow: 0 4px 20px rgba(212,175,55,0.15); }
-  .gbb-card-body { padding: 28px 24px; }
-  .gbb-tier { font-size: 1.4rem; font-weight: 800; color: var(--color-primary, #1e3a5f); margin-bottom: 4px; font-family: var(--font-heading, 'Playfair Display', serif); }
-  .gbb-label { font-size: 0.95rem; color: #6b7280; margin-bottom: 16px; }
-  .gbb-price { display: none; }
-  .gbb-features { list-style: none; padding: 0; margin: 0; }
-  .gbb-features li { padding: 8px 0; font-size: 0.9rem; color: #374151; border-bottom: 1px solid #f3f4f6; display: flex; align-items: center; gap: 8px; }
-  .gbb-features li:last-child { border-bottom: none; }
-  .gbb-features li::before { content: "\2713"; color: #059669; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
-  .gbb-btn { display: block; text-align: center; padding: 12px 24px; margin: 20px 24px 24px; background: var(--color-primary, #1e3a5f); color: #fff; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: all 0.3s; }
-  .gbb-btn:hover { background: #0f2744; transform: translateY(-1px); }
-  .gbb-card.featured .gbb-btn { background: var(--color-accent, #d4af37); color: #1a1a2e; }
-  .gbb-card.featured .gbb-btn:hover { background: #c5982e; }
-  @media (max-width: 768px) { .gbb-grid { grid-template-columns: 1fr !important; max-width: 400px; } }
-
-  /* Warranty Section */
+  /* GBB styles moved to global block below */
   .warranty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 800px; margin: 0 auto; }
   .warranty-card { background: var(--bg-white); border: 2px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; }
   .warranty-badge { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary); line-height: 1; }
@@ -321,4 +300,45 @@ const {
   .warranty-text { font-size: 0.85rem; color: var(--text-body); line-height: 1.6; }
   .warranty-list { list-style: none; padding: 0; text-align: left; }
   .warranty-list li { padding: 4px 0; font-size: 0.85rem; color: var(--text-body); }
+</style>
+
+<style is:global>
+.gbb-section{padding:80px 24px;background:var(--bg-light,#f8f7f4)}
+.gbb-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:0!important;max-width:1100px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.10)}
+.gbb-card{background:#fff;padding:0;text-align:left;position:relative;border-right:1px solid #e5e2dc;display:flex;flex-direction:column}
+.gbb-card:last-child{border-right:none}
+.gbb-badge{display:block;text-align:center;padding:10px 0;font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#fff;background:var(--dark,#1e2a3a)}
+.gbb-card.best .gbb-badge{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-recommended{display:none}
+.gbb-card.best .gbb-recommended{display:block;text-align:center;font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent,#c8a951);padding-top:12px}
+.gbb-title-area{text-align:center;padding:16px 24px 8px}
+.gbb-card-title{font-family:var(--font-heading,'Playfair Display',serif);font-size:1.35rem;font-weight:700;color:var(--dark,#1e2a3a);margin:0}
+.gbb-card-subtitle{font-size:.85rem;color:#6b7280;margin-top:4px}
+.gbb-photo{width:100%;height:200px;object-fit:cover;display:block;margin:8px 0 0}
+.gbb-specs{padding:20px 24px 0}
+.gbb-specs-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--dark,#1e2a3a);margin-bottom:12px;border-bottom:2px solid var(--accent,#c8a951);padding-bottom:6px}
+.gbb-spec-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0ede8;font-size:.875rem}
+.gbb-spec-row:last-child{border-bottom:none}
+.gbb-spec-label{font-weight:600;color:var(--dark,#1e2a3a);min-width:80px}
+.gbb-spec-value{color:#4b5563;text-align:right}
+.gbb-pros,.gbb-cons{padding:12px 24px 0}
+.gbb-pros-title,.gbb-cons-title{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.gbb-pros-title{color:var(--dark,#1e2a3a)}
+.gbb-cons-title{color:#b45309}
+.gbb-pros ul,.gbb-cons ul{list-style:none;padding:0;margin:0}
+.gbb-pros li,.gbb-cons li{font-size:.85rem;padding:3px 0 3px 20px;position:relative;color:#374151;line-height:1.4}
+.gbb-pros li::before{content:'\2713';position:absolute;left:0;color:#16a34a;font-weight:700}
+.gbb-cons li::before{content:'\2717';position:absolute;left:0;color:#dc2626;font-weight:700}
+.gbb-cta{display:block;text-align:center;padding:12px 24px;margin:auto 24px 24px;background:var(--accent,#c8a951);color:var(--dark,#1e2a3a);font-weight:700;font-size:.9rem;border-radius:8px;text-decoration:none;letter-spacing:.5px;transition:all .2s}
+.gbb-cta:hover{background:var(--dark,#1e2a3a);color:#fff}
+.gbb-summary{max-width:1100px;margin:32px auto 0;background:#fff;border-radius:12px;padding:24px 32px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.gbb-summary-title{font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dark,#1e2a3a);margin-bottom:16px}
+.gbb-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.gbb-summary-item strong{display:block;font-size:.95rem;color:var(--dark,#1e2a3a);margin-bottom:4px}
+.gbb-summary-item span{font-size:.85rem;color:#6b7280}
+.gbb-availability{text-align:center;font-size:.85rem;color:#6b7280;font-style:italic;margin-top:16px}
+.gbb-contact-bar{max-width:1100px;margin:24px auto 0;background:var(--dark,#1e2a3a);border-radius:12px;padding:20px 32px;display:flex;align-items:center;justify-content:space-between;color:#fff}
+.gbb-contact-bar p{margin:0;font-size:1.05rem}
+.gbb-contact-bar a{color:var(--accent,#c8a951);font-size:1.3rem;font-weight:700;text-decoration:none}
+@media(max-width:900px){.gbb-grid{grid-template-columns:1fr!important}.gbb-card{border-right:none;border-bottom:1px solid #e5e2dc}.gbb-card:last-child{border-bottom:none}.gbb-summary-grid{grid-template-columns:1fr;gap:12px}.gbb-contact-bar{flex-direction:column;text-align:center;gap:12px}}
 </style>
