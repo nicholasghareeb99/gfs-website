@@ -177,129 +177,48 @@ const {
 </BaseLayout>
 
 <style is:global>
-  .fence-hero {
-    min-height: 70vh;
-    background-size: cover;
-    background-position: center;
-    position: relative;
-  }
-  .fence-hero-overlay {
-    background: linear-gradient(135deg, rgba(30,58,95,0.92) 0%, rgba(15,39,68,0.85) 50%, rgba(139,90,43,0.7) 100%);
-    min-height: 70vh;
-    display: flex;
-    align-items: center;
-    padding: 120px 0 80px;
-  }
-  .fence-hero-content { max-width: 650px; }
-  .fence-hero-title {
-    font-family: var(--font-display);
-    font-size: clamp(2.2rem, 5vw, 3.2rem);
-    line-height: 1.15;
-    margin-bottom: 20px;
-    color: white;
-  }
-  .fence-hero-title .highlight { color: white; }
-  .fence-hero-text { color: rgba(255,255,255,0.85); font-size: 1.1rem; margin-bottom: 32px; line-height: 1.7; }
-  .fence-hero-cta { display: flex; gap: 16px; flex-wrap: wrap; }
-  .btn-hero-gold {
-    background: linear-gradient(135deg, #d4af37, #f4d03f);
-    color: #0f2744;
-    font-weight: 700;
-    padding: 16px 32px;
-    border-radius: 9999px;
-    text-decoration: none;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 15px rgba(212,175,55,0.3);
-    transition: all 0.3s;
-  }
-  .btn-hero-gold:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.4); }
-  .btn-hero-outline {
-    background: rgba(255,255,255,0.1);
-    color: white;
-    font-weight: 600;
-    padding: 16px 32px;
-    border-radius: 9999px;
-    border: 2px solid rgba(255,255,255,0.3);
-    text-decoration: none;
-    font-size: 1rem;
-    transition: all 0.3s;
-  }
-  .btn-hero-outline:hover { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.5); color: white; }
-
-  .benefits-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px; }
-  .benefit-card {
-    background: var(--bg-white); border-radius: var(--radius); padding: 28px;
-    border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s;
-  }
-  .benefit-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
-  .benefit-icon { width: 48px; height: 48px; background: rgba(30,58,95,0.08); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--primary); }
-  .benefit-icon :global(svg) { width: 24px; height: 24px; }
-  .benefit-card h3 { font-size: 1.1rem; margin-bottom: 8px; }
-  .benefit-card p { color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; }
-
-  .fence-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .fence-gallery-item { border-radius: 12px; overflow: hidden; position: relative; aspect-ratio: 4/3; }
-  .fence-gallery-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-  .fence-gallery-item:hover img { transform: scale(1.05); }
-  .fence-gallery-label {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,0.8));
-    color: var(--accent); font-weight: 600; font-size: 0.8rem;
-  }
-
-  .specs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; max-width: 900px; margin: 0 auto; }
-  .spec-item { background: var(--bg-white); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); text-align: center; }
-  .spec-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 6px; }
-  .spec-value { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--primary); }
-
-  .faq-list { max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-  .faq-item {
-    background: var(--bg-white); border-radius: var(--radius); border: 1px solid var(--border);
-    overflow: hidden; transition: box-shadow 0.2s;
-  }
-  .faq-item[open] { box-shadow: var(--shadow); }
-  .faq-item summary {
-    padding: 20px 24px; font-weight: 600; cursor: pointer; list-style: none;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .faq-item summary::after { content: '+'; font-size: 1.3rem; color: var(--accent); transition: transform 0.2s; }
-  .faq-item[open] summary::after { content: 'ÃÂ¢ÃÂÃÂ'; }
-  .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-item p { padding: 0 24px 20px; color: var(--text-muted); line-height: 1.7; }
-
-  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-  .related-card { border-radius: var(--radius); overflow: hidden; position: relative; aspect-ratio: 3/2; display: block; }
-  .related-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
-  .related-card:hover img { transform: scale(1.08); }
-  .related-overlay {
-    position: absolute; bottom: 0; left: 0; right: 0; padding: 20px;
-    background: linear-gradient(transparent, rgba(0,0,0,0.85));
-    color: white;
-  }
-  .related-overlay h4 { font-size: 1.1rem; margin-bottom: 4px; }
-  .related-link { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
-
-  @media (max-width: 768px) {
-    .fence-hero-overlay { padding: 100px 0 60px; min-height: auto; }
-    .fence-hero-title { font-size: 1.8rem; }
-    .fence-gallery { grid-template-columns: repeat(2, 1fr); }
-    .related-grid { grid-template-columns: repeat(2, 1fr); }
-    .gbb-grid { grid-template-columns: 1fr !important; }
-    .warranty-grid { grid-template-columns: 1fr !important; }
-  }
-
-  /* GBB styles moved to global block below */
-  .warranty-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; max-width: 800px; margin: 0 auto; }
-  .warranty-card { background: var(--bg-white); border: 2px solid var(--border); border-radius: 16px; padding: 32px; text-align: center; }
-  .warranty-badge { font-family: var(--font-heading); font-size: 2.5rem; color: var(--primary); line-height: 1; }
-  .warranty-badge span { display: block; font-size: 0.85rem; color: var(--text-muted); font-family: var(--font-body); margin-top: 4px; }
-  .warranty-title { font-family: var(--font-heading); font-size: 1.1rem; margin: 16px 0 12px; color: var(--dark); }
-  .warranty-text { font-size: 0.85rem; color: var(--text-body); line-height: 1.6; }
-  .warranty-list { list-style: none; padding: 0; text-align: left; }
-  .warranty-list li { padding: 4px 0; font-size: 0.85rem; color: var(--text-body); }
+.gbb-section{padding:80px 24px;background:var(--bg-light,#f8f7f4)}
+.gbb-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:0!important;max-width:1100px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.10)}
+.gbb-card{background:#fff;padding:0;text-align:left;position:relative;border-right:1px solid #e5e2dc;display:flex!important;flex-direction:column}
+.gbb-card:last-child{border-right:none}
+.gbb-badge{display:block;text-align:center;padding:12px 0;font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#fff;background:var(--dark,#1e2a3a)}
+.gbb-card.best .gbb-badge{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-recommended{display:none}
+.gbb-card.best .gbb-recommended{display:block;text-align:center;font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--accent,#c8a951);padding-top:10px}
+.gbb-title-area{text-align:center;padding:14px 20px 8px}
+.gbb-card-title{font-family:'Playfair Display',serif;font-size:1.25rem;font-weight:700;color:var(--dark,#1e2a3a);margin:0}
+.gbb-card-subtitle{font-size:.8rem;color:#888;margin-top:2px;font-style:italic}
+.gbb-photo{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.gbb-specs{padding:16px 20px 8px}
+.gbb-specs-title{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent,#c8a951);margin-bottom:8px}
+.gbb-spec-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0ede8;font-size:.85rem}
+.gbb-spec-row:last-child{border-bottom:none}
+.gbb-spec-label{color:#666;font-weight:500}
+.gbb-spec-value{color:var(--dark,#1e2a3a);font-weight:600;text-align:right}
+.gbb-pros,.gbb-cons{padding:8px 20px;list-style:none;margin:0}
+.gbb-pros-title,.gbb-cons-title{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.gbb-pros-title{color:#2e7d32}
+.gbb-cons-title{color:#c62828}
+.gbb-pros li,.gbb-cons li{font-size:.82rem;padding:3px 0;line-height:1.4}
+.gbb-pros li::before{content:'\2713  ';color:#2e7d32;font-weight:700}
+.gbb-cons li::before{content:'\2717  ';color:#c62828;font-weight:700}
+.gbb-card-bottom{padding:12px 20px 20px;margin-top:auto}
+.gbb-summary{max-width:1100px;margin:24px auto 0;background:var(--dark,#1e2a3a);border-radius:12px;padding:20px 32px;color:#fff}
+.gbb-summary-title{font-size:.85rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent,#c8a951);margin-bottom:12px}
+.gbb-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.gbb-summary-item{font-size:.82rem;line-height:1.5}
+.gbb-summary-item strong{color:var(--accent,#c8a951);display:block;font-size:.9rem;margin-bottom:2px}
+.gbb-contact-bar{max-width:1100px;margin:16px auto 0;background:#f0ede8;border-radius:12px;padding:16px 32px;display:flex;align-items:center;justify-content:space-between}
+.gbb-contact-text{font-size:.95rem;color:var(--dark,#1e2a3a);font-weight:500}
+.gbb-contact-phone{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700;color:var(--dark,#1e2a3a);text-decoration:none}
+.gbb-contact-phone:hover{color:var(--accent,#c8a951)}
+@media(max-width:768px){
+.gbb-grid{grid-template-columns:1fr!important}
+.gbb-card{border-right:none;border-bottom:1px solid #e5e2dc}
+.gbb-card:last-child{border-bottom:none}
+.gbb-summary-grid{grid-template-columns:1fr;gap:12px}
+.gbb-contact-bar{flex-direction:column;text-align:center;gap:12px}
+}
 </style>
 
 <style is:global>
