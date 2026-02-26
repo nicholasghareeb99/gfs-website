@@ -177,54 +177,45 @@ const {
 </BaseLayout>
 
 <style is:global>
-/* GBB Good/Better/Best - Premium Brochure Style */
-.gbb-section{padding:80px 24px;background:#f8f7f4}
-.gbb-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:0!important;max-width:1100px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+/* Good / Better / Best - Premium Card Design */
+.gbb-section{padding:80px 24px;background:var(--bg-light,#f8f7f4)}
+.gbb-grid{display:grid!important;grid-template-columns:repeat(3,1fr)!important;gap:0!important;max-width:1100px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.12)}
 .gbb-card{background:#fff;padding:0;text-align:left;position:relative;border-right:1px solid #e5e2dc;display:flex!important;flex-direction:column}
 .gbb-card:last-child{border-right:none}
-.gbb-card:hover{transform:translateY(-2px);box-shadow:0 12px 36px rgba(0,0,0,.12);z-index:2}
-.gbb-badge{display:block;text-align:center;padding:14px 0;font-size:13px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#fff}
-.gbb-card:nth-child(1) .gbb-badge{background:#8a8a8a}
-.gbb-card:nth-child(2) .gbb-badge{background:#1b2d4f}
-.gbb-card:nth-child(3) .gbb-badge{background:linear-gradient(135deg,#c9a84c,#dbb960);color:#1b2d4f}
-.gbb-card.featured .gbb-badge{background:#1b2d4f}
-.gbb-card-body{padding:28px 24px;flex:1;display:flex;flex-direction:column}
-.gbb-tier{display:none}
-.gbb-price{display:none}
+.gbb-badge{display:block;text-align:center;padding:14px 0;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#fff}
+.gbb-card:first-child .gbb-badge{background:#8b8b8b}
+.gbb-card:nth-child(2) .gbb-badge{background:var(--dark,#1e2a3a)}
+.gbb-card:last-child .gbb-badge{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-card.best .gbb-badge{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
 .gbb-recommended{display:none}
-.gbb-label{font-size:1.25rem;font-weight:700;color:#1b2d4f;margin-bottom:20px;text-align:center}
+.gbb-card.best .gbb-recommended,.gbb-card:last-child .gbb-recommended{display:block;text-align:center;font-size:11px;font-weight:700;letter-spacing:2px;color:var(--accent,#c8a951);padding:10px 0 0;text-transform:uppercase}
+.gbb-card-body{padding:24px 28px 28px;flex:1;display:flex;flex-direction:column}
+.gbb-card-title{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark,#1e2a3a);margin:0 0 20px;text-align:center}
 .gbb-features{list-style:none;padding:0;margin:0 0 24px;flex:1}
-.gbb-features li{padding:10px 0;border-bottom:1px solid #f0ede8;font-size:.95rem;color:#444;display:flex;align-items:center;gap:10px}
+.gbb-features li{font-size:.9rem;padding:8px 0 8px 24px;position:relative;color:#374151;line-height:1.5;border-bottom:1px solid #f5f3ef}
 .gbb-features li:last-child{border-bottom:none}
-.gbb-features li::before{content:"✓";color:#2d8a4e;font-weight:700;font-size:1rem;flex-shrink:0}
-.gbb-btn{display:block;text-align:center;padding:14px 24px;border-radius:8px;font-weight:700;font-size:.95rem;text-decoration:none;letter-spacing:.5px;transition:all .3s;margin-top:auto}
-.gbb-card:nth-child(1) .gbb-btn{background:#f0ede8;color:#1b2d4f}
-.gbb-card:nth-child(2) .gbb-btn{background:#1b2d4f;color:#fff}
-.gbb-card:nth-child(3) .gbb-btn{background:linear-gradient(135deg,#c9a84c,#dbb960);color:#1b2d4f}
-.gbb-card.featured .gbb-btn{background:#1b2d4f;color:#fff}
-.gbb-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
-/* New-style classes (cedar) */
-.gbb-title-area{text-align:center;padding:28px 24px 16px}
-.gbb-card-title{font-size:1.3rem;font-weight:700;color:#1b2d4f}
-.gbb-card-subtitle{font-size:.85rem;color:#888;font-weight:500;margin-top:4px}
-.gbb-specs{padding:0 24px 16px;flex:1}
-.gbb-specs-title{font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent,#c9a84c);margin-bottom:12px}
-.gbb-spec-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0ede8;font-size:.9rem}
-.gbb-spec-row:last-child{border-bottom:none}
-.gbb-spec-label{color:#777;font-weight:500}
-.gbb-spec-value{color:#1b2d4f;font-weight:600;text-align:right}
-.gbb-pros{padding:0 24px 16px}
-.gbb-pros-title{font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#2d8a4e;margin-bottom:10px}
-.gbb-pros ul{list-style:none;padding:0;margin:0}
-.gbb-pros li{padding:6px 0;font-size:.88rem;color:#444;display:flex;align-items:center;gap:8px}
-.gbb-pros li::before{content:"✓";color:#2d8a4e;font-weight:700;flex-shrink:0}
-.gbb-cta{padding:16px 24px 28px}
-.gbb-cta a{display:block;text-align:center;padding:14px;border-radius:8px;font-weight:700;font-size:.95rem;text-decoration:none;transition:all .3s}
+.gbb-features li::before{content:'\2022';position:absolute;left:4px;color:var(--accent,#c8a951);font-weight:700;font-size:1.2em}
+.gbb-card.best .gbb-features li::before,.gbb-card:last-child .gbb-features li::before{content:'\2713';color:#16a34a}
+.gbb-cta{display:block;text-align:center;padding:14px 24px;margin-top:auto;background:var(--dark,#1e2a3a);color:#fff;font-weight:700;font-size:.9rem;border-radius:8px;text-decoration:none;letter-spacing:.5px;transition:all .3s}
+.gbb-cta:hover{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-card.best .gbb-cta,.gbb-card:last-child .gbb-cta{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-card.best .gbb-cta:hover,.gbb-card:last-child .gbb-cta:hover{background:var(--dark,#1e2a3a);color:#fff}
+/* Legacy class support */
+.gbb-tier{display:block;text-align:center;padding:14px 0;font-size:13px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#fff;background:var(--dark,#1e2a3a)}
+.gbb-label{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--dark,#1e2a3a);padding:16px 28px 8px;text-align:center}
+.gbb-price{display:none}
+.gbb-btn{display:block;text-align:center;padding:14px 24px;margin:auto 28px 28px;background:var(--dark,#1e2a3a);color:#fff;font-weight:700;font-size:.9rem;border-radius:8px;text-decoration:none;transition:all .3s}
+.gbb-btn:hover{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
+.gbb-card.featured .gbb-tier{background:var(--accent,#c8a951);color:var(--dark,#1e2a3a)}
 /* Warranty section */
-.warranty-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;max-width:800px;margin:0 auto}
-.warranty-card{background:#fff;border-radius:12px;padding:32px;box-shadow:0 2px 12px rgba(0,0,0,.06)}
-.warranty-badge{font-size:2rem;font-weight:800;color:#1b2d4f;margin-bottom:4px}
-.warranty-text{color:#555;line-height:1.6}
-@media(max-width:900px){.gbb-grid{grid-template-columns:1fr!important}.gbb-card{border-right:none;border-bottom:1px solid #e5e2dc}.gbb-card:last-child{border-bottom:none}}
-@media(max-width:768px){.warranty-grid{grid-template-columns:1fr}}
+.warranty-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;max-width:1000px;margin:0 auto}
+.warranty-card{background:#fff;border-radius:12px;padding:32px 24px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.06)}
+.warranty-badge{font-size:2.5rem;margin-bottom:12px;display:block}
+.warranty-text{font-size:.95rem;color:#374151;line-height:1.6}
+@media(max-width:768px){
+.gbb-grid{grid-template-columns:1fr!important}
+.gbb-card{border-right:none;border-bottom:1px solid #e5e2dc}
+.gbb-card:last-child{border-bottom:none}
+.warranty-grid{grid-template-columns:1fr}
+}
 </style>
