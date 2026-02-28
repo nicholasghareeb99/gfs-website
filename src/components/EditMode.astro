@@ -1,6 +1,6 @@
 ---
 /**
- * EditMode.astro ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Squarespace-like visual editor for GFS website
+ * EditMode.astro ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Squarespace-like visual editor for GFS website
  * Features: Inline text editing, drag-and-drop, image replacement,
  *           nav/topbar editing, per-element color/font, page toggle,
  *           localStorage persistence
@@ -11,7 +11,7 @@
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
     <div class="et-left">
-      <div class="et-logo">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂ¸ÃÂÃÂ GFS Editor</div>
+      <div class="et-logo">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ GFS Editor</div>
       <span class="et-page" id="et-page-name"></span>
     </div>
     <div class="et-center">
@@ -31,16 +31,20 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10c0 2-1 3-3 3h-1.9c-.8 0-1.1.9-.5 1.4.5.4.8 1 .8 1.6 0 1.7-1.3 3-3 3z"/></svg>
         <span>Colors</span>
       </button>
-      <button id="et-seo-btn" class="et-btn" title="SEO settings">
+      <button id="et-admin-btn" class="et-btn" title="Admin Panel">
+<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+<span>Admin</span>
+</button>
+<button id="et-seo-btn" class="et-btn" title="SEO settings">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span>SEO</span>
       </button>
     </div>
     <div class="et-right">
       <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
-      <button id="et-save" class="et-btn et-btn-save" style="display:none;">ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save</button>
+      <button id="et-save" class="et-btn et-btn-save" style="display:none;">ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save</button>
       <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
-      <button id="et-logout" class="et-btn et-btn-ghost">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂª Exit</button>
+      <button id="et-logout" class="et-btn et-btn-ghost">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª Exit</button>
     </div>
   </div>
 </div>
@@ -51,21 +55,21 @@
   <div class="et-pop-row"><label>Background</label><input type="color" id="et-pop-bg" /></div>
   <div class="et-pop-row"><label>Font Size</label><input type="range" id="et-pop-size" min="10" max="72" value="16" /><span id="et-pop-size-val">16px</span></div>
   <div class="et-pop-row"><label>Weight</label><select id="et-pop-weight"><option value="400">Normal</option><option value="500">Medium</option><option value="600">Semi-Bold</option><option value="700">Bold</option><option value="800">Extra Bold</option></select></div>
-  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</button><button data-align="center">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ</button><button data-align="right">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¶</button></div></div>
+  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button><button data-align="center">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button><button data-align="right">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¶</button></div></div>
   <div class="et-pop-row"><label>Width</label><input type="range" id="et-pop-width" min="50" max="1200" value="100" /><span id="et-pop-width-val">auto</span></div>
 <div class="et-pop-row"><label>Max Width</label><input type="range" id="et-pop-maxw" min="100" max="1200" value="1200" /><span id="et-pop-maxw-val">none</span></div>
 <div class="et-pop-row"><label>Padding</label><input type="range" id="et-pop-pad" min="0" max="80" value="0" /><span id="et-pop-pad-val">0px</span></div>
 <div class="et-pop-row"><label>Margin</label><input type="range" id="et-pop-margin" min="0" max="80" value="0" /><span id="et-pop-margin-val">0px</span></div>
 <div class="et-pop-row"><label>Border R.</label><input type="range" id="et-pop-radius" min="0" max="50" value="0" /><span id="et-pop-radius-val">0px</span></div>
-<div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
+<div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
 </div>
 
 <!-- Login Modal -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
-    <h3>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ Admin Login</h3>
+    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Admin Login</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label><input type="text" id="et-login-email" placeholder="admin" autocomplete="username" /></div>
-    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢" autocomplete="current-password" /></div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢" autocomplete="current-password" /></div>
     <div id="et-login-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
     <div class="et-modal-actions"><button id="et-login-cancel" class="et-btn">Cancel</button><button id="et-login-submit" class="et-btn et-btn-save">Login</button></div>
   </div>
@@ -75,7 +79,7 @@
 <div id="et-image-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>Replace Image</h3>
-    <div class="et-upload-zone" id="et-upload-zone"><p>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ· Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
+    <div class="et-upload-zone" id="et-upload-zone"><p>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
     <div id="et-upload-preview" style="display:none;margin:12px 0;"><img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" /></div>
     <div style="margin:12px 0;"><label style="font-size:13px;color:#6b7280;">Or enter image URL:</label><input type="url" id="et-image-url" placeholder="https://..." /></div>
     <div class="et-modal-actions"><button id="et-image-cancel" class="et-btn">Cancel</button><button id="et-image-apply" class="et-btn et-btn-save">Apply</button></div>
@@ -85,7 +89,7 @@
 <!-- Page Manager Modal -->
 <div id="et-pages-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:500px;">
-    <h3>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ Page Manager</h3>
+    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Page Manager</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off in the navigation.</p>
     <div id="et-pages-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-pages-close" class="et-btn">Close</button><button id="et-pages-save" class="et-btn et-btn-save">Save</button></div>
@@ -95,7 +99,7 @@
 <!-- Color Editor Modal -->
 <div id="et-colors-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:480px;">
-    <h3>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ¨ Brand Colors</h3>
+    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¨ Brand Colors</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Changes preview live.</p>
     <div id="et-colors-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-colors-close" class="et-btn">Close</button><button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button></div>
@@ -105,7 +109,7 @@
 <!-- Nav Editor Modal -->
 <div id="et-nav-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:600px;">
-    <h3>ÃÂÃÂ°ÃÂÃÂÃÂÃÂ§ÃÂÃÂ­ Navigation Editor</h3>
+    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ­ Navigation Editor</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit top bar text and nav links.</p>
     <div id="et-nav-topbar" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Top Bar Items</h4><div id="et-topbar-items"></div></div>
     <div id="et-nav-links" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Main Navigation</h4><div id="et-nav-items"></div></div>
@@ -116,11 +120,110 @@
 <!-- SEO Editor Modal -->
 <div id="et-seo-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:550px;">
-    <h3>ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ Page SEO</h3>
+    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Page SEO</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Page Title</label><input type="text" id="et-seo-title" /><span id="et-seo-title-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Meta Description</label><textarea id="et-seo-desc" rows="3" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box;"></textarea><span id="et-seo-desc-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div class="et-modal-actions"><button id="et-seo-close" class="et-btn">Close</button><button id="et-seo-save" class="et-btn et-btn-save">Save SEO</button></div>
   </div>
+</div>
+
+<!-- Admin Panel Modal -->
+<div id="et-admin-modal" class="et-modal" style="display:none;">
+<div class="et-modal-content" style="max-width:900px;max-height:90vh;">
+<div class="et-admin-header">
+<h3>⚙️ Admin Panel</h3>
+<div class="et-admin-tabs">
+<button class="et-admin-tab active" data-tab="seo">🔍 SEO</button>
+<button class="et-admin-tab" data-tab="analytics">📊 Analytics</button>
+<button class="et-admin-tab" data-tab="settings">⚙️ Settings</button>
+</div>
+</div>
+<div class="et-admin-body">
+<!-- SEO Tab -->
+<div class="et-admin-pane active" id="et-admin-seo">
+<div class="et-seo-section">
+<h4>Page Meta</h4>
+<div class="et-field"><label>Page Title</label><input type="text" id="et-adm-title" /><span class="et-field-hint" id="et-adm-title-ct"></span></div>
+<div class="et-field"><label>Meta Description</label><textarea id="et-adm-desc" rows="3"></textarea><span class="et-field-hint" id="et-adm-desc-ct"></span></div>
+<div class="et-field"><label>Keywords (comma separated)</label><input type="text" id="et-adm-keywords" placeholder="cedar fence toledo, fence installation ohio" /></div>
+<div class="et-field"><label>Canonical URL</label><input type="url" id="et-adm-canonical" placeholder="https://ghareebfencing.com/fences/cedar/" /></div>
+</div>
+<div class="et-seo-section">
+<h4>Open Graph / Social</h4>
+<div class="et-field"><label>OG Title</label><input type="text" id="et-adm-og-title" placeholder="Override page title for social" /></div>
+<div class="et-field"><label>OG Description</label><textarea id="et-adm-og-desc" rows="2" placeholder="Override description for social"></textarea></div>
+<div class="et-field"><label>OG Image URL</label><input type="url" id="et-adm-og-image" placeholder="https://..." /></div>
+<div class="et-field"><label>OG Type</label><select id="et-adm-og-type"><option value="website">Website</option><option value="article">Article</option><option value="product">Product</option></select></div>
+</div>
+<div class="et-seo-section">
+<h4>Advanced</h4>
+<div class="et-field"><label>Robots</label><select id="et-adm-robots"><option value="index,follow">Index, Follow</option><option value="noindex,follow">No Index, Follow</option><option value="index,nofollow">Index, No Follow</option><option value="noindex,nofollow">No Index, No Follow</option></select></div>
+<div class="et-field"><label>Schema Type</label><select id="et-adm-schema"><option value="LocalBusiness">Local Business</option><option value="Service">Service</option><option value="Product">Product</option><option value="FAQPage">FAQ Page</option></select></div>
+<div class="et-seo-preview">
+<h4>🔍 Google Preview</h4>
+<div class="et-google-preview">
+<div class="et-gp-title" id="et-gp-title">Page Title</div>
+<div class="et-gp-url" id="et-gp-url">ghareebfencing.com</div>
+<div class="et-gp-desc" id="et-gp-desc">Meta description preview...</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Analytics Tab -->
+<div class="et-admin-pane" id="et-admin-analytics">
+<div class="et-analytics-grid">
+<div class="et-stat-card"><div class="et-stat-num" id="et-stat-views">0</div><div class="et-stat-lbl">Page Views</div><div class="et-stat-sub">Last 30 days</div></div>
+<div class="et-stat-card"><div class="et-stat-num" id="et-stat-visitors">0</div><div class="et-stat-lbl">Unique Visitors</div><div class="et-stat-sub">Last 30 days</div></div>
+<div class="et-stat-card"><div class="et-stat-num" id="et-stat-bounce">0%</div><div class="et-stat-lbl">Bounce Rate</div><div class="et-stat-sub">Estimated</div></div>
+<div class="et-stat-card"><div class="et-stat-num" id="et-stat-avg">0s</div><div class="et-stat-lbl">Avg Time</div><div class="et-stat-sub">On page</div></div>
+</div>
+<div class="et-analytics-section">
+<h4>📈 Page Views (Last 7 Days)</h4>
+<div class="et-chart" id="et-chart-views"></div>
+</div>
+<div class="et-analytics-section">
+<h4>📍 Top Pages</h4>
+<div id="et-top-pages" class="et-top-list"></div>
+</div>
+<div class="et-analytics-section">
+<h4>🌍 Visitor Locations</h4>
+<div id="et-visitor-locations" class="et-top-list"></div>
+</div>
+<div class="et-analytics-section">
+<h4>📱 Device Breakdown</h4>
+<div id="et-device-stats" class="et-device-grid"></div>
+</div>
+<div class="et-analytics-section">
+<h4>🔗 Top Referrers</h4>
+<div id="et-referrers" class="et-top-list"></div>
+</div>
+<p style="font-size:12px;color:#9ca3af;text-align:center;margin-top:16px;">Analytics data is tracked locally. For full analytics, connect Google Analytics 4.</p>
+</div>
+<!-- Settings Tab -->
+<div class="et-admin-pane" id="et-admin-settings">
+<div class="et-settings-section">
+<h4>Site Settings</h4>
+<div class="et-field"><label>Company Name</label><input type="text" id="et-set-company" value="Ghareeb Fencing Solutions" /></div>
+<div class="et-field"><label>Phone Number</label><input type="tel" id="et-set-phone" value="(419) 902-8257" /></div>
+<div class="et-field"><label>Email</label><input type="email" id="et-set-email" value="ng.ghareebfencingsolutions@outlook.com" /></div>
+<div class="et-field"><label>Service Area</label><input type="text" id="et-set-area" value="Toledo, OH Area" /></div>
+</div>
+<div class="et-settings-section">
+<h4>Integrations</h4>
+<div class="et-field"><label>Google Analytics ID</label><input type="text" id="et-set-ga" placeholder="G-XXXXXXXXXX" /><span class="et-field-hint">Enter your GA4 Measurement ID</span></div>
+<div class="et-field"><label>Google Tag Manager</label><input type="text" id="et-set-gtm" placeholder="GTM-XXXXXXX" /></div>
+<div class="et-field"><label>Facebook Pixel</label><input type="text" id="et-set-fbpixel" placeholder="XXXXXXXXXXXXXXX" /></div>
+</div>
+<div class="et-settings-section">
+<h4>Advanced</h4>
+<div class="et-field"><label>Custom Head Code</label><textarea id="et-set-headcode" rows="4" placeholder="<!-- Custom scripts, meta tags, etc. -->"></textarea></div>
+<button id="et-clear-cache" class="et-btn" style="margin-top:8px;color:#ef4444;border-color:#ef4444;">🗑️ Clear All Edit Cache</button>
+<button id="et-export-data" class="et-btn" style="margin-top:8px;color:#059669;border-color:#059669;">📤 Export All Data</button>
+</div>
+</div>
+</div>
+<div class="et-modal-actions"><button id="et-admin-close" class="et-btn">Close</button><button id="et-admin-save" class="et-btn et-btn-save">Save All</button></div>
+</div>
 </div>
 
 <style is:global>
@@ -193,11 +296,112 @@ body.edit-mode-active img[data-et-img]{resize:both;overflow:hidden;cursor:nwse-r
 body.edit-mode-active img[data-et-img].et-resizing{outline:2px solid #d4af37!important;outline-offset:2px}
 .et-img-size-badge{position:absolute;bottom:-22px;right:0;background:#1a1a2e;color:#fff;font-size:11px;padding:2px 8px;border-radius:4px;pointer-events:none;z-index:99997;white-space:nowrap;font-family:monospace}
 body.edit-mode-active [data-et-editable]{transition:all .15s ease}
+
+/* Admin Panel */
+.et-admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.et-admin-tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:8px;padding:3px}
+.et-admin-tab{padding:8px 16px;border:none;background:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;color:#6b7280;transition:.2s}
+.et-admin-tab.active{background:#fff;color:#1e3a5f;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.et-admin-tab:hover{color:#1e3a5f}
+.et-admin-body{min-height:400px}
+.et-admin-pane{display:none}
+.et-admin-pane.active{display:block}
+.et-seo-section{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #f3f4f6}
+.et-seo-section:last-child{border-bottom:none}
+.et-seo-section h4{font-size:14px;font-weight:700;color:#1e3a5f;margin:0 0 12px}
+.et-field{margin-bottom:12px}
+.et-field label{display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.et-field input,.et-field textarea,.et-field select{width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;box-sizing:border-box;transition:border-color .2s}
+.et-field input:focus,.et-field textarea:focus{border-color:#3b82f6;outline:none;box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.et-field-hint{font-size:11px;color:#9ca3af;margin-top:2px;display:block}
+.et-google-preview{background:#fff;border:1px solid #dfe1e5;border-radius:8px;padding:16px;max-width:600px}
+.et-gp-title{color:#1a0dab;font-size:18px;font-weight:400;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.et-gp-url{color:#006621;font-size:13px;margin-bottom:4px}
+.et-gp-desc{color:#545454;font-size:13px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* Analytics */
+.et-analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.et-stat-card{background:linear-gradient(135deg,#f8fafc,#eef2ff);border:1px solid #e5e7eb;border-radius:10px;padding:16px;text-align:center}
+.et-stat-num{font-size:1.8rem;font-weight:800;color:#1e3a5f;line-height:1}
+.et-stat-lbl{font-size:12px;font-weight:600;color:#6b7280;margin-top:4px}
+.et-stat-sub{font-size:10px;color:#9ca3af;margin-top:2px}
+.et-analytics-section{margin-bottom:20px}
+.et-analytics-section h4{font-size:14px;font-weight:700;color:#1e3a5f;margin:0 0 10px}
+.et-chart{height:120px;background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;display:flex;align-items:flex-end;padding:12px 8px 8px;gap:4px}
+.et-chart-bar{flex:1;background:linear-gradient(to top,#1e3a5f,#3b82f6);border-radius:4px 4px 0 0;min-height:4px;position:relative;transition:height .3s}
+.et-chart-bar:hover{opacity:.8}
+.et-chart-bar .et-chart-tip{position:absolute;top:-20px;left:50%;transform:translateX(-50%);background:#1a1a2e;color:#fff;font-size:10px;padding:2px 6px;border-radius:3px;white-space:nowrap;display:none}
+.et-chart-bar:hover .et-chart-tip{display:block}
+.et-top-list{background:#f8fafc;border-radius:8px;border:1px solid #e5e7eb;overflow:hidden}
+.et-top-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid #e5e7eb;font-size:13px}
+.et-top-item:last-child{border-bottom:none}
+.et-top-item-name{color:#374151;font-weight:500}
+.et-top-item-val{color:#1e3a5f;font-weight:700;font-size:14px}
+.et-top-item-bar{flex:1;height:4px;background:#e5e7eb;border-radius:2px;margin:0 12px;max-width:120px}
+.et-top-item-bar-fill{height:100%;background:linear-gradient(90deg,#1e3a5f,#d4af37);border-radius:2px}
+.et-device-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.et-device-card{background:#f8fafc;border:1px solid #e5e7eb;border-radius:8px;padding:12px;text-align:center}
+.et-device-icon{font-size:24px;margin-bottom:4px}
+.et-device-pct{font-size:1.2rem;font-weight:700;color:#1e3a5f}
+.et-device-name{font-size:11px;color:#6b7280}
+/* Settings */
+.et-settings-section{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #f3f4f6}
+.et-settings-section:last-child{border-bottom:none}
+.et-settings-section h4{font-size:14px;font-weight:700;color:#1e3a5f;margin:0 0 12px}
+@media(max-width:768px){.et-analytics-grid{grid-template-columns:repeat(2,1fr)}.et-device-grid{grid-template-columns:repeat(3,1fr)}.et-modal-content{max-width:95%!important}}
+
 </style>
 
 <script is:inline>
 (function(){
   'use strict';
+  // === ANALYTICS TRACKER ===
+  (function trackVisit(){
+    try{
+      const ak='gfs_analytics_';
+      const today=new Date().toISOString().split('T')[0];
+      const pg=window.location.pathname;
+      // Track pageview
+      const views=JSON.parse(localStorage.getItem(ak+'views')||'{}');
+      if(!views[today])views[today]={};
+      views[today][pg]=(views[today][pg]||0)+1;
+      localStorage.setItem(ak+'views',JSON.stringify(views));
+      // Track unique visitor
+      let vid=localStorage.getItem(ak+'vid');
+      if(!vid){vid='v_'+Math.random().toString(36).substr(2,9);localStorage.setItem(ak+'vid',vid)}
+      const visitors=JSON.parse(localStorage.getItem(ak+'visitors')||'{}');
+      if(!visitors[today])visitors[today]=[];
+      if(!visitors[today].includes(vid))visitors[today].push(vid);
+      localStorage.setItem(ak+'visitors',JSON.stringify(visitors));
+      // Track referrer
+      if(document.referrer){
+        const refs=JSON.parse(localStorage.getItem(ak+'referrers')||'{}');
+        const refHost=new URL(document.referrer).hostname;
+        refs[refHost]=(refs[refHost]||0)+1;
+        localStorage.setItem(ak+'referrers',JSON.stringify(refs));
+      }
+      // Track device
+      const devs=JSON.parse(localStorage.getItem(ak+'devices')||'{}');
+      const ua=navigator.userAgent;
+      const dev=/Mobile|Android|iPhone/i.test(ua)?'mobile':/Tablet|iPad/i.test(ua)?'tablet':'desktop';
+      devs[dev]=(devs[dev]||0)+1;
+      localStorage.setItem(ak+'devices',JSON.stringify(devs));
+      // Track time on page
+      const startTime=Date.now();
+      window.addEventListener('beforeunload',()=>{
+        const duration=Math.round((Date.now()-startTime)/1000);
+        const times=JSON.parse(localStorage.getItem(ak+'times')||'{}');
+        if(!times[pg])times[pg]={total:0,count:0};
+        times[pg].total+=duration;times[pg].count+=1;
+        localStorage.setItem(ak+'times',JSON.stringify(times));
+      });
+      // Track location via timezone
+      const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'Unknown';
+      const locs=JSON.parse(localStorage.getItem(ak+'locations')||'{}');
+      locs[tz]=(locs[tz]||0)+1;
+      localStorage.setItem(ak+'locations',JSON.stringify(locs));
+    }catch(e){}
+  })();
+  
   const SP='gfs_edit_';
   let user=null,editActive=false,changes=new Map(),originalContent=new Map(),curSelectedEl=null;
 
@@ -235,7 +439,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
   // === TRIGGERS ===
   document.addEventListener('keydown',function(e){
     if(e.ctrlKey&&e.shiftKey&&(e.key==='E'||e.key==='e'||e.code==='KeyE')){e.preventDefault();handleEditShortcut();return}
-    if(/Mac|iPhone|iPad/i.test(navigator.userAgent)&&e.metaKey&&e.shiftKey&&(e.key==='L'||e.key==='l'||e.key==='.')){e.preventDefault();handleEditShortcut()}
+    if(/Mac|iPhone|iPad/i.test(navigator.userAgent)&&e.metaKey&&e.shiftKey&&(e.key==='E'||e.key==='e'||e.key==='L'||e.key==='l'||e.key==='.')){e.preventDefault();handleEditShortcut()}
     if(e.key==='Escape'){document.getElementById('et-style-popover').style.display='none';document.querySelectorAll('.et-modal').forEach(m=>{if(m.style.display==='flex')m.style.display='none'})}
   });
   if(window.location.search.includes('edit')){const fn=()=>setTimeout(handleEditShortcut,500);if(document.readyState==='loading')window.addEventListener('DOMContentLoaded',fn);else fn()}
@@ -262,7 +466,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
         user={uid:'local-admin'};modal.style.display='none';
         document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Lax';
         localStorage.setItem('gfs_edit_wasAdmin','1');
-        showToolbar();activateEditing();showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Logged in ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Editor active!');return;
+        showToolbar();activateEditing();showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Logged in ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Editor active!');return;
       }
       err.textContent='Invalid credentials. Try: admin / gfs2024';err.style.display='block';pi.value='';pi.focus();
     }
@@ -283,6 +487,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
     document.getElementById('et-colors-btn').onclick=showColorEditor;
     document.getElementById('et-nav-btn').onclick=showNavEditor;
     document.getElementById('et-seo-btn').onclick=showSEOEditor;
+    document.getElementById('et-admin-btn').onclick=showAdminPanel;
   }
 
   // === ACTIVATE / DEACTIVATE ===
@@ -298,7 +503,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
     document.querySelectorAll('[data-page-hidden]').forEach(li=>{li.style.display='';li.style.opacity='0.4'});
   // ResizeObserver for images
   if(window.ResizeObserver){const ro=new ResizeObserver(ents=>{ents.forEach(e=>{const img=e.target;if(!img.hasAttribute('data-et-img'))return;const w=Math.round(e.contentRect.width);const ht=Math.round(e.contentRect.height);const idx=img.getAttribute('data-et-img');const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)['imgw:'+idx]=w+'px';changes.get(pk)['imgh:'+idx]=ht+'px';updateChangesCount()})});imgs.forEach(img=>ro.observe(img));window._gfsRO=ro}
-    showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂ¸ÃÂÃÂ Editing: '+tEls.length+' text, '+imgs.length+' images');
+    showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ Editing: '+tEls.length+' text, '+imgs.length+' images');
   }
 
   function deactivateEditing(){
@@ -360,12 +565,12 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
 
   // === DRAG AND DROP ===
   function enableDrag(el){
-    el.classList.add('et-dragging');el.draggable=true;showToast('ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ Drag to reposition');
+    el.classList.add('et-dragging');el.draggable=true;showToast('ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Drag to reposition');
     let ph=document.createElement('div');ph.className='et-drop-indicator';
     const parent=el.parentElement;
     el.ondragstart=ev=>{ev.dataTransfer.effectAllowed='move'};
     parent.ondragover=ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move';const after=getDragAfter(parent,ev.clientY);if(ph.parentElement)ph.remove();if(after)parent.insertBefore(ph,after);else parent.appendChild(ph)};
-    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Moved')};
+    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Moved')};
     const cleanup=()=>{el.classList.remove('et-dragging');el.draggable=false;el.ondragstart=null;parent.ondragover=null;parent.ondrop=null;if(ph.parentElement)ph.remove()};
     setTimeout(()=>{if(el.classList.contains('et-dragging'))cleanup()},15000);
   }
@@ -378,8 +583,8 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
   function updateChangesCount(){let c=0;changes.forEach(f=>{c+=Object.keys(f).length});const el=document.getElementById('et-changes'),sb=document.getElementById('et-save'),db=document.getElementById('et-discard');if(c>0){el.style.display='inline';el.textContent=c+' change'+(c!==1?'s':'');sb.style.display='inline-flex';db.style.display='inline-flex'}else{el.style.display='none';sb.style.display='none';db.style.display='none'}}
 
   // === SAVE / DISCARD ===
-  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ³ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Saved!';showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Changes saved!');setTimeout(()=>{sb.innerHTML='ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Error';sb.disabled=false;showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ '+e.message)}}
-  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('ÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂ¸ÃÂÃÂ Discarded')}
+  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Saved!';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Changes saved!');setTimeout(()=>{sb.innerHTML='ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Error';sb.disabled=false;showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ '+e.message)}}
+  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ Discarded')}
 
   // === IMAGE EDITING ===
   let curImgEl=null,curImgKey=null,curIsBg=false;
@@ -387,17 +592,205 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
   function applyImage(){if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';if(fi.files[0])src=document.getElementById('et-preview-img').src;else if(ui.value.trim())src=ui.value.trim();if(src){if(curIsBg)curImgEl.style.backgroundImage='url('+src+')';else if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}document.getElementById('et-image-modal').style.display='none';curImgEl=null}
 
   // === PAGE MANAGER ===
-  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Pages updated!')}}
+  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Pages updated!')}}
 
   // === COLOR EDITOR ===
-  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Colors saved!')}}
+  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Colors saved!')}}
 
   // === NAV EDITOR ===
-  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ Nav saved! Refresh to apply.')}}
+  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Nav saved! Refresh to apply.')}}
 
   // === SEO EDITOR ===
-  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ ÃÂÃÂ¯ÃÂÃÂ¸ÃÂÃÂ':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ ÃÂÃÂ¯ÃÂÃÂ¸ÃÂÃÂ':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('ÃÂÃÂ¢ÃÂÃÂÃÂÃÂ SEO saved!')}}
+  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ SEO saved!')}}
 
+  // === ADMIN PANEL ===
+  function showAdminPanel(){
+    const m=document.getElementById('et-admin-modal');
+    m.style.display='flex';
+    // Tab switching
+    m.querySelectorAll('.et-admin-tab').forEach(tab=>{
+      tab.onclick=()=>{
+        m.querySelectorAll('.et-admin-tab').forEach(t=>t.classList.remove('active'));
+        m.querySelectorAll('.et-admin-pane').forEach(p=>p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('et-admin-'+tab.dataset.tab).classList.add('active');
+        if(tab.dataset.tab==='analytics')loadAnalytics();
+      };
+    });
+    // Load SEO data
+    loadAdminSEO();
+    // Load settings
+    loadAdminSettings();
+    // Close / Save
+    document.getElementById('et-admin-close').onclick=()=>{m.style.display='none'};
+    document.getElementById('et-admin-save').onclick=saveAdminPanel;
+    // Clear cache
+    document.getElementById('et-clear-cache').onclick=()=>{
+      if(!confirm('Clear ALL edit data? This cannot be undone.'))return;
+      const keys=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.startsWith('gfs_edit_'))keys.push(k)}
+      keys.forEach(k=>localStorage.removeItem(k));
+      showToast('\u2705 Cache cleared! Refresh to see changes.');
+    };
+    document.getElementById('et-export-data').onclick=exportAllData;
+  }
+  function loadAdminSEO(){
+    const pk=getPageKey();
+    const saved=JSON.parse(localStorage.getItem(SP+'seo_'+pk)||'{}');
+    document.getElementById('et-adm-title').value=saved.title||document.title;
+    document.getElementById('et-adm-desc').value=saved.description||document.querySelector('meta[name="description"]')?.content||'';
+    document.getElementById('et-adm-keywords').value=saved.keywords||document.querySelector('meta[name="keywords"]')?.content||'';
+    document.getElementById('et-adm-canonical').value=saved.canonical||window.location.href;
+    document.getElementById('et-adm-og-title').value=saved.ogTitle||'';
+    document.getElementById('et-adm-og-desc').value=saved.ogDesc||'';
+    document.getElementById('et-adm-og-image').value=saved.ogImage||'';
+    document.getElementById('et-adm-og-type').value=saved.ogType||'website';
+    document.getElementById('et-adm-robots').value=saved.robots||'index,follow';
+    document.getElementById('et-adm-schema').value=saved.schema||'LocalBusiness';
+    // Update preview
+    const updatePreview=()=>{
+      const t=document.getElementById('et-adm-title').value;
+      const d=document.getElementById('et-adm-desc').value;
+      document.getElementById('et-gp-title').textContent=t.substring(0,60)||(t+'...');
+      document.getElementById('et-gp-url').textContent=window.location.href;
+      document.getElementById('et-gp-desc').textContent=d.substring(0,160);
+      document.getElementById('et-adm-title-ct').textContent=t.length+'/60'+(t.length>60?' \u26a0\ufe0f':'');
+      document.getElementById('et-adm-desc-ct').textContent=d.length+'/160'+(d.length>160?' \u26a0\ufe0f':'');
+    };
+    document.getElementById('et-adm-title').oninput=updatePreview;
+    document.getElementById('et-adm-desc').oninput=updatePreview;
+    updatePreview();
+  }
+  function loadAdminSettings(){
+    const s=JSON.parse(localStorage.getItem(SP+'settings')||'{}');
+    if(s.company)document.getElementById('et-set-company').value=s.company;
+    if(s.phone)document.getElementById('et-set-phone').value=s.phone;
+    if(s.email)document.getElementById('et-set-email').value=s.email;
+    if(s.area)document.getElementById('et-set-area').value=s.area;
+    if(s.gaId)document.getElementById('et-set-ga').value=s.gaId;
+    if(s.gtmId)document.getElementById('et-set-gtm').value=s.gtmId;
+    if(s.fbPixel)document.getElementById('et-set-fbpixel').value=s.fbPixel;
+    if(s.headCode)document.getElementById('et-set-headcode').value=s.headCode;
+  }
+  function loadAnalytics(){
+    const ak='gfs_analytics_';
+    const views=JSON.parse(localStorage.getItem(ak+'views')||'{}');
+    const visitors=JSON.parse(localStorage.getItem(ak+'visitors')||'{}');
+    const devs=JSON.parse(localStorage.getItem(ak+'devices')||'{}');
+    const refs=JSON.parse(localStorage.getItem(ak+'referrers')||'{}');
+    const locs=JSON.parse(localStorage.getItem(ak+'locations')||'{}');
+    const times=JSON.parse(localStorage.getItem(ak+'times')||'{}');
+    // Calculate totals for last 30 days
+    const now=new Date();let totalViews=0,totalVisitors=0;
+    for(let i=0;i<30;i++){
+      const d=new Date(now);d.setDate(d.getDate()-i);
+      const key=d.toISOString().split('T')[0];
+      if(views[key])Object.values(views[key]).forEach(v=>totalViews+=v);
+      if(visitors[key])totalVisitors+=visitors[key].length;
+    }
+    document.getElementById('et-stat-views').textContent=totalViews.toLocaleString();
+    document.getElementById('et-stat-visitors').textContent=totalVisitors.toLocaleString();
+    // Bounce rate estimate
+    const totalDevices=Object.values(devs).reduce((a,b)=>a+b,0);
+    const bounceEst=totalViews>0?Math.max(20,Math.min(70,Math.round(100-((totalVisitors/Math.max(totalViews,1))*100))))+'%':'N/A';
+    document.getElementById('et-stat-bounce').textContent=bounceEst;
+    // Avg time
+    let totalTime=0,totalCount=0;
+    Object.values(times).forEach(t=>{totalTime+=t.total;totalCount+=t.count});
+    const avgTime=totalCount>0?Math.round(totalTime/totalCount):0;
+    document.getElementById('et-stat-avg').textContent=avgTime>60?Math.round(avgTime/60)+'m':avgTime+'s';
+    // Chart - last 7 days
+    const chartEl=document.getElementById('et-chart-views');
+    chartEl.innerHTML='';
+    let maxDayViews=1;
+    const days=[];
+    for(let i=6;i>=0;i--){
+      const d=new Date(now);d.setDate(d.getDate()-i);
+      const key=d.toISOString().split('T')[0];
+      let dayTotal=0;
+      if(views[key])Object.values(views[key]).forEach(v=>dayTotal+=v);
+      days.push({key,total:dayTotal,label:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()]});
+      if(dayTotal>maxDayViews)maxDayViews=dayTotal;
+    }
+    days.forEach(day=>{
+      const pct=Math.max(4,(day.total/maxDayViews)*100);
+      chartEl.innerHTML+=`<div class="et-chart-bar" style="height:${pct}%"><span class="et-chart-tip">${day.label}: ${day.total}</span></div>`;
+    });
+    // Top pages
+    const pageStats={};
+    Object.values(views).forEach(dayData=>{Object.entries(dayData).forEach(([pg,ct])=>{pageStats[pg]=(pageStats[pg]||0)+ct})});
+    const topPages=Object.entries(pageStats).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const maxPV=topPages[0]?topPages[0][1]:1;
+    document.getElementById('et-top-pages').innerHTML=topPages.length?topPages.map(([pg,ct])=>`<div class="et-top-item"><span class="et-top-item-name">${pg||'/'}</span><div class="et-top-item-bar"><div class="et-top-item-bar-fill" style="width:${(ct/maxPV)*100}%"></div></div><span class="et-top-item-val">${ct}</span></div>`).join(''):'<div class="et-top-item"><span style="color:#9ca3af">No data yet</span></div>';
+    // Locations
+    const topLocs=Object.entries(locs).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const maxLoc=topLocs[0]?topLocs[0][1]:1;
+    document.getElementById('et-visitor-locations').innerHTML=topLocs.length?topLocs.map(([loc,ct])=>{
+      const name=loc.split('/').pop().replace(/_/g,' ');
+      return `<div class="et-top-item"><span class="et-top-item-name">\ud83d\udccd ${name}</span><div class="et-top-item-bar"><div class="et-top-item-bar-fill" style="width:${(ct/maxLoc)*100}%"></div></div><span class="et-top-item-val">${ct}</span></div>`;
+    }).join(''):'<div class="et-top-item"><span style="color:#9ca3af">No data yet</span></div>';
+    // Devices
+    const totalDev=Object.values(devs).reduce((a,b)=>a+b,0)||1;
+    const devIcons={desktop:'\ud83d\udcbb',mobile:'\ud83d\udcf1',tablet:'\ud83d\udcf1'};
+    document.getElementById('et-device-stats').innerHTML=['desktop','mobile','tablet'].map(d=>{
+      const ct=devs[d]||0;const pct=Math.round((ct/totalDev)*100);
+      return `<div class="et-device-card"><div class="et-device-icon">${devIcons[d]}</div><div class="et-device-pct">${pct}%</div><div class="et-device-name">${d}</div></div>`;
+    }).join('');
+    // Referrers
+    const topRefs=Object.entries(refs).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const maxRef=topRefs[0]?topRefs[0][1]:1;
+    document.getElementById('et-referrers').innerHTML=topRefs.length?topRefs.map(([ref,ct])=>`<div class="et-top-item"><span class="et-top-item-name">\ud83d\udd17 ${ref}</span><div class="et-top-item-bar"><div class="et-top-item-bar-fill" style="width:${(ct/maxRef)*100}%"></div></div><span class="et-top-item-val">${ct}</span></div>`).join(''):'<div class="et-top-item"><span style="color:#9ca3af">No referrer data yet</span></div>';
+  }
+  function saveAdminPanel(){
+    const pk=getPageKey();
+    // Save SEO
+    const seo={
+      title:document.getElementById('et-adm-title').value,
+      description:document.getElementById('et-adm-desc').value,
+      keywords:document.getElementById('et-adm-keywords').value,
+      canonical:document.getElementById('et-adm-canonical').value,
+      ogTitle:document.getElementById('et-adm-og-title').value,
+      ogDesc:document.getElementById('et-adm-og-desc').value,
+      ogImage:document.getElementById('et-adm-og-image').value,
+      ogType:document.getElementById('et-adm-og-type').value,
+      robots:document.getElementById('et-adm-robots').value,
+      schema:document.getElementById('et-adm-schema').value
+    };
+    localStorage.setItem(SP+'seo_'+pk,JSON.stringify(seo));
+    // Apply SEO live
+    document.title=seo.title;
+    const metaDesc=document.querySelector('meta[name="description"]');if(metaDesc)metaDesc.content=seo.description;
+    let metaKey=document.querySelector('meta[name="keywords"]');
+    if(!metaKey){metaKey=document.createElement('meta');metaKey.name='keywords';document.head.appendChild(metaKey)}
+    metaKey.content=seo.keywords;
+    let metaRobots=document.querySelector('meta[name="robots"]');
+    if(!metaRobots){metaRobots=document.createElement('meta');metaRobots.name='robots';document.head.appendChild(metaRobots)}
+    metaRobots.content=seo.robots;
+    // Save settings
+    const settings={
+      company:document.getElementById('et-set-company').value,
+      phone:document.getElementById('et-set-phone').value,
+      email:document.getElementById('et-set-email').value,
+      area:document.getElementById('et-set-area').value,
+      gaId:document.getElementById('et-set-ga').value,
+      gtmId:document.getElementById('et-set-gtm').value,
+      fbPixel:document.getElementById('et-set-fbpixel').value,
+      headCode:document.getElementById('et-set-headcode').value
+    };
+    localStorage.setItem(SP+'settings',JSON.stringify(settings));
+    document.getElementById('et-admin-modal').style.display='none';
+    showToast('\u2705 Admin settings saved!');
+  }
+  function exportAllData(){
+    const data={};
+    for(let i=0;i<localStorage.length;i++){
+      const k=localStorage.key(i);
+      if(k.startsWith('gfs_'))data[k]=localStorage.getItem(k);
+    }
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+    a.download='gfs-site-data-'+new Date().toISOString().split('T')[0]+'.json';
+    a.click();showToast('\ud83d\udce4 Data exported!');
+  }
   // === UTILITY ===
   function rgbToHex(rgb){if(!rgb||rgb==='transparent'||rgb.includes('0, 0, 0, 0'))return'#ffffff';const m=rgb.match(/\d+/g);if(!m||m.length<3)return'#000000';return'#'+m.slice(0,3).map(x=>parseInt(x).toString(16).padStart(2,'0')).join('')}
   function showToast(msg){const ex=document.getElementById('et-toast');if(ex)ex.remove();const t=document.createElement('div');t.id='et-toast';t.textContent=msg;Object.assign(t.style,{position:'fixed',bottom:'20px',left:'50%',transform:'translateX(-50%)',background:'#1a1a2e',color:'#fff',padding:'10px 24px',borderRadius:'8px',fontSize:'14px',zIndex:'9999999',boxShadow:'0 4px 12px rgba(0,0,0,.3)',fontFamily:'-apple-system,sans-serif'});document.body.appendChild(t);setTimeout(()=>{t.style.opacity='0';t.style.transition='opacity .3s';setTimeout(()=>t.remove(),300)},3000)}
