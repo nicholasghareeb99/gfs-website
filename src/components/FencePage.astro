@@ -44,7 +44,7 @@ const {
     <div class="fence-hero-overlay">
       <div class="container">
         <div class="fence-hero-content">
-          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">&#9733; Premium {heroTitle.split(' ')[0]} Beauty</div>
+          <div class="section-label" style="color: #d4af37; border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.1);">&#9733; Premium {heroHighlight.split(' ')[0]} Beauty</div>
           <h1 class="fence-hero-title">{heroTitle} <span class="highlight">{heroHighlight}</span></h1>
           <p class="fence-hero-text">{heroText}</p>
           <div class="fence-hero-cta">
@@ -235,6 +235,19 @@ const {
 .gbb-cons li::before{content:'\2717';position:absolute;left:0;color:#dc3545;font-weight:700}
 /* GBB Photo */
 .gbb-photo{width:100%;height:180px;object-fit:cover}
+/* GBB Specs */
+.gbb-specs{padding:16px 24px}
+.gbb-specs-title{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--color-primary,#1e3a5f);margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #f0f0f0}
+.gbb-spec-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f5f3ef;font-size:.88rem}
+.gbb-spec-row:last-child{border-bottom:none}
+.gbb-spec-label{color:#888;font-weight:500}
+.gbb-spec-value{color:var(--color-primary,#1e3a5f);font-weight:700}
+/* GBB Pros */
+.gbb-pros{padding:0 24px 8px}
+.gbb-pros-title{font-size:.7rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#16a34a;margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid #f0f0f0}
+.gbb-pros ul{list-style:none;padding:0;margin:0;text-align:left}
+.gbb-pros li{padding:6px 0 6px 22px;font-size:.88rem;color:#444;position:relative}
+.gbb-pros li::before{content:'\2713';position:absolute;left:0;color:#16a34a;font-weight:700}
 /* GBB Title Area */
 .gbb-title-area{padding:20px 24px 12px;text-align:center}
 .gbb-card-subtitle{font-size:.85rem;color:#888;font-weight:500}
@@ -246,6 +259,9 @@ const {
 .gbb-summary-item strong{color:var(--color-primary,#1e3a5f);font-size:.95rem}
 .gbb-summary-item span{color:#666;font-size:.85rem}
 .gbb-availability{font-size:.85rem;color:#888;margin:12px 0 0}
+.gbb-contact-bar{max-width:1080px;margin:24px auto 0;text-align:center;padding:20px;background:var(--color-primary,#1e3a5f);border-radius:12px;color:#fff;display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap}
+.gbb-contact-bar p{margin:0;font-size:.95rem;color:rgba(255,255,255,.9)}
+.gbb-contact-bar a{color:var(--color-secondary,#d4af37);font-weight:700;text-decoration:none;font-size:1.1rem}
 /* Warranty */
 .warranty-badge{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--color-primary,#1e3a5f);margin-bottom:8px}
 .warranty-badge span{display:block;font-size:.85rem;font-weight:500;color:#666;font-family:var(--font-body);margin-top:4px}
