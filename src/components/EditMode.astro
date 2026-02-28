@@ -1,6 +1,6 @@
 ---
 /**
- * EditMode.astro — Squarespace-like visual editor for GFS website
+ * EditMode.astro â Squarespace-like visual editor for GFS website
  * Features: Inline text editing, drag-and-drop, image replacement,
  *           nav/topbar editing, per-element color/font, page toggle,
  *           localStorage persistence
@@ -11,7 +11,7 @@
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
     <div class="et-left">
-      <div class="et-logo">✏️ GFS Editor</div>
+      <div class="et-logo">âï¸ GFS Editor</div>
       <span class="et-page" id="et-page-name"></span>
     </div>
     <div class="et-center">
@@ -38,9 +38,9 @@
     </div>
     <div class="et-right">
       <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
-      <button id="et-save" class="et-btn et-btn-save" style="display:none;">💾 Save</button>
+      <button id="et-save" class="et-btn et-btn-save" style="display:none;">ð¾ Save</button>
       <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
-      <button id="et-logout" class="et-btn et-btn-ghost">↪ Exit</button>
+      <button id="et-logout" class="et-btn et-btn-ghost">âª Exit</button>
     </div>
   </div>
 </div>
@@ -51,16 +51,21 @@
   <div class="et-pop-row"><label>Background</label><input type="color" id="et-pop-bg" /></div>
   <div class="et-pop-row"><label>Font Size</label><input type="range" id="et-pop-size" min="10" max="72" value="16" /><span id="et-pop-size-val">16px</span></div>
   <div class="et-pop-row"><label>Weight</label><select id="et-pop-weight"><option value="400">Normal</option><option value="500">Medium</option><option value="600">Semi-Bold</option><option value="700">Bold</option><option value="800">Extra Bold</option></select></div>
-  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">◀</button><button data-align="center">◆</button><button data-align="right">▶</button></div></div>
-  <div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">↕ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
+  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">â</button><button data-align="center">â</button><button data-align="right">â¶</button></div></div>
+  <div class="et-pop-row"><label>Width</label><input type="range" id="et-pop-width" min="50" max="1200" value="100" /><span id="et-pop-width-val">auto</span></div>
+<div class="et-pop-row"><label>Max Width</label><input type="range" id="et-pop-maxw" min="100" max="1200" value="1200" /><span id="et-pop-maxw-val">none</span></div>
+<div class="et-pop-row"><label>Padding</label><input type="range" id="et-pop-pad" min="0" max="80" value="0" /><span id="et-pop-pad-val">0px</span></div>
+<div class="et-pop-row"><label>Margin</label><input type="range" id="et-pop-margin" min="0" max="80" value="0" /><span id="et-pop-margin-val">0px</span></div>
+<div class="et-pop-row"><label>Border R.</label><input type="range" id="et-pop-radius" min="0" max="50" value="0" /><span id="et-pop-radius-val">0px</span></div>
+<div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">â Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
 </div>
 
 <!-- Login Modal -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
-    <h3>🔐 Admin Login</h3>
+    <h3>ð Admin Login</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label><input type="text" id="et-login-email" placeholder="admin" autocomplete="username" /></div>
-    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="••••••••" autocomplete="current-password" /></div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="â¢â¢â¢â¢â¢â¢â¢â¢" autocomplete="current-password" /></div>
     <div id="et-login-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
     <div class="et-modal-actions"><button id="et-login-cancel" class="et-btn">Cancel</button><button id="et-login-submit" class="et-btn et-btn-save">Login</button></div>
   </div>
@@ -70,7 +75,7 @@
 <div id="et-image-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
     <h3>Replace Image</h3>
-    <div class="et-upload-zone" id="et-upload-zone"><p>📷 Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
+    <div class="et-upload-zone" id="et-upload-zone"><p>ð· Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
     <div id="et-upload-preview" style="display:none;margin:12px 0;"><img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" /></div>
     <div style="margin:12px 0;"><label style="font-size:13px;color:#6b7280;">Or enter image URL:</label><input type="url" id="et-image-url" placeholder="https://..." /></div>
     <div class="et-modal-actions"><button id="et-image-cancel" class="et-btn">Cancel</button><button id="et-image-apply" class="et-btn et-btn-save">Apply</button></div>
@@ -80,7 +85,7 @@
 <!-- Page Manager Modal -->
 <div id="et-pages-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:500px;">
-    <h3>📄 Page Manager</h3>
+    <h3>ð Page Manager</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off in the navigation.</p>
     <div id="et-pages-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-pages-close" class="et-btn">Close</button><button id="et-pages-save" class="et-btn et-btn-save">Save</button></div>
@@ -90,7 +95,7 @@
 <!-- Color Editor Modal -->
 <div id="et-colors-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:480px;">
-    <h3>🎨 Brand Colors</h3>
+    <h3>ð¨ Brand Colors</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Changes preview live.</p>
     <div id="et-colors-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-colors-close" class="et-btn">Close</button><button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button></div>
@@ -100,7 +105,7 @@
 <!-- Nav Editor Modal -->
 <div id="et-nav-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:600px;">
-    <h3>🧭 Navigation Editor</h3>
+    <h3>ð§­ Navigation Editor</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit top bar text and nav links.</p>
     <div id="et-nav-topbar" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Top Bar Items</h4><div id="et-topbar-items"></div></div>
     <div id="et-nav-links" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Main Navigation</h4><div id="et-nav-items"></div></div>
@@ -111,7 +116,7 @@
 <!-- SEO Editor Modal -->
 <div id="et-seo-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:550px;">
-    <h3>🔍 Page SEO</h3>
+    <h3>ð Page SEO</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Page Title</label><input type="text" id="et-seo-title" /><span id="et-seo-title-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Meta Description</label><textarea id="et-seo-desc" rows="3" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box;"></textarea><span id="et-seo-desc-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div class="et-modal-actions"><button id="et-seo-close" class="et-btn">Close</button><button id="et-seo-save" class="et-btn et-btn-save">Save SEO</button></div>
@@ -253,7 +258,7 @@
         user={uid:'local-admin'};modal.style.display='none';
         document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Lax';
         localStorage.setItem('gfs_edit_wasAdmin','1');
-        showToolbar();activateEditing();showToast('✅ Logged in — Editor active!');return;
+        showToolbar();activateEditing();showToast('â Logged in â Editor active!');return;
       }
       err.textContent='Invalid credentials. Try: admin / gfs2024';err.style.display='block';pi.value='';pi.focus();
     }
@@ -287,7 +292,7 @@
     const bgs=getEditableBackgrounds();
     bgs.forEach((el,i)=>{el.setAttribute('data-et-bg',i);el._bc=e=>{if(e.target!==el)return;e.preventDefault();openImageModal(el,'bg:'+i,true)};el.addEventListener('click',el._bc)});
     document.querySelectorAll('[data-page-hidden]').forEach(li=>{li.style.display='';li.style.opacity='0.4'});
-    showToast('✏️ Editing: '+tEls.length+' text, '+imgs.length+' images');
+    showToast('âï¸ Editing: '+tEls.length+' text, '+imgs.length+' images');
   }
 
   function deactivateEditing(){
@@ -332,12 +337,12 @@
 
   // === DRAG AND DROP ===
   function enableDrag(el){
-    el.classList.add('et-dragging');el.draggable=true;showToast('🔄 Drag to reposition');
+    el.classList.add('et-dragging');el.draggable=true;showToast('ð Drag to reposition');
     let ph=document.createElement('div');ph.className='et-drop-indicator';
     const parent=el.parentElement;
     el.ondragstart=ev=>{ev.dataTransfer.effectAllowed='move'};
     parent.ondragover=ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move';const after=getDragAfter(parent,ev.clientY);if(ph.parentElement)ph.remove();if(after)parent.insertBefore(ph,after);else parent.appendChild(ph)};
-    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('✅ Moved')};
+    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('â Moved')};
     const cleanup=()=>{el.classList.remove('et-dragging');el.draggable=false;el.ondragstart=null;parent.ondragover=null;parent.ondrop=null;if(ph.parentElement)ph.remove()};
     setTimeout(()=>{if(el.classList.contains('et-dragging'))cleanup()},15000);
   }
@@ -350,8 +355,8 @@
   function updateChangesCount(){let c=0;changes.forEach(f=>{c+=Object.keys(f).length});const el=document.getElementById('et-changes'),sb=document.getElementById('et-save'),db=document.getElementById('et-discard');if(c>0){el.style.display='inline';el.textContent=c+' change'+(c!==1?'s':'');sb.style.display='inline-flex';db.style.display='inline-flex'}else{el.style.display='none';sb.style.display='none';db.style.display='none'}}
 
   // === SAVE / DISCARD ===
-  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='⏳ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='✅ Saved!';showToast('✅ Changes saved!');setTimeout(()=>{sb.innerHTML='💾 Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='❌ Error';sb.disabled=false;showToast('❌ '+e.message)}}
-  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('👑️ Discarded')}
+  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='â³ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='â Saved!';showToast('â Changes saved!');setTimeout(()=>{sb.innerHTML='ð¾ Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='â Error';sb.disabled=false;showToast('â '+e.message)}}
+  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('ðï¸ Discarded')}
 
   // === IMAGE EDITING ===
   let curImgEl=null,curImgKey=null,curIsBg=false;
@@ -359,16 +364,16 @@
   function applyImage(){if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';if(fi.files[0])src=document.getElementById('et-preview-img').src;else if(ui.value.trim())src=ui.value.trim();if(src){if(curIsBg)curImgEl.style.backgroundImage='url('+src+')';else if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}document.getElementById('et-image-modal').style.display='none';curImgEl=null}
 
   // === PAGE MANAGER ===
-  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('✅ Pages updated!')}}
+  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('â Pages updated!')}}
 
   // === COLOR EDITOR ===
-  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('✅ Colors saved!')}}
+  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('â Colors saved!')}}
 
   // === NAV EDITOR ===
-  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('✅ Nav saved! Refresh to apply.')}}
+  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('â Nav saved! Refresh to apply.')}}
 
   // === SEO EDITOR ===
-  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' ⚠️':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' ⚠️':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('✅ SEO saved!')}}
+  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' â ï¸':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' â ï¸':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('â SEO saved!')}}
 
   // === UTILITY ===
   function rgbToHex(rgb){if(!rgb||rgb==='transparent'||rgb.includes('0, 0, 0, 0'))return'#ffffff';const m=rgb.match(/\d+/g);if(!m||m.length<3)return'#000000';return'#'+m.slice(0,3).map(x=>parseInt(x).toString(16).padStart(2,'0')).join('')}
