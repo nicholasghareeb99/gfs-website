@@ -2,11 +2,11 @@
 import FencePage from '../../components/FencePage.astro';
 
 const benefits = [
-  { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Natural Rot Resistance', text: 'Cedar contains natural oils that resist decay, insects, and moisture â no chemical treatment needed.' },
+  { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', title: 'Natural Rot Resistance', text: 'Cedar contains natural oils that resist decay, insects, and moisture Ã¢ÂÂ no chemical treatment needed.' },
   { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>', title: 'Beautiful Natural Look', text: 'Rich warm tones that age gracefully to a distinguished silver patina, or stain it to preserve the original color.' },
   { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', title: '20+ Year Lifespan', text: 'With minimal care, cedar fences easily last 20-30 years. Much longer than pressure-treated pine alternatives.' },
   { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>', title: 'Complete Privacy', text: '6-foot solid board construction with no gaps. Board-on-board and shadowbox options available for airflow.' },
-  { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Michigan Sourced', text: 'We use premium Northern White Cedar sourced from Michigan mills â supporting local and getting the best quality.' },
+  { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', title: 'Michigan Sourced', text: 'We use premium Northern White Cedar sourced from Michigan mills Ã¢ÂÂ supporting local and getting the best quality.' },
   { icon: '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>', title: '4x6 Gate Posts', text: 'Oversized gate posts prevent sagging and keep your gates swinging true for years to come.' },
 ];
 
@@ -33,7 +33,7 @@ const galleryImages = [
   { src: '/images/gallery/cedar-full-yard.jpg', alt: 'Cedar full yard fence Perrysburg', label: 'Solid Cedar Privacy' },
   { src: '/images/gallery/cedar-detail.jpg', alt: 'Board on board cedar fence', label: 'Board on Board' },
   { src: '/images/gallery/cedar-gate-closeup.jpg', alt: 'Custom cedar gate', label: 'Custom Gate' },
-  { src: '/images/gallery/cedar-lattice-detail.jpg', alt: 'Cedar lattice detail', label: 'Stained Cedar' },
+  { src: '/images/gallery/cedar-lattice-detail.jpg', alt: 'Cedar lattice detail', label: 'Lattice Detail' },
 ];
 
 const relatedTypes = [
@@ -57,31 +57,7 @@ const relatedTypes = [
   galleryImages={galleryImages}
   relatedTypes={relatedTypes}
 >
-  <!-- Cedar-specific: Style options -->
-  <section class="section section-light">
-    <div class="container">
-      <div class="section-header">
-        <div class="section-label">Style Options</div>
-        <h2 class="section-title">Cedar Fence <span class="gold">Styles We Install</span></h2>
-      </div>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; max-width: 900px; margin: 0 auto;">
-        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
-          <h4 style="margin-bottom: 8px;">Solid Board Privacy</h4>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Pickets butted together for complete privacy. 6ft height standard. Our most popular cedar style.</p>
-        </div>
-        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
-          <h4 style="margin-bottom: 8px;">Shadowbox</h4>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Alternating pickets front and back. Looks great from both sides. Allows airflow while maintaining privacy.</p>
-        </div>
-        <div style="background: var(--bg-white); border-radius: var(--radius); padding: 24px; border: 1px solid var(--border); text-align: center;">
-          <h4 style="margin-bottom: 8px;">Privacy with Lattice Top</h4>
-          <p style="color: var(--text-muted); font-size: 0.9rem;">Privacy panels with decorative lattice accent. Adds elegance, light, and airflow.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Good / Better / Best Ã¢ÂÂ Brochure-style horizontal cards -->
+  <!-- Good / Better / Best — Comparison cards -->
     <section class="gbb-section">
   <div class="container">
     <div class="section-header">
@@ -146,7 +122,7 @@ const relatedTypes = [
       </div>
       <div class="gbb-card best">
         <div class="gbb-badge">BEST</div>
-        <div class="gbb-recommended">Ã¢ÂÂ RECOMMENDED</div>
+        <div class="gbb-recommended">ÃÂ¢ÃÂÃÂ RECOMMENDED</div>
         <div class="gbb-title-area">
           <div class="gbb-card-title">Northern White Cedar</div>
           <div class="gbb-card-subtitle">Michigan Sourced Premium</div>
@@ -204,10 +180,10 @@ const relatedTypes = [
         <div class="warranty-card">
           <div class="warranty-badge">20-40+<span>YEARS Natural Cedar Lifespan</span></div>
           <ul class="warranty-list">
-            <li>â  Western Red Cedar: 20-25 years</li>
-            <li>â  Northern White Cedar: 30-40+ years</li>
-            <li>â  Natural rot/insect resistance</li>
-            <li>â  Can be sealed for longevity</li>
+            <li>Ã¢ÂÂ  Western Red Cedar: 20-25 years</li>
+            <li>Ã¢ÂÂ  Northern White Cedar: 30-40+ years</li>
+            <li>Ã¢ÂÂ  Natural rot/insect resistance</li>
+            <li>Ã¢ÂÂ  Can be sealed for longevity</li>
           </ul>
         </div>
       </div>
@@ -216,107 +192,5 @@ const relatedTypes = [
 </FencePage>
 
 <style is:global>
-/* Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ
-   GOOD / BETTER / BEST Ã¢ÂÂ Premium Brochure Layout
-   Ã¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂÃ¢ÂÂ */
-.gbb-section { padding: 80px 0; background: #f8f7f4; }
-.gbb-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 28px; max-width: 1080px; margin: 48px auto 0;
-}
-/* Card Base */
-.gbb-card {
-  background: #fff; border: 2px solid #e8e8e8; border-radius: 12px;
-  padding: 0; text-align: center; position: relative;
-  transition: all 0.35s ease; overflow: hidden;
-  display: flex; flex-direction: column;
-}
-.gbb-card:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,0.1); }
-.gbb-card.best { border-color: #c9a84c; box-shadow: 0 4px 24px rgba(201,168,76,0.18); }
-
-/* Badge (top bar) */
-.gbb-badge {
-  display: block; padding: 14px 0; font-size: 0.8rem; font-weight: 700;
-  letter-spacing: 3px; text-transform: uppercase; color: #fff;
-}
-.gbb-card:nth-child(1) .gbb-badge { background: #8a8a8a; }
-.gbb-card:nth-child(2) .gbb-badge { background: #1b2d4f; }
-.gbb-card:nth-child(3) .gbb-badge { background: linear-gradient(135deg, #c9a84c, #dbb960); }
-
-/* Recommended tag */
-.gbb-recommended {
-  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
-  background: #c9a84c; color: #fff; padding: 4px 18px; border-radius: 0 0 12px 12px;
-  font-size: 0.65rem; font-weight: 700; letter-spacing: 1.5px; white-space: nowrap; z-index: 2;
-}
-
-/* Title Area */
-.gbb-title-area { padding: 28px 24px 16px; }
-.gbb-card-title {
-  font-size: 1.2rem; font-weight: 700; color: #1b2d4f;
-  font-family: 'Playfair Display', serif; margin: 0 0 4px;
-}
-.gbb-card-subtitle { font-size: 0.85rem; color: #888; font-weight: 500; }
-
-/* Specs */
-.gbb-specs { padding: 0 24px 16px; flex: 1; }
-.gbb-specs-title {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: #1b2d4f; margin-bottom: 12px;
-  padding-bottom: 8px; border-bottom: 2px solid #f0f0f0;
-}
-.gbb-spec-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 7px 0; border-bottom: 1px solid #f5f5f5; font-size: 0.88rem;
-}
-.gbb-spec-row:last-child { border-bottom: none; }
-.gbb-spec-label { color: #777; font-weight: 500; }
-.gbb-spec-value { color: #1b2d4f; font-weight: 600; text-align: right; }
-
-/* Highlights */
-.gbb-pros { padding: 0 24px 16px; }
-.gbb-pros-title {
-  font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: #1b2d4f; margin-bottom: 10px;
-  padding-bottom: 8px; border-bottom: 2px solid #f0f0f0;
-}
-.gbb-pros ul { list-style: none; padding: 0; margin: 0; text-align: left; }
-.gbb-pros li {
-  padding: 6px 0 6px 22px; font-size: 0.88rem; color: #444;
-  position: relative;
-}
-.gbb-pros li::before {
-  content: '\2713'; position: absolute; left: 0; color: #27ae60; font-weight: 700;
-}
-
-/* CTA Button */
-.gbb-cta {
-  display: block; margin: auto 24px 24px; padding: 14px 0;
-  border: 2px solid #1b2d4f; color: #1b2d4f; border-radius: 50px;
-  font-weight: 700; text-decoration: none; font-size: 0.9rem;
-  letter-spacing: 1px; transition: all 0.3s; text-align: center;
-}
-.gbb-cta:hover { background: #1b2d4f; color: #fff; }
-.gbb-card.best .gbb-cta {
-  background: #c9a84c; border-color: #c9a84c; color: #fff;
-}
-.gbb-card.best .gbb-cta:hover { background: #b8943d; border-color: #b8943d; }
-
-/* Contact Bar */
-.gbb-contact-bar {
-  display: flex; align-items: center; justify-content: center; gap: 16px;
-  background: #1b2d4f; color: #fff; padding: 20px 32px; border-radius: 12px;
-  max-width: 1080px; margin: 32px auto 0; flex-wrap: wrap; text-align: center;
-}
-.gbb-contact-bar p { margin: 0; font-size: 0.95rem; }
-.gbb-contact-bar a {
-  color: #c9a84c; font-weight: 700; font-size: 1.1rem; text-decoration: none;
-}
-.gbb-contact-bar a:hover { text-decoration: underline; }
-
-/* Responsive */
-@media(max-width: 900px){
-  .gbb-grid { grid-template-columns: 1fr !important; max-width: 420px; }
-}
+/* Cedar page - minimal overrides only. GBB styles live in FencePage.astro */
 </style>
