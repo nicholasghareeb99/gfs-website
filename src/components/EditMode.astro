@@ -1,6 +1,6 @@
 ---
 /**
- * EditMode.astro ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Squarespace-like visual editor for GFS website
+ * EditMode.astro — Squarespace-like visual editor for GFS website
  * Features: Inline text editing, drag-and-drop, image replacement,
  *           nav/topbar editing, per-element color/font, page toggle,
  *           localStorage persistence
@@ -11,7 +11,7 @@
 <div id="edit-toolbar" style="display:none;">
   <div class="et-bar">
     <div class="et-left">
-      <div class="et-logo">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ GFS Editor</div>
+      <div class="et-logo">✏️ GFS Editor</div>
       <span class="et-page" id="et-page-name"></span>
     </div>
     <div class="et-center">
@@ -22,6 +22,10 @@
       <button id="et-nav-btn" class="et-btn" title="Edit navigation">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         <span>Nav</span>
+      </button>
+      <button id="et-logo-btn" class="et-btn" title="Edit logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="18" height="18" rx="2"/><text x="12" y="16" text-anchor="middle" font-size="10" fill="currentColor" stroke="none" font-weight="bold">GF</text></svg>
+        <span>Logo</span>
       </button>
       <button id="et-pages-btn" class="et-btn" title="Manage pages">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
@@ -42,9 +46,10 @@
     </div>
     <div class="et-right">
       <span id="et-changes" class="et-changes" style="display:none;">0 changes</span>
-      <button id="et-save" class="et-btn et-btn-save" style="display:none;">ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save</button>
+      <button id="et-save" class="et-btn et-btn-save" style="display:none;">💾 Save</button>
       <button id="et-discard" class="et-btn" style="display:none;">Discard</button>
-      <button id="et-logout" class="et-btn et-btn-ghost">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂª Exit</button>
+      <button id="et-reset-page" class="et-btn et-btn-ghost" title="Reset page to original content">Reset</button>
+      <button id="et-logout" class="et-btn et-btn-ghost">↪ Exit</button>
     </div>
   </div>
 </div>
@@ -55,21 +60,21 @@
   <div class="et-pop-row"><label>Background</label><input type="color" id="et-pop-bg" /></div>
   <div class="et-pop-row"><label>Font Size</label><input type="range" id="et-pop-size" min="10" max="72" value="16" /><span id="et-pop-size-val">16px</span></div>
   <div class="et-pop-row"><label>Weight</label><select id="et-pop-weight"><option value="400">Normal</option><option value="500">Medium</option><option value="600">Semi-Bold</option><option value="700">Bold</option><option value="800">Extra Bold</option></select></div>
-  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button><button data-align="center">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ</button><button data-align="right">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¶</button></div></div>
+  <div class="et-pop-row"><label>Align</label><div class="et-pop-align"><button data-align="left">◀</button><button data-align="center">◆</button><button data-align="right">▶</button></div></div>
   <div class="et-pop-row"><label>Width</label><input type="range" id="et-pop-width" min="50" max="1200" value="100" /><span id="et-pop-width-val">auto</span></div>
 <div class="et-pop-row"><label>Max Width</label><input type="range" id="et-pop-maxw" min="100" max="1200" value="1200" /><span id="et-pop-maxw-val">none</span></div>
 <div class="et-pop-row"><label>Padding</label><input type="range" id="et-pop-pad" min="0" max="80" value="0" /><span id="et-pop-pad-val">0px</span></div>
 <div class="et-pop-row"><label>Margin</label><input type="range" id="et-pop-margin" min="0" max="80" value="0" /><span id="et-pop-margin-val">0px</span></div>
 <div class="et-pop-row"><label>Border R.</label><input type="range" id="et-pop-radius" min="0" max="50" value="0" /><span id="et-pop-radius-val">0px</span></div>
-<div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
+<div class="et-pop-actions"><button id="et-pop-move" class="et-btn-small">↕ Move</button><button id="et-pop-done" class="et-btn-small et-btn-save">Done</button></div>
 </div>
 
 <!-- Login Modal -->
 <div id="et-login-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
-    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Admin Login</h3>
+    <h3>🔐 Admin Login</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Username</label><input type="text" id="et-login-email" placeholder="admin" autocomplete="username" /></div>
-    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¢" autocomplete="current-password" /></div>
+    <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:14px;color:#6b7280;">Password</label><input type="password" id="et-login-password" placeholder="••••••••" autocomplete="current-password" /></div>
     <div id="et-login-error" style="color:#ef4444;font-size:13px;margin-bottom:12px;display:none;"></div>
     <div class="et-modal-actions"><button id="et-login-cancel" class="et-btn">Cancel</button><button id="et-login-submit" class="et-btn et-btn-save">Login</button></div>
   </div>
@@ -78,18 +83,70 @@
 <!-- Image Upload Modal -->
 <div id="et-image-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content">
-    <h3>Replace Image</h3>
-    <div class="et-upload-zone" id="et-upload-zone"><p>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ· Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
+    <h3 id="et-image-modal-title">Replace Image</h3>
+    <div class="et-upload-zone" id="et-upload-zone"><p>📷 Drag & drop or click to browse</p><input type="file" id="et-file-input" accept="image/*" style="display:none;" /></div>
     <div id="et-upload-preview" style="display:none;margin:12px 0;"><img id="et-preview-img" src="" alt="Preview" style="max-width:100%;max-height:200px;border-radius:8px;" /></div>
     <div style="margin:12px 0;"><label style="font-size:13px;color:#6b7280;">Or enter image URL:</label><input type="url" id="et-image-url" placeholder="https://..." /></div>
+    <div id="et-alt-section" style="margin:12px 0;">
+      <label style="font-size:13px;color:#6b7280;">Image Description (alt text):</label>
+      <input type="text" id="et-image-alt" placeholder="Describe this image..." style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" />
+    </div>
+    <div id="et-caption-section" style="margin:12px 0;display:none;">
+      <label style="font-size:13px;color:#6b7280;">Caption (shown below image):</label>
+      <input type="text" id="et-image-caption" placeholder="Optional caption text..." style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" />
+    </div>
+    <div id="et-overlay-section" style="margin:12px 0;display:none;">
+      <label style="font-size:13px;color:#6b7280;">Overlay Opacity: <span id="et-overlay-val">85%</span></label>
+      <input type="range" id="et-overlay-opacity" min="0" max="100" value="85" style="width:100%;margin-top:4px;accent-color:#1e3a5f;" />
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#9ca3af;"><span>Transparent</span><span>Opaque</span></div>
+    </div>
     <div class="et-modal-actions"><button id="et-image-cancel" class="et-btn">Cancel</button><button id="et-image-apply" class="et-btn et-btn-save">Apply</button></div>
+  </div>
+</div>
+
+<!-- Logo Editor Modal -->
+<div id="et-logo-modal" class="et-modal" style="display:none;">
+  <div class="et-modal-content" style="max-width:480px;">
+    <h3>✏️ Edit Logo</h3>
+    <div style="margin-bottom:16px;">
+      <label style="display:block;font-size:13px;font-weight:600;color:#374151;margin-bottom:6px;">Logo Style</label>
+      <div style="display:flex;gap:8px;">
+        <button id="et-logo-type-text" class="et-btn et-btn-save" style="flex:1;">Text Logo</button>
+        <button id="et-logo-type-image" class="et-btn" style="flex:1;">Image Logo</button>
+      </div>
+    </div>
+    <div id="et-logo-text-fields">
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;color:#6b7280;">Logo Icon Text (1-3 chars):</label>
+        <input type="text" id="et-logo-icon" maxlength="3" placeholder="GF" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;color:#6b7280;">Company Name (top line):</label>
+        <input type="text" id="et-logo-name" placeholder="GHAREEB" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" />
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;color:#6b7280;">Tagline (bottom line):</label>
+        <input type="text" id="et-logo-tagline" placeholder="FENCING" style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" />
+      </div>
+    </div>
+    <div id="et-logo-image-fields" style="display:none;">
+      <div class="et-upload-zone" id="et-logo-upload-zone" style="margin-bottom:12px;"><p>📷 Upload logo image</p><input type="file" id="et-logo-file-input" accept="image/*" style="display:none;" /></div>
+      <div id="et-logo-preview" style="display:none;margin:12px 0;text-align:center;"><img id="et-logo-preview-img" src="" alt="Logo Preview" style="max-height:80px;border-radius:4px;" /></div>
+      <div style="margin:8px 0;"><label style="font-size:13px;color:#6b7280;">Or logo URL:</label><input type="url" id="et-logo-image-url" placeholder="https://..." style="width:100%;padding:8px 12px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;margin-top:4px;" /></div>
+      <div style="margin:8px 0;">
+        <label style="font-size:13px;color:#6b7280;">Max Height (px):</label>
+        <input type="range" id="et-logo-height" min="30" max="120" value="50" style="width:100%;" />
+        <span id="et-logo-height-val" style="font-size:12px;color:#9ca3af;">50px</span>
+      </div>
+    </div>
+    <div class="et-modal-actions"><button id="et-logo-cancel" class="et-btn">Cancel</button><button id="et-logo-apply" class="et-btn et-btn-save">Apply</button></div>
   </div>
 </div>
 
 <!-- Page Manager Modal -->
 <div id="et-pages-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:500px;">
-    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Page Manager</h3>
+    <h3>📄 Page Manager</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Toggle pages on/off in the navigation.</p>
     <div id="et-pages-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-pages-close" class="et-btn">Close</button><button id="et-pages-save" class="et-btn et-btn-save">Save</button></div>
@@ -99,7 +156,7 @@
 <!-- Color Editor Modal -->
 <div id="et-colors-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:480px;">
-    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¨ Brand Colors</h3>
+    <h3>🎨 Brand Colors</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Changes preview live.</p>
     <div id="et-colors-list"></div>
     <div class="et-modal-actions" style="margin-top:16px;"><button id="et-colors-close" class="et-btn">Close</button><button id="et-colors-save" class="et-btn et-btn-save">Save Colors</button></div>
@@ -109,7 +166,7 @@
 <!-- Nav Editor Modal -->
 <div id="et-nav-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:600px;">
-    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ§ÃÂÃÂÃÂÃÂ­ Navigation Editor</h3>
+    <h3>🧭 Navigation Editor</h3>
     <p style="font-size:13px;color:#6b7280;margin-bottom:16px;">Edit top bar text and nav links.</p>
     <div id="et-nav-topbar" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Top Bar Items</h4><div id="et-topbar-items"></div></div>
     <div id="et-nav-links" style="margin-bottom:20px;"><h4 style="font-size:14px;margin-bottom:8px;color:#1e3a5f;">Main Navigation</h4><div id="et-nav-items"></div></div>
@@ -120,7 +177,7 @@
 <!-- SEO Editor Modal -->
 <div id="et-seo-modal" class="et-modal" style="display:none;">
   <div class="et-modal-content" style="max-width:550px;">
-    <h3>ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Page SEO</h3>
+    <h3>🔍 Page SEO</h3>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Page Title</label><input type="text" id="et-seo-title" /><span id="et-seo-title-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div style="margin-bottom:16px;"><label style="display:block;margin-bottom:6px;font-size:13px;font-weight:600;color:#374151;">Meta Description</label><textarea id="et-seo-desc" rows="3" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;resize:vertical;box-sizing:border-box;"></textarea><span id="et-seo-desc-count" style="font-size:11px;color:#9ca3af;"></span></div>
     <div class="et-modal-actions"><button id="et-seo-close" class="et-btn">Close</button><button id="et-seo-save" class="et-btn et-btn-save">Save SEO</button></div>
@@ -285,8 +342,12 @@
   body.edit-mode-active [data-et-editable].et-selected{outline:2px solid #d4af37!important;outline-offset:2px}
   body.edit-mode-active [data-et-img]{cursor:pointer;position:relative}
   body.edit-mode-active [data-et-img]:hover{outline:2px dashed #f59e0b!important;outline-offset:2px}
-  body.edit-mode-active [data-et-bg]{cursor:pointer}
+  body.edit-mode-active [data-et-bg]{cursor:pointer;position:relative}
   body.edit-mode-active [data-et-bg]:hover{outline:2px dashed #f59e0b!important;outline-offset:4px}
+  body.edit-mode-active [data-et-bg]::after{content:'📷 Click to change background';position:absolute;top:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;padding:4px 10px;border-radius:4px;font-size:12px;z-index:10;opacity:0;transition:opacity .2s;pointer-events:none}
+  body.edit-mode-active [data-et-bg]:hover::after{opacity:1}
+  body.edit-mode-active [data-et-img]::after{content:'📷 Click to edit';position:absolute;top:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;padding:3px 8px;border-radius:4px;font-size:11px;z-index:10;opacity:0;transition:opacity .2s;pointer-events:none}
+  body.edit-mode-active [data-et-img]:hover::after{opacity:1}
   body.edit-mode-active .hero-bg,body.edit-mode-active .hero-overlay,body.edit-mode-active .hero-gradient,body.edit-mode-active .fence-hero-overlay{pointer-events:none!important}
   body.edit-mode-active [data-et-editable].et-dragging{opacity:.5;outline:2px dashed #ef4444!important}
   .et-drop-indicator{position:absolute;left:0;right:0;height:3px;background:#3b82f6;z-index:99998;pointer-events:none;border-radius:2px}
@@ -408,7 +469,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
   // === OVERRIDES (run on every page load) ===
   function applyHiddenPages(){try{const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');if(!h.length)return;document.querySelectorAll('.nav-links>li').forEach(li=>{const a=li.querySelector('a');if(!a)return;if(h.includes(a.getAttribute('href'))){li.style.display='none';li.setAttribute('data-page-hidden','true')}});document.querySelectorAll('.dropdown li').forEach(li=>{const a=li.querySelector('a');if(!a)return;if(h.includes(a.getAttribute('href')))li.style.display='none'});document.querySelectorAll('.site-footer a').forEach(a=>{if(h.includes(a.getAttribute('href'))){const li=a.closest('li');if(li)li.style.display='none'}});}catch(e){}}
 
-  function applyLocalOverrides(){try{const pk=getPageKey(),saved=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');if(!Object.keys(saved).length)return;function apply(){const tEls=getEditableTextElements(),imgs=getEditableImages();Object.entries(saved).forEach(([k,v])=>{try{if(k.startsWith('img:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].src=v}else if(k.startsWith('imgw:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].style.width=v}else if(k.startsWith('imgh:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].style.height=v}else if(k.startsWith('bg:')){const i=parseInt(k.split(':')[1]);const bgs=getEditableBackgrounds();if(bgs[i])bgs[i].style.backgroundImage='url('+v+')'}else if(k.startsWith('style:')){const p=k.split(':');const i=parseInt(p[1]);const prop=p[2];if(tEls[i])tEls[i].style[prop]=v}else{const i=parseInt(k);if(tEls[i]){if(tEls[i].children.length>0)tEls[i].innerHTML=v;else tEls[i].textContent=v}}}catch(e){}})}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply()}catch(e){}}
+  function applyLocalOverrides(){try{const pk=getPageKey(),saved=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');const logoData=JSON.parse(localStorage.getItem(SP+'logo')||'null');function applyLogo(){if(!logoData)return;if(logoData.type==='image'){document.querySelectorAll('.logo,.footer-logo').forEach(container=>{const icon=container.querySelector('.logo-icon');const text=container.querySelector('.logo-text');if(icon){icon.style.display='none'}if(text){text.style.display='none'}let img=container.querySelector('.logo-custom-img');if(!img){img=document.createElement('img');img.className='logo-custom-img';img.style.cssText='max-height:'+(logoData.height||50)+'px;object-fit:contain;';container.prepend(img)}img.src=logoData.src;img.alt=logoData.alt||'Logo'})}else{document.querySelectorAll('.logo-icon').forEach(el=>{if(logoData.icon)el.textContent=logoData.icon});document.querySelectorAll('.company-name').forEach(el=>{if(logoData.name)el.textContent=logoData.name});document.querySelectorAll('.company-tagline').forEach(el=>{if(logoData.tagline)el.textContent=logoData.tagline});document.querySelectorAll('.footer-logo>span').forEach(el=>{if(logoData.name)el.textContent=logoData.name+(logoData.tagline?' '+logoData.tagline:'')})}}if(!Object.keys(saved).length&&!logoData)return;function apply(){const tEls=getEditableTextElements(),imgs=getEditableImages();Object.entries(saved).forEach(([k,v])=>{try{if(k.startsWith('img:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].src=v}else if(k.startsWith('imgw:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].style.width=v}else if(k.startsWith('imgh:')){const i=parseInt(k.split(':')[1]);if(imgs[i])imgs[i].style.height=v}else if(k.startsWith('alt:')){const i=parseInt(k.split(':')[1]);if(imgs[i]){imgs[i].alt=v;imgs[i].title=v}}else if(k.startsWith('cap:')){const i=parseInt(k.split(':')[1]);if(imgs[i]&&v){const fig=imgs[i].closest('figure');const fc=fig?fig.querySelector('figcaption'):null;const nc=imgs[i].nextElementSibling;const ec=fc||(nc&&(nc.classList.contains('caption')||nc.classList.contains('image-caption'))?nc:null);if(ec)ec.textContent=v;else{const cap=document.createElement('div');cap.className='image-caption';cap.textContent=v;cap.style.cssText='font-size:13px;color:#6b7280;text-align:center;padding:6px 0;';imgs[i].insertAdjacentElement('afterend',cap)}}}else if(k.startsWith('overlay:')){var oi=parseInt(k.split(':')[1]);var obgs=getEditableBackgrounds();if(obgs[oi]){var ov=obgs[oi].querySelector('.fence-hero-overlay')||obgs[oi].querySelector('[class*=overlay]');if(ov){var oop=v/100;ov.style.background='linear-gradient(135deg,rgba(30,58,95,'+oop+'),rgba(15,39,68,'+(oop*0.9).toFixed(2)+'))'}}}else if(k.startsWith('bg:')){const i=parseInt(k.split(':')[1]);const bgs=getEditableBackgrounds();if(bgs[i])bgs[i].style.backgroundImage='url('+v+')'}else if(k.startsWith('style:')){const p=k.split(':');const i=parseInt(p[1]);const prop=p[2];if(tEls[i])tEls[i].style[prop]=v}else{const i=parseInt(k);if(tEls[i]){if(tEls[i].children.length>0)tEls[i].innerHTML=v;else tEls[i].textContent=v}}}catch(e){}});applyLogo()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',apply);else apply()}catch(e){}}
 
   function applyColorOverrides(){try{const c=JSON.parse(localStorage.getItem(SP+'colors')||'{}');Object.entries(c).forEach(([v,val])=>document.documentElement.style.setProperty(v,val))}catch(e){}}
 
@@ -419,7 +480,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
   function getPageKey(){return(window.location.pathname.replace(/^\/|\/$/g,'')||'home').replace(/\//g,'-')}
 
   function getEditableTextElements(){
-    const sel='h1,h2,h3,h4,h5,h6,p,li,td,th,label,blockquote,figcaption,a,button,span.highlight,span.gold,span.company-name,span.company-tagline,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,.cta-content h2,.cta-content p,.section-label,.section-title,details summary,details>p,[data-editable],a.cta-btn,.gbb-tier,.gbb-price,.gbb-label,.gbb-features li,.fence-hero-text,.fence-hero-title,.warranty-badge,.warranty-text,.top-bar-item,.footer-about p,.footer-col h4,.site-footer p,.site-footer a,.city-search,.permits-hero p,.permits-hero h1,.detail-disclaimer p,.area-tag,.btn,.gallery-label,.compare-vs,.logo-icon,.testimonial-stars,.testimonial-avatar,.site-header .nav-links a,.site-header .btn,.footer-logo span';
+    const sel='h1,h2,h3,h4,h5,h6,p,li,td,th,label,blockquote,figcaption,a,button,span.highlight,span.gold,span.company-name,span.company-tagline,.hero-text,.stat-value,.stat-label,.review-text,.review-author,.card-title,.card-text,.benefit-title,.benefit-text,.cta-content h2,.cta-content p,.section-label,.section-title,details summary,details>p,[data-editable],a.cta-btn,.gbb-tier,.gbb-price,.gbb-label,.gbb-features li,.fence-hero-text,.fence-hero-title,.warranty-badge,.warranty-text,.top-bar-item,.footer-about p,.footer-col h4,.site-footer p,.site-footer a,.city-search,.permits-hero p,.permits-hero h1,.detail-disclaimer p,.area-tag,.btn,.gallery-label,.fence-gallery-label,.compare-vs,.logo-icon,.testimonial-stars,.testimonial-avatar,.site-header .nav-links a,.site-header .btn,.footer-logo span';
     const els=[];
     document.querySelectorAll(sel).forEach(el=>{
       if(el.closest('#edit-toolbar')||el.closest('.et-modal')||el.closest('.et-popover')||el.closest('script')||el.closest('style'))return;
@@ -434,7 +495,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
 
   function getEditableImages(){const imgs=[];document.querySelectorAll('img').forEach(img=>{if(img.closest('#edit-toolbar')||img.closest('.et-modal')||img.closest('.et-popover'))return;if(img.width<30||img.height<30)return;imgs.push(img)});return imgs}
 
-  function getEditableBackgrounds(){const bgs=[];document.querySelectorAll('[style*="background-image"],.hero-bg,.fence-hero,.hero,.section[style*="background"]').forEach(el=>{if(el.closest('#edit-toolbar'))return;const bg=getComputedStyle(el).backgroundImage;if(bg&&bg!=='none')bgs.push(el)});return bgs}
+  function getEditableBackgrounds(){const bgs=[];document.querySelectorAll('[style*="background-image"],.hero-bg,.fence-hero,.hero,.section[style*="background"],.hero--overlay,[class*="hero"],[data-bg],section[style*="background"],.cta-section,.banner,.page-header').forEach(el=>{if(el.closest('#edit-toolbar'))return;const bg=getComputedStyle(el).backgroundImage;if(bg&&bg!=='none')bgs.push(el)});return bgs}
 
   // === TRIGGERS ===
   document.addEventListener('keydown',function(e){
@@ -466,7 +527,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
         user={uid:'local-admin'};modal.style.display='none';
         document.cookie='gfs_admin=1;path=/;max-age=86400;SameSite=Lax';
         localStorage.setItem('gfs_edit_wasAdmin','1');
-        showToolbar();activateEditing();showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Logged in ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Editor active!');return;
+        showToolbar();activateEditing();showToast('✅ Logged in — Editor active!');return;
       }
       err.textContent='Invalid credentials. Try: admin / gfs2024';err.style.display='block';pi.value='';pi.focus();
     }
@@ -486,8 +547,10 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
     document.getElementById('et-pages-btn').onclick=showPageManager;
     document.getElementById('et-colors-btn').onclick=showColorEditor;
     document.getElementById('et-nav-btn').onclick=showNavEditor;
+    document.getElementById('et-logo-btn').onclick=showLogoEditor;
     document.getElementById('et-seo-btn').onclick=showSEOEditor;
     document.getElementById('et-admin-btn').onclick=showAdminPanel;
+    document.getElementById('et-reset-page').onclick=resetPage;
   }
 
   // === ACTIVATE / DEACTIVATE ===
@@ -503,7 +566,7 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
     document.querySelectorAll('[data-page-hidden]').forEach(li=>{li.style.display='';li.style.opacity='0.4'});
   // ResizeObserver for images
   if(window.ResizeObserver){const ro=new ResizeObserver(ents=>{ents.forEach(e=>{const img=e.target;if(!img.hasAttribute('data-et-img'))return;const w=Math.round(e.contentRect.width);const ht=Math.round(e.contentRect.height);const idx=img.getAttribute('data-et-img');const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)['imgw:'+idx]=w+'px';changes.get(pk)['imgh:'+idx]=ht+'px';updateChangesCount()})});imgs.forEach(img=>ro.observe(img));window._gfsRO=ro}
-    showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ Editing: '+tEls.length+' text, '+imgs.length+' images');
+    showToast('✏️ Editing: '+tEls.length+' text, '+imgs.length+' images, '+bgs.length+' backgrounds');
   }
 
   function deactivateEditing(){
@@ -565,12 +628,12 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
 
   // === DRAG AND DROP ===
   function enableDrag(el){
-    el.classList.add('et-dragging');el.draggable=true;showToast('ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Drag to reposition');
+    el.classList.add('et-dragging');el.draggable=true;showToast('🔄 Drag to reposition');
     let ph=document.createElement('div');ph.className='et-drop-indicator';
     const parent=el.parentElement;
     el.ondragstart=ev=>{ev.dataTransfer.effectAllowed='move'};
     parent.ondragover=ev=>{ev.preventDefault();ev.dataTransfer.dropEffect='move';const after=getDragAfter(parent,ev.clientY);if(ph.parentElement)ph.remove();if(after)parent.insertBefore(ph,after);else parent.appendChild(ph)};
-    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Moved')};
+    parent.ondrop=ev=>{ev.preventDefault();if(ph.parentElement){parent.insertBefore(el,ph);ph.remove()}cleanup();trackTextChange(el);showToast('✅ Moved')};
     const cleanup=()=>{el.classList.remove('et-dragging');el.draggable=false;el.ondragstart=null;parent.ondragover=null;parent.ondrop=null;if(ph.parentElement)ph.remove()};
     setTimeout(()=>{if(el.classList.contains('et-dragging'))cleanup()},15000);
   }
@@ -578,30 +641,136 @@ body.edit-mode-active [data-et-editable]{transition:all .15s ease}
 
   // === TRACK CHANGES ===
   function onTextEdit(e){const el=e.target.closest('[data-et-editable]');if(el)trackTextChange(el)}
-  function trackTextChange(el){const idx=el.getAttribute('data-et-editable'),pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)[idx]=el.children.length>0?el.innerHTML:el.textContent.trim();updateChangesCount()}
+  function trackTextChange(el){const idx=el.getAttribute('data-et-editable'),pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});var txt=el.children.length>0?el.innerHTML:el.textContent.trim();try{txt=decodeURIComponent(encodeURIComponent(txt))}catch(e){}changes.get(pk)[idx]=txt;updateChangesCount()}
   function trackImageChange(key,src){const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)[key]=src;updateChangesCount()}
   function updateChangesCount(){let c=0;changes.forEach(f=>{c+=Object.keys(f).length});const el=document.getElementById('et-changes'),sb=document.getElementById('et-save'),db=document.getElementById('et-discard');if(c>0){el.style.display='inline';el.textContent=c+' change'+(c!==1?'s':'');sb.style.display='inline-flex';db.style.display='inline-flex'}else{el.style.display='none';sb.style.display='none';db.style.display='none'}}
 
   // === SAVE / DISCARD ===
-  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ³ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Saved!';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Changes saved!');setTimeout(()=>{sb.innerHTML='ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¾ Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Error';sb.disabled=false;showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ '+e.message)}}
-  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('ÃÂÃÂÃÂÃÂ°ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ Discarded')}
+  function saveChanges(){if(changes.size===0)return;const sb=document.getElementById('et-save');sb.innerHTML='⏳ Saving...';sb.disabled=true;try{changes.forEach((fields,pk)=>{const ex=JSON.parse(localStorage.getItem(SP+'content_'+pk)||'{}');Object.assign(ex,fields);localStorage.setItem(SP+'content_'+pk,JSON.stringify(ex))});document.querySelectorAll('[data-et-editable]').forEach(el=>originalContent.set(el,el.innerHTML));changes.clear();updateChangesCount();sb.innerHTML='✅ Saved!';showToast('✅ Changes saved!');setTimeout(()=>{sb.innerHTML='💾 Save';sb.disabled=false},2000)}catch(e){sb.innerHTML='❌ Error';sb.disabled=false;showToast('❌ '+e.message)}}
+  function discardChanges(){if(!confirm('Discard all changes?'))return;originalContent.forEach((h,el)=>{el.innerHTML=h});changes.clear();updateChangesCount();showToast('👑️ Discarded')}
+  function resetPage(){if(!confirm('Reset this page to its original content? This removes ALL saved edits.'))return;var pk=getPageKey();localStorage.removeItem(SP+'content_'+pk);changes.clear();updateChangesCount();showToast('Page reset! Refreshing...');setTimeout(function(){window.location.reload()},800)}
 
   // === IMAGE EDITING ===
   let curImgEl=null,curImgKey=null,curIsBg=false;
-  function openImageModal(el,key,isBg){curImgEl=el;curImgKey=key;curIsBg=!!isBg;const m=document.getElementById('et-image-modal');m.style.display='flex';document.getElementById('et-image-url').value='';document.getElementById('et-upload-preview').style.display='none';document.getElementById('et-file-input').value='';document.getElementById('et-upload-zone').onclick=()=>document.getElementById('et-file-input').click();document.getElementById('et-file-input').onchange=e=>{const f=e.target.files[0];if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)};document.getElementById('et-image-cancel').onclick=()=>{m.style.display='none'};document.getElementById('et-image-apply').onclick=applyImage;const z=document.getElementById('et-upload-zone');z.ondragover=e=>{e.preventDefault();z.style.borderColor='#3b82f6'};z.ondragleave=()=>{z.style.borderColor='#d1d5db'};z.ondrop=e=>{e.preventDefault();z.style.borderColor='#d1d5db';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){const dt=new DataTransfer();dt.items.add(f);document.getElementById('et-file-input').files=dt.files;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)}}}
-  function applyImage(){if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';if(fi.files[0])src=document.getElementById('et-preview-img').src;else if(ui.value.trim())src=ui.value.trim();if(src){if(curIsBg)curImgEl.style.backgroundImage='url('+src+')';else if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}document.getElementById('et-image-modal').style.display='none';curImgEl=null}
+  function openImageModal(el,key,isBg){curImgEl=el;curImgKey=key;curIsBg=!!isBg;const m=document.getElementById('et-image-modal');m.style.display='flex';document.getElementById('et-image-url').value='';document.getElementById('et-upload-preview').style.display='none';document.getElementById('et-file-input').value='';
+    // Set modal title based on type
+    document.getElementById('et-image-modal-title').textContent=isBg?'Replace Background Image':'Replace Image';
+    // Alt text
+    const altSec=document.getElementById('et-alt-section');
+    const altInp=document.getElementById('et-image-alt');
+    const capSec=document.getElementById('et-caption-section');
+    const capInp=document.getElementById('et-image-caption');
+    if(isBg){altSec.style.display='none';capSec.style.display='none';altInp.value='';capInp.value='';
+      var oSec=document.getElementById('et-overlay-section');oSec.style.display='block';
+      var oSlider=document.getElementById('et-overlay-opacity');var oVal=document.getElementById('et-overlay-val');
+      var overlay=el.querySelector('.fence-hero-overlay')||el.querySelector('[class*=overlay]');
+      if(overlay){var bg=getComputedStyle(overlay).background||getComputedStyle(overlay).backgroundColor;var m=bg.match(/[\d.]+(?=\))/g);if(m&&m.length>=4)oSlider.value=Math.round(parseFloat(m[3])*100)}
+      oVal.textContent=oSlider.value+'%';
+      oSlider.oninput=function(){oVal.textContent=oSlider.value+'%';var op=oSlider.value/100;if(overlay)overlay.style.background='linear-gradient(135deg,rgba(30,58,95,'+op+'),rgba(15,39,68,'+(op*0.9).toFixed(2)+'))'}
+    }
+    else{altSec.style.display='block';altInp.value=el.alt||'';document.getElementById('et-overlay-section').style.display='none';
+      // Check for figcaption sibling
+      const fig=el.closest('figure');const fc=fig?fig.querySelector('figcaption'):null;
+      // Also check for next sibling caption elements
+      const nextCap=el.nextElementSibling;const hasCap=fc||(nextCap&&(nextCap.classList.contains('caption')||nextCap.classList.contains('image-caption')||nextCap.tagName==='FIGCAPTION'));
+      capSec.style.display='block';capInp.value=fc?fc.textContent.trim():(hasCap&&nextCap?nextCap.textContent.trim():'');
+    }
+    document.getElementById('et-upload-zone').onclick=()=>document.getElementById('et-file-input').click();document.getElementById('et-file-input').onchange=e=>{const f=e.target.files[0];if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)};document.getElementById('et-image-cancel').onclick=()=>{m.style.display='none'};document.getElementById('et-image-apply').onclick=applyImage;const z=document.getElementById('et-upload-zone');z.ondragover=e=>{e.preventDefault();z.style.borderColor='#3b82f6'};z.ondragleave=()=>{z.style.borderColor='#d1d5db'};z.ondrop=e=>{e.preventDefault();z.style.borderColor='#d1d5db';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){const dt=new DataTransfer();dt.items.add(f);document.getElementById('et-file-input').files=dt.files;const r=new FileReader();r.onload=ev=>{document.getElementById('et-preview-img').src=ev.target.result;document.getElementById('et-upload-preview').style.display='block'};r.readAsDataURL(f)}}}
+  function applyImage(){if(!curImgEl)return;const fi=document.getElementById('et-file-input'),ui=document.getElementById('et-image-url');let src='';if(fi.files[0])src=document.getElementById('et-preview-img').src;else if(ui.value.trim())src=ui.value.trim();if(src){if(curIsBg)curImgEl.style.backgroundImage='url('+src+')';else if(curImgEl.tagName==='IMG')curImgEl.src=src;else curImgEl.style.backgroundImage='url('+src+')';trackImageChange(curImgKey,src)}
+    // Save alt text
+    if(!curIsBg&&curImgEl.tagName==='IMG'){
+      const newAlt=document.getElementById('et-image-alt').value.trim();
+      if(newAlt!==curImgEl.alt){curImgEl.alt=newAlt;curImgEl.title=newAlt;const pk=getPageKey();if(!changes.has(pk))changes.set(pk,{});changes.get(pk)['alt:'+curImgKey.split(':')[1]]=newAlt;updateChangesCount()}
+      // Handle caption
+      const capVal=document.getElementById('et-image-caption').value.trim();
+      const fig=curImgEl.closest('figure');const fc=fig?fig.querySelector('figcaption'):null;
+      const nextCap=curImgEl.nextElementSibling;const existingCap=fc||(nextCap&&(nextCap.classList.contains('caption')||nextCap.classList.contains('image-caption')||nextCap.tagName==='FIGCAPTION')?nextCap:null);
+      if(capVal){
+        if(existingCap){existingCap.textContent=capVal}
+        else if(fig){const newFc=document.createElement('figcaption');newFc.textContent=capVal;newFc.style.cssText='font-size:13px;color:#6b7280;text-align:center;padding:6px 0;';fig.appendChild(newFc)}
+        else{const cap=document.createElement('div');cap.className='image-caption';cap.textContent=capVal;cap.style.cssText='font-size:13px;color:#6b7280;text-align:center;padding:6px 0;';curImgEl.insertAdjacentElement('afterend',cap)}
+        if(!changes.has(getPageKey()))changes.set(getPageKey(),{});changes.get(getPageKey())['cap:'+curImgKey.split(':')[1]]=capVal;updateChangesCount();
+      } else if(existingCap&&existingCap.textContent.trim()){existingCap.textContent='';if(!changes.has(getPageKey()))changes.set(getPageKey(),{});changes.get(getPageKey())['cap:'+curImgKey.split(':')[1]]='';updateChangesCount()}
+    }
+    if(curIsBg){var oS=document.getElementById('et-overlay-opacity');if(oS){var pk2=getPageKey();if(!changes.has(pk2))changes.set(pk2,{});changes.get(pk2)['overlay:'+curImgKey]=oS.value;updateChangesCount()}}
+    document.getElementById('et-image-modal').style.display='none';curImgEl=null}
 
   // === PAGE MANAGER ===
-  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Pages updated!')}}
+  function showPageManager(){const m=document.getElementById('et-pages-modal'),l=document.getElementById('et-pages-list');const h=JSON.parse(localStorage.getItem(SP+'hiddenPages')||'[]');const pages=[{name:'Home',path:'/'},{name:'Fence Styles',path:'/fences/'},{name:'Cedar Privacy',path:'/fences/cedar/'},{name:'Wood Privacy',path:'/fences/wood/'},{name:'Vinyl Privacy',path:'/fences/vinyl/'},{name:'Vinyl Picket',path:'/fences/vinyl-picket/'},{name:'Ornamental Aluminum',path:'/fences/aluminum/'},{name:'Chain Link',path:'/fences/chainlink/'},{name:'Split Rail',path:'/fences/split-rail/'},{name:'Ranch Rail',path:'/fences/ranch-rail/'},{name:'Permits & Zoning',path:'/permits/'},{name:'Reviews',path:'/reviews/'},{name:'About',path:'/about/'},{name:'Contact',path:'/contact/'},{name:'Get Free Quote',path:'/quote/'},{name:'Gallery',path:'/gallery/'},{name:'Blog',path:'/blog/'},{name:'Service Areas',path:'/service-areas/'}];l.innerHTML=pages.map(p=>'<div class="et-page-item"><div><div class="et-page-item-name">'+p.name+'</div><div class="et-page-item-path">'+p.path+'</div></div><label class="et-page-toggle"><input type="checkbox" data-path="'+p.path+'" '+(h.includes(p.path)?'':'checked')+'><span class="slider"></span></label></div>').join('');m.style.display='flex';document.getElementById('et-pages-close').onclick=()=>{m.style.display='none'};document.getElementById('et-pages-save').onclick=()=>{const nh=[];l.querySelectorAll('input[type="checkbox"]').forEach(cb=>{if(!cb.checked)nh.push(cb.dataset.path)});localStorage.setItem(SP+'hiddenPages',JSON.stringify(nh));m.style.display='none';applyHiddenPages();showToast('✅ Pages updated!')}}
 
   // === COLOR EDITOR ===
-  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Colors saved!')}}
+  function showColorEditor(){const m=document.getElementById('et-colors-modal'),l=document.getElementById('et-colors-list');const sc=JSON.parse(localStorage.getItem(SP+'colors')||'{}');const vars=[{name:'Primary (Navy)',v:'--color-primary',d:'#1e3a5f'},{name:'Primary Dark',v:'--color-primary-dark',d:'#0f2744'},{name:'Accent (Gold)',v:'--color-accent',d:'#d4af37'},{name:'Accent Light',v:'--color-accent-light',d:'#f4d03f'},{name:'Text Color',v:'--color-text',d:'#1f2937'},{name:'Text Light',v:'--color-text-light',d:'#6b7280'},{name:'Background',v:'--color-bg',d:'#ffffff'},{name:'Background Alt',v:'--color-bg-alt',d:'#f8fafc'},{name:'Success Green',v:'--color-success',d:'#059669'}];l.innerHTML=vars.map(c=>{const cv=sc[c.v]||getComputedStyle(document.documentElement).getPropertyValue(c.v)?.trim()||c.d;return'<div class="et-color-item"><div class="et-color-swatch" style="background:'+cv+'"><input type="color" value="'+cv+'" data-var="'+c.v+'"/></div><div class="et-color-label"><div class="et-color-label-name">'+c.name+'</div><div class="et-color-label-var">'+c.v+'</div></div><div class="et-color-hex" data-hex="'+c.v+'">'+cv+'</div></div>'}).join('');l.querySelectorAll('input[type="color"]').forEach(inp=>{inp.addEventListener('input',e=>{document.documentElement.style.setProperty(e.target.dataset.var,e.target.value);e.target.closest('.et-color-swatch').style.background=e.target.value;l.querySelector('[data-hex="'+e.target.dataset.var+'"]').textContent=e.target.value})});m.style.display='flex';document.getElementById('et-colors-close').onclick=()=>{m.style.display='none'};document.getElementById('et-colors-save').onclick=()=>{const nc={};l.querySelectorAll('input[type="color"]').forEach(i=>{nc[i.dataset.var]=i.value});localStorage.setItem(SP+'colors',JSON.stringify(nc));m.style.display='none';showToast('✅ Colors saved!')}}
 
   // === NAV EDITOR ===
-  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ Nav saved! Refresh to apply.')}}
+  function showNavEditor(){const m=document.getElementById('et-nav-modal'),tEl=document.getElementById('et-topbar-items'),nEl=document.getElementById('et-nav-items');const ti=[];document.querySelectorAll('.top-bar-item').forEach((item,i)=>ti.push({i,t:item.textContent.trim()}));tEl.innerHTML=ti.map(t=>'<div class="et-nav-item"><span class="et-nav-label">#'+(t.i+1)+'</span><input type="text" data-tb="'+t.i+'" value="'+t.t.replace(/"/g,'&quot;')+'" /></div>').join('');const ni=[];document.querySelectorAll('.nav-links>li>a').forEach((a,i)=>ni.push({i,t:a.textContent.trim(),h:a.getAttribute('href')}));nEl.innerHTML=ni.map(n=>'<div class="et-nav-item"><input type="text" data-nt="'+n.i+'" value="'+n.t.replace(/"/g,'&quot;')+'" /><input type="text" data-nh="'+n.i+'" value="'+(n.h||'')+'" style="color:#6b7280" placeholder="/url/" /></div>').join('');m.style.display='flex';document.getElementById('et-nav-close').onclick=()=>{m.style.display='none'};document.getElementById('et-nav-save').onclick=()=>{const d={topbar:{},links:{}};tEl.querySelectorAll('input[data-tb]').forEach(i=>{d.topbar[i.dataset.tb]=i.value});nEl.querySelectorAll('input[data-nt]').forEach(i=>{if(!d.links[i.dataset.nt])d.links[i.dataset.nt]={};d.links[i.dataset.nt].text=i.value});nEl.querySelectorAll('input[data-nh]').forEach(i=>{if(!d.links[i.dataset.nh])d.links[i.dataset.nh]={};d.links[i.dataset.nh].href=i.value});localStorage.setItem(SP+'nav',JSON.stringify(d));m.style.display='none';showToast('✅ Nav saved! Refresh to apply.')}}
+
+  // === LOGO EDITOR ===
+  function showLogoEditor(){
+    const m=document.getElementById('et-logo-modal');m.style.display='flex';
+    const saved=JSON.parse(localStorage.getItem(SP+'logo')||'null');
+    const textBtn=document.getElementById('et-logo-type-text'),imgBtn=document.getElementById('et-logo-type-image');
+    const textFields=document.getElementById('et-logo-text-fields'),imgFields=document.getElementById('et-logo-image-fields');
+    function setType(t){
+      if(t==='image'){imgBtn.classList.add('et-btn-save');textBtn.classList.remove('et-btn-save');textFields.style.display='none';imgFields.style.display='block'}
+      else{textBtn.classList.add('et-btn-save');imgBtn.classList.remove('et-btn-save');textFields.style.display='block';imgFields.style.display='none'}
+    }
+    textBtn.onclick=()=>setType('text');imgBtn.onclick=()=>setType('image');
+    // Populate current values
+    const curIcon=document.querySelector('.logo-icon');const curName=document.querySelector('.company-name');const curTag=document.querySelector('.company-tagline');
+    document.getElementById('et-logo-icon').value=saved?.icon||curIcon?.textContent||'GF';
+    document.getElementById('et-logo-name').value=saved?.name||curName?.textContent||'GHAREEB';
+    document.getElementById('et-logo-tagline').value=saved?.tagline||curTag?.textContent||'FENCING';
+    document.getElementById('et-logo-image-url').value=saved?.src||'';
+    document.getElementById('et-logo-height').value=saved?.height||50;
+    document.getElementById('et-logo-height-val').textContent=(saved?.height||50)+'px';
+    document.getElementById('et-logo-height').oninput=e=>{document.getElementById('et-logo-height-val').textContent=e.target.value+'px'};
+    if(saved?.type==='image'&&saved.src){setType('image');document.getElementById('et-logo-preview').style.display='block';document.getElementById('et-logo-preview-img').src=saved.src}else{setType('text');document.getElementById('et-logo-preview').style.display='none'}
+    // Logo image upload
+    const lz=document.getElementById('et-logo-upload-zone');const lfi=document.getElementById('et-logo-file-input');
+    lz.onclick=()=>lfi.click();
+    lfi.onchange=e=>{const f=e.target.files[0];if(!f||!f.type.startsWith('image/'))return;const r=new FileReader();r.onload=ev=>{document.getElementById('et-logo-preview-img').src=ev.target.result;document.getElementById('et-logo-preview').style.display='block'};r.readAsDataURL(f)};
+    lz.ondragover=e=>{e.preventDefault();lz.style.borderColor='#3b82f6'};lz.ondragleave=()=>{lz.style.borderColor='#d1d5db'};
+    lz.ondrop=e=>{e.preventDefault();lz.style.borderColor='#d1d5db';const f=e.dataTransfer.files[0];if(f&&f.type.startsWith('image/')){const dt=new DataTransfer();dt.items.add(f);lfi.files=dt.files;const r=new FileReader();r.onload=ev=>{document.getElementById('et-logo-preview-img').src=ev.target.result;document.getElementById('et-logo-preview').style.display='block'};r.readAsDataURL(f)}};
+    document.getElementById('et-logo-cancel').onclick=()=>{m.style.display='none'};
+    document.getElementById('et-logo-apply').onclick=()=>{
+      const isImage=imgFields.style.display!=='none';
+      if(isImage){
+        let src='';if(lfi.files[0])src=document.getElementById('et-logo-preview-img').src;else src=document.getElementById('et-logo-image-url').value.trim();
+        if(!src){showToast('⚠️ Please upload or enter a logo URL');return}
+        const height=parseInt(document.getElementById('et-logo-height').value)||50;
+        const logoData={type:'image',src,height,alt:'Company Logo'};
+        localStorage.setItem(SP+'logo',JSON.stringify(logoData));
+        // Apply immediately
+        document.querySelectorAll('.logo,.footer-logo').forEach(container=>{
+          const icon=container.querySelector('.logo-icon');const text=container.querySelector('.logo-text');
+          if(icon)icon.style.display='none';if(text)text.style.display='none';
+          let img=container.querySelector('.logo-custom-img');
+          if(!img){img=document.createElement('img');img.className='logo-custom-img';container.prepend(img)}
+          img.src=src;img.alt='Company Logo';img.style.cssText='max-height:'+height+'px;object-fit:contain;';
+        });
+      } else {
+        const icon=document.getElementById('et-logo-icon').value.trim()||'GF';
+        const name=document.getElementById('et-logo-name').value.trim()||'GHAREEB';
+        const tagline=document.getElementById('et-logo-tagline').value.trim()||'FENCING';
+        const logoData={type:'text',icon,name,tagline};
+        localStorage.setItem(SP+'logo',JSON.stringify(logoData));
+        // Apply immediately - remove any custom image first
+        document.querySelectorAll('.logo,.footer-logo').forEach(container=>{
+          const customImg=container.querySelector('.logo-custom-img');if(customImg)customImg.remove();
+          const iconEl=container.querySelector('.logo-icon');const textEl=container.querySelector('.logo-text');
+          if(iconEl){iconEl.style.display='';iconEl.textContent=icon}
+          if(textEl)textEl.style.display='';
+        });
+        document.querySelectorAll('.company-name').forEach(el=>{el.textContent=name});
+        document.querySelectorAll('.company-tagline').forEach(el=>{el.textContent=tagline});
+        document.querySelectorAll('.footer-logo>span').forEach(el=>{el.textContent=name+' '+tagline});
+      }
+      m.style.display='none';showToast('✅ Logo updated!');
+    };
+  }
 
   // === SEO EDITOR ===
-  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ ÃÂÃÂÃÂÃÂ¯ÃÂÃÂÃÂÃÂ¸ÃÂÃÂÃÂÃÂ':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('ÃÂÃÂÃÂÃÂ¢ÃÂÃÂÃÂÃÂÃÂÃÂÃÂÃÂ SEO saved!')}}
+  function showSEOEditor(){const m=document.getElementById('et-seo-modal'),ti=document.getElementById('et-seo-title'),di=document.getElementById('et-seo-desc');ti.value=document.title;di.value=document.querySelector('meta[name="description"]')?.content||'';const uc=()=>{document.getElementById('et-seo-title-count').textContent=ti.value.length+'/60'+(ti.value.length>60?' ⚠️':'');document.getElementById('et-seo-desc-count').textContent=di.value.length+'/160'+(di.value.length>160?' ⚠️':'')};ti.oninput=uc;di.oninput=uc;uc();m.style.display='flex';document.getElementById('et-seo-close').onclick=()=>{m.style.display='none'};document.getElementById('et-seo-save').onclick=()=>{localStorage.setItem(SP+'seo_'+getPageKey(),JSON.stringify({title:ti.value,description:di.value}));document.title=ti.value;const meta=document.querySelector('meta[name="description"]');if(meta)meta.content=di.value;m.style.display='none';showToast('✅ SEO saved!')}}
 
   // === ADMIN PANEL ===
   function showAdminPanel(){
