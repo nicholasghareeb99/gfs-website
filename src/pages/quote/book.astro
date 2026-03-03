@@ -2,6 +2,17 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="Book Free Consultation | Ghareeb Fencing Solutions Toledo OH" description="Schedule a free on-site fence consultation." pageId="quote-book" activeNav="quote">
+
+<!-- Hidden Netlify form for email notifications -->
+<form name="booking-leads" netlify netlify-honeypot="bot-field" hidden>
+  <input name="name" type="text" />
+  <input name="phone" type="tel" />
+  <input name="email" type="email" />
+  <input name="address" type="text" />
+  <input name="date" type="text" />
+  <input name="time" type="text" />
+</form>
+
 <style>
   .calendar{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:25px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
   .calendar-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
@@ -166,8 +177,7 @@ function renderCal(){
         let c='cal-day';
         if(disabled)c+=' disabled';
         if(isTod)c+=' today';
-        if(isSel)c+=' selected';
-        const oc=disabled?'':`onclick="pickDate(${y},${m},${d})"`;
+        if(isSel)c+=' selected';        const oc=disabled?'':`onclick="pickDate(${y},${m},${d})"`;
         let label=''+d;
         if(blocked)label+=' 🚫';
         if(full&&!past&&!dayDisabled&&!blocked)label+=' ✗';
@@ -225,7 +235,8 @@ document.getElementById('bookingForm').addEventListener('submit',async function(
       await db.collection('jobs').add({cName:booking.name,cEmail:booking.email,cPhone:booking.phone,cAddress:booking.address,status:'Lead',priority:'normal',source:'Website - Booking',notes:'Appointment: '+booking.date+' at '+booking.time,createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),isWebsiteLead:true,websiteLead:true});
       if(typeof gtag==='function')gtag('event','generate_lead',{event_category:'Conversions',event_label:'Booking',value:100,currency:'USD'});
     }
-    document.querySelector('.booking-grid').innerHTML='<div class="card" style="text-align:center;padding:60px 40px;grid-column:1/-1;"><div style="font-size:4rem;margin-bottom:20px;">✅</div><h2>Appointment <span class="gold">Requested!</span></h2><p style="color:#475569;margin:15px 0 10px;">We\'ve received your booking for:</p><p style="font-size:1.3rem;font-weight:700;color:#1e3a5f;margin-bottom:30px;">'+selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' at '+selTime+'</p><p style="color:#475569;margin-bottom:30px;">We\'ll confirm within 24 hours.</p><a href="/" class="btn btn-primary">Return to Home</a></div>';
+    /* Submit to Netlify Forms for email notification */
+    try{const nf=new FormData();nf.append('form-name','booking-leads');nf.append('name',booking.name);nf.append('phone',booking.phone);nf.append('email',booking.email);nf.append('address',booking.address);nf.append('date',booking.date);nf.append('time',booking.time);await fetch('/__forms.html',{method:'POST',body:nf});}catch(e){}    document.querySelector('.booking-grid').innerHTML='<div class="card" style="text-align:center;padding:60px 40px;grid-column:1/-1;"><div style="font-size:4rem;margin-bottom:20px;">✅</div><h2>Estimate <span class="gold">Scheduled!</span></h2><p style="color:#475569;margin:15px 0 10px;">We\'ve received your booking for:</p><p style="font-size:1.3rem;font-weight:700;color:#1e3a5f;margin-bottom:30px;">'+selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})+' at '+selTime+'</p><p style="color:#475569;margin-bottom:30px;">We will contact you to confirm your information.</p><a href="/" class="btn btn-primary">Return to Home</a></div>';
   }catch(err){console.error(err);alert('Error. Please call (419) 902-8257.');btn.disabled=false;btn.textContent='Book Appointment →';}
 });
 
