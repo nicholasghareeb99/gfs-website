@@ -7,7 +7,7 @@ const site = await getSiteSettings();
 
 <BaseLayout 
     title="Request a Detailed Quote | Ghareeb Fencing Solutions" 
-    description="Submit a detailed fence quote request. Tell us about your project and we'll prepare a comprehensive estimate within 24 hours."
+    description="Submit a detailed fence quote request. Tell us about your project and we will prepare a comprehensive estimate within 24 hours."
     canonical="/quote/form/"
 >
     <section class="hero-mini">
@@ -415,12 +415,12 @@ const site = await getSiteSettings();
 
 
 <!-- Google Maps Places Autocomplete for Address -->
-<script is:inline define:vars={{ mapsKey }}>
-window._gfsMapsKey=mapsKey;
-</script>
+<span id="gfs-maps-key" data-key={mapsKey} style="display:none"></span>
 <script is:inline>
 (function(){
-    const key=window._gfsMapsKey||'';if(!key)return;
+    var el=document.getElementById('gfs-maps-key');
+    var key=el?el.dataset.key:'';
+    if(!key)return;
     window._initFormAutocomplete=function(){
         try{
             const addrField=document.getElementById('q-address');
