@@ -1,8 +1,8 @@
 ---
-const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
+const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 ---
 
 <BaseLayout 
