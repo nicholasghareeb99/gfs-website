@@ -657,34 +657,80 @@ if($('pool-area'))$('pool-area').addEventListener('change',updateQ);
 let gmap=null;
 window.searchMapAddress=function(addr){
     if(!addr)addr=$('map-address-input')?.value?.trim();if(!addr){$('map-status-text').textContent='Enter an address to search';return;}
-    if(!window.google||!window.google.maps){$('map-status-text').textContent='\u26a0\ufe0f Maps not loaded. Click the Satellite Map tab after a moment.';return;}
+    if(!window.google||!window.google.maps){$('map-status-text').textContent='\u26a0\ufe0f Maps not loaded. Click Satellite Map tab again in a moment.';return;}
     $('map-status-text').textContent='\U0001f50d Searching for your property...';$('map-instructions').style.display='flex';
-    const mapEl=$('map');const container=$('map-container');
-    const searchTimeout=setTimeout(()=>{$('map-status-text').textContent='\u26a0\ufe0f Search taking long. Try a more specific address (include city, state).';},8000);
-    try{new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
-        clearTimeout(searchTimeout);
-        if(s==='OK'&&r[0]){const loc=r[0].geometry.location;
-            /* Always destroy + recreate map to avoid hidden-panel render bug */
-            mapEl.innerHTML='';gmap=null;
-            $('map-instructions').style.display='none';
-            gmap=new google.maps.Map(mapEl,{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT}});
-            /* Add property marker */
-            new google.maps.Marker({position:{lat:loc.lat(),lng:loc.lng()},map:gmap,title:'Your Property',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
-            /* Enable drawing tools on map */
-            if(google.maps.drawing){
-                const dm=new google.maps.drawing.DrawingManager({drawingControl:true,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline','polygon','marker']},polylineOptions:{strokeColor:'#d4af37',strokeWeight:3},polygonOptions:{strokeColor:'#d4af37',fillColor:'#d4af37',fillOpacity:0.15}});
-                dm.setMap(gmap);
-                google.maps.event.addListener(dm,'polylinecomplete',function(pl){
-                    const len=google.maps.geometry.sphericalLength(pl.getPath());
-                    const ft=Math.round(len*3.28084);
-                    if($('manual-feet')&&ft>5){$('manual-feet').value=ft;updateQ();}
-                    const info=new google.maps.InfoWindow({content:'<strong>'+ft+' ft</strong>'});
-                    info.open(gmap);info.setPosition(pl.getPath().getAt(Math.floor(pl.getPath().getLength()/2)));
-                });
+    const mapEl=$('map');
+
+    function showMap(lat,lng){
+        mapEl.innerHTML='';gmap=null;
+        $('map-instructions').style.display='none';
+        gmap=new google.maps.Map(mapEl,{center:{lat,lng},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT}});
+        new google.maps.Marker({position:{lat,lng},map:gmap,title:'Your Property',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
+        if(google.maps.drawing){
+            const dm=new google.maps.drawing.DrawingManager({drawingControl:true,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline','polygon','marker']},polylineOptions:{strokeColor:'#d4af37',strokeWeight:3},polygonOptions:{strokeColor:'#d4af37',fillColor:'#d4af37',fillOpacity:0.15}});
+            dm.setMap(gmap);
+            google.maps.event.addListener(dm,'polylinecomplete',function(pl){
+                const len=google.maps.geometry.sphericalLength(pl.getPath());
+                const ft=Math.round(len*3.28084);
+                if($('manual-feet')&&ft>5){$('manual-feet').value=ft;updateQ();}
+                const info=new google.maps.InfoWindow({content:'<strong>'+ft+' ft</strong>'});
+                info.open(gmap);info.setPosition(pl.getPath().getAt(Math.floor(pl.getPath().getLength()/2)));
+            });
+        }
+        $('map-status-text').textContent='';
+    }
+
+    /* Strategy: Try Geocoder first (4s timeout), then fallback to Places findPlaceFromQuery */
+    let resolved=false;
+    const geocodeTimeout=setTimeout(()=>{
+        if(resolved)return;
+        console.log('[Map] Geocoder timed out, trying Places API fallback...');
+        $('map-status-text').textContent='\U0001f50d Trying alternate search...';
+        tryPlacesFallback(addr);
+    },4000);
+
+    try{
+        new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
+            if(resolved)return;resolved=true;clearTimeout(geocodeTimeout);
+            if(s==='OK'&&r[0]){
+                showMap(r[0].geometry.location.lat(),r[0].geometry.location.lng());
+            }else{
+                console.log('[Map] Geocoder status:',s,'— trying Places fallback');
+                tryPlacesFallback(addr);
             }
-            $('map-status-text').textContent='';
-        }else{$('map-status-text').textContent='Address not found. Include full address with city & state.';}
-    });}catch(e){clearTimeout(searchTimeout);$('map-status-text').textContent='\u26a0\ufe0f Map error. Use Grid Drawing to design your fence.';}};
+        });
+    }catch(e){
+        if(!resolved){resolved=true;clearTimeout(geocodeTimeout);tryPlacesFallback(addr);}
+    }
+
+    function tryPlacesFallback(query){
+        /* Use Places service — doesn't need Geocoding API enabled */
+        try{
+            if(!google.maps.places){$('map-status-text').textContent='\u26a0\ufe0f Places API not available. Enable Geocoding API in Google Cloud Console.';return;}
+            /* Create a temporary invisible map just for the PlacesService */
+            const tempDiv=document.createElement('div');
+            const svc=new google.maps.places.PlacesService(tempDiv);
+            svc.findPlaceFromQuery({query:query,fields:['geometry','name']},(results,status)=>{
+                if(status==='OK'&&results&&results[0]&&results[0].geometry){
+                    const loc=results[0].geometry.location;
+                    showMap(loc.lat(),loc.lng());
+                }else{
+                    /* Last resort: try TextSearch */
+                    svc.textSearch({query:query},(r2,s2)=>{
+                        if(s2==='OK'&&r2&&r2[0]&&r2[0].geometry){
+                            showMap(r2[0].geometry.location.lat(),r2[0].geometry.location.lng());
+                        }else{
+                            $('map-status-text').textContent='\u26a0\ufe0f Could not find address. Enable the Geocoding API in Google Cloud Console, or try a different address.';
+                        }
+                    });
+                }
+            });
+        }catch(e2){
+            console.error('[Map] Places fallback error:',e2);
+            $('map-status-text').textContent='\u26a0\ufe0f Map search failed. Enable the Geocoding API in Google Cloud Console > APIs & Services > Library.';
+        }
+    }
+};
 if($('map-search-btn'))$('map-search-btn').addEventListener('click',()=>window.searchMapAddress());
 if($('map-address-input'))$('map-address-input').addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();window.searchMapAddress();}});
 
