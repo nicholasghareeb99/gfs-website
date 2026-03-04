@@ -80,9 +80,8 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                         <button type="button" class="view-tab" data-view="manual">✏️ Enter Feet</button>
                     </div>
 
-                    <!-- GRID VIEW -->
-                    <div class="view-panel active" id="view-grid">
-                        <div class="draw-toolbar">
+                    <!-- SHARED DRAW TOOLBAR (Grid + Map) -->
+                    <div class="draw-toolbar" id="shared-toolbar">
                             <div class="tool-group">
                                 <button type="button" class="draw-tool active" data-tool="fence"><span class="tool-icon">✏️</span><span class="tool-label">Fence</span></button>
                                 <button type="button" class="draw-tool" data-tool="gate-walk"><span class="tool-icon">🚪</span><span class="tool-label">Gate</span></button>
@@ -102,9 +101,16 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                             </div>
                             <div class="tool-divider"></div>
                             <button type="button" class="draw-tool" data-tool="erase"><span class="tool-icon">🗑</span><span class="tool-label">Erase</span></button>
+                    </div>
+
+                    <!-- GRID VIEW -->
+                    <div class="view-panel active" id="view-grid">
+                        <div class="grid-tip-bar">
+                            <p class="grid-tip">Tap to place points, double-tap or click ✓ Done to finish. Shift = straight.</p>
                         </div>
                         <div class="grid-wrapper"><canvas id="grid-canvas"></canvas></div>
                         <div class="grid-controls">
+                            <button type="button" id="grid-finish" class="toolbar-btn finish-line-btn" title="Finish current line">✓ Done</button>
                             <button type="button" id="grid-undo" class="toolbar-btn">↩ Undo</button>
                             <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear</button>
                             <button type="button" id="grid-zoom-in" class="toolbar-btn" title="Zoom In">🔍+</button>
@@ -117,14 +123,19 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 
                     <!-- MAP VIEW -->
                     <div class="view-panel" id="view-map">
+                        <div class="map-tip-bar">
+                            <p class="map-tip">📍 <strong>Select a tool above</strong>, then click points on the map to draw fence lines with real measurements. Select Gate or Tree, then tap to place.</p>
+                        </div>
                         <div class="map-search-bar">
                             <input type="text" id="map-address-input" autocomplete="off" placeholder="Search your address for satellite view" />
                             <button type="button" id="map-search-btn" class="btn btn-primary btn-sm">🔍 Search</button>
                         </div>
                         <div id="map-container"><div id="map"></div><div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div></div>
-                        <div class="map-hint-bar">
-                            <p class="map-hint">📍 <strong>Satellite view</strong> — See your property. Use the drawing tools on the map to measure fence lines, or switch to <strong>Grid Drawing</strong> for detailed layout.</p>
-                            <p class="map-hint" style="margin-top:4px;font-size:0.8rem;">Tip: Draw a polyline on the map to auto-measure feet. Lines drawn here auto-fill the manual footage field.</p>
+                        <div id="map-measurement-bar" class="map-measurement-bar">
+                            <span id="map-active-tool" class="map-tool-badge">Fence ✏</span>
+                            <span id="map-total-ft">Select a tool & draw on the map</span>
+                            <button type="button" id="map-undo-line" class="toolbar-btn" style="margin-left:auto;font-size:0.8rem;">↩ Undo</button>
+                            <button type="button" id="map-clear-lines" class="toolbar-btn" style="font-size:0.8rem;">🗑 Clear</button>
                         </div>
                     </div>
 
@@ -194,6 +205,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     <div class="summary-actions">
                         <a href={`tel:${site.company.phoneRaw}`} class="btn btn-primary btn-block">📞 Call — {site.company.phone}</a>
                         <a href="/quote/book/" class="btn btn-outline btn-block">📅 Book Free Consultation</a>
+                        <button type="button" id="export-pdf-btn" class="btn btn-outline btn-block" style="display:none;">📄 Download PDF Quote</button>
                         <button type="button" id="compare-btn" class="btn btn-outline btn-block" style="display:none;">🔄 Compare Other Styles</button>
                     </div>
                 </div>
@@ -213,11 +225,25 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
     <!-- GATE MODAL -->
     <div id="gate-modal" class="modal-overlay" style="display:none;"><div class="modal-box">
         <h3 id="gate-modal-title">Place Gate</h3>
-        <p style="color:#64748b;font-size:0.9rem;margin:0 0 16px;">Choose swing direction:</p>
-        <div class="gate-direction-btns">
-            <button type="button" class="gate-dir-btn" data-dir="left">⟵ Swings Left</button>
-            <button type="button" class="gate-dir-btn" data-dir="right">Swings Right ⟶</button>
+        <div class="gate-config-section">
+            <label class="gate-config-label">Gate Width:</label>
+            <div id="gate-width-options" class="gate-width-grid">
+                <button type="button" class="gate-width-btn" data-width="3">3 ft</button>
+                <button type="button" class="gate-width-btn active" data-width="4">4 ft</button>
+                <button type="button" class="gate-width-btn" data-width="5">5 ft</button>
+                <button type="button" class="gate-width-btn" data-width="6">6 ft</button>
+            </div>
         </div>
+        <div class="gate-config-section">
+            <label class="gate-config-label">Swing Direction:</label>
+            <div class="gate-direction-grid">
+                <button type="button" class="gate-dir-btn" data-dir="up">↑ Up</button>
+                <button type="button" class="gate-dir-btn" data-dir="down">↓ Down</button>
+                <button type="button" class="gate-dir-btn" data-dir="left">← Left</button>
+                <button type="button" class="gate-dir-btn" data-dir="right">→ Right</button>
+            </div>
+        </div>
+        <p style="color:#94a3b8;font-size:0.78rem;margin:8px 0 0;text-align:center;">Double-click gate later to rotate · Drag to reposition</p>
         <div class="modal-btns"><button type="button" id="gate-modal-cancel" class="toolbar-btn">Cancel</button></div>
     </div></div>
 </BaseLayout>
@@ -325,8 +351,10 @@ document.querySelectorAll('.view-tab').forEach(tab=>{tab.addEventListener('click
     document.querySelectorAll('.view-tab').forEach(t=>t.classList.remove('active'));
     document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');const panel=$('view-'+tab.dataset.view);if(panel)panel.classList.add('active');
-    if(tab.dataset.view==='grid')initCanvas();
-    if(tab.dataset.view==='map'){
+    if(tab.dataset.view==='grid'){initCanvas();if(window._syncMapTool)window._syncMapTool();}
+    /* Show/hide toolbar based on view (hide for manual) */
+    const tb=$('shared-toolbar');if(tb)tb.style.display=(tab.dataset.view==='manual')?'none':'flex';
+    if(tab.dataset.view==='map'){if(window._syncMapTool)window._syncMapTool();
         if(window._leadAddress&&$('map-address-input'))$('map-address-input').value=window._leadAddress;
         if(window._mapsReady&&!gmap&&window._leadAddress){setTimeout(()=>window.searchMapAddress(window._leadAddress),100);}
         else if(gmap){setTimeout(()=>google.maps.event.trigger(gmap,'resize'),100);}
@@ -388,14 +416,87 @@ function onTE(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);co
 }
 
 /* ======== GATE MODAL ======== */
-let pendingGate=null;
-function openGM(x,y,type){pendingGate={x,y,type};$('gate-modal-title').textContent=type==='gate-walk'?'Place Walk Gate':'Place Double Gate';$('gate-modal').style.display='flex';}
-document.querySelectorAll('.gate-dir-btn').forEach(b=>{b.addEventListener('click',()=>{if(!pendingGate)return;su();objs.push({type:pendingGate.type,x:pendingGate.x,y:pendingGate.y,dir:b.dataset.dir});$('gate-modal').style.display='none';pendingGate=null;redraw();updateQ();asd();});});
+let pendingGate=null;let selGateWidth=4;
+function openGM(x,y,type,suggestedDir){
+    pendingGate={x,y,type,suggestedDir:suggestedDir||null};
+    $('gate-modal-title').textContent=type==='gate-walk'?'Place Walk Gate (3-6 ft)':'Place Double Gate (10-16 ft)';
+    /* Set width options based on gate type */
+    const wo=$('gate-width-options');
+    if(type==='gate-drive'){
+        wo.innerHTML='<button type="button" class="gate-width-btn" data-width="10">10 ft</button><button type="button" class="gate-width-btn active" data-width="12">12 ft</button><button type="button" class="gate-width-btn" data-width="14">14 ft</button><button type="button" class="gate-width-btn" data-width="16">16 ft</button>';
+        selGateWidth=12;
+    }else{
+        wo.innerHTML='<button type="button" class="gate-width-btn" data-width="3">3 ft</button><button type="button" class="gate-width-btn active" data-width="4">4 ft</button><button type="button" class="gate-width-btn" data-width="5">5 ft</button><button type="button" class="gate-width-btn" data-width="6">6 ft</button>';
+        selGateWidth=4;
+    }
+    wo.querySelectorAll('.gate-width-btn').forEach(b=>{b.addEventListener('click',()=>{wo.querySelectorAll('.gate-width-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selGateWidth=parseInt(b.dataset.width);});});
+    /* Pre-select suggested direction if snapped to fence */
+    if(pendingGate.suggestedDir){
+        document.querySelectorAll('.gate-dir-btn').forEach(b=>{
+            b.classList.toggle('suggested',b.dataset.dir===pendingGate.suggestedDir);
+        });
+    }else{document.querySelectorAll('.gate-dir-btn').forEach(b=>b.classList.remove('suggested'));}
+    $('gate-modal').style.display='flex';
+}
+document.querySelectorAll('.gate-dir-btn').forEach(b=>{b.addEventListener('click',()=>{
+    if(!pendingGate)return;
+    su();
+    if(pendingGate.fromMap&&pendingGate.mapLatLng&&gmap){
+        /* Place marker on map */
+        const color=pendingGate.type==='gate-walk'?'#10b981':'#3b82f6';
+        const mk=new google.maps.Marker({position:pendingGate.mapLatLng,map:gmap,title:(pendingGate.type==='gate-walk'?'Walk':'Dbl')+' Gate ('+selGateWidth+'ft)',icon:{path:google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,scale:6,fillColor:color,fillOpacity:1,strokeColor:'#fff',strokeWeight:2},draggable:true});
+        const info=new google.maps.InfoWindow({content:'<div style="padding:4px 8px;font-weight:bold;color:'+color+';">'+(pendingGate.type==='gate-walk'?'🚪 Walk':'🚗 Dbl')+' Gate ('+selGateWidth+'ft) — '+b.dataset.dir+'</div>'});
+        mk.addListener('click',()=>info.open(gmap,mk));
+        window._mapMarkers.push({marker:mk,type:pendingGate.type});
+        objs.push({type:pendingGate.type,x:0,y:0,dir:b.dataset.dir,width:selGateWidth,fromMap:true});
+        if(window.updateMapBar)window.updateMapBar();
+    }else{
+        objs.push({type:pendingGate.type,x:pendingGate.x,y:pendingGate.y,dir:b.dataset.dir,width:selGateWidth});
+        redraw();
+    }
+    $('gate-modal').style.display='none';pendingGate=null;updateQ();asd();
+});});
 $('gate-modal-cancel').addEventListener('click',()=>{$('gate-modal').style.display='none';pendingGate=null;});
+
+/* Find closest point on any fence segment */
+function snapGateToFence(x,y){
+    let best=null,bestDist=Infinity;
+    objs.forEach(o=>{
+        if(o.type!=='fence')return;
+        for(let i=0;i<o.points.length-1;i++){
+            const a=o.points[i],b=o.points[i+1];
+            /* Project point onto line segment */
+            const dx=b.x-a.x,dy=b.y-a.y,len2=dx*dx+dy*dy;
+            if(len2===0)continue;
+            let t=((x-a.x)*dx+(y-a.y)*dy)/len2;
+            t=Math.max(0,Math.min(1,t));
+            const px=a.x+t*dx,py=a.y+t*dy;
+            const d=Math.sqrt((x-px)**2+(y-py)**2);
+            if(d<bestDist){bestDist=d;
+                /* Auto-detect gate direction from fence angle */
+                const angle=Math.atan2(dy,dx);
+                const isVert=Math.abs(Math.sin(angle))>Math.abs(Math.cos(angle));
+                let dir;
+                if(isVert){dir=(x<px)?'left':'right';}
+                else{dir=(y<py)?'up':'down';}
+                best={x:sn(px),y:sn(py),dir,dist:d};
+            }
+        }
+    });
+    /* Snap if within 3 grid cells */
+    if(best&&best.dist<GCS*3)return best;
+    return null;
+}
 
 function doClick(x,y){
     if(tool==='fence'||tool==='propline'||tool==='existing'){cfp.push({x,y});redraw();return;}
-    if(tool==='gate-walk'||tool==='gate-drive'){openGM(x,y,tool);return;}
+    if(tool==='gate-walk'||tool==='gate-drive'){
+        /* Try to snap gate to nearest fence line */
+        const snap=snapGateToFence(x,y);
+        if(snap){openGM(snap.x,snap.y,tool,snap.dir);}
+        else{openGM(x,y,tool);}
+        return;
+    }
     if(tool==='tree'){su();objs.push({type:'tree',x,y});redraw();asd();return;}
     if(tool==='text'){openTM(x,y);return;}
     if(tool==='pool'||tool==='house'){return;} /* handled by drag */
@@ -403,7 +504,7 @@ function doClick(x,y){
 }
 
 /* ======== TOOLS ======== */
-document.querySelectorAll('.draw-tool').forEach(btn=>{btn.addEventListener('click',()=>{finLine();document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));btn.classList.add('active');tool=btn.dataset.tool;});});
+document.querySelectorAll('.draw-tool').forEach(btn=>{btn.addEventListener('click',()=>{finLine();document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));btn.classList.add('active');tool=btn.dataset.tool;if(window._syncMapTool)window._syncMapTool();});});
 
 /* ======== MOUSE ======== */
 function snapPt(px,py){
@@ -412,22 +513,37 @@ function snapPt(px,py){
     return{x:sx,y:sy};
 }
 function onClick(e){const p=gcp(e);const sp=snapPt(p.x,p.y);doClick(sp.x,sp.y);}
-function onDown(e){if(tool==='house'||tool==='pool'){const p=gcp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
-function onUp(e){if((tool==='house'||tool==='pool')&&dragS){const p=gcp(e);const ex=sn(p.x),ey=sn(p.y);const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
+function onDown(e){
+    const p=gcp(e);
+    /* Check if clicking on a gate to drag it */
+    if(tool==='erase'||tool==='fence'||tool==='propline'||tool==='existing'){
+        const g=objs.find(o=>(o.type==='gate-walk'||o.type==='gate-drive')&&Math.abs(o.x-sn(p.x))<=GCS&&Math.abs(o.y-sn(p.y))<=GCS);
+        if(g){dragGate=g;dragGateStart={x:g.x,y:g.y};canvas.style.cursor='grabbing';return;}
+    }
+    if(tool==='house'||tool==='pool'){dragS={x:sn(p.x),y:sn(p.y)};}
+}
+let dragGate=null,dragGateStart=null;
+function onUp(e){
+    if(dragGate){dragGate=null;dragGateStart=null;canvas.style.cursor='crosshair';redraw();asd();return;}
+    if((tool==='house'||tool==='pool')&&dragS){const p=gcp(e);const ex=sn(p.x),ey=sn(p.y);const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
     if(w>=GCS&&h>=GCS){su();
         if(tool==='house'){const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h,label:lb});}
         else{objs.push({type:'pool',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h});}
         redraw();updateQ();asd();}dragS=null;}}
-function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);redraw();
+function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);if(dragGate){dragGate.x=sp.x;dragGate.y=sp.y;redraw();return;}redraw();
     if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>0){drawPL(cfp[cfp.length-1],sp,tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':'rgba(212,175,55,0.5)');drawSP(sp.x,sp.y,tool==='propline'?'rgba(148,163,184,0.5)':tool==='existing'?'rgba(239,68,68,0.5)':'rgba(212,175,55,0.5)');}
     if((tool==='house'||tool==='pool')&&dragS){const color=tool==='pool'?'rgba(59,130,246,0.3)':'rgba(100,130,180,0.3)';ctx.fillStyle=color;const sx=sn(sp.x),sy=sn(sp.y);const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);ctx.strokeStyle=tool==='pool'?'#3b82f6':'#4682B4';ctx.lineWidth=2;ctx.strokeRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
-    if(tool==='gate-walk'||tool==='gate-drive')drawSP(sp.x,sp.y,'rgba(16,185,129,0.5)');
+    if(tool==='gate-walk'||tool==='gate-drive'){
+        const snap=snapGateToFence(sp.x,sp.y);
+        if(snap){drawSP(snap.x,snap.y,'#10b981');ctx.beginPath();ctx.setLineDash([4,3]);ctx.moveTo(sp.x,sp.y);ctx.lineTo(snap.x,snap.y);ctx.strokeStyle='#10b981';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([]);ctx.font='bold 9px sans-serif';ctx.fillStyle='#10b981';ctx.fillText('⚡ snap',snap.x+8,snap.y-8);}
+        else drawSP(sp.x,sp.y,'rgba(16,185,129,0.5)');
+    }
     if(tool==='tree'){ctx.beginPath();ctx.arc(sp.x,sp.y,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();}
     if(tool==='erase')canvas.style.cursor=findAt(mx,my)?'pointer':'crosshair';
 }
 function onDbl(e){
     const p=gcp(e);const o=findAt(p.x,p.y);
-    if(o&&(o.type==='gate-walk'||o.type==='gate-drive')){o.dir=o.dir==='left'?'right':'left';redraw();asd();e.stopPropagation();return;}
+    if(o&&(o.type==='gate-walk'||o.type==='gate-drive')){const dirs=['right','down','left','up'];const ci=dirs.indexOf(o.dir||'right');o.dir=dirs[(ci+1)%4];redraw();asd();e.stopPropagation();return;}
     if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>=2)finLine();
 }
 
@@ -484,31 +600,38 @@ function drawFL(o){if(o.points.length<2)return;ctx.beginPath();ctx.moveTo(o.poin
     for(let i=0;i<o.points.length-1;i++){const a=o.points[i],b=o.points[i+1];ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);}
     const m={x:(o.points[0].x+o.points[1].x)/2,y:(o.points[0].y+o.points[1].y)/2};ctx.font='9px sans-serif';ctx.fillStyle='rgba(30,58,95,0.7)';ctx.fillText(o.fenceType.name,m.x+4,m.y+14);}
 
-/* ======== ARCHITECTURAL GATES ======== */
-function drawGate(o,label,color,radius){
-    const dir=o.dir||'right';const gw=radius*2;
+/* ======== ARCHITECTURAL GATES (4-direction + custom width) ======== */
+function drawGate(o,label,color,defaultRadius){
+    const dir=o.dir||'right';
+    /* Use stored width if available, otherwise default */
+    const widthFt=o.width||(o.type==='gate-drive'?12:4);
+    const radius=Math.max(defaultRadius,(widthFt/GS)*GCS*0.5);
+    const gw=radius*2;
+    const vert=(dir==='up'||dir==='down');
+    ctx.save();ctx.translate(o.x,o.y);
     ctx.strokeStyle=color;ctx.lineWidth=2;
-    /* Gate posts */
-    ctx.beginPath();ctx.moveTo(o.x-radius,o.y-6);ctx.lineTo(o.x-radius,o.y+6);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(o.x+radius,o.y-6);ctx.lineTo(o.x+radius,o.y+6);ctx.stroke();
-    /* Gate panel */
-    ctx.fillStyle=color+'22';ctx.strokeStyle=color;ctx.lineWidth=1.5;
-    ctx.fillRect(o.x-radius,o.y-2,gw,4);ctx.strokeRect(o.x-radius,o.y-2,gw,4);
-    /* Swing arc */
-    ctx.setLineDash([4,4]);ctx.strokeStyle=color+'66';ctx.lineWidth=1;
-    if(dir==='right'){
-        ctx.beginPath();ctx.arc(o.x-radius,o.y,gw,0,-Math.PI/2,true);ctx.stroke();
-        ctx.beginPath();ctx.arc(o.x-radius,o.y,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+    if(vert){
+        ctx.beginPath();ctx.moveTo(-6,-radius);ctx.lineTo(6,-radius);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(-6,radius);ctx.lineTo(6,radius);ctx.stroke();
+        ctx.fillStyle=color+'22';ctx.strokeStyle=color;ctx.lineWidth=1.5;
+        ctx.fillRect(-2,-radius,4,gw);ctx.strokeRect(-2,-radius,4,gw);
+        ctx.setLineDash([4,4]);ctx.strokeStyle=color+'66';ctx.lineWidth=1;
+        if(dir==='down'){ctx.beginPath();ctx.arc(0,-radius,gw,Math.PI/2,0,true);ctx.stroke();ctx.beginPath();ctx.arc(0,-radius,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+        else{ctx.beginPath();ctx.arc(0,radius,gw,-Math.PI/2,0,false);ctx.stroke();ctx.beginPath();ctx.arc(0,radius,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
     }else{
-        ctx.beginPath();ctx.arc(o.x+radius,o.y,gw,-Math.PI,-Math.PI/2,false);ctx.stroke();
-        ctx.beginPath();ctx.arc(o.x+radius,o.y,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();
+        ctx.beginPath();ctx.moveTo(-radius,-6);ctx.lineTo(-radius,6);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(radius,-6);ctx.lineTo(radius,6);ctx.stroke();
+        ctx.fillStyle=color+'22';ctx.strokeStyle=color;ctx.lineWidth=1.5;
+        ctx.fillRect(-radius,-2,gw,4);ctx.strokeRect(-radius,-2,gw,4);
+        ctx.setLineDash([4,4]);ctx.strokeStyle=color+'66';ctx.lineWidth=1;
+        if(dir==='right'){ctx.beginPath();ctx.arc(-radius,0,gw,0,-Math.PI/2,true);ctx.stroke();ctx.beginPath();ctx.arc(-radius,0,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
+        else{ctx.beginPath();ctx.arc(radius,0,gw,-Math.PI,-Math.PI/2,false);ctx.stroke();ctx.beginPath();ctx.arc(radius,0,3,0,Math.PI*2);ctx.fillStyle=color;ctx.fill();}
     }
     ctx.setLineDash([]);
-    /* Labels */
     ctx.font='bold 9px sans-serif';ctx.fillStyle=color;ctx.textAlign='center';
-    ctx.fillText(label,o.x,o.y+radius+14);
-    ctx.font='7px sans-serif';ctx.fillStyle=color+'88';ctx.fillText('dbl-click to flip',o.x,o.y+radius+23);
-    ctx.textAlign='left';
+    ctx.fillText(label+' ('+widthFt+'ft)',0,radius+14);
+    ctx.font='7px sans-serif';ctx.fillStyle=color+'88';ctx.fillText('dbl-click to rotate',0,radius+23);
+    ctx.textAlign='left';ctx.restore();
 }
 
 function drawTr(o){ctx.beginPath();ctx.arc(o.x,o.y,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.35)';ctx.fill();ctx.strokeStyle='#228B22';ctx.lineWidth=1.5;ctx.stroke();ctx.beginPath();ctx.arc(o.x,o.y,3,0,Math.PI*2);ctx.fillStyle='#5C4033';ctx.fill();}
@@ -551,6 +674,7 @@ $('text-modal-input').addEventListener('keypress',e=>{if(e.key==='Enter')$('text
 
 /* ======== UNDO ======== */
 function su(){undo.push(JSON.stringify(objs));}
+$('grid-finish')?.addEventListener('click',()=>{finLine();});
 $('grid-undo').addEventListener('click',()=>{if(cfp.length>0){cfp.pop();redraw();return;}if(undo.length){objs=JSON.parse(undo.pop());redraw();updateQ();asd();}});
 $('grid-clear').addEventListener('click',()=>{if(!confirm('Clear entire drawing?'))return;su();objs=[];cfp=[];redraw();updateQ();asd();});
 
@@ -576,13 +700,14 @@ function updateQ(){
     objs.forEach(o=>{
         if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
         if(o.type==='gate-walk')gates.walk++;if(o.type==='gate-drive')gates.drive++;
+        if(o.type==='gate-walk'||o.type==='gate-drive'){if(!gates.details)gates.details=[];gates.details.push({type:o.type,width:o.width||(o.type==='gate-drive'?12:4)});}
         if(o.type==='existing')existingFt+=o.segments.reduce((s,g)=>s+g.dist,0);
         if(o.type==='propline')propFt+=o.segments.reduce((s,g)=>s+g.dist,0);
         if(o.type==='pool')hasPool=true;
     });
     const mf=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;if(mf>0&&!totalFt)totalFt=mf;
     if(totalFt<10&&!Object.keys(fences).length){$('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';$('drawing-legend').style.display='none';$('compare-btn').style.display='none';$('compare-section').style.display='none';return;}
-    $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';$('compare-btn').style.display='block';
+    $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';$('compare-btn').style.display='block';$('export-pdf-btn').style.display='block';
     const hm=HM[$('fence-height').value];
     /* Removal: combine drawn existing fence + manual input */
     const manualRemoval=parseInt($('removal-feet')?.value)||0;
@@ -593,8 +718,11 @@ function updateQ(){
     else if(mf>0&&selFence){gt=mf*selFence.ppf*hm;bh=`<div class="summary-line"><span><span class="swatch" style="background:${selFence.color}"></span>${selFence.name}</span><span>${mf} ft</span></div>`;}
     $('fence-breakdown').innerHTML=bh;
     let gh='';
-    if(gates.walk>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.walk*(ff.sg||350);gt+=c;gh+=`<div class="summary-line"><span>🚪 Walk Gates ×${gates.walk}</span><span>$${c.toLocaleString()}</span></div>`;}
-    if(gates.drive>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.drive*(ff.dg||650);gt+=c;gh+=`<div class="summary-line"><span>🚗 Drive Gates ×${gates.drive}</span><span>$${c.toLocaleString()}</span></div>`;}
+    /* Gate pricing with width details */
+    const walkGates=objs.filter(o=>o.type==='gate-walk');
+    const driveGates=objs.filter(o=>o.type==='gate-drive');
+    if(walkGates.length>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const baseC=ff.sg||350;walkGates.forEach(g=>{const w=g.width||4;const wm=w<=3?0.85:w===4?1:w===5?1.15:1.3;const c=Math.round(baseC*wm);gt+=c;gh+=`<div class="summary-line"><span>🚪 Walk Gate (${w}ft)</span><span>$${c.toLocaleString()}</span></div>`;});}
+    if(driveGates.length>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const baseC=ff.dg||650;driveGates.forEach(g=>{const w=g.width||12;const wm=w<=10?0.85:w===12?1:w===14?1.15:1.3;const c=Math.round(baseC*wm);gt+=c;gh+=`<div class="summary-line"><span>🚗 Dbl Gate (${w}ft)</span><span>$${c.toLocaleString()}</span></div>`;});}
     $('gate-breakdown').innerHTML=gh;
     /* Existing fence line */
     const efl=$('existing-fence-line');if(efl){if(existingFt>0){efl.style.display='flex';$('existing-fence-ft').textContent=existingFt+' ft';}else efl.style.display='none';}
@@ -652,9 +780,69 @@ async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>{
 /* ======== LEAD SUBMIT — jobs + websiteLeads + Netlify Forms + API ======== */
 async function submitLead(d,notes){
     try{const f=new FormData();f.append('form-name','ballpark-leads');f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');f.append('address',d.address||'');if(d.estimate)f.append('estimatedRange','$'+d.estimate.low+'-$'+d.estimate.high);f.append('notes',notes||'');await fetch('/__forms.html',{method:'POST',body:f});}catch(e){}
-    if(db&&!leadDocId){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'website-ballpark',priority:'normal',style:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),height:(d.estimate?.height||'6')+' ft',footage:String(d.estimate?.totalFt||0),singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:(notes||'')+'\n[Website Ballpark — '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),cDate:new Date().toISOString().split('T')[0],websiteLead:true,isWebsiteLead:true});leadDocId=ref.id;}catch(e){}}
+    if(db&&!leadDocId){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'website-ballpark',priority:'normal',style:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),height:(d.estimate?.height||'6')+' ft',footage:String(d.estimate?.totalFt||0),singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,gateDetails:JSON.stringify(d.estimate?.gates?.details||[]),removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:(notes||'')+'\n[Website Ballpark — '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),cDate:new Date().toISOString().split('T')[0],websiteLead:true,isWebsiteLead:true});leadDocId=ref.id;}catch(e){}}
     if(db){try{const np=(d.name||'').split(' ');await db.collection('websiteLeads').add({firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',name:d.name,phone:d.phone,email:d.email||'',address:d.address,source:'ballpark-calculator',fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),totalFeet:d.estimate?.totalFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),status:'new',jobId:leadDocId||''});}catch(e){}}
     try{await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'ballpark',name:d.name,phone:d.phone,email:d.email,address:d.address,fenceType:selFence?.name||'',fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',website:$('hp-website')?.value||''})});}catch(e){}
+}
+
+/* ======== PDF EXPORT ======== */
+$('export-pdf-btn')?.addEventListener('click',generatePDF);
+function generatePDF(){
+    const est=leadData.estimate;if(!est)return;
+    /* Capture canvas drawing */
+    let drawingImg='';
+    if(canvas){
+        const tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=canvas.height;
+        const tc=tmp.getContext('2d');tc.fillStyle='#fff';tc.fillRect(0,0,tmp.width,tmp.height);tc.drawImage(canvas,0,0);
+        drawingImg=tmp.toDataURL('image/png',0.9);
+    }
+    /* Build quote rows */
+    let rows='';
+    const fences={};let totalFt=0;
+    objs.forEach(o=>{
+        if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
+    });
+    const hm=HM[$('fence-height').value];
+    for(const[n,f]of Object.entries(fences)){
+        const cost=Math.round(f.ft*f.ppf*hm);
+        rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${f.color};margin-right:8px;vertical-align:middle;"></span>${n}</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${f.ft} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;
+    }
+    if(!totalFt&&est.totalFt){
+        const cost=Math.round(est.totalFt*(selFence?.ppf||28)*hm);
+        rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${selFence?.name||'Fence'}</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.totalFt} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;
+    }
+    const walkGates=objs.filter(o=>o.type==='gate-walk');
+    const driveGates=objs.filter(o=>o.type==='gate-drive');
+    walkGates.forEach(g=>{const w=g.width||4;rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🚪 Walk Gate (${w}ft)</td><td style="padding:8px 12px;"></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
+    driveGates.forEach(g=>{const w=g.width||12;rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🚗 Dbl Gate (${w}ft)</td><td style="padding:8px 12px;"></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
+    if(est.removalFt>0)rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🗑 Removal</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.removalFt} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">+$${(est.removalFt*4).toLocaleString()}</td></tr>`;
+    if(est.pool)rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🏊 Pool Compliance</td><td></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">Included</td></tr>`;
+    const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    const html=`<!DOCTYPE html><html><head><title>Fence Quote - Ghareeb Fencing Solutions</title>
+<style>@media print{body{margin:0}@page{margin:0.5in}}body{font-family:-apple-system,system-ui,sans-serif;color:#1e293b;max-width:800px;margin:0 auto;padding:20px}
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:3px solid #1e3a5f;margin-bottom:24px}
+.hdr h1{margin:0;font-size:1.5rem;color:#1e3a5f}.hdr .co{text-align:right;font-size:0.85rem;color:#475569}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;padding:16px;background:#f8fafc;border-radius:8px}
+.info div{font-size:0.9rem}.info strong{color:#1e3a5f}
+.drawing{text-align:center;margin:20px 0;page-break-inside:avoid}
+.drawing img{max-width:100%;border:2px solid #e2e8f0;border-radius:8px}
+table{width:100%;border-collapse:collapse;margin:16px 0}
+th{background:#1e3a5f;color:white;padding:10px 12px;text-align:left;font-size:0.85rem}
+th:nth-child(2),th:nth-child(3){text-align:right}
+.total{background:#1e3a5f;color:white;padding:16px;border-radius:8px;text-align:center;margin:20px 0;page-break-inside:avoid}
+.total .range{font-size:1.8rem;font-weight:700}.total .note{font-size:0.8rem;opacity:0.8;margin-top:4px}
+.footer{margin-top:32px;padding-top:16px;border-top:2px solid #e2e8f0;font-size:0.8rem;color:#64748b;text-align:center}
+.cta{background:#d4af37;color:#1e3a5f;padding:14px;border-radius:8px;text-align:center;font-weight:600;font-size:1.1rem;margin:20px 0}
+</style></head><body>
+<div class="hdr"><div><h1>Fence Quote Estimate</h1><p style="margin:4px 0 0;color:#64748b;font-size:0.9rem;">Ballpark estimate — ${today}</p></div><div class="co"><strong>Ghareeb Fencing Solutions</strong><br>(419) 902-8257<br>Toledo, OH area</div></div>
+<div class="info"><div><strong>Customer:</strong><br>${leadData.name||''}</div><div><strong>Phone:</strong><br>${leadData.phone||''}</div><div><strong>Address:</strong><br>${leadData.address||''}</div><div><strong>Height:</strong><br>${$('fence-height').value} ft</div></div>
+${drawingImg?'<div class="drawing"><img src="'+drawingImg+'" alt="Fence layout drawing" /></div>':''}
+<table><thead><tr><th>Item</th><th>Footage</th><th>Est. Cost</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="total"><div class="range">$${est.low?.toLocaleString()||0} — $${est.high?.toLocaleString()||0}</div><div class="note">*Ballpark estimate only. Final price determined after free on-site measurement.</div></div>
+<div class="cta">📞 Call (419) 902-8257 or visit ghareebfencing.com to schedule your free consultation</div>
+<div class="footer"><p><strong>Ghareeb Fencing Solutions</strong> · Serving Toledo & NW Ohio · Licensed & Insured · 3-Year Warranty</p><p>This estimate is for planning purposes only. Actual costs may vary based on site conditions, material availability, and property specifics.</p></div>
+</body></html>`;
+    const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);}
 }
 
 /* ======== STEP 1 UNLOCK ======== */
@@ -703,21 +891,154 @@ window.searchMapAddress=function(addr){
     }
 
     function showMap(lat,lng){
-        mapEl.innerHTML='';gmap=null;
+        mapEl.innerHTML='';gmap=null;window._mapLines=[];window._mapLabels=[];window._mapTotalFt=0;window._mapMarkers=[];
         $('map-instructions').style.display='none';
         gmap=new google.maps.Map(mapEl,{center:{lat,lng},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT}});
         new google.maps.Marker({position:{lat,lng},map:gmap,title:'Your Property',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
+        /* Map click handler — place gates, trees, text based on active tool */
+        google.maps.event.addListener(gmap,'click',function(e){
+            const lat2=e.latLng.lat(),lng2=e.latLng.lng();
+            if(tool==='gate-walk'||tool==='gate-drive'){
+                const gType=tool;/* capture */
+                const gLatLng=e.latLng;
+                /* Open gate modal to pick width+direction, THEN place marker */
+                pendingGate={x:0,y:0,type:gType,fromMap:true,mapLatLng:gLatLng};
+                $('gate-modal-title').textContent=gType==='gate-walk'?'Place Walk Gate (3-6 ft)':'Place Double Gate (10-16 ft)';
+                const wo=$('gate-width-options');
+                if(gType==='gate-drive'){wo.innerHTML='<button type="button" class="gate-width-btn" data-width="10">10 ft</button><button type="button" class="gate-width-btn active" data-width="12">12 ft</button><button type="button" class="gate-width-btn" data-width="14">14 ft</button><button type="button" class="gate-width-btn" data-width="16">16 ft</button>';selGateWidth=12;}
+                else{wo.innerHTML='<button type="button" class="gate-width-btn" data-width="3">3 ft</button><button type="button" class="gate-width-btn active" data-width="4">4 ft</button><button type="button" class="gate-width-btn" data-width="5">5 ft</button><button type="button" class="gate-width-btn" data-width="6">6 ft</button>';selGateWidth=4;}
+                wo.querySelectorAll('.gate-width-btn').forEach(b=>{b.addEventListener('click',()=>{wo.querySelectorAll('.gate-width-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selGateWidth=parseInt(b.dataset.width);});});
+                document.querySelectorAll('.gate-dir-btn').forEach(b=>b.classList.remove('suggested'));
+                $('gate-modal').style.display='flex';
+                return;
+            }
+            if(tool==='tree'){
+                const mk=new google.maps.Marker({position:e.latLng,map:gmap,title:'Tree',icon:{url:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%2322c55e" stroke="%23fff" stroke-width="2"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="12">🌳</text></svg>'),scaledSize:new google.maps.Size(28,28)},draggable:true});
+                window._mapMarkers.push({marker:mk,type:'tree'});
+                su();objs.push({type:'tree',x:0,y:0,fromMap:true});asd();
+                return;
+            }
+        });
         if(google.maps.drawing){
-            const dm=new google.maps.drawing.DrawingManager({drawingControl:true,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline','polygon','marker']},polylineOptions:{strokeColor:'#d4af37',strokeWeight:3},polygonOptions:{strokeColor:'#d4af37',fillColor:'#d4af37',fillOpacity:0.15}});
-            dm.setMap(gmap);
+            const dm=new google.maps.drawing.DrawingManager({drawingControl:false,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline']},polylineOptions:{strokeColor:'#FFD700',strokeWeight:4,strokeOpacity:1,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,strokeWeight:2,strokeColor:'#fff'},offset:'0',repeat:'20px'}]}});
+            dm.setMap(gmap);window._mapDM=dm;
+            /* Sync toolbar tool with DrawingManager */
+            function syncMapTool(){
+                if(!window._mapDM)return;
+                const toolNames={fence:'Fence ✏',propline:'Prop Line 📏',existing:'Old Fence 🔴','gate-walk':'Walk Gate 🚪','gate-drive':'Dbl Gate 🚗',tree:'Tree 🌳',house:'House 🏠',pool:'Pool 🏊',text:'Text 💬',erase:'Erase 🗑'};
+                const badge=$('map-active-tool');
+                if(badge){badge.textContent=toolNames[tool]||tool;
+                    const badgeColors={fence:'#d4af37',propline:'#94a3b8',existing:'#ef4444','gate-walk':'#10b981','gate-drive':'#3b82f6',tree:'#22c55e',erase:'#ef4444'};
+                    badge.style.background=badgeColors[tool]||'#1e3a5f';
+                }
+                if(tool==='fence'||tool==='propline'||tool==='existing'){
+                    const colors={fence:'#FFD700',propline:'#94a3b8',existing:'#ef4444'};
+                    window._mapDM.setOptions({drawingMode:'polyline',polylineOptions:{strokeColor:colors[tool]||'#FFD700',strokeWeight:tool==='fence'?4:3,strokeOpacity:1,icons:tool==='fence'?[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,strokeWeight:2,strokeColor:'#fff'},offset:'0',repeat:'20px'}]:[]}});
+                }else{
+                    window._mapDM.setDrawingMode(null);
+                }
+            }
+            window._syncMapTool=syncMapTool;
+            syncMapTool();
             google.maps.event.addListener(dm,'polylinecomplete',function(pl){
-                const len=google.maps.geometry.sphericalLength(pl.getPath());
-                const ft=Math.round(len*3.28084);
-                if($('manual-feet')&&ft>5){$('manual-feet').value=ft;updateQ();}
-                const info=new google.maps.InfoWindow({content:'<strong>'+ft+' ft</strong>'});
-                info.open(gmap);info.setPosition(pl.getPath().getAt(Math.floor(pl.getPath().getLength()/2)));
+                const path=pl.getPath();
+                const totalLen=google.maps.geometry.spherical.computeLength(path);
+                const totalFt=Math.round(totalLen*3.28084);
+                const curTool=tool;/* capture current tool */
+                window._mapLines.push({line:pl,tool:curTool});
+                /* Build segment data with real feet */
+                const segs=[];const pts=[];
+                for(let i=0;i<path.getLength();i++){
+                    pts.push({x:0,y:0,lat:path.getAt(i).lat(),lng:path.getAt(i).lng()});
+                    if(i>0){
+                        const segLen=google.maps.geometry.spherical.computeDistanceBetween(path.getAt(i-1),path.getAt(i));
+                        segs.push({dist:Math.round(segLen*3.28084)});
+                    }
+                }
+                /* Create a REAL obj so it shows in the quote */
+                su();
+                if(curTool==='fence'){
+                    objs.push({type:'fence',points:pts,segments:segs,fenceType:{name:selFence?.name||'Wood Privacy',ppf:selFence?.ppf||28,sg:selFence?.sg||350,dg:selFence?.dg||650,color:selFence?.color||'#d4af37'},fromMap:true});
+                }else if(curTool==='existing'){
+                    objs.push({type:'existing',points:pts,segments:segs,fromMap:true});
+                }else if(curTool==='propline'){
+                    objs.push({type:'propline',points:pts,segments:segs,fromMap:true});
+                }
+                updateQ();asd();
+                /* Color + label */
+                const lColor=curTool==='existing'?'#ef4444':curTool==='propline'?'#94a3b8':'#FFD700';
+                const lBg=curTool==='existing'?'#991b1b':curTool==='propline'?'#475569':'#1e3a5f';
+                /* Per-segment labels */
+                for(let i=0;i<path.getLength()-1;i++){
+                    const a=path.getAt(i),b=path.getAt(i+1);
+                    const mid=new google.maps.LatLng((a.lat()+b.lat())/2,(a.lng()+b.lng())/2);
+                    const segFt=segs[i].dist;
+                    const lbl=new google.maps.InfoWindow({content:'<div style="background:'+lBg+';color:'+lColor+';padding:4px 10px;border-radius:4px;font-size:14px;font-weight:bold;white-space:nowrap;border:2px solid '+lColor+';box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+segFt+' ft</div>',disableAutoPan:true,maxWidth:200});
+                    lbl.setPosition(mid);lbl.open(gmap);window._mapLabels.push(lbl);
+                }
+                /* Total label at end */
+                if(path.getLength()>2){
+                    const endPt=path.getAt(path.getLength()-1);
+                    const totLbl=new google.maps.InfoWindow({content:'<div style="background:#fff;color:#1e3a5f;padding:6px 12px;border-radius:6px;font-size:16px;font-weight:bold;white-space:nowrap;border:2px solid #1e3a5f;box-shadow:0 2px 8px rgba(0,0,0,0.3);">Total: '+totalFt+' ft</div>',disableAutoPan:true});
+                    totLbl.setPosition(endPt);totLbl.open(gmap);window._mapLabels.push(totLbl);
+                }
+                /* Update measurement bar */
+                const mb=$('map-measurement-bar');if(mb)mb.style.display='flex';
+                updateMapBar();
             });
+            window.updateMapBar=function updateMapBar(){
+                let fFt=0,eFt=0,pFt=0;
+                objs.forEach(o=>{
+                    if(!o.fromMap)return;
+                    const ft=o.segments?o.segments.reduce((s,g)=>s+g.dist,0):0;
+                    if(o.type==='fence')fFt+=ft;
+                    if(o.type==='existing')eFt+=ft;
+                    if(o.type==='propline')pFt+=ft;
+                });
+                let txt='';
+                if(fFt>0)txt+='Fence: '+fFt+'ft';
+                if(eFt>0)txt+=(txt?' · ':'')+' Removal: '+eFt+'ft';
+                if(pFt>0)txt+=(txt?' · ':'')+'Prop: '+pFt+'ft';
+                const gateCount=(window._mapMarkers||[]).filter(m=>m.type.includes('gate')).length;
+                if(gateCount>0)txt+=(txt?' · ':'')+'Gates: '+gateCount;
+                if(!txt)txt='Draw on the map — footage feeds into your quote';
+                const mtf=$('map-total-ft');if(mtf)mtf.textContent=txt;
+            }
         }
+        /* Clear lines button */
+        /* Undo last map action */
+        const undoBtn=$('map-undo-line');
+        if(undoBtn){undoBtn.onclick=function(){
+            /* Remove last polyline */
+            if(window._mapLines&&window._mapLines.length>0){
+                const last=window._mapLines.pop();
+                try{last.line.setMap(null);}catch(e){}
+                /* Remove corresponding obj */
+                for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&(objs[i].type==='fence'||objs[i].type==='propline'||objs[i].type==='existing')){objs.splice(i,1);break;}}
+                /* Remove last N labels (segment count + maybe total label) */
+                /* Each polyline adds N-1 segment labels + possibly 1 total label */
+                /* Just remove last 2 labels as approximation */
+                for(let r=0;r<3&&window._mapLabels.length>0;r++){const lb=window._mapLabels.pop();try{lb.close();}catch(e){}}
+                updateQ();asd();updateMapBar();
+                if(window._syncMapTool)window._syncMapTool();
+            }else if(window._mapMarkers&&window._mapMarkers.length>0){
+                const last=window._mapMarkers.pop();
+                try{last.marker.setMap(null);}catch(e){}
+                for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&(objs[i].type==='gate-walk'||objs[i].type==='gate-drive'||objs[i].type==='tree')){objs.splice(i,1);break;}}
+                updateQ();asd();updateMapBar();
+            }
+        };}
+        const clBtn=$('map-clear-lines');
+        if(clBtn){clBtn.onclick=function(){
+            (window._mapLines||[]).forEach(l=>{try{l.line.setMap(null)}catch(e){}});(window._mapLabels||[]).forEach(l=>l.close());
+            (window._mapMarkers||[]).forEach(m=>{try{m.marker.setMap(null)}catch(e){}});
+            /* Remove fromMap objects from grid objs */
+            objs=objs.filter(o=>!o.fromMap);
+            window._mapLines=[];window._mapLabels=[];window._mapTotalFt=0;window._mapMarkers=[];
+            const mb=$('map-measurement-bar');if(mb)mb.style.display='none';
+            if($('manual-feet')){$('manual-feet').value='';updateQ();}
+            if(window.updateMapBar)window.updateMapBar();
+        };}
         $('map-status-text').textContent='';
     }
 
@@ -816,7 +1137,7 @@ loadPricing();
     .view-tab:hover{background:rgba(255,255,255,0.5)}.view-tab.active{background:white;color:var(--primary);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
     .view-panel{display:none}.view-panel.active{display:block}
     .panel-hint{color:#64748b;font-size:0.9rem;margin:0 0 12px}
-    .draw-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:12px;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none}
+    .draw-toolbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:12px;background:#f1f5f9;border:2px solid #e2e8f0;border-radius:0}
     .tool-group{display:flex;gap:4px}.tool-divider{width:1px;height:28px;background:#cbd5e1;margin:0 4px}
     .draw-tool{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 10px;border:2px solid transparent;border-radius:8px;background:white;cursor:pointer;transition:all 0.15s;min-width:56px}
     .draw-tool:hover{border-color:var(--primary);background:#f0f4ff}
@@ -852,6 +1173,7 @@ loadPricing();
     .checkbox-group{display:flex;align-items:center}.checkbox-label{display:flex;align-items:center;gap:10px;cursor:pointer}
     .checkbox-label input{width:18px;height:18px;cursor:pointer}
     .calculator-sidebar{position:sticky;top:100px}
+    @media(max-width:1024px){.calculator-sidebar{position:static}}
     .quote-summary{background:white;border-radius:12px;padding:24px;box-shadow:0 4px 12px rgba(0,0,0,0.1)}
     .quote-summary h3{margin:0 0 16px;font-size:1.2rem}
     .summary-placeholder{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;color:#64748b}
@@ -884,16 +1206,82 @@ loadPricing();
     .compare-select-btn{padding:5px 12px;border:1.5px solid var(--primary);background:white;color:var(--primary);border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.15s}
     .compare-select-btn:hover{background:var(--primary);color:white}
     .compare-current{font-size:0.8rem;color:#10b981;font-weight:600}
-    .gate-direction-btns{display:flex;gap:10px;margin-bottom:16px}
-    .gate-dir-btn{flex:1;padding:14px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.15s;text-align:center}
+    .gate-direction-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+    .gate-dir-btn{padding:14px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.15s;text-align:center}
     .gate-dir-btn:hover{border-color:var(--primary);background:#f0f4ff}
+    .gate-dir-btn:active{background:var(--primary);color:white}
     .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000}
     .modal-box{background:white;border-radius:12px;padding:24px;width:90%;max-width:360px;box-shadow:0 20px 40px rgba(0,0,0,0.2)}
     .modal-box h3{margin:0 0 16px}.modal-box input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
     .modal-box input:focus{border-color:var(--primary);outline:none}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
     @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.tool-divider{height:24px}.grid-legend{display:none}.view-tab{font-size:0.8rem;padding:8px 4px}.compare-grid{grid-template-columns:1fr 1fr}}
-    .map-hint-bar{background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:12px}
-    .map-hint-bar .map-hint{margin:0}
+
+    /* Map tips + measurements */
+    .map-tip-bar{padding:10px 14px;background:#fffbeb;border:2px solid #e2e8f0;border-bottom:none;border-radius:10px 10px 0 0;font-size:0.85rem;color:#92400e}
+    .map-tip-bar .map-tip{margin:0}
+    .map-measurement-bar{display:flex;align-items:center;gap:8px;padding:8px 14px;background:#1e3a5f;color:#FFD700;font-weight:600;font-size:0.9rem;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;flex-wrap:wrap}
+    .map-tool-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.8rem;color:white;background:#d4af37;font-weight:700;white-space:nowrap}
+    .map-measurement-bar .toolbar-btn{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3);color:white;font-size:0.8rem}
+    .map-measurement-bar .toolbar-btn:hover{background:rgba(255,255,255,0.3)}
+    .grid-tip-bar{padding:8px 14px;background:#f0f4ff;border:2px solid #e2e8f0;border-bottom:none;border-radius:10px 10px 0 0;font-size:0.8rem;color:#475569}
+    .grid-tip-bar .grid-tip{margin:0}
+    .finish-line-btn{background:#10b981;color:white;border-color:#10b981;font-weight:600}
+    .finish-line-btn:hover{background:#059669;border-color:#059669}
+    /* Mobile deep optimization */
+    @media(max-width:600px){
+        .calculator-section{padding:20px 0}
+        .calc-step{padding:16px;margin-bottom:16px;border-radius:8px}
+        .step-header{gap:10px;margin-bottom:16px}
+        .step-header h3{font-size:1.05rem}
+        .step-header p{font-size:0.85rem}
+        .hero-mini{padding:90px 0 30px}
+        .hero-mini h1{font-size:1.6rem}
+        .hero-mini .subtitle{font-size:0.95rem}
+        .view-tabs{gap:2px;padding:4px}
+        .view-tab{padding:8px 4px;font-size:0.75rem}
+        .draw-toolbar{gap:3px;padding:6px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+        .draw-tool{padding:6px 8px;min-width:42px;flex-shrink:0}
+        .tool-icon{font-size:1rem}
+        .tool-label{font-size:0.5rem}
+        .tool-divider{height:24px;margin:0 2px}
+        .grid-wrapper{min-height:250px}
+        .grid-controls{gap:6px;padding:6px 8px}
+        .grid-controls .toolbar-btn{padding:6px 8px;font-size:0.8rem}
+        .grid-info{font-size:0.85rem}
+        .grid-legend{display:none}
+        #map-container{height:350px}
+        .map-search-bar{padding:8px;gap:6px}
+        .map-search-bar input{padding:10px;font-size:0.9rem}
+        .quote-summary{padding:16px}
+        .estimate-range{padding:12px}
+        .range-values{font-size:1.3rem}
+        .summary-actions .btn{padding:12px 16px;font-size:0.9rem}
+        .fence-selector{padding:10px}
+        .fence-dropdown{font-size:0.9rem;padding:8px 10px}
+        .options-grid{gap:12px;flex-direction:column;align-items:stretch}
+        .compare-grid{grid-template-columns:1fr 1fr}
+        .modal-box{padding:20px;max-width:90%}
+        .gate-direction-grid{gap:6px}
+        .gate-dir-btn{padding:12px;font-size:0.9rem}
+    }
+    @media(max-width:400px){
+        .draw-tool{min-width:38px;padding:5px 6px}
+        .tool-label{display:none}
+        .form-row{gap:10px}
+    }
+
+    /* Gate width selector */
+    .gate-config-section{margin-bottom:14px}
+    .gate-config-label{display:block;font-weight:600;font-size:0.85rem;color:#475569;margin-bottom:6px}
+    .gate-width-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+    .gate-width-btn{padding:10px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.9rem;font-weight:600;transition:all 0.15s;text-align:center}
+    .gate-width-btn:hover{border-color:var(--primary);background:#f0f4ff}
+    .gate-width-btn.active{border-color:var(--primary);background:var(--primary);color:white}
+    /* Map cursor changes based on tool */
+    #map-container.tool-gate{cursor:crosshair}
+    #map-container.tool-tree{cursor:crosshair}
+    .gate-dir-btn.suggested{border-color:#10b981;background:#ecfdf5;position:relative}
+    .gate-dir-btn.suggested::after{content:'recommended';position:absolute;top:-8px;right:6px;font-size:0.6rem;background:#10b981;color:white;padding:1px 6px;border-radius:10px;font-weight:600}
     .pac-container{z-index:99999!important}
 </style>
