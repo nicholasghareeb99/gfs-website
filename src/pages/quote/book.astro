@@ -1,4 +1,13 @@
 ---
+const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
+const fbConfig = JSON.stringify({
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY || '',
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN || '',
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || '',
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET || '',
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || '',
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || ''
+});
 import BaseLayout from '../../layouts/BaseLayout.astro';
 ---
 <BaseLayout title="Book Free Consultation | Ghareeb Fencing Solutions Toledo OH" description="Schedule a free on-site fence consultation." pageId="quote-book" activeNav="quote">
@@ -12,6 +21,34 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   <input name="date" type="text" />
   <input name="time" type="text" />
 </form>
+
+
+<script is:inline define:vars={{ mapsKey }}>
+window._gfsMapsKey=mapsKey;
+</script>
+<script is:inline>
+(function(){
+    const key=window._gfsMapsKey||'';if(!key)return;
+    window._initBookAutocomplete=function(){
+        try{
+            const addrField=document.getElementById('bAddr');
+            if(!addrField||!window.google)return;
+            const ac=new google.maps.places.Autocomplete(addrField,{
+                componentRestrictions:{country:'us'},
+                fields:['formatted_address'],
+                types:['address']
+            });
+            ac.addListener('place_changed',function(){
+                const place=ac.getPlace();
+                if(place.formatted_address)addrField.value=place.formatted_address;
+            });
+        }catch(e){}
+    };
+    const s=document.createElement('script');
+    s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&libraries=places&callback=_initBookAutocomplete';
+    s.async=true;s.defer=true;document.head.appendChild(s);
+})();
+</script>
 
 <style>
   .calendar{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:25px;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
@@ -39,6 +76,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
   .book-form-group input:focus{outline:none;border-color:var(--primary,#1e3a5f)}
   @media(max-width:900px){.booking-grid{grid-template-columns:1fr!important}}
   @media(max-width:600px){.time-slots{grid-template-columns:repeat(2,1fr)}}
+    .pac-container{z-index:99999!important}
 </style>
 
 <section class="section" style="padding-top:140px;">
@@ -77,7 +115,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           <div class="book-form-group"><label>Name *</label><input type="text" id="bName" required placeholder="John Smith"></div>
           <div class="book-form-group"><label>Phone *</label><input type="tel" id="bPhone" required placeholder="(419) 555-1234"></div>
           <div class="book-form-group"><label>Email *</label><input type="email" id="bEmail" required placeholder="john@example.com"></div>
-          <div class="book-form-group"><label>Property Address *</label><input type="text" id="bAddr" required placeholder="123 Main St, Toledo, OH"></div>
+          <div class="book-form-group"><label>Property Address *</label><input type="text" id="bAddr" required autocomplete="off" placeholder="123 Main St, Toledo, OH"></div>
           <div class="selected-datetime" id="selDisplay" style="display:none;">
             <p style="font-size:0.9rem;color:#065f46;margin-bottom:5px;">Selected Appointment:</p>
             <p style="font-size:1.2rem;font-weight:700;color:#1e3a5f;" id="selText"></p>
@@ -91,8 +129,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-<script is:inline>
-const fbCfg={apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+<script is:inline define:vars={{ fbConfig }}>
+const fbCfg=JSON.parse(fbConfig);
 let db;try{if(!firebase.apps.length)firebase.initializeApp(fbCfg);db=firebase.firestore();}catch(e){}
 let curDate=new Date(),selDate=null,selTime=null;
 
