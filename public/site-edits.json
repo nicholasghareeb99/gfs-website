@@ -1,0 +1,9 @@
+{
+  "gfs_edit_content_quote-ballpark": "{\"18\":\"Instant Ballpark Quote\",\"26\":\"🔓 Unlock Quote Tool\",\"style:18:color\":\"#d4af37\"}",
+  "gfs_edit_content_quote-book": "{\"32\":\"Toledo's trusted fence contractor since 2022. Quality craftsmanship, honest pricing, and exceptional service on every project.\",\"33\":\"Toledo's trusted fence contractor since 2022. Quality craftsmanship, honest pricing, and exceptional service on every project.\"}",
+  "gfs_edit_formFields": "[{\"type\":\"dropdown\",\"label\":\"New Field\",\"placeholder\":\"\",\"required\":false,\"options\":[\"Option 1\",\"Option 2\"]}]",
+  "gfs_edit_content_home": "{\"167\":\"Ghareeb Fencing\",\"168\":\"Toledo's trusted fence contractor since 2022. Quality craftsmanship, honest pricing, and exceptional service on every project.\",\"imgw:0\":\"276px\",\"imgh:0\":\"276px\",\"imgw:1\":\"276px\",\"imgh:1\":\"276px\",\"imgw:2\":\"276px\",\"imgh:2\":\"276px\",\"imgw:3\":\"276px\",\"imgh:3\":\"276px\",\"imgw:4\":\"185px\",\"imgh:4\":\"185px\",\"imgw:5\":\"185px\",\"imgh:5\":\"185px\",\"imgw:6\":\"185px\",\"imgh:6\":\"185px\",\"imgw:7\":\"185px\",\"imgh:7\":\"185px\",\"imgw:8\":\"185px\",\"imgh:8\":\"185px\"}",
+  "gfs_edit_wasAdmin": "1",
+  "_updatedAt": "2026-03-04T14:18:41.859Z",
+  "_updatedBy": "edit-mode"
+}
