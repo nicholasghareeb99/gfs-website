@@ -37,12 +37,12 @@ export const POST: APIRoute = async ({ request }) => {
       const { getFirestore, collection, addDoc, serverTimestamp } = await import('firebase/firestore');
 
       const firebaseConfig = {
-        apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
-        authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-        projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-        storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-        messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-        appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+        apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY || "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+        authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN || "ghareeb-fencing.firebaseapp.com",
+        projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || "ghareeb-fencing",
+        storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET || "ghareeb-fencing.firebasestorage.app",
+        messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "187837905206",
+        appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || "1:187837905206:web:1e9a9bc33f745cbeeddb97"
       };
 
       const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
@@ -58,7 +58,7 @@ export const POST: APIRoute = async ({ request }) => {
 
         // Job info
         status: 'Lead',
-        source: 'website-' + (data.type || 'contact'),
+        source: data.type === 'ballpark' ? 'website-ballpark' : 'website-' + (data.type || 'contact'),
 
         // Fence details (if provided)
         style: data.fenceType || '',
@@ -97,9 +97,8 @@ export const POST: APIRoute = async ({ request }) => {
 
     } catch (fbError) {
       console.error('[API] Firestore save error:', fbError);
-      // Still return success since lead was captured
-      return new Response(JSON.stringify({ success: true, id: null }), {
-        status: 200,
+      return new Response(JSON.stringify({ error: 'Failed to save — please try again or call (419) 902-8257', detail: String(fbError) }), {
+        status: 500,
         headers: { 'Content-Type': 'application/json' }
       });
     }
