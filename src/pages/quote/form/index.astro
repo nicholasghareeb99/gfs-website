@@ -125,6 +125,9 @@ const site = await getSiteSettings();
                             </div>
                         </div>
 
+                        <!-- Custom Fields (editable via Edit Mode) -->
+                        <div id="custom-fields-section"></div>
+
                         <button type="submit" id="q-submit" class="btn btn-primary btn-block btn-lg">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg>
                             Submit Quote Request
@@ -212,6 +215,7 @@ const site = await getSiteSettings();
         try {
             // Build notes from all project details
             const details = [];
+            if(window._getCustomFieldValues){window._getCustomFieldValues().forEach(function(v){details.push(v)});}
             const height = $('q-height').value;
             const length = $('q-length').value;
             const timeline = $('q-timeline').value;
@@ -275,6 +279,123 @@ const site = await getSiteSettings();
     });
 })();
 </script>
+
+<!-- Custom Form Fields System -->
+<script is:inline>
+(function(){
+  var FK='gfs_edit_formFields';
+  function getF(){try{return JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){return[]}}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+  function render(){
+    var box=document.getElementById('custom-fields-section');
+    if(!box)return;
+    var fields=getF();
+    if(!fields.length){box.innerHTML='';return}
+    var h='<div class="form-card"><h3>Additional Information</h3>';
+    fields.forEach(function(f,i){
+      var req=f.required?' *':'',ra=f.required?' required':'';
+      if(f.type==='text'){
+        h+='<div class="form-group"><label for="cf-'+i+'">'+esc(f.label)+req+'</label><input type="text" id="cf-'+i+'"'+ra+' placeholder="'+esc(f.placeholder||'')+'" /></div>';
+      }else if(f.type==='textarea'){
+        h+='<div class="form-group"><label for="cf-'+i+'">'+esc(f.label)+req+'</label><textarea id="cf-'+i+'" rows="3"'+ra+' placeholder="'+esc(f.placeholder||'')+'"></textarea></div>';
+      }else if(f.type==='checkbox'){
+        h+='<div class="checkbox-row" style="margin-bottom:12px"><label class="checkbox-label"><input type="checkbox" id="cf-'+i+'" /> '+esc(f.label)+'</label></div>';
+      }else if(f.type==='dropdown'){
+        h+='<div class="form-group"><label for="cf-'+i+'">'+esc(f.label)+req+'</label><select id="cf-'+i+'"'+ra+'><option value="">Select...</option>';
+        (f.options||[]).forEach(function(opt){h+='<option value="'+esc(opt)+'">'+esc(opt)+'</option>'});
+        h+='</select></div>';
+      }
+    });
+    h+='</div>';box.innerHTML=h;
+  }
+  window._getCustomFieldValues=function(){
+    var fields=getF(),vals=[];
+    fields.forEach(function(f,i){
+      var el=document.getElementById('cf-'+i);if(!el)return;
+      var v=f.type==='checkbox'?(el.checked?'Yes':'No'):(el.value||'').trim();
+      if(v&&v!=='No')vals.push(f.label+': '+v);
+    });return vals;
+  };
+  // Load remote edits for form fields too
+  fetch('/site-edits.json?_='+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(d){
+    if(d&&d[FK]&&!localStorage.getItem(FK))localStorage.setItem(FK,d[FK]);
+    render();
+  }).catch(function(){render()});
+})();
+</script>
+
+<!-- Form Builder (Edit Mode only) -->
+<script is:inline>
+(function(){
+  var FK='gfs_edit_formFields';
+  function getF(){try{return JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){return[]}}
+  function saveF(f){localStorage.setItem(FK,JSON.stringify(f))}
+  function esc(s){return String(s).replace(/"/g,'&quot;').replace(/</g,'&lt;')}
+  var obs=new MutationObserver(function(){
+    if(document.body.classList.contains('edit-mode-active'))inject();else remove();
+  });
+  obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+  function inject(){
+    if(document.getElementById('fb-panel'))return;
+    var sec=document.getElementById('custom-fields-section');if(!sec)return;
+    var p=document.createElement('div');p.id='fb-panel';
+    p.style.cssText='background:#fffbeb;border:2px dashed #d4af37;border-radius:12px;padding:24px;margin:20px 0;';
+    p.innerHTML='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><h4 style="margin:0;color:#1e3a5f">Form Builder</h4><button id="fb-save" style="background:#059669;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600">Save & Publish</button></div><p style="font-size:13px;color:#6b7280;margin-bottom:16px">Add custom fields that appear on the form and submit to your Exec App.</p><div id="fb-list"></div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><select id="fb-type" style="padding:8px 12px;border:1px solid #d1d5db;border-radius:6px"><option value="text">Text Input</option><option value="textarea">Text Area</option><option value="checkbox">Checkbox</option><option value="dropdown">Dropdown</option></select><button id="fb-add" style="background:#1e3a5f;color:white;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:500">+ Add Field</button></div>';
+    sec.parentNode.insertBefore(p,sec);
+    document.getElementById('fb-add').onclick=addField;
+    document.getElementById('fb-save').onclick=function(){
+      saveF(getF());
+      var btn=this;btn.textContent='Publishing...';btn.disabled=true;
+      // Push to GitHub via EditMode's exposed function
+      if(window._gfsPushToGitHub){
+        window._gfsPushToGitHub().then(function(ok){
+          btn.textContent=ok?'Published!':'Saved locally';
+          btn.disabled=false;
+          setTimeout(function(){btn.textContent='Save & Publish'},2000);
+          location.reload();
+        });
+      }else{
+        btn.textContent='Saved locally';btn.disabled=false;
+        setTimeout(function(){btn.textContent='Save & Publish'},2000);
+        location.reload();
+      }
+    };
+    renderList();
+  }
+  function remove(){var p=document.getElementById('fb-panel');if(p)p.remove()}
+  function addField(){
+    var type=document.getElementById('fb-type').value,fields=getF();
+    fields.push({type:type,label:type==='checkbox'?'New Checkbox':'New Field',placeholder:'',required:false,options:type==='dropdown'?['Option 1','Option 2']:[]});
+    saveF(fields);renderList();
+    // re-render custom fields
+    document.body.classList.remove('edit-mode-active');
+    setTimeout(function(){document.body.classList.add('edit-mode-active')},50);
+  }
+  function renderList(){
+    var list=document.getElementById('fb-list');if(!list)return;
+    var fields=getF();
+    if(!fields.length){list.innerHTML='<p style="color:#9ca3af;font-size:13px;font-style:italic">No custom fields yet.</p>';return}
+    var icons={text:'T',textarea:'P',checkbox:'C',dropdown:'D'};
+    list.innerHTML=fields.map(function(f,i){
+      var h='<div style="background:white;border:1px solid #e2e8f0;border-radius:8px;padding:14px;margin-bottom:10px">';
+      h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><span style="font-weight:600;font-size:13px">['+icons[f.type]+'] '+f.type.charAt(0).toUpperCase()+f.type.slice(1)+'</span>';
+      h+='<div style="display:flex;gap:6px"><button onclick="window._fbMove('+i+',-1)" style="background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:4px;cursor:pointer">Up</button><button onclick="window._fbMove('+i+',1)" style="background:#f1f5f9;border:1px solid #e2e8f0;padding:4px 8px;border-radius:4px;cursor:pointer">Dn</button><button onclick="window._fbDel('+i+')" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:4px 8px;border-radius:4px;cursor:pointer">X</button></div></div>';
+      h+='<div style="display:flex;gap:8px;flex-wrap:wrap"><input type="text" value="'+esc(f.label)+'" onchange="window._fbSet('+i+',this.value)" placeholder="Label" style="flex:1;min-width:150px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />';
+      if(f.type!=='checkbox')h+='<input type="text" value="'+esc(f.placeholder||'')+'" onchange="window._fbSetP('+i+',this.value)" placeholder="Placeholder" style="flex:1;min-width:120px;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px" />';
+      h+='<label style="display:flex;align-items:center;gap:4px;font-size:12px;white-space:nowrap"><input type="checkbox" '+(f.required?'checked':'')+' onchange="window._fbReq('+i+',this.checked)" /> Req</label></div>';
+      if(f.type==='dropdown')h+='<div style="margin-top:8px"><label style="font-size:12px;color:#6b7280">Options (one per line):</label><textarea onchange="window._fbOpts('+i+',this.value)" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-top:4px" rows="3">'+(f.options||[]).join('\n')+'</textarea></div>';
+      h+='</div>';return h;
+    }).join('');
+  }
+  window._fbSet=function(i,v){var f=getF();if(f[i]){f[i].label=v;saveF(f);renderList()}};
+  window._fbSetP=function(i,v){var f=getF();if(f[i]){f[i].placeholder=v;saveF(f)}};
+  window._fbReq=function(i,v){var f=getF();if(f[i]){f[i].required=v;saveF(f)}};
+  window._fbOpts=function(i,v){var f=getF();if(f[i]){f[i].options=v.split('\n').filter(function(x){return x.trim()});saveF(f)}};
+  window._fbDel=function(i){if(!confirm('Delete this field?'))return;var f=getF();f.splice(i,1);saveF(f);renderList()};
+  window._fbMove=function(i,d){var f=getF(),n=i+d;if(n<0||n>=f.length)return;var t=f[i];f[i]=f[n];f[n]=t;saveF(f);renderList()};
+})();
+</script>
+
 
 <style>
     .hero-mini { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 120px 0 40px; color: white; }
