@@ -83,7 +83,7 @@ const site = await getSiteSettings();
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="q-length">Approximate Length (feet)</label>
-                                    <input type="number" id="q-length" min="10" placeholder="e.g., 150" />
+                                    <input type="text" id="q-length" placeholder="e.g., 150 ft, or 'not sure'" />
                                 </div>
                                 <div class="form-group">
                                     <label for="q-timeline">Timeline</label>
@@ -97,10 +97,24 @@ const site = await getSiteSettings();
                                     </select>
                                 </div>
                             </div>
-                            <div class="checkbox-row">
-                                <label class="checkbox-label"><input type="checkbox" id="q-gates" /> Need gate(s)</label>
-                                <label class="checkbox-label"><input type="checkbox" id="q-removal" /> Remove existing fence</label>
-                                <label class="checkbox-label"><input type="checkbox" id="q-pool" /> Pool area (code compliance needed)</label>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="q-gates">Gates (number & width)</label>
+                                    <input type="text" id="q-gates" placeholder="e.g., 1 gate, 4ft wide" />
+                                </div>
+                                <div class="form-group">
+                                    <label for="q-double-gates">Double Gates (number & width)</label>
+                                    <input type="text" id="q-double-gates" placeholder="e.g., 1 double gate, 12ft wide" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="q-removal">Existing Fence Removal (length & style)</label>
+                                    <input type="text" id="q-removal" placeholder="e.g., 80ft chain link, 40ft wood" />
+                                </div>
+                                <div class="form-group" style="display:flex;align-items:end;padding-bottom:2px;">
+                                    <label class="checkbox-label" style="margin-bottom:14px;"><input type="checkbox" id="q-pool" /> Pool area (code compliance needed)</label>
+                                </div>
                             </div>
                         </div>
 
@@ -219,17 +233,19 @@ const site = await getSiteSettings();
             const height = $('q-height').value;
             const length = $('q-length').value;
             const timeline = $('q-timeline').value;
-            const gates = $('q-gates').checked;
-            const removal = $('q-removal').checked;
+            const gates = $('q-gates').value.trim();
+            const doubleGates = $('q-double-gates').value.trim();
+            const removal = $('q-removal').value.trim();
             const pool = $('q-pool').checked;
             const notes = $('q-notes').value.trim();
             const heard = $('q-heard').value;
 
             if (height) details.push('Height: ' + height);
-            if (length) details.push('Length: ~' + length + ' ft');
+            if (length) details.push('Length: ' + length);
             if (timeline) details.push('Timeline: ' + timeline);
-            if (gates) details.push('Needs gates');
-            if (removal) details.push('Remove existing fence');
+            if (gates) details.push('Gates: ' + gates);
+            if (doubleGates) details.push('Double Gates: ' + doubleGates);
+            if (removal) details.push('Removal: ' + removal);
             if (pool) details.push('Pool area - code compliance');
             if (heard) details.push('Heard about us: ' + heard);
             if (notes) details.push('Notes: ' + notes);
@@ -291,7 +307,7 @@ const site = await getSiteSettings();
     if(!box)return;
     var fields=getF();
     if(!fields.length){box.innerHTML='';return}
-    var h='<div class="form-card"><h3>Additional Information</h3>';
+    var h='';
     fields.forEach(function(f,i){
       var req=f.required?' *':'',ra=f.required?' required':'';
       if(f.type==='text'){
@@ -306,7 +322,7 @@ const site = await getSiteSettings();
         h+='</select></div>';
       }
     });
-    h+='</div>';box.innerHTML=h;
+    box.innerHTML=h;
   }
   window._getCustomFieldValues=function(){
     var fields=getF(),vals=[];
