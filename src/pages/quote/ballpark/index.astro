@@ -10,7 +10,7 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "187837905206",
   appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || "1:187837905206:web:1e9a9bc33f745cbeeddb97"
 };
-const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
+const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || 'AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y';
 ---
 
 <BaseLayout title="Instant Fence Quote Calculator | Ghareeb Fencing Solutions" description="Get an instant ballpark fence quote in 60 seconds. Draw fence lines, add gates, and see pricing instantly." canonical="/quote/ballpark/">
@@ -41,7 +41,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     </div>
                     <div class="form-row">
                         <div class="form-group"><label for="lead-email">Email</label><input type="email" id="lead-email" placeholder="john@email.com" /></div>
-                        <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required placeholder="123 Main St, Toledo, OH" /></div>
+                        <div class="form-group"><label for="lead-address">Property Address *</label><input type="text" id="lead-address" required autocomplete="off" placeholder="123 Main St, Toledo, OH" /></div>
                     </div>
                     <button type="button" id="unlock-tool-btn" class="btn btn-primary btn-block btn-lg" disabled>🔓 Unlock Quote Tool</button>
                     <p class="form-disclaimer">Your info is never shared. We'll follow up within 24 hours with a detailed estimate.</p>
@@ -118,7 +118,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     <!-- MAP VIEW -->
                     <div class="view-panel" id="view-map">
                         <div class="map-search-bar">
-                            <input type="text" id="map-address-input" placeholder="Search your address for satellite view" />
+                            <input type="text" id="map-address-input" autocomplete="off" placeholder="Search your address for satellite view" />
                             <button type="button" id="map-search-btn" class="btn btn-primary btn-sm">🔍 Search</button>
                         </div>
                         <div id="map-container"><div id="map"></div><div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div></div>
@@ -225,7 +225,45 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 <script is:inline define:vars={{ mapsApiKey }}>
 window._mapsApiKey=mapsApiKey||'';
 if(mapsApiKey&&mapsApiKey!=='undefined'&&mapsApiKey!==''){
-    window.initGoogleMaps=function(){window._mapsReady=true;};
+    window.initGoogleMaps=function(){
+        window._mapsReady=true;
+        /* Init Places Autocomplete on address fields */
+        try{
+            const leadAddr=document.getElementById('lead-address');
+            const mapAddr=document.getElementById('map-address-input');
+            const acOpts={componentRestrictions:{country:'us'},fields:['address_components','geometry','formatted_address'],types:['address']};
+            if(leadAddr){
+                const ac1=new google.maps.places.Autocomplete(leadAddr,acOpts);
+                ac1.addListener('place_changed',function(){
+                    const place=ac1.getPlace();
+                    if(place.formatted_address)leadAddr.value=place.formatted_address;
+                    if(mapAddr&&place.formatted_address)mapAddr.value=place.formatted_address;
+                    /* If geometry available, store coords for instant map load */
+                    if(place.geometry&&place.geometry.location){
+                        window._placeCoords={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};
+                    }
+                });
+            }
+            if(mapAddr){
+                const ac2=new google.maps.places.Autocomplete(mapAddr,acOpts);
+                ac2.addListener('place_changed',function(){
+                    const place=ac2.getPlace();
+                    if(place.formatted_address)mapAddr.value=place.formatted_address;
+                    /* Instant map load from geometry — no geocoding needed */
+                    if(place.geometry&&place.geometry.location){
+                        window._placeCoords={lat:place.geometry.location.lat(),lng:place.geometry.location.lng()};
+                        if(window.searchMapAddress)window.searchMapAddress(place.formatted_address);
+                    }
+                });
+            }
+        }catch(e){console.log('[Maps] Autocomplete init error:',e);}
+    };
+    /* Load Maps JS immediately so autocomplete works on step 1 address field */
+    const _ms=document.createElement('script');
+    _ms.src='https://maps.googleapis.com/maps/api/js?key='+mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
+    _ms.async=true;_ms.defer=true;
+    _ms.onerror=function(){window._mapsUnavailable=true;};
+    document.head.appendChild(_ms);
 }else{window._mapsUnavailable=true;}
 </script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -634,14 +672,10 @@ $('unlock-tool-btn').addEventListener('click',async()=>{
     ['step-2-content','step-3-content'].forEach(id=>$(id).style.display='block');
     if($('map-address-input'))$('map-address-input').value=address;
     initCanvas();
-    if(!window._mapsUnavailable&&window._mapsApiKey){
-        $('map-status-text').textContent='Loading satellite view...';
-        const s=document.createElement('script');
-        s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
-        s.async=true;
-        s.onerror=function(){window._mapsUnavailable=true;$('map-status-text').textContent='Satellite view unavailable. Use Grid Drawing.';};
-        setTimeout(()=>{if(!window._mapsReady)$('map-status-text').textContent='Maps loading... Switch to Satellite Map tab when ready.';},5000);
-        document.head.appendChild(s);
+    if(!window._mapsUnavailable&&window._mapsReady){
+        $('map-status-text').textContent='Maps loaded! Switch to Satellite Map to see your property.';
+    }else if(!window._mapsUnavailable){
+        $('map-status-text').textContent='Maps loading... Switch to Satellite Map tab when ready.';
     }else{$('map-status-text').textContent='Satellite view not configured. Use Grid Drawing.';}
     $('step-2').scrollIntoView({behavior:'smooth',block:'start'});
 });
@@ -660,6 +694,13 @@ window.searchMapAddress=function(addr){
     if(!window.google||!window.google.maps){$('map-status-text').textContent='\u26a0\ufe0f Maps not loaded. Click Satellite Map tab again in a moment.';return;}
     $('map-status-text').textContent='\U0001f50d Searching for your property...';$('map-instructions').style.display='flex';
     const mapEl=$('map');
+
+    /* If Places Autocomplete already gave us coords, use them directly — no geocoding needed */
+    if(window._placeCoords){
+        const pc=window._placeCoords;window._placeCoords=null;
+        showMap(pc.lat,pc.lng);
+        return;
+    }
 
     function showMap(lat,lng){
         mapEl.innerHTML='';gmap=null;
@@ -854,4 +895,5 @@ loadPricing();
     @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.tool-divider{height:24px}.grid-legend{display:none}.view-tab{font-size:0.8rem;padding:8px 4px}.compare-grid{grid-template-columns:1fr 1fr}}
     .map-hint-bar{background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:12px}
     .map-hint-bar .map-hint{margin:0}
+    .pac-container{z-index:99999!important}
 </style>
