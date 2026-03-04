@@ -3,12 +3,12 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
 const firebaseConfig = {
-  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
-  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
+  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY || "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN || "ghareeb-fencing.firebaseapp.com",
+  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID || "ghareeb-fencing",
+  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET || "ghareeb-fencing.firebasestorage.app",
+  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID || "187837905206",
+  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID || "1:187837905206:web:1e9a9bc33f745cbeeddb97"
 };
 const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 ---
@@ -90,6 +90,12 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                             </div>
                             <div class="tool-divider"></div>
                             <div class="tool-group">
+                                <button type="button" class="draw-tool" data-tool="propline"><span class="tool-icon">📏</span><span class="tool-label">Prop Line</span></button>
+                                <button type="button" class="draw-tool" data-tool="existing"><span class="tool-icon">🔴</span><span class="tool-label">Old Fence</span></button>
+                                <button type="button" class="draw-tool" data-tool="pool"><span class="tool-icon">🏊</span><span class="tool-label">Pool</span></button>
+                            </div>
+                            <div class="tool-divider"></div>
+                            <div class="tool-group">
                                 <button type="button" class="draw-tool" data-tool="house"><span class="tool-icon">🏠</span><span class="tool-label">House</span></button>
                                 <button type="button" class="draw-tool" data-tool="tree"><span class="tool-icon">🌳</span><span class="tool-label">Tree</span></button>
                                 <button type="button" class="draw-tool" data-tool="text"><span class="tool-icon">💬</span><span class="tool-label">Text</span></button>
@@ -100,9 +106,12 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                         <div class="grid-wrapper"><canvas id="grid-canvas"></canvas></div>
                         <div class="grid-controls">
                             <button type="button" id="grid-undo" class="toolbar-btn">↩ Undo</button>
-                            <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear All</button>
+                            <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear</button>
+                            <button type="button" id="grid-zoom-in" class="toolbar-btn" title="Zoom In">🔍+</button>
+                            <button type="button" id="grid-zoom-out" class="toolbar-btn" title="Zoom Out">🔍−</button>
+                            <button type="button" id="grid-download" class="toolbar-btn" title="Download Drawing">📥 Save</button>
                             <div class="grid-info"><span id="grid-total-display">Total: 0 ft</span></div>
-                            <div class="grid-legend"><span>1 sq = 5 ft · Double-click to finish line</span></div>
+                            <div class="grid-legend"><span>1 sq = 5 ft · Dbl-click/Esc to finish · Shift = straight</span></div>
                         </div>
                     </div>
 
@@ -113,13 +122,16 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                             <button type="button" id="map-search-btn" class="btn btn-primary btn-sm">🔍 Search</button>
                         </div>
                         <div id="map-container"><div id="map"></div><div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div></div>
-                        <p class="map-hint">Use satellite view to reference your property, then switch to Grid Drawing to draw fence lines.</p>
+                        <div class="map-hint-bar">
+                            <p class="map-hint">📍 <strong>Satellite view</strong> — See your property. Use the drawing tools on the map to measure fence lines, or switch to <strong>Grid Drawing</strong> for detailed layout.</p>
+                            <p class="map-hint" style="margin-top:4px;font-size:0.8rem;">Tip: Draw a polyline on the map to auto-measure feet. Lines drawn here auto-fill the manual footage field.</p>
+                        </div>
                     </div>
 
                     <!-- MANUAL VIEW -->
                     <div class="view-panel" id="view-manual">
                         <div class="manual-input-group">
-                            <p class="panel-hint">Don't worry about being exact — this is a ballpark estimate.</p>
+                            <p class="panel-hint">Don't worry about being exact — this is a ballpark estimate. Measure or estimate the total length of fence you need.</p>
                             <label for="manual-feet"><strong>Total Linear Feet of Fence</strong></label>
                             <div class="input-with-unit"><input type="number" id="manual-feet" min="10" max="2000" placeholder="e.g., 150" /><span class="unit">ft</span></div>
                             <div class="footage-helpers">
@@ -142,7 +154,14 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                 <div class="step-content" id="step-3-content" style="display:none;">
                     <div class="options-grid">
                         <div class="option-group"><label for="fence-height">Fence Height</label><select id="fence-height"><option value="4">4 ft</option><option value="5">5 ft</option><option value="6" selected>6 ft (Standard)</option><option value="8">8 ft</option></select></div>
-                        <div class="checkbox-group"><label class="checkbox-label"><input type="checkbox" id="remove-old" /><span>Remove existing fence (+$4/ft)</span></label></div>
+                        <div class="option-group"><label for="removal-feet">Remove Existing Fence</label>
+                            <div class="input-with-unit" style="max-width:200px"><input type="number" id="removal-feet" min="0" max="2000" placeholder="0" value="" style="border-radius:8px 0 0 8px" /><span class="unit" style="border-radius:0 8px 8px 0">ft</span></div>
+                            <span style="font-size:0.8rem;color:#64748b;">+$4/ft · Or draw Old Fence lines above</span>
+                        </div>
+                        <div class="option-group">
+                            <label class="checkbox-label" style="margin-top:8px;"><input type="checkbox" id="pool-area" /><span>Pool area (code compliance)</span></label>
+                            <span id="pool-note" style="display:none;font-size:0.8rem;color:#dc6803;margin-top:4px;">Pool fencing requires self-closing gates & 4ft+ min height</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -162,7 +181,10 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                 <div id="summary-preview" style="display:none;">
                     <div id="fence-breakdown"></div>
                     <div id="gate-breakdown"></div>
+                    <div id="existing-fence-line" class="summary-line" style="display:none;"><span>🔴 Existing Fence</span><span id="existing-fence-ft">0 ft</span></div>
                     <div id="preview-removal-line" class="summary-line" style="display:none;"><span>🗑 Removal</span><span id="removal-cost">+$0</span></div>
+                    <div id="preview-pool-line" class="summary-line" style="display:none;"><span>🏊 Pool Compliance</span><span style="color:#059669;">Included</span></div>
+                    <div id="propline-summary" class="summary-line" style="display:none;"><span>📏 Property Line</span><span id="propline-ft">0 ft</span></div>
                     <div class="summary-line total-line"><span><strong>Total Fence</strong></span><span id="total-feet">0 ft</span></div>
                     <div class="estimate-range">
                         <div class="range-label">Estimated Price Range</div>
@@ -203,7 +225,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 <script is:inline define:vars={{ mapsApiKey }}>
 window._mapsApiKey=mapsApiKey||'';
 if(mapsApiKey&&mapsApiKey!=='undefined'&&mapsApiKey!==''){
-    window.initGoogleMaps=function(){if(window._toolUnlocked&&window._leadAddress)window.searchMapAddress(window._leadAddress);};
+    window.initGoogleMaps=function(){window._mapsReady=true;};
 }else{window._mapsUnavailable=true;}
 </script>
 <script is:inline src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
@@ -266,12 +288,23 @@ document.querySelectorAll('.view-tab').forEach(tab=>{tab.addEventListener('click
     document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
     tab.classList.add('active');const panel=$('view-'+tab.dataset.view);if(panel)panel.classList.add('active');
     if(tab.dataset.view==='grid')initCanvas();
-    if(tab.dataset.view==='map'&&window._leadAddress&&$('map-address-input'))$('map-address-input').value=window._leadAddress;
+    if(tab.dataset.view==='map'){
+        if(window._leadAddress&&$('map-address-input'))$('map-address-input').value=window._leadAddress;
+        if(window._mapsReady&&!gmap&&window._leadAddress){setTimeout(()=>window.searchMapAddress(window._leadAddress),100);}
+        else if(gmap){setTimeout(()=>google.maps.event.trigger(gmap,'resize'),100);}
+    }
 });});
 
 /* ======== DRAWING STATE ======== */
 let canvas,ctx,GCS=20,GS=5;
 let tool='fence',objs=[],cfp=[],dragS=null,undo=[];
+let shiftHeld=false;
+document.addEventListener('keydown',e=>{
+    shiftHeld=e.shiftKey;
+    if(e.key==='Escape'){if(cfp.length>0){cfp=[];redraw();}tool='fence';document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));document.querySelector('.draw-tool[data-tool=fence]')?.classList.add('active');}
+    if((e.ctrlKey||e.metaKey)&&e.key==='z'){e.preventDefault();$('grid-undo')?.click();}
+});
+document.addEventListener('keyup',e=>{shiftHeld=e.shiftKey;});
 
 function initCanvas(){
     canvas=$('grid-canvas');if(!canvas)return;
@@ -288,7 +321,7 @@ function initCanvas(){
     canvas.addEventListener('click',onClick);canvas.addEventListener('mousemove',onMove);
     canvas.addEventListener('mousedown',onDown);canvas.addEventListener('mouseup',onUp);
     canvas.addEventListener('dblclick',onDbl);
-    canvas.addEventListener('contextmenu',e=>{e.preventDefault();finFence();});
+    canvas.addEventListener('contextmenu',e=>{e.preventDefault();finLine();});
     canvas.addEventListener('touchstart',onTS,{passive:false});canvas.addEventListener('touchmove',onTM,{passive:false});canvas.addEventListener('touchend',onTE,{passive:false});
     redraw();
 }
@@ -300,16 +333,19 @@ function fd(a,b){const dx=Math.abs(b.x-a.x)/GCS,dy=Math.abs(b.y-a.y)/GCS;return 
 /* ======== TOUCH ======== */
 let lastTap=0;
 function tp(e){const r=canvas.getBoundingClientRect();const t=e.touches[0]||e.changedTouches[0];return{x:(t.clientX-r.left)*(canvas._w/r.width),y:(t.clientY-r.top)*(canvas._h/r.height)};}
-function onTS(e){e.preventDefault();if(tool==='house'){const p=tp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
+function onTS(e){e.preventDefault();if(tool==='house'||tool==='pool'){const p=tp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
 function onTM(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);redraw();
-    if(tool==='fence'&&cfp.length>0)drawPL(cfp[cfp.length-1],{x:sx,y:sy});
-    if(tool==='house'&&dragS)drawPR(dragS,{x:sx,y:sy});
+    if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>0)drawPL(cfp[cfp.length-1],{x:sx,y:sy},tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':undefined);
+    if((tool==='house'||tool==='pool')&&dragS){const color=tool==='pool'?'rgba(59,130,246,0.3)':'rgba(100,130,180,0.3)';ctx.fillStyle=color;const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
 }
 function onTE(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);const now=Date.now();
-    if(now-lastTap<300&&tool==='fence'&&cfp.length>=2){finFence();lastTap=0;return;}
+    if(now-lastTap<300&&(tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>=2){finLine();lastTap=0;return;}
     lastTap=now;
-    if(tool==='house'&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);
-        if(w>=GCS&&h>=GCS){su();const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,sx),y:Math.min(dragS.y,sy),w,h,label:lb});redraw();updateQ();asd();}dragS=null;return;}
+    if((tool==='house'||tool==='pool')&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);
+        if(w>=GCS&&h>=GCS){su();
+            if(tool==='house'){const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,sx),y:Math.min(dragS.y,sy),w,h,label:lb});}
+            else{objs.push({type:'pool',x:Math.min(dragS.x,sx),y:Math.min(dragS.y,sy),w,h});}
+            redraw();updateQ();asd();}dragS=null;return;}
     doClick(sx,sy);
 }
 
@@ -320,47 +356,61 @@ document.querySelectorAll('.gate-dir-btn').forEach(b=>{b.addEventListener('click
 $('gate-modal-cancel').addEventListener('click',()=>{$('gate-modal').style.display='none';pendingGate=null;});
 
 function doClick(x,y){
-    if(tool==='fence'){cfp.push({x,y});redraw();return;}
+    if(tool==='fence'||tool==='propline'||tool==='existing'){cfp.push({x,y});redraw();return;}
     if(tool==='gate-walk'||tool==='gate-drive'){openGM(x,y,tool);return;}
     if(tool==='tree'){su();objs.push({type:'tree',x,y});redraw();asd();return;}
     if(tool==='text'){openTM(x,y);return;}
+    if(tool==='pool'||tool==='house'){return;} /* handled by drag */
     if(tool==='erase'){const o=findAt(x,y);if(o){su();objs.splice(objs.indexOf(o),1);redraw();updateQ();asd();}return;}
 }
 
 /* ======== TOOLS ======== */
-document.querySelectorAll('.draw-tool').forEach(btn=>{btn.addEventListener('click',()=>{finFence();document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));btn.classList.add('active');tool=btn.dataset.tool;});});
+document.querySelectorAll('.draw-tool').forEach(btn=>{btn.addEventListener('click',()=>{finLine();document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));btn.classList.add('active');tool=btn.dataset.tool;});});
 
 /* ======== MOUSE ======== */
-function onClick(e){const p=gcp(e);doClick(sn(p.x),sn(p.y));}
-function onDown(e){if(tool==='house'){const p=gcp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
-function onUp(e){if(tool==='house'&&dragS){const p=gcp(e);const ex=sn(p.x),ey=sn(p.y);const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
-    if(w>=GCS&&h>=GCS){su();const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h,label:lb});redraw();asd();}dragS=null;}}
-function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sx=sn(mx),sy=sn(my);redraw();
-    if(tool==='fence'&&cfp.length>0){drawPL(cfp[cfp.length-1],{x:sx,y:sy});drawSP(sx,sy,'rgba(212,175,55,0.5)');}
-    if(tool==='house'&&dragS)drawPR(dragS,{x:sx,y:sy});
-    if(tool==='gate-walk'||tool==='gate-drive')drawSP(sx,sy,'rgba(16,185,129,0.5)');
-    if(tool==='tree'){ctx.beginPath();ctx.arc(sx,sy,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();}
+function snapPt(px,py){
+    let sx=sn(px),sy=sn(py);
+    if(shiftHeld&&cfp.length>0){const lp=cfp[cfp.length-1];if(Math.abs(sx-lp.x)>Math.abs(sy-lp.y))sy=lp.y;else sx=lp.x;}
+    return{x:sx,y:sy};
+}
+function onClick(e){const p=gcp(e);const sp=snapPt(p.x,p.y);doClick(sp.x,sp.y);}
+function onDown(e){if(tool==='house'||tool==='pool'){const p=gcp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
+function onUp(e){if((tool==='house'||tool==='pool')&&dragS){const p=gcp(e);const ex=sn(p.x),ey=sn(p.y);const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
+    if(w>=GCS&&h>=GCS){su();
+        if(tool==='house'){const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h,label:lb});}
+        else{objs.push({type:'pool',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h});}
+        redraw();updateQ();asd();}dragS=null;}}
+function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);redraw();
+    if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>0){drawPL(cfp[cfp.length-1],sp,tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':'rgba(212,175,55,0.5)');drawSP(sp.x,sp.y,tool==='propline'?'rgba(148,163,184,0.5)':tool==='existing'?'rgba(239,68,68,0.5)':'rgba(212,175,55,0.5)');}
+    if((tool==='house'||tool==='pool')&&dragS){const color=tool==='pool'?'rgba(59,130,246,0.3)':'rgba(100,130,180,0.3)';ctx.fillStyle=color;const sx=sn(sp.x),sy=sn(sp.y);const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);ctx.strokeStyle=tool==='pool'?'#3b82f6':'#4682B4';ctx.lineWidth=2;ctx.strokeRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
+    if(tool==='gate-walk'||tool==='gate-drive')drawSP(sp.x,sp.y,'rgba(16,185,129,0.5)');
+    if(tool==='tree'){ctx.beginPath();ctx.arc(sp.x,sp.y,GCS*0.8,0,Math.PI*2);ctx.fillStyle='rgba(34,139,34,0.3)';ctx.fill();}
     if(tool==='erase')canvas.style.cursor=findAt(mx,my)?'pointer':'crosshair';
 }
 function onDbl(e){
     const p=gcp(e);const o=findAt(p.x,p.y);
     if(o&&(o.type==='gate-walk'||o.type==='gate-drive')){o.dir=o.dir==='left'?'right':'left';redraw();asd();e.stopPropagation();return;}
-    if(tool==='fence'&&cfp.length>=2)finFence();
+    if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>=2)finLine();
 }
 
-function drawPL(from,to){ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.strokeStyle='rgba(212,175,55,0.5)';ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
-    const d=fd(from,to);if(d>0){ctx.font='bold 12px sans-serif';ctx.fillStyle='#d4af37';ctx.fillText(d+'ft',(from.x+to.x)/2+5,(from.y+to.y)/2-8);}}
+function drawPL(from,to,color){const c2=color||'rgba(212,175,55,0.5)';ctx.beginPath();ctx.moveTo(from.x,from.y);ctx.lineTo(to.x,to.y);ctx.strokeStyle=c2;ctx.lineWidth=2;ctx.setLineDash([5,5]);ctx.stroke();ctx.setLineDash([]);
+    const d=fd(from,to);if(d>0){ctx.font='bold 12px sans-serif';ctx.fillStyle=c2.replace(',0.5)',',1)').replace('rgba','rgb');ctx.fillText(d+'ft',(from.x+to.x)/2+5,(from.y+to.y)/2-8);}}
 function drawPR(from,to){const sx=sn(to.x),sy=sn(to.y);const w=Math.abs(sx-from.x),h=Math.abs(sy-from.y);ctx.fillStyle='rgba(100,130,180,0.3)';ctx.strokeStyle='#4682B4';ctx.lineWidth=2;
     ctx.fillRect(Math.min(from.x,sx),Math.min(from.y,sy),w,h);ctx.strokeRect(Math.min(from.x,sx),Math.min(from.y,sy),w,h);
     ctx.font='11px sans-serif';ctx.fillStyle='#4682B4';ctx.fillText(Math.round(w/GCS*GS)+'×'+Math.round(h/GCS*GS)+'ft',Math.min(from.x,sx)+4,Math.min(from.y,sy)-4);}
 
-function finFence(){if(cfp.length>=2){su();const segs=[];for(let i=0;i<cfp.length-1;i++)segs.push({dist:fd(cfp[i],cfp[i+1])});objs.push({type:'fence',points:[...cfp],fenceType:{...selFence},segments:segs});updateQ();asd();}cfp=[];redraw();}
+function finLine(){if(cfp.length>=2){su();const segs=[];for(let i=0;i<cfp.length-1;i++)segs.push({dist:fd(cfp[i],cfp[i+1])});
+    if(tool==='fence')objs.push({type:'fence',points:[...cfp],fenceType:{...selFence},segments:segs});
+    else if(tool==='propline')objs.push({type:'propline',points:[...cfp],segments:segs});
+    else if(tool==='existing')objs.push({type:'existing',points:[...cfp],segments:segs});
+    updateQ();asd();}cfp=[];redraw();}
+function finFence(){finLine();}
 
 function findAt(mx,my){for(let i=objs.length-1;i>=0;i--){const o=objs[i];
-    if(o.type==='fence'){for(let j=0;j<o.points.length-1;j++){if(dts(mx,my,o.points[j],o.points[j+1])<10)return o;}}
+    if(o.type==='fence'||o.type==='propline'||o.type==='existing'){for(let j=0;j<o.points.length-1;j++){if(dts(mx,my,o.points[j],o.points[j+1])<10)return o;}}
     if(o.type==='gate-walk'||o.type==='gate-drive'){if(di({x:mx,y:my},o)<GCS*1.2)return o;}
     if(o.type==='tree'){if(di({x:mx,y:my},o)<GCS)return o;}
-    if(o.type==='house'){if(mx>=o.x&&mx<=o.x+o.w&&my>=o.y&&my<=o.y+o.h)return o;}
+    if(o.type==='house'||o.type==='pool'){if(mx>=o.x&&mx<=o.x+o.w&&my>=o.y&&my<=o.y+o.h)return o;}
     if(o.type==='text'){if(mx>=o.x-5&&mx<=o.x+100&&my>=o.y-15&&my<=o.y+5)return o;}}return null;}
 function dts(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;if(l2===0)return di({x:px,y:py},a);let t=((px-a.x)*dx+(py-a.y)*dy)/l2;t=Math.max(0,Math.min(1,t));return di({x:px,y:py},{x:a.x+t*dx,y:a.y+t*dy});}
 
@@ -372,14 +422,19 @@ function drawGrid(){const w=canvas._w,h=canvas._h;ctx.fillStyle='#f8fafc';ctx.fi
 function drawSP(x,y,c){ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
 
 function redraw(){if(!ctx)return;drawGrid();
-    objs.forEach(o=>{if(o.type==='house')drawHouse(o);});
+    objs.forEach(o=>{if(o.type==='house')drawHouse(o);if(o.type==='pool')drawPool(o);});
+    objs.forEach(o=>{if(o.type==='propline')drawPropLine(o);if(o.type==='existing')drawExisting(o);});
     objs.forEach(o=>{if(o.type==='fence')drawFL(o);});
     objs.forEach(o=>{
         if(o.type==='gate-walk')drawGate(o,'Walk Gate','#10b981',GCS*0.7);
         if(o.type==='gate-drive')drawGate(o,'Dbl Gate','#3b82f6',GCS*1.0);
         if(o.type==='tree')drawTr(o);if(o.type==='text')drawTx(o);});
-    if(cfp.length>0){ctx.beginPath();ctx.moveTo(cfp[0].x,cfp[0].y);for(let i=1;i<cfp.length;i++)ctx.lineTo(cfp[i].x,cfp[i].y);ctx.strokeStyle=selFence?.color||'#d4af37';ctx.lineWidth=4;ctx.stroke();
-        cfp.forEach((p,i)=>drawSP(p.x,p.y,i===0?'#10b981':selFence?.color||'#d4af37'));
+    if(cfp.length>0){const lc=tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':selFence?.color||'#d4af37';
+        ctx.beginPath();ctx.moveTo(cfp[0].x,cfp[0].y);for(let i=1;i<cfp.length;i++)ctx.lineTo(cfp[i].x,cfp[i].y);
+        if(tool==='propline'){ctx.setLineDash([8,6]);ctx.strokeStyle='#94a3b8';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);}
+        else if(tool==='existing'){ctx.setLineDash([6,4]);ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);}
+        else{ctx.strokeStyle=lc;ctx.lineWidth=4;ctx.stroke();}
+        cfp.forEach((p,i)=>drawSP(p.x,p.y,i===0?'#10b981':lc));
         for(let i=0;i<cfp.length-1;i++){const a=cfp[i],b=cfp[i+1];ctx.font='bold 10px sans-serif';ctx.fillStyle='#1e3a5f';ctx.fillText(fd(a,b)+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2-6);}}
     let tf=0;objs.forEach(o=>{if(o.type==='fence')o.segments.forEach(s=>tf+=s.dist);});
     const gd=$('grid-total-display');if(gd)gd.textContent='Total: '+tf+' ft';
@@ -425,6 +480,30 @@ function drawHouse(o){ctx.fillStyle='rgba(70,100,140,0.15)';ctx.fillRect(o.x,o.y
     ctx.font='9px sans-serif';ctx.fillStyle='rgba(70,130,180,0.6)';ctx.fillText(Math.round(o.w/GCS*GS)+'×'+Math.round(o.h/GCS*GS)+'ft',o.x+4,o.y+14);}
 function drawTx(o){ctx.font='bold 12px sans-serif';ctx.fillStyle='#6b21a8';ctx.fillText(o.text,o.x,o.y);ctx.beginPath();ctx.arc(o.x-4,o.y-4,2,0,Math.PI*2);ctx.fillStyle='#6b21a8';ctx.fill();}
 
+function drawPropLine(o){if(o.points.length<2)return;ctx.beginPath();ctx.moveTo(o.points[0].x,o.points[0].y);for(let i=1;i<o.points.length;i++)ctx.lineTo(o.points[i].x,o.points[i].y);
+    ctx.setLineDash([8,6]);ctx.strokeStyle='#94a3b8';ctx.lineWidth=2;ctx.stroke();ctx.setLineDash([]);
+    o.points.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle='#94a3b8';ctx.fill();});
+    for(let i=0;i<o.points.length-1;i++){const a=o.points[i],b=o.points[i+1];ctx.font='9px sans-serif';ctx.fillStyle='#94a3b8';ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+4,(a.y+b.y)/2+14);}
+    ctx.font='8px sans-serif';ctx.fillStyle='#94a3b8';ctx.fillText('PROP LINE',o.points[0].x+4,o.points[0].y-8);}
+
+function drawExisting(o){if(o.points.length<2)return;ctx.beginPath();ctx.moveTo(o.points[0].x,o.points[0].y);for(let i=1;i<o.points.length;i++)ctx.lineTo(o.points[i].x,o.points[i].y);
+    ctx.setLineDash([6,4]);ctx.strokeStyle='#ef4444';ctx.lineWidth=3;ctx.stroke();ctx.setLineDash([]);
+    /* X marks along existing fence */
+    for(let i=0;i<o.points.length-1;i++){const a=o.points[i],b=o.points[i+1];const mx=(a.x+b.x)/2,my=(a.y+b.y)/2;
+        ctx.strokeStyle='#ef4444';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(mx-4,my-4);ctx.lineTo(mx+4,my+4);ctx.stroke();ctx.beginPath();ctx.moveTo(mx+4,my-4);ctx.lineTo(mx-4,my+4);ctx.stroke();
+        ctx.font='bold 9px sans-serif';ctx.fillStyle='#dc2626';ctx.fillText(o.segments[i].dist+'ft',(a.x+b.x)/2+8,(a.y+b.y)/2-6);}
+    ctx.font='8px sans-serif';ctx.fillStyle='#ef4444';ctx.fillText('REMOVE',o.points[0].x+4,o.points[0].y-8);}
+
+function drawPool(o){
+    ctx.fillStyle='rgba(59,130,246,0.12)';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.strokeStyle='#3b82f6';ctx.lineWidth=2;ctx.setLineDash([6,4]);ctx.strokeRect(o.x,o.y,o.w,o.h);ctx.setLineDash([]);
+    /* Water wave pattern */
+    ctx.strokeStyle='rgba(59,130,246,0.3)';ctx.lineWidth=1;
+    for(let y=o.y+GCS;y<o.y+o.h;y+=GCS){ctx.beginPath();for(let x=o.x;x<=o.x+o.w;x+=4){ctx.lineTo(x,y+Math.sin((x-o.x)/8)*3);}ctx.stroke();}
+    ctx.font='bold 10px sans-serif';ctx.fillStyle='#3b82f6';ctx.textAlign='center';ctx.fillText('POOL',o.x+o.w/2,o.y+o.h/2+4);
+    ctx.font='8px sans-serif';ctx.fillText(Math.round(o.w/GCS*GS)+'×'+Math.round(o.h/GCS*GS)+'ft',o.x+o.w/2,o.y+o.h/2+16);
+    ctx.textAlign='left';}
+
 /* ======== TEXT MODAL ======== */
 let tPos=null;
 function openTM(x,y){tPos={x,y};$('text-modal').style.display='flex';$('text-modal-input').value='';$('text-modal-input').focus();}
@@ -437,15 +516,41 @@ function su(){undo.push(JSON.stringify(objs));}
 $('grid-undo').addEventListener('click',()=>{if(cfp.length>0){cfp.pop();redraw();return;}if(undo.length){objs=JSON.parse(undo.pop());redraw();updateQ();asd();}});
 $('grid-clear').addEventListener('click',()=>{if(!confirm('Clear entire drawing?'))return;su();objs=[];cfp=[];redraw();updateQ();asd();});
 
+/* ======== ZOOM ======== */
+$('grid-zoom-in')?.addEventListener('click',()=>{if(GCS<40){GCS+=4;GS=Math.round(GCS/4);canvas._init=false;initCanvas();redraw();}});
+$('grid-zoom-out')?.addEventListener('click',()=>{if(GCS>10){GCS-=4;GS=Math.round(GCS/4);canvas._init=false;initCanvas();redraw();}});
+
+/* ======== DOWNLOAD ======== */
+$('grid-download')?.addEventListener('click',()=>{
+    const link=document.createElement('a');link.download='fence-layout-'+new Date().toISOString().split('T')[0]+'.png';
+    /* Draw a clean version with white background */
+    const tmpCanvas=document.createElement('canvas');tmpCanvas.width=canvas.width;tmpCanvas.height=canvas.height;
+    const tmpCtx=tmpCanvas.getContext('2d');tmpCtx.drawImage(canvas,0,0);
+    /* Add watermark */
+    const dpr=window.devicePixelRatio||1;tmpCtx.font='bold '+(14*dpr)+'px sans-serif';tmpCtx.fillStyle='rgba(30,58,95,0.3)';
+    tmpCtx.fillText('Ghareeb Fencing Solutions · (419) 902-8257',10*dpr,(canvas._h-10)*dpr);
+    link.href=tmpCanvas.toDataURL('image/png');link.click();
+});
+
 /* ======== QUOTE CALC ======== */
 function updateQ(){
-    const fences={},gates={walk:0,drive:0};let totalFt=0;
-    objs.forEach(o=>{if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
-        if(o.type==='gate-walk')gates.walk++;if(o.type==='gate-drive')gates.drive++;});
+    const fences={},gates={walk:0,drive:0};let totalFt=0;let existingFt=0;let propFt=0;let hasPool=false;
+    objs.forEach(o=>{
+        if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,sg:o.fenceType.sg,dg:o.fenceType.dg,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
+        if(o.type==='gate-walk')gates.walk++;if(o.type==='gate-drive')gates.drive++;
+        if(o.type==='existing')existingFt+=o.segments.reduce((s,g)=>s+g.dist,0);
+        if(o.type==='propline')propFt+=o.segments.reduce((s,g)=>s+g.dist,0);
+        if(o.type==='pool')hasPool=true;
+    });
     const mf=$('manual-feet')&&$('manual-feet').value?parseInt($('manual-feet').value):0;if(mf>0&&!totalFt)totalFt=mf;
     if(totalFt<10&&!Object.keys(fences).length){$('summary-placeholder').style.display='flex';$('summary-preview').style.display='none';$('drawing-legend').style.display='none';$('compare-btn').style.display='none';$('compare-section').style.display='none';return;}
     $('summary-placeholder').style.display='none';$('summary-preview').style.display='block';$('compare-btn').style.display='block';
-    const hm=HM[$('fence-height').value];const rem=$('remove-old').checked;let gt=0,bh='';
+    const hm=HM[$('fence-height').value];
+    /* Removal: combine drawn existing fence + manual input */
+    const manualRemoval=parseInt($('removal-feet')?.value)||0;
+    const totalRemoval=existingFt+manualRemoval;
+    const isPool=hasPool||$('pool-area')?.checked;
+    let gt=0,bh='';
     if(Object.keys(fences).length>0){for(const[n,f]of Object.entries(fences)){gt+=f.ft*f.ppf*hm;bh+=`<div class="summary-line"><span><span class="swatch" style="background:${f.color}"></span>${n}</span><span>${f.ft} ft</span></div>`;}}
     else if(mf>0&&selFence){gt=mf*selFence.ppf*hm;bh=`<div class="summary-line"><span><span class="swatch" style="background:${selFence.color}"></span>${selFence.name}</span><span>${mf} ft</span></div>`;}
     $('fence-breakdown').innerHTML=bh;
@@ -453,12 +558,20 @@ function updateQ(){
     if(gates.walk>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.walk*(ff.sg||350);gt+=c;gh+=`<div class="summary-line"><span>🚪 Walk Gates ×${gates.walk}</span><span>$${c.toLocaleString()}</span></div>`;}
     if(gates.drive>0){const ff=Object.values(fences)[0]||selFence||pricingData[0];const c=gates.drive*(ff.dg||650);gt+=c;gh+=`<div class="summary-line"><span>🚗 Drive Gates ×${gates.drive}</span><span>$${c.toLocaleString()}</span></div>`;}
     $('gate-breakdown').innerHTML=gh;
-    if(rem&&totalFt>0){const rc=totalFt*4;gt+=rc;$('preview-removal-line').style.display='flex';$('removal-cost').textContent='+$'+rc.toLocaleString();}else $('preview-removal-line').style.display='none';
+    /* Existing fence line */
+    const efl=$('existing-fence-line');if(efl){if(existingFt>0){efl.style.display='flex';$('existing-fence-ft').textContent=existingFt+' ft';}else efl.style.display='none';}
+    /* Removal cost */
+    if(totalRemoval>0){const rc=totalRemoval*4;gt+=rc;$('preview-removal-line').style.display='flex';$('removal-cost').textContent='+$'+rc.toLocaleString()+' ('+totalRemoval+'ft)';}else $('preview-removal-line').style.display='none';
+    /* Pool compliance */
+    const ppl=$('preview-pool-line');if(ppl){ppl.style.display=isPool?'flex':'none';}
+    const pn=$('pool-note');if(pn)pn.style.display=isPool?'block':'none';
+    /* Property line */
+    const pls=$('propline-summary');if(pls){if(propFt>0){pls.style.display='flex';$('propline-ft').textContent=propFt+' ft';}else pls.style.display='none';}
     $('total-feet').innerHTML='<strong>'+totalFt+' ft</strong>';
     const lo=Math.round(gt*0.85),hi=Math.round(gt*1.15);
     $('range-low').textContent='$'+lo.toLocaleString();$('range-high').textContent='$'+hi.toLocaleString();
-    leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:rem};
-    updateLeg(fences,gates);
+    leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:totalRemoval>0,removalFt:totalRemoval,pool:isPool,existingFenceFt:existingFt,propertyLineFt:propFt};
+    updateLeg(fences,gates,existingFt,propFt,hasPool);
     if(lo>0&&leadData.name){clearTimeout(window._qst);window._qst=setTimeout(()=>submitLead(leadData,'Ballpark: '+Object.keys(fences).join(', ')+', '+totalFt+'ft, $'+lo+'-$'+hi),3000);}
 }
 
@@ -481,23 +594,29 @@ function renderCompare(){
     h+='</div>';$('compare-cards').innerHTML=h;
 }
 
-function updateLeg(fences,gates){const leg=$('drawing-legend'),items=$('legend-items');const has=objs.length>0;leg.style.display=has?'block':'none';if(!has)return;
+function updateLeg(fences,gates,existingFt,propFt,hasPool){const leg=$('drawing-legend'),items=$('legend-items');const has=objs.length>0;leg.style.display=has?'block':'none';if(!has)return;
     let h='';for(const[n,f]of Object.entries(fences))h+=`<div class="legend-row"><span class="swatch" style="background:${f.color}"></span><span>${n}: ${f.ft}ft</span></div>`;
     if(gates.walk>0)h+=`<div class="legend-row">🚪 Walk Gates: ${gates.walk}</div>`;if(gates.drive>0)h+=`<div class="legend-row">🚗 Drive Gates: ${gates.drive}</div>`;
+    if(existingFt>0)h+=`<div class="legend-row"><span class="swatch" style="background:#ef4444"></span> Existing Fence: ${existingFt}ft (removal)</div>`;
+    if(propFt>0)h+=`<div class="legend-row"><span class="swatch" style="background:#94a3b8"></span> Property Line: ${propFt}ft</div>`;
+    if(hasPool)h+=`<div class="legend-row">🏊 Pool Area</div>`;
     objs.filter(o=>o.type==='house').forEach(x=>{h+=`<div class="legend-row">🏠 ${x.label}</div>`;});
     const tr=objs.filter(o=>o.type==='tree').length;if(tr)h+=`<div class="legend-row">🌳 Trees: ${tr}</div>`;items.innerHTML=h;}
 
 /* ======== SAVE DRAWING ======== */
 let svT=null;function asd(){clearTimeout(svT);svT=setTimeout(()=>saveDraw(),2000);}
-async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>o.type==='fence'?{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments}:{...o});
+async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>{
+    if(o.type==='fence')return{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments};
+    if(o.type==='propline'||o.type==='existing')return{type:o.type,points:o.points,segments:o.segments};
+    return{...o};});
     const img=canvas.toDataURL('image/png',0.7);await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
 
 /* ======== LEAD SUBMIT — jobs + websiteLeads + Netlify Forms + API ======== */
 async function submitLead(d,notes){
     try{const f=new FormData();f.append('form-name','ballpark-leads');f.append('name',d.name||'');f.append('phone',d.phone||'');f.append('email',d.email||'');f.append('address',d.address||'');if(d.estimate)f.append('estimatedRange','$'+d.estimate.low+'-$'+d.estimate.high);f.append('notes',notes||'');await fetch('/__forms.html',{method:'POST',body:f});}catch(e){}
-    if(db&&!leadDocId){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'website-ballpark',priority:'normal',style:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),height:(d.estimate?.height||'6')+' ft',footage:String(d.estimate?.totalFt||0),singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:(notes||'')+'\n[Website Ballpark — '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),cDate:new Date().toISOString().split('T')[0],websiteLead:true,isWebsiteLead:true});leadDocId=ref.id;}catch(e){}}
+    if(db&&!leadDocId){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'website-ballpark',priority:'normal',style:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),height:(d.estimate?.height||'6')+' ft',footage:String(d.estimate?.totalFt||0),singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:(notes||'')+'\n[Website Ballpark — '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),cDate:new Date().toISOString().split('T')[0],websiteLead:true,isWebsiteLead:true});leadDocId=ref.id;}catch(e){}}
     if(db){try{const np=(d.name||'').split(' ');await db.collection('websiteLeads').add({firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',name:d.name,phone:d.phone,email:d.email||'',address:d.address,source:'ballpark-calculator',fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),totalFeet:d.estimate?.totalFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),status:'new',jobId:leadDocId||''});}catch(e){}}
-    try{await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'lead',name:d.name,phone:d.phone,email:d.email,address:d.address,fenceType:selFence?.name||'',fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',website:$('hp-website')?.value||''})});}catch(e){}
+    try{await fetch('/api/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type:'ballpark',name:d.name,phone:d.phone,email:d.email,address:d.address,fenceType:selFence?.name||'',fenceLength:d.estimate?.totalFt||0,fenceHeight:d.estimate?.height||'6',singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',website:$('hp-website')?.value||''})});}catch(e){}
 }
 
 /* ======== STEP 1 UNLOCK ======== */
@@ -515,8 +634,15 @@ $('unlock-tool-btn').addEventListener('click',async()=>{
     ['step-2-content','step-3-content'].forEach(id=>$(id).style.display='block');
     if($('map-address-input'))$('map-address-input').value=address;
     initCanvas();
-    if(!window._mapsUnavailable&&window._mapsApiKey){const s=document.createElement('script');s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';s.async=true;s.onerror=function(){window._mapsUnavailable=true;$('map-status-text').textContent='Satellite view unavailable';};document.head.appendChild(s);}
-    else{$('map-status-text').textContent='Satellite view not configured';}
+    if(!window._mapsUnavailable&&window._mapsApiKey){
+        $('map-status-text').textContent='Loading satellite view...';
+        const s=document.createElement('script');
+        s.src='https://maps.googleapis.com/maps/api/js?key='+window._mapsApiKey+'&libraries=drawing,places,geometry&callback=initGoogleMaps';
+        s.async=true;
+        s.onerror=function(){window._mapsUnavailable=true;$('map-status-text').textContent='Satellite view unavailable. Use Grid Drawing.';};
+        setTimeout(()=>{if(!window._mapsReady)$('map-status-text').textContent='Maps loading... Switch to Satellite Map tab when ready.';},5000);
+        document.head.appendChild(s);
+    }else{$('map-status-text').textContent='Satellite view not configured. Use Grid Drawing.';}
     $('step-2').scrollIntoView({behavior:'smooth',block:'start'});
 });
 
@@ -524,17 +650,41 @@ $('unlock-tool-btn').addEventListener('click',async()=>{
 if($('manual-feet'))$('manual-feet').addEventListener('input',updateQ);
 document.querySelectorAll('.quick-ft').forEach(b=>b.addEventListener('click',()=>{$('manual-feet').value=b.dataset.ft;updateQ();}));
 $('fence-height').addEventListener('change',updateQ);
-$('remove-old').addEventListener('change',updateQ);
+if($('removal-feet'))$('removal-feet').addEventListener('input',updateQ);
+if($('pool-area'))$('pool-area').addEventListener('change',updateQ);
 
 /* ======== MAP ======== */
 let gmap=null;
 window.searchMapAddress=function(addr){
     if(!addr)addr=$('map-address-input')?.value?.trim();if(!addr){$('map-status-text').textContent='Enter an address to search';return;}
-    if(!window.google||!window.google.maps){$('map-status-text').textContent='⚠️ Satellite view requires Maps API setup. Use Grid Drawing to design your fence.';return;}
-    $('map-status-text').textContent='🔍 Searching...';
-    new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
-        if(s==='OK'&&r[0]){const loc=r[0].geometry.location;$('map-instructions').style.display='none';gmap=new google.maps.Map($('map'),{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true});}
-        else{$('map-status-text').textContent='Address not found — try a more specific address.';}});};
+    if(!window.google||!window.google.maps){$('map-status-text').textContent='\u26a0\ufe0f Maps not loaded. Click the Satellite Map tab after a moment.';return;}
+    $('map-status-text').textContent='\U0001f50d Searching for your property...';$('map-instructions').style.display='flex';
+    const mapEl=$('map');const container=$('map-container');
+    const searchTimeout=setTimeout(()=>{$('map-status-text').textContent='\u26a0\ufe0f Search taking long. Try a more specific address (include city, state).';},8000);
+    try{new google.maps.Geocoder().geocode({address:addr},(r,s)=>{
+        clearTimeout(searchTimeout);
+        if(s==='OK'&&r[0]){const loc=r[0].geometry.location;
+            /* Always destroy + recreate map to avoid hidden-panel render bug */
+            mapEl.innerHTML='';gmap=null;
+            $('map-instructions').style.display='none';
+            gmap=new google.maps.Map(mapEl,{center:{lat:loc.lat(),lng:loc.lng()},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT}});
+            /* Add property marker */
+            new google.maps.Marker({position:{lat:loc.lat(),lng:loc.lng()},map:gmap,title:'Your Property',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
+            /* Enable drawing tools on map */
+            if(google.maps.drawing){
+                const dm=new google.maps.drawing.DrawingManager({drawingControl:true,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline','polygon','marker']},polylineOptions:{strokeColor:'#d4af37',strokeWeight:3},polygonOptions:{strokeColor:'#d4af37',fillColor:'#d4af37',fillOpacity:0.15}});
+                dm.setMap(gmap);
+                google.maps.event.addListener(dm,'polylinecomplete',function(pl){
+                    const len=google.maps.geometry.sphericalLength(pl.getPath());
+                    const ft=Math.round(len*3.28084);
+                    if($('manual-feet')&&ft>5){$('manual-feet').value=ft;updateQ();}
+                    const info=new google.maps.InfoWindow({content:'<strong>'+ft+' ft</strong>'});
+                    info.open(gmap);info.setPosition(pl.getPath().getAt(Math.floor(pl.getPath().getLength()/2)));
+                });
+            }
+            $('map-status-text').textContent='';
+        }else{$('map-status-text').textContent='Address not found. Include full address with city & state.';}
+    });}catch(e){clearTimeout(searchTimeout);$('map-status-text').textContent='\u26a0\ufe0f Map error. Use Grid Drawing to design your fence.';}};
 if($('map-search-btn'))$('map-search-btn').addEventListener('click',()=>window.searchMapAddress());
 if($('map-address-input'))$('map-address-input').addEventListener('keypress',e=>{if(e.key==='Enter'){e.preventDefault();window.searchMapAddress();}});
 
@@ -656,4 +806,6 @@ loadPricing();
     .modal-box input:focus{border-color:var(--primary);outline:none}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
     @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.tool-divider{height:24px}.grid-legend{display:none}.view-tab{font-size:0.8rem;padding:8px 4px}.compare-grid{grid-template-columns:1fr 1fr}}
+    .map-hint-bar{background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;padding:12px}
+    .map-hint-bar .map-hint{margin:0}
 </style>
