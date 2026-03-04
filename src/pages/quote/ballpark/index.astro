@@ -124,18 +124,28 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     <!-- MAP VIEW -->
                     <div class="view-panel" id="view-map">
                         <div class="map-tip-bar">
-                            <p class="map-tip">📍 <strong>Select a tool above</strong>, then click points on the map to draw fence lines with real measurements. Select Gate or Tree, then tap to place.</p>
+                            <p class="map-tip">📍 <strong>Draw mode:</strong> Click to place points, double-click or ✓ Done to finish. <strong>Pan mode:</strong> Drag to move map. Two-finger pinch to zoom. All measurements are GPS-accurate.</p>
                         </div>
                         <div class="map-search-bar">
                             <input type="text" id="map-address-input" autocomplete="off" placeholder="Search your address for satellite view" />
                             <button type="button" id="map-search-btn" class="btn btn-primary btn-sm">🔍 Search</button>
                         </div>
-                        <div id="map-container"><div id="map"></div><div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div></div>
+                        <div id="map-container">
+                            <div id="map"></div>
+                            <canvas id="map-canvas"></canvas>
+                            <div class="map-instructions" id="map-instructions"><span id="map-status-text">Search your address above to load satellite view</span></div>
+                            <div class="map-mode-toggle">
+                                <button type="button" id="map-mode-draw" class="map-mode-btn active">✏️ Draw</button>
+                                <button type="button" id="map-mode-pan" class="map-mode-btn">🖐 Pan</button>
+                            </div>
+                            <div class="map-scale-bar" id="map-scale-bar"></div>
+                        </div>
                         <div id="map-measurement-bar" class="map-measurement-bar">
                             <span id="map-active-tool" class="map-tool-badge">Fence ✏</span>
-                            <span id="map-total-ft">Select a tool & draw on the map</span>
-                            <button type="button" id="map-undo-line" class="toolbar-btn" style="margin-left:auto;font-size:0.8rem;">↩ Undo</button>
-                            <button type="button" id="map-clear-lines" class="toolbar-btn" style="font-size:0.8rem;">🗑 Clear</button>
+                            <span id="map-total-ft">Draw fence lines on the map with accurate measurements</span>
+                            <button type="button" id="map-finish-line" class="toolbar-btn" style="margin-left:auto;">✓ Done</button>
+                            <button type="button" id="map-undo-line" class="toolbar-btn">↩ Undo</button>
+                            <button type="button" id="map-clear-lines" class="toolbar-btn">🗑 Clear</button>
                         </div>
                     </div>
 
@@ -441,20 +451,13 @@ function openGM(x,y,type,suggestedDir){
 document.querySelectorAll('.gate-dir-btn').forEach(b=>{b.addEventListener('click',()=>{
     if(!pendingGate)return;
     su();
-    if(pendingGate.fromMap&&pendingGate.mapLatLng&&gmap){
-        /* Place marker on map */
-        const color=pendingGate.type==='gate-walk'?'#10b981':'#3b82f6';
-        const mk=new google.maps.Marker({position:pendingGate.mapLatLng,map:gmap,title:(pendingGate.type==='gate-walk'?'Walk':'Dbl')+' Gate ('+selGateWidth+'ft)',icon:{path:google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,scale:6,fillColor:color,fillOpacity:1,strokeColor:'#fff',strokeWeight:2},draggable:true});
-        const info=new google.maps.InfoWindow({content:'<div style="padding:4px 8px;font-weight:bold;color:'+color+';">'+(pendingGate.type==='gate-walk'?'🚪 Walk':'🚗 Dbl')+' Gate ('+selGateWidth+'ft) — '+b.dataset.dir+'</div>'});
-        mk.addListener('click',()=>info.open(gmap,mk));
-        window._mapMarkers.push({marker:mk,type:pendingGate.type});
-        objs.push({type:pendingGate.type,x:0,y:0,dir:b.dataset.dir,width:selGateWidth,fromMap:true});
-        if(window.updateMapBar)window.updateMapBar();
+    if(pendingGate.fromMap&&window._onMapGateConfirmed){
+        window._onMapGateConfirmed(b.dataset.dir,selGateWidth);
     }else{
         objs.push({type:pendingGate.type,x:pendingGate.x,y:pendingGate.y,dir:b.dataset.dir,width:selGateWidth});
-        redraw();
+        redraw();pendingGate=null;
     }
-    $('gate-modal').style.display='none';pendingGate=null;updateQ();asd();
+    $('gate-modal').style.display='none';updateQ();asd();
 });});
 $('gate-modal-cancel').addEventListener('click',()=>{$('gate-modal').style.display='none';pendingGate=null;});
 
@@ -791,7 +794,23 @@ function generatePDF(){
     const est=leadData.estimate;if(!est)return;
     /* Capture canvas drawing */
     let drawingImg='';
-    if(canvas){
+    /* Try map canvas first (satellite overlay), then grid canvas */
+    const mc2=$('map-canvas');
+    if(mc2&&mc2.width>10){
+        /* Composite: capture google map div + our canvas overlay */
+        try{
+            const mapEl=$('map');const mr=mapEl.getBoundingClientRect();
+            /* Use html2canvas-style approach: just use the overlay canvas */
+            const tmp=document.createElement('canvas');tmp.width=mc2.width;tmp.height=mc2.height;
+            const tc=tmp.getContext('2d');tc.fillStyle='#2d3748';tc.fillRect(0,0,tmp.width,tmp.height);
+            tc.drawImage(mc2,0,0);
+            const dpr=window.devicePixelRatio||1;
+            tc.font='bold '+(12*dpr)+'px sans-serif';tc.fillStyle='rgba(255,255,255,0.4)';
+            tc.fillText('Satellite overlay — Ghareeb Fencing Solutions',8*dpr,(mc2.height/dpr-8)*dpr);
+            drawingImg=tmp.toDataURL('image/png',0.9);
+        }catch(e){}
+    }
+    if(!drawingImg&&canvas){
         const tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=canvas.height;
         const tc=tmp.getContext('2d');tc.fillStyle='#fff';tc.fillRect(0,0,tmp.width,tmp.height);tc.drawImage(canvas,0,0);
         drawingImg=tmp.toDataURL('image/png',0.9);
@@ -891,154 +910,420 @@ window.searchMapAddress=function(addr){
     }
 
     function showMap(lat,lng){
-        mapEl.innerHTML='';gmap=null;window._mapLines=[];window._mapLabels=[];window._mapTotalFt=0;window._mapMarkers=[];
+        const mapEl=$('map');
+        mapEl.innerHTML='';gmap=null;
         $('map-instructions').style.display='none';
-        gmap=new google.maps.Map(mapEl,{center:{lat,lng},zoom:20,mapTypeId:'satellite',tilt:0,disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT}});
-        new google.maps.Marker({position:{lat,lng},map:gmap,title:'Your Property',icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
-        /* Map click handler — place gates, trees, text based on active tool */
-        google.maps.event.addListener(gmap,'click',function(e){
-            const lat2=e.latLng.lat(),lng2=e.latLng.lng();
+
+        /* ---- Map objects (stored with lat/lng for GPS accuracy) ---- */
+        let mapObjs=[];/* {type,points:[{lat,lng}],segments:[{dist}],fenceType,...} */
+        let mapCfp=[];/* Current fence points being drawn */
+        let mapMode='draw';/* 'draw' or 'pan' */
+        let mapDragGate=null;
+
+        /* ---- Create Google Map ---- */
+        gmap=new google.maps.Map(mapEl,{center:{lat,lng},zoom:20,mapTypeId:'satellite',tilt:0,
+            disableDefaultUI:true,zoomControl:true,gestureHandling:'greedy',
+            mapTypeControl:true,mapTypeControlOptions:{style:google.maps.MapTypeControlStyle.DROPDOWN_MENU,position:google.maps.ControlPosition.TOP_RIGHT},
+            draggable:false,scrollwheel:false,disableDoubleClickZoom:true});
+        new google.maps.Marker({position:{lat,lng},map:gmap,title:'Your Property',
+            icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#d4af37',fillOpacity:1,strokeColor:'#fff',strokeWeight:2}});
+
+        /* ---- Canvas overlay ---- */
+        const mc=$('map-canvas');
+        const mcRect=mapEl.getBoundingClientRect();
+        const dpr=window.devicePixelRatio||1;
+        mc.width=mcRect.width*dpr;mc.height=mcRect.height*dpr;
+        mc.style.width=mcRect.width+'px';mc.style.height=mcRect.height+'px';
+        const mctx=mc.getContext('2d');mctx.scale(dpr,dpr);
+        const mcW=mcRect.width,mcH=mcRect.height;
+
+        /* ---- Projection via OverlayView ---- */
+        let ovProj=null;
+        const ov=new google.maps.OverlayView();
+        ov.onAdd=function(){};ov.draw=function(){ovProj=this.getProjection();redrawMapCanvas();};ov.onRemove=function(){};
+        ov.setMap(gmap);
+
+        function ll2px(lt,ln){
+            if(!ovProj)return null;
+            try{return ovProj.fromLatLngToContainerPixel(new google.maps.LatLng(lt,ln));}catch(e){return null;}
+        }
+        function px2ll(x,y){
+            if(!ovProj)return null;
+            try{const ll=ovProj.fromContainerPixelToLatLng(new google.maps.Point(x,y));return{lat:ll.lat(),lng:ll.lng()};}catch(e){return null;}
+        }
+        function llDist(a,b){
+            return Math.round(google.maps.geometry.spherical.computeDistanceBetween(
+                new google.maps.LatLng(a.lat,a.lng),new google.maps.LatLng(b.lat,b.lng))*3.28084);
+        }
+
+        /* ---- Pan/Draw mode toggle ---- */
+        function setMapMode(mode){
+            mapMode=mode;
+            mc.style.pointerEvents=(mode==='draw')?'auto':'none';
+            mc.style.cursor=(mode==='draw')?'crosshair':'default';
+            gmap.setOptions({draggable:mode==='pan',scrollwheel:mode==='pan',disableDoubleClickZoom:mode==='draw'});
+            document.querySelectorAll('.map-mode-btn').forEach(b=>b.classList.remove('active'));
+            $(mode==='draw'?'map-mode-draw':'map-mode-pan').classList.add('active');
+        }
+        $('map-mode-draw')?.addEventListener('click',()=>setMapMode('draw'));
+        $('map-mode-pan')?.addEventListener('click',()=>setMapMode('pan'));
+        setMapMode('draw');
+
+        /* Allow two-finger zoom even in draw mode */
+        mc.addEventListener('wheel',e=>{
+            e.preventDefault();
+            const z=gmap.getZoom();
+            gmap.setZoom(z+(e.deltaY<0?1:-1));
+        },{passive:false});
+
+        /* ---- Redraw on map move ---- */
+        google.maps.event.addListener(gmap,'idle',redrawMapCanvas);
+        google.maps.event.addListener(gmap,'zoom_changed',()=>setTimeout(redrawMapCanvas,50));
+
+        /* ---- Scale bar ---- */
+        function updateScaleBar(){
+            const center=gmap.getCenter();
+            const zoom=gmap.getZoom();
+            const mpp=156543.03392*Math.cos(center.lat()*Math.PI/180)/Math.pow(2,zoom);
+            const fpp=mpp*3.28084;
+            /* Find a nice round footage for ~100px */
+            const rawFt=fpp*100;
+            const nice=[10,20,25,50,100,150,200,250,500];
+            let scaleFt=nice.find(n=>n>=rawFt*0.5)||nice[nice.length-1];
+            const scalePx=Math.round(scaleFt/fpp);
+            const sb=$('map-scale-bar');
+            if(sb){sb.innerHTML='<div class="scale-line" style="width:'+scalePx+'px"></div><span>'+scaleFt+' ft</span>';}
+        }
+        google.maps.event.addListener(gmap,'idle',updateScaleBar);
+        google.maps.event.addListener(gmap,'zoom_changed',updateScaleBar);
+
+        /* ---- TOOL BADGE SYNC ---- */
+        const toolNames={fence:'Fence ✏',propline:'Prop Line 📏',existing:'Old Fence 🔴','gate-walk':'Walk Gate 🚪','gate-drive':'Dbl Gate 🚗',tree:'Tree 🌳',house:'House 🏠',pool:'Pool 🏊',text:'Text 💬',erase:'Erase 🗑'};
+        const badgeColors={fence:'#d4af37',propline:'#94a3b8',existing:'#ef4444','gate-walk':'#10b981','gate-drive':'#3b82f6',tree:'#22c55e',erase:'#ef4444'};
+        window._syncMapTool=function(){
+            const badge=$('map-active-tool');
+            if(badge){badge.textContent=toolNames[tool]||tool;badge.style.background=badgeColors[tool]||'#1e3a5f';}
+            redrawMapCanvas();
+        };
+        window._syncMapTool();
+
+        /* ---- Get canvas-local coords from mouse/touch ---- */
+        function mcPos(e){const r=mc.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top};}
+
+        /* ---- DRAWING: Click to place points ---- */
+        mc.addEventListener('click',function(e){
+            if(mapMode!=='draw')return;
+            const p=mcPos(e);const ll=px2ll(p.x,p.y);if(!ll)return;
+
+            if(tool==='fence'||tool==='propline'||tool==='existing'){
+                mapCfp.push(ll);redrawMapCanvas();return;
+            }
             if(tool==='gate-walk'||tool==='gate-drive'){
-                const gType=tool;/* capture */
-                const gLatLng=e.latLng;
-                /* Open gate modal to pick width+direction, THEN place marker */
-                pendingGate={x:0,y:0,type:gType,fromMap:true,mapLatLng:gLatLng};
-                $('gate-modal-title').textContent=gType==='gate-walk'?'Place Walk Gate (3-6 ft)':'Place Double Gate (10-16 ft)';
-                const wo=$('gate-width-options');
-                if(gType==='gate-drive'){wo.innerHTML='<button type="button" class="gate-width-btn" data-width="10">10 ft</button><button type="button" class="gate-width-btn active" data-width="12">12 ft</button><button type="button" class="gate-width-btn" data-width="14">14 ft</button><button type="button" class="gate-width-btn" data-width="16">16 ft</button>';selGateWidth=12;}
-                else{wo.innerHTML='<button type="button" class="gate-width-btn" data-width="3">3 ft</button><button type="button" class="gate-width-btn active" data-width="4">4 ft</button><button type="button" class="gate-width-btn" data-width="5">5 ft</button><button type="button" class="gate-width-btn" data-width="6">6 ft</button>';selGateWidth=4;}
-                wo.querySelectorAll('.gate-width-btn').forEach(b=>{b.addEventListener('click',()=>{wo.querySelectorAll('.gate-width-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selGateWidth=parseInt(b.dataset.width);});});
-                document.querySelectorAll('.gate-dir-btn').forEach(b=>b.classList.remove('suggested'));
-                $('gate-modal').style.display='flex';
+                /* Snap to nearest map fence line */
+                let snapLL=ll,snapDir='right';
+                let bestDist=Infinity;
+                mapObjs.forEach(o=>{
+                    if(o.type!=='fence')return;
+                    for(let i=0;i<o.points.length-1;i++){
+                        const a=o.points[i],b=o.points[i+1];
+                        const pa=ll2px(a.lat,a.lng),pb=ll2px(b.lat,b.lng);if(!pa||!pb)continue;
+                        const dx=pb.x-pa.x,dy=pb.y-pa.y,len2=dx*dx+dy*dy;if(len2===0)continue;
+                        let t=((p.x-pa.x)*dx+(p.y-pa.y)*dy)/len2;t=Math.max(0,Math.min(1,t));
+                        const px2=pa.x+t*dx,py2=pa.y+t*dy;
+                        const d=Math.sqrt((p.x-px2)**2+(p.y-py2)**2);
+                        if(d<bestDist&&d<40){bestDist=d;
+                            const snapPx=px2ll(px2,py2);if(snapPx)snapLL=snapPx;
+                            const ang=Math.atan2(dy,dx);
+                            const isV=Math.abs(Math.sin(ang))>Math.abs(Math.cos(ang));
+                            snapDir=isV?(p.x<px2?'left':'right'):(p.y<py2?'up':'down');
+                        }
+                    }
+                });
+                pendingGate={x:0,y:0,type:tool,fromMap:true,mapLL:snapLL,suggestedDir:snapDir};
+                openGM(0,0,tool,snapDir);
                 return;
             }
-            if(tool==='tree'){
-                const mk=new google.maps.Marker({position:e.latLng,map:gmap,title:'Tree',icon:{url:'data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%2322c55e" stroke="%23fff" stroke-width="2"/><text x="12" y="16" text-anchor="middle" fill="white" font-size="12">🌳</text></svg>'),scaledSize:new google.maps.Size(28,28)},draggable:true});
-                window._mapMarkers.push({marker:mk,type:'tree'});
-                su();objs.push({type:'tree',x:0,y:0,fromMap:true});asd();
+            if(tool==='tree'){su();mapObjs.push({type:'tree',ll:ll});objs.push({type:'tree',x:0,y:0,fromMap:true});redrawMapCanvas();updateQ();asd();return;}
+            if(tool==='erase'){
+                /* Find nearest map object */
+                let bestI=-1,bestD=Infinity;
+                mapObjs.forEach((o,idx)=>{
+                    if(o.type==='tree'){const pp=ll2px(o.ll.lat,o.ll.lng);if(pp){const d=Math.sqrt((p.x-pp.x)**2+(p.y-pp.y)**2);if(d<bestD){bestD=d;bestI=idx;}}}
+                    if(o.type==='gate-walk'||o.type==='gate-drive'){const pp=ll2px(o.ll.lat,o.ll.lng);if(pp){const d=Math.sqrt((p.x-pp.x)**2+(p.y-pp.y)**2);if(d<bestD){bestD=d;bestI=idx;}}}
+                    if(o.type==='fence'||o.type==='propline'||o.type==='existing'){
+                        o.points.forEach(pt=>{const pp=ll2px(pt.lat,pt.lng);if(pp){const d=Math.sqrt((p.x-pp.x)**2+(p.y-pp.y)**2);if(d<bestD){bestD=d;bestI=idx;}}});
+                    }
+                });
+                if(bestI>=0&&bestD<30){
+                    const rem=mapObjs[bestI];mapObjs.splice(bestI,1);
+                    /* Remove matching fromMap obj */
+                    for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&objs[i].type===rem.type){objs.splice(i,1);break;}}
+                    redrawMapCanvas();updateQ();asd();updateMBar();
+                }
                 return;
             }
         });
-        if(google.maps.drawing){
-            const dm=new google.maps.drawing.DrawingManager({drawingControl:false,drawingControlOptions:{position:google.maps.ControlPosition.TOP_CENTER,drawingModes:['polyline']},polylineOptions:{strokeColor:'#FFD700',strokeWeight:4,strokeOpacity:1,icons:[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,strokeWeight:2,strokeColor:'#fff'},offset:'0',repeat:'20px'}]}});
-            dm.setMap(gmap);window._mapDM=dm;
-            /* Sync toolbar tool with DrawingManager */
-            function syncMapTool(){
-                if(!window._mapDM)return;
-                const toolNames={fence:'Fence ✏',propline:'Prop Line 📏',existing:'Old Fence 🔴','gate-walk':'Walk Gate 🚪','gate-drive':'Dbl Gate 🚗',tree:'Tree 🌳',house:'House 🏠',pool:'Pool 🏊',text:'Text 💬',erase:'Erase 🗑'};
-                const badge=$('map-active-tool');
-                if(badge){badge.textContent=toolNames[tool]||tool;
-                    const badgeColors={fence:'#d4af37',propline:'#94a3b8',existing:'#ef4444','gate-walk':'#10b981','gate-drive':'#3b82f6',tree:'#22c55e',erase:'#ef4444'};
-                    badge.style.background=badgeColors[tool]||'#1e3a5f';
-                }
-                if(tool==='fence'||tool==='propline'||tool==='existing'){
-                    const colors={fence:'#FFD700',propline:'#94a3b8',existing:'#ef4444'};
-                    window._mapDM.setOptions({drawingMode:'polyline',polylineOptions:{strokeColor:colors[tool]||'#FFD700',strokeWeight:tool==='fence'?4:3,strokeOpacity:1,icons:tool==='fence'?[{icon:{path:'M 0,-1 0,1',strokeOpacity:1,strokeWeight:2,strokeColor:'#fff'},offset:'0',repeat:'20px'}]:[]}});
-                }else{
-                    window._mapDM.setDrawingMode(null);
-                }
+
+        /* ---- DRAWING: Mousemove preview ---- */
+        let mapMouse=null;
+        mc.addEventListener('mousemove',function(e){
+            if(mapMode!=='draw')return;
+            mapMouse=mcPos(e);redrawMapCanvas();
+        });
+        mc.addEventListener('mouseleave',function(){mapMouse=null;redrawMapCanvas();});
+
+        /* ---- DRAWING: Double-click to finish line ---- */
+        mc.addEventListener('dblclick',function(e){
+            e.preventDefault();
+            if(mapCfp.length>=2)finMapLine();
+        });
+
+        /* ---- TOUCH: Single tap=draw, two-finger=pan ---- */
+        let mapTouches=0,mapLastTap=0;
+        mc.addEventListener('touchstart',function(e){
+            mapTouches=e.touches.length;
+            if(mapTouches>=2){/* Two-finger: pass to map for pan/zoom */
+                mc.style.pointerEvents='none';
+                setTimeout(()=>{if(mapMode==='draw')mc.style.pointerEvents='auto';},500);
             }
-            window._syncMapTool=syncMapTool;
-            syncMapTool();
-            google.maps.event.addListener(dm,'polylinecomplete',function(pl){
-                const path=pl.getPath();
-                const totalLen=google.maps.geometry.spherical.computeLength(path);
-                const totalFt=Math.round(totalLen*3.28084);
-                const curTool=tool;/* capture current tool */
-                window._mapLines.push({line:pl,tool:curTool});
-                /* Build segment data with real feet */
-                const segs=[];const pts=[];
-                for(let i=0;i<path.getLength();i++){
-                    pts.push({x:0,y:0,lat:path.getAt(i).lat(),lng:path.getAt(i).lng()});
-                    if(i>0){
-                        const segLen=google.maps.geometry.spherical.computeDistanceBetween(path.getAt(i-1),path.getAt(i));
-                        segs.push({dist:Math.round(segLen*3.28084)});
+        },{passive:true});
+        mc.addEventListener('touchend',function(e){
+            if(mapTouches>=2){mapTouches=0;return;}/* was a two-finger gesture */
+            if(e.changedTouches.length===0)return;
+            const t=e.changedTouches[0];const r=mc.getBoundingClientRect();
+            const x=t.clientX-r.left,y=t.clientY-r.top;
+            const now=Date.now();
+            /* Double-tap detection */
+            if(now-mapLastTap<300&&mapCfp.length>=2){finMapLine();mapLastTap=0;return;}
+            mapLastTap=now;
+            /* Simulate click */
+            const ll=px2ll(x,y);if(!ll)return;
+            if(tool==='fence'||tool==='propline'||tool==='existing'){mapCfp.push(ll);redrawMapCanvas();}
+            else{/* Trigger click handler for gates, trees, erase */
+                mc.dispatchEvent(new MouseEvent('click',{clientX:t.clientX,clientY:t.clientY}));
+            }
+        },{passive:true});
+
+        /* ---- Finish current line ---- */
+        function finMapLine(){
+            if(mapCfp.length<2)return;
+            const segs=[];
+            for(let i=0;i<mapCfp.length-1;i++)segs.push({dist:llDist(mapCfp[i],mapCfp[i+1])});
+            su();
+            if(tool==='fence'||tool==='propline'||tool==='existing'){
+                const mObj={type:tool==='fence'?'fence':tool,points:mapCfp.slice(),segments:segs};
+                if(tool==='fence')mObj.fenceType={name:selFence?.name||'Wood Privacy',ppf:selFence?.ppf||28,sg:selFence?.sg||350,dg:selFence?.dg||650,color:selFence?.color||'#d4af37'};
+                mapObjs.push(mObj);
+                /* Create real obj for quote */
+                const qObj={type:mObj.type,points:mObj.points.map(p=>({x:0,y:0,lat:p.lat,lng:p.lng})),segments:segs,fromMap:true};
+                if(tool==='fence')qObj.fenceType=mObj.fenceType;
+                objs.push(qObj);
+            }
+            mapCfp=[];
+            redrawMapCanvas();updateQ();asd();updateMBar();
+        }
+        $('map-finish-line')?.addEventListener('click',finMapLine);
+
+        /* ---- Gate confirmed from modal ---- */
+        window._onMapGateConfirmed=function(dir,width){
+            if(!pendingGate||!pendingGate.fromMap||!pendingGate.mapLL)return;
+            su();
+            mapObjs.push({type:pendingGate.type,ll:pendingGate.mapLL,dir:dir,width:width});
+            objs.push({type:pendingGate.type,x:0,y:0,dir:dir,width:width,fromMap:true});
+            pendingGate=null;
+            redrawMapCanvas();updateQ();asd();updateMBar();
+        };
+
+        /* ---- Undo ---- */
+        $('map-undo-line')?.addEventListener('click',function(){
+            if(mapCfp.length>0){mapCfp.pop();redrawMapCanvas();return;}
+            if(mapObjs.length>0){
+                const rem=mapObjs.pop();
+                for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&objs[i].type===rem.type){objs.splice(i,1);break;}}
+                redrawMapCanvas();updateQ();asd();updateMBar();
+            }
+        });
+
+        /* ---- Clear all ---- */
+        $('map-clear-lines')?.addEventListener('click',function(){
+            mapObjs=[];mapCfp=[];
+            objs=objs.filter(o=>!o.fromMap);
+            redrawMapCanvas();updateQ();asd();updateMBar();
+        });
+
+        /* ---- Measurement bar ---- */
+        function updateMBar(){
+            let fFt=0,eFt=0,pFt=0,gC=0,tC=0;
+            mapObjs.forEach(o=>{
+                if(o.type==='fence')fFt+=o.segments.reduce((s,g)=>s+g.dist,0);
+                if(o.type==='existing')eFt+=o.segments.reduce((s,g)=>s+g.dist,0);
+                if(o.type==='propline')pFt+=o.segments.reduce((s,g)=>s+g.dist,0);
+                if(o.type==='gate-walk'||o.type==='gate-drive')gC++;
+                if(o.type==='tree')tC++;
+            });
+            let txt='';
+            if(fFt)txt+='Fence: '+fFt+'ft';
+            if(eFt)txt+=(txt?' · ':'')+' Removal: '+eFt+'ft';
+            if(pFt)txt+=(txt?' · ':'')+'Prop: '+pFt+'ft';
+            if(gC)txt+=(txt?' · ':'')+'Gates: '+gC;
+            if(tC)txt+=(txt?' · ':'')+'Trees: '+tC;
+            if(!txt)txt='Draw fence lines on the map with accurate measurements';
+            $('map-total-ft').textContent=txt;
+        }
+
+        /* ============ RENDER MAP CANVAS ============ */
+        function redrawMapCanvas(){
+            if(!mctx||!ovProj)return;
+            mctx.clearRect(0,0,mcW,mcH);
+
+            /* Draw completed objects */
+            mapObjs.forEach(o=>{
+                if(o.type==='fence')drawMFence(o);
+                if(o.type==='propline')drawMPropLine(o);
+                if(o.type==='existing')drawMExisting(o);
+                if(o.type==='gate-walk'||o.type==='gate-drive')drawMGate(o);
+                if(o.type==='tree')drawMTree(o);
+            });
+
+            /* Draw in-progress line */
+            if(mapCfp.length>0){
+                const pts=mapCfp.map(p=>ll2px(p.lat,p.lng)).filter(p=>p);
+                const lnColor=tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':selFence?.color||'#FFD700';
+                if(pts.length>0){
+                    mctx.beginPath();mctx.moveTo(pts[0].x,pts[0].y);
+                    for(let i=1;i<pts.length;i++)mctx.lineTo(pts[i].x,pts[i].y);
+                    /* Preview to mouse */
+                    if(mapMouse&&mapMode==='draw'){mctx.lineTo(mapMouse.x,mapMouse.y);}
+                    mctx.strokeStyle=lnColor;mctx.lineWidth=4;mctx.setLineDash([8,6]);mctx.stroke();mctx.setLineDash([]);
+                    /* Vertex dots */
+                    pts.forEach((p,i)=>{mctx.beginPath();mctx.arc(p.x,p.y,5,0,Math.PI*2);mctx.fillStyle=i===0?'#10b981':lnColor;mctx.fill();mctx.strokeStyle='#fff';mctx.lineWidth=2;mctx.stroke();});
+                    /* Segment labels */
+                    for(let i=0;i<mapCfp.length-1;i++){
+                        const ft=llDist(mapCfp[i],mapCfp[i+1]);
+                        drawMLabel((pts[i].x+pts[i+1].x)/2,(pts[i].y+pts[i+1].y)/2,ft+'ft',lnColor);
+                    }
+                    /* Preview segment to mouse */
+                    if(mapMouse&&mapMode==='draw'&&pts.length>0){
+                        const lastPt=mapCfp[mapCfp.length-1];
+                        const mousLL=px2ll(mapMouse.x,mapMouse.y);
+                        if(mousLL){const pft=llDist(lastPt,mousLL);
+                            if(pft>0)drawMLabel((pts[pts.length-1].x+mapMouse.x)/2,(pts[pts.length-1].y+mapMouse.y)/2,pft+'ft','rgba(255,255,255,0.8)');}
+                    }
+                    /* Running total */
+                    let runFt=0;for(let i=0;i<mapCfp.length-1;i++)runFt+=llDist(mapCfp[i],mapCfp[i+1]);
+                    if(runFt>0&&pts.length>1){
+                        const lp=pts[pts.length-1];
+                        drawMLabel(lp.x,lp.y-20,'Total: '+runFt+'ft','#fff',true);
                     }
                 }
-                /* Create a REAL obj so it shows in the quote */
-                su();
-                if(curTool==='fence'){
-                    objs.push({type:'fence',points:pts,segments:segs,fenceType:{name:selFence?.name||'Wood Privacy',ppf:selFence?.ppf||28,sg:selFence?.sg||350,dg:selFence?.dg||650,color:selFence?.color||'#d4af37'},fromMap:true});
-                }else if(curTool==='existing'){
-                    objs.push({type:'existing',points:pts,segments:segs,fromMap:true});
-                }else if(curTool==='propline'){
-                    objs.push({type:'propline',points:pts,segments:segs,fromMap:true});
-                }
-                updateQ();asd();
-                /* Color + label */
-                const lColor=curTool==='existing'?'#ef4444':curTool==='propline'?'#94a3b8':'#FFD700';
-                const lBg=curTool==='existing'?'#991b1b':curTool==='propline'?'#475569':'#1e3a5f';
-                /* Per-segment labels */
-                for(let i=0;i<path.getLength()-1;i++){
-                    const a=path.getAt(i),b=path.getAt(i+1);
-                    const mid=new google.maps.LatLng((a.lat()+b.lat())/2,(a.lng()+b.lng())/2);
-                    const segFt=segs[i].dist;
-                    const lbl=new google.maps.InfoWindow({content:'<div style="background:'+lBg+';color:'+lColor+';padding:4px 10px;border-radius:4px;font-size:14px;font-weight:bold;white-space:nowrap;border:2px solid '+lColor+';box-shadow:0 2px 6px rgba(0,0,0,0.3);">'+segFt+' ft</div>',disableAutoPan:true,maxWidth:200});
-                    lbl.setPosition(mid);lbl.open(gmap);window._mapLabels.push(lbl);
-                }
-                /* Total label at end */
-                if(path.getLength()>2){
-                    const endPt=path.getAt(path.getLength()-1);
-                    const totLbl=new google.maps.InfoWindow({content:'<div style="background:#fff;color:#1e3a5f;padding:6px 12px;border-radius:6px;font-size:16px;font-weight:bold;white-space:nowrap;border:2px solid #1e3a5f;box-shadow:0 2px 8px rgba(0,0,0,0.3);">Total: '+totalFt+' ft</div>',disableAutoPan:true});
-                    totLbl.setPosition(endPt);totLbl.open(gmap);window._mapLabels.push(totLbl);
-                }
-                /* Update measurement bar */
-                const mb=$('map-measurement-bar');if(mb)mb.style.display='flex';
-                updateMapBar();
-            });
-            window.updateMapBar=function updateMapBar(){
-                let fFt=0,eFt=0,pFt=0;
-                objs.forEach(o=>{
-                    if(!o.fromMap)return;
-                    const ft=o.segments?o.segments.reduce((s,g)=>s+g.dist,0):0;
-                    if(o.type==='fence')fFt+=ft;
-                    if(o.type==='existing')eFt+=ft;
-                    if(o.type==='propline')pFt+=ft;
-                });
-                let txt='';
-                if(fFt>0)txt+='Fence: '+fFt+'ft';
-                if(eFt>0)txt+=(txt?' · ':'')+' Removal: '+eFt+'ft';
-                if(pFt>0)txt+=(txt?' · ':'')+'Prop: '+pFt+'ft';
-                const gateCount=(window._mapMarkers||[]).filter(m=>m.type.includes('gate')).length;
-                if(gateCount>0)txt+=(txt?' · ':'')+'Gates: '+gateCount;
-                if(!txt)txt='Draw on the map — footage feeds into your quote';
-                const mtf=$('map-total-ft');if(mtf)mtf.textContent=txt;
+            }
+
+            /* Erase mode highlight */
+            if(tool==='erase'&&mapMouse&&mapMode==='draw'){
+                mctx.beginPath();mctx.arc(mapMouse.x,mapMouse.y,20,0,Math.PI*2);
+                mctx.strokeStyle='rgba(239,68,68,0.6)';mctx.lineWidth=2;mctx.setLineDash([4,4]);mctx.stroke();mctx.setLineDash([]);
             }
         }
-        /* Clear lines button */
-        /* Undo last map action */
-        const undoBtn=$('map-undo-line');
-        if(undoBtn){undoBtn.onclick=function(){
-            /* Remove last polyline */
-            if(window._mapLines&&window._mapLines.length>0){
-                const last=window._mapLines.pop();
-                try{last.line.setMap(null);}catch(e){}
-                /* Remove corresponding obj */
-                for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&(objs[i].type==='fence'||objs[i].type==='propline'||objs[i].type==='existing')){objs.splice(i,1);break;}}
-                /* Remove last N labels (segment count + maybe total label) */
-                /* Each polyline adds N-1 segment labels + possibly 1 total label */
-                /* Just remove last 2 labels as approximation */
-                for(let r=0;r<3&&window._mapLabels.length>0;r++){const lb=window._mapLabels.pop();try{lb.close();}catch(e){}}
-                updateQ();asd();updateMapBar();
-                if(window._syncMapTool)window._syncMapTool();
-            }else if(window._mapMarkers&&window._mapMarkers.length>0){
-                const last=window._mapMarkers.pop();
-                try{last.marker.setMap(null);}catch(e){}
-                for(let i=objs.length-1;i>=0;i--){if(objs[i].fromMap&&(objs[i].type==='gate-walk'||objs[i].type==='gate-drive'||objs[i].type==='tree')){objs.splice(i,1);break;}}
-                updateQ();asd();updateMapBar();
+
+        function drawMFence(o){
+            const pts=o.points.map(p=>ll2px(p.lat,p.lng)).filter(p=>p);
+            if(pts.length<2)return;
+            const clr=o.fenceType?.color||'#FFD700';
+            /* Thick line */
+            mctx.beginPath();mctx.moveTo(pts[0].x,pts[0].y);
+            for(let i=1;i<pts.length;i++)mctx.lineTo(pts[i].x,pts[i].y);
+            mctx.strokeStyle=clr;mctx.lineWidth=5;mctx.lineCap='round';mctx.lineJoin='round';mctx.stroke();
+            /* White dash overlay */
+            mctx.strokeStyle='rgba(255,255,255,0.4)';mctx.lineWidth=2;mctx.setLineDash([8,8]);mctx.stroke();mctx.setLineDash([]);
+            /* Vertices */
+            pts.forEach(p=>{mctx.beginPath();mctx.arc(p.x,p.y,5,0,Math.PI*2);mctx.fillStyle=clr;mctx.fill();mctx.strokeStyle='#fff';mctx.lineWidth=2;mctx.stroke();});
+            /* Segment labels */
+            for(let i=0;i<o.segments.length;i++){
+                if(i>=pts.length-1)break;
+                drawMLabel((pts[i].x+pts[i+1].x)/2,(pts[i].y+pts[i+1].y)/2,o.segments[i].dist+'ft',clr);
             }
-        };}
-        const clBtn=$('map-clear-lines');
-        if(clBtn){clBtn.onclick=function(){
-            (window._mapLines||[]).forEach(l=>{try{l.line.setMap(null)}catch(e){}});(window._mapLabels||[]).forEach(l=>l.close());
-            (window._mapMarkers||[]).forEach(m=>{try{m.marker.setMap(null)}catch(e){}});
-            /* Remove fromMap objects from grid objs */
-            objs=objs.filter(o=>!o.fromMap);
-            window._mapLines=[];window._mapLabels=[];window._mapTotalFt=0;window._mapMarkers=[];
-            const mb=$('map-measurement-bar');if(mb)mb.style.display='none';
-            if($('manual-feet')){$('manual-feet').value='';updateQ();}
-            if(window.updateMapBar)window.updateMapBar();
-        };}
+            /* Total */
+            const tf=o.segments.reduce((s,g)=>s+g.dist,0);
+            if(o.segments.length>1){
+                const lp=pts[pts.length-1];
+                mctx.font='bold 11px sans-serif';mctx.fillStyle='#fff';mctx.textAlign='center';
+                mctx.fillText('Σ '+tf+'ft',lp.x,lp.y+18);mctx.textAlign='left';
+            }
+            /* Name label */
+            if(pts.length>=2){
+                const mx=(pts[0].x+pts[1].x)/2,my=(pts[0].y+pts[1].y)/2;
+                mctx.font='8px sans-serif';mctx.fillStyle='rgba(255,255,255,0.7)';mctx.fillText(o.fenceType?.name||'Fence',mx+5,my+18);
+            }
+        }
+
+        function drawMPropLine(o){
+            const pts=o.points.map(p=>ll2px(p.lat,p.lng)).filter(p=>p);if(pts.length<2)return;
+            mctx.beginPath();mctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)mctx.lineTo(pts[i].x,pts[i].y);
+            mctx.strokeStyle='#94a3b8';mctx.lineWidth=3;mctx.setLineDash([10,6]);mctx.stroke();mctx.setLineDash([]);
+            pts.forEach(p=>{mctx.beginPath();mctx.arc(p.x,p.y,4,0,Math.PI*2);mctx.fillStyle='#94a3b8';mctx.fill();});
+            for(let i=0;i<o.segments.length&&i<pts.length-1;i++){
+                drawMLabel((pts[i].x+pts[i+1].x)/2,(pts[i].y+pts[i+1].y)/2,o.segments[i].dist+'ft (prop)','#94a3b8');
+            }
+        }
+
+        function drawMExisting(o){
+            const pts=o.points.map(p=>ll2px(p.lat,p.lng)).filter(p=>p);if(pts.length<2)return;
+            mctx.beginPath();mctx.moveTo(pts[0].x,pts[0].y);for(let i=1;i<pts.length;i++)mctx.lineTo(pts[i].x,pts[i].y);
+            mctx.strokeStyle='#ef4444';mctx.lineWidth=3;mctx.setLineDash([6,4]);mctx.stroke();mctx.setLineDash([]);
+            /* X marks */
+            for(let i=0;i<pts.length-1;i++){const mx=(pts[i].x+pts[i+1].x)/2,my=(pts[i].y+pts[i+1].y)/2;
+                mctx.strokeStyle='#ef4444';mctx.lineWidth=2;mctx.beginPath();mctx.moveTo(mx-5,my-5);mctx.lineTo(mx+5,my+5);mctx.stroke();mctx.beginPath();mctx.moveTo(mx+5,my-5);mctx.lineTo(mx-5,my+5);mctx.stroke();}
+            for(let i=0;i<o.segments.length&&i<pts.length-1;i++){
+                drawMLabel((pts[i].x+pts[i+1].x)/2,(pts[i].y+pts[i+1].y)/2,o.segments[i].dist+'ft (remove)','#ef4444');
+            }
+        }
+
+        function drawMGate(o){
+            const p=ll2px(o.ll.lat,o.ll.lng);if(!p)return;
+            const clr=o.type==='gate-walk'?'#10b981':'#3b82f6';
+            const w=o.width||(o.type==='gate-drive'?12:4);
+            const r=Math.max(12,w*2);
+            /* Gate icon */
+            mctx.beginPath();mctx.arc(p.x,p.y,r,0,Math.PI*2);
+            mctx.fillStyle=clr+'44';mctx.fill();mctx.strokeStyle=clr;mctx.lineWidth=2.5;mctx.stroke();
+            /* Arrow for direction */
+            const dirs={up:[0,-1],down:[0,1],left:[-1,0],right:[1,0]};
+            const d=dirs[o.dir||'right']||[1,0];
+            mctx.beginPath();mctx.moveTo(p.x,p.y);mctx.lineTo(p.x+d[0]*r*0.8,p.y+d[1]*r*0.8);
+            mctx.strokeStyle=clr;mctx.lineWidth=2;mctx.stroke();
+            /* Label */
+            mctx.font='bold 10px sans-serif';mctx.fillStyle='#fff';mctx.textAlign='center';
+            mctx.strokeStyle='rgba(0,0,0,0.6)';mctx.lineWidth=3;
+            const lbl=(o.type==='gate-walk'?'Gate':'Dbl')+' '+w+'ft';
+            mctx.strokeText(lbl,p.x,p.y+r+14);mctx.fillText(lbl,p.x,p.y+r+14);
+            mctx.textAlign='left';
+        }
+
+        function drawMTree(o){
+            const p=ll2px(o.ll.lat,o.ll.lng);if(!p)return;
+            mctx.beginPath();mctx.arc(p.x,p.y,10,0,Math.PI*2);
+            mctx.fillStyle='rgba(34,197,94,0.5)';mctx.fill();mctx.strokeStyle='#22c55e';mctx.lineWidth=2;mctx.stroke();
+            mctx.font='14px sans-serif';mctx.textAlign='center';mctx.fillText('🌳',p.x,p.y+5);mctx.textAlign='left';
+        }
+
+        function drawMLabel(x,y,text,color,big){
+            const fs=big?'bold 12px sans-serif':'bold 11px sans-serif';
+            mctx.font=fs;const tw=mctx.measureText(text).width;
+            const px=4,py=2;
+            mctx.fillStyle='rgba(0,0,0,0.7)';
+            mctx.beginPath();
+            const rx=x-tw/2-px,ry=y-7-py,rw=tw+px*2,rh=14+py*2,cr=4;
+            mctx.moveTo(rx+cr,ry);mctx.lineTo(rx+rw-cr,ry);mctx.quadraticCurveTo(rx+rw,ry,rx+rw,ry+cr);
+            mctx.lineTo(rx+rw,ry+rh-cr);mctx.quadraticCurveTo(rx+rw,ry+rh,rx+rw-cr,ry+rh);
+            mctx.lineTo(rx+cr,ry+rh);mctx.quadraticCurveTo(rx,ry+rh,rx,ry+rh-cr);
+            mctx.lineTo(rx,ry+cr);mctx.quadraticCurveTo(rx,ry,rx+cr,ry);
+            mctx.fill();
+            mctx.strokeStyle=color;mctx.lineWidth=1.5;mctx.stroke();
+            mctx.fillStyle=color;mctx.textAlign='center';mctx.fillText(text,x,y+4);
+            mctx.textAlign='left';
+        }
+
+        updateScaleBar();
         $('map-status-text').textContent='';
     }
 
@@ -1154,7 +1439,14 @@ loadPricing();
     .map-search-bar{display:flex;gap:10px;padding:12px;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none}
     .map-search-bar input{flex:1;padding:10px;border:2px solid #e2e8f0;border-radius:8px;font-size:0.95rem;background:white}
     .map-search-bar input:focus{border-color:var(--primary);outline:none}
-    #map-container{position:relative;height:400px;background:#1a1a2e;border:2px solid #e2e8f0;border-top:none}
+    #map-container{position:relative;height:420px;background:#1a1a2e;border:2px solid #e2e8f0;border-top:none;overflow:hidden}
+    #map-canvas{position:absolute;top:0;left:0;width:100%;height:100%;z-index:2;cursor:crosshair}
+    .map-mode-toggle{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);z-index:3;display:flex;gap:0;background:rgba(0,0,0,0.7);border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.4)}
+    .map-mode-btn{padding:8px 16px;border:none;background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;font-size:0.85rem;font-weight:600;transition:all 0.15s}
+    .map-mode-btn.active{background:#d4af37;color:#1e3a5f}
+    .map-mode-btn:hover:not(.active){background:rgba(255,255,255,0.15)}
+    .map-scale-bar{position:absolute;bottom:12px;right:12px;z-index:3;display:flex;align-items:center;gap:6px;color:white;font-size:0.75rem;font-weight:600;text-shadow:0 1px 3px rgba(0,0,0,0.8)}
+    .scale-line{height:3px;background:white;border-left:2px solid white;border-right:2px solid white;min-width:20px;box-shadow:0 1px 3px rgba(0,0,0,0.5)}
     #map{width:100%;height:100%}
     .map-instructions{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.7);text-align:center;padding:20px;font-size:0.95rem}
     .map-hint{font-size:0.85rem;color:#94a3b8;padding:12px;margin:0;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px}
@@ -1251,6 +1543,7 @@ loadPricing();
         .grid-info{font-size:0.85rem}
         .grid-legend{display:none}
         #map-container{height:350px}
+        #map-canvas{touch-action:none}
         .map-search-bar{padding:8px;gap:6px}
         .map-search-bar input{padding:10px;font-size:0.9rem}
         .quote-summary{padding:16px}
