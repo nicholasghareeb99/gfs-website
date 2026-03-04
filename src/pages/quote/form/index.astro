@@ -1,4 +1,5 @@
 ---
+const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getSiteSettings } from '../../../lib/firestore.js';
 const site = await getSiteSettings();
@@ -44,7 +45,7 @@ const site = await getSiteSettings();
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label for="q-email">Email *</label><input type="email" id="q-email" required placeholder="john@email.com" /></div>
-                                <div class="form-group"><label for="q-address">Property Address *</label><input type="text" id="q-address" required placeholder="123 Main St, Toledo, OH" /></div>
+                                <div class="form-group"><label for="q-address">Property Address *</label><input type="text" id="q-address" required autocomplete="off" placeholder="123 Main St, Toledo, OH" /></div>
                             </div>
                         </div>
 
@@ -413,6 +414,35 @@ const site = await getSiteSettings();
 </script>
 
 
+<!-- Google Maps Places Autocomplete for Address -->
+<script is:inline define:vars={{ mapsKey }}>
+window._gfsMapsKey=mapsKey;
+</script>
+<script is:inline>
+(function(){
+    const key=window._gfsMapsKey||'';if(!key)return;
+    window._initFormAutocomplete=function(){
+        try{
+            const addrField=document.getElementById('q-address');
+            if(!addrField||!window.google)return;
+            const ac=new google.maps.places.Autocomplete(addrField,{
+                componentRestrictions:{country:'us'},
+                fields:['formatted_address','address_components'],
+                types:['address']
+            });
+            ac.addListener('place_changed',function(){
+                const place=ac.getPlace();
+                if(place.formatted_address)addrField.value=place.formatted_address;
+            });
+        }catch(e){}
+    };
+    const s=document.createElement('script');
+    s.src='https://maps.googleapis.com/maps/api/js?key='+key+'&libraries=places&callback=_initFormAutocomplete';
+    s.async=true;s.defer=true;document.head.appendChild(s);
+})();
+</script>
+
+
 <style>
     .hero-mini { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); padding: 120px 0 40px; color: white; }
     .hero-mini .breadcrumb { margin-bottom: 16px; font-size: 0.9rem; }
@@ -447,4 +477,5 @@ const site = await getSiteSettings();
     .promise-list { list-style: none; padding: 0; margin: 0; }
     .promise-list li { padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.95rem; }
     .promise-list li:last-child { border-bottom: none; }
+    .pac-container{z-index:99999!important}
 </style>
