@@ -301,14 +301,19 @@ const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
 <script is:inline>
 (function(){
   var FK='gfs_edit_formFields';
-  function getF(){try{return JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){return[]}}
+  var FIREBASE_FIELDS=null;
+  function getF(){
+    // Priority: Firebase fields > localStorage > empty
+    if(FIREBASE_FIELDS)return FIREBASE_FIELDS;
+    try{return JSON.parse(localStorage.getItem(FK)||'[]')}catch(e){return[]}
+  }
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
   function render(){
     var box=document.getElementById('custom-fields-section');
     if(!box)return;
     var fields=getF();
     if(!fields.length){box.innerHTML='';return}
-    var h='';
+    var h='<div class="form-card"><h3>📝 Additional Details</h3>';
     fields.forEach(function(f,i){
       var req=f.required?' *':'',ra=f.required?' required':'';
       if(f.type==='text'){
@@ -323,6 +328,7 @@ const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
         h+='</select></div>';
       }
     });
+    h+='</div>';
     box.innerHTML=h;
   }
   window._getCustomFieldValues=function(){
@@ -333,11 +339,52 @@ const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
       if(v&&v!=='No')vals.push(f.label+': '+v);
     });return vals;
   };
-  // Load remote edits for form fields too
-  fetch('/site-edits.json?_='+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(d){
-    if(d&&d[FK]&&!localStorage.getItem(FK))localStorage.setItem(FK,d[FK]);
-    render();
-  }).catch(function(){render()});
+  // Load from Firebase settings first, then fallback to site-edits.json
+  var fbLoaded=false;
+  try{
+    var script1=document.createElement('script');
+    script1.src='https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js';
+    script1.onload=function(){
+      var script2=document.createElement('script');
+      script2.src='https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js';
+      script2.onload=function(){
+        try{
+          var cfg={apiKey:"AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",authDomain:"ghareeb-fencing.firebaseapp.com",projectId:"ghareeb-fencing",storageBucket:"ghareeb-fencing.firebasestorage.app",messagingSenderId:"187837905206",appId:"1:187837905206:web:1e9a9bc33f745cbeeddb97"};
+          if(!firebase.apps.length)firebase.initializeApp(cfg);
+          var db=firebase.firestore();
+          db.collection('settings').doc('global').get().then(function(doc){
+            if(doc.exists){
+              var data=doc.data();
+              if(data.formFields){
+                var ff=typeof data.formFields==='string'?JSON.parse(data.formFields):data.formFields;
+                if(Array.isArray(ff)&&ff.length>0){
+                  FIREBASE_FIELDS=ff;
+                  localStorage.setItem(FK,JSON.stringify(ff));
+                  fbLoaded=true;
+                }
+              }
+            }
+            render();
+          }).catch(function(){render()});
+        }catch(e){render()}
+      };
+      document.head.appendChild(script2);
+    };
+    document.head.appendChild(script1);
+  }catch(e){}
+  // Fallback: try site-edits.json if Firebase hasn't loaded in 3 seconds
+  setTimeout(function(){
+    if(!fbLoaded){
+      fetch('/site-edits.json?_='+Date.now()).then(function(r){return r.ok?r.json():null}).then(function(d){
+        if(d&&d[FK]&&!FIREBASE_FIELDS){
+          localStorage.setItem(FK,d[FK]);
+          render();
+        }
+      }).catch(function(){render()});
+    }
+  },3000);
+  // Also render immediately from localStorage cache
+  render();
 })();
 </script>
 
@@ -363,7 +410,25 @@ const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
     document.getElementById('fb-save').onclick=function(){
       saveF(getF());
       var btn=this;btn.textContent='Publishing...';btn.disabled=true;
-      // Push to GitHub via EditMode's exposed function
+      // Save to Firebase settings/global.formFields (primary)
+      var saved=false;
+      try{
+        if(typeof firebase!=='undefined'&&firebase.apps.length){
+          var db=firebase.firestore();
+          db.collection('settings').doc('global').set({formFields:JSON.stringify(getF())},{merge:true}).then(function(){
+            saved=true;
+            btn.textContent='Published!';btn.disabled=false;
+            setTimeout(function(){btn.textContent='Save & Publish'},2000);
+          }).catch(function(e){
+            console.error('Firebase save error:',e);
+            fallbackGitHub(btn);
+          });
+          return;
+        }
+      }catch(e){}
+      fallbackGitHub(btn);
+    };
+    function fallbackGitHub(btn){
       if(window._gfsPushToGitHub){
         window._gfsPushToGitHub().then(function(ok){
           btn.textContent=ok?'Published!':'Saved locally';
@@ -376,7 +441,7 @@ const mapsKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
         setTimeout(function(){btn.textContent='Save & Publish'},2000);
         location.reload();
       }
-    };
+    }
     renderList();
   }
   function remove(){var p=document.getElementById('fb-panel');if(p)p.remove()}
