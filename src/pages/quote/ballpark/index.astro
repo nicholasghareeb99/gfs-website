@@ -106,18 +106,23 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     <!-- GRID VIEW -->
                     <div class="view-panel active" id="view-grid">
                         <div class="grid-tip-bar">
-                            <p class="grid-tip">Tap to place points, double-tap or click ✓ Done to finish. Shift = straight.</p>
+                            <p class="grid-tip">Tap to place points, double-tap or click ✓ Done to finish. Shift = straight. <strong>Tip:</strong> Change fence style mid-drawing to mix styles! Scroll to zoom, drag in Pan mode to navigate.</p>
                         </div>
                         <div class="grid-wrapper"><canvas id="grid-canvas"></canvas></div>
                         <div class="grid-controls">
+                            <div class="grid-mode-toggle">
+                                <button type="button" id="grid-mode-draw" class="grid-mode-btn active">✏️ Draw</button>
+                                <button type="button" id="grid-mode-pan" class="grid-mode-btn">🖐 Pan</button>
+                            </div>
                             <button type="button" id="grid-finish" class="toolbar-btn finish-line-btn" title="Finish current line">✓ Done</button>
                             <button type="button" id="grid-undo" class="toolbar-btn">↩ Undo</button>
                             <button type="button" id="grid-clear" class="toolbar-btn">🗑 Clear</button>
                             <button type="button" id="grid-zoom-in" class="toolbar-btn" title="Zoom In">🔍+</button>
                             <button type="button" id="grid-zoom-out" class="toolbar-btn" title="Zoom Out">🔍−</button>
+                            <button type="button" id="grid-reset-view" class="toolbar-btn" title="Reset View">⟲ Reset</button>
                             <button type="button" id="grid-download" class="toolbar-btn" title="Download Drawing">📥 Save</button>
                             <div class="grid-info"><span id="grid-total-display">Total: 0 ft</span></div>
-                            <div class="grid-legend"><span>1 sq = 5 ft · Dbl-click/Esc to finish · Shift = straight</span></div>
+                            <div class="grid-legend"><span>1 sq = 5 ft · Scroll=zoom · Dbl-click/Esc=finish · Shift=straight</span></div>
                         </div>
                     </div>
 
@@ -353,7 +358,7 @@ function renderDropdown(){
 function showPreview(f){
     const card=$('fence-preview-card'),img=$('fence-preview-img'),name=$('fence-preview-name'),price=$('fence-preview-price'),mini=$('fence-preview-mini');
     if(mini)mini.innerHTML=`<span class="swatch-lg" style="background:${f.color}"></span>`;
-    if(f.img){card.style.display='flex';img.src=f.img;img.alt=f.name;name.textContent=f.name;price.textContent='~$'+f.ppf+'/ft installed';}else{card.style.display='none';}
+    if(f.img){card.style.display='flex';img.src=f.img;img.alt=f.name;name.textContent=f.name;price.textContent='Select to see pricing';}else{card.style.display='none';}
 }
 
 /* ======== VIEW TABS ======== */
@@ -375,6 +380,10 @@ document.querySelectorAll('.view-tab').forEach(tab=>{tab.addEventListener('click
 let canvas,ctx,GCS=20,GS=5;
 let tool='fence',objs=[],cfp=[],dragS=null,undo=[];
 let shiftHeld=false;
+let gridMode='draw'; /* 'draw' or 'pan' */
+let vpX=0,vpY=0; /* viewport pan offset */
+let isPanning=false,panStart=null;
+let pinchDist=0,pinchMid=null;
 document.addEventListener('keydown',e=>{
     shiftHeld=e.shiftKey;
     if(e.key==='Escape'){if(cfp.length>0){cfp=[];redraw();}tool='fence';document.querySelectorAll('.draw-tool').forEach(b=>b.classList.remove('active'));document.querySelector('.draw-tool[data-tool=fence]')?.classList.add('active');}
@@ -399,22 +408,53 @@ function initCanvas(){
     canvas.addEventListener('dblclick',onDbl);
     canvas.addEventListener('contextmenu',e=>{e.preventDefault();finLine();});
     canvas.addEventListener('touchstart',onTS,{passive:false});canvas.addEventListener('touchmove',onTM,{passive:false});canvas.addEventListener('touchend',onTE,{passive:false});
+    canvas.addEventListener('wheel',(e)=>{e.preventDefault();if(e.deltaY<0&&GCS<40){GCS+=2;GS=Math.round(GCS/4)||1;}else if(e.deltaY>0&&GCS>8){GCS-=2;GS=Math.round(GCS/4)||1;}redraw();},{passive:false});
     redraw();
 }
-function gcp(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas._w/r.width),y:(e.clientY-r.top)*(canvas._h/r.height)};}
+function gcp(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas._w/r.width)-vpX,y:(e.clientY-r.top)*(canvas._h/r.height)-vpY};}
 function sn(v){return Math.round(v/GCS)*GCS;}
 function di(a,b){return Math.sqrt((a.x-b.x)**2+(a.y-b.y)**2);}
 function fd(a,b){const dx=Math.abs(b.x-a.x)/GCS,dy=Math.abs(b.y-a.y)/GCS;return Math.round(Math.sqrt(dx*dx+dy*dy)*GS);}
 
-/* ======== TOUCH ======== */
+/* ======== TOUCH (improved: 2-finger pan/pinch, better tap detection) ======== */
 let lastTap=0;
-function tp(e){const r=canvas.getBoundingClientRect();const t=e.touches[0]||e.changedTouches[0];return{x:(t.clientX-r.left)*(canvas._w/r.width),y:(t.clientY-r.top)*(canvas._h/r.height)};}
-function onTS(e){e.preventDefault();if(tool==='house'||tool==='pool'){const p=tp(e);dragS={x:sn(p.x),y:sn(p.y)};}}
-function onTM(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);redraw();
+let touchStartPos=null,touchMoved=false;
+function tpScreen(e,idx){const r=canvas.getBoundingClientRect();const t=idx!==undefined?e.touches[idx]:(e.touches[0]||e.changedTouches[0]);if(!t)return null;return{sx:t.clientX,sy:t.clientY,x:(t.clientX-r.left)*(canvas._w/r.width),y:(t.clientY-r.top)*(canvas._h/r.height)};}
+function onTS(e){e.preventDefault();
+    /* Two-finger: start pan/pinch */
+    if(e.touches.length===2){const t0=tpScreen(e,0),t1=tpScreen(e,1);if(t0&&t1){pinchDist=Math.sqrt((t1.sx-t0.sx)**2+(t1.sy-t0.sy)**2);pinchMid={sx:(t0.sx+t1.sx)/2,sy:(t0.sy+t1.sy)/2};isPanning=true;panStart={x:vpX,y:vpY};}return;}
+    /* Single finger in pan mode */
+    if(gridMode==='pan'){const raw=tpScreen(e);if(raw){isPanning=true;panStart={x:vpX,y:vpY,sx:raw.sx,sy:raw.sy};}return;}
+    /* Single finger draw mode */
+    const p=tp(e);touchStartPos={x:p.x,y:p.y};touchMoved=false;
+    if(tool==='house'||tool==='pool'){dragS={x:sn(p.x),y:sn(p.y)};}
+}
+function onTM(e){e.preventDefault();
+    /* Two-finger pan/pinch */
+    if(e.touches.length===2&&isPanning){const t0=tpScreen(e,0),t1=tpScreen(e,1);if(t0&&t1){
+        const newMidSx=(t0.sx+t1.sx)/2,newMidSy=(t0.sy+t1.sy)/2;
+        vpX=panStart.x+(newMidSx-pinchMid.sx);vpY=panStart.y+(newMidSy-pinchMid.sy);
+        /* Pinch zoom */
+        const nd=Math.sqrt((t1.sx-t0.sx)**2+(t1.sy-t0.sy)**2);
+        if(pinchDist>0&&Math.abs(nd-pinchDist)>30){
+            if(nd>pinchDist&&GCS<40){GCS+=2;GS=Math.round(GCS/4)||1;}
+            else if(nd<pinchDist&&GCS>8){GCS-=2;GS=Math.round(GCS/4)||1;}
+            pinchDist=nd;}
+        redraw();}return;}
+    /* Single finger pan mode */
+    if(gridMode==='pan'&&isPanning&&panStart){const raw=tpScreen(e);if(raw){vpX=panStart.x+(raw.sx-panStart.sx);vpY=panStart.y+(raw.sy-panStart.sy);redraw();}return;}
+    /* Draw mode move */
+    touchMoved=true;
+    const p=tp(e);const sx=sn(p.x),sy=sn(p.y);redraw();
     if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>0)drawPL(cfp[cfp.length-1],{x:sx,y:sy},tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':undefined);
     if((tool==='house'||tool==='pool')&&dragS){const color=tool==='pool'?'rgba(59,130,246,0.3)':'rgba(100,130,180,0.3)';ctx.fillStyle=color;const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
 }
-function onTE(e){e.preventDefault();const p=tp(e);const sx=sn(p.x),sy=sn(p.y);const now=Date.now();
+function onTE(e){e.preventDefault();
+    if(isPanning){isPanning=false;panStart=null;pinchDist=0;return;}
+    if(gridMode==='pan')return;
+    const p=tp(e);const sx=sn(p.x),sy=sn(p.y);const now=Date.now();
+    /* Prevent tap if finger moved significantly */
+    if(touchStartPos&&touchMoved){const dx=Math.abs(p.x-touchStartPos.x),dy=Math.abs(p.y-touchStartPos.y);if(Math.sqrt(dx*dx+dy*dy)>GCS*2){touchStartPos=null;dragS=null;return;}}
     if(now-lastTap<300&&(tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>=2){finLine();lastTap=0;return;}
     lastTap=now;
     if((tool==='house'||tool==='pool')&&dragS){const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);
@@ -515,8 +555,11 @@ function snapPt(px,py){
     if(shiftHeld&&cfp.length>0){const lp=cfp[cfp.length-1];if(Math.abs(sx-lp.x)>Math.abs(sy-lp.y))sy=lp.y;else sx=lp.x;}
     return{x:sx,y:sy};
 }
-function onClick(e){const p=gcp(e);const sp=snapPt(p.x,p.y);doClick(sp.x,sp.y);}
+function onClick(e){if(gridMode==='pan')return;const p=gcp(e);const sp=snapPt(p.x,p.y);doClick(sp.x,sp.y);}
 function onDown(e){
+    /* Middle-click or pan mode: start panning */
+    if(e.button===1||gridMode==='pan'){e.preventDefault();isPanning=true;panStart={x:vpX,y:vpY,mx:e.clientX,my:e.clientY};canvas.style.cursor='grabbing';return;}
+    if(gridMode==='pan')return;
     const p=gcp(e);
     /* Check if clicking on a gate to drag it */
     if(tool==='erase'||tool==='fence'||tool==='propline'||tool==='existing'){
@@ -527,13 +570,18 @@ function onDown(e){
 }
 let dragGate=null,dragGateStart=null;
 function onUp(e){
+    if(isPanning){isPanning=false;panStart=null;canvas.style.cursor=gridMode==='pan'?'grab':'crosshair';return;}
+    if(gridMode==='pan')return;
     if(dragGate){dragGate=null;dragGateStart=null;canvas.style.cursor='crosshair';redraw();asd();return;}
     if((tool==='house'||tool==='pool')&&dragS){const p=gcp(e);const ex=sn(p.x),ey=sn(p.y);const w=Math.abs(ex-dragS.x),h=Math.abs(ey-dragS.y);
     if(w>=GCS&&h>=GCS){su();
         if(tool==='house'){const lb=prompt('Label (House, Garage, Shed):')||'House';objs.push({type:'house',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h,label:lb});}
         else{objs.push({type:'pool',x:Math.min(dragS.x,ex),y:Math.min(dragS.y,ey),w,h});}
         redraw();updateQ();asd();}dragS=null;}}
-function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);if(dragGate){dragGate.x=sp.x;dragGate.y=sp.y;redraw();return;}redraw();
+function onMove(e){
+    if(isPanning&&panStart){vpX=panStart.x+(e.clientX-panStart.mx);vpY=panStart.y+(e.clientY-panStart.my);redraw();return;}
+    if(gridMode==='pan'){canvas.style.cursor='grab';return;}
+    const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);if(dragGate){dragGate.x=sp.x;dragGate.y=sp.y;redraw();return;}redraw();
     if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>0){drawPL(cfp[cfp.length-1],sp,tool==='propline'?'#94a3b8':tool==='existing'?'#ef4444':'rgba(212,175,55,0.5)');drawSP(sp.x,sp.y,tool==='propline'?'rgba(148,163,184,0.5)':tool==='existing'?'rgba(239,68,68,0.5)':'rgba(212,175,55,0.5)');}
     if((tool==='house'||tool==='pool')&&dragS){const color=tool==='pool'?'rgba(59,130,246,0.3)':'rgba(100,130,180,0.3)';ctx.fillStyle=color;const sx=sn(sp.x),sy=sn(sp.y);const w=Math.abs(sx-dragS.x),h=Math.abs(sy-dragS.y);ctx.fillRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);ctx.strokeStyle=tool==='pool'?'#3b82f6':'#4682B4';ctx.lineWidth=2;ctx.strokeRect(Math.min(dragS.x,sx),Math.min(dragS.y,sy),w,h);}
     if(tool==='gate-walk'||tool==='gate-drive'){
@@ -545,6 +593,7 @@ function onMove(e){const p=gcp(e);const mx=p.x,my=p.y;const sp=snapPt(mx,my);if(
     if(tool==='erase')canvas.style.cursor=findAt(mx,my)?'pointer':'crosshair';
 }
 function onDbl(e){
+    if(gridMode==='pan')return;
     const p=gcp(e);const o=findAt(p.x,p.y);
     if(o&&(o.type==='gate-walk'||o.type==='gate-drive')){const dirs=['right','down','left','up'];const ci=dirs.indexOf(o.dir||'right');o.dir=dirs[(ci+1)%4];redraw();asd();e.stopPropagation();return;}
     if((tool==='fence'||tool==='propline'||tool==='existing')&&cfp.length>=2)finLine();
@@ -572,13 +621,16 @@ function findAt(mx,my){for(let i=objs.length-1;i>=0;i--){const o=objs[i];
 function dts(px,py,a,b){const dx=b.x-a.x,dy=b.y-a.y,l2=dx*dx+dy*dy;if(l2===0)return di({x:px,y:py},a);let t=((px-a.x)*dx+(py-a.y)*dy)/l2;t=Math.max(0,Math.min(1,t));return di({x:px,y:py},{x:a.x+t*dx,y:a.y+t*dy});}
 
 /* ======== RENDER ======== */
-function drawGrid(){const w=canvas._w,h=canvas._h;ctx.fillStyle='#f8fafc';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#e8ecf0';ctx.lineWidth=0.5;
-    for(let x=0;x<=w;x+=GCS){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
-    for(let y=0;y<=h;y+=GCS){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-    ctx.font='10px sans-serif';ctx.fillStyle='#b0b8c4';ctx.fillText('1 sq = '+GS+' ft',4,h-4);}
+function drawGrid(){const w=canvas._w,h=canvas._h;ctx.fillStyle='#f8fafc';ctx.fillRect(-vpX,-vpY,w,h);ctx.strokeStyle='#e8ecf0';ctx.lineWidth=0.5;
+    /* Draw grid lines extended for pan offset */
+    const startX=Math.floor((-vpX)/GCS)*GCS,endX=startX+w+GCS*2;
+    const startY=Math.floor((-vpY)/GCS)*GCS,endY=startY+h+GCS*2;
+    for(let x=startX;x<=endX;x+=GCS){ctx.beginPath();ctx.moveTo(x,startY);ctx.lineTo(x,endY);ctx.stroke();}
+    for(let y=startY;y<=endY;y+=GCS){ctx.beginPath();ctx.moveTo(startX,y);ctx.lineTo(endX,y);ctx.stroke();}
+    ctx.font='10px sans-serif';ctx.fillStyle='#b0b8c4';ctx.fillText('1 sq = '+GS+' ft',4-vpX,h-4-vpY);}
 function drawSP(x,y,c){ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fillStyle=c;ctx.fill();}
 
-function redraw(){if(!ctx)return;drawGrid();
+function redraw(){if(!ctx)return;const dpr=window.devicePixelRatio||1;ctx.setTransform(dpr,0,0,dpr,vpX*dpr,vpY*dpr);drawGrid();
     objs.forEach(o=>{if(o.type==='house')drawHouse(o);if(o.type==='pool')drawPool(o);});
     objs.forEach(o=>{if(o.type==='propline')drawPropLine(o);if(o.type==='existing')drawExisting(o);});
     objs.forEach(o=>{if(o.type==='fence')drawFL(o);});
@@ -682,19 +734,34 @@ $('grid-undo').addEventListener('click',()=>{if(cfp.length>0){cfp.pop();redraw()
 $('grid-clear').addEventListener('click',()=>{if(!confirm('Clear entire drawing?'))return;su();objs=[];cfp=[];redraw();updateQ();asd();});
 
 /* ======== ZOOM ======== */
-$('grid-zoom-in')?.addEventListener('click',()=>{if(GCS<40){GCS+=4;GS=Math.round(GCS/4);canvas._init=false;initCanvas();redraw();}});
-$('grid-zoom-out')?.addEventListener('click',()=>{if(GCS>10){GCS-=4;GS=Math.round(GCS/4);canvas._init=false;initCanvas();redraw();}});
+$('grid-zoom-in')?.addEventListener('click',()=>{if(GCS<40){GCS+=4;GS=Math.round(GCS/4)||1;redraw();}});
+$('grid-zoom-out')?.addEventListener('click',()=>{if(GCS>8){GCS-=4;GS=Math.round(GCS/4)||1;redraw();}});
+
+/* Scroll-wheel zoom (listener in initCanvas) */
+
+/* Draw/Pan mode toggle */
+$('grid-mode-draw')?.addEventListener('click',()=>{gridMode='draw';$('grid-mode-draw').classList.add('active');$('grid-mode-pan').classList.remove('active');canvas.style.cursor='crosshair';});
+$('grid-mode-pan')?.addEventListener('click',()=>{gridMode='pan';finLine();$('grid-mode-pan').classList.add('active');$('grid-mode-draw').classList.remove('active');canvas.style.cursor='grab';});
+
+/* Reset view */
+$('grid-reset-view')?.addEventListener('click',()=>{vpX=0;vpY=0;GCS=Math.max(14,Math.floor(canvas._w/40));GS=Math.round(GCS/4)||1;redraw();});
+
+/* Keyboard shortcut: Space to toggle pan mode */
+document.addEventListener('keydown',e=>{if(e.code==='Space'&&document.activeElement?.tagName!=='INPUT'&&document.activeElement?.tagName!=='TEXTAREA'){e.preventDefault();$('grid-mode-pan')?.click();}});
+document.addEventListener('keyup',e=>{if(e.code==='Space'&&gridMode==='pan'){$('grid-mode-draw')?.click();}});
 
 /* ======== DOWNLOAD ======== */
 $('grid-download')?.addEventListener('click',()=>{
+    /* Save current viewport, reset for clean screenshot */
+    const savedVpX=vpX,savedVpY=vpY;vpX=0;vpY=0;redraw();
     const link=document.createElement('a');link.download='fence-layout-'+new Date().toISOString().split('T')[0]+'.png';
-    /* Draw a clean version with white background */
     const tmpCanvas=document.createElement('canvas');tmpCanvas.width=canvas.width;tmpCanvas.height=canvas.height;
     const tmpCtx=tmpCanvas.getContext('2d');tmpCtx.drawImage(canvas,0,0);
-    /* Add watermark */
     const dpr=window.devicePixelRatio||1;tmpCtx.font='bold '+(14*dpr)+'px sans-serif';tmpCtx.fillStyle='rgba(30,58,95,0.3)';
     tmpCtx.fillText('Ghareeb Fencing Solutions · (419) 902-8257',10*dpr,(canvas._h-10)*dpr);
     link.href=tmpCanvas.toDataURL('image/png');link.click();
+    /* Restore viewport */
+    vpX=savedVpX;vpY=savedVpY;redraw();
 });
 
 /* ======== QUOTE CALC ======== */
@@ -755,10 +822,11 @@ function renderCompare(){
         h+=`<div class="compare-card${isSel?' compare-active':''}">`;
         h+=`<div class="compare-color" style="background:${s.color}"></div>`;
         if(s.img)h+=`<img src="${s.img}" alt="${s.name}" class="compare-img" />`;
-        h+=`<div class="compare-name">${s.name}</div><div class="compare-price">$${lo.toLocaleString()} — $${hi.toLocaleString()}</div>`;
-        h+=`<div class="compare-ppf">~$${s.ppf}/ft · ${tf}ft</div>`;
-        if(!isSel)h+=`<button class="compare-select-btn" onclick="document.getElementById('fence-style-dropdown').value='${idx}';document.getElementById('fence-style-dropdown').dispatchEvent(new Event('change'));document.getElementById('compare-section').style.display='none';">Select</button>`;
-        else h+=`<span class="compare-current">✓ Selected</span>`;
+        h+=`<div class="compare-name">${s.name}</div>`;
+        h+=`<div class="compare-price">$${lo.toLocaleString()} — $${hi.toLocaleString()}</div>`;
+        h+=`<div class="compare-footage">${tf} linear ft</div>`;
+        if(!isSel)h+=`<button class="compare-select-btn" onclick="document.getElementById('fence-style-dropdown').value='${idx}';document.getElementById('fence-style-dropdown').dispatchEvent(new Event('change'));document.getElementById('compare-section').style.display='none';">Select This Style</button>`;
+        else h+=`<span class="compare-current">✓ Currently Selected</span>`;
         h+=`</div>`;});
     h+='</div>';$('compare-cards').innerHTML=h;
 }
@@ -1429,8 +1497,8 @@ loadPricing();
     .draw-tool.active{border-color:var(--primary);background:var(--primary);color:white}
     .draw-tool.active .tool-label{color:white}
     .tool-icon{font-size:1.1rem;line-height:1}.tool-label{font-size:0.65rem;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:0.5px}
-    .grid-wrapper{border:2px solid #e2e8f0;border-top:none;overflow:hidden;cursor:crosshair;background:#f8fafc}
-    .grid-wrapper canvas{display:block}
+    .grid-wrapper{border:2px solid #e2e8f0;border-top:none;overflow:hidden;cursor:crosshair;background:#f8fafc;touch-action:none}
+    .grid-wrapper canvas{display:block;touch-action:none}
     .grid-controls{display:flex;gap:12px;align-items:center;padding:10px 12px;background:#f1f5f9;border:2px solid #e2e8f0;border-top:none;border-radius:0 0 10px 10px;flex-wrap:wrap}
     .grid-info{font-weight:600;font-size:0.9rem;color:var(--primary)}
     .grid-legend{margin-left:auto;font-size:0.8rem;color:#94a3b8}
@@ -1486,18 +1554,22 @@ loadPricing();
     .legend-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:0.85rem;color:#475569}
     .trust-badges{display:flex;justify-content:center;gap:16px;margin-top:20px;flex-wrap:wrap}
     .trust-badges .badge{font-size:0.85rem;color:#64748b}
-    .compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
-    .compare-card{background:white;border:2px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;transition:all 0.15s}
-    .compare-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,0,0,0.1)}
-    .compare-active{border-color:var(--accent);background:#fffbeb}
-    .compare-color{width:100%;height:6px;border-radius:3px;margin-bottom:8px}
-    .compare-img{width:100%;height:70px;object-fit:cover;border-radius:6px;margin-bottom:6px}
-    .compare-name{font-weight:600;font-size:0.9rem;margin-bottom:2px}
-    .compare-price{font-size:1rem;font-weight:700;color:var(--primary)}
-    .compare-ppf{font-size:0.75rem;color:#94a3b8;margin:2px 0 6px}
-    .compare-select-btn{padding:5px 12px;border:1.5px solid var(--primary);background:white;color:var(--primary);border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:500;transition:all 0.15s}
-    .compare-select-btn:hover{background:var(--primary);color:white}
-    .compare-current{font-size:0.8rem;color:#10b981;font-weight:600}
+    .compare-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+    .compare-card{background:white;border:2px solid #e2e8f0;border-radius:12px;padding:18px;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center}
+    .compare-card:hover{border-color:var(--primary);box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-2px)}
+    .compare-active{border-color:var(--accent);background:linear-gradient(135deg,#fffbeb,#fef3c7);box-shadow:0 2px 8px rgba(212,175,55,0.2)}
+    .compare-color{width:100%;height:6px;border-radius:3px;margin-bottom:10px}
+    .compare-img{width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px}
+    .compare-name{font-weight:700;font-size:0.95rem;margin-bottom:4px;color:var(--primary)}
+    .compare-price{font-size:1.1rem;font-weight:700;color:#1e293b;margin-bottom:2px}
+    .compare-footage{font-size:0.8rem;color:#94a3b8;margin-bottom:10px}
+    .compare-select-btn{padding:8px 18px;border:2px solid var(--primary);background:white;color:var(--primary);border-radius:8px;cursor:pointer;font-size:0.85rem;font-weight:600;transition:all 0.15s;margin-top:auto}
+    .compare-select-btn:hover{background:var(--primary);color:white;transform:scale(1.02)}
+    .compare-current{font-size:0.85rem;color:#10b981;font-weight:700;margin-top:auto;padding:6px 0}
+    /* Grid mode toggle */
+    .grid-mode-toggle{display:flex;gap:2px;background:#e2e8f0;border-radius:6px;padding:2px;margin-right:8px}
+    .grid-mode-btn{padding:5px 10px;border:none;background:transparent;cursor:pointer;font-size:0.8rem;font-weight:600;border-radius:4px;transition:all 0.15s;color:#64748b}
+    .grid-mode-btn.active{background:white;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,0.1)}
     .gate-direction-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
     .gate-dir-btn{padding:14px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.15s;text-align:center}
     .gate-dir-btn:hover{border-color:var(--primary);background:#f0f4ff}
@@ -1507,7 +1579,7 @@ loadPricing();
     .modal-box h3{margin:0 0 16px}.modal-box input{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;box-sizing:border-box}
     .modal-box input:focus{border-color:var(--primary);outline:none}
     .modal-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
-    @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.tool-divider{height:24px}.grid-legend{display:none}.view-tab{font-size:0.8rem;padding:8px 4px}.compare-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.draw-toolbar{gap:3px;padding:8px}.draw-tool{padding:6px 7px;min-width:44px}.tool-icon{font-size:0.95rem}.tool-label{font-size:0.55rem}.tool-divider{height:24px}.grid-legend{display:none}.view-tab{font-size:0.8rem;padding:8px 4px}.compare-grid{grid-template-columns:1fr 1fr}.grid-mode-toggle{margin-right:4px}.grid-mode-btn{padding:4px 8px;font-size:0.7rem}}
 
     /* Map tips + measurements */
     .map-tip-bar{padding:10px 14px;background:#fffbeb;border:2px solid #e2e8f0;border-bottom:none;border-radius:10px 10px 0 0;font-size:0.85rem;color:#92400e}
