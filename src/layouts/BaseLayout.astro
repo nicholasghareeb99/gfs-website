@@ -717,26 +717,26 @@ const siteUrl = site.company.website;
 
     /* Responsive */
     @media (max-width: 1024px) {
-      .nav-links > li > a { padding: 0.75rem 0.6rem; font-size: 0.9rem; }
-    }
-
-    @media (max-width: 768px) {
       .top-bar-content { justify-content: center; text-align: center; }
       .top-bar-left, .top-bar-right { flex-wrap: wrap; justify-content: center; gap: 1rem; }
       .mobile-menu-toggle { display: block; }
       .nav-links {
         position: fixed;
         top: 0;
-        right: -300px;
+        right: -320px;
         width: 300px;
-        height: 100vh;
+        height: 100dvh;
+        height: 100vh; /* fallback */
         background: var(--color-white);
         flex-direction: column;
         align-items: stretch;
         padding: 5rem 1rem 2rem;
-        transition: right var(--transition-base);
+        padding-bottom: max(2rem, env(safe-area-inset-bottom));
+        transition: right 0.3s ease;
         z-index: 99;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: -4px 0 20px rgba(0,0,0,0.15);
       }
       .nav-links.active { right: 0; }
       .nav-links > li > a {
@@ -772,23 +772,49 @@ const siteUrl = site.company.website;
     const menuToggle = document.querySelector('.mobile-menu-toggle');
     const navLinks = document.querySelector('.nav-links');
     const overlay = document.querySelector('.mobile-menu-overlay');
+
+    function closeMenu() {
+      navLinks?.classList.remove('active');
+      overlay?.classList.remove('active');
+      document.body.style.overflow = '';
+    }
     
     menuToggle?.addEventListener('click', () => {
-      navLinks?.classList.toggle('active');
-      overlay?.classList.toggle('active');
-      document.body.style.overflow = navLinks?.classList.contains('active') ? 'hidden' : '';
+      const isOpen = navLinks?.classList.contains('active');
+      if (isOpen) { closeMenu(); }
+      else {
+        navLinks?.classList.add('active');
+        overlay?.classList.add('active');
+        document.body.style.overflow = 'hidden';
+      }
     });
     
-    overlay?.addEventListener('click', () => {
-      navLinks?.classList.remove('active');
-      overlay.classList.remove('active');
-      document.body.style.overflow = '';
+    overlay?.addEventListener('click', closeMenu);
+
+    // Close nav when clicking any link (not dropdowns)
+    navLinks?.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const parent = link.parentElement;
+        // If it's a dropdown parent on mobile, toggle dropdown instead of closing
+        if (parent?.classList.contains('has-dropdown') && window.innerWidth <= 1024) {
+          return; // handled below
+        }
+        closeMenu();
+      });
     });
+
+    // Add close X button inside nav
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.setAttribute('aria-label', 'Close menu');
+    closeBtn.style.cssText = 'position:absolute;top:1rem;right:1rem;font-size:1.5rem;color:#64748b;background:none;border:none;cursor:pointer;padding:0.5rem;line-height:1;z-index:100;';
+    closeBtn.addEventListener('click', closeMenu);
+    navLinks?.prepend(closeBtn);
 
     // Mobile Dropdown
     document.querySelectorAll('.has-dropdown > a').forEach(dropdown => {
       dropdown.addEventListener('click', (e) => {
-        if (window.innerWidth <= 768) {
+        if (window.innerWidth <= 1024) {
           e.preventDefault();
           dropdown.parentElement?.classList.toggle('active');
         }
