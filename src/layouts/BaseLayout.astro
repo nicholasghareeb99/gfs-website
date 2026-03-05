@@ -148,6 +148,7 @@ const siteUrl = site.company.website;
           </button>
           
           <ul class="nav-links">
+            <li class="mobile-close-li"><button class="mobile-close-btn" aria-label="Close menu">✕</button></li>
             <li><a href="/">Home</a></li>
             <li class="has-dropdown">
               <a href="/fences/">Fence Styles</a>
@@ -522,6 +523,9 @@ const siteUrl = site.company.website;
     }
     .nav-cta .btn { margin-left: 0.5rem; }
 
+    .mobile-close-li { display: none; }
+    .mobile-close-btn { display: none; }
+
     .mobile-menu-toggle {
       display: none;
       background: none;
@@ -720,6 +724,9 @@ const siteUrl = site.company.website;
       .top-bar-content { justify-content: center; text-align: center; }
       .top-bar-left, .top-bar-right { flex-wrap: wrap; justify-content: center; gap: 1rem; }
       .mobile-menu-toggle { display: block; }
+      .mobile-close-li { display: block; position: absolute; top: 0.75rem; right: 0.75rem; list-style: none; }
+      .mobile-close-btn { display: block; font-size: 1.5rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0.5rem; line-height: 1; }
+      .mobile-close-btn:hover { color: #1e293b; }
       .nav-links {
         position: fixed;
         top: 0;
@@ -803,13 +810,8 @@ const siteUrl = site.company.website;
       });
     });
 
-    // Add close X button inside nav
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
-    closeBtn.setAttribute('aria-label', 'Close menu');
-    closeBtn.style.cssText = 'position:absolute;top:1rem;right:1rem;font-size:1.5rem;color:#64748b;background:none;border:none;cursor:pointer;padding:0.5rem;line-height:1;z-index:100;';
-    closeBtn.addEventListener('click', closeMenu);
-    navLinks?.prepend(closeBtn);
+    // Close button inside nav
+    document.querySelector('.mobile-close-btn')?.addEventListener('click', closeMenu);
 
     // Mobile Dropdown
     document.querySelectorAll('.has-dropdown > a').forEach(dropdown => {
