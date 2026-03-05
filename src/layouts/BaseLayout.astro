@@ -724,31 +724,30 @@ const siteUrl = site.company.website;
       .top-bar-content { justify-content: center; text-align: center; }
       .top-bar-left, .top-bar-right { flex-wrap: wrap; justify-content: center; gap: 1rem; }
       .mobile-menu-toggle { display: block; }
-      .mobile-close-li { display: block; position: absolute; top: 0.75rem; right: 0.75rem; list-style: none; }
-      .mobile-close-btn { display: block; font-size: 1.5rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0.5rem; line-height: 1; }
-      .mobile-close-btn:hover { color: #1e293b; }
+      .mobile-close-li { display: block; position: absolute; top: 0.75rem; right: 0.75rem; list-style: none; z-index: 10; }
+      .mobile-close-btn { display: block; font-size: 1.8rem; color: #1e293b; background: none; border: none; cursor: pointer; padding: 0.75rem; line-height: 1; -webkit-tap-highlight-color: rgba(0,0,0,0.1); touch-action: manipulation; }
       .nav-links {
+        display: none;
         position: fixed;
         top: 0;
-        right: -320px;
+        right: 0;
         width: 300px;
+        height: 100vh;
         height: 100dvh;
-        height: 100vh; /* fallback */
-        background: var(--color-white);
+        background: var(--color-white, #fff);
         flex-direction: column;
         align-items: stretch;
-        padding: 5rem 1rem 2rem;
+        padding: 4.5rem 1rem 2rem;
         padding-bottom: max(2rem, env(safe-area-inset-bottom));
-        transition: right 0.3s ease;
         z-index: 99;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
         box-shadow: -4px 0 20px rgba(0,0,0,0.15);
       }
-      .nav-links.active { right: 0; }
+      .nav-links.active { display: flex; }
       .nav-links > li > a {
         padding: 1rem;
-        border-bottom: 1px solid var(--color-light-gray);
+        border-bottom: 1px solid var(--color-light-gray, #e2e8f0);
       }
       .has-dropdown .dropdown {
         position: static;
@@ -774,62 +773,73 @@ const siteUrl = site.company.website;
     }
   </style>
 
-  <script>
-    // Mobile Menu
-    const menuToggle = document.querySelector('.mobile-menu-toggle');
-    const navLinks = document.querySelector('.nav-links');
-    const overlay = document.querySelector('.mobile-menu-overlay');
+  <script is:inline>
+    document.addEventListener('DOMContentLoaded', function() {
+      var navLinks = document.querySelector('.nav-links');
+      var overlay = document.querySelector('.mobile-menu-overlay');
+      var menuToggle = document.querySelector('.mobile-menu-toggle');
 
-    function closeMenu() {
-      navLinks?.classList.remove('active');
-      overlay?.classList.remove('active');
-      document.body.style.overflow = '';
-    }
-    
-    menuToggle?.addEventListener('click', () => {
-      const isOpen = navLinks?.classList.contains('active');
-      if (isOpen) { closeMenu(); }
-      else {
-        navLinks?.classList.add('active');
-        overlay?.classList.add('active');
+      function closeMenu() {
+        if (navLinks) navLinks.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      function openMenu() {
+        if (navLinks) navLinks.classList.add('active');
+        if (overlay) overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
       }
-    });
-    
-    overlay?.addEventListener('click', closeMenu);
 
-    // Close nav when clicking any link (not dropdowns)
-    navLinks?.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', (e) => {
-        const parent = link.parentElement;
-        // If it's a dropdown parent on mobile, toggle dropdown instead of closing
-        if (parent?.classList.contains('has-dropdown') && window.innerWidth <= 1024) {
-          return; // handled below
-        }
-        closeMenu();
+      // Hamburger toggle
+      if (menuToggle) {
+        menuToggle.addEventListener('click', function() {
+          if (navLinks && navLinks.classList.contains('active')) { closeMenu(); }
+          else { openMenu(); }
+        });
+      }
+
+      // Overlay click closes
+      if (overlay) overlay.addEventListener('click', closeMenu);
+
+      // Event delegation on nav: handles close btn, nav links, and dropdowns
+      if (navLinks) {
+        navLinks.addEventListener('click', function(e) {
+          var target = e.target;
+
+          // Close button
+          if (target.classList.contains('mobile-close-btn') || target.closest('.mobile-close-btn')) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeMenu();
+            return;
+          }
+
+          // Dropdown toggle on mobile
+          var dropdownParent = target.closest('.has-dropdown');
+          if (dropdownParent && target.closest('.has-dropdown > a') && window.innerWidth <= 1024) {
+            e.preventDefault();
+            dropdownParent.classList.toggle('active');
+            return;
+          }
+
+          // Any other link click: close menu
+          if (target.tagName === 'A' || target.closest('a')) {
+            closeMenu();
+          }
+        });
+      }
+
+      // Scroll to Top
+      var scrollBtn = document.querySelector('.scroll-to-top');
+      window.addEventListener('scroll', function() {
+        if (scrollBtn) scrollBtn.classList.toggle('visible', window.scrollY > 300);
       });
-    });
-
-    // Close button inside nav
-    document.querySelector('.mobile-close-btn')?.addEventListener('click', closeMenu);
-
-    // Mobile Dropdown
-    document.querySelectorAll('.has-dropdown > a').forEach(dropdown => {
-      dropdown.addEventListener('click', (e) => {
-        if (window.innerWidth <= 1024) {
-          e.preventDefault();
-          dropdown.parentElement?.classList.toggle('active');
-        }
-      });
-    });
-
-    // Scroll to Top
-    const scrollBtn = document.querySelector('.scroll-to-top');
-    window.addEventListener('scroll', () => {
-      scrollBtn?.classList.toggle('visible', window.scrollY > 300);
-    });
-    scrollBtn?.addEventListener('click', () => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if (scrollBtn) {
+        scrollBtn.addEventListener('click', function() {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
     });
   </script>
   <EditMode />
