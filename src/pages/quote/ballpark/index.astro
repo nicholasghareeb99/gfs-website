@@ -428,6 +428,7 @@ function fd(a,b){const dx=Math.abs(b.x-a.x)/GCS,dy=Math.abs(b.y-a.y)/GCS;return 
 let lastTap=0;
 let touchStartPos=null,touchMoved=false;
 function tpScreen(e,idx){const r=canvas.getBoundingClientRect();const t=idx!==undefined?e.touches[idx]:(e.touches[0]||e.changedTouches[0]);if(!t)return null;return{sx:t.clientX,sy:t.clientY,x:(t.clientX-r.left)*(canvas._w/r.width),y:(t.clientY-r.top)*(canvas._h/r.height)};}
+function tp(e){const r=canvas.getBoundingClientRect();const t=e.touches[0]||e.changedTouches[0];if(!t)return{x:0,y:0};return{x:(t.clientX-r.left)*(canvas._w/r.width)-vpX,y:(t.clientY-r.top)*(canvas._h/r.height)-vpY};}
 function onTS(e){e.preventDefault();
     /* Two-finger: start pan/pinch */
     if(e.touches.length===2){const t0=tpScreen(e,0),t1=tpScreen(e,1);if(t0&&t1){pinchDist=Math.sqrt((t1.sx-t0.sx)**2+(t1.sy-t0.sy)**2);pinchMid={sx:(t0.sx+t1.sx)/2,sy:(t0.sy+t1.sy)/2};isPanning=true;panStart={x:vpX,y:vpY};}return;}
