@@ -71,6 +71,11 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                                 <span class="fence-preview-price" id="fence-preview-price"></span>
                             </div>
                         </div>
+                        <!-- Active style photos panel (shows all styles used in drawing) -->
+                        <div id="active-styles-panel" class="active-styles-panel" style="display:none;">
+                            <div class="active-styles-label">Styles in your design:</div>
+                            <div id="active-styles-list" class="active-styles-list"></div>
+                        </div>
                     </div>
 
                     <!-- VIEW TABS -->
@@ -819,6 +824,15 @@ function updateQ(){
     const mqb=$('mobile-quote-bar');if(mqb){if(lo>0){mqb.style.display='block';$('mqb-range').textContent='$'+lo.toLocaleString()+' — $'+hi.toLocaleString();$('mqb-ft').textContent=totalFt+' ft';}else{mqb.style.display='none';}}
     leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:totalRemoval>0,removalFt:totalRemoval,pool:isPool,existingFenceFt:existingFt,propertyLineFt:propFt};
     updateLeg(fences,gates,existingFt,propFt,hasPool);
+    /* Update active styles photo panel */
+    const asp=$('active-styles-panel'),asl=$('active-styles-list');
+    if(asp&&asl){const styleNames=Object.keys(fences);
+        if(styleNames.length>0){asp.style.display='block';
+            asl.innerHTML=styleNames.map(n=>{const f=pricingData.find(p=>p.name===n);
+                return f&&f.img?`<div class="active-style-chip"><img src="${f.img}" alt="${n}" class="active-style-thumb" /><span>${n}<br><small>${fences[n].ft}ft</small></span></div>`
+                :`<div class="active-style-chip"><span class="active-style-swatch" style="background:${fences[n].color}"></span><span>${n}<br><small>${fences[n].ft}ft</small></span></div>`;
+            }).join('');
+        }else{asp.style.display='none';}}
     if(lo>0&&leadData.name){clearTimeout(window._qst);window._qst=setTimeout(()=>submitLead(leadData,'Ballpark: '+Object.keys(fences).join(', ')+', '+totalFt+'ft, $'+lo+'-$'+hi),3000);}
 }
 
@@ -854,10 +868,17 @@ function updateLeg(fences,gates,existingFt,propFt,hasPool){const leg=$('drawing-
 /* ======== SAVE DRAWING ======== */
 let svT=null;function asd(){clearTimeout(svT);svT=setTimeout(()=>saveDraw(),2000);}
 async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>{
-    if(o.type==='fence')return{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,segments:o.segments};
+    if(o.type==='fence')return{type:o.type,points:o.points,fenceTypeName:o.fenceType.name,fenceTypeColor:o.fenceType.color,fenceTypeImg:o.fenceType.img||'',segments:o.segments};
     if(o.type==='propline'||o.type==='existing')return{type:o.type,points:o.points,segments:o.segments};
     return{...o};});
-    const img=canvas.toDataURL('image/png',0.7);await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
+    /* Capture clean drawing image (reset viewport) */
+    const svpX=vpX,svpY=vpY;vpX=0;vpY=0;redraw();
+    const img=canvas.toDataURL('image/png',0.7);
+    vpX=svpX;vpY=svpY;redraw();
+    /* Collect style photos used in drawing */
+    const usedStyles={};
+    objs.forEach(o=>{if(o.type==='fence'&&o.fenceType){usedStyles[o.fenceType.name]={name:o.fenceType.name,color:o.fenceType.color,img:o.fenceType.img||''};}});
+    await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingStyles:JSON.stringify(Object.values(usedStyles)),drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
 
 /* ======== LEAD SUBMIT — jobs + websiteLeads + Netlify Forms + API ======== */
 async function submitLead(d,notes){
@@ -871,74 +892,82 @@ async function submitLead(d,notes){
 $('export-pdf-btn')?.addEventListener('click',generatePDF);
 function generatePDF(){
     const est=leadData.estimate;if(!est)return;
-    /* Capture canvas drawing */
+    /* Capture canvas drawing (reset viewport for clean image) */
     let drawingImg='';
-    /* Try map canvas first (satellite overlay), then grid canvas */
     const mc2=$('map-canvas');
     if(mc2&&mc2.width>10){
-        /* Composite: capture google map div + our canvas overlay */
-        try{
-            const mapEl=$('map');const mr=mapEl.getBoundingClientRect();
-            /* Use html2canvas-style approach: just use the overlay canvas */
-            const tmp=document.createElement('canvas');tmp.width=mc2.width;tmp.height=mc2.height;
+        try{const tmp=document.createElement('canvas');tmp.width=mc2.width;tmp.height=mc2.height;
             const tc=tmp.getContext('2d');tc.fillStyle='#2d3748';tc.fillRect(0,0,tmp.width,tmp.height);
-            tc.drawImage(mc2,0,0);
-            const dpr=window.devicePixelRatio||1;
-            tc.font='bold '+(12*dpr)+'px sans-serif';tc.fillStyle='rgba(255,255,255,0.4)';
-            tc.fillText('Satellite overlay — Ghareeb Fencing Solutions',8*dpr,(mc2.height/dpr-8)*dpr);
-            drawingImg=tmp.toDataURL('image/png',0.9);
-        }catch(e){}
+            tc.drawImage(mc2,0,0);drawingImg=tmp.toDataURL('image/png',0.9);}catch(e){}
     }
     if(!drawingImg&&canvas){
+        const svpX=vpX,svpY=vpY;vpX=0;vpY=0;redraw();
         const tmp=document.createElement('canvas');tmp.width=canvas.width;tmp.height=canvas.height;
         const tc=tmp.getContext('2d');tc.fillStyle='#fff';tc.fillRect(0,0,tmp.width,tmp.height);tc.drawImage(canvas,0,0);
         drawingImg=tmp.toDataURL('image/png',0.9);
+        vpX=svpX;vpY=svpY;redraw();
     }
-    /* Build quote rows */
-    let rows='';
-    const fences={};let totalFt=0;
-    objs.forEach(o=>{
-        if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,color:o.fenceType.color};fences[k].ft+=ft;totalFt+=ft;}
-    });
+    /* Build fence line items */
+    let rows='';const fences={};let totalFt=0;
+    objs.forEach(o=>{if(o.type==='fence'){const ft=o.segments.reduce((s,g)=>s+g.dist,0);const k=o.fenceType.name;if(!fences[k])fences[k]={ft:0,ppf:o.fenceType.ppf,color:o.fenceType.color,img:o.fenceType.img||''};fences[k].ft+=ft;totalFt+=ft;}});
     const hm=HM[$('fence-height').value];
-    for(const[n,f]of Object.entries(fences)){
-        const cost=Math.round(f.ft*f.ppf*hm);
-        rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${f.color};margin-right:8px;vertical-align:middle;"></span>${n}</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${f.ft} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;
+    for(const[n,f]of Object.entries(fences)){const cost=Math.round(f.ft*f.ppf*hm);
+        rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;"><span style="display:inline-block;width:14px;height:14px;border-radius:50%;background:${f.color};margin-right:10px;vertical-align:middle;"></span><strong>${n}</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">${f.ft} ft</td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;}
+    if(!totalFt&&est.totalFt){const cost=Math.round(est.totalFt*(selFence?.ppf||28)*hm);
+        rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;"><strong>${selFence?.name||'Fence'}</strong></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.totalFt} ft</td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;}
+    objs.filter(o=>o.type==='gate-walk').forEach(g=>{const w=g.width||4;rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">Walk Gate (${w}ft)</td><td style="padding:10px 14px;"></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
+    objs.filter(o=>o.type==='gate-drive').forEach(g=>{const w=g.width||12;rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">Double Gate (${w}ft)</td><td style="padding:10px 14px;"></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
+    if(est.removalFt>0)rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">Existing Fence Removal</td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.removalFt} ft</td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">+$${(est.removalFt*4).toLocaleString()}</td></tr>`;
+    if(est.pool)rows+=`<tr><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;">Pool Code Compliance</td><td></td><td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;text-align:right;">Included</td></tr>`;
+    /* Build fence style photo gallery */
+    let stylePhotos='';
+    const usedStyles=Object.entries(fences).filter(([n,f])=>f.img);
+    if(usedStyles.length>0){
+        stylePhotos='<div style="margin:20px 0;page-break-inside:avoid;"><h3 style="margin:0 0 12px;font-size:1rem;color:#1e3a5f;">Selected Fence Styles</h3><div style="display:flex;gap:16px;flex-wrap:wrap;">';
+        usedStyles.forEach(([n,f])=>{stylePhotos+=`<div style="flex:1;min-width:200px;max-width:300px;border:2px solid #e2e8f0;border-radius:10px;overflow:hidden;"><img src="${f.img}" alt="${n}" style="width:100%;height:140px;object-fit:cover;" crossorigin="anonymous" /><div style="padding:10px;text-align:center;"><strong style="color:#1e3a5f;">${n}</strong><br><span style="font-size:0.85rem;color:#64748b;">${f.ft} linear ft</span></div></div>`;});
+        stylePhotos+='</div></div>';
     }
-    if(!totalFt&&est.totalFt){
-        const cost=Math.round(est.totalFt*(selFence?.ppf||28)*hm);
-        rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${selFence?.name||'Fence'}</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.totalFt} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">$${cost.toLocaleString()}</td></tr>`;
+    /* If no drawn styles have images, show selected style */
+    if(!stylePhotos&&selFence?.img){
+        stylePhotos=`<div style="margin:20px 0;page-break-inside:avoid;"><h3 style="margin:0 0 12px;font-size:1rem;color:#1e3a5f;">Selected Fence Style</h3><div style="display:flex;gap:16px;"><div style="max-width:300px;border:2px solid #e2e8f0;border-radius:10px;overflow:hidden;"><img src="${selFence.img}" alt="${selFence.name}" style="width:100%;height:140px;object-fit:cover;" crossorigin="anonymous" /><div style="padding:10px;text-align:center;"><strong style="color:#1e3a5f;">${selFence.name}</strong></div></div></div></div>`;
     }
-    const walkGates=objs.filter(o=>o.type==='gate-walk');
-    const driveGates=objs.filter(o=>o.type==='gate-drive');
-    walkGates.forEach(g=>{const w=g.width||4;rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🚪 Walk Gate (${w}ft)</td><td style="padding:8px 12px;"></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
-    driveGates.forEach(g=>{const w=g.width||12;rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🚗 Dbl Gate (${w}ft)</td><td style="padding:8px 12px;"></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">incl.</td></tr>`;});
-    if(est.removalFt>0)rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🗑 Removal</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">${est.removalFt} ft</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">+$${(est.removalFt*4).toLocaleString()}</td></tr>`;
-    if(est.pool)rows+=`<tr><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">🏊 Pool Compliance</td><td></td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;">Included</td></tr>`;
     const today=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+    /* SVG logo for PDF */
+    const logoSvg=`<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 100 100"><rect fill="#1e3a5f" rx="15" width="100" height="100"/><text x="50%" y="55%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="bold" font-size="40" fill="#d4af37">GF</text></svg>`;
+    const logoDataUrl='data:image/svg+xml;base64,'+btoa(logoSvg);
     const html=`<!DOCTYPE html><html><head><title>Fence Quote - Ghareeb Fencing Solutions</title>
-<style>@media print{body{margin:0}@page{margin:0.5in}}body{font-family:-apple-system,system-ui,sans-serif;color:#1e293b;max-width:800px;margin:0 auto;padding:20px}
-.hdr{display:flex;justify-content:space-between;align-items:center;padding:20px 0;border-bottom:3px solid #1e3a5f;margin-bottom:24px}
-.hdr h1{margin:0;font-size:1.5rem;color:#1e3a5f}.hdr .co{text-align:right;font-size:0.85rem;color:#475569}
-.info{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;padding:16px;background:#f8fafc;border-radius:8px}
-.info div{font-size:0.9rem}.info strong{color:#1e3a5f}
-.drawing{text-align:center;margin:20px 0;page-break-inside:avoid}
-.drawing img{max-width:100%;border:2px solid #e2e8f0;border-radius:8px}
-table{width:100%;border-collapse:collapse;margin:16px 0}
-th{background:#1e3a5f;color:white;padding:10px 12px;text-align:left;font-size:0.85rem}
+<style>@media print{body{margin:0}@page{margin:0.4in 0.5in}}body{font-family:-apple-system,system-ui,'Segoe UI',sans-serif;color:#1e293b;max-width:800px;margin:0 auto;padding:20px;font-size:14px}
+.title-block{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;background:linear-gradient(135deg,#1e3a5f,#0f2744);border-radius:12px;color:white;margin-bottom:24px}
+.title-left{display:flex;align-items:center;gap:16px}.title-left img{width:56px;height:56px;border-radius:12px}
+.title-left h1{margin:0;font-size:1.4rem;color:#d4af37;letter-spacing:0.5px}.title-left p{margin:4px 0 0;font-size:0.85rem;color:rgba(255,255,255,0.75)}
+.title-right{text-align:right;font-size:0.85rem;color:rgba(255,255,255,0.85);line-height:1.6}.title-right strong{color:#d4af37;font-size:1rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;padding:16px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
+.info-grid div{font-size:0.9rem}.info-grid strong{color:#1e3a5f;display:block;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px;color:#64748b}.info-grid .val{font-weight:600;color:#1e293b}
+.drawing-section{text-align:center;margin:20px 0;page-break-inside:avoid}
+.drawing-section img{max-width:100%;border:2px solid #e2e8f0;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.drawing-section .caption{font-size:0.8rem;color:#64748b;margin-top:6px}
+table{width:100%;border-collapse:collapse;margin:16px 0;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+th{background:#1e3a5f;color:white;padding:12px 14px;text-align:left;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.5px}
 th:nth-child(2),th:nth-child(3){text-align:right}
-.total{background:#1e3a5f;color:white;padding:16px;border-radius:8px;text-align:center;margin:20px 0;page-break-inside:avoid}
-.total .range{font-size:1.8rem;font-weight:700}.total .note{font-size:0.8rem;opacity:0.8;margin-top:4px}
-.footer{margin-top:32px;padding-top:16px;border-top:2px solid #e2e8f0;font-size:0.8rem;color:#64748b;text-align:center}
-.cta{background:#d4af37;color:#1e3a5f;padding:14px;border-radius:8px;text-align:center;font-weight:600;font-size:1.1rem;margin:20px 0}
+.total-block{background:linear-gradient(135deg,#1e3a5f,#0f2744);color:white;padding:24px;border-radius:12px;text-align:center;margin:24px 0;page-break-inside:avoid}
+.total-block .range{font-size:2rem;font-weight:800;color:#d4af37;letter-spacing:1px}.total-block .note{font-size:0.8rem;opacity:0.7;margin-top:6px}
+.cta-block{background:#d4af37;color:#1e3a5f;padding:16px;border-radius:10px;text-align:center;font-weight:700;font-size:1.1rem;margin:20px 0}
+.footer-block{margin-top:32px;padding-top:16px;border-top:2px solid #e2e8f0;font-size:0.8rem;color:#64748b;text-align:center;line-height:1.6}
+.badge-row{display:flex;justify-content:center;gap:20px;margin:16px 0;flex-wrap:wrap}
+.badge{padding:6px 14px;background:#f0f4ff;border:1px solid #c7d2fe;border-radius:20px;font-size:0.8rem;font-weight:600;color:#1e3a5f}
 </style></head><body>
-<div class="hdr"><div><h1>Fence Quote Estimate</h1><p style="margin:4px 0 0;color:#64748b;font-size:0.9rem;">Ballpark estimate — ${today}</p></div><div class="co"><strong>Ghareeb Fencing Solutions</strong><br>(419) 902-8257<br>Toledo, OH area</div></div>
-<div class="info"><div><strong>Customer:</strong><br>${leadData.name||''}</div><div><strong>Phone:</strong><br>${leadData.phone||''}</div><div><strong>Address:</strong><br>${leadData.address||''}</div><div><strong>Height:</strong><br>${$('fence-height').value} ft</div></div>
-${drawingImg?'<div class="drawing"><img src="'+drawingImg+'" alt="Fence layout drawing" /></div>':''}
-<table><thead><tr><th>Item</th><th>Footage</th><th>Est. Cost</th></tr></thead><tbody>${rows}</tbody></table>
-<div class="total"><div class="range">$${est.low?.toLocaleString()||0} — $${est.high?.toLocaleString()||0}</div><div class="note">*Ballpark estimate only. Final price determined after free on-site measurement.</div></div>
-<div class="cta">📞 Call (419) 902-8257 or visit ghareebfencing.com to schedule your free consultation</div>
-<div class="footer"><p><strong>Ghareeb Fencing Solutions</strong> · Serving Toledo & NW Ohio · Licensed & Insured · 3-Year Warranty</p><p>This estimate is for planning purposes only. Actual costs may vary based on site conditions, material availability, and property specifics.</p></div>
+<div class="title-block">
+  <div class="title-left"><img src="${logoDataUrl}" alt="GF" /><div><h1>GHAREEB FENCING</h1><p>Ballpark Fence Estimate</p></div></div>
+  <div class="title-right"><strong>(419) 902-8257</strong><br>ghareebfencingsolutions.com<br>Toledo &amp; NW Ohio<br><em>${today}</em></div>
+</div>
+<div class="badge-row"><span class="badge">Licensed &amp; Insured</span><span class="badge">3-Year Warranty</span><span class="badge">0% Financing</span><span class="badge">4.9★ Rating</span></div>
+<div class="info-grid"><div><strong>Customer</strong><span class="val">${leadData.name||'—'}</span></div><div><strong>Phone</strong><span class="val">${leadData.phone||'—'}</span></div><div><strong>Property Address</strong><span class="val">${leadData.address||'—'}</span></div><div><strong>Fence Height</strong><span class="val">${$('fence-height').value||'6'} ft</span></div></div>
+${drawingImg?`<div class="drawing-section"><img src="${drawingImg}" alt="Fence layout drawing" /><div class="caption">Property Layout Drawing — Not to scale</div></div>`:''}
+${stylePhotos}
+<table><thead><tr><th>Item</th><th>Linear Ft</th><th>Est. Cost</th></tr></thead><tbody>${rows}</tbody></table>
+<div class="total-block"><div class="range">$${est.low?.toLocaleString()||0} — $${est.high?.toLocaleString()||0}</div><div class="note">*Ballpark estimate for planning purposes. Final price after free on-site measurement.</div></div>
+<div class="cta-block">Ready to get started? Call (419) 902-8257 or book online at ghareebfencingsolutions.com</div>
+<div class="footer-block"><p><strong>Ghareeb Fencing Solutions</strong> — Serving Lucas, Wood, Fulton &amp; Monroe Counties</p><p>This estimate is approximate and may vary based on site conditions, material availability, and property specifics. Valid for 30 days.</p></div>
 </body></html>`;
     const w=window.open('','_blank');if(w){w.document.write(html);w.document.close();setTimeout(()=>w.print(),500);}
 }
@@ -1581,6 +1610,14 @@ loadPricing();
     .grid-mode-toggle{display:flex;gap:2px;background:#e2e8f0;border-radius:6px;padding:2px;margin-right:8px}
     .grid-mode-btn{padding:5px 10px;border:none;background:transparent;cursor:pointer;font-size:0.8rem;font-weight:600;border-radius:4px;transition:all 0.15s;color:#64748b}
     .grid-mode-btn.active{background:white;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,0.1)}
+    /* Active styles photo panel */
+    .active-styles-panel{margin-top:12px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}
+    .active-styles-label{font-size:0.8rem;font-weight:600;color:#64748b;margin-bottom:8px}
+    .active-styles-list{display:flex;gap:10px;flex-wrap:wrap}
+    .active-style-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;background:white;border:1px solid #e2e8f0;border-radius:8px;font-size:0.8rem;color:#1e293b}
+    .active-style-thumb{width:48px;height:36px;object-fit:cover;border-radius:4px}
+    .active-style-swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+    .active-style-chip small{color:#64748b;font-weight:400}
     .gate-direction-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
     .gate-dir-btn{padding:14px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.15s;text-align:center}
     .gate-dir-btn:hover{border-color:var(--primary);background:#f0f4ff}
