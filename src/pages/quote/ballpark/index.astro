@@ -71,11 +71,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                                 <span class="fence-preview-price" id="fence-preview-price"></span>
                             </div>
                         </div>
-                        <!-- Active style photos panel (shows all styles used in drawing) -->
-                        <div id="active-styles-panel" class="active-styles-panel" style="display:none;">
-                            <div class="active-styles-label">Styles in your design:</div>
-                            <div id="active-styles-list" class="active-styles-list"></div>
-                        </div>
+
                     </div>
 
                     <!-- VIEW TABS -->
@@ -230,7 +226,7 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                     </div>
                 </div>
             </div>
-            <div id="drawing-legend" class="drawing-legend" style="display:none;"><h4>📐 Drawing Legend</h4><div id="legend-items"></div></div>
+            <div id="drawing-legend" class="drawing-legend" style="display:none;"><h4>🎨 Your Design</h4><div id="legend-style-photos"></div><div id="legend-items"></div></div>
             <div class="trust-badges"><div class="badge">🛡️ 3-Year Warranty</div><div class="badge">⭐ 4.9★ Rating</div><div class="badge">💳 0% Financing</div></div>
         </div>
     </div></div></section>
@@ -355,8 +351,22 @@ async function loadPricing(){
         if(d.exists){const data=d.data();
             if(data.pricing){let i=0;pricingData=data.pricing.split('\n').filter(l=>l.trim()).map(l=>{const p=l.split(':').map(s=>s.trim());const df=DEF[i]||{color:'#666',img:''};i++;return{name:p[0]||'Unknown',ppf:parseFloat(p[1])||0,sg:parseFloat(p[2])||350,dg:parseFloat(p[3])||650,color:df.color,img:''};}).filter(x=>x.ppf>0);}
             if(data.fenceStyles){try{const styles=typeof data.fenceStyles==='string'?JSON.parse(data.fenceStyles):data.fenceStyles;if(Array.isArray(styles)){styles.forEach(s=>{const match=pricingData.find(p=>p.name.toLowerCase().includes(s.name?.toLowerCase())||s.name?.toLowerCase().includes(p.name?.toLowerCase()));if(match&&s.image)match.img=s.image;if(match&&s.color)match.color=s.color;});}}catch(e){}}
+            /* PRIMARY SOURCE: stylePhotos from Exec App (settings/global.stylePhotos) */
+            if(data.stylePhotos&&typeof data.stylePhotos==='object'){
+                for(const[styleName,photos]of Object.entries(data.stylePhotos)){
+                    if(!Array.isArray(photos)||!photos.length)continue;
+                    /* Find matching pricing entry (fuzzy match) */
+                    const match=pricingData.find(p=>p.name.toLowerCase()===styleName.toLowerCase()||p.name.toLowerCase().includes(styleName.toLowerCase())||styleName.toLowerCase().includes(p.name.toLowerCase()));
+                    if(match){
+                        /* Use first photo's URL (primary photo) */
+                        const primary=photos[0];
+                        if(primary.url)match.img=primary.url;
+                        else if(primary.dataUrl)match.img=primary.dataUrl;
+                    }
+                }
+            }
         }
-        try{const snap=await db.collection('fenceStyles').get();snap.forEach(doc=>{const s=doc.data();const match=pricingData.find(p=>p.name.toLowerCase()===s.name?.toLowerCase());if(match){if(s.image||s.imageUrl)match.img=s.image||s.imageUrl;if(s.color)match.color=s.color;}});}catch(e){}
+        try{const snap=await db.collection('fenceStyles').get();snap.forEach(doc=>{const s=doc.data();const match=pricingData.find(p=>p.name.toLowerCase()===s.name?.toLowerCase());if(match){if(!match.img&&(s.image||s.imageUrl))match.img=s.image||s.imageUrl;if(s.color)match.color=s.color;}});}catch(e){}
     }catch(e){}}
     if(!pricingData.length)pricingData=[...DEF];
     selFence=pricingData[0];renderDropdown();
@@ -371,7 +381,7 @@ function renderDropdown(){
 function showPreview(f){
     const card=$('fence-preview-card'),img=$('fence-preview-img'),name=$('fence-preview-name'),price=$('fence-preview-price'),mini=$('fence-preview-mini');
     if(mini)mini.innerHTML=`<span class="swatch-lg" style="background:${f.color}"></span>`;
-    if(f.img){card.style.display='flex';img.src=f.img;img.alt=f.name;name.textContent=f.name;price.textContent='Select to see pricing';}else{card.style.display='none';}
+    if(f.img){card.style.display='flex';img.src=f.img;img.alt=f.name;img.crossOrigin='anonymous';name.textContent=f.name;price.textContent='';}else{card.style.display='none';}
 }
 
 /* ======== VIEW TABS ======== */
@@ -824,15 +834,7 @@ function updateQ(){
     const mqb=$('mobile-quote-bar');if(mqb){if(lo>0){mqb.style.display='block';$('mqb-range').textContent='$'+lo.toLocaleString()+' — $'+hi.toLocaleString();$('mqb-ft').textContent=totalFt+' ft';}else{mqb.style.display='none';}}
     leadData.estimate={low:lo,high:hi,totalFt,fences,gates,height:$('fence-height').value,removal:totalRemoval>0,removalFt:totalRemoval,pool:isPool,existingFenceFt:existingFt,propertyLineFt:propFt};
     updateLeg(fences,gates,existingFt,propFt,hasPool);
-    /* Update active styles photo panel */
-    const asp=$('active-styles-panel'),asl=$('active-styles-list');
-    if(asp&&asl){const styleNames=Object.keys(fences);
-        if(styleNames.length>0){asp.style.display='block';
-            asl.innerHTML=styleNames.map(n=>{const f=pricingData.find(p=>p.name===n);
-                return f&&f.img?`<div class="active-style-chip"><img src="${f.img}" alt="${n}" class="active-style-thumb" /><span>${n}<br><small>${fences[n].ft}ft</small></span></div>`
-                :`<div class="active-style-chip"><span class="active-style-swatch" style="background:${fences[n].color}"></span><span>${n}<br><small>${fences[n].ft}ft</small></span></div>`;
-            }).join('');
-        }else{asp.style.display='none';}}
+
     if(lo>0&&leadData.name){clearTimeout(window._qst);window._qst=setTimeout(()=>submitLead(leadData,'Ballpark: '+Object.keys(fences).join(', ')+', '+totalFt+'ft, $'+lo+'-$'+hi),3000);}
 }
 
@@ -846,7 +848,7 @@ function renderCompare(){
     pricingData.forEach((s,idx)=>{const cost=Math.round(tf*s.ppf*hm);const lo=Math.round(cost*0.85),hi=Math.round(cost*1.15);const isSel=selFence&&selFence.name===s.name;
         h+=`<div class="compare-card${isSel?' compare-active':''}">`;
         h+=`<div class="compare-color" style="background:${s.color}"></div>`;
-        if(s.img)h+=`<img src="${s.img}" alt="${s.name}" class="compare-img" />`;
+        if(s.img)h+=`<img src="${s.img}" alt="${s.name}" class="compare-img" crossorigin="anonymous" />`;
         h+=`<div class="compare-name">${s.name}</div>`;
         h+=`<div class="compare-price">$${lo.toLocaleString()} — $${hi.toLocaleString()}</div>`;
         h+=`<div class="compare-footage">${tf} linear ft</div>`;
@@ -856,7 +858,16 @@ function renderCompare(){
     h+='</div>';$('compare-cards').innerHTML=h;
 }
 
-function updateLeg(fences,gates,existingFt,propFt,hasPool){const leg=$('drawing-legend'),items=$('legend-items');const has=objs.length>0;leg.style.display=has?'block':'none';if(!has)return;
+function updateLeg(fences,gates,existingFt,propFt,hasPool){const leg=$('drawing-legend'),items=$('legend-items'),photos=$('legend-style-photos');const has=objs.length>0;leg.style.display=has?'block':'none';if(!has)return;
+    /* Style photos */
+    let ph='';const styleNames=Object.keys(fences);
+    if(styleNames.length>0){ph='<div class="legend-photos">';
+        styleNames.forEach(n=>{const f=pricingData.find(p=>p.name===n);const img=f&&f.img?f.img:'';const color=fences[n].color;
+            ph+=img?`<div class="legend-photo-card"><img src="${img}" alt="${n}" /><div class="legend-photo-info"><strong>${n}</strong><span>${fences[n].ft} ft</span></div></div>`
+            :`<div class="legend-photo-card"><div class="legend-photo-swatch" style="background:${color}"></div><div class="legend-photo-info"><strong>${n}</strong><span>${fences[n].ft} ft</span></div></div>`;
+        });ph+='</div>';}
+    if(photos)photos.innerHTML=ph;
+    /* Legend items */
     let h='';for(const[n,f]of Object.entries(fences))h+=`<div class="legend-row"><span class="swatch" style="background:${f.color}"></span><span>${n}: ${f.ft}ft</span></div>`;
     if(gates.walk>0)h+=`<div class="legend-row">🚪 Walk Gates: ${gates.walk}</div>`;if(gates.drive>0)h+=`<div class="legend-row">🚗 Drive Gates: ${gates.drive}</div>`;
     if(existingFt>0)h+=`<div class="legend-row"><span class="swatch" style="background:#ef4444"></span> Existing Fence: ${existingFt}ft (removal)</div>`;
@@ -1610,14 +1621,14 @@ loadPricing();
     .grid-mode-toggle{display:flex;gap:2px;background:#e2e8f0;border-radius:6px;padding:2px;margin-right:8px}
     .grid-mode-btn{padding:5px 10px;border:none;background:transparent;cursor:pointer;font-size:0.8rem;font-weight:600;border-radius:4px;transition:all 0.15s;color:#64748b}
     .grid-mode-btn.active{background:white;color:var(--primary);box-shadow:0 1px 2px rgba(0,0,0,0.1)}
-    /* Active styles photo panel */
-    .active-styles-panel{margin-top:12px;padding:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px}
-    .active-styles-label{font-size:0.8rem;font-weight:600;color:#64748b;margin-bottom:8px}
-    .active-styles-list{display:flex;gap:10px;flex-wrap:wrap}
-    .active-style-chip{display:flex;align-items:center;gap:8px;padding:6px 10px;background:white;border:1px solid #e2e8f0;border-radius:8px;font-size:0.8rem;color:#1e293b}
-    .active-style-thumb{width:48px;height:36px;object-fit:cover;border-radius:4px}
-    .active-style-swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0}
-    .active-style-chip small{color:#64748b;font-weight:400}
+    /* Legend style photos */
+    .legend-photos{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e2e8f0}
+    .legend-photo-card{display:flex;align-items:center;gap:10px;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;flex:1;min-width:160px}
+    .legend-photo-card img{width:64px;height:48px;object-fit:cover;border-radius:6px;flex-shrink:0}
+    .legend-photo-swatch{width:48px;height:48px;border-radius:6px;flex-shrink:0}
+    .legend-photo-info{display:flex;flex-direction:column;font-size:0.85rem}
+    .legend-photo-info strong{color:var(--primary,#1e3a5f);font-size:0.9rem}
+    .legend-photo-info span{color:#64748b;font-size:0.8rem}
     .gate-direction-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
     .gate-dir-btn{padding:14px;border:2px solid #e2e8f0;border-radius:8px;background:white;cursor:pointer;font-size:0.95rem;font-weight:500;transition:all 0.15s;text-align:center}
     .gate-dir-btn:hover{border-color:var(--primary);background:#f0f4ff}
