@@ -27,7 +27,16 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
         <p class="subtitle">Get a price estimate in 60 seconds — just tell us about your project</p>
     </div></section>
 
-    <section class="calculator-section"><div class="container"><div class="calculator-grid">
+    <section class="calculator-section"><div class="container">
+    <div style="background:linear-gradient(135deg,#fef3c7,#fde68a);padding:14px 20px;border-radius:10px;margin-bottom:24px;border:2px solid #f59e0b;display:flex;align-items:center;gap:12px;flex-wrap:wrap;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.urgencyBanner">
+        <span style="font-size:1.5rem;">🔥</span>
+        <div style="flex:1;min-width:200px;">
+            <strong style="color:#92400e;font-size:1rem;">Limited Availability This Month</strong>
+            <div style="font-size:0.85rem;color:#a16207;margin-top:2px;">We book up fast — get your free on-site estimate locked in before our schedule fills.</div>
+        </div>
+        <a href="/quote/book/" style="background:#1e3a5f;color:#d4af37;padding:10px 20px;border-radius:8px;font-weight:700;text-decoration:none;white-space:nowrap;font-size:0.9rem;">📅 Book Free Estimate →</a>
+    </div>
+    <div class="calculator-grid">
         <div class="calculator-main">
 
             <!-- STEP 1: LEAD CAPTURE -->
@@ -48,6 +57,20 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                 </div>
                 <div id="lead-wall-success" style="display:none;">
                     <div class="success-banner">✅ <div><strong>Quote tool unlocked!</strong><span>Now design your fence below to see instant pricing.</span></div></div>
+                    <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+                        <div style="flex:1;min-width:120px;background:#f0f4ff;padding:10px;border-radius:8px;text-align:center;border:1px solid #c7d2fe;">
+                            <div style="font-size:1.3rem;font-weight:800;color:#1e3a5f;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.statFences">247+</div>
+                            <div style="font-size:0.75rem;color:#64748b;">Fences installed<br>this year</div>
+                        </div>
+                        <div style="flex:1;min-width:120px;background:#ecfdf5;padding:10px;border-radius:8px;text-align:center;border:1px solid #a7f3d0;">
+                            <div style="font-size:1.3rem;font-weight:800;color:#065f46;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.statRating">4.9★</div>
+                            <div style="font-size:0.75rem;color:#64748b;">Google rating<br>150+ reviews</div>
+                        </div>
+                        <div style="flex:1;min-width:120px;background:#fffbeb;padding:10px;border-radius:8px;text-align:center;border:1px solid #fde68a;">
+                            <div style="font-size:1.3rem;font-weight:800;color:#92400e;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.statWarranty">3yr</div>
+                            <div style="font-size:0.75rem;color:#64748b;">Warranty on<br>all work</div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -227,6 +250,18 @@ const mapsApiKey = import.meta.env.PUBLIC_GOOGLE_MAPS_KEY || '';
                 </div>
             </div>
             <div id="drawing-legend" class="drawing-legend" style="display:none;"><h4>🎨 Your Design</h4><div id="legend-style-photos"></div><div id="legend-items"></div></div>
+            <div style="background:linear-gradient(135deg,#065f46,#064e3b);border-radius:12px;padding:20px;margin-top:16px;color:white;text-align:center;">
+                <div style="font-size:1.2rem;font-weight:800;margin-bottom:6px;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.whyWaitTitle">Why Wait?</div>
+                <div style="font-size:0.9rem;opacity:0.9;margin-bottom:12px;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.whyWaitText">Get an exact price with a free on-site measurement. No obligation, no pressure.</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                    <a href="/quote/book/" style="background:#d4af37;color:#1e3a5f;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:1rem;">📅 Book Free Estimate</a>
+                    <div style="font-size:0.75rem;opacity:0.7;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.whyWaitSub">Available this week • Takes 15 minutes • 100% free</div>
+                </div>
+            </div>
+            <div style="background:white;border-radius:12px;padding:16px;margin-top:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);text-align:center;">
+                <div style="font-size:0.85rem;color:#64748b;margin-bottom:8px;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.financingTitle">💳 <strong>0% APR Financing Available</strong></div>
+                <div style="font-size:0.8rem;color:#94a3b8;" data-editable data-edit-doc="content/pages" data-edit-field="ballpark.financingText">As low as <strong style="color:#1e3a5f;font-size:1.1rem;">$89/mo</strong> for most projects</div>
+            </div>
             <div class="trust-badges"><div class="badge">🛡️ 3-Year Warranty</div><div class="badge">⭐ 4.9★ Rating</div><div class="badge">💳 0% Financing</div></div>
         </div>
     </div></div></section>
@@ -326,7 +361,7 @@ try{if(firebaseConfig&&firebaseConfig.projectId){if(!firebase.apps.length)fireba
 const $=id=>document.getElementById(id);
 const HM={'4':0.85,'5':0.92,'6':1.0,'8':1.25};
 window._toolUnlocked=false;window._leadAddress='';
-let leadData={},leadDocId=null;
+let leadData={},leadDocId=null,leadsDocId=null;
 
 /* ======== PRICING ======== */
 let pricingData=[];
@@ -889,7 +924,10 @@ async function saveDraw(){if(!db||!leadDocId)return;try{const dd=objs.map(o=>{
     /* Collect style photos used in drawing */
     const usedStyles={};
     objs.forEach(o=>{if(o.type==='fence'&&o.fenceType){usedStyles[o.fenceType.name]={name:o.fenceType.name,color:o.fenceType.color,img:o.fenceType.img||''};}});
-    await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingStyles:JSON.stringify(Object.values(usedStyles)),drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
+    await db.collection('jobs').doc(leadDocId).update({drawing:JSON.stringify(dd),drawingImage:img,drawingStyles:JSON.stringify(Object.values(usedStyles)),drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    /* Also save snapshot to leads collection so exec app can display drawing on lead cards */
+    if(leadsDocId){try{await db.collection('leads').doc(leadsDocId).update({canvasSnapshot:img,drawingImage:img,drawingUpdatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e2){}}
+    }catch(e){}}
 
 /* ======== LEAD SUBMIT — jobs + websiteLeads + Netlify Forms + API ======== */
 async function submitLead(d,notes){
@@ -899,8 +937,34 @@ async function submitLead(d,notes){
     if(db&&!leadDocId){try{const ref=await db.collection('jobs').add({cName:d.name,cPhone:d.phone,cEmail:d.email||'',cAddress:d.address,status:'Lead',source:'Website - Ballpark',priority:'normal',style:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),height:(d.estimate?.height||'6')+' ft',footage:String(d.estimate?.totalFt||0),singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,gateDetails:JSON.stringify(d.estimate?.gates?.details||[]),removalFootage:d.estimate?.removalFt||0,poolCompliance:d.estimate?.pool||false,propertyLineFootage:d.estimate?.propertyLineFt||0,existingFenceFootage:d.estimate?.existingFenceFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:(notes||'')+'\n[Website Ballpark \u2014 '+new Date().toLocaleDateString()+']',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),cDate:new Date().toISOString().split('T')[0],websiteLead:true,isWebsiteLead:true});leadDocId=ref.id;}catch(e){}}
     /* 3. Update job if estimate changes after initial unlock */
     else if(db&&leadDocId&&d.estimate){try{await db.collection('jobs').doc(leadDocId).update({style:d.estimate.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),footage:String(d.estimate.totalFt||0),estimateLow:d.estimate.low||0,estimateHigh:d.estimate.high||0,estimatedRange:'$'+d.estimate.low+'-$'+d.estimate.high,singleGates:d.estimate.gates?.walk||0,doubleGates:d.estimate.gates?.drive||0,updatedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
-    /* 4. Create websiteLead (links to job via jobId for drawing access) */
-    if(db){try{const np=(d.name||'').split(' ');await db.collection('websiteLeads').add({firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',name:d.name,phone:d.phone,email:d.email||'',address:d.address,source:'ballpark-calculator',fenceType:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),totalFeet:d.estimate?.totalFt||0,estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',notes:notes||'',createdAt:firebase.firestore.FieldValue.serverTimestamp(),status:'new',jobId:leadDocId||''});}catch(e){}}
+    /* 4. Save to 'leads' collection (shows as Ballpark source in exec app) */
+    if(db&&!leadsDocId){try{const np=(d.name||'').split(' ');const lRef=await db.collection('leads').add({
+        firstName:np[0]||'',lastName:np.slice(1).join(' ')||'',
+        name:d.name,phone:d.phone,email:d.email||'',address:d.address,
+        source:'ballpark-calculator',
+        fenceStyle:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),
+        selectedStyle:selFence?.name||'',
+        totalFootage:d.estimate?.totalFt||0,linearFeet:String(d.estimate?.totalFt||0),
+        selectedHeight:d.estimate?.height||'6',
+        singleGates:d.estimate?.gates?.walk||0,
+        doubleGates:d.estimate?.gates?.drive||0,
+        estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,
+        estimatedTotal:d.estimate?.high||0,
+        estimatedRange:d.estimate?'$'+d.estimate.low+'-$'+d.estimate.high:'',
+        notes:notes||'',canvasSnapshot:'',
+        createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        status:'new',jobId:leadDocId||''
+    });leadsDocId=lRef.id;}catch(e){console.log('Lead save err:',e);}}
+    else if(db&&leadsDocId&&d.estimate){try{await db.collection('leads').doc(leadsDocId).update({
+        fenceStyle:d.estimate?.fences?Object.keys(d.estimate.fences).join(', '):(selFence?.name||''),
+        totalFootage:d.estimate?.totalFt||0,linearFeet:String(d.estimate?.totalFt||0),
+        selectedHeight:d.estimate?.height||'6',
+        singleGates:d.estimate?.gates?.walk||0,doubleGates:d.estimate?.gates?.drive||0,
+        estimateLow:d.estimate?.low||0,estimateHigh:d.estimate?.high||0,
+        estimatedTotal:d.estimate?.high||0,
+        estimatedRange:'$'+d.estimate.low+'-$'+d.estimate.high,
+        updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    });}catch(e){}}
 }
 
 /* ======== PDF EXPORT ======== */
