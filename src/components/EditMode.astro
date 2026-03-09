@@ -368,39 +368,53 @@ const firebaseConfig = {
     const saveBtn = document.getElementById('et-save');
     saveBtn.innerHTML = '⏳ Saving...'; saveBtn.disabled = true;
 
-    try {
-      const batch = db.batch();
-      changes.forEach((fields, docPath) => {
-        const ref = db.doc(docPath);
-        // Build nested field updates using dot notation
-        const update = {};
-        for (const [field, value] of Object.entries(fields)) {
-          update[field] = value;
+    const MAX_RETRIES = 3;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        const batch = db.batch();
+        changes.forEach((fields, docPath) => {
+          const ref = db.doc(docPath);
+          const update = {};
+          for (const [field, value] of Object.entries(fields)) {
+            update[field] = value;
+          }
+          batch.set(ref, update, { merge: true });
+        });
+        await batch.commit();
+
+        // Success! Clear changes and update UI
+        changes.clear();
+        updateChangesCount();
+        clearHydratorCache();
+        triggerNetlifyRebuild();
+
+        saveBtn.innerHTML = '✅ Saved!';
+        setTimeout(() => {
+          saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
+          saveBtn.disabled = false;
+        }, 2000);
+
+        document.querySelectorAll('[data-editable]').forEach(el => {
+          originalContent.set(el, el.innerHTML);
+        });
+        return; // Exit on success
+      } catch (e) {
+        lastError = e;
+        console.warn('[EditMode] Save attempt ' + attempt + '/' + MAX_RETRIES + ' failed:', e.message);
+        if (attempt < MAX_RETRIES) {
+          saveBtn.innerHTML = '⏳ Retrying (' + attempt + '/' + MAX_RETRIES + ')...';
+          await new Promise(r => setTimeout(r, 1000 * attempt)); // Backoff: 1s, 2s, 3s
         }
-        batch.set(ref, update, { merge: true });
-      });
-      await batch.commit();
-
-      changes.clear();
-      updateChangesCount();
-
-      // Flash green on toolbar
-      saveBtn.innerHTML = '✅ Saved!';
-      setTimeout(() => {
-        saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
-        saveBtn.disabled = false;
-      }, 2000);
-
-      // Update original content map
-      document.querySelectorAll('[data-editable]').forEach(el => {
-        originalContent.set(el, el.innerHTML);
-      });
-    } catch (e) {
-      console.error('Save error:', e);
-      saveBtn.innerHTML = '❌ Error — try again';
-      saveBtn.disabled = false;
-      alert('Save failed: ' + e.message);
+      }
     }
+
+    // All retries exhausted
+    console.error('[EditMode] Save failed after ' + MAX_RETRIES + ' attempts:', lastError);
+    saveBtn.innerHTML = '❌ Save Failed';
+    saveBtn.disabled = false;
+    alert('Save failed after ' + MAX_RETRIES + ' attempts: ' + (lastError ? lastError.message : 'Unknown error') + '\n\nYour changes are still pending — try again in a moment.');
   }
 
   function discardChanges() {
@@ -533,6 +547,34 @@ const firebaseConfig = {
       });
     }
   });
+
+  // =============================================
+  // 9. Netlify deploy hook — trigger rebuild after save
+  // =============================================
+  // To set this up: Netlify Dashboard → Site Settings → Build & deploy → Build hooks
+  // Create a hook named "Content Update" and paste the URL below
+  const NETLIFY_BUILD_HOOK = window.__GFS_NETLIFY_HOOK || '';
+
+  async function triggerNetlifyRebuild() {
+    if (!NETLIFY_BUILD_HOOK) return;
+    try {
+      await fetch(NETLIFY_BUILD_HOOK, { method: 'POST' });
+      console.log('[EditMode] Netlify rebuild triggered');
+    } catch(e) {
+      console.warn('[EditMode] Netlify rebuild trigger failed:', e.message);
+      // Non-critical — content is already in Firestore and hydrator will pick it up
+    }
+  }
+
+  // Clear hydrator cache so page shows new content immediately
+  function clearHydratorCache() {
+    try {
+      var keys = Object.keys(sessionStorage);
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].startsWith('gfs_hydrate_')) sessionStorage.removeItem(keys[i]);
+      }
+    } catch(e) {}
+  }
 
   // Expose for login page
   window.GFS_EditMode = { loadFirebaseAndInit };
