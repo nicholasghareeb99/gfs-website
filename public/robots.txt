@@ -3,8 +3,10 @@
 User-agent: *
 Allow: /
 
-# Disallow admin area
+# Disallow admin and internal pages
 Disallow: /admin/
+Disallow: /api/
 
-# Sitemap
+# Sitemaps
 Sitemap: https://ghareebfencing.com/sitemap.xml
+Sitemap: https://gfs-website.netlify.app/sitemap.xml
