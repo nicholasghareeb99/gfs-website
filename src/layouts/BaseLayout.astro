@@ -123,11 +123,7 @@ const siteUrl = site.company.website;
       <div class="container">
         <div class="nav-content">
           <a href="/" class="logo">
-            <div class="logo-icon">GF</div>
-            <div class="logo-text">
-              <span class="company-name">Ghareeb Fencing</span>
-              <span class="company-tagline">Solutions</span>
-            </div>
+            <img src="/images/gfs-logo.png" alt="Ghareeb Fencing Solutions" class="logo-img" />
           </a>
           
           <button class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -174,8 +170,7 @@ const siteUrl = site.company.website;
         <div class="footer-grid">
           <div class="footer-col footer-about">
             <div class="footer-logo">
-              <div class="logo-icon">GF</div>
-              <span>Ghareeb Fencing</span>
+              <img src="/images/gfs-logo.png" alt="Ghareeb Fencing Solutions" class="footer-logo-img" />
             </div>
             <p>Toledo's trusted fence contractor since 2022. Quality craftsmanship, honest pricing, and exceptional service on every project.</p>
           </div>
@@ -436,6 +431,17 @@ const siteUrl = site.company.website;
       font-weight: 800;
       font-size: 1.1rem;
       color: var(--color-secondary);
+    }
+    .logo-img {
+      height: 48px;
+      width: auto;
+      object-fit: contain;
+    }
+    .footer-logo-img {
+      height: 40px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
     }
     .logo-text { display: flex; flex-direction: column; }
     .company-name {
