@@ -177,9 +177,21 @@ const firebaseConfig = {
   // =============================================
   // 1. Check auth state — only load SDK if cookie hint exists
   // =============================================
-  if (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin')) {
+  if (document.cookie.includes('gfs_admin=1') || window.location.pathname.startsWith('/admin') || window.location.search.includes('edit')) {
     loadFirebaseAndInit();
   }
+
+  // Keyboard shortcut: Ctrl+Shift+E (Win) or Cmd+Shift+L (Mac)
+  document.addEventListener('keydown', function(e) {
+    var isWin = e.ctrlKey && e.shiftKey && (e.key === 'E' || e.key === 'e');
+    var isMac = e.metaKey && e.shiftKey && (e.key === 'L' || e.key === 'l');
+    if (isWin || isMac) {
+      e.preventDefault();
+      if (!auth) loadFirebaseAndInit();
+      else if (!user) window.location.href = '/admin/';
+      else { if (document.getElementById('edit-toolbar').style.display === 'none') showToolbar(); else hideToolbar(); }
+    }
+  });
 
   async function loadFirebaseAndInit() {
     // Load Firebase SDKs
