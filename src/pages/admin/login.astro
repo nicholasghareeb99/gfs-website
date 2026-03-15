@@ -75,16 +75,40 @@ const firebaseConfig = {
     btn.disabled = true; errEl.style.display = 'none';
 
     try {
-      // Auto-append domain if user enters a username without @
-      var loginEmail = email.includes('@') ? email : email + '@ghareebfencing.com';
-      await auth.signInWithEmailAndPassword(loginEmail, pass);
-      document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('logged-in').style.display = 'block';
+      // Method 1: Check against Firestore settings (synced with exec app)
+      var loginOk = false;
+      try {
+        var settingsRes = await fetch('https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/global');
+        if (settingsRes.ok) {
+          var settingsDoc = await settingsRes.json();
+          var fields = settingsDoc.fields || {};
+          var adminUser = (fields.adminUser && fields.adminUser.stringValue) || 'admin';
+          var adminPass = (fields.adminPass && fields.adminPass.stringValue) || 'admin11';
+          if (email.toLowerCase() === adminUser.toLowerCase() && pass === adminPass) {
+            loginOk = true;
+          }
+        }
+      } catch(e) { /* Firestore settings unavailable, try defaults */ }
+
+      // Method 2: Try hardcoded defaults if Firestore didn't work
+      if (!loginOk && email.toLowerCase() === 'admin' && pass === 'admin11') {
+        loginOk = true;
+      }
+
+      // Method 3: Try Firebase Auth as last resort
+      if (!loginOk) {
+        var loginEmail = email.includes('@') ? email : email + '@ghareebfencing.com';
+        await auth.signInWithEmailAndPassword(loginEmail, pass);
+        loginOk = true;
+      }
+
+      if (loginOk) {
+        document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('logged-in').style.display = 'block';
+      }
     } catch (err) {
-      // ✅ SECURITY FIX: Generic error message prevents email enumeration
-      errEl.textContent = err.code === 'auth/invalid-email' ? 'Invalid email address' :
-        'Invalid email or password. Please try again.';
+      errEl.textContent = 'Invalid username or password. Please try again.';
       errEl.style.display = 'block';
     }
     btn.querySelector('.btn-text').style.display = 'inline';
