@@ -388,9 +388,12 @@ const firebaseConfig = {
         changes.clear();
         updateChangesCount();
         clearHydratorCache();
-        triggerNetlifyRebuild();
 
-        saveBtn.innerHTML = '✅ Saved!';
+        // Push to GitHub (triggers Netlify rebuild)
+        saveBtn.innerHTML = '⏳ Publishing...';
+        var ghOk = await pushToGitHub();
+
+        saveBtn.innerHTML = ghOk ? '✅ Published!' : '✅ Saved (GitHub pending)';
         setTimeout(() => {
           saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Save Changes';
           saveBtn.disabled = false;
@@ -549,20 +552,87 @@ const firebaseConfig = {
   });
 
   // =============================================
-  // 9. Netlify deploy hook — trigger rebuild after save
+  // 9. GitHub Push — commit edits to repo, triggers Netlify rebuild
   // =============================================
-  // To set this up: Netlify Dashboard → Site Settings → Build & deploy → Build hooks
-  // Create a hook named "Content Update" and paste the URL below
-  const NETLIFY_BUILD_HOOK = window.__GFS_NETLIFY_HOOK || '';
+  const GH_REPO = 'nicholasghareeb99/gfs-website';
+  const GH_FILE = 'public/site-edits.json';
 
-  async function triggerNetlifyRebuild() {
-    if (!NETLIFY_BUILD_HOOK) return;
+  async function pushToGitHub() {
     try {
-      await fetch(NETLIFY_BUILD_HOOK, { method: 'POST' });
-      console.log('[EditMode] Netlify rebuild triggered');
+      // 1. Collect all Firestore edit data into a JSON snapshot
+      const data = { _updatedAt: new Date().toISOString(), _updatedBy: 'edit-mode' };
+
+      // Gather all pending edits from the page's data-edit elements
+      document.querySelectorAll('[data-edit-doc][data-edit-field]').forEach(function(el) {
+        var doc = el.dataset.editDoc;
+        var field = el.dataset.editField;
+        if (!data[doc]) data[doc] = {};
+        if (el.tagName === 'IMG') {
+          data[doc][field] = el.src;
+        } else if (el.dataset.editType === 'html' || el.dataset.editType === 'richtext') {
+          data[doc][field] = el.innerHTML;
+        } else {
+          data[doc][field] = el.textContent.trim();
+        }
+      });
+
+      var json = JSON.stringify(data, null, 2);
+      var b64 = btoa(unescape(encodeURIComponent(json)));
+
+      // 2. Get GitHub token from server endpoint
+      var tokenRes = await fetch('/api/editor-token');
+      if (!tokenRes.ok) {
+        console.warn('[EditMode] Editor token fetch failed:', tokenRes.status);
+        return false;
+      }
+      var tokenData = await tokenRes.json();
+      if (!tokenData.token) {
+        console.warn('[EditMode] No GitHub token returned');
+        return false;
+      }
+      var token = tokenData.token;
+
+      // 3. Get current file SHA (needed for updates)
+      var sha = null;
+      try {
+        var shaRes = await fetch('https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_FILE, {
+          headers: { 'Authorization': 'token ' + token, 'Accept': 'application/vnd.github.v3+json' }
+        });
+        if (shaRes.ok) {
+          var shaData = await shaRes.json();
+          sha = shaData.sha;
+        }
+      } catch(e) { /* file doesn't exist yet, that's fine */ }
+
+      // 4. Commit the file
+      var commitBody = {
+        message: 'Edit mode update: ' + new Date().toLocaleString(),
+        content: b64,
+        branch: 'main'
+      };
+      if (sha) commitBody.sha = sha;
+
+      var commitRes = await fetch('https://api.github.com/repos/' + GH_REPO + '/contents/' + GH_FILE, {
+        method: 'PUT',
+        headers: {
+          'Authorization': 'token ' + token,
+          'Accept': 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(commitBody)
+      });
+
+      if (commitRes.ok) {
+        console.log('[EditMode] GitHub commit successful — Netlify rebuild will trigger');
+        return true;
+      } else {
+        var errText = await commitRes.text();
+        console.error('[EditMode] GitHub commit failed:', commitRes.status, errText);
+        return false;
+      }
     } catch(e) {
-      console.warn('[EditMode] Netlify rebuild trigger failed:', e.message);
-      // Non-critical — content is already in Firestore and hydrator will pick it up
+      console.error('[EditMode] pushToGitHub error:', e.message);
+      return false;
     }
   }
 
