@@ -20,8 +20,8 @@ const firebaseConfig = {
       </div>
       <form id="login-form" novalidate>
         <div class="form-field">
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="admin@ghareebfencing.com" />
+          <label for="email">Username</label>
+          <input type="text" id="email" required placeholder="admin" />
         </div>
         <div class="form-field">
           <label for="password">Password</label>
@@ -75,7 +75,9 @@ const firebaseConfig = {
     btn.disabled = true; errEl.style.display = 'none';
 
     try {
-      await auth.signInWithEmailAndPassword(email, pass);
+      // Auto-append domain if user enters a username without @
+      var loginEmail = email.includes('@') ? email : email + '@ghareebfencing.com';
+      await auth.signInWithEmailAndPassword(loginEmail, pass);
       document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
       document.getElementById('login-form').style.display = 'none';
       document.getElementById('logged-in').style.display = 'block';
