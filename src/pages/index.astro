@@ -49,10 +49,10 @@ const site = { ...siteJson, ...siteSettings };
                     </div>
                 </div>
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/cedar-shadowbox.jpg" alt="Cedar privacy fence Toledo" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/vinyl-white.jpg" alt="Vinyl fence Perrysburg" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/aluminum-black.jpg" alt="Aluminum ornamental fence" style="width: 100%; height: 100%; object-fit: cover;"></div>
-                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);"><img src="/images/gallery/pt-privacy.jpg" alt="Wood fence Maumee" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" data-editable-image data-edit-doc="content/homepage" data-edit-field="heroImage1"><img src="/images/gallery/cedar-shadowbox.jpg" alt="Cedar privacy fence Toledo" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" data-editable-image data-edit-doc="content/homepage" data-edit-field="heroImage2"><img src="/images/gallery/vinyl-white.jpg" alt="Vinyl fence Perrysburg" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" data-editable-image data-edit-doc="content/homepage" data-edit-field="heroImage3"><img src="/images/gallery/aluminum-black.jpg" alt="Aluminum ornamental fence" style="width: 100%; height: 100%; object-fit: cover;"></div>
+                    <div style="border-radius: 12px; overflow: hidden; aspect-ratio: 1; box-shadow: 0 10px 40px rgba(0,0,0,0.3);" data-editable-image data-edit-doc="content/homepage" data-edit-field="heroImage4"><img src="/images/gallery/pt-privacy.jpg" alt="Wood fence Maumee" style="width: 100%; height: 100%; object-fit: cover;"></div>
                 </div>
             </div>
         </div>
@@ -70,8 +70,8 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
                 <div>
-                    <h2 class="section-title" style="margin: 0;">Recent <span class="gold">Installations</span></h2>
-                    <p style="color: var(--text-muted); margin: 8px 0 0;">Real projects from Toledo and surrounding areas</p>
+                    <h2 class="section-title" style="margin: 0;" data-editable data-edit-doc="content/homepage" data-edit-field="galleryTitle">Recent <span class="gold">Installations</span></h2>
+                    <p style="color: var(--text-muted); margin: 8px 0 0;" data-editable data-edit-doc="content/homepage" data-edit-field="gallerySubtitle">Real projects from Toledo and surrounding areas</p>
                 </div>
                 <a href="/gallery/" class="btn btn-secondary" style="white-space: nowrap;">View All Projects</a>
             </div>
@@ -101,8 +101,8 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div class="section-header">
                 <div class="section-label">Our Services</div>
-                <h2 class="section-title">Professional Fence <span class="gold">Installation</span></h2>
-                <p class="section-text">Quality materials, expert craftsmanship, and lasting results for every fencing need</p>
+                <h2 class="section-title" data-editable data-edit-doc="content/homepage" data-edit-field="servicesTitle">Professional Fence <span class="gold">Installation</span></h2>
+                <p class="section-text" data-editable data-edit-doc="content/homepage" data-edit-field="servicesSubtitle">Quality materials, expert craftsmanship, and lasting results for every fencing need</p>
             </div>
             <div class="grid-4" id="dyn-fence-types">
                 <a href="/fences/cedar/" class="card"><div class="card-icon">🌲</div><h3 class="card-title">Cedar Privacy</h3><p class="card-text">Natural beauty with 30-40+ year lifespan. The premium choice for privacy.</p></a>
@@ -123,8 +123,8 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div class="section-header">
                 <div class="section-label">Why Choose Us</div>
-                <h2 class="section-title">The Ghareeb <span class="gold">Difference</span></h2>
-                <p class="section-text">What sets us apart from other fence contractors</p>
+                <h2 class="section-title" data-editable data-edit-doc="content/homepage" data-edit-field="whyUsTitle">The Ghareeb <span class="gold">Difference</span></h2>
+                <p class="section-text" data-editable data-edit-doc="content/homepage" data-edit-field="whyUsSubtitle">What sets us apart from other fence contractors</p>
             </div>
             <div class="quote-options-grid" id="dyn-why-us">
                 <!-- Static fallback — replaced by Firestore on load -->
@@ -149,8 +149,8 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div class="section-header">
                 <div class="section-label">Our Process</div>
-                <h2 class="section-title">Simple <span class="gold">4-Step</span> Process</h2>
-                <p class="section-text">From quote to completion, we make fence installation easy</p>
+                <h2 class="section-title" data-editable data-edit-doc="content/homepage" data-edit-field="processTitle">Simple <span class="gold">4-Step</span> Process</h2>
+                <p class="section-text" data-editable data-edit-doc="content/homepage" data-edit-field="processSubtitle">From quote to completion, we make fence installation easy</p>
             </div>
             <div class="process-grid">
                 {site.process.map((step) => (
@@ -169,7 +169,7 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div class="section-header">
                 <div class="section-label">Customer Reviews</div>
-                <h2 class="section-title">What Our <span class="gold">Customers</span> Say</h2>
+                <h2 class="section-title" data-editable data-edit-doc="content/homepage" data-edit-field="reviewsTitle">What Our <span class="gold">Customers</span> Say</h2>
             </div>
             <div class="grid-3" id="dyn-reviews">
                 <!-- Static fallback — replaced by Firestore on load -->
@@ -198,8 +198,8 @@ const site = { ...siteJson, ...siteSettings };
         <div class="container">
             <div class="section-header">
                 <div class="section-label">Service Areas</div>
-                <h2 class="section-title">Serving <span class="gold">Northwest Ohio</span> & SE Michigan</h2>
-                <p class="section-text">Professional fence installation across 5+ counties</p>
+                <h2 class="section-title" data-editable data-edit-doc="content/homepage" data-edit-field="areasTitle">Serving <span class="gold">Northwest Ohio</span> & SE Michigan</h2>
+                <p class="section-text" data-editable data-edit-doc="content/homepage" data-edit-field="areasSubtitle">Professional fence installation across 5+ counties</p>
             </div>
             <div class="areas-grid">
                 <a href="/service-areas/toledo/" class="area-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Toledo</a>
@@ -216,8 +216,8 @@ const site = { ...siteJson, ...siteSettings };
     <section class="section cta-section">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready for Your New Fence?</h2>
-                <p>Get your free quote in 60 seconds or talk to an expert today.</p>
+                <h2 data-editable data-edit-doc="content/homepage" data-edit-field="ctaTitle">Ready for Your New Fence?</h2>
+                <p data-editable data-edit-doc="content/homepage" data-edit-field="ctaSubtitle">Get your free quote in 60 seconds or talk to an expert today.</p>
                 <div class="cta-buttons">
                     <a href="/quote/" class="btn btn-primary btn-lg">Get Instant Quote</a>
                     <a href={`tel:${site.company.phoneRaw}`} class="btn btn-secondary btn-lg">{site.company.phone}</a>
