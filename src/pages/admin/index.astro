@@ -20,6 +20,10 @@ const firebaseConfig = {
     <meta name="robots" content="noindex, nofollow">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
     <style>
         :root { --primary:#1e3a5f;--primary-dark:#152a45;--accent:#d4af37;--success:#10b981;--warning:#f59e0b;--error:#ef4444;--bg:#f8fafc;--text:#1e293b;--text-muted:#64748b;--border:#e2e8f0;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,0.1);--shadow-lg:0 10px 15px -3px rgba(0,0,0,0.1); }
         *{margin:0;padding:0;box-sizing:border-box;} body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
@@ -225,20 +229,13 @@ const firebaseConfig = {
 
     <div class="toast" id="toast"></div>
 
-    <script is:inline define:vars={{ firebaseConfig, defaultFences: fences.fenceTypes, defaultReviews: reviews }}>
-    window.__GFS_CONFIG = firebaseConfig;
-    window.__GFS_FENCES = defaultFences;
-    window.__GFS_REVIEWS = defaultReviews;
-    </script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-storage-compat.js"></script>
+    <script id="gfs-config" type="application/json" set:html={JSON.stringify({firebaseConfig, defaultFences: fences.fenceTypes, defaultReviews: reviews})}></script>
 
     <script is:inline>
-    var firebaseConfig = window.__GFS_CONFIG;
-    var defaultFences = window.__GFS_FENCES;
-    var defaultReviews = window.__GFS_REVIEWS;
+    var _cfg = JSON.parse(document.getElementById('gfs-config').textContent);
+    var firebaseConfig = _cfg.firebaseConfig;
+    var defaultFences = _cfg.defaultFences;
+    var defaultReviews = _cfg.defaultReviews;
     firebase.initializeApp(firebaseConfig);
     const auth=firebase.auth(), db=firebase.firestore(), storage=firebase.storage();
     const toast=document.getElementById('toast');
