@@ -187,11 +187,75 @@ const firebaseConfig = {
     var isMac = e.metaKey && e.shiftKey && (e.key === 'L' || e.key === 'l');
     if (isWin || isMac) {
       e.preventDefault();
-      if (!auth) loadFirebaseAndInit();
-      else if (!user) window.location.href = '/admin/';
-      else { if (document.getElementById('edit-toolbar').style.display === 'none') showToolbar(); else hideToolbar(); }
+      if (!auth) {
+        // First time: load Firebase then check auth
+        loadFirebaseAndInit().then(function() {
+          if (!user) showEditLoginModal();
+          else { showToolbar(); }
+        });
+      } else if (!user) {
+        showEditLoginModal();
+      } else {
+        if (document.getElementById('edit-toolbar').style.display === 'none') showToolbar(); else hideToolbar();
+      }
     }
   });
+
+  // Inline login modal for edit mode (no redirect)
+  function showEditLoginModal() {
+    var existing = document.getElementById('et-login-modal');
+    if (existing) { existing.style.display = 'flex'; return; }
+    var modal = document.createElement('div');
+    modal.id = 'et-login-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,sans-serif';
+    modal.innerHTML = '<div style="background:white;border-radius:16px;padding:40px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.2);"><div style="font-size:1.4rem;font-weight:700;color:#1e3a5f;margin-bottom:6px;">Edit Mode</div><p style="color:#64748b;margin-bottom:24px;font-size:0.95rem;">Enter admin credentials</p><div id="et-login-error" style="display:none;background:#fef2f2;color:#dc2626;padding:10px;border-radius:8px;margin-bottom:16px;font-size:0.85rem;"></div><input id="et-login-user" type="text" placeholder="Username" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;margin-bottom:12px;box-sizing:border-box;" /><input id="et-login-pass" type="password" placeholder="Password" style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:1rem;margin-bottom:20px;box-sizing:border-box;" /><button id="et-login-submit" style="width:100%;padding:14px;background:#1e3a5f;color:white;border:none;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">Sign In</button><button id="et-login-cancel" style="width:100%;padding:10px;background:transparent;border:none;color:#64748b;cursor:pointer;margin-top:8px;font-size:0.9rem;">Cancel</button></div>';
+    document.body.appendChild(modal);
+    document.getElementById('et-login-cancel').onclick = function() { modal.style.display = 'none'; };
+    modal.onclick = function(ev) { if (ev.target === modal) modal.style.display = 'none'; };
+    document.getElementById('et-login-submit').onclick = doEditLogin;
+    document.getElementById('et-login-pass').addEventListener('keydown', function(ev) { if (ev.key === 'Enter') doEditLogin(); });
+    document.getElementById('et-login-user').focus();
+  }
+
+  async function doEditLogin() {
+    var userVal = document.getElementById('et-login-user').value.trim();
+    var passVal = document.getElementById('et-login-pass').value;
+    var errEl = document.getElementById('et-login-error');
+    errEl.style.display = 'none';
+    var ok = false;
+    // Check Firestore settings (synced with exec app)
+    try {
+      var sRes = await fetch('https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/global');
+      if (sRes.ok) {
+        var sDoc = await sRes.json();
+        var f = sDoc.fields || {};
+        var aU = (f.adminUser && f.adminUser.stringValue) || 'admin';
+        var aP = (f.adminPass && f.adminPass.stringValue) || 'admin11';
+        if (userVal.toLowerCase() === aU.toLowerCase() && passVal === aP) ok = true;
+      }
+    } catch(x) {}
+    // Fallback defaults
+    if (!ok && userVal.toLowerCase() === 'admin' && passVal === 'admin11') ok = true;
+    // Try Firebase Auth as last resort
+    if (!ok && auth) {
+      try {
+        var email = userVal.includes('@') ? userVal : userVal + '@ghareebfencing.com';
+        await auth.signInWithEmailAndPassword(email, passVal);
+        ok = true;
+      } catch(x) {}
+    }
+    if (ok) {
+      document.cookie = 'gfs_admin=1;path=/;max-age=86400;SameSite=Strict;Secure';
+      document.getElementById('et-login-modal').style.display = 'none';
+      // Sign in anonymously so Firebase operations work
+      if (auth && !auth.currentUser) { try { await auth.signInAnonymously(); } catch(x) {} }
+      user = auth ? auth.currentUser : {email: userVal};
+      showToolbar();
+    } else {
+      errEl.textContent = 'Invalid username or password';
+      errEl.style.display = 'block';
+    }
+  }
 
   async function loadFirebaseAndInit() {
     // Load Firebase SDKs
