@@ -1,12 +1,5 @@
 ---
-const firebaseConfig = {
-  apiKey: import.meta.env.PUBLIC_FIREBASE_API_KEY,
-  authDomain: import.meta.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.PUBLIC_FIREBASE_APP_ID
-};
+// No frontmatter needed - Firebase config is hardcoded in the script
 ---
 <!-- Edit Mode: Only loads Firebase SDK when needed, activates for authenticated admins -->
 <div id="edit-toolbar" style="display:none;">
@@ -164,10 +157,10 @@ const firebaseConfig = {
   }
 </style>
 
-<script is:inline define:vars={{ firebaseConfig }}>
+<script is:inline>
 (function() {
-  // Firebase config from environment variables
-  const FB_CFG = firebaseConfig;
+  // Firebase config hardcoded (public client-side config)
+  const FB_CFG = {apiKey:'AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE',authDomain:'ghareeb-fencing.firebaseapp.com',projectId:'ghareeb-fencing',storageBucket:'ghareeb-fencing.firebasestorage.app',messagingSenderId:'187837905206',appId:'1:187837905206:web:1e9a9bc33f745cbeeddb97'};
 
   let auth, db, storage, user = null;
   let editActive = false;
