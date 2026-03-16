@@ -1,0 +1,32 @@
+{
+  "_updatedAt": "2026-03-16T03:29:42.278Z",
+  "_updatedBy": "edit-mode",
+  "settings/site": {
+    "hero.badge": "Toledo's #1 Rated Fence Contractor",
+    "hero.title": "Your Family Deserves a",
+    "hero.titleHighlight": "Beautiful, Safe Backyard",
+    "hero.subtitle": "Professional fence installation by local craftsmen who care. Get an instant quote in 60 seconds.",
+    "stats.fencesInstalled": "500+",
+    "stats.googleRating": "4.9★",
+    "stats.warranty": "3 Year"
+  },
+  "content/homepage": {
+    "heroImage1": "",
+    "heroImage2": "",
+    "heroImage3": "",
+    "heroImage4": "",
+    "galleryTitle": "Recent Installations",
+    "gallerySubtitle": "Real projects from Toledo and surrounding areas",
+    "servicesTitle": "Professional Fence Installation",
+    "servicesSubtitle": "Quality materials, expert craftsmanship, and lasting results for every fencing need",
+    "whyUsTitle": "The Ghareeb Difference",
+    "whyUsSubtitle": "What sets us apart from other fence contractors",
+    "processTitle": "Simple 4-Step Process",
+    "processSubtitle": "From quote to completion, we make fence installation easy",
+    "reviewsTitle": "What Our Customers Say",
+    "areasTitle": "Serving Northwest Ohio & SE Michigan",
+    "areasSubtitle": "Professional fence installation across 5+ counties",
+    "ctaTitle": "Ready for Your New Fence?",
+    "ctaSubtitle": "Get your free quote in 60 seconds or talk to an expert today."
+  }
+}
