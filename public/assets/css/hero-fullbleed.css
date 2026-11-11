@@ -205,3 +205,58 @@ html .pagehero p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
 /* Guides use class="skip" for the skip link, which had no styles and showed as plain text. */
 a.skip{ position:absolute; left:-9999px; top:0; z-index:1000; padding:10px 14px; background:#fff; color:#0e1720; }
 a.skip:focus{ left:8px; top:8px; }
+
+/* ---------- Style library: blueprint, 3D model, photo and write-up per style ---------- */
+.gfs-styles{ background:#fbfaf7; padding:clamp(48px,7vw,96px) 0; }
+.gfs-styles__inner{ max-width:1180px; margin:0 auto; padding:0 clamp(16px,4vw,54px); }
+.gfs-styles__eyebrow{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#5a6672; margin:0 0 10px; }
+.gfs-styles h2{ font-size:clamp(28px,3.8vw,46px); line-height:1.08; margin:0 0 12px; color:#0e1720; }
+.gfs-styles__lede{ font-size:18px; color:#3c4854; max-width:60ch; margin:0 0 36px; }
+.gfs-style{ background:#fff; border:1px solid #dfe3e6; border-radius:10px; padding:clamp(16px,2.6vw,30px); margin:0 0 26px; }
+.gfs-style > header{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; border-bottom:2px solid #0e1720; padding-bottom:10px; margin-bottom:18px; }
+.gfs-style h3{ font-size:clamp(22px,2.6vw,30px); line-height:1.1; margin:0; color:#0e1720; }
+.gfs-style > header span{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#a4552b; white-space:nowrap; }
+.gfs-style__body{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:24px; align-items:start; }
+.gfs-style__text p, .gfs-style__cap{ font-size:18px; line-height:1.55; color:#1c2630; margin:0 0 18px; }
+.gfs-style__media{ display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:14px; }
+.gfs-style figure{ margin:0; }
+.gfs-style__media img{ display:block; width:100%; height:220px; object-fit:cover; border-radius:6px; background:#efefed; }
+.gfs-style figcaption{ font-size:13px; line-height:1.4; color:#5a6672; margin-top:6px; }
+.gfs-style__bp{ margin-top:22px !important; }
+.gfs-style__bp img{ display:block; width:100%; height:auto; border:1px solid #dfe3e6; border-radius:6px; background:#fff; }
+.gfs-style__media:empty{ display:none; }
+@media (max-width:820px){
+  .gfs-style__body{ grid-template-columns:1fr; }
+  .gfs-style__media img{ height:180px; }
+  .gfs-style > header{ flex-direction:column; gap:4px; }
+  /* blueprints are wide drawings: let them scroll sideways on a phone so the numbers stay readable */
+  .gfs-style__bp a{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .gfs-style__bp img{ width:820px; max-width:none; }
+}
+.gfs-style__model img{ object-fit:contain; background:#efefed; }
+.gfs-style__bp--narrow{ max-width:520px; }
+@media (max-width:820px){ .gfs-style__bp--narrow a{ overflow:visible; } .gfs-style__bp--narrow img{ width:100%; max-width:100%; } }
+.gfs-style__media .gfs-style__model img{ height:auto; aspect-ratio:auto; }
+
+/* ---------- Brochure downloads and online reader ---------- */
+.gfs-read{ background:#fbfaf7; padding:clamp(40px,6vw,80px) 0; }
+.gfs-read__inner{ max-width:1100px; margin:0 auto; padding:0 clamp(16px,4vw,54px); }
+.gfs-read h2{ font-size:clamp(26px,3.4vw,40px); line-height:1.1; color:#0e1720; margin:0 0 18px; }
+.gfs-read__lede{ font-size:18px; color:#1c2630; margin:0 0 24px; }
+.gfs-dl-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:18px; margin:0 0 48px; }
+.gfs-dl{ display:flex; flex-direction:column; gap:6px; text-decoration:none; color:#0e1720; background:#fff; border:1px solid #dfe3e6; border-radius:8px; padding:10px; }
+.gfs-dl:hover, .gfs-dl:focus-visible{ border-color:#0e1720; }
+.gfs-dl img{ width:100%; height:auto; border-radius:4px; display:block; }
+.gfs-dl strong{ font-size:17px; line-height:1.2; }
+.gfs-dl span{ font-size:14px; line-height:1.4; color:#3c4854; }
+.gfs-dl em{ font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:12px; color:#a4552b; margin-top:auto; }
+.gfs-read__toc{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 28px; padding:0; }
+.gfs-read__toc a{ font-size:14px; padding:8px 12px; border:1px solid #0e1720; border-radius:999px; color:#0e1720; text-decoration:none; background:#fff; }
+.gfs-read__section{ margin-top:48px !important; padding-top:16px; border-top:2px solid #0e1720; scroll-margin-top:90px; }
+.gfs-read__page{ margin:0 auto 34px; max-width:900px; scroll-margin-top:90px; }
+.gfs-read__page img{ display:block; width:100%; height:auto; border:1px solid #dfe3e6; border-radius:6px; background:#fff; box-shadow:0 6px 24px rgba(14,23,32,.08); }
+.gfs-read__page figcaption{ font-size:14px; color:#3c4854; margin:8px 0 4px; }
+.gfs-read__page summary{ cursor:pointer; font-size:14px; color:#0e1720; text-decoration:underline; padding:6px 0; }
+.gfs-read__text p{ font-size:16px; line-height:1.5; margin:0 0 6px; color:#1c2630; }
+.gfs-read__end{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:40px; }
+.gfs-read--teaser .gfs-dl-grid{ margin-bottom:0; }
