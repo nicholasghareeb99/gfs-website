@@ -155,3 +155,24 @@ html body .sell-hero .sell-intro{
 }
 html body .sell-hero .sell-photo{ order:0; }
 html .sell-hero .sell-intro a:not(.btn){ color:#fff !important; text-decoration-color:rgba(255,255,255,.7); }
+
+/* ---------- Winter line in the homepage hero ---------- */
+html .hero2--photo .hero-winter{
+  display:inline-block; max-width:54ch; margin:0 0 22px; padding:10px 14px;
+  color:#fff; font-size:16px; line-height:1.45;
+  background:rgba(8,14,20,.45); border-left:3px solid #fff; border-radius:4px;
+  backdrop-filter:blur(4px);
+}
+html .hero2--photo .hero-winter strong{ color:#fff; }
+
+/* ---------- Build spec block on fence style pages ---------- */
+.gfs-spec{ background:#0e1720; color:#fff; padding:clamp(48px,7vw,88px) 0; }
+.gfs-spec__inner{ max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,54px); }
+.gfs-spec__eyebrow{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.72); margin:0 0 10px; }
+.gfs-spec h2{ color:#fff; font-size:clamp(28px,3.6vw,44px); line-height:1.08; margin:0 0 28px; }
+.gfs-spec__list{ margin:0; border-top:1px solid rgba(255,255,255,.22); }
+.gfs-spec__row{ display:grid; grid-template-columns:minmax(150px,280px) 1fr; gap:8px 28px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.22); }
+.gfs-spec__row dt{ font-family:"IBM Plex Mono",monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.72); }
+.gfs-spec__row dd{ margin:0; font-size:18px; line-height:1.45; color:#fff; }
+.gfs-spec__note{ margin:20px 0 0; font-size:15px; color:rgba(255,255,255,.72); }
+@media (max-width:640px){ .gfs-spec__row{ grid-template-columns:1fr; gap:4px; } }
