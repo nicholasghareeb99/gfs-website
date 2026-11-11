@@ -201,3 +201,7 @@ html .pagehero p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
   html .pagehero::after{ background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%); }
 }
 .gfs-spec__src{ display:block; margin-top:6px; }
+
+/* Guides use class="skip" for the skip link, which had no styles and showed as plain text. */
+a.skip{ position:absolute; left:-9999px; top:0; z-index:1000; padding:10px 14px; background:#fff; color:#0e1720; }
+a.skip:focus{ left:8px; top:8px; }
