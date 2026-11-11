@@ -1,0 +1,157 @@
+/* hero-fullbleed.css — GFS, Nov 2026
+   Full-width photo heroes with white text on top.
+   Load this LAST, after construction-lab.css. No HTML changes needed. */
+
+/* ---------- Homepage hero ---------- */
+html .home-experience .hero2--photo{
+  display:flex; align-items:flex-end; position:relative;
+  min-height:min(88vh,820px); padding:0;
+  background:#0e1720; isolation:isolate; overflow:hidden;
+}
+html .home-experience .hero2--photo .hero2__bg{
+  position:absolute; inset:0; z-index:0;
+  width:100%; height:100%; margin:0;
+  aspect-ratio:auto; border-radius:0; box-shadow:none; grid-area:auto;
+}
+html .home-experience .hero2--photo .hero2__bg img{
+  width:100%; height:100%; object-fit:cover;
+}
+html .home-experience .hero2--photo .hero2__scrim{
+  display:block; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.38) 0%, rgba(8,14,20,.12) 32%, rgba(8,14,20,.80) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 68%);
+}
+html .home-experience .hero2--photo .hero2__grid{
+  position:relative; z-index:2; grid-area:auto;
+  width:100%; max-width:1248px; margin:0 auto;
+  padding:clamp(96px,14vh,170px) clamp(20px,4vw,54px) clamp(34px,7vh,72px);
+}
+html .home-experience .hero2--photo .hero2__content{ width:100%; max-width:700px; }
+html .home-experience .hero2--photo .hero2__content h1{
+  color:#fff; font-size:clamp(40px,6vw,78px); line-height:1.02;
+  letter-spacing:-.035em; margin:16px 0 18px; max-width:none;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .home-experience .hero2--photo .hero2__lede{
+  color:#fff; font-size:clamp(17px,1.5vw,20px); max-width:54ch;
+  text-shadow:0 1px 12px rgba(0,0,0,.55);
+}
+html .home-experience .hero2--photo .spec{ color:#fff; }
+html .home-experience .hero2--photo .dot{ background:#fff; }
+html .home-experience .hero2--photo #hero-quote-alt,
+html .home-experience .hero2--photo .hero-review-link,
+html .home-experience .hero2--photo .hero-review-link *{ color:#fff !important; }
+html .home-experience .hero2--photo .hero-review-link > span:first-child{ color:#ffd166 !important; }
+html .home-experience .hero2--photo .btn2--ghost{
+  border:1.5px solid rgba(255,255,255,.85); color:#fff;
+  background:rgba(8,14,20,.28); backdrop-filter:blur(4px);
+}
+
+@media (max-width:800px){
+  html .home-experience .hero2--photo{ min-height:82svh; padding:0; }
+  html .home-experience .hero2--photo .hero2__bg{
+    width:100%; height:100%; margin:0; aspect-ratio:auto; border-radius:0;
+  }
+  html .home-experience .hero2--photo .hero2__scrim{
+    display:block;
+    background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%);
+  }
+  html .home-experience .hero2--photo .hero2__grid{ padding:110px 20px 26px; }
+  html .home-experience .hero2--photo .hero2__content h1{ font-size:clamp(36px,10vw,50px); max-width:none; }
+}
+
+/* ---------- Fence style pages (.sell-hero) ---------- */
+html .sell-hero{
+  position:relative; display:grid; grid-template-columns:1fr; align-items:end;
+  min-height:min(80vh,720px); background:#0e1720; overflow:hidden; isolation:isolate;
+}
+html .sell-hero .sell-photo{
+  position:absolute; inset:0; z-index:0; width:100%; height:100%; margin:0; background:#0e1720;
+}
+html .sell-hero .sell-photo img{ width:100%; height:100%; object-fit:cover; }
+html .sell-hero .sell-photo::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.38) 0%, rgba(8,14,20,.14) 30%, rgba(8,14,20,.82) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 70%);
+}
+html .sell-hero .sell-intro{
+  position:relative; z-index:2; width:100%; max-width:780px;
+  justify-content:flex-end; background:none;
+  padding:clamp(96px,13vh,160px) clamp(20px,4vw,54px) clamp(30px,6vh,64px);
+}
+html .sell-hero .sell-intro,
+html .sell-hero .sell-intro :is(h1,p,span,nav,a:not(.btn)){ color:#fff; }
+html .sell-hero .sell-intro h1{
+  font-size:clamp(38px,5.6vw,72px); line-height:1.03; text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .sell-hero .sell-intro p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+
+/* ---------- City, guide, about, financing, gallery, why-us (.page-header--photo) ---------- */
+html .page-header--photo{
+  background:#0e1720; display:flex; align-items:flex-end;
+  min-height:min(74vh,660px);
+  padding:clamp(96px,13vh,160px) 0 clamp(30px,6vh,60px);
+}
+html .page-header--photo .ph__bg img{ width:100%; height:100%; object-fit:cover; }
+html .page-header--photo .ph__scrim{
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.16) 30%, rgba(8,14,20,.84) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 72%);
+}
+html .page-header--photo .ph__content{ width:100%; }
+html .page-header--photo .ph__content,
+html .page-header--photo .ph__content :is(h1,p,span,div,a:not(.btn)){ color:#fff; }
+html .page-header--photo h1{ max-width:18ch; text-shadow:0 2px 24px rgba(0,0,0,.45); }
+html .page-header--photo p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+
+/* ---------- Reviews page (had no photo) ---------- */
+html .gfs-reviews-hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  display:flex; align-items:flex-end; min-height:min(70vh,620px);
+  background:#0e1720 url(/assets/img/performance-v12/7b29998db19a45dd-1600.webp) center/cover no-repeat;
+}
+html .gfs-reviews-hero::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.20) 30%, rgba(8,14,20,.85) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.60) 0%, rgba(8,14,20,0) 70%);
+}
+html .gfs-reviews-hero .gfs-reviews-inner{
+  position:relative; z-index:1; width:100%;
+  padding:clamp(96px,13vh,160px) clamp(20px,4vw,54px) clamp(30px,6vh,64px);
+}
+html .gfs-reviews-hero :is(h1,p,span,strong){ color:#fff; }
+html .gfs-reviews-hero h1{
+  font-size:clamp(38px,5.6vw,72px); line-height:1.03; text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .gfs-reviews-hero .gfs-review-score{
+  padding:14px 20px; color:#fff; background:rgba(8,14,20,.35);
+  border:1.5px solid rgba(255,255,255,.8); backdrop-filter:blur(4px);
+}
+html .gfs-reviews-hero .gfs-review-score strong{ font-size:clamp(40px,5vw,60px); }
+
+/* ---------- Shared: outline buttons on photos ---------- */
+html :is(.sell-hero,.page-header--photo) .btn-outline{
+  color:#fff; border:1.5px solid rgba(255,255,255,.85);
+  background:rgba(8,14,20,.28); backdrop-filter:blur(4px);
+}
+
+@media (max-width:800px){
+  html .sell-hero, html .page-header--photo, html .gfs-reviews-hero{ min-height:76svh; }
+  html .sell-hero .sell-photo::after,
+  html .page-header--photo .ph__scrim,
+  html .gfs-reviews-hero::before{
+    background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%);
+  }
+}
+
+/* Phone layout: the style pages flatten .sell-intro with display:contents,
+   which would leave the text under the photo. Restore it as a real box. */
+html body .sell-hero{ display:grid !important; grid-template-columns:1fr !important; }
+html body .sell-hero .sell-intro{
+  display:flex !important; flex-direction:column; justify-content:flex-end; align-self:end;
+}
+html body .sell-hero .sell-photo{ order:0; }
+html .sell-hero .sell-intro a:not(.btn){ color:#fff !important; text-decoration-color:rgba(255,255,255,.7); }

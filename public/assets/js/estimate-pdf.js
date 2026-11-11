@@ -229,7 +229,7 @@
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     textColor(COLORS.goldBright);
-    doc.text('info@ghareebfencingsolutions.com  ·  ghareebfence.com', 50, H - 14);
+    doc.text('nick@ghareebfence.com  ·  ghareebfence.com', 50, H - 14);
     doc.setFontSize(8);
     textColor(COLORS.cream);
     doc.text('Page 1 of 4', W - 80, H - 14);
