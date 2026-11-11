@@ -176,3 +176,28 @@ html .hero2--photo .hero-winter strong{ color:#fff; }
 .gfs-spec__row dd{ margin:0; font-size:18px; line-height:1.45; color:#fff; }
 .gfs-spec__note{ margin:20px 0 0; font-size:15px; color:rgba(255,255,255,.72); }
 @media (max-width:640px){ .gfs-spec__row{ grid-template-columns:1fr; gap:4px; } }
+
+/* ---------- Comparison guides (.pagehero) ---------- */
+html .pagehero{
+  position:relative; isolation:isolate; overflow:hidden; background:#0e1720;
+  display:flex; align-items:flex-end; min-height:min(74vh,660px);
+  padding:clamp(96px,13vh,160px) 0 clamp(30px,6vh,60px);
+}
+html .pagehero .pagehero__bg{ position:absolute; inset:0; z-index:0; opacity:1; }
+html .pagehero .pagehero__bg img{ width:100%; height:100%; object-fit:cover; opacity:1; filter:none; }
+html .pagehero::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.16) 30%, rgba(8,14,20,.84) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 72%);
+}
+html .pagehero .pagehero__inner{ position:relative; z-index:2; width:100%; }
+html .pagehero .pagehero__inner,
+html .pagehero .pagehero__inner :is(h1,p,div,span,a:not(.btn)){ color:#fff; }
+html .pagehero h1{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
+html .pagehero p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+@media (max-width:800px){
+  html .pagehero{ min-height:76svh; }
+  html .pagehero::after{ background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%); }
+}
+.gfs-spec__src{ display:block; margin-top:6px; }
