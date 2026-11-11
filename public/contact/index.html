@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Contact Us | Free Fence Estimates Toledo | Ghareeb Fencing</title>
+<meta name="description" content="Get a free fence estimate in Toledo & Northwest Ohio. Call (419) 214-2107 or send our team a message — we respond within 24 hours.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Contact Us | Free Fence Estimates Toledo | Ghareeb Fencing">
+<meta property="og:description" content="Get a free fence estimate in Toledo & Northwest Ohio. Call (419) 214-2107 or send our team a message — we respond within 24 hours.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/contact/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Contact Us | Free Fence Estimates Toledo | Ghareeb Fencing">
+<meta name="twitter:description" content="Get a free fence estimate in Toledo & Northwest Ohio. Call (419) 214-2107 or send our team a message — we respond within 24 hours.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/contact/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Contact", "item": "https://ghareebfence.com/contact/"}
+  ]
+}
+</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How quickly will you get back to me?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Most quote requests get a callback within 24 hours, often the same day. If you're calling during business hours we usually answer in person."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the estimate really free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes\u2014the on-site estimate is genuinely free and there's no pressure to commit. We measure your property, walk through fence options, and you can think about it for as long as you need."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long does an estimate take?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Typically 30-45 minutes on-site. We measure the area, discuss style options, walk through the proposal, and answer all questions. No high-pressure sales pitch."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How far in advance do I need to schedule?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Spring and summer (April through August) book up 2-4 weeks out. Fall and winter installs are typically available within a week or two of approval. Emergency or rush jobs can sometimes accommodate\u2014just call."
+      }
+    }
+  ]
+}</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="preload" as="image" href="/assets/img/performance-v12/76240167911e14f7-1600.webp" imagesrcset="/assets/img/performance-v12/76240167911e14f7-480.webp 480w, /assets/img/performance-v12/76240167911e14f7-960.webp 960w, /assets/img/performance-v12/76240167911e14f7-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../reviews/">Reviews</a></li>
+      <li><a href="../guides/">Guides</a></li>
+      <li><a href="../about/">About</a></li>
+      <li><a href="../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+      <li><a class="is-active" href="../contact/">Contact</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../fences/">Fence Styles</a></li>
+    <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../reviews/">Reviews</a></li>
+    <li><a href="../about/">About</a></li>
+    <li><a href="../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+    <li><a href="../contact/">Contact</a></li>
+    <li><a href="../guides/">Guides</a></li>
+    <li><a href="../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="hero.v4.contact.image" aria-hidden="true"><img decoding="async" src="/assets/img/performance-v12/76240167911e14f7-1600.webp" srcset="/assets/img/performance-v12/76240167911e14f7-480.webp 480w, /assets/img/performance-v12/76240167911e14f7-960.webp 960w, /assets/img/performance-v12/76240167911e14f7-1600.webp 1600w" sizes="100vw" width="1600" height="1200" alt="Tan privacy fence corner with a walk gate around a sunny lawn." loading="eager" fetchpriority="high"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="../">Home</a> <span>/</span> Contact</div>
+    <h1 class="display-2" data-editable="contact.title">Contact Us</h1>
+    <p class="lede" data-editable="contact.lede">We'd love to hear from you. Get in touch today — we typically reply within 24 hours, often the same day during business hours.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 40px;">
+  <div class="container">
+    <div style="display: grid; grid-template-columns: 1fr 1.4fr; gap: 64px; align-items: start;">
+      <aside>
+        <h2 class="display-3" style="margin-bottom: 24px;" data-editable="contact.aside.title">Get in touch</h2>
+        <p style="font-size: 17px; color: var(--gray-700); margin-bottom: 32px;" data-editable="contact.aside.body">
+          Ready to start your fence project? Have questions about a quote we sent? We're here to help.
+        </p>
+
+        <div style="display: grid; gap: 20px; margin-bottom: 32px;">
+          <a href="tel:14192142107" style="background: var(--white); padding: 24px; border-radius: 6px; box-shadow: var(--shadow-sm); display: block;">
+            <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-bottom: 6px;">Phone</div>
+            <div style="font-family: var(--serif); font-size: 26px; color: var(--navy);" data-editable="contact.aside.phone">(419) 214-2107</div>
+          </a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="background: var(--white); padding: 24px; border-radius: 6px; box-shadow: var(--shadow-sm); display: block;">
+            <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-bottom: 6px;">Email</div>
+            <div style="font-family: var(--serif); font-size: 18px; color: var(--navy); word-break: break-all;" data-editable="contact.aside.email">info@ghareebfencingsolutions.com</div>
+          </a>
+          <div style="background: var(--white); padding: 24px; border-radius: 6px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-bottom: 6px;">Service Area</div>
+            <div style="font-family: var(--serif); font-size: 18px; color: var(--navy);" data-editable="contact.aside.area">Northwest Ohio &amp; Southeast Michigan</div>
+          </div>
+          <div style="background: var(--white); padding: 24px; border-radius: 6px; box-shadow: var(--shadow-sm);">
+            <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-bottom: 6px;">Hours</div>
+            <div style="font-family: var(--serif); font-size: 18px; color: var(--navy);" data-editable="contact.aside.hours">Mon–Sat · 8am – 6pm</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <a href="../quote/ballpark/" class="btn btn-primary btn-sm">Instant Quote Tool →</a>
+          <a href="../service-areas/" class="btn btn-outline btn-sm">View Service Areas</a>
+        </div>
+      </aside>
+
+      <div>
+        <h2 class="display-3" style="margin-bottom: 8px;" data-editable="contact.form.title">Send us a message</h2>
+        <p style="color: var(--gray-700); margin-bottom: 32px;" data-editable="contact.form.lede">Fill out the form below and we'll get back to you within 24 hours.</p>
+
+        <form data-lead-form data-redirect="" style="background: var(--white); padding: 32px; border-radius: 8px; box-shadow: var(--shadow-sm);">
+          <div class="form-success"></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fld-first-name-1">First Name <span class="req">*</span></label>
+              <input id="fld-first-name-1" name="firstName" type="text" class="form-input" required autocomplete="given-name">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fld-last-name-2">Last Name <span class="req">*</span></label>
+              <input id="fld-last-name-2" name="lastName" type="text" class="form-input" required autocomplete="family-name">
+            </div>
+          </div>
+          <input name="name" type="hidden">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fld-email-3">Email <span class="req">*</span></label>
+              <input id="fld-email-3" name="email" type="email" class="form-input" required autocomplete="email">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fld-phone-4">Phone <span class="req">*</span></label>
+              <input id="fld-phone-4" name="phone" type="tel" class="form-input" required autocomplete="tel">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fld-property-address-5">Property Address</label>
+            <input id="fld-property-address-5" name="address" type="text" class="form-input" placeholder="Street, City, State" autocomplete="street-address">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fld-project-type-6">Project Type <span class="req">*</span></label>
+              <select id="fld-project-type-6" name="projectType" class="form-select" required>
+                <option value="">Select project type…</option>
+                <option>New Fence Installation</option>
+                <option>Fence Replacement</option>
+                <option>Fence Repair</option>
+                <option>Gate Installation</option>
+                <option>Commercial Project</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fld-fence-type-interest-7">Fence Type Interest</label>
+              <select id="fld-fence-type-interest-7" name="fenceType" class="form-select">
+                <option value="">Select fence type…</option>
+                <option>Cedar Privacy</option>
+                <option>Wood Privacy</option>
+                <option>Vinyl Privacy</option>
+                <option>Ornamental Aluminum</option>
+                <option>Chain Link</option>
+                <option>Split Rail</option>
+                <option>Not Sure — Need Advice</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="fld-project-timeline-8">Project Timeline</label>
+              <select id="fld-project-timeline-8" name="timeline" class="form-select">
+                <option value="">When do you need this completed?</option>
+                <option>As Soon As Possible</option>
+                <option>Within 1 Month</option>
+                <option>1-3 Months</option>
+                <option>3-6 Months</option>
+                <option>Just Planning / Getting Quotes</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fld-how-did-you-hear-about-u-9">How Did You Hear About Us?</label>
+              <select id="fld-how-did-you-hear-about-u-9" name="heardFrom" class="form-select">
+                <option value="">Select one…</option>
+                <option>Google Search</option>
+                <option>Facebook</option>
+                <option>Friend/Family Referral</option>
+                <option>Saw Our Work in Neighborhood</option>
+                <option>BBB</option>
+                <option>Previous Customer</option>
+                <option>Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="fld-project-details-10">Project Details</label>
+            <textarea id="fld-project-details-10" name="notes" class="form-textarea" placeholder="Tell us about your property, any specific requirements, or questions you have…"></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-lg btn-block">Send Message</button>
+          <div class="form-error" role="alert" aria-atomic="true"></div>
+          <p class="form-note">By submitting, you agree to receive communications from Ghareeb Fencing Solutions. We use your details to respond to your request. See our <a href="/privacy/">privacy policy</a>.</p>
+        </form>
+
+        <script>
+          // Combine first/last name before submit so it lands in the lead as a single 'name' field
+          document.querySelector('[data-lead-form]').addEventListener('submit', function(e) {
+            var f = this.elements;
+            f.name.value = (f.firstName.value + ' ' + f.lastName.value).trim();
+          });
+        </script>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="container container-narrow">
+    <div class="section-header" style="margin-bottom: 40px;">
+      <div class="eyebrow" data-editable="contact.faq.eyebrow">FAQ</div>
+      <h2 class="display-3" data-editable="contact.faq.title">Frequently Asked Questions</h2>
+    </div>
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary data-editable="contact.faq.1.q">How do I get a free estimate?</summary>
+        <p data-editable="contact.faq.1.a">You can get a free estimate by calling us at (419) 214-2107, filling out our contact form above, or using our instant ballpark quote tool for a structured project profile that helps us prepare a faster, more accurate on-site visit.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-editable="contact.faq.2.q">What areas do you serve?</summary>
+        <p data-editable="contact.faq.2.a">We serve all of Northwest Ohio and Southeast Michigan, including Toledo, Perrysburg, Maumee, Sylvania, Bowling Green, Monroe, and many more communities. Check our service areas page for the full list.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-editable="contact.faq.3.q">How quickly can you start my project?</summary>
+        <p data-editable="contact.faq.3.a">During peak season (April–October), our typical lead time is 1-3 weeks from approved contract to installation. We can often accommodate urgent projects — call us to discuss your timeline.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-editable="contact.faq.4.q">Do you handle permits?</summary>
+        <p data-editable="contact.faq.4.a">Yes. We research permit requirements for your municipality and can assist with the application process. We also call OUPS to get utility lines marked before any digging starts.</p>
+      </details>
+      <details class="faq-item">
+        <summary data-editable="contact.faq.5.q">Do you offer financing?</summary>
+        <p data-editable="contact.faq.5.a">Yes — qualified homeowners can access 0% APR financing through First National Bank of Omaha (Slice). Apply in 60 seconds with no impact on your credit score. Ask us for the link.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">A backyard transformation</p><blockquote><p>“Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the look of our backyard.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Frank Powell</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Frank Powell (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../about/">About Nick</a></li>
+          <li><a href="../reviews/">Reviews</a></li>
+          <li><a href="../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+          <li><a href="../service-areas/">Service Areas</a></li>
+            <li class="nav-opt"><a href="../guides/">Guides</a>
+  <a href="../faq/">FAQ</a></li>
+          <li><a href="../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../privacy/" style="color:inherit;">Privacy</a> · <a href="../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+<script>
+// Address autocomplete on the detailed-quote form
+(function(){
+  function boot(){
+    if (!(window.google && google.maps && google.maps.places)) return false;
+    var inp = document.getElementById('fld-property-address-5');
+    if (!inp || inp.dataset.acBound) return true;
+    inp.dataset.acBound = '1';
+    var ac = new google.maps.places.Autocomplete(inp, {
+      componentRestrictions: { country: 'us' },
+      fields: ['formatted_address'],
+      types: ['address']
+    });
+    ac.addListener('place_changed', function(){
+      var p = ac.getPlace();
+      if (p && p.formatted_address) inp.value = p.formatted_address;
+    });
+    return true;
+  }
+  if (!boot()) {
+    if (window.GFS_GOOGLE_MAPS_KEY && !document.querySelector('script[src*="maps.googleapis.com/maps/api/js"]')) {
+      var s = document.createElement('script');
+      s.src = 'https://maps.googleapis.com/maps/api/js?key=' + window.GFS_GOOGLE_MAPS_KEY + '&libraries=places&v=weekly&loading=async';
+      s.async = true; s.defer = true;
+      document.head.appendChild(s);
+    }
+    var t = setInterval(function(){ if (boot()) clearInterval(t); }, 400);
+    setTimeout(function(){ clearInterval(t); }, 20000);
+  }
+})();
+</script>
+
+</body>
+</html>

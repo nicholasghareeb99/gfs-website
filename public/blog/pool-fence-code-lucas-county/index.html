@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Pool Fence Code in Lucas County, Ohio | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Complete guide to pool fence requirements in Lucas County, Ohio including Toledo, Sylvania, Maumee, and Ottawa Hills. Height, gates, self-latching, and inspection.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Pool Fence Code in Lucas County, Ohio: What You Actually Need to Know | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Complete guide to pool fence requirements in Lucas County, Ohio including Toledo, Sylvania, Maumee, and Ottawa Hills. Height, gates, self-latching, and inspection.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/blog/pool-fence-code-lucas-county/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pool Fence Code in Lucas County, Ohio: What You Actually Need to Know | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Complete guide to pool fence requirements in Lucas County, Ohio including Toledo, Sylvania, Maumee, and Ottawa Hills. Height, gates, self-latching, and inspection.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/blog/pool-fence-code-lucas-county/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://ghareebfence.com/blog/"},
+    {"@type": "ListItem", "position": 3, "name": "Pool Fence Code Lucas County", "item": "https://ghareebfence.com/blog/pool-fence-code-lucas-county/"}
+  ]
+}
+</script>
+<script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Pool Fence Code in Lucas County, Ohio: What You Actually Need to Know",
+  "description": "Complete guide to pool fence requirements in Lucas County, Ohio including Toledo, Sylvania, Maumee, and Ottawa Hills. Height, gates, self-latching, and inspection.",
+  "author": {
+    "@type": "Organization",
+    "name": "Ghareeb Fencing Solutions",
+    "url": "https://ghareebfence.com/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "Ghareeb Fencing Solutions",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://images.squarespace-cdn.com/content/v1/63530cf72e43e61523d4f318/cd2c9d97-72ff-405e-9007-2f7b3de85545/8F5C4C98-DDFA-4D07-8135-8366CF7247FA.png"
+    }
+  },
+  "datePublished": "2026-05-12",
+  "dateModified": "2026-10-01",
+  "mainEntityOfPage": "https://ghareebfence.com/blog/pool-fence-code-lucas-county/"
+}</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="pagehero.img" aria-hidden="true"><img src="/assets/img/performance-v12/edb5a320a18f55fa-1600.webp" alt="Code-compliant vinyl picket pool fence in Lucas County Ohio" loading="eager" decoding="async" srcset="/assets/img/performance-v12/edb5a320a18f55fa-480.webp 480w, /assets/img/performance-v12/edb5a320a18f55fa-960.webp 960w, /assets/img/performance-v12/edb5a320a18f55fa-1600.webp 1600w" sizes="100vw" width="1600" height="1200"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="../../">Home</a> <span>/</span> <a href="../../blog/">Blog</a> <span>/</span> Pool Fencing</div>
+    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="b.pool-fence-code-lucas-county.category">Pool Fencing</div>
+    <h1 class="display-1" data-editable="b.pool-fence-code-lucas-county.title">Pool Fence Code in Lucas County, Ohio: What You Actually Need to Know</h1>
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-top: 24px; color: #edf6fb; font-size: 14px;">
+      <span>Updated October 1, 2026</span>
+      <span>·</span>
+      <span>5 min read</span>
+    </div>
+    <p style="font-size: 19px; line-height: 1.6; color: #edf6fb; margin-top: 32px; max-width: 720px;" data-editable="b.pool-fence-code-lucas-county.summary">Plan your pool barrier around the requirements for your exact address, pool and fence design. Use this guide to prepare for your estimate and the local approval process.</p>
+  </div>
+</section>
+
+<article class="section" style="padding: 64px 0;">
+  <div class="container" style="max-width: 760px; margin: 0 auto;">
+      <figure style="margin:28px 0 8px;" data-editable-img="pool.photo1.img">
+    <img src="/assets/img/performance-v12/28c24ec6f61ec26a-480.webp" alt="White vinyl pickets with shaped tops and pointed post caps." loading="lazy" decoding="async" style="width:100%;height:auto;border-radius:6px;display:block;" srcset="/assets/img/performance-v12/28c24ec6f61ec26a-480.webp 480w, /assets/img/performance-v12/28c24ec6f61ec26a-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" data-photo-original="/assets/img/work/vinyl-picket-white-pool.jpg" data-photo-thumbnail="/assets/img/performance-v12/28c24ec6f61ec26a-480.webp">
+    <figcaption data-editable-caption="photo.detail.v30.blog.pool.fence.code.lucas.county.index.html.assets.img.work.vinyl.picket.white.pool.jpg">White vinyl pickets with shaped tops and pointed post caps.</figcaption>
+  </figure>
+
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.1">The short answer</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.1">Pool-barrier requirements vary by jurisdiction and pool design. The City of Toledo currently describes a minimum four-foot barrier for swimming pools, with additional conditions. Sylvania, Maumee, other Lucas County communities and Michigan jurisdictions must be checked separately.</p>
+<ul style="font-size: 17px; color: var(--gray-700); margin-bottom: 20px; padding-left: 22px;">
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.1.1">Confirm the required barrier height with the authority for your property.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.1.2">Check openings, ground clearance, rail arrangement and climbability.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.1.3">Specify the required self-closing, self-latching gate and hardware.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.1.4">Confirm latch position, gate swing and release access for the selected design.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.1.5">Review the full barrier, including any house walls, doors, pool walls and access ladders.</li>
+</ul>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.2">Start with the <a href="https://toledo.oh.gov/residents/homeowners/remodeling-construction/swimming-pools" target="_blank" rel="noopener noreferrer">City of Toledo swimming-pool guidance</a> if your property is in Toledo. Confirm permit and inspection requirements before installation; this page does not grant approval.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.2">Why pool fence code matters</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.3">Pool barriers help limit unsupervised access. A fence must work as a complete system, including gates and the surrounding site. Keep gates operating correctly and review any insurance questions directly with your insurer.</p>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.4">Tell us that the project includes a pool when you request an estimate. We will review the proposed barrier, selected product and local requirements with you; the responsible authority determines approval.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.3">What fence materials meet pool code</h2>
+<h3 style="font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--navy); margin: 28px 0 12px;" data-editable="b.pool-fence-code-lucas-county.h3.4">Ornamental aluminum (most common)</h3>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.5">Ornamental aluminum can preserve views of the pool area. The selected panel height, rail layout, openings and gate hardware must suit the applicable requirements. <a href="../../fences/aluminum/">Explore aluminum fencing →</a></p>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.6">Not every aluminum style is suitable for a pool barrier. Review the actual manufacturer drawing and installation details, including clearances on slopes, before choosing a model.</p>
+<h3 style="font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--navy); margin: 28px 0 12px;" data-editable="b.pool-fence-code-lucas-county.h3.5">Vinyl privacy</h3>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.7">Vinyl privacy can provide screening around a pool. Height alone does not establish compliance; openings, gates, adjacent structures and installation details also need review. <a href="../../fences/vinyl/">Explore vinyl fencing →</a></p>
+<h3 style="font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--navy); margin: 28px 0 12px;" data-editable="b.pool-fence-code-lucas-county.h3.6">Cedar privacy</h3>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.8">Cedar can provide privacy around a pool. Confirm the approved height, openings, structural design and gate details with the local authority; a particular height alone does not make a fence compliant.</p>
+<h3 style="font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--navy); margin: 28px 0 12px;" data-editable="b.pool-fence-code-lucas-county.h3.7">Chain link (with restrictions)</h3>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.9">Chain-link barriers need a mesh, height and installation detail accepted by the local authority. Do not assume a standard residential chain-link package is suitable for a pool.</p>
+<h3 style="font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--navy); margin: 28px 0 12px;" data-editable="b.pool-fence-code-lucas-county.h3.8">Split rail and ranch rail</h3>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.10">Open rail fencing by itself generally cannot provide a pool barrier. Any proposed infill system needs review as a complete assembly with the local authority.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.9">Gate hardware specifics</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.11">Gate operation is an essential part of a pool barrier. Confirm these details with the local authority and the selected hardware manufacturer:</p>
+<ul style="font-size: 17px; color: var(--gray-700); margin-bottom: 20px; padding-left: 22px;">
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.2.1"><strong>Self-closing:</strong> Select and install closing hardware that meets the applicable pool-barrier requirements and the manufacturer’s instructions.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.2.2"><strong>Self-latch:</strong> The latch must engage automatically when the gate closes. No manual sliding required.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.2.3"><strong>Latch position and protection:</strong> Required placement depends on the applicable code and gate configuration. Confirm the release height, pool-side placement and surrounding opening limits before installation.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ul.2.4"><strong>Swing direction:</strong> Gate must swing away from the pool, never toward it.</li>
+</ul>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.12">We review the selected gate and hardware together, then check that the installed gate closes and latches as intended. Keep hinges, closers and latches maintained and check their operation regularly.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.10">Door-to-pool considerations</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.13">When a house wall forms part of the pool enclosure, doors and other openings may need additional protection. The permitted options depend on the applicable code and the proposed barrier design; confirm them with your building department.</p>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.14">A separate enclosure may simplify the layout for some properties. We can compare the practical options during your estimate.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.11">Inspections</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.15">Start by identifying the building department responsible for your property. A typical project includes these steps, with local requirements determining the exact order:</p>
+<ol style="font-size: 17px; color: var(--gray-700); margin-bottom: 20px; padding-left: 22px;">
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ol.3.1">Confirm the design and obtain required approvals before installation.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ol.3.2">Install the approved fence, gates and hardware.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ol.3.3">Arrange the required inspection with the responsible building department.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ol.3.4">Review any inspection findings and complete required corrections.</li>
+<li style="margin-bottom: 8px; line-height: 1.7;" data-editable="b.pool-fence-code-lucas-county.ol.3.5">Follow the building department’s directions on when the pool may be filled or used.</li>
+</ol>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.16">We coordinate the fence scope and address inspection findings relating to our installation. Approval and timing are determined by the responsible authority.</p>
+<h2 class="display-3" style="margin:48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.budget.title">Budget for the complete enclosure</h2>
+<p style="font-size:17px;line-height:1.7;color:var(--gray-700);margin-bottom:16px;">A general fence estimate does not confirm the price or compliance of a pool barrier. Request a proposal for your address, enclosure layout and required gate hardware.</p>
+<ul style="font-size:17px;color:var(--gray-700);margin-bottom:20px;padding-left:22px;line-height:1.7;">
+<li>Confirm the selected material, approved height and layout, including all openings.</li>
+<li>Specify each gate's width, framing, self-closing hinges and latching arrangement for review.</li>
+<li>Identify access restrictions, ground conditions and any old fence or footings to remove.</li>
+<li>Clarify application, inspection and fee responsibilities in the written scope.</li>
+</ul>
+<p style="font-size:17px;line-height:1.7;color:var(--gray-700);margin-bottom:16px;">Our <a href="/blog/fence-cost-ohio-2026/">fence budget guide</a> explains the general cost inputs. Pool-specific work and hardware need their own review; do not assume they are included in a ballpark range.</p>
+<h2 class="display-3" style="margin: 48px 0 16px;" data-editable="b.pool-fence-code-lucas-county.h2.13">Get a pool fence quote</h2>
+<p style="font-size: 17px; line-height: 1.7; color: var(--gray-700); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.p.19">If you're building a pool, mention it when you contact us — pool fences are quoted differently than general residential fencing because of the code requirements. <a href="../../contact/">Free estimate here</a> or call <a href="tel:14192142107">(419) 214-2107</a>.</p>
+  </div>
+</article>
+
+<section class="section" style="padding: 64px 0; background: var(--navy); color: var(--cream);">
+  <div class="container">
+    <div style="text-align: center; max-width: 600px; margin: 0 auto;">
+      <h2 class="display-2" style="color: var(--cream); margin-bottom: 16px;" data-editable="b.pool-fence-code-lucas-county.cta.title">Ready to get a quote?</h2>
+      <p style="font-size: 18px; opacity: 0.85; margin-bottom: 32px;" data-editable="b.pool-fence-code-lucas-county.budget.cta">Tell us about your pool and enclosure so we can review the layout and gate requirements with you.</p>
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <a href="/quote/" class="btn btn-gold btn-lg">Request a pool fence quote</a>
+        <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">A backyard transformation</p><blockquote><p>“Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the look of our backyard.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Frank Powell</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Frank Powell (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+</body>
+</html>

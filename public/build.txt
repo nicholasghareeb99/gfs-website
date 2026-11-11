@@ -1,0 +1,166 @@
+GFS WEBSITE BUILD v37
+built: 2026-08-22T18:36Z
+new:  EDIT MODE v3 — add text/photo blocks anywhere on any page,
+      GALLERY +10 (84 items) — birch woodgrain vinyl corner-lot job
+      (3 angles: curb view, twin gates, street side), NEW lattice-top
+      shadowbox style (2), white picket gate, 4-rail split+wire, crew-
+      at-work shot, pine pool-patio + fresh-build runs.
+      GALLERY +10 (74 items) — winter installs (aluminum pool fence in
+      snowfall, fresh vinyl in snow: year-round proof), grade-following
+      pine run, split rail front-yard + golf-course gate, cedar double
+      gate hardware, woodgrain vinyl gate, country white vinyl.
+      FINAL PHOTO BATCH (+12 curated of 20) — ALUMINUM (spear-top
+      ornamental) and SPLIT RAIL heroes close the last material gaps:
+      every fence style page now opens on real GFS work. Woodgrain
+      vinyl on financing, cap-top board-on-board on brochure, branded-
+      truck ornamental shot on the quote hub, shadowbox on about, pine
+      runs on quote form/book. Gallery +12 → 64 items, every filter
+      (cedar/wood/vinyl/aluminum/chainlink/splitrail) stocked with
+      real jobs.
+      +12 MORE REAL PHOTOS (curated from 20) — vinyl page hero is now the
+      two-tone garden job; chainlink hero is the black chain link;
+      pool-fence blog gets a real code-height pool fence; contact hero
+      shows the branded truck on site; all 4 blog heroes + FAQ +
+      service-areas now real work; gallery +8 (52 items) covering the
+      vinyl and chainlink filters with actual GFS jobs.
+      REAL WORK PHOTOS — 9 actual GFS job photos self-hosted in
+      /assets/img/work/ and placed: homepage hero (LCP now local, was
+      Squarespace), wood + cedar page heroes, fences hub, gallery hero,
+      why-us, all three guide heroes; +9 gallery items under the
+      wood/cedar filters with descriptive alt text. Every placement
+      remains editable (pagehero.img / g.N.img keys).
+      LIVE-TEST FIXES (gfencing.netlify.app) — BLANK BALLPARK solved:
+      scroll-reveal used a 6% visibility threshold the giant wizard
+      shell could never reach (opacity:0 forever); now any visible
+      pixel reveals + blocks taller than 1.2 viewports are never
+      gated. TOP BAR repaired: a bad regex had jammed Guides+FAQ into
+      one malformed li (the stacked column) and duplicated Guides;
+      nav now slims responsively (Brochure/FAQ yield at 1420px, phone
+      at 1240px) instead of wrapping. Drawer finally has Guides.
+      mobile-web-app-capable meta added.
+      RUNTIME CERTIFICATION, ROUND 2 — full ADMIN harness (18 checks:
+      stubbed-Firebase boot, owner sign-in, vitals, WoW delta,
+      source table, lead/booking pipelines incl. statusChangedAtMs
+      write capture, slot chips, page directory) all green. FIXED:
+      WoW delta filtered on x.ts but analytics writes tsMs — the
+      feature was dead twice over; now verified rendering.
+      CERTIFICATION PASS — full-system audit & runtime verification:
+      58 pages static-regressed (fixed 2 stale og:urls + dup meta);
+      all 12 JS files + inline scripts syntax-clean; ballpark, leads,
+      AND a new full edit-mode runtime harness (23 checks across
+      v2→v5.2: enter/edit/counter/insert/theme/select/drag/preview/
+      undo) all green. FIXED: duplicate #bp-success meant the form's
+      "✓ Price unlocked" box could never display (email-flow block
+      renamed); admin week-over-week delta targeted a nonexistent
+      element and never rendered (now on #v-sessions).
+      COMPETITIVE PASS (researched vs Superior franchise + Straitline) —
+      new /why-us/ "Three ways to buy a fence in Toledo" framework page
+      (structural comparison table, honest when-we're-not-the-fit,
+      never names competitors); warranty line rewritten from contestable
+      comparison to unfalsifiable mechanism ("honored by the builder,
+      not a claims process"); quote surfaces now counter type-in-
+      dimensions tools ("trace your actual yard on satellite").
+      GUIDES — new /guides/ hub + three deep customer guides in owner
+      voice: Choosing a Fence (honest materials comparison TABLE, height
+      rules, 5 contractor questions), the Install Process (gold-numbered
+      TIMELINE: quote→811→permit→build→walkthrough→warranty), and Fence
+      Care (per-material seasonal list). New styled components:
+      compare-table, process-timeline, owner's-tip callouts. Nav +
+      drawer + footer + sitemap wired.
+      PHOTO HEROES SITE-WIDE — every page header is now a full-bleed
+      photo with scrim + white text like the homepage, per-page image
+      EDITABLE (pagehero.img), auto-seeded from each page's own first
+      photo. BRAND — logo reads "Ghareeb Fencing Solutions" (gold
+      accent), editable via edit mode. NAV — gold active-page underline
+      + hover sweep. ADMIN v2.1 — all-pages directory with edit counts
+      and ✎ edit-mode doors, instant lead search, week-over-week
+      visitor delta.
+      BALLPARK v8.1 — optional customer YARD PHOTO on the lead form
+      (camera-ready on mobile, auto-compressed ≤380KB, previewed);
+      rides the lead into exec + admin with thumbnails. Admin lead
+      status writes now stamp statusChangedAtMs (powers exec nudges).
+      MODERN PASS — full-bleed PHOTO HERO with text over a navy scrim,
+      staggered entrance, slow Ken-Burns drift; GLASS sticky nav with
+      scroll shadow; site-wide SCROLL-REVEAL animations (IO-based,
+      reduced-motion safe); button/card micro-interactions with lift,
+      image zoom, gold focus rings; glassy hero stat chips.
+      DRAG-AND-DROP — ✥ handle on any selected element: hold and pull
+      up/down, a gold line shows the landing spot, works mouse + touch
+      with edge auto-scroll. A11Y: skip-to-content link, dropdown ARIA.
+      NAV — Fence Styles is now a dropdown (8 styles, hover/focus,
+      desktop); "Free Estimate" nav button → /quote/; hero gains a
+      second path: "Prefer a person? Book a free on-site estimate".
+      EDIT MODE v5.1 — 🎨 SITE COLORS panel: change navy/gold/cedar/
+      background once, applies to every page for every visitor;
+      first-run 3-step tour so Select/Colors/Preview get discovered.
+      MOBILE — clamped headline sizes, bigger drawer targets,
+      tighter section rhythm.
+      EDIT MODE v5 — rich-text toolbar (bold/italic/bullets/links) on
+      any text you type in; 👁 Preview-as-visitor toggle; 🗂 site photo
+      LIBRARY in the image picker (reuse any published photo); ＋Button
+      blocks (label + link, editable).
+      SITE COMMAND v2.0 — inspector now EDITS text overrides remotely
+      (textarea + save per key, live on the site instantly); bookings
+      CSV export; 💬 one-tap SMS on every lead with a prefilled intro;
+      conversion-by-source table on the dashboard.
+      BALLPARK v8.0 — PRICE FULLY GATED (blur until contact submitted;
+      the "range" mode that showed numbers to everyone is off).
+      PROPERTY LINES enabled like the Exec app: Lucas + Wayne exact
+      county layers, Ohio statewide catch-all, CORS proxy fallback.
+      DRAWING UX: giant in-map live footage chip while drawing,
+      first-visit 4-step coach, 🚶/🚗 gate buttons.
+      SW CLEANUP — sw.js now ships a cache-purging, self-unregistering
+      worker that evicts the Exec app service worker left on this
+      origin from earlier deploys (visitors were at risk of stale
+      exec caches). ADMIN v1.4 — published-slots strip (green/🔒) on
+      the Bookings tab + per-booking status pipeline
+      (pending/confirmed/done/cancelled).
+      BALLPARK v7.8 — pricing sync now prefers the trimmed
+      settings/public mirror (falls back to global until exec v195
+      mirrors once). Leads harness: 12/12 green incl. offline queue
+      recovery with geometry intact.
+      BALLPARK v7.7 — triple-check fix: boot-time saveDraft was wiping
+      the visitor's stored draft BEFORE restore could read it (resume
+      silently broken on reload). Runtime-harness verified: 9/9 green.
+      LEGAL PAGES — /privacy/ and /terms/ in plain English (required
+      for Google Ads / LSA), footer Privacy·Terms links on every page,
+      sitemapped. Terms cover online-estimate + parcel-line disclaimers.
+      AUDIT FIXES — Reset Page now actually deletes the page overrides
+      (was silently lost on reload); duplicated elements no longer
+      shift sibling identities (saved moves/styles/hides stay stable).
+      BALLPARK v7.6 — address AUTOCOMPLETE on the map search and the
+      lead form (Google Places, one tap picks the address and jumps
+      the map); MAP ENLARGED (560px desktop / 62vh mobile); mobile
+      touch pass: 46-50px buttons, sticky draw toolbar, 16px inputs
+      (kills iOS zoom); window.syncStep3 mirror bulletproofs any
+      stale-cache page. CONTACT form address autocompletes too.
+      NO-DIG FENCING page /fences/no-dig/ + hub card + footer links
+      on every page + sitemap.
+      EDIT MODE v4 — UNDO button (40 steps), 🎨 style panel on any
+      selected element (size/bold/align/text+fill colors), ⧉ duplicate
+      any element (copies are independently editable), hidden-items
+      unhide-all + full page reset via the ⋯ menu.
+      ADMIN v1.3 — override INSPECTOR (see + delete any individual
+      edit on any page, or wipe a page to original), one-tap seed of
+      the 8 Toledo competitor domains, live activity feed (last 50
+      events) on the dashboard.
+      REVIEW PAGE — /review/ to text customers after the final walk:
+      one-tap Google / Facebook / BBB buttons (Google link is a
+      placeholder — set it once in Edit Mode), plus a call-first
+      catch for unhappy customers before they post.
+      FAQ PAGE — /faq/ with 10 Toledo-specific Q&As, FAQPage schema
+      for Google rich results, fully Edit-Mode editable, linked from
+      the drawer + footer on every page, in the sitemap.
+      SELECT/MOVE TOOL — tap any element on any page: move it up/down
+      among its siblings, widen selection to its container, or hide it
+      from visitors entirely (tap ghosted elements to unhide).
+      CHROME EDITING — nav links (desktop + drawer) and every footer
+      text/link are click-to-edit in Edit Mode; changes publish
+      SITE-WIDE from any page via the shared _chrome document.
+      reorder blocks, move whole sections up/down; all changes
+      publish for every visitor.
+      SITE COMMAND v1.2 — lead status pipeline + owner notes,
+      CSV export, today-so-far strip, exec pricing-sync viewer,
+      analytics purge tool, drawing-attached badge on leads.
+base: ballpark v7.5, analytics, financing CTA, /p/ pages, admin
+verify: /build.txt reachable after deploy

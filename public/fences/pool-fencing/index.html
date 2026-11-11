@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Pool Fence Planning &amp; Installation | Ghareeb Fencing</title>
+<meta name="description" content="Plan a pool fence with the layout, access gates and local requirements in view. Compare styles and request a site review from Ghareeb Fencing Solutions.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Pool Fence Planning &amp; Installation | Ghareeb Fencing">
+<meta property="og:description" content="Plan a pool fence with the layout, access gates and local requirements in view. Compare styles and request a site review from Ghareeb Fencing Solutions.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/fences/pool-fencing/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/vinyl-v4/open-style-4.webp">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Pool Fence Planning &amp; Installation | Ghareeb Fencing">
+<meta name="twitter:description" content="Plan a pool fence with the layout, access gates and local requirements in view. Compare styles and request a site review from Ghareeb Fencing Solutions.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/vinyl-v4/open-style-4.webp">
+
+<link rel="canonical" href="https://ghareebfence.com/fences/pool-fencing/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/fence-explorer.js?v=caption-sept30" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ghareebfence.com/"},{"@type":"ListItem","position":2,"name":"Pool fencing","item":"https://ghareebfence.com/fences/pool-fencing/"}]}</script>
+
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20260907-landings">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/growth-upgrade.css?v=20260919">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/photo-showcase.css?v=20260919-1">
+<link rel="stylesheet" href="/assets/css/fence-explorer.css?v=20260920-mobile-v5">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Is a fence sold as a pool style automatically approved for my pool?", "acceptedAnswer": {"@type": "Answer", "text": "No. Product information is only one input. The local review must consider the installed layout, openings, gates, ground conditions and other access routes. Request the exact proposed system and approval steps."}}, {"@type": "Question", "name": "Can the house be part of the pool enclosure?", "acceptedAnswer": {"@type": "Answer", "text": "That creates door-access questions that need separate protection. CPSC recommends additional layers such as alarms or a qualifying cover where the home provides access. Confirm the accepted arrangement with your local reviewing authority."}}, {"@type": "Question", "name": "What needs checking after the pool fence is installed?", "acceptedAnswer": {"@type": "Answer", "text": "Confirm routine gate closing and latching, look for damage or changed openings, and keep objects from becoming a climbing aid. A barrier complements close supervision; it does not replace it."}}]}</script>
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="preload" as="image" href="/assets/img/performance-v12/80848200310b54f8-1600.webp" imagesrcset="/assets/img/performance-v12/80848200310b54f8-480.webp 480w, /assets/img/performance-v12/80848200310b54f8-960.webp 960w, /assets/img/performance-v12/80848200310b54f8-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars" aria-hidden="true">GFS</span>
+      <span class="spec spec--paper">Local family-owned fence company</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">BBB Accredited</span>
+      <span class="spec spec--paper">Our own project photos</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main" class="selling-page fence-experience">
+<section class="sell-hero" data-gfs-sec="s0"><div class="sell-intro"><nav class="sell-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/fences/">Fence styles</a></nav><span class="sell-eyebrow">Pool fencing · Toledo &amp; Southeast Michigan</span><h1 data-editable="fence.v2.pool-fencing.title">Pool fencing. Every detail matters.</h1><p data-editable="fence.v2.pool-fencing.intro">Choose a pool barrier as a complete access-control layout, then select its appearance. The fence, gates, ground clearances and any route from the house must be reviewed together for the actual property and applicable local requirements.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/ballpark/?project=pool">Get a ballpark price</a><a class="btn btn-outline" href="#project-photos">Explore our work ↓</a></div></div><figure class="sell-photo"><img data-editable-img="hero.v5.pool-fencing" src="/assets/img/performance-v12/80848200310b54f8-1600.webp" alt="White picket fencing and matching gate around a swimming pool." width="1600" height="1200" fetchpriority="high" decoding="async" srcset="/assets/img/performance-v12/80848200310b54f8-480.webp 480w, /assets/img/performance-v12/80848200310b54f8-960.webp 960w, /assets/img/performance-v12/80848200310b54f8-1600.webp 1600w" sizes="100vw"></figure></section>
+<nav class="fence-jump" aria-label="On this page"><a href="#project-photos">Project photos</a><a href="#style-guide">Details &amp; tradeoffs</a><a href="#fence-questions">Common questions</a><a href="/fences/#compare-materials">Compare materials</a><a href="/#fence-finder">Find my style</a></nav>
+<section class="fence-decision" data-gfs-sec="v2-at-a-glance"><div class="growth-inner"><span class="eyebrow">Before you choose</span><h2>How this fits your yard</h2><dl class="fence-facts"><div><dt>privacy</dt><dd data-editable="fence.v2.pool-fencing.quick.privacy">Open fencing keeps views; solid panels screen them. Neither alone establishes suitability.</dd></div><div><dt>upkeep</dt><dd data-editable="fence.v2.pool-fencing.quick.upkeep">Check that gates close and latch, openings remain correct and the barrier stays intact.</dd></div><div><dt>access</dt><dd data-editable="fence.v2.pool-fencing.quick.access">Pedestrian gate operation and house access need dedicated review.</dd></div><div><dt>grade</dt><dd data-editable="fence.v2.pool-fencing.quick.grade">Dips and changes in surface can affect the effective barrier and bottom clearance.</dd></div></dl></div></section>
+<section class="fence-collection" id="project-photos" data-fence-collection data-gfs-sec="growth-pool-fencing-photos"><div class="growth-inner"><div class="growth-heading"><span class="eyebrow">Built by Ghareeb Fencing Solutions</span><h2 data-editable="fence.v2.pool-fencing.gallery.title">See the details. Find your favorite.</h2><p data-editable="fence.v6.pool-fencing.gallery.intro">Our own fence photographs with pools visible: wood, chain-link, ornamental metal and white picket designs.</p><p class="photo-authentic">All fence installation photos in this collection show our own work.</p><p class="growth-note">Some photographs show different views of the same setting. A photo does not establish barrier compliance, dimensions, latch operation or self-closing performance. The chain-link walk gate is shown open.</p></div><div class="fence-filters" aria-label="Filter project photos" hidden><button type="button" data-photo-filter="all" aria-pressed="true">All photos</button><button type="button" data-photo-filter="Board-on-board" aria-pressed="false">Board-on-board</button><button type="button" data-photo-filter="Shadowbox gate" aria-pressed="false">Shadowbox gate</button><button type="button" data-photo-filter="Poolside chain link" aria-pressed="false">Poolside chain link</button><button type="button" data-photo-filter="Closed-top picket" aria-pressed="false">Closed-top picket</button><button type="button" data-photo-filter="Ornamental metal" aria-pressed="false">Ornamental metal</button></div><p class="fence-photo-count" data-photo-count aria-live="polite">8 project photographs. Select a photo to explore the details.</p><div class="fence-photo-grid"><figure class="fence-photo-card" data-fence-photo data-photo-tag="Board-on-board"><a href="/assets/img/projects-sept26/03-2.webp" target="_blank" rel="noopener" aria-label="View photo 1: Long wood privacy fence beside a green lawn and above-ground pool."><img data-editable-img="fence.v2.pool-fencing.photo.03-2" src="/assets/img/performance-v12/2031dd7484faefd0-480.webp" alt="Board-on-board wood privacy fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/2031dd7484faefd0-480.webp 480w, /assets/img/performance-v12/2031dd7484faefd0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/03-2.webp" data-photo-thumbnail="/assets/img/performance-v12/2031dd7484faefd0-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Board-on-board"><a href="/assets/img/projects-sept26/03-6.webp" target="_blank" rel="noopener" aria-label="View photo 2: Wood privacy fence around a lawn with a covered above-ground pool."><img data-editable-img="fence.v2.pool-fencing.photo.03-6" src="/assets/img/performance-v12/1abe01669a3aea6d-480.webp" alt="Board-on-board wood privacy fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/1abe01669a3aea6d-480.webp 480w, /assets/img/performance-v12/1abe01669a3aea6d-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/03-6.webp" data-photo-thumbnail="/assets/img/performance-v12/1abe01669a3aea6d-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Shadowbox gate"><a href="/assets/img/projects-sept26/04-2.webp" target="_blank" rel="noopener" aria-label="View photo 3: Wood shadowbox gate and long fence beside a lawn and pool."><img data-editable-img="fence.v2.pool-fencing.photo.04-2" src="/assets/img/performance-v12/a98da0fbaf058910-480.webp" alt="Alternating pickets on both sides of the rails create a shadowbox fence and gate." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/a98da0fbaf058910-480.webp 480w, /assets/img/performance-v12/a98da0fbaf058910-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/04-2.webp" data-photo-thumbnail="/assets/img/performance-v12/a98da0fbaf058910-480.webp"></a><figcaption data-editable-caption="photo.detail.v30.fences.pool.fencing.index.html.assets.img.projects.sept26.04.2.webp">Alternating pickets on both sides of the rails create a shadowbox fence and gate.</figcaption></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Poolside chain link"><a href="/assets/img/projects-sept26/06-5.webp" target="_blank" rel="noopener" aria-label="View photo 4: Black chain-link fence and open walk gate with a covered pool at the edge of the view."><img data-editable-img="fence.v2.pool-fencing.photo.06-5" src="/assets/img/performance-v12/3311e6323b50e6a6-480.webp" alt="Chain-link fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/3311e6323b50e6a6-480.webp 480w, /assets/img/performance-v12/3311e6323b50e6a6-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/06-5.webp" data-photo-thumbnail="/assets/img/performance-v12/3311e6323b50e6a6-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Poolside chain link"><a href="/assets/img/projects-sept26/06-6.webp" target="_blank" rel="noopener" aria-label="View photo 5: Black chain-link fence and open walk gate beside a blue-covered pool and white privacy fence."><img data-editable-img="fence.v2.pool-fencing.photo.06-6" src="/assets/img/performance-v12/249a7f814ef194b2-480.webp" alt="Chain-link fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/249a7f814ef194b2-480.webp 480w, /assets/img/performance-v12/249a7f814ef194b2-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/06-6.webp" data-photo-thumbnail="/assets/img/performance-v12/249a7f814ef194b2-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Closed-top picket"><a href="/assets/img/projects-sept26/09-5.webp" target="_blank" rel="noopener" aria-label="View photo 6: White closed-top picket fence between raised garden beds and a covered pool."><img data-editable-img="fence.v2.pool-fencing.photo.09-5" src="/assets/img/performance-v12/0900fcb2358b798c-480.webp" alt="A continuous top rail caps the white vinyl pickets." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/0900fcb2358b798c-480.webp 480w, /assets/img/performance-v12/0900fcb2358b798c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/09-5.webp" data-photo-thumbnail="/assets/img/performance-v12/0900fcb2358b798c-480.webp"></a><figcaption data-editable-caption="photo.detail.v30.fences.pool.fencing.index.html.assets.img.projects.sept26.09.5.webp">A continuous top rail caps the white vinyl pickets.</figcaption></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Ornamental metal"><a href="/assets/img/work/aluminum-pool-winter.jpg" target="_blank" rel="noopener" aria-label="View photo 7: Black ornamental metal fence around a covered pool, with an arched gate opposite the house."><img data-editable-img="fence.v6.pool-fencing.photo.additional-1" src="/assets/img/performance-v12/b978958dcd04a0a0-480.webp" alt="Ornamental metal fence with an arched gate" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/b978958dcd04a0a0-480.webp 480w, /assets/img/performance-v12/b978958dcd04a0a0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/aluminum-pool-winter.jpg" data-photo-thumbnail="/assets/img/performance-v12/b978958dcd04a0a0-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Closed-top picket"><a href="/assets/img/vinyl-v4/open-style-6.webp" target="_blank" rel="noopener" aria-label="View photo 8: White closed-top picket fence with a covered pool visible behind it."><img data-editable-img="fence.v6.pool-fencing.photo.additional-2" src="/assets/img/performance-v12/c9db10cba017bff3-480.webp" alt="Closed-top vinyl picket fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/c9db10cba017bff3-480.webp 480w, /assets/img/performance-v12/c9db10cba017bff3-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/vinyl-v4/open-style-6.webp" data-photo-thumbnail="/assets/img/performance-v12/c9db10cba017bff3-480.webp"></a></figure></div></div></section>
+<section class="fence-decision" id="planning-details" data-gfs-sec="growth-pool-fencing-planning-v6"><div class="growth-inner"><div class="growth-heading"><span class="eyebrow">Make the layout your own</span><h2 data-editable="fence.v6.pool-fencing.planning.title">Bring the whole pool setting into the conversation</h2><p data-editable="fence.v6.pool-fencing.planning.intro">A close-up of the style helps with appearance. A wider set of photos helps explain the layout that needs review.</p></div><div class="fence-detail-grid"><article><h3 data-editable="fence.v6.pool-fencing.planning.1.title">Photograph every approach</h3><p data-editable="fence.v6.pool-fencing.planning.1.body">Send an overview from each side, then closer views of the house doors, existing gates, deck or steps, and changes in the ground surface. Mark which parts of the proposed enclosure are new and which existing parts you want assessed.</p></article><article><h3 data-editable="fence.v6.pool-fencing.planning.2.title">Keep the documents together</h3><p data-editable="fence.v6.pool-fencing.planning.2.body">Bring any existing pool plan, barrier drawings and review comments to the estimate. Ask who will confirm the applicable requirements, what information is still needed and which approval steps belong in the written scope before installation is scheduled.</p></article></div></div></section>
+<section class="fence-decision" id="style-guide" data-gfs-sec="growth-pool-fencing-guide"><div class="growth-inner"><span class="eyebrow">Make a more informed choice</span><h2>Pool fencing: the details that matter</h2><p class="growth-note">These CPSC figures are national safety recommendations, not a statement of local code or approval. Confirm current requirements for the complete pool and barrier with the responsible local authority.</p><div class="fence-detail-grid"><article><h3 data-editable="fence.v2.pool-fencing.fact.0.title">48 inches is a national guideline, not your final specification</h3><p data-editable="fence.v2.pool-fencing.fact.0.text">CPSC recommends a barrier at least 4 feet (48 inches) high and notes that higher barriers are preferable. Local rules and the complete design still determine what is appropriate for your project.</p></article><article><h3 data-editable="fence.v2.pool-fencing.fact.1.title">Pedestrian gates need three coordinated features</h3><p data-editable="fence.v2.pool-fencing.fact.1.text">CPSC recommends pedestrian gates that open away from the pool, close themselves and latch themselves. Gate swing and hardware belong in the initial layout, not as an afterthought.</p></article><article><h3 data-editable="fence.v2.pool-fencing.fact.2.title">A small-opening rule has design-specific details</h3><p data-editable="fence.v2.pool-fencing.fact.2.text">CPSC uses a 4-inch sphere as a general opening check, with tighter recommendations for certain rail, mesh and decorative arrangements. Do not use one gap measurement as proof the complete barrier is suitable.</p></article><article><h3 data-editable="fence.v2.pool-fencing.fact.3.title">The house may create another access route</h3><p data-editable="fence.v2.pool-fencing.fact.3.text">If the house forms one side of the enclosure, doors leading to the pool need their own protection review. CPSC recommends layers that can include alarms and covers alongside the barrier and close supervision.</p></article><article><h3 data-editable="fence.v2.pool-fencing.fact.4.title">Keep climb-assisting objects out of the layout</h3><p data-editable="fence.v2.pool-fencing.fact.4.text">Nearby equipment or furniture can undermine a barrier by providing a way over it. Plan storage and seating along with the fence line, and preserve those clear relationships after installation.</p></article></div><div class="fence-planning"><h3>Bring these questions to your estimate</h3><ol><li data-editable="fence.v2.pool-fencing.planning.0">Which local authority will review the pool and complete barrier?</li><li data-editable="fence.v2.pool-fencing.planning.1">Does any door, deck, ladder or gate provide another route to the water?</li><li data-editable="fence.v2.pool-fencing.planning.2">Where do ground changes create the most difficult clearance detail?</li><li data-editable="fence.v2.pool-fencing.planning.3">How will gates and access protection be checked during normal use?</li></ol></div><div class="growth-actions"><a class="btn btn-primary" href="/quote/form/?project=pool">Request my on-site estimate</a><a class="btn btn-outline" href="tel:+14192142107">Call 419-214-2107</a></div><p class="growth-note">A ballpark is a planning range. The final quote depends on measurements, gates, removal, site conditions and the written installation scope.</p></div></section>
+<section class="fence-decision" id="fence-questions" data-gfs-sec="v2-questions"><div class="growth-inner"><h2>Good questions. Clearer answers.</h2><div class="growth-faq"><details><summary data-editable="fence.v2.pool-fencing.faq.0.q">Is a fence sold as a pool style automatically approved for my pool?</summary><p data-editable="fence.v2.pool-fencing.faq.0.a">No. Product information is only one input. The local review must consider the installed layout, openings, gates, ground conditions and other access routes. Request the exact proposed system and approval steps.</p></details><details><summary data-editable="fence.v2.pool-fencing.faq.1.q">Can the house be part of the pool enclosure?</summary><p data-editable="fence.v2.pool-fencing.faq.1.a">That creates door-access questions that need separate protection. CPSC recommends additional layers such as alarms or a qualifying cover where the home provides access. Confirm the accepted arrangement with your local reviewing authority.</p></details><details><summary data-editable="fence.v2.pool-fencing.faq.2.q">What needs checking after the pool fence is installed?</summary><p data-editable="fence.v2.pool-fencing.faq.2.a">Confirm routine gate closing and latching, look for damage or changed openings, and keep objects from becoming a climbing aid. A barrier complements close supervision; it does not replace it.</p></details></div><details class="fence-sources"><summary>Material guidance &amp; planning references</summary><p>These references explain material behavior and planning considerations. Product examples do not identify the brand in our photos or promise a particular specification. Your proposal and applicable local requirements determine the project details.</p><ul><li><a href="https://www.cpsc.gov/s3fs-public/SafetyBarrierGuidelinesPub362_0423.pdf" target="_blank" rel="noopener">U.S. CPSC: Safety Barrier Guidelines for Home Pools (2023)</a></li><li><a href="https://www.cpsc.gov/safety-education/neighborhood-safety-network/toolkits/drowning-prevention" target="_blank" rel="noopener">U.S. CPSC: Drowning Prevention — Layers of Protection</a></li></ul></details></div></section>
+<section class="sell-section sell-close" data-gfs-sec="v2-close"><span class="eyebrow">From inspiration to a shared plan</span><h2>Keep the fence, gates and next steps on the same page.</h2><p>Review the proposed fence line and gates with our team, then use your project portal to keep the saved plan, project details and communication together. Site-plan property-line references help with planning; they do not replace a boundary survey.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/form/?project=pool">Plan my fence</a><a class="btn btn-outline" href="/process/">See how it works</a></div><div class="sell-related"><a href="/fences/">Compare all fence styles</a><a href="/gallery/">More of our work</a><a href="/service-areas/">Find your service area</a></div></section>
+<section class="legacy-content-anchor" data-gfs-sec="s1" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s2" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s3" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s4" aria-label="Additional project content"></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChZDSUhNMG9nS0VJQ0FnSUMteExfSER3EAE">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">The installation experience</p><blockquote><p>“Very professional, kind, hard-working, responsive and did an excellent job.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>megan ward</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSUMteExfSER3EAE!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by megan ward (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>3-year workmanship warranty</span>
+        <span>BBB Accredited</span>
+        <span>Family owned</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Fence Styles | Cedar, Vinyl, Aluminum, Chain Link & More | Ghareeb</title>
+<meta name="description" content="Explore all six fence styles we install in Toledo and Southeast Michigan. Cedar, wood, vinyl, aluminum, chain link, and split rail.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Fence Styles | Cedar, Vinyl, Aluminum, Chain Link & More | Ghareeb">
+<meta property="og:description" content="Explore all six fence styles we install in Toledo and Southeast Michigan. Cedar, wood, vinyl, aluminum, chain link, and split rail.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/fences/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fence Styles | Cedar, Vinyl, Aluminum, Chain Link & More | Ghareeb">
+<meta name="twitter:description" content="Explore all six fence styles we install in Toledo and Southeast Michigan. Cedar, wood, vinyl, aluminum, chain link, and split rail.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/fences/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Fence Styles", "item": "https://ghareebfence.com/fences/"}
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/fence-explorer.css?v=20260920-mobile-v5">
+<link rel="stylesheet" href="/assets/css/material-compare.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars" aria-hidden="true">GFS</span>
+      <span class="spec spec--paper">Local family-owned fence company</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">BBB Accredited</span>
+      <span class="spec spec--paper">Our own project photos</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../reviews/">Reviews</a></li>
+      <li><a href="../guides/">Guides</a></li>
+      <li><a href="../about/">About</a></li>
+      <li><a href="../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+      <li><a href="../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../fences/">Fence Styles</a></li>
+    <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../reviews/">Reviews</a></li>
+    <li><a href="../about/">About</a></li>
+    <li><a href="../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+    <li><a href="../contact/">Contact</a></li>
+    <li><a href="../guides/">Guides</a></li>
+    <li><a href="../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="pagehero.img" aria-hidden="true"><img src="/assets/img/performance-v12/600812dfc9d1dcfd-1600.webp" alt="Cedar spaced picket fence with post caps at a corner" loading="eager" decoding="async" srcset="/assets/img/performance-v12/600812dfc9d1dcfd-480.webp 480w, /assets/img/performance-v12/600812dfc9d1dcfd-960.webp 960w, /assets/img/performance-v12/600812dfc9d1dcfd-1600.webp 1600w" sizes="100vw" width="1600" height="1200"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="../">Home</a> <span>/</span> Fence Styles</div>
+    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="fences.eyebrow">Explore Fence Styles</div>
+    <h1 class="display-1" data-editable="fences.title">Find the right fence <span class="italic-accent">for your home.</span></h1>
+    <p class="lede" data-editable="fences.lede">Compare materials, privacy, open styles and gates. Review the exact product and installation scope for your property.</p>
+  </div>
+</section>
+
+<!-- MATERIAL COMPARISON START -->
+<section class="material-compare" id="compare-materials" data-material-compare aria-labelledby="compare-materials-title" data-gfs-sec="material-comparison-v1"><div class="container">
+<div class="material-compare__intro"><div class="eyebrow" data-editable="compare.v1.eyebrow">Start with what matters to you</div><h2 id="compare-materials-title" data-editable="compare.v1.title">Compare your fence options.</h2><p data-editable="compare.v1.intro">More privacy, an open view or a different care routine? Put two materials beside each other and compare the details that affect everyday use.</p></div>
+<fieldset class="material-compare__controls" data-compare-controls hidden><legend>Choose two materials</legend><div class="material-compare__fields"><label class="material-compare__field" for="compare-first">First material<select id="compare-first" aria-controls="material-comparison-results"><option value="cedar" selected>Cedar</option><option value="wood">Treated wood</option><option value="vinyl">Vinyl</option><option value="aluminum">Ornamental aluminum</option><option value="chainlink">Chain link</option><option value="split-rail">Split rail</option></select></label><label class="material-compare__field" for="compare-second">Second material<select id="compare-second" aria-controls="material-comparison-results"><option value="cedar">Cedar</option><option value="wood">Treated wood</option><option value="vinyl" selected>Vinyl</option><option value="aluminum">Ornamental aluminum</option><option value="chainlink">Chain link</option><option value="split-rail">Split rail</option></select></label><button class="material-compare__all" type="button" data-compare-all aria-pressed="false" aria-controls="material-comparison-results">Show all six</button></div><p class="material-compare__status" data-compare-status role="status" aria-live="polite" aria-atomic="true">Showing cedar and vinyl. Choose either material to change the comparison.</p></fieldset>
+<div class="material-compare__grid" id="material-comparison-results"><article class="material-compare__card" data-material="cedar" aria-labelledby="compare-cedar-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.cedar.image"><img src="/assets/img/performance-v12/7b29998db19a45dd-480.webp" srcset="/assets/img/performance-v12/7b29998db19a45dd-480.webp 480w, /assets/img/performance-v12/7b29998db19a45dd-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Diagonal lattice above vertical wood privacy boards." loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/01-1.webp" data-photo-thumbnail="/assets/img/performance-v12/7b29998db19a45dd-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-cedar-title" data-editable="compare.v1.cedar.name">Cedar</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.cedar.privacy">Depends on the board pattern; lattice and shadowbox leave visible openings.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.cedar.upkeep">Choose natural weathering or a finish with ongoing care.</dd><dt>Open views</dt><dd data-editable="compare.v1.cedar.views">Spaced pickets or a decorative top leave openings where a view matters.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.cedar.gates">Include gate framing, swing and usable opening in the design.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.cedar.planning">Review whether the top follows the slope or steps between sections.</dd></dl><a class="material-compare__link" href="/fences/cedar/">Explore cedar fencing <span aria-hidden="true">→</span></a></div></article>
+<article class="material-compare__card" data-material="wood" aria-labelledby="compare-wood-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.wood.image"><img src="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp" srcset="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp 480w, /assets/img/performance-v12/80cbe7ffd7419d97-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Board-on-board wood privacy fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/03-1.webp" data-photo-thumbnail="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-wood-title" data-editable="compare.v1.wood.name">Treated wood</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.wood.privacy">Butted boards can develop gaps as wet lumber dries; overlap changes the sightline.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.wood.upkeep">Inspect wood and hardware; plan coating care if a finished color matters.</dd><dt>Open views</dt><dd data-editable="compare.v1.wood.views">Shadowbox allows angled views; overlapping boards provide different screening.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.wood.gates">Include gate framing and hardware along with the boards.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.wood.planning">Discuss sloped runs and the bottom gap before fixing the board layout.</dd></dl><a class="material-compare__link" href="/fences/wood/">Explore treated wood fencing <span aria-hidden="true">→</span></a></div></article>
+<article class="material-compare__card" data-material="vinyl" aria-labelledby="compare-vinyl-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.vinyl.image"><img src="/assets/img/performance-v12/0aad320032716ad0-480.webp" srcset="/assets/img/performance-v12/0aad320032716ad0-480.webp 480w, /assets/img/performance-v12/0aad320032716ad0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Tan privacy infill contrasts with white posts and rails." loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/08-6.webp" data-photo-thumbnail="/assets/img/performance-v12/0aad320032716ad0-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-vinyl-title" data-editable="compare.v1.vinyl.name">Vinyl</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.vinyl.privacy">Solid infill screens views; picket and decorative openings do not.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.vinyl.upkeep">Routine washing and hardware checks; follow the product's care instructions.</dd><dt>Open views</dt><dd data-editable="compare.v1.vinyl.views">Picket and decorative openings keep views; solid infill screens them.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.vinyl.gates">Gate-post reinforcement and hardware depend on the selected system.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.vinyl.planning">Some systems rack; others need a different layout. Confirm the actual limit.</dd></dl><a class="material-compare__link" href="/fences/vinyl/">Explore vinyl fencing <span aria-hidden="true">→</span></a></div></article>
+<article class="material-compare__card" data-material="aluminum" aria-labelledby="compare-aluminum-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.aluminum.image"><img src="/assets/img/performance-v12/5e3e27622d34167c-480.webp" srcset="/assets/img/performance-v12/5e3e27622d34167c-480.webp 480w, /assets/img/performance-v12/5e3e27622d34167c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/10-3.webp" data-photo-thumbnail="/assets/img/performance-v12/5e3e27622d34167c-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-aluminum-title" data-editable="compare.v1.aluminum.name">Ornamental aluminum</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.aluminum.privacy">Open pickets preserve sightlines rather than providing a solid screen.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.aluminum.upkeep">Clean the coating gently and inspect gates and damaged areas.</dd><dt>Open views</dt><dd data-editable="compare.v1.aluminum.views">Open pickets define the yard while keeping the landscape visible.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.aluminum.gates">Review latch position, opening and swing independently of the panel style.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.aluminum.planning">Rackability varies by system; bottom gaps still need review.</dd></dl><a class="material-compare__link" href="/fences/aluminum/">Explore ornamental aluminum fencing <span aria-hidden="true">→</span></a></div></article>
+<article class="material-compare__card" data-material="chainlink" aria-labelledby="compare-chainlink-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.chainlink.image"><img src="/assets/img/performance-v12/02a91de7787f6ed8-480.webp" srcset="/assets/img/performance-v12/02a91de7787f6ed8-480.webp 480w, /assets/img/performance-v12/02a91de7787f6ed8-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Two matching chain-link gate leaves create a wider opening." loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/06-1.webp" data-photo-thumbnail="/assets/img/performance-v12/02a91de7787f6ed8-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-chainlink-title" data-editable="compare.v1.chainlink.name">Chain link</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.chainlink.privacy">Open mesh; slats change screening and require a system review.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.chainlink.upkeep">Inspect coating, ties, tension and gate operation.</dd><dt>Open views</dt><dd data-editable="compare.v1.chainlink.views">Open mesh keeps the yard visible. Discuss future screening before choosing supports.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.chainlink.gates">Specify walking and equipment gates separately.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.chainlink.planning">Review the bottom line at dips, corners and transitions.</dd></dl><a class="material-compare__link" href="/fences/chainlink/">Explore chain link fencing <span aria-hidden="true">→</span></a></div></article>
+<article class="material-compare__card" data-material="split-rail" aria-labelledby="compare-split-rail-title">
+<figure class="material-compare__photo" data-editable-img="compare.v1.split-rail.image"><img src="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp" srcset="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp 480w, /assets/img/performance-v12/42dfc4ee1dbe0c9e-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Wood rail fencing with wire mesh" loading="lazy" decoding="async" data-photo-original="/assets/img/projects-sept26/05-1.webp" data-photo-thumbnail="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp"></figure>
+<div class="material-compare__body"><h3 id="compare-split-rail-title" data-editable="compare.v1.split-rail.name">Split rail</h3><dl><dt>Privacy</dt><dd data-editable="compare.v1.split-rail.privacy">Open rails leave the landscape visible.</dd><dt>Upkeep</dt><dd data-editable="compare.v1.split-rail.upkeep">Wood care depends on species, treatment and chosen finish.</dd><dt>Open views</dt><dd data-editable="compare.v1.split-rail.views">Rails keep the landscape open; wire backing is a separate enclosure choice.</dd><dt>Gates and access</dt><dd data-editable="compare.v1.split-rail.gates">Plan entrances with the correct end and gate-post arrangement.</dd><dt>Planning your layout</dt><dd data-editable="compare.v1.split-rail.planning">Check how rails meet at grade changes; wire backing needs its own bottom detail.</dd></dl><a class="material-compare__link" href="/fences/split-rail/">Explore split rail fencing <span aria-hidden="true">→</span></a></div></article></div>
+<p class="material-compare__note" data-editable="compare.v1.note">The layout and exact product matter as much as the material. Review ground gaps, gate details and the selected product’s care instructions with our team. Pet enclosures and pool barriers need their own design review.</p>
+</div></section>
+<!-- MATERIAL COMPARISON END -->
+
+<section class="section" style="padding-top: 40px;">
+  <div class="container">
+    <div class="fence-grid">
+
+      <a href="../fences/cedar/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.cedar" src="/assets/img/performance-v12/7b29998db19a45dd-480.webp" alt="Diagonal lattice above vertical wood privacy boards." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/7b29998db19a45dd-480.webp 480w, /assets/img/performance-v12/7b29998db19a45dd-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/01-1.webp" data-photo-thumbnail="/assets/img/performance-v12/7b29998db19a45dd-480.webp"><span class="fence-card-badge" data-editable="fences.cedar.badge">Explore Cedar</span></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.cedar.eyebrow">Natural Wood</div>
+          <h2 data-editable="fence.overview.v2.cedar.name">Cedar fencing</h2>
+          <p class="fence-card-tagline" data-editable="fences.cedar.tag">A natural wood look.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.cedar.f1">Compare the specified cedar species</li>
+            <li data-editable="fences.cedar.f2">Privacy, shadowbox and decorative layouts</li>
+            <li data-editable="fences.cedar.f3">Review heights and gate options</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+
+      <a href="../fences/wood/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.wood" src="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp" alt="Board-on-board wood privacy fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp 480w, /assets/img/performance-v12/80cbe7ffd7419d97-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/03-1.webp" data-photo-thumbnail="/assets/img/performance-v12/80cbe7ffd7419d97-480.webp"></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.wood.eyebrow">Wood Privacy</div>
+          <h2 data-editable="fences.wood.title">Wood Privacy</h2>
+          <p class="fence-card-tagline" data-editable="fences.wood.tag">Privacy with a choice of details.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.wood.f1">Compare treated-wood layouts</li>
+            <li data-editable="fences.wood.f2">Review boards, rails and post systems</li>
+            <li data-editable="fences.wood.f3">Discuss finishing and care</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+
+      <a href="../fences/vinyl/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.vinyl" src="/assets/img/performance-v12/0aad320032716ad0-480.webp" alt="Tan privacy infill contrasts with white posts and rails." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/0aad320032716ad0-480.webp 480w, /assets/img/performance-v12/0aad320032716ad0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/08-6.webp" data-photo-thumbnail="/assets/img/performance-v12/0aad320032716ad0-480.webp"></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.vinyl.eyebrow">Vinyl Options</div>
+          <h2 data-editable="fence.overview.v2.vinyl.name">Vinyl fencing</h2>
+          <p class="fence-card-tagline" data-editable="fences.vinyl.tag">Clean lines and a choice of finishes.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.vinyl.f1">Privacy and picket designs</li>
+            <li data-editable="fences.vinyl.f2">Compare colors, profiles and gates</li>
+            <li data-editable="fences.vinyl.f3">Review product care and coverage</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+
+      <a href="../fences/aluminum/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.aluminum" src="/assets/img/performance-v12/5e3e27622d34167c-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/5e3e27622d34167c-480.webp 480w, /assets/img/performance-v12/5e3e27622d34167c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-3.webp" data-photo-thumbnail="/assets/img/performance-v12/5e3e27622d34167c-480.webp"></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.aluminum.eyebrow">Open Views</div>
+          <h2 data-editable="fences.aluminum.title">Ornamental Aluminum</h2>
+          <p class="fence-card-tagline" data-editable="fences.aluminum.tag">Defined boundaries with an open view.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.aluminum.f1">Explore ornamental profiles</li>
+            <li data-editable="fences.aluminum.f2">Review gates and installation details</li>
+            <li data-editable="fences.aluminum.f3">Pool layouts need local review</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+
+      <a href="../fences/chainlink/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.chainlink" src="/assets/img/performance-v12/02a91de7787f6ed8-480.webp" alt="Two matching chain-link gate leaves create a wider opening." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/02a91de7787f6ed8-480.webp 480w, /assets/img/performance-v12/02a91de7787f6ed8-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/06-1.webp" data-photo-thumbnail="/assets/img/performance-v12/02a91de7787f6ed8-480.webp"></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.cl.eyebrow">Practical Boundaries</div>
+          <h2 data-editable="fences.cl.title">Chain Link</h2>
+          <p class="fence-card-tagline" data-editable="fences.cl.tag">An open fence for your yard.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.cl.f1">Compare galvanized and coated finishes</li>
+            <li data-editable="fences.cl.f2">Review height and gate arrangement</li>
+            <li data-editable="fences.cl.f3">Discuss your installation needs</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+
+      <a href="../fences/split-rail/" class="fence-card">
+        <div class="fence-card-img" ><img data-editable-img="fence.overview.v2.split-rail" src="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp" alt="Wood rail fencing with wire mesh" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp 480w, /assets/img/performance-v12/42dfc4ee1dbe0c9e-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/05-1.webp" data-photo-thumbnail="/assets/img/performance-v12/42dfc4ee1dbe0c9e-480.webp"></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.sr.eyebrow">Open Boundaries</div>
+          <h2 data-editable="fences.sr.title">Split Rail</h2>
+          <p class="fence-card-tagline" data-editable="fences.sr.tag">An open, rustic boundary.</p>
+          <ul class="fence-card-features">
+            <li data-editable="fences.sr.f1">Compare the selected rail material</li>
+            <li data-editable="fences.sr.f2">Explore rail layouts and gates</li>
+            <li data-editable="fences.sr.f3">Review mesh backing for your project</li>
+          </ul>
+          <div class="fence-card-foot"><span class="fence-card-link">Learn More →</span></div>
+        </div>
+      </a>
+      <a href="../fences/no-dig/" class="fence-card">
+        <div class="fence-card-img fence-card-img--illustration"><img data-editable-img="fence.overview.v8.no-dig.illustration" src="/assets/img/performance-v12/6ef54f461b547881-480.webp" alt="AI concept cutaway of a white vinyl sleeve, composite adapters and a steel pipe extending into soil." width="480" height="600" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/6ef54f461b547881-480.webp 480w, /assets/img/performance-v12/6ef54f461b547881-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/no-dig/ridge-x-cutaway-v8.webp" data-photo-thumbnail="/assets/img/performance-v12/6ef54f461b547881-480.webp"><span class="fence-card-illustration-label" data-editable="fences.nodig.illustration-label.v8">AI concept illustration</span></div>
+        <div class="fence-card-body">
+          <div class="fence-card-eyebrow" data-editable="fences.nodig.eyebrow">Explore driven installation</div>
+          <h3 data-editable="fences.nodig.name">No-Dig Fencing</h3>
+          <p class="fence-card-tagline" data-editable="fences.nodig.tag">Review a driven post or anchor system for your site and fence design.</p>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">A backyard transformation</p><blockquote><p>“Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the look of our backyard.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Frank Powell</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Frank Powell (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+<section class="cta-banner">
+  <div class="container cta-banner-inner">
+   <h2 class="display-2" style="color: var(--cream); margin-bottom: 24px;" data-editable="fences.cta.title">Still not sure which style?</h2>
+    <p class="cta-banner-lede" data-editable="fences.cta.body">Request a free on-site estimate to review the layout, materials and gates that fit your property.</p>
+    <div class="cta-banner-actions">
+      <a href="../quote/" class="btn btn-gold btn-lg">Get Free Estimate →</a>
+      <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" data-gfs-sec="project-needs" data-gfsn="project-needs"><div class="container"><h2 class="display-2" data-editable="fences.project-needs.title">Start with what your yard needs</h2><p class="lede" data-editable="fences.project-needs.body">Plan the layout, openings and installation around the way you use the space.</p><div style="display:flex;flex-wrap:wrap;gap:16px;margin-top:24px"><a class="btn btn-outline" href="/fences/pet-fencing/">Fencing for pets</a><a class="btn btn-outline" href="/fences/pool-fencing/">Pool fencing</a><a class="btn btn-outline" href="/fences/replacement/">Fence replacement</a></div></div></section>
+<section class="fence-decision" id="plan-by-project"><div class="growth-inner"><span class="eyebrow">What do you want your fence to do?</span><h2>Start with your project</h2><div class="fence-photo-grid"><article class="fence-photo-card fence-project-card"><a href="/fences/pet-fencing/"><img src="/assets/img/performance-v12/6216b49c4d24f8b0-480.webp" alt="Wood rail fence and gate" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/6216b49c4d24f8b0-480.webp 480w, /assets/img/performance-v12/6216b49c4d24f8b0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/05-6.webp" data-photo-thumbnail="/assets/img/performance-v12/6216b49c4d24f8b0-480.webp"></a><div style="padding:24px"><h3 style="font-size:23px;margin-bottom:14px"><a href="/fences/pet-fencing/">Plan around your pets →</a></h3><p>Compare gate gaps, escape behavior and the way your yard meets the ground.</p></div></article><article class="fence-photo-card fence-project-card"><a href="/fences/pool-fencing/"><img src="/assets/img/performance-v12/249a7f814ef194b2-480.webp" alt="Chain-link fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/249a7f814ef194b2-480.webp 480w, /assets/img/performance-v12/249a7f814ef194b2-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/06-6.webp" data-photo-thumbnail="/assets/img/performance-v12/249a7f814ef194b2-480.webp"></a><div style="padding:24px"><h3 style="font-size:23px;margin-bottom:14px"><a href="/fences/pool-fencing/">Plan your pool barrier →</a></h3><p>Review the fence, gates and routes to the water as one complete layout.</p></div></article><article class="fence-photo-card fence-project-card"><a href="/fences/replacement/"><img src="/assets/img/performance-v12/10ee7f73df70de9f-480.webp" alt="A flat top cap and horizontal trim frame the wood privacy boards." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/10ee7f73df70de9f-480.webp 480w, /assets/img/performance-v12/10ee7f73df70de9f-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/01-3.webp" data-photo-thumbnail="/assets/img/performance-v12/10ee7f73df70de9f-480.webp"></a><div style="padding:24px"><h3 style="font-size:23px;margin-bottom:14px"><a href="/fences/replacement/">Replace with a better plan →</a></h3><p>Compare repair, removal and new materials before repeating the old layout.</p></div></article></div></div></section>
+<section class="fence-decision material-reference" id="material-reference"><div class="growth-inner"><details class="material-reference__details"><summary data-editable="compare.v1.reference.summary">Read the material reference</summary><div class="material-reference__content"><span class="eyebrow">Choose by how you use your yard</span><h2>Compare your fence options</h2><p>Start with privacy and upkeep, then review the gates and slope. Select a material for project photos and a more detailed buying guide.</p><div class="fence-detail-grid"><article><h3><a href="/fences/cedar/">Cedar →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Depends on the board pattern; lattice and shadowbox leave visible openings.</dd><dt><strong>Upkeep</strong></dt><dd>Choose natural weathering or a finish with ongoing care.</dd></dl></article><article><h3><a href="/fences/wood/">Pressure-treated wood →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Butted boards can develop gaps as wet lumber dries; overlap changes the sightline.</dd><dt><strong>Upkeep</strong></dt><dd>Inspect wood and hardware; plan coating care if a finished color matters.</dd></dl></article><article><h3><a href="/fences/vinyl/">Vinyl →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Solid infill screens views; picket and decorative openings do not.</dd><dt><strong>Upkeep</strong></dt><dd>Routine washing and hardware checks; follow the product&#x27;s care instructions.</dd></dl></article><article><h3><a href="/fences/aluminum/">Ornamental aluminum →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Open pickets preserve sightlines rather than providing a solid screen.</dd><dt><strong>Upkeep</strong></dt><dd>Clean the coating gently and inspect gates and damaged areas.</dd></dl></article><article><h3><a href="/fences/chainlink/">Chain link →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Open mesh; slats change screening and require a system review.</dd><dt><strong>Upkeep</strong></dt><dd>Inspect coating, ties, tension and gate operation.</dd></dl></article><article><h3><a href="/fences/split-rail/">Split rail →</a></h3><dl><dt><strong>Privacy</strong></dt><dd>Open rails leave the landscape visible.</dd><dt><strong>Upkeep</strong></dt><dd>Wood care depends on species, treatment and chosen finish.</dd></dl></article></div><p class="growth-note">No-dig describes an installation approach. Pet and pool fencing describe the use. Compare the material and the project requirements together.</p></div></details></div></section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Fence installation in Toledo and nearby communities. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../about/">About Nick</a></li>
+          <li><a href="../reviews/">Reviews</a></li>
+          <li><a href="../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+          <li><a href="../service-areas/">Service Areas</a></li>
+          <li><a href="../faq/">FAQ</a></li>
+    <li><a href="../guides/">Fence Guides</a></li>
+    <li><a href="../why-us/">Why Choose Us</a></li>
+          <li><a href="../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Business Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../privacy/" style="color:inherit;">Privacy</a> · <a href="../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>3-year workmanship warranty</span>
+        <span>BBB Accredited</span>
+        <span>Family owned</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+<script src="/assets/js/material-compare.js?v=20260920-1" defer></script>
+
+</body>
+</html>

@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Fence Installation Process in Toledo | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Explore our fence installation process in Toledo and surrounding communities, from your estimate and written proposal to installation and project follow-up.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Fence Installation Process in Toledo | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Explore our fence installation process in Toledo and surrounding communities, from your estimate and written proposal to installation and project follow-up.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/process/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fence Installation Process in Toledo | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Explore our fence installation process in Toledo and surrounding communities, from your estimate and written proposal to installation and project follow-up.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/process/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Our process", "item": "https://ghareebfence.com/process/"}
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/portal-tour.css?v=20261001-label">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../reviews/">Reviews</a></li>
+      <li><a href="../guides/">Guides</a></li>
+      <li><a href="../about/">About</a></li>
+      <li><a href="../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+      <li><a href="../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../fences/">Fence Styles</a></li>
+    <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../reviews/">Reviews</a></li>
+    <li><a href="../about/">About</a></li>
+    <li><a href="../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+    <li><a href="../contact/">Contact</a></li>
+    <li><a href="../guides/">Guides</a></li>
+    <li><a href="../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main"><section class="section project-path"><div class="container">
+<div class="breadcrumbs"><a href="/">Home</a> / Our process</div>
+<p class="eyebrow">Toledo · Northwest Ohio · Southeast Michigan</p>
+<h1 class="display-1" data-editable="process.v1.title">Your fence project.<br>A clear plan at every step.</h1>
+<p class="lede" data-editable="process.v1.lede">A good fence starts with clear decisions. Here is how we move from your first idea to installation, with a customer portal to keep your project information close at hand.</p>
+<div class="path-actions"><a class="btn btn-primary btn-lg" href="/quote/">Request a free estimate</a><a class="btn btn-outline btn-lg" href="/portal/">Explore the customer portal</a></div>
+<h2 class="display-3" style="margin-top:40px" data-editable="process.v1.features">From estimate to installation</h2><div class="path-grid"><article class="path-card"><span class="path-num">01</span><h3 data-editable="process.v1.card1.title">Plan your fence</h3><p data-editable="process.v1.card1.body">Start with your goals: privacy, pets, pool access or a new look. Explore materials and sketch an initial layout online, or request an on-site estimate. Online measurements and prices are planning tools; our team reviews the site and scope.</p></article><article class="path-card"><span class="path-num">02</span><h3 data-editable="process.v1.card2.title">Compare a written proposal</h3><p data-editable="process.v1.card2.body">Review the fence style, height, gates, removal and installation scope. Ask about the differences between options before choosing. Your project portal gives you a place to review the information our team shares.</p></article><article class="path-card"><span class="path-num">03</span><h3 data-editable="process.v1.card3.title">Confirm the details</h3><p data-editable="process.v1.card3.body">Agree on the final scope, price and payment terms before installation. Discuss property lines, HOA requirements and any permits that apply to your project. Responsibility for each approval should be clear in your agreement.</p></article><article class="path-card"><span class="path-num">04</span><h3 data-editable="process.v1.card4.title">Prepare for installation</h3><p data-editable="process.v1.card4.body">Confirm access, pets, landscaping and any removal work with our team. Coordinate utility marking and required approvals before digging. We confirm scheduling with you; weather and site conditions can affect dates.</p></article><article class="path-card"><span class="path-num">05</span><h3 data-editable="process.v1.card5.title">Stay in touch during the work</h3><p data-editable="process.v1.card5.body">Use your portal to ask questions and review shared project information, files and photos. Discuss any requested change with our team before it becomes part of the work. Check the portal for schedule information when available.</p></article><article class="path-card"><span class="path-num">06</span><h3 data-editable="process.v1.card6.title">Review the finished fence</h3><p data-editable="process.v1.card6.body">Walk through the fence and gates with our team, discuss care and address any outstanding questions. Review your remaining balance and keep the project records shared in your portal for future reference.</p></article></div>
+<section style="margin-top:56px"><p class="eyebrow">Your project, connected</p><h2 class="display-2" data-editable="process.v1.portal">Less searching. More clarity.</h2><p>Review your shared quote and layout, find the files our team has shared and keep questions with your project conversation. The portal supports the conversation with our team, so you can find the details when you need them.</p><div class="path-links"><a href="/portal/">See how the portal works →</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div></section>
+<section style="margin-top:48px"><h2 class="display-3">Before your fence installation</h2>
+<details><summary>What should I have ready for an estimate?</summary><p>Tell us the purpose of your fence, materials you like, approximate layout, desired height and number of gates. Photos and a property survey, if you have one, help us discuss the site. Let us know about old fencing, slopes and tight access.</p></details>
+<details><summary>Can I get an exact price from the online planner?</summary><p>The planner provides an initial layout and planning range. A final written proposal depends on reviewed measurements, materials, gates, removal and site conditions.</p></details>
+<details><summary>How do permits and property lines get handled?</summary><p>Requirements depend on your municipality, property and project. Discuss permits, HOA approval, boundary information and responsibility for approvals with our team before work begins. A map sketch does not establish a legal property boundary.</p></details>
+<details><summary>How do I check my project or make a payment?</summary><p>Open the customer portal and sign in using the details requested on the login screen. Review your shared project and available balance there. If you cannot find your job number or need help, call <a href="tel:14192142107">(419) 214-2107</a>.</p></details>
+</section><div class="path-links"><a href="/fences/">Compare fence styles</a><a href="/gallery/">See completed fences</a><a href="/service-areas/">Check our service areas</a></div>
+</div></section>
+<!-- BUILD-LAB:project-journey-demo:START --><section class="build-lab-section" id="project-journey-demo" data-gfs-sec="build-lab-project-journey-demo" data-gfs-protected><div class="build-lab" data-build-lab="project-journey-demo" data-scene="0" aria-labelledby="project-journey-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="project-journey-demo-title">Know the next decision before it arrives.</h2><p>Explore what you and our team review as the project moves forward.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="project-journey-demo-graphic-title project-journey-demo-graphic-desc"><title id="project-journey-demo-graphic-title">Four connected project stages: plan, scope, installation and walkthrough.</title><desc id="project-journey-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><path d="M75 174H525" stroke="#aac4d7" stroke-width="9"/><g class="lab-journey-node lab-journey-0"><circle cx="75" cy="174" r="37" fill="#fff" stroke="#466e8c" stroke-width="4"/><text x="75" y="182" text-anchor="middle" class="lab-node-number">1</text><text x="75" y="248" text-anchor="middle">Plan</text></g><g class="lab-journey-node lab-journey-1"><circle cx="225" cy="174" r="37" fill="#fff" stroke="#466e8c" stroke-width="4"/><text x="225" y="182" text-anchor="middle" class="lab-node-number">2</text><text x="225" y="248" text-anchor="middle">Scope</text></g><g class="lab-journey-node lab-journey-2"><circle cx="375" cy="174" r="37" fill="#fff" stroke="#466e8c" stroke-width="4"/><text x="375" y="182" text-anchor="middle" class="lab-node-number">3</text><text x="375" y="248" text-anchor="middle">Install</text></g><g class="lab-journey-node lab-journey-3"><circle cx="525" cy="174" r="37" fill="#fff" stroke="#466e8c" stroke-width="4"/><text x="525" y="182" text-anchor="middle" class="lab-node-number">4</text><text x="525" y="248" text-anchor="middle">Review</text></g><text x="30" y="51">A clear scope connects every stage</text></svg><figcaption>Process overview. The signed scope and information shared for your project govern the actual work and schedule.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="Know the next decision before it arrives. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="project-journey-demo-notes">Plan</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="project-journey-demo-notes">Agree on scope</button><button type="button" data-lab-step="2" aria-pressed="false" aria-controls="project-journey-demo-notes">Install</button><button type="button" data-lab-step="3" aria-pressed="false" aria-controls="project-journey-demo-notes">Walk through</button></div><ol id="project-journey-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Plan</h3><p>You share the goals, approximate line and access needs. We review site conditions, gate locations and the available material choices.</p></li><li data-lab-note="1"><h3>Agree on scope</h3><p>Review the written style, height, length, gates, removal, price and approval responsibilities. Requested changes need review before becoming part of the work.</p></li><li data-lab-note="2"><h3>Install</h3><p>Confirm access, utility locating and approvals. Our team confirms scheduling; site conditions and weather can affect the plan.</p></li><li data-lab-note="3"><h3>Walk through</h3><p>Review finish, fence alignment and gate operation together. Keep the shared project records and care information for later.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/quote/">Choose how to get a quote <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:project-journey-demo:END -->
+<section class="portal-visual-tour" id="process-portal-tour"><div class="container"><div class="portal-tour-heading"><p class="eyebrow">Actual portal interface · Sample project</p><h2 data-editable="process.v3.tour.title">A plan you can return to.</h2><p data-editable="process.v3.tour.intro">Keep the drawing, written scope and shared files close to the conversation. These screenshots use a sample project; names, address, amounts and dates are illustrative. The details available in your portal depend on what our team has shared.</p></div><div class="portal-shot-grid"><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-plan.webp" aria-label="Sample project; enlarge: Put the fence line in context." target="_blank" rel="noopener"><img data-editable-img="process.v3.plan.image" src="/assets/img/portal-demo/tour-plan.webp" alt="Actual portal showing the shared sample fence drawing, marked as not an actual property." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="process.v3.plan.title">Put the fence line in context.</h3><p data-editable="process.v3.plan.caption">Review the shared layout and discuss gates, fence runs and access with our team. A site drawing is a planning reference, not a boundary survey.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-scope.webp" aria-label="Sample project; enlarge: Know what is included." target="_blank" rel="noopener"><img data-editable-img="process.v3.scope.image" src="/assets/img/portal-demo/tour-scope.webp" alt="Sample customer portal showing the shared written fence scope and project details." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="process.v3.scope.title">Know what is included.</h3><p data-editable="process.v3.scope.caption">Check the written scope before confirming the work. Discuss any requested changes with our team.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-files.webp" aria-label="Sample project; enlarge: Keep the paperwork with the plan." target="_blank" rel="noopener"><img data-editable-img="process.v3.files.image" src="/assets/img/portal-demo/tour-files.webp" alt="Sample portal Files and documents section listing shared proposal, layout and supporting project files." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="process.v3.files.title">Keep the paperwork with the plan.</h3><p data-editable="process.v3.files.caption">Return to the proposal, layout and supporting files shared for your project.</p></figcaption></figure></div><div class="path-links"><a href="/portal/#portal-tour">Explore the full portal tour →</a><a href="https://portal.ghareebfence.com/">Open your customer portal →</a></div></div></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Care on the job</p><blockquote><p>“They were on time, professional, and clean.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>doug holben</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by doug holben (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../about/">About Nick</a></li>
+          <li><a href="../reviews/">Reviews</a></li>
+          <li><a href="../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+          <li><a href="../service-areas/">Service Areas</a></li>
+          <li><a href="../faq/">FAQ</a></li>
+    <li><a href="../guides/">Fence Guides</a></li>
+    <li><a href="../why-us/">Why Choose Us</a></li>
+          <li><a href="../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../privacy/" style="color:inherit;">Privacy</a> · <a href="../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+<script src="/assets/js/portal-tour.js?v=20260920-v3" defer></script>
+
+<script type="module" src="/assets/js/construction-lab.mjs?v=20260930"></script>
+</body>
+</html>

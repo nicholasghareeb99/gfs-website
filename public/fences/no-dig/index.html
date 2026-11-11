@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>No-Dig Fence Installation: Process & Benefits | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Explore cleaner no-dig fence installation, steel support for wood and vinyl, reduced excavation and future replacement planning. See the process and illustrations.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="No-Dig Fence Installation: Process & Benefits | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Explore cleaner no-dig fence installation, steel support for wood and vinyl, reduced excavation and future replacement planning. See the process and illustrations.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/fences/no-dig/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/no-dig/ridge-x-cutaway-v8.webp">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="No-Dig Fence Installation: Process & Benefits | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Explore cleaner no-dig fence installation, steel support for wood and vinyl, reduced excavation and future replacement planning. See the process and illustrations.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/no-dig/ridge-x-cutaway-v8.webp">
+
+<link rel="canonical" href="https://ghareebfence.com/fences/no-dig/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/fence-explorer.js?v=caption-sept30" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "LocalBusiness", "@id": "https://ghareebfence.com/#business", "name": "Ghareeb Fencing Solutions", "telephone": "+1-419-214-2107", "email": "info@ghareebfencingsolutions.com", "url": "https://ghareebfence.com/", "priceRange": "$$", "address": {"@type": "PostalAddress", "streetAddress": "5242 Tractor Rd Suite C", "addressLocality": "Toledo", "addressRegion": "OH", "postalCode": "43612", "addressCountry": "US"}, "areaServed": ["Toledo, OH", "Perrysburg, OH", "Sylvania, OH", "Maumee, OH", "Bowling Green, OH", "Rossford, OH", "Northwood, OH", "Monroe, MI", "Temperance, MI", "Lambertville, MI", "Whiteford, MI", "Dundee, MI"], "openingHoursSpecification": [{"@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"], "opens": "08:00", "closes": "18:00"}], "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]}</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"}, {"@type": "ListItem", "position": 2, "name": "Installation methods", "item": "https://ghareebfence.com/fences/no-dig/"}]}</script>
+
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20260907-landings">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/growth-upgrade.css?v=20260919">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/photo-showcase.css?v=20260919-1">
+<link rel="stylesheet" href="/assets/css/fence-explorer.css?v=20260920-mobile-v5">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "What does “no-dig” mean?", "acceptedAnswer": {"@type": "Answer", "text": "The fence support is driven into the ground instead of being placed in an excavated, concrete-filled post hole. It describes the post installation method. The fence material and finish are separate choices."}}, {"@type": "Question", "name": "Can every fence use driven posts?", "acceptedAnswer": {"@type": "Answer", "text": "No. The selected post system, soil, obstructions, fence height and gate loads all matter. We review the proposed method for your project and explain where a different foundation detail is needed."}}, {"@type": "Question", "name": "Does no-dig mean no site checks?", "acceptedAnswer": {"@type": "Answer", "text": "No. The layout, property-line information, easements, underground utilities and required approvals still need review before installation. Parcel mapping helps with planning but does not replace a boundary survey."}}, {"@type": "Question", "name": "Can I choose privacy or an open fence?", "acceptedAnswer": {"@type": "Answer", "text": "The finished style depends on the compatible fence system. Tell us whether you want privacy, an open view or a particular gate, and we will review suitable materials and support details together."}}, {"@type": "Question", "name": "Will there be any mess at all?", "acceptedAnswer": {"@type": "Answer", "text": "Directly driven supports avoid the excavated dirt piles and concrete handling associated with those post holes. Old-fence removal, access, obstructions and other project details can still disturb the yard. The proposal should describe removal and cleanup."}}, {"@type": "Question", "name": "Does steel make every no-dig fence stronger?", "acceptedAnswer": {"@type": "Answer", "text": "Steel reinforcement is part of the support system, but performance depends on the complete assembly and installation. Ask which post, coating, fittings and gate details are specified. Compare any tested rating only for the exact system and conditions it covers."}}, {"@type": "Question", "name": "Can the steel posts stay when the fence is replaced?", "acceptedAnswer": {"@type": "Answer", "text": "Possibly. Retaining sound, compatible supports can reduce replacement work. Their condition, spacing, alignment and suitability for the new fence need inspection before reuse or savings can be confirmed."}}, {"@type": "Question", "name": "Is no-dig a way to skip utility locating?", "acceptedAnswer": {"@type": "Answer", "text": "No. A driven post can damage buried utilities. Required utility notification, responses, private-line locating and safe working procedures still apply before installation."}}]}</script>
+<link rel="stylesheet" href="/assets/css/no-dig-v4.css?v=20260920-benefits-v7">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="preload" as="image" href="/assets/img/performance-v12/6ef54f461b547881-1122.webp" imagesrcset="/assets/img/performance-v12/6ef54f461b547881-480.webp 480w, /assets/img/performance-v12/6ef54f461b547881-960.webp 960w, /assets/img/performance-v12/6ef54f461b547881-1122.webp 1122w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars" aria-hidden="true">GFS</span>
+      <span class="spec spec--paper">Local family-owned fence company</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">BBB Accredited</span>
+      <span class="spec spec--paper">Our own project photos</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="nodig-hero" data-gfs-sec="s0"><div class="container nodig-hero-grid"><div><nav class="sell-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/fences/">Fence styles</a></nav><p class="eyebrow">The installation makes the difference</p><h1 data-editable="nodig.v7.title">Less mess above ground.<br>Steel support below.</h1><p class="nodig-lede" data-editable="nodig.v7.intro">Enjoy your new fence without a row of excavated post holes and piles of spoil at the driven-post locations. A compatible steel support system gives your fence its backbone, with less soil to move and less cleanup around those posts.</p><div class="growth-actions"><a class="btn btn-primary" href="/quote/form/?project=no-dig">Ask about no-dig for my yard</a><a class="btn btn-outline" href="#installation">See the installation steps ↓</a></div></div><figure class="nodig-system-visual"><p class="nodig-visual-title" data-editable="nodig.v8.visual.title">Inside a steel-supported vinyl post</p><a href="/assets/img/no-dig/ridge-x-cutaway-v8.webp" target="_blank" rel="noopener" aria-label="Open the Ridge X vinyl support concept illustration"><img src="/assets/img/performance-v12/6ef54f461b547881-1122.webp" alt="AI concept cutaway of a white vinyl sleeve around a round steel pipe, with red composite adapters and the pipe extending into soil." width="1122" height="1402" fetchpriority="high" decoding="async" data-editable-img="nodig.v8.ridge-x-cutaway" srcset="/assets/img/performance-v12/6ef54f461b547881-480.webp 480w, /assets/img/performance-v12/6ef54f461b547881-960.webp 960w, /assets/img/performance-v12/6ef54f461b547881-1122.webp 1122w" sizes="100vw"></a><dl class="nodig-image-key"><div><dt>Vinyl sleeve</dt><dd>The visible post finish.</dd></div><div><dt>Composite adapters</dt><dd>Fit between the sleeve and steel pipe.</dd></div><div><dt>Steel support</dt><dd>Continues directly into the soil.</dd></div></dl><figcaption data-editable="nodig.v8.ridge.caption">AI-generated Ridge X system concept, not an exact product rendering or installation specification. Adapter model, fastening, dimensions and depth are determined for the project.</figcaption></figure></div></section>
+<nav class="fence-jump" aria-label="On this page"><a href="#installation">The installation process</a><a href="#benefits">Less mess</a><a href="#steel-support">Steel support</a><a href="#future-replacement">Future replacement</a><a href="#site-review">Is it right for my yard?</a><a href="#fence-questions">Your questions</a><a href="/#fence-finder">Find my style</a></nav>
+
+
+<!-- BUILD-LAB:driven-post-demo:START --><section class="build-lab-section" id="driven-post-demo" data-gfs-sec="build-lab-driven-post-demo" data-gfs-protected><div class="build-lab" data-build-lab="driven-post-demo" data-scene="0" aria-labelledby="driven-post-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="driven-post-demo-title">Watch the support go in.</h2><p>Follow a driven post from the reviewed layout to the finished fence. Select a stage to move the illustration.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="driven-post-demo-graphic-title driven-post-demo-graphic-desc"><title id="driven-post-demo-graphic-title">A steel support is positioned, driven, then covered by the fence assembly.</title><desc id="driven-post-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><path d="M0 255H600V360H0Z" fill="#dce8dc"/><path d="M0 255H600" stroke="#6b8970" stroke-width="3"/><text x="24" y="285">Ground line</text><g class="lab-drive-post"><rect x="282" y="115" width="36" height="205" rx="5" fill="#70889b"/><rect x="289" y="119" width="9" height="195" rx="3" fill="#bbccd7"/><rect x="258" y="77" width="84" height="48" rx="9" fill="#163e61"/><path d="M259 88h-25v44m108-44h25v44" fill="none" stroke="#163e61" stroke-width="10"/></g><g class="lab-drive-finish"><rect x="264" y="80" width="72" height="175" fill="#fff" stroke="#8eabbd" stroke-width="3"/><path d="M335 115H550M335 225H550" stroke="#8eabbd" stroke-width="15"/><rect x="352" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/><rect x="383" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/><rect x="414" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/><rect x="445" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/><rect x="476" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/><rect x="507" y="112" width="25" height="116" fill="#fff" stroke="#a4bac8"/></g><text x="37" y="58">1 support · less excavation</text></svg><figcaption>Illustrated sequence, not a depth or equipment specification. Driven posts still require utility locating and safe site procedures.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="Watch the support go in. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="driven-post-demo-notes">Position</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="driven-post-demo-notes">Drive</button><button type="button" data-lab-step="2" aria-pressed="false" aria-controls="driven-post-demo-notes">Build</button></div><ol id="driven-post-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Position</h3><p>After the layout and utility checks, position the specified steel support at the planned post location.</p></li><li data-lab-note="1"><h3>Drive</h3><p>The driver advances the support into the ground. Required embedment depends on the system, soil, height and loads.</p></li><li data-lab-note="2"><h3>Build</h3><p>Fit the compatible post assembly, rails and fence finish. Gate supports receive their own review.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/quote/form/?project=no-dig">Review no-dig for my yard <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:driven-post-demo:END -->
+<!-- BUILD-LAB:cleanup-demo:START --><section class="build-lab-section" id="cleanup-demo" data-gfs-sec="build-lab-cleanup-demo" data-gfs-protected><div class="build-lab" data-build-lab="cleanup-demo" data-scene="0" aria-labelledby="cleanup-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="cleanup-demo-title">See where the dirt piles come from.</h2><p>Compare the ground work at one post location before final cleanup.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="cleanup-demo-graphic-title cleanup-demo-graphic-desc"><title id="cleanup-demo-graphic-title">Driven-post and excavated-footing comparison, including excavated soil.</title><desc id="cleanup-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><path d="M0 255H600V360H0Z" fill="#dce8dc"/><path d="M0 255H600" stroke="#6b8970" stroke-width="3"/><text x="24" y="285">Ground line</text><g class="lab-clean-driven"><rect x="282" y="75" width="36" height="255" rx="5" fill="#70889b"/><rect x="289" y="79" width="9" height="245" rx="3" fill="#bbccd7"/><text x="72" y="80">Directly driven</text><text x="347" y="309">No full post hole</text></g><g class="lab-clean-dug"><path d="M247 180H353V343H247Z" fill="#a7b1b7"/><rect x="282" y="75" width="36" height="244" fill="#b98350"/><path d="M385 255q22-57 50-34q22-78 52-18q45-24 81 52Z" fill="#8c674b"/><path d="M247 180H353V343H247Z" fill="none" stroke="#697985" stroke-dasharray="8 5" stroke-width="3"/><text x="70" y="65">Excavated footing</text><text x="405" y="285">Removed soil</text></g></svg><figcaption>Illustration before cleanup, not a comparison of finished jobs. Old-fence removal, access and obstacles can still disturb the yard.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="See where the dirt piles come from. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="cleanup-demo-notes">Driven support</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="cleanup-demo-notes">Dug footing</button></div><ol id="cleanup-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Driven support</h3><p>A directly driven support avoids excavating a full footing-sized hole at that location. There is no hole-sized pile of spoil to remove.</p></li><li data-lab-note="1"><h3>Dug footing</h3><p>Excavation removes soil to make space for the specified footing. That soil needs spreading, removal or other cleanup. Both methods still need a tidy final walkthrough.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/guides/no-dig-vs-concrete/">Compare installation methods <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:cleanup-demo:END -->
+<section class="nodig-section" id="installation" data-gfs-sec="v4-installation"><div class="container"><p class="eyebrow">From layout to final walkthrough</p><h2 data-editable="nodig.v4.process.title">How a driven-post fence comes together.</h2><figure class="nodig-process-picture"><a href="/assets/img/no-dig/driving-process-v6.webp" target="_blank" rel="noopener" aria-label="Enlarge the post-driving process illustration"><img src="/assets/img/performance-v12/eb59859f60a109e9-480.webp" alt="Illustrated installer holding a powered post driver over a steel fence support, with a cutaway showing the post entering soil." width="480" height="320" loading="lazy" decoding="async" data-editable-img="nodig.v6.driver" srcset="/assets/img/performance-v12/eb59859f60a109e9-480.webp 480w, /assets/img/performance-v12/eb59859f60a109e9-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/no-dig/driving-process-v6.webp" data-photo-thumbnail="/assets/img/performance-v12/eb59859f60a109e9-480.webp"></a><figcaption><strong>The driving step, made visible.</strong><span>The driver advances the steel support before compatible sleeves, rails or panels are fitted.</span><small>AI-generated process illustration, not a photo of our crew. Equipment, components and required depth vary by project.</small></figcaption></figure><div class="nodig-step-controls" role="group" aria-label="Explore the installation steps" hidden></div><p class="nodig-step-status" role="status"></p><ol class="nodig-steps"><li><span class="nodig-step-number">01</span><div><h3 data-editable="nodig.v4.step1.title">Plan the line and gates</h3><p data-editable="nodig.v4.step1.body">We review where the fence will run, how gates will be used and what access the installation needs. The shared site plan gives you a clear starting point.</p></div></li><li><span class="nodig-step-number">02</span><div><h3 data-editable="nodig.v4.step2.title">Check the site and post system</h3><p data-editable="nodig.v4.step2.body">Before driving begins, confirm the required approvals and utility locating. Review ground conditions, obstructions, post spacing and the support detail for the selected fence.</p></div></li><li><span class="nodig-step-number">03</span><div><h3 data-editable="nodig.v4.step3.title">Drive the steel supports</h3><p data-editable="nodig.v4.step3.body">A post driver advances the steel support into the ground. The required embedment and installation procedure come from the selected system and site requirements—not a one-depth-fits-all rule.</p></div></li><li><span class="nodig-step-number">04</span><div><h3 data-editable="nodig.v8.step4.title">Fit and align the post assembly</h3><p data-editable="nodig.v8.step4.body">For vinyl, fit the Ridge X adapters and vinyl sleeve to the steel pipe. For King Plus wood fencing, build the U-shaped wood box, fit it around the driven support and align it before adding the rails. Follow the fastening detail selected for the project.</p></div></li><li><span class="nodig-step-number">05</span><div><h3 data-editable="nodig.v4.step5.title">Build the fence and fit the gates</h3><p data-editable="nodig.v4.step5.body">Attach the selected panels or rails and fit the gate hardware. Gate posts and wide openings receive the support detail required for their loads.</p></div></li><li><span class="nodig-step-number">06</span><div><h3 data-editable="nodig.v4.step6.title">Walk through the finished project</h3><p data-editable="nodig.v4.step6.body">Review the fence line, finish and gate operation together. Keep the shared scope, plan and questions with your project in the customer portal.</p></div></li></ol></div></section>
+<section class="nodig-section nodig-benefits" id="benefits" data-gfs-sec="v4-benefits"><div class="container"><p class="eyebrow">A smaller excavation footprint</p><h2 data-editable="nodig.v7.benefits.title">Your new fence. Less mess in your yard.</h2><div class="nodig-benefit-grid"><article><h3 data-editable="nodig.v7.clean.title">No pile from a dug post hole.</h3><p data-editable="nodig.v7.clean.body">At a directly driven support, there is no full post hole to excavate and no hole-sized pile of soil to spread or haul away. That keeps more of the surrounding lawn in place.</p></article><article><h3 data-editable="nodig.v7.concrete.title">Skip the concrete handling.</h3><p data-editable="nodig.v7.concrete.body">Where the approved system uses no poured footing, there is no concrete to mix, move or wait to cure at that post. Removal work, gates or other site details may still need excavation.</p></article><article><h3 data-editable="nodig.v7.cleanup.title">Less disruption around each post.</h3><p data-editable="nodig.v7.cleanup.body">A narrow driven support avoids opening a larger footing-sized hole. We still plan access, protect the work area and clean up after installation—especially when an old fence is being removed.</p></article></div><figure class="nodig-comparison"><a href="/assets/img/no-dig/footing-cleanup-v7.webp" target="_blank" rel="noopener" aria-label="Open the post foundation comparison illustration"><img src="/assets/img/performance-v12/c205d035cb18a8de-480.webp" alt="Illustration comparing an undisturbed lawn at a driven steel post with an excavated concrete footing and a pile of removed soil awaiting cleanup." width="480" height="320" loading="lazy" decoding="async" data-editable-img="nodig.v7.cleanup" srcset="/assets/img/performance-v12/c205d035cb18a8de-480.webp 480w, /assets/img/performance-v12/c205d035cb18a8de-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/no-dig/footing-cleanup-v7.webp" data-photo-thumbnail="/assets/img/performance-v12/c205d035cb18a8de-480.webp"></a><div class="nodig-comparison-labels"><div><strong>Directly driven support</strong><p>No excavated post-hole pile at this location.</p></div><div><strong>Excavated footing</strong><p>Removed soil needs spreading, removal or other cleanup.</p></div></div><figcaption>AI-generated installation-stage comparison, not actual jobs or a specification. Excavated soil is shown before cleanup. The required support detail varies by site.</figcaption></figure></div></section>
+<section class="nodig-section" id="steel-support" data-gfs-sec="v7-steel"><div class="container"><p class="eyebrow">The support is more than the finish you see</p><h2>Steel at the core. More choices on the outside.</h2><div class="nodig-support-grid"><article><h3 data-editable="nodig.v8.vinyl.title">Ridge X adapters inside the vinyl.</h3><p data-editable="nodig.v8.vinyl.body">GFS uses Ridge X adapters from Central Fence Supply between the steel pipe and vinyl post sleeve. The composite adapters have openings for rail clearance and a square outer fit that helps keep the sleeve aligned. The pipe, adapters, fasteners, rails and panels work together as a system.</p><p data-editable="nodig.v7.strength.body">Strength comes from the complete specified assembly: steel size and wall thickness, embedment, soil, connections, fence height and gate loads. Some conventional vinyl systems also use reinforcement, so we compare the actual systems rather than the outer appearance alone.</p></article><article><h3 data-editable="nodig.v8.wood.title">The King Plus wood-box method.</h3><p data-editable="nodig.v8.wood.body">GFS uses the King Plus method for wood fencing: one picket and two vertical 2×4s form a U-shaped box around the driven steel support. We build and align the box before attaching the fence rails. The steel provides the ground-contact support; the wood components still need appropriate care.</p><p data-editable="nodig.v7.grade.body">The ground line is an important place to inspect a wood post for decay and loss of section. A protected steel post addresses that wood-decay mechanism; its coating, connections and condition still matter over time. Galvanizing provides zinc protection, while soil conditions and coating condition influence corrosion performance.</p></article></div><figure class="nodig-wood-detail"><a href="/assets/img/no-dig/king-plus-box-v8.webp" target="_blank" rel="noopener" aria-label="Enlarge the King Plus wood-box concept illustration"><img src="/assets/img/performance-v12/6c58d6b478e711cd-480.webp" alt="AI concept showing a U-shaped wood box around a round steel support, a horizontal fence rail and a top-view inset of the three-sided box." width="480" height="320" loading="lazy" decoding="async" data-editable-img="nodig.v8.king-plus-box" srcset="/assets/img/performance-v12/6c58d6b478e711cd-480.webp 480w, /assets/img/performance-v12/6c58d6b478e711cd-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/no-dig/king-plus-box-v8.webp" data-photo-thumbnail="/assets/img/performance-v12/6c58d6b478e711cd-480.webp"></a><figcaption><strong data-editable="nodig.v8.king.caption.title">A wood box around the driven steel support.</strong><span data-editable="nodig.v8.king.caption.body">One picket and two vertical 2×4s form the King Plus box. Build and align the box, then attach the fence rails.</span><small data-editable="nodig.v8.king.caption.note">AI-generated concept, not a GFS project photo or an exact installation specification. Fasteners are omitted for clarity; connections, clearances and dimensions must follow the project requirements.</small></figcaption></figure></div></section>
+<section class="nodig-section" id="site-review" data-gfs-sec="v4-fit"><div class="container nodig-fit-grid"><div><p class="eyebrow">The right method starts with the site</p><h2 data-editable="nodig.v7.site.title">Careful placement starts with knowing what is below.</h2><p data-editable="nodig.v7.site.body">We plan individual post positions around the confirmed site constraints before installation. A narrow support uses a smaller footprint than an excavated footing, but it cannot detect or safely pass through a buried utility.</p><p data-editable="nodig.v7.utilities.body">No-dig still disturbs the ground. Before posts are driven, the crew needs the required 811 notification, utility responses and any necessary private-line locating. Near marked lines, follow the required clearance and exposure procedures; change the layout or method when needed.</p><ul><li>Review loose fill, rock and hidden obstructions.</li><li>Match supports to the fence system, height and gates.</li><li>Check public utilities and private lines such as irrigation, pool equipment and power to a shed.</li><li>Confirm property information, easements and approvals.</li><li>Agree on any locations that need a different detail.</li></ul><a class="btn btn-primary" href="/quote/form/?project=no-dig">Request a site review</a></div><figure><a href="/portal/"><img src="/assets/img/portal-demo/tour-plan.webp" alt="Sample customer portal displaying a shared fence layout and gate location." width="1425" height="1175" loading="lazy" decoding="async" data-editable-img="nodig.v4.portal"></a><figcaption>Sample portal plan. Keep the proposed fence line and gate decisions together. Parcel mapping does not locate utilities or replace a boundary survey.</figcaption></figure></div></section>
+<section class="nodig-section nodig-future" id="future-replacement" data-gfs-sec="v7-future"><div class="container"><p class="eyebrow">Think beyond the first set of panels</p><h2>A future fence may start with posts you already have.</h2><p class="nodig-future-intro" data-editable="nodig.v7.reuse.intro">If the steel supports remain sound and suit the next fence, it may be possible to replace boards, rails or panels while retaining them. That can avoid some post removal, disposal and reinstallation work.</p><div class="nodig-benefit-grid"><article><h3>1. Inspect what remains.</h3><p>Check corrosion, movement, damage, alignment and connections. A post that is leaning or deteriorated is not automatically a candidate for reuse.</p></article><article><h3>2. Match the new design.</h3><p>Confirm spacing, height, gate loads, fittings and the support requirements for the replacement fence. A change of style may need different posts.</p></article><article><h3>3. Price the work you need.</h3><p>Compare a reuse option with a full replacement in the written proposal. Savings depend on how much sound structure can actually stay.</p></article></div><p class="nodig-future-note" data-editable="nodig.v7.reuse.note">A durable steel support can outlast replaceable wood components. Future reuse and lower replacement cost are possibilities to evaluate—not a lifetime guarantee or a fixed discount.</p><a class="btn btn-primary" href="/quote/form/?project=no-dig">Talk through a longer-term fence plan</a></div></section>
+<section class="nodig-section nodig-questions" id="fence-questions" data-gfs-sec="v4-questions"><div class="container"><h2>Questions about no-dig installation.</h2><details><summary data-editable="nodig.v4.faq0.q">What does “no-dig” mean?</summary><p data-editable="nodig.v4.faq0.a">The fence support is driven into the ground instead of being placed in an excavated, concrete-filled post hole. It describes the post installation method. The fence material and finish are separate choices.</p></details><details><summary data-editable="nodig.v4.faq1.q">Can every fence use driven posts?</summary><p data-editable="nodig.v4.faq1.a">No. The selected post system, soil, obstructions, fence height and gate loads all matter. We review the proposed method for your project and explain where a different foundation detail is needed.</p></details><details><summary data-editable="nodig.v4.faq2.q">Does no-dig mean no site checks?</summary><p data-editable="nodig.v4.faq2.a">No. The layout, property-line information, easements, underground utilities and required approvals still need review before installation. Parcel mapping helps with planning but does not replace a boundary survey.</p></details><details><summary data-editable="nodig.v4.faq3.q">Can I choose privacy or an open fence?</summary><p data-editable="nodig.v4.faq3.a">The finished style depends on the compatible fence system. Tell us whether you want privacy, an open view or a particular gate, and we will review suitable materials and support details together.</p></details><details><summary data-editable="nodig.v7.faq0.q">Will there be any mess at all?</summary><p data-editable="nodig.v7.faq0.a">Directly driven supports avoid the excavated dirt piles and concrete handling associated with those post holes. Old-fence removal, access, obstructions and other project details can still disturb the yard. The proposal should describe removal and cleanup.</p></details><details><summary data-editable="nodig.v7.faq1.q">Does steel make every no-dig fence stronger?</summary><p data-editable="nodig.v7.faq1.a">Steel reinforcement is part of the support system, but performance depends on the complete assembly and installation. Ask which post, coating, fittings and gate details are specified. Compare any tested rating only for the exact system and conditions it covers.</p></details><details><summary data-editable="nodig.v7.faq2.q">Can the steel posts stay when the fence is replaced?</summary><p data-editable="nodig.v7.faq2.a">Possibly. Retaining sound, compatible supports can reduce replacement work. Their condition, spacing, alignment and suitability for the new fence need inspection before reuse or savings can be confirmed.</p></details><details><summary data-editable="nodig.v7.faq3.q">Is no-dig a way to skip utility locating?</summary><p data-editable="nodig.v7.faq3.a">No. A driven post can damage buried utilities. Required utility notification, responses, private-line locating and safe working procedures still apply before installation.</p></details><details class="nodig-sources"><summary>How this installation overview was prepared</summary><p data-editable="nodig.v8.sources">GFS has confirmed Ridge X adapters for vinyl and the King Plus method for wood. Central Fence Supply describes the <a href="https://centralfencesupply.com/collections/ridge-x-adapters" target="_blank" rel="noopener">Ridge X adapter family</a> and publishes <a href="https://cdn.shopify.com/s/files/1/0946/3149/3946/files/Final_CFS_Ridge_X_Adapter_Warranty.pdf?v=1768435875" target="_blank" rel="noopener">fastening instructions and warranty conditions</a>. Mr. Fence Tools explains the <a href="https://mrfencetools.com/products/king-plus-box-throne" target="_blank" rel="noopener">King Plus wood-box construction</a>; its <a href="https://www.youtube.com/watch?v=YLimLwDLlbU" target="_blank" rel="noopener">King Plus demonstration</a> and <a href="https://www.youtube.com/watch?v=xG7RLNtCxU4" target="_blank" rel="noopener">additional installation demonstration</a> show the method. Exact components, dimensions and installation details are confirmed in the project scope. For utility planning, see <a href="https://oups.org/private-utility-locating/" target="_blank" rel="noopener">OHIO811 private-line guidance</a> and <a href="https://www.missdig811.org/homeowners/faq.html" target="_blank" rel="noopener">MISS DIG 811 homeowner guidance</a>. For material behavior, see the <a href="https://www.fpl.fs.usda.gov/documnts/pdf1979/degro79a.pdf" target="_blank" rel="noopener">USDA wood-fence durability guide</a> and <a href="https://galvanizeit.org/hot-dip-galvanizing/why-specify-galvanizing/corrosion-protection" target="_blank" rel="noopener">American Galvanizers Association coating explanation</a>.</p></details><div class="nodig-style-links"><h3>Choose the look separately from the installation.</h3><a href="/fences/vinyl/">Vinyl: privacy, picket &amp; ranch rail →</a><a href="/fences/aluminum/">Open-view aluminum →</a><a href="/fences/wood/">Wood fencing →</a></div></div></section>
+<section class="legacy-content-anchor" data-gfs-sec="growth-no-dig-guide" aria-label="Additional project content"></section><section class="legacy-content-anchor" data-gfs-sec="growth-no-dig-gallery" aria-label="Additional project content"></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Care on the job</p><blockquote><p>“They were on time, professional, and clean.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>doug holben</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by doug holben (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>3-year workmanship warranty</span>
+        <span>BBB Accredited</span>
+        <span>Family owned</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+<script src="/assets/js/no-dig-walkthrough.js?v=20260920-v7" defer></script>
+
+<script type="module" src="/assets/js/construction-lab.mjs?v=20260930"></script>
+</body>
+</html>

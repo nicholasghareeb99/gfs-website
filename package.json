@@ -1,0 +1,8 @@
+{
+  "name": "gfs-live-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  }
+}

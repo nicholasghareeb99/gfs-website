@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>About Nick Ghareeb | Toledo's Owner-Supervised Fence Company</title>
+<meta name="description" content="Meet Nick Ghareeb, the owner who personally supervises every fence install. The story, the philosophy, and why we do things differently.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="About Nick Ghareeb | Toledo's Owner-Supervised Fence Company">
+<meta property="og:description" content="Meet Nick Ghareeb, the owner who personally supervises every fence install. The story, the philosophy, and why we do things differently.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/about/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="About Nick Ghareeb | Toledo's Owner-Supervised Fence Company">
+<meta name="twitter:description" content="Meet Nick Ghareeb, the owner who personally supervises every fence install. The story, the philosophy, and why we do things differently.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/about/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "info@ghareebfencingsolutions.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "About", "item": "https://ghareebfence.com/about/"}
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/project-photo-story.css?v=20260922">
+<link rel="preload" as="image" href="/assets/img/performance-v12/7b29998db19a45dd-1600.webp" imagesrcset="/assets/img/performance-v12/7b29998db19a45dd-480.webp 480w, /assets/img/performance-v12/7b29998db19a45dd-960.webp 960w, /assets/img/performance-v12/7b29998db19a45dd-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../reviews/">Reviews</a></li>
+      <li><a href="../guides/">Guides</a></li>
+      <li><a class="is-active" href="../about/">About</a></li>
+      <li><a href="../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+      <li><a href="../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../fences/">Fence Styles</a></li>
+    <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../reviews/">Reviews</a></li>
+    <li><a href="../about/">About</a></li>
+    <li><a href="../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+    <li><a href="../contact/">Contact</a></li>
+    <li><a href="../guides/">Guides</a></li>
+    <li><a href="../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="hero.v4.about.image" aria-hidden="true"><img decoding="async" src="/assets/img/performance-v12/7b29998db19a45dd-1600.webp" srcset="/assets/img/performance-v12/7b29998db19a45dd-480.webp 480w, /assets/img/performance-v12/7b29998db19a45dd-960.webp 960w, /assets/img/performance-v12/7b29998db19a45dd-1600.webp 1600w" sizes="100vw" width="1600" height="1200" alt="Lattice-top wood fence with hanging flower baskets beside a landscaped garden." loading="eager" fetchpriority="high"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="../">Home</a> <span>/</span> About</div>
+    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="about.eyebrow">Meet the Owner</div>
+    <h1 class="display-1" data-editable="about.title">A local who shows up <span class="italic-accent">on every job.</span></h1>
+    <p class="lede" data-editable="about.lede">Most fence companies hand you off the moment you sign the contract. We don't. Here's why.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 40px;">
+  <div class="container">
+    <div class="owner-grid">
+      <div class="owner-img" data-editable-img="about.img">
+        <img src="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp" alt="Wood picket fencing" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp 480w, /assets/img/performance-v12/05d76a7b22cddd6d-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" data-photo-original="/assets/img/work/cedar-picket-corner.jpg" data-photo-thumbnail="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp">
+      </div>
+      <div>
+        <h2 class="display-3" style="margin-bottom: 24px;" data-editable="about.story.title">The Ghareeb story.</h2>
+        <p style="font-size: 18px; color: var(--gray-700); margin-bottom: 20px;" data-editable="about.story.p1">
+          Nick Ghareeb founded Ghareeb Fencing Solutions in 2022 after years in landscaping and outdoor construction. The decision came after watching too many neighbors get burned by big national chains — quoted by a salesperson, installed by a sub-crew they'd never meet, then ghosted when something went wrong.
+        </p>
+        <p style="font-size: 18px; color: var(--gray-700); margin-bottom: 20px;" data-editable="about.story.p2">
+          Nick built the company around a single operating rule: the person who sells you the project is the same person who installs it and stands behind it. No phone tree. No subcontractors. No handoffs.
+        </p>
+        <p style="font-size: 18px; color: var(--gray-700);" data-editable="about.story.p3.owner-oct01">Every job includes our 3-year workmanship warranty. We put your options, scope and warranty terms in writing, with material coverage explained separately for the products in your proposal.</p>
+        <div class="owner-quote" data-editable="about.quote">
+          "If I wouldn't install it on my own mother's property, we don't install it on yours. It's that simple."
+        </div>
+        <div class="owner-sig">
+          <span data-editable="about.signature">Nick Ghareeb</span>
+          <small data-editable="about.role">Owner · Ghareeb Fencing Solutions</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-navy">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="about.principles.eyebrow">How We Operate</div>
+      <h2 class="display-2" data-editable="about.principles.title">The five principles <span class="italic-accent">we never bend.</span></h2>
+    </div>
+
+    <div class="diff-grid">
+      <div class="diff-cell">
+        <div class="diff-num">01 / Owner on Site</div>
+        <h3 data-editable="about.p1.t">Nick walks every job.</h3>
+        <p data-editable="about.p1.b">Quote, install, walkthrough. Same person. Every time.</p>
+      </div>
+      <div class="diff-cell">
+        <div class="diff-num">02 / Written Pricing</div>
+        <h3 data-editable="about.p2.t">Three tiers in writing.</h3>
+        <p data-editable="about.p2.b">Good, Better, Best — every option on paper before you commit. No surprises.</p>
+      </div>
+      <div class="diff-cell">
+        <div class="diff-num">03 / Local Crew</div>
+        <h3 data-editable="about.p3.t">No subcontractors.</h3>
+        <p data-editable="about.p3.b">Every installer is on our payroll, trained in-house, and accountable to us.</p>
+      </div>
+      <div class="diff-cell">
+        <div class="diff-num">04 / 3-Year Warranty</div>
+        <h3 data-editable="about.p4.t.owner-oct01">Workmanship coverage on every job.</h3>
+        <p data-editable="about.p4.b.owner-oct01">Every job gets a 3-year workmanship warranty. Ask us for the written terms and the material warranty information for your project.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="about.creds.eyebrow">Credentials</div>
+      <h2 class="display-3" data-editable="about.creds.title">Licensed. Insured. <span class="italic-accent">Accountable.</span></h2>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; max-width: 1000px; margin: 0 auto;">
+      <div style="background: var(--white); padding: 28px; border-radius: 6px; box-shadow: var(--shadow-sm); text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 12px;">📋</div>
+        <strong style="display: block; color: var(--navy); font-family: var(--serif); font-size: 18px; margin-bottom: 6px;" data-editable="about.creds.1.t">Ohio Licensed</strong>
+        <span style="font-size: 13px; color: var(--gray-500);" data-editable="about.creds.1.b">Fully licensed for residential and commercial fence construction in Ohio.</span>
+      </div>
+      <div style="background: var(--white); padding: 28px; border-radius: 6px; box-shadow: var(--shadow-sm); text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 12px;">🛡️</div>
+        <strong style="display: block; color: var(--navy); font-family: var(--serif); font-size: 18px; margin-bottom: 6px;" data-editable="about.creds.2.t">Fully Insured</strong>
+        <span style="font-size: 13px; color: var(--gray-500);" data-editable="about.creds.2.b">$2M general liability + workers comp on every job site.</span>
+      </div>
+      <div style="background: var(--white); padding: 28px; border-radius: 6px; box-shadow: var(--shadow-sm); text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 12px;">✓</div>
+        <strong style="display: block; color: var(--navy); font-family: var(--serif); font-size: 18px; margin-bottom: 6px;" data-editable="about.creds.3.t">BBB Accredited</strong>
+        <span style="font-size: 13px; color: var(--gray-500);" data-editable="about.creds.3.b">Better Business Bureau accredited with no complaints on file.</span>
+      </div>
+      <div style="background: var(--white); padding: 28px; border-radius: 6px; box-shadow: var(--shadow-sm); text-align: center;">
+        <div style="font-size: 32px; margin-bottom: 12px;">★</div>
+        <strong style="display: block; color: var(--navy); font-family: var(--serif); font-size: 18px; margin-bottom: 6px;" data-editable="about.google.rating.20260924">4.9 Google Rating</strong>
+        <span style="font-size: 13px; color: var(--gray-500);" data-editable="about.creds.4.b">Every review verified and visible — not curated.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT2s5c2JsUkdVVWxYYzFBeGJHSnNjVFJXUTA5MU9XYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Working with Nick</p><blockquote><p>“Nick was AWESOME! Very professional. He did a great job and takes great pride in his work.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>jason wyper</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2s5c2JsUkdVVWxYYzFBeGJHSnNjVFJXUTA5MU9XYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by jason wyper (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+<section class="cta-banner">
+  <div class="container cta-banner-inner">
+    <h2 class="display-2" style="color: var(--cream); margin-bottom: 24px;" data-editable="about.cta.title">Ready to talk fences?</h2>
+    <p class="cta-banner-lede" data-editable="about.cta.body">Schedule a free on-site estimate with Nick — measurements, written pricing, and honest answers, no obligation.</p>
+    <div class="cta-banner-actions">
+      <a href="../quote/" class="btn btn-gold btn-lg">Get Free Estimate →</a>
+      <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+    </div>
+  </div>
+</section>
+
+<section class="project-photo-story" data-gfs-sec="about-photos-v11"><div class="container"><p class="eyebrow">Built by Ghareeb Fencing Solutions</p><h2>Our work, out in the neighborhood.</h2><p class="project-photo-story-lede">From a private patio to an open backyard, every fence starts with how you want to use your space.</p><p class="photo-authentic">These installation photos are our own work.</p><div class="project-photo-story-grid"><figure><a href="/assets/img/more-projects-sept26/01-9.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Wood privacy fence with lattice above the boards"><img data-editable-img="about.v11.01-9" src="/assets/img/performance-v12/3ca350dea8ac597b-480.webp" srcset="/assets/img/performance-v12/3ca350dea8ac597b-480.webp 480w, /assets/img/performance-v12/3ca350dea8ac597b-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Wood privacy fence with lattice above the boards" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/01-9.webp" data-photo-thumbnail="/assets/img/performance-v12/3ca350dea8ac597b-480.webp"></a></figure><figure><a href="/assets/img/more-projects-sept26/03-9.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Wood fencing with a change in height"><img data-editable-img="about.v11.03-9" src="/assets/img/performance-v12/670ac86ae5e12b01-480.webp" srcset="/assets/img/performance-v12/670ac86ae5e12b01-480.webp 480w, /assets/img/performance-v12/670ac86ae5e12b01-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Wood fencing with a change in height" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/03-9.webp" data-photo-thumbnail="/assets/img/performance-v12/670ac86ae5e12b01-480.webp"></a></figure><figure><a href="/assets/img/more-projects-sept26/08-7.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Two-tone vinyl privacy fencing"><img data-editable-img="about.v11.08-7" src="/assets/img/performance-v12/47b87fc63238145d-480.webp" srcset="/assets/img/performance-v12/47b87fc63238145d-480.webp 480w, /assets/img/performance-v12/47b87fc63238145d-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Two-tone vinyl privacy fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/08-7.webp" data-photo-thumbnail="/assets/img/performance-v12/47b87fc63238145d-480.webp"></a></figure><figure><a href="/assets/img/more-projects-sept26/05-7.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Wood rail fencing with wire mesh"><img data-editable-img="about.v11.05-7" src="/assets/img/performance-v12/f0ce1293fa850c51-480.webp" srcset="/assets/img/performance-v12/f0ce1293fa850c51-480.webp 480w, /assets/img/performance-v12/f0ce1293fa850c51-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Wood rail fencing with wire mesh" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/05-7.webp" data-photo-thumbnail="/assets/img/performance-v12/f0ce1293fa850c51-480.webp"></a></figure><figure><a href="/assets/img/more-projects-sept26/06-7.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Chain-link double gate"><img data-editable-img="about.v11.06-7" src="/assets/img/performance-v12/691d073f7fe725f1-480.webp" srcset="/assets/img/performance-v12/691d073f7fe725f1-480.webp 480w, /assets/img/performance-v12/691d073f7fe725f1-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Chain-link double gate" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/06-7.webp" data-photo-thumbnail="/assets/img/performance-v12/691d073f7fe725f1-480.webp"></a></figure><figure><a href="/assets/img/more-projects-sept26/10-11.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="about.v11.10-11" src="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp" srcset="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp 480w, /assets/img/performance-v12/92bca2ca6c061e2a-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/10-11.webp" data-photo-thumbnail="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp"></a></figure></div><a class="btn btn-outline" href="/gallery/">Explore more of our work →</a></div></section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:info@ghareebfencingsolutions.com" style="display: block; margin-top: 8px;">info@ghareebfencingsolutions.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../about/">About Nick</a></li>
+          <li><a href="../reviews/">Reviews</a></li>
+          <li><a href="../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+          <li><a href="../service-areas/">Service Areas</a></li>
+          <li><a href="../faq/">FAQ</a></li>
+    <li><a href="../guides/">Fence Guides</a></li>
+    <li><a href="../why-us/">Why Choose Us</a></li>
+          <li><a href="../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../privacy/" style="color:inherit;">Privacy</a> · <a href="../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../assets/js/leads.js?v=domain-oct03" defer></script>
+
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+</body>
+</html>
