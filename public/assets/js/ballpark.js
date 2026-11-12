@@ -3903,7 +3903,8 @@
     const words = wanted.toLowerCase().replace(/[‘’]/g, "'").split(/[^a-z0-9.']+/).filter(Boolean);
     if (!words.length) return '';
     const ids = Object.keys(FENCE_PRICING);
-    const exact = ids.find(id => FENCE_PRICING[id].name.toLowerCase() === wanted.toLowerCase());
+    const plain = text => String(text).toLowerCase().replace(/[‘’]/g, "'").replace(/\s+/g, ' ').trim();
+    const exact = ids.find(id => plain(FENCE_PRICING[id].name) === plain(wanted));
     if (exact) return exact;
     const hits = ids.filter(id => { const name = ' ' + FENCE_PRICING[id].name.toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9.']+/g, ' ') + ' '; return words.every(word => name.includes(' ' + word + ' ') || name.includes(' ' + word)); });
     if (!hits.length) return '';
@@ -3917,6 +3918,39 @@
     const id = matchRequestedStyle(requestedStyle);
     requestedStyle = '';
     if (id) { selectFenceStyle(id); track('style-link'); }
+  }
+
+  // ---- STYLE CARRIED OVER FROM THE 3D STUDIO (?studio-style=Name) -----------------------
+  // The studio hands over a style name as a reference only. When that name
+  // is one model in the price list, offer to price it in one tap. The host
+  // is made at start-up so Edit Mode keeps it in place; it stays empty and
+  // hidden unless there is something to offer.
+  function ensureStyleOffer() {
+    let host = el('bp-style-offer');
+    if (host) return host;
+    const summary = el('bp-style-summary');
+    if (!summary) return null;
+    host = document.createElement('div');
+    host.id = 'bp-style-offer'; host.className = 'bp-offer'; host.hidden = true;
+    host.setAttribute('data-gfs-protected', '');
+    summary.before(host);
+    return host;
+  }
+  function offerStudioStyle() {
+    const host = ensureStyleOffer();
+    if (!host) return;
+    let wanted = '';
+    try { const values = new URLSearchParams(location.search).getAll('studio-style'); wanted = values.length === 1 ? values[0].trim().slice(0, 180) : ''; } catch (e) {}
+    const id = wanted ? matchRequestedStyle(wanted) : '';
+    if (!id || id === state.fenceId) { host.hidden = true; host.replaceChildren(); return; }
+    if (host.dataset.offer === id) return;
+    host.dataset.offer = id;
+    const text = document.createElement('p'), button = document.createElement('button');
+    text.textContent = 'You were looking at ' + FENCE_PRICING[id].name + ' in the 3D Studio.';
+    button.type = 'button'; button.className = 'btn btn-primary'; button.textContent = 'Price this style';
+    button.addEventListener('click', () => { selectFenceStyle(id); host.hidden = true; host.replaceChildren(); track('style-studio'); });
+    host.replaceChildren(text, button);
+    host.hidden = false;
   }
 
   // ---- ONE PASS AFTER EVERY UPDATE ---------------------------------------------------
@@ -3938,6 +3972,7 @@
   function initPlus() {
     document.body.classList.add('bp-page');
     ensureSummaryParts();
+    ensureStyleOffer();
     bindSiteNotes();
     readRequestedStyle();
     const form = el('bp-form');
@@ -4008,7 +4043,7 @@
     } finally {
       styleCatalogSettled = true;
       updateDraftStyleNotice();
-      try { applyRequestedStyle(); updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] post-catalog refresh skipped:', e); }
+      try { applyRequestedStyle(); offerStudioStyle(); updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] post-catalog refresh skipped:', e); }
     }
   }
 

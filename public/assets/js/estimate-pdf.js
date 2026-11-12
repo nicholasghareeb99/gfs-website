@@ -280,6 +280,17 @@
     doc.text('Book your measure: ghareebfence.com/quote/book  or call ' + PHONE, M, y);
     y += 26;
 
+    // ---------- What the proposal covers ----------
+    need(130);
+    heading('Your written proposal spells out');
+    bullets([
+      'Selected materials, gates and installation method',
+      'Removal, disposal and site preparation',
+      'Permit, utility-location and HOA responsibilities',
+      'Payment terms, schedule and scope changes',
+      'Material and workmanship coverage',
+    ], 2);
+    y += 10;
     // ---------- The sketch ----------
     const sketch = readSketch(data.geometry);
     if (sketch) {
@@ -315,17 +326,7 @@
       y += 12;
     }
 
-    // ---------- What the proposal covers ----------
-    need(130);
-    heading('Your written proposal spells out');
-    bullets([
-      'Selected materials, gates and installation method',
-      'Removal, disposal and site preparation',
-      'Permit, utility-location and HOA responsibilities',
-      'Payment terms, schedule and scope changes',
-      'Material and workmanship coverage',
-    ], 2);
-    y += 10;
+    // ---------- Closing line ----------
     need(40);
     font('normal', 9.5); color(GRAY);
     doc.text('3-year workmanship warranty  ·  Financing options at ghareebfence.com/financing  ·  Family owned in Toledo', M, y);

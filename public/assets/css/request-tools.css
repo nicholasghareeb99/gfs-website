@@ -175,3 +175,8 @@ body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar,body:has(di
 .bp-map-full #bp-measure-total{margin:0 0 8px;font-weight:700}
 .bp-map-full #bp-drawing-next{margin:0}
 .bp-parts[hidden]{display:none}
+
+/* a style carried over from the 3D Studio */
+.bp-offer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:14px 16px;border:1.5px solid #1d5eb6;border-radius:10px;background:#f1f6fd}
+.bp-offer[hidden]{display:none}
+.bp-offer p{margin:0;font-size:16px;line-height:1.4;color:#102b46;font-weight:600}
