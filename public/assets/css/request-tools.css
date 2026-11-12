@@ -1,0 +1,177 @@
+/* request-tools.css
+   Shared by the quote form, visit request, contact form and ballpark tool.
+   1. "Best way to reach you" control (required on every request)
+   2. Ballpark tool: larger layout, full-screen map, tap-size controls,
+      more than one fence style, site notes, phone progress bar            */
+
+/* ---------- 1. Best way to reach you ---------- */
+.gfs-reach{border:0;margin:22px 0 0;padding:0;min-width:0}
+.gfs-reach>legend{padding:0;margin:0 0 8px;float:none;width:auto}
+.gfs-reach__opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.gfs-reach__opt{position:relative;display:block;margin:0;cursor:pointer}
+.gfs-reach__opt input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+.gfs-reach__opt span{display:flex;align-items:center;justify-content:center;min-height:52px;padding:10px 6px;border:1.5px solid #9fb2c6;border-radius:8px;background:#fff;color:#102b46;font-weight:600;font-size:16px;line-height:1.2;text-align:center;transition:background .12s,border-color .12s,color .12s}
+.gfs-reach__opt:hover span{border-color:#1d5eb6}
+.gfs-reach__opt input:checked+span{background:#1d5eb6;border-color:#1d5eb6;color:#fff}
+.gfs-reach__opt input:focus-visible+span{outline:3px solid #1d5eb6;outline-offset:2px}
+.gfs-reach.is-missing .gfs-reach__opt span{border-color:#b3261e;background:#fff6f5}
+.gfs-reach.is-missing>legend::after{content:"Pick one";margin-left:8px;color:#b3261e;font-weight:700;text-transform:none;letter-spacing:0}
+.gfs-reach__time{margin-top:14px}
+.gfs-reach__hint{font-weight:400;text-transform:none;letter-spacing:0;opacity:.85}
+@media(min-width:720px){
+  .gfs-reach--row{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);column-gap:20px;align-items:end}
+  .gfs-reach--row .gfs-reach__time{margin-top:0}
+  .gfs-reach--row .gfs-reach__time .form-label{margin-top:0}
+}
+/* on the dark contact card in the ballpark tool */
+.gfs-reach--dark>legend,.gfs-reach--dark .form-label{color:#fbfcfe}
+.gfs-reach--dark .gfs-reach__opt span{background:rgba(255,255,255,.08);border-color:rgba(250,246,239,.38);color:#fbfcfe}
+.gfs-reach--dark .gfs-reach__opt:hover span{border-color:#fff}
+.gfs-reach--dark .gfs-reach__opt input:checked+span{background:#fff;border-color:#fff;color:#102b46}
+.gfs-reach--dark .gfs-reach__opt input:focus-visible+span{outline-color:#8cc7ff}
+.gfs-reach--dark.is-missing .gfs-reach__opt span{border-color:#ffb4ab;background:rgba(255,180,171,.12)}
+.gfs-reach--dark.is-missing>legend::after{color:#ffb4ab}
+
+/* ---------- 2. Ballpark tool ---------- */
+.bp-visually-hidden{position:absolute!important;width:1px!important;height:1px!important;margin:-1px!important;padding:0!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important;border:0!important}
+
+/* 2a. A bigger working area */
+.bp-page main>.section>.container{max-width:1480px}
+.bp-page .ballpark-layout{grid-template-columns:minmax(0,1fr) 340px!important;gap:28px!important}
+.bp-page #bp-map{height:clamp(520px,72vh,800px)!important}
+.bp-page .bp-step h2{font-size:26px!important}
+.bp-page .bp-step .form-input,.bp-page .bp-step .form-select,.bp-page .bp-step .form-textarea{font-size:17px;min-height:52px}
+.bp-page #bp-linear-feet{font-size:22px;font-weight:600;min-height:60px;max-width:340px}
+.bp-page #bp-size-presets button{min-height:56px!important}
+@media(max-width:1024px){
+  .bp-page .ballpark-layout{grid-template-columns:minmax(0,1fr)!important;gap:20px!important}
+  .bp-page main>.section{padding-top:20px!important}
+  /* the phone bar below replaces the generic call bar on this page */
+  body.bp-page .mobile-cta{display:none!important}
+  body.bp-page{padding-bottom:84px}
+}
+@media(max-width:600px){
+  .bp-page main>.section>.container{padding-left:10px;padding-right:10px}
+  .bp-page .bp-step{padding:20px 14px!important;border-radius:10px!important;margin-bottom:14px!important}
+  .bp-page .bp-step h2{font-size:22px!important}
+  .bp-page #bp-map{height:clamp(400px,64vh,600px)!important;min-height:0!important}
+  .bp-page #bp-linear-feet{max-width:none}
+  /* this page is the estimator: free the second header row for the tool */
+  .bp-page .nav .header-measure-button,.bp-page .nav .header-quote-button{display:none!important}
+  .bp-page .page-header--photo .lede{display:none}
+}
+
+/* 2b. Full-screen map */
+.bp-map-frame{position:relative}
+#bp-map-fullscreen{position:absolute;top:10px;right:10px;z-index:1001;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:8px 14px;border:0;border-radius:8px;background:#102b46;color:#fff;font:600 14px/1.1 inherit;cursor:pointer;box-shadow:0 4px 14px rgba(16,43,70,.35)}
+#bp-map-fullscreen:focus-visible{outline:3px solid #8cc7ff;outline-offset:2px}
+html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
+#bp-map-tools.bp-map-full{position:fixed!important;inset:0;z-index:2147483000;display:flex!important;flex-direction:column;width:100vw;height:100vh;height:100dvh;margin:0!important;padding:0!important;background:#fff;overflow:hidden}
+.bp-map-full #bp-sketch-help{display:none!important}
+.bp-map-full .bp-map-address{flex:0 0 auto;margin:0!important;padding:8px 10px;padding-top:calc(8px + env(safe-area-inset-top));background:#fff}
+.bp-map-full .bp-map-address .form-label{display:none}
+.bp-map-full .bp-map-frame{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;border:0!important;border-radius:0!important}
+.bp-map-full #bp-map{flex:1 1 auto;height:auto!important;min-height:0!important}
+.bp-map-full #bp-draw-toolbar,.bp-map-full #bp-live-feet,.bp-map-full #bp-draw-hint{flex:0 0 auto}
+.bp-map-full #bp-draw-hint{min-height:0!important;padding:10px 14px!important}
+.bp-map-full #bp-measure-slot{flex:0 0 auto;max-height:30vh;overflow:auto;padding-bottom:env(safe-area-inset-bottom)}
+.bp-map-full #bp-measure-slot ol,.bp-map-full .bp-measure-note,.bp-map-full #bp-measure-opening{display:none}
+.bp-map-full .bp-map-measurements{border-radius:0;border-width:1px 0 0}
+
+/* 2c. Color and height chips */
+.bp-variants{display:grid;gap:14px;margin:6px 0 18px}
+.bp-variants:empty{display:none}
+.bp-variants__row{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.bp-variants__label{flex:0 0 100%;font:600 12px/1.2 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#506680}
+.bp-chip{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;min-width:68px;padding:8px 16px;border:1.5px solid #9fb2c6;border-radius:999px;background:#fff;color:#102b46;font:600 16px/1.2 inherit;cursor:pointer;transition:background .12s,border-color .12s,color .12s}
+.bp-chip:hover{border-color:#1d5eb6}
+.bp-chip[aria-pressed="true"]{background:#102b46;border-color:#102b46;color:#fff}
+.bp-chip:focus-visible{outline:3px solid #1d5eb6;outline-offset:2px}
+.bp-chip__dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(16,43,70,.35);flex:0 0 auto}
+.bp-variants__note{margin:0;font-size:14px;line-height:1.5;color:#506680}
+
+/* 2d. Gate steppers */
+.bp-page .bp-step-3-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important}
+.bp-page .bp-step-3-grid>.bp-col-hidden{display:none}
+.bp-stepper{display:flex;align-items:stretch;width:100%;max-width:280px;border:1.5px solid #9fb2c6;border-radius:10px;overflow:hidden;background:#fff}
+.bp-stepper button{flex:0 0 60px;min-height:56px;border:0;background:#e9f0f8;color:#102b46;font-size:28px;font-weight:600;line-height:1;cursor:pointer}
+.bp-stepper button:hover:not(:disabled){background:#d9e6f4}
+.bp-stepper button:disabled{opacity:.35;cursor:default}
+.bp-stepper button:focus-visible{outline:3px solid #1d5eb6;outline-offset:-3px}
+.bp-stepper output{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font:700 22px/1 "IBM Plex Mono",ui-monospace,monospace;color:#102b46}
+.bp-stepper__help{margin:6px 0 0;font-size:13px;line-height:1.4;color:#506680}
+@media(max-width:600px){.bp-page .bp-step-3-grid{grid-template-columns:1fr!important}.bp-stepper{max-width:none}}
+
+/* 2e. More than one fence style */
+.bp-sections{display:grid;gap:14px;margin-top:18px}
+.bp-sec{border:1.5px solid #cbd7e3;border-radius:12px;padding:18px;background:#fbfcfe}
+.bp-sec__head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.bp-sec__head strong{font:700 18px/1.2 var(--display,inherit);color:#102b46}
+.bp-sec__remove{min-height:44px;padding:6px 12px;border:1px solid #cbd7e3;border-radius:8px;background:#fff;color:#9b2424;font:600 14px/1 inherit;cursor:pointer}
+.bp-sec__style{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:10px 14px;border:1.5px solid #9fb2c6;border-radius:10px;background:#fff;color:#102b46;text-align:left;font:inherit;cursor:pointer}
+.bp-sec__style img{width:84px;height:63px;object-fit:contain;border-radius:6px;background:#e9eef3;flex:0 0 auto}
+.bp-sec__style b{display:block;font:700 17px/1.25 var(--display,inherit)}
+.bp-sec__style small{display:block;margin-top:3px;font-size:14px;color:#1d5eb6;font-weight:600}
+.bp-sec__grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:16px;align-items:start}
+.bp-sec__grid .form-label{display:block;margin-bottom:6px}
+.bp-sec__feet{font-size:20px!important;font-weight:600;min-height:56px!important}
+.bp-sec__runs{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.bp-sec__runs .bp-chip{min-height:40px;padding:6px 12px;font-size:14px}
+.bp-sec__issue{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:#fff4f2;color:#8f1d15;font-size:15px;line-height:1.45}
+.bp-sec__issue:empty{display:none}
+.bp-split{margin:0;padding:14px 16px;border-radius:10px;background:#eef3f9;color:#102b46;font-size:16px;line-height:1.5}
+.bp-split b{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.bp-add-section{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:12px 16px;border:1.5px dashed #6f8aa6;border-radius:12px;background:#fff;color:#102b46;font:600 16px/1.3 inherit;cursor:pointer}
+.bp-add-section:hover{border-color:#1d5eb6;background:#f4f8fc}
+.bp-add-section:disabled{opacity:.5;cursor:default}
+.bp-add-hint{margin:8px 0 0;font-size:14px;line-height:1.5;color:#506680}
+@media(max-width:760px){.bp-sec__grid{grid-template-columns:1fr}.bp-sec{padding:14px}}
+
+/* 2f. Site notes */
+.bp-notes{margin-top:22px;padding-top:20px;border-top:1px solid #dfe6ee}
+.bp-notes__title{margin:0 0 4px;font:700 17px/1.3 var(--display,inherit);color:#102b46}
+.bp-notes__sub{margin:0 0 12px;font-size:14px;color:#506680}
+.bp-notes__chips{display:flex;flex-wrap:wrap;gap:8px}
+.bp-notes__chips .bp-chip{font-size:15px;min-height:46px;border-radius:10px}
+.bp-notes__chips .bp-chip[aria-pressed="true"]::before{content:"\2713";font-weight:700}
+
+/* 2g. Summary card: parts list */
+.bp-parts{margin:0 0 14px;padding:0;list-style:none;display:grid;gap:8px}
+.bp-parts li{padding:10px 12px;border-radius:8px;background:#f2f6fa;font-size:14px;line-height:1.4;color:#102b46}
+.bp-parts li b{display:block;font-size:15px}
+
+/* 2h. Phone progress bar */
+#bp-bar{position:fixed;left:0;right:0;bottom:0;z-index:940;display:none;align-items:center;gap:12px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:#102b46;color:#fff;box-shadow:0 -4px 18px rgba(16,43,70,.28)}
+#bp-bar .bp-bar__text{flex:1 1 auto;min-width:0}
+#bp-bar .bp-bar__step{display:block;font:600 11px/1.2 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.1em;text-transform:uppercase;color:#a9c4e2}
+#bp-bar .bp-bar__now{display:block;margin-top:3px;font-size:16px;font-weight:700;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#bp-bar .bp-bar__go{flex:0 0 auto;min-height:52px;max-width:54%;padding:10px 16px;border:0;border-radius:8px;background:#fff;color:#102b46;font:700 15px/1.2 inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;text-align:center}
+#bp-bar .bp-bar__go:focus-visible{outline:3px solid #8cc7ff;outline-offset:2px}
+@media(max-width:1024px){body.bp-page #bp-bar{display:flex}}
+body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar,body:has(dialog[open]) #bp-bar,body:has(#mobileDrawer.open) #bp-bar{display:none!important}
+
+@media(prefers-reduced-motion:reduce){.gfs-reach__opt span,.bp-chip{transition:none}}
+@media print{#bp-bar,#bp-map-fullscreen{display:none!important}}
+
+/* selects on the dark contact card */
+.bp-dark-select{background-color:rgba(255,255,255,.08)!important;color:#fbfcfe!important;border-color:rgba(250,246,239,.2)!important}
+.bp-dark-select option{color:#102b46;background:#fff}
+/* gates that belong to an added style */
+.bp-gate-assign__row{margin-top:14px}
+.bp-gate-assign__label{display:block;margin-bottom:6px;font-size:14px;line-height:1.4;color:#102b46}
+.bp-gate-assign .bp-stepper{max-width:220px}
+.bp-gate-assign .bp-stepper button{min-height:46px;flex-basis:52px;font-size:24px}
+.bp-sec__feetwrap{margin-top:16px;max-width:360px}
+.bp-sec__feetwrap .form-label{display:block;margin-bottom:6px}
+
+/* the drawing toolbar sat 10px left of the map on phones (a leftover offset) */
+.bp-page #bp-draw-toolbar.bp-draw-toolbar-ready{right:auto!important}
+/* full-screen map: everything around the map keeps one height, so the map
+   does not jump while someone is drawing */
+.bp-map-full #bp-live-feet{display:none!important}
+.bp-map-full #bp-draw-hint{height:60px;min-height:0!important;overflow:hidden;padding:8px 12px!important;font-size:13px!important;line-height:1.4!important}
+.bp-map-full .bp-measure-heading{display:none}
+.bp-map-full .bp-map-measurements{padding:10px 12px}
+.bp-map-full #bp-measure-total{margin:0 0 8px;font-weight:700}
+.bp-map-full #bp-drawing-next{margin:0}
+.bp-parts[hidden]{display:none}

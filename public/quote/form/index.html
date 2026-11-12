@@ -192,6 +192,7 @@
 <link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261112a">
 </head>
 <body>
 
@@ -305,7 +306,7 @@
             </div>
             <input name="name" type="hidden">
             <div>
-              <label class="form-label" for="fld-email-3">Email (optional)</label>
+              <label class="form-label" for="fld-email-3">Email</label>
               <input id="fld-email-3" name="email" type="email" class="form-input" autocomplete="email">
             </div>
             <div>
@@ -314,6 +315,23 @@
             </div>
           </div>
 
+          <fieldset class="gfs-reach gfs-reach--row" data-gfs-protected>
+            <legend class="form-label">Best way to reach you *</legend>
+            <div class="gfs-reach__opts">
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Call" required><span>Call me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Text"><span>Text me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Email"><span>Email me</span></label>
+            </div>
+            <div class="gfs-reach__time">
+              <label class="form-label" for="qf-best-time">Best time to reach you</label>
+              <select id="qf-best-time" name="bestTime" class="form-select">
+                <option value="">Any time</option>
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Evening</option>
+              </select>
+            </div>
+          </fieldset>
           <div style="margin-top: 20px;">
             <label class="form-label" for="fld-property-address-5">Property Address *</label>
             <input id="fld-property-address-5" name="address" type="text" class="form-input" required autocomplete="street-address" placeholder="Street, City, State, ZIP">
@@ -430,7 +448,7 @@
 
           <div style="margin-top: 32px;">
             <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Submit Quote Request</button>
-            <p style="font-size: 12px; color: var(--gray-500); margin-top: 12px; text-align: center;">By submitting, you agree to receive a follow-up call or email. We use your details to respond to your project request. See our <a href="/privacy/">privacy policy</a>.</p>
+            <p style="font-size: 12px; color: var(--gray-500); margin-top: 12px; text-align: center;">By submitting, you agree to receive a follow-up call, text or email about your request. We use your details to respond to your project request. See our <a href="/privacy/">privacy policy</a>.</p>
           </div>
 
           <div class="form-success" style="margin-top: 20px;">✓ Thanks! Your request has been received. We will review your project and contact you about the next step.</div>
@@ -577,7 +595,7 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=domain-oct03" defer></script>
+<script src="../../assets/js/leads.js?v=20261112-reach" defer></script>
 
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>

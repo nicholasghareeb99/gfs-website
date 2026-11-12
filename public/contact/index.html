@@ -227,6 +227,7 @@
 <link rel="preload" as="image" href="/assets/img/performance-v12/76240167911e14f7-1600.webp" imagesrcset="/assets/img/performance-v12/76240167911e14f7-480.webp 480w, /assets/img/performance-v12/76240167911e14f7-960.webp 960w, /assets/img/performance-v12/76240167911e14f7-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261112a">
 </head>
 <body>
 
@@ -378,6 +379,23 @@
               <input id="fld-phone-4" name="phone" type="tel" class="form-input" required autocomplete="tel">
             </div>
           </div>
+          <fieldset class="gfs-reach gfs-reach--row" data-gfs-protected>
+            <legend class="form-label">Best way to reach you *</legend>
+            <div class="gfs-reach__opts">
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Call" required><span>Call me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Text"><span>Text me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Email"><span>Email me</span></label>
+            </div>
+            <div class="gfs-reach__time">
+              <label class="form-label" for="ct-best-time">Best time to reach you</label>
+              <select id="ct-best-time" name="bestTime" class="form-select">
+                <option value="">Any time</option>
+                <option>Morning</option>
+                <option>Afternoon</option>
+                <option>Evening</option>
+              </select>
+            </div>
+          </fieldset>
           <div class="form-group">
             <label class="form-label" for="fld-property-address-5">Property Address</label>
             <input id="fld-property-address-5" name="address" type="text" class="form-input" placeholder="Street, City, State" autocomplete="street-address">
@@ -569,7 +587,7 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../assets/js/leads.js?v=domain-oct03" defer></script>
+<script src="../assets/js/leads.js?v=20261112-reach" defer></script>
 
 <script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>

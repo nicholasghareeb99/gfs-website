@@ -180,8 +180,9 @@
 <link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261112a">
 </head>
-<body>
+<body class="bp-page">
 
 <a class="skip-link" href="#main">Skip to main content</a>
 
@@ -342,8 +343,8 @@
           </details>
 
           <!-- Address search -->
-          <div style="margin-bottom:14px;">
-            <label class="form-label" for="bp-map-search">Property Address</label>
+          <div class="bp-map-address" style="margin-bottom:14px;">
+          <label class="form-label" for="bp-map-search">Property Address</label>
             <div id="bp-map-search-row" style="display:grid;grid-template-columns:1fr 100px;gap:10px;">
               <input id="bp-map-search" type="text" class="form-input" placeholder="e.g. 5242 Tractor Rd, Toledo" autocomplete="street-address">
               <button id="bp-map-search-btn" type="button" class="btn btn-primary" style="white-space:nowrap;">Find</button>
@@ -352,8 +353,8 @@
           </div>
 
           <!-- Satellite map with custom drawing toolbar -->
-          <div style="position:relative;border:1px solid var(--gray-300);border-radius:6px;overflow:hidden;background:#e5e7eb;">
-            <div id="bp-map" style="width:100%;height:460px;background:#e5e7eb;"></div>
+          <div class="bp-map-frame" style="position:relative;border:1px solid var(--gray-300);border-radius:6px;overflow:hidden;background:#e5e7eb;">
+          <div id="bp-map" style="width:100%;height:460px;background:#e5e7eb;"></div>
 
             <!-- Custom drawing toolbar (floats over the map) -->
             <div id="bp-draw-toolbar" aria-label="Fence sketch controls"><button type="button" data-mode="idle" class="bp-draw-btn" aria-label="Move map and adjust corners" aria-pressed="true"><span aria-hidden="true">✥</span><span class="bp-btn-label">Move map</span></button><button type="button" data-mode="fence" aria-label="Draw fence line" class="bp-draw-btn" title="Draw fence line — click each corner, tap Finish line when done" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--navy);color:var(--cream);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
@@ -412,7 +413,7 @@
             <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">2</div>
             <div>
               <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s2.title">Pick your fence style.</h2>
-              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s2.sub">Explore available styles with project photos and 3D previews.</p>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s2.sub.v2">Pick a style, then its color and height. Need two styles on one job? Add the second one here.</p>
             </div>
           </div>
           <!-- Material filter. With ~100 styles synced from the Executive app,
@@ -438,7 +439,7 @@
             <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">3</div>
             <div>
               <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s3.title">Customize your project.</h2>
-              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s3.sub">Height, gates, and whether we're removing an old fence.</p>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s3.sub.v2">Gates, old fence removal and anything we should know about the yard.</p>
             </div>
           </div>
           <div class="bp-step-3-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
@@ -485,8 +486,22 @@
               <option value="other">Other / mixed materials</option>
             </select>
             <p id="bp-removal-help" style="font-size:14px;line-height:1.6;margin:10px 0 0;color:var(--navy);">Choose the fence being removed, not the new style. This allowance uses the same length as your new fence. Tell us in your project notes if the removal length differs or materials are mixed; we will confirm the scope.</p>
-          </div>
-        </div>
+</div>
+<div class="bp-notes" id="bp-site-notes" data-gfs-protected>
+<p class="bp-notes__title">Anything about the yard we should know?</p>
+<p class="bp-notes__sub">Optional. Tap any that apply so we show up prepared. They do not change the price range.</p>
+<div class="bp-notes__chips" role="group" aria-label="Yard notes">
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Dog in the yard">Dog in the yard</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Yard slopes">Yard slopes</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Trees or brush on the fence line">Trees or brush on the line</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Tight access to the back yard">Tight access to the back yard</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Not sure where the property line is">Not sure where the property line is</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="HOA approval needed">HOA approval needed</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Has permit questions">Permit questions</button>
+<button type="button" class="bp-chip" aria-pressed="false" data-note="Interested in financing">Interested in financing</button>
+</div>
+</div>
+</div>
 
         <!-- STEP 4 -->
         <div id="bp-step-4" class="bp-step" style="background:var(--navy);color:var(--cream);padding:32px;border-radius:6px;box-shadow:var(--shadow-lg);margin-bottom:24px;">
@@ -511,7 +526,35 @@
             <div style="margin-bottom:14px;">
               <label class="form-label" style="color:var(--cream);" for="bpf-email">Email</label>
               <input name="email" id="bpf-email" type="email" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="email">
-            </div>
+              </div>
+              <fieldset class="gfs-reach gfs-reach--dark gfs-reach--row" data-gfs-protected style="margin:0 0 14px;">
+              <legend class="form-label">Best way to reach you *</legend>
+              <div class="gfs-reach__opts">
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Call" required><span>Call me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Text"><span>Text me</span></label>
+              <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Email"><span>Email me</span></label>
+              </div>
+              <div class="gfs-reach__time">
+              <label class="form-label" for="bpf-best-time">Best time to reach you</label>
+              <select id="bpf-best-time" name="bestTime" class="form-select bp-dark-select">
+              <option value="">Any time</option>
+              <option>Morning</option>
+              <option>Afternoon</option>
+              <option>Evening</option>
+              </select>
+              </div>
+              </fieldset>
+              <div style="margin-bottom:14px;">
+              <label class="form-label" style="color:var(--cream);" for="bpf-timeline">When do you want it built?</label>
+              <select id="bpf-timeline" name="timeline" class="form-select bp-dark-select">
+              <option value="">Not sure yet</option>
+              <option>As soon as possible</option>
+              <option>Within 1 month</option>
+              <option>1 to 3 months</option>
+              <option>3 to 6 months</option>
+              <option>Just getting prices</option>
+              </select>
+              </div>
             <div style="margin-bottom:14px;">
               <label class="form-label" for="bp-form-address" style="color:var(--cream);">Property Address</label>
               <input id="bp-form-address" name="address" type="text" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="street-address">
@@ -545,7 +588,7 @@
             👁  Preview in 3D
           </button>
           <button id="bp-action-pdf" type="button" class="btn btn-primary btn-lg" style="flex:1;min-width:200px;">
-            &#11015;  Download Planning PDF
+            &#11015;  Download or print estimate (PDF)
           </button>
           <button id="bp-action-email" type="button" class="btn btn-outline btn-lg" style="flex:1;min-width:200px;">
             &#9993;  Request emailed estimate
@@ -718,9 +761,9 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=domain-oct03" defer></script>
+<script src="../../assets/js/leads.js?v=20261112-reach" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=20260930-photo-accuracy" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=kit-d75710f2f389" defer></script>
+<script src="../../assets/js/ballpark.js?v=20261112-multi-style" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261112-print" defer></script>
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
 <script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>

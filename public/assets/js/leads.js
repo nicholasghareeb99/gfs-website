@@ -95,6 +95,51 @@
     return (first + ' ' + last).trim();
   }
 
+  // ---- HOW THE CUSTOMER WANTS TO BE REACHED --------------------
+  // Every quote, ballpark and visit request has to say call, text or email.
+  // The answer leads the notes, so it is the first thing shown in the
+  // Executive app, and it gets its own line in the office notification email.
+  const REACH = { call: 'Call', text: 'Text', email: 'Email' };
+  const REACH_KEY = 'gfs_reach';
+  function reachOf(input) { return REACH[String((input && input.contactMethod) || '').trim().toLowerCase()] || ''; }
+  function oneLine(value, max) { return String(value == null ? '' : value).replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max); }
+  function reachErrors(input) {
+    const reach = reachOf(input);
+    if (!reach) return ['Tell us the best way to reach you: call, text or email'];
+    if (reach === 'Email' && !String(input.email || '').trim()) return ['Add your email address so we can email you'];
+    return [];
+  }
+  function niceDate(value) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return oneLine(value, 30);
+    try { return new Date(value + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }); } catch { return value; }
+  }
+  // One readable line for the top of the office email and its subject.
+  function officeSummary(input, sections, priceRange) {
+    const bits = [];
+    if (input.date) bits.push(niceDate(input.date) + (input.time ? ', ' + oneLine(input.time, 40) : ''));
+    if (input.projectType) bits.push(oneLine(input.projectType, 60));
+    if (sections.length > 1) bits.push(sections.length + ' fence styles');
+    else if (input.fenceStyle || input.fenceType) bits.push(oneLine(input.fenceStyle || input.fenceType, 80));
+    if (Number(input.linearFeet) > 0) bits.push(Number(input.linearFeet) + ' ft');
+    if (input.height && sections.length <= 1) bits.push(oneLine(input.height, 10) + ' ft tall');
+    const gates = [];
+    if (Number(input.singleGates) > 0) gates.push(Number(input.singleGates) + ' walk');
+    if (Number(input.doubleGates) > 0) gates.push(Number(input.doubleGates) + ' drive');
+    if (gates.length) bits.push(gates.join(' + ') + (gates.length === 1 && /^1 /.test(gates[0]) ? ' gate' : ' gates'));
+    if (input.removeOldFence) bits.push('remove old fence');
+    if (input.timeline) bits.push(oneLine(input.timeline, 60));
+    if (priceRange) bits.push('shown ' + priceRange);
+    return bits.join(' \u00b7 ').slice(0, 300);
+  }
+  function drawingLine(geometry) {
+    if (!geometry) return '';
+    try {
+      const drawing = JSON.parse(geometry), runs = Array.isArray(drawing.lines) ? drawing.lines.length : 0, gates = Array.isArray(drawing.gates) ? drawing.gates.length : 0;
+      if (!runs) return '';
+      return 'Customer drew ' + runs + ' fence run' + (runs === 1 ? '' : 's') + (gates ? ' and ' + gates + ' gate' + (gates === 1 ? '' : 's') : '') + ' on the map. Open the lead in the Executive app to see the sketch.';
+    } catch { return ''; }
+  }
+
   function buildLead(input) {
     const fullName = resolveName(input);
     const email = (input.email || '').trim().toLowerCase();
@@ -105,19 +150,28 @@
     // Compile structured project info into a readable notes string.
     // The Executive app's lead inbox displays this as the project summary.
     const detail = [];
+    const reach = reachOf(input), bestTime = oneLine(input.bestTime, 40);
+    // A project with more than one fence style lists each part on its own line.
+    const sections = String(input.sections || '').split('\n').map(line => oneLine(line, 200)).filter(Boolean).slice(0, 6);
+    const multi = sections.length > 1;
+    const siteNotes = (Array.isArray(input.siteNotes) ? input.siteNotes : String(input.siteNotes || '').split(/[;\n]/)).map(note => oneLine(note, 80)).filter(Boolean).slice(0, 12).join('; ');
+    const priceRange = oneLine(input.priceRange, 60);
     const parentReceipt = input.source === 'ballpark-email-estimate' && typeof input.parentReceipt === 'string' && /^web_[a-zA-Z0-9_-]{16,80}$/.test(input.parentReceipt) ? input.parentReceipt : '';
     if (parentReceipt) detail.push(`Email follow-up to request: ${parentReceipt}`);
+    if (reach)                 detail.push('Best way to reach: ' + reach + (bestTime ? ' (' + bestTime + ')' : ''));
     if (input.projectType)     detail.push(`Project: ${input.projectType}`);
-    if (input.fenceType)       detail.push(`Fence: ${input.fenceType}`);
-    if (input.fenceStyle)      detail.push(`Style: ${input.fenceStyle}`);
-    if (input.linearFeet)      detail.push(`Length: ${input.linearFeet} ft`);
-    if (input.height)          detail.push(`Height: ${input.height} ft`);
+    if (input.fenceType && !multi)  detail.push(`Fence: ${input.fenceType}`);
+    if (input.fenceStyle && !multi) detail.push(`Style: ${input.fenceStyle}`);
+    if (input.linearFeet)      detail.push(`Length: ${input.linearFeet} ft` + (multi ? ' total' : ''));
+    if (input.height && !multi)     detail.push(`Height: ${input.height} ft`);
+    if (multi)                 detail.push('Fence sections: ' + sections.map((line, i) => '(' + (i + 1) + ') ' + line).join('; '));
     const gateBits = [];
     if (Number(input.singleGates) > 0) gateBits.push(`${input.singleGates} walk`);
     if (Number(input.doubleGates) > 0) gateBits.push(`${input.doubleGates} drive`);
     if (gateBits.length) detail.push(`Gates: ${gateBits.join(' + ')}`);
     if (input.removeOldFence) detail.push('Remove existing fence');
     if (input.timeline)        detail.push(`Timeline: ${input.timeline}`);
+    if (siteNotes)             detail.push('Site notes: ' + siteNotes);
     if (input.heardFrom)       detail.push(`Source: ${input.heardFrom}`);
     const interest = window.GFSProjectContext?.get();
     if (interest) detail.push(`Project interest: ${interest.label}`);
@@ -166,7 +220,52 @@
       // Timestamps
       createdAt: new Date().toISOString(),
       createdAtMs: Date.now(),
+      // Office-email fields. Netlify lists these in the notification email.
+      // The intake function copies only the fields above into Firestore, so
+      // the Executive app record keeps its existing shape; everything staff
+      // need there is already written into `notes`.
+      best_way_to_reach: reach,
+      best_time_to_reach: bestTime,
+      summary: officeSummary(input, sections, priceRange),
+      price_range_shown: priceRange,
+      fence_sections: sections.join('\n'),
+      site_notes: siteNotes,
+      heard_from: oneLine(input.heardFrom, 80),
+      map_link: address ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address.slice(0, 300)) : '',
+      map_drawing: drawingLine(typeof input.geometry === 'string' ? input.geometry : ''),
     };
+  }
+
+  // Fields worked out at send time for the office email only: a subject that
+  // says who and what at a glance, where the visitor came from in plain
+  // words, the page the form was on and the local time it was sent.
+  function officeEmailFields(record, kind) {
+    try {
+      const values = {};
+      for (const part of String(record.meta || '').split(' | ')) {
+        const at = part.indexOf('='); if (at < 1) continue;
+        try { values[part.slice(0, at)] = decodeURIComponent(part.slice(at + 1)); } catch {}
+      }
+      const page = oneLine(values.page || location.pathname, 120);
+      const label = values.request_action === 'email_estimate' ? 'Emailed estimate request'
+        : values.request_action === 'project_update' ? 'Project update'
+        : kind === 'booking' ? 'Visit request'
+        : kind === 'ballpark' ? 'Ballpark lead'
+        : /^\/contact\//.test(page) ? 'Website message' : 'Quote request';
+      const wants = ({ Call: 'wants a call', Text: 'wants a text', Email: 'wants an email' })[record.best_way_to_reach] || '';
+      // Who, how to reach them, and the first two facts. The rest is in the email body.
+      const gist = oneLine(record.summary, 300).split(' \u00b7 ').slice(0, 2).join(' \u00b7 ');
+      let subject = [label + ': ' + oneLine(record.name, 60), wants, gist].filter(Boolean).join(' \u00b7 ');
+      if (subject.length > 140) subject = subject.slice(0, 139).replace(/[\s\u00b7]+$/, '') + '\u2026';
+      let from = values.gclid || values.gbraid || values.wbraid ? 'Google Ads' : values.fbclid ? 'Facebook' : values.utm_source ? values.utm_source + (values.utm_medium ? ' / ' + values.utm_medium : '') : '';
+      if (!from && values.ref) { try { const host = new URL(values.ref).hostname.replace(/^www\./, ''); if (host !== location.hostname.replace(/^www\./, '')) from = host; } catch {} }
+      if (!from) from = 'Direct visit, or not recorded';
+      if (values.utm_campaign) from += ' \u00b7 campaign ' + values.utm_campaign;
+      if (values.landing_page) from += ' \u00b7 first page ' + values.landing_page;
+      let submitted = '';
+      try { submitted = new Date(record.createdAtMs || Date.now()).toLocaleString('en-US', { timeZone: 'America/New_York', weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET'; } catch {}
+      return { subject, came_from: oneLine(from, 240), page, submitted };
+    } catch { return {}; }
   }
 
   function attributionMeta(){
@@ -239,7 +338,7 @@
       const submittedRecord=row.record;
       if(submittedRecord&&!adsAllowed()&&window.GFSConsent)submittedRecord.meta=window.GFSConsent.redactMeta(submittedRecord.meta);
       if(!submittedRecord||validate(submittedRecord).length)return{ok:false,errors:['This saved request needs review. Re-enter your details before retrying.']};
-      const fields={'form-name':'gfs-'+kind,gfs_contract:'gfs-intake-v1',intake_kind:kind,submission_id:row.id,'bot-field':'',...submittedRecord};
+      const fields={'form-name':'gfs-'+kind,gfs_contract:'gfs-intake-v1',intake_kind:kind,submission_id:row.id,'bot-field':'',...officeEmailFields(submittedRecord,kind),...submittedRecord};
       delete fields.photo;
       let body=new URLSearchParams(fields).toString(),headers={'Content-Type':'application/x-www-form-urlencoded'};
       if(submittedRecord.photo){
@@ -267,7 +366,14 @@
     if(result.ok&&prepared.track&&acceptedRecord.source!=='ballpark-email-estimate'){try{fireAnalytics(acceptedRecord,result.id,kind==='booking'?'booking':'lead');}catch{}}
     return result;
   }
-  async function submit(input,options={}){const lead=buildLead(input),errors=validate(lead);if(errors.length)return{ok:false,errors};return submitRecordWithFlow(lead,/ballpark/i.test(lead.source)?'ballpark':'estimate',options);}
+  async function submit(input,options={}){
+    // An emailed-estimate follow-up is itself a request to be emailed.
+    if(input&&input.source==='ballpark-email-estimate'&&!reachOf(input))input={...input,contactMethod:'Email'};
+    const reachIssue=reachErrors(input||{});if(reachIssue.length)return{ok:false,errors:reachIssue,field:'contactMethod'};
+    const lead=buildLead(input),errors=validate(lead);if(errors.length)return{ok:false,errors};
+    rememberReach(input);
+    return submitRecordWithFlow(lead,/ballpark/i.test(lead.source)?'ballpark':'estimate',options);
+  }
 
   // ---- ANALYTICS -----------------------------------------------
   const receiptPattern = /^web_[a-zA-Z0-9_-]{16,80}$/;
@@ -452,19 +558,76 @@
   // ---- FORM HELPER ---------------------------------------------
   // Hooks up any element with [data-lead-form] to use this system.
   // The form's inputs need name="" matching the lead fields above.
+  // Reads a form into a plain object. A radio group gives its checked value
+  // (not whichever button happens to be last), and the siteNotes checkboxes
+  // give the list of ticked values.
+  function collectForm(form) {
+    const data = {};
+    Array.from(form.elements).forEach(el => {
+      if (!el.name) return;
+      if (el.type === 'radio') { if (el.checked) data[el.name] = el.value; else if (!(el.name in data)) data[el.name] = ''; }
+      else if (el.type === 'checkbox' && el.name === 'siteNotes') { data.siteNotes = data.siteNotes || []; if (el.checked) data.siteNotes.push(el.value); }
+      else if (el.type === 'checkbox') data[el.name] = el.checked;
+      else data[el.name] = el.value;
+    });
+    return data;
+  }
+
+  // ---- "BEST WAY TO REACH YOU" CONTROL ---------------------------
+  // The control is written into each form's HTML. If a form ever ships
+  // without it, the same control is added here so the question is never
+  // skipped. Choosing Email makes the email box required.
+  function rememberReach(input) { try { const reach = reachOf(input); if (reach) sessionStorage.setItem(REACH_KEY, reach); } catch {} }
+  function wireReach(form) {
+    if (!form || form.dataset.reachBound === 'yes') return;
+    form.dataset.reachBound = 'yes';
+    if (!form.querySelector('[name="contactMethod"]')) {
+      const box = document.createElement('fieldset');
+      box.className = 'gfs-reach'; box.setAttribute('data-gfs-protected', '');
+      box.innerHTML = '<legend class="form-label">Best way to reach you *</legend><div class="gfs-reach__opts">' +
+        ['Call', 'Text', 'Email'].map((label, i) => '<label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="' + label + '"' + (i ? '' : ' required') + '><span>' + label + ' me</span></label>').join('') + '</div>';
+      const submit = form.querySelector('[type="submit"]');
+      const anchor = submit && submit.parentElement !== form ? submit.parentElement : submit;
+      if (anchor && anchor.parentElement) anchor.parentElement.insertBefore(box, anchor); else form.appendChild(box);
+    }
+    const radios = Array.from(form.querySelectorAll('[name="contactMethod"]'));
+    const email = form.querySelector('[name="email"]');
+    const emailLabel = email && email.id ? form.querySelector('label[for="' + email.id + '"]') : null;
+    const emailLabelText = emailLabel ? emailLabel.innerHTML : '';
+    const emailWasRequired = !!(email && email.required);
+    function sync() {
+      const chosen = radios.find(radio => radio.checked);
+      const box = radios[0] && radios[0].closest('.gfs-reach');
+      if (box) { box.classList.toggle('is-chosen', !!chosen); if (chosen) box.classList.remove('is-missing'); }
+      if (email) {
+        email.required = emailWasRequired || (!!chosen && chosen.value === 'Email');
+        if (emailLabel && !emailWasRequired) emailLabel.innerHTML = email.required ? 'Email * <span class="gfs-reach__hint">so we can email you</span>' : emailLabelText;
+      }
+    }
+    radios.forEach(radio => radio.addEventListener('change', () => { sync(); rememberReach({ contactMethod: radio.value }); }));
+    // Carry the choice made earlier in this visit (for example from the
+    // ballpark tool to the visit request) so nobody is asked twice.
+    try {
+      const saved = sessionStorage.getItem(REACH_KEY);
+      if (saved && !radios.some(radio => radio.checked)) { const match = radios.find(radio => radio.value === saved); if (match) match.checked = true; }
+    } catch {}
+    sync();
+  }
+  function flagReach(form) {
+    const first = form.querySelector('[name="contactMethod"]'); if (!first) return;
+    const box = first.closest('.gfs-reach'); if (box) box.classList.add('is-missing');
+    try { first.focus({ preventScroll: true }); (box || first).scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch {}
+  }
+
   function bindForm(form) {
     if (form.dataset.bound === 'yes') return;
     form.dataset.bound = 'yes';
     window.GFSRequestFlow?.bindForm(form,form.hasAttribute('data-booking-form')?'booking':'estimate');
+    wireReach(form);
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const data = {};
-      Array.from(form.elements).forEach(el => {
-        if (!el.name) return;
-        if (el.type === 'checkbox') data[el.name] = el.checked;
-        else data[el.name] = el.value;
-      });
+      const data = collectForm(form);
 
       const submitBtn = form.querySelector('[type="submit"]');
       if(submitBtn?.disabled)return;
@@ -493,9 +656,10 @@
       if (result.ok) {
         // A preferred time is a request; only staff confirms or reserves it.
         if (successEl) {
+          const how = ({ Call: 'call you', Text: 'text you', Email: 'email you' })[reachOf(data)] || 'contact you';
           successEl.textContent = isBooking
-            ? '\u2713 We received your preferred date and time. We will contact you to confirm the visit.'
-            : '\u2713 Thanks! Your request has been received. We will review your project and contact you about the next step.';
+            ? '\u2713 We received your preferred date and time. We will ' + how + ' to confirm the visit.'
+            : '\u2713 Thanks! Your request has been received. We will review your project and ' + how + ' about the next step.';
           successEl.classList.add('show');
         }
         if(!window.GFSRequestFlow)form.reset();
@@ -507,6 +671,7 @@
           errorEl.textContent = (result.errors || ['Something went wrong']).join('. ');
           errorEl.classList.add('show');
         }
+        if (result.field === 'contactMethod') flagReach(form);
       }
 
       if (submitBtn) {
@@ -527,6 +692,9 @@
   // Rules require: name, phone, date, time (all strings).
   // Optional: email, address, notes (rule-validated max lengths).
   async function submitBooking(input,options={}) {
+    const reachIssue = reachErrors(input || {});
+    if (reachIssue.length) return { ok: false, errors: reachIssue, field: 'contactMethod' };
+    const details = buildLead(input);
     const booking = {
       name: resolveName(input).slice(0, 200),
       phone: normalizePhone(input.phone || '').slice(0, 50),
@@ -534,11 +702,17 @@
       time: (input.time || '').trim().slice(0, 30),
       email: (input.email || '').trim().toLowerCase().slice(0, 200),
       address: (input.address || '').trim().slice(0, 500),
-      notes: buildLead(input).notes,
+      notes: details.notes,
       meta: attributionMeta(),
       createdAt: new Date().toISOString(),
       createdAtMs: Date.now(),
       source: input.source || 'website-booking',
+      // Office-email fields (see buildLead). Not written to Firestore.
+      best_way_to_reach: details.best_way_to_reach,
+      best_time_to_reach: details.best_time_to_reach,
+      summary: details.summary,
+      heard_from: details.heard_from,
+      map_link: details.map_link,
     };
 
     // Validate required fields
@@ -547,6 +721,7 @@
     if (!requestedDate || !Number.isFinite(requestedDate.getTime()) || requestedDate.toISOString().slice(0,10) !== booking.date) errors.push('Pick a valid date');
     if (!booking.time) errors.push('Pick a time');
     if (errors.length) return { ok: false, errors };
+    rememberReach(input);
 
     // Always back up locally first (last 50 retained)
     try {
@@ -567,5 +742,5 @@
   }
 
   // Public API
-  window.GFSLeads = { submit, submitBooking, buildLead, validate, bindForm, getAttribution, retryConversionEvents, retryPendingRequest };
+  window.GFSLeads = { submit, submitBooking, buildLead, validate, bindForm, getAttribution, retryConversionEvents, retryPendingRequest, wireReach, flagReach, reachOf, collectForm };
 })();

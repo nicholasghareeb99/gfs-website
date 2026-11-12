@@ -819,7 +819,7 @@
   // Build stamp — visible in DevTools console. If you see an OLD stamp,
   // your browser cached an older ballpark.js. Hard-reload with Ctrl+Shift+R
   // (Windows/Linux) or Cmd+Shift+R (Mac) to force-fetch the latest.
-  const BUILD = 'ballpark-20260926-height-selection';
+  const BUILD = 'ballpark-20261112-multi-style';
   console.log('%c[Ghareeb Ballpark] ' + BUILD, 'background:#1A2E40;color:#B8945A;padding:3px 8px;border-radius:3px;font-weight:bold;');
 
   // -------- GEOMETRY CAPTURE (Exec-app sketch handoff) --------
@@ -1119,6 +1119,11 @@
     existingFenceMaterial: '',
     address: '',
     priceUnlocked: false,
+    // Added styles for part of the fence: {uid, fenceId, feet, height, singleGates, doubleGates}
+    sections: [],
+    // Optional yard notes the customer ticked (information only, not priced)
+    siteNotes: [],
+    sawDetails: false,
   };
   let pendingDraftStyle = '', styleCatalogSettled = false;
   let acceptedBallparkReceipt = '';
@@ -1204,32 +1209,26 @@
     box.style.display = price && Number.isFinite(price.total) && price.total > 0 ? 'block' : 'none';
   }
 
-  function calculatePrice() {
-    if (!state.fenceId || !Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000) return null;
-    // Only the approved height ladder can produce an automatic price.
-    if (![4, 5, 6, 8].includes(Number(state.height))) return null;
-    const fence = FENCE_PRICING[state.fenceId];
-    if (!fence) return null;
-    // A missing fence rate is not a free fence, even when gates/removal have prices.
-    if (!Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
-
-    // Bill at the next full panel for styles installed in sections — the
-    // Executive app does this, so the website must too or the quotes diverge.
-    const rounding = roundToSections(state.linearFeet, fence.name);
-    const billableFeet = rounding.billable;
-
-    // One global height ladder (matches the Executive app), not per-style
-    const heightMod = heightFactorFor(state.height);
-
-    const fenceCost = billableFeet * fence.perFoot * heightMod;
-    const gateCost = (state.singleGates * fence.singleGate) +
-                     (state.doubleGates * fence.doubleGate);
+  // `primaryId` prices the same project with a different main style (used
+  // by the comparison list); leave it out for the customer's own pick.
+  function calculatePrice(primaryId) {
+    const mainId = primaryId || state.fenceId;
+    if (!mainId || !FENCE_PRICING[mainId] || !Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000) return null;
+    if (sectionsIssue()) return null;
+    // Each part is billed at the next full panel for styles installed in
+    // sections, the way the Executive app does it. A missing rate is not a
+    // free fence, so any part that cannot be priced leaves the whole
+    // project unpriced. A style that names its height uses its own price;
+    // only styles without one use the 4/5/6/8 ft ladder (see pricePart).
+    const parts = projectParts(mainId).map(pricePart);
+    if (parts.some(part => !part)) return null;
     if (state.removeOldFence && !existingFenceMaterialLabel()) return null;
     // Ballpark assumes removal of the same run length being installed
     const removalCost = state.removeOldFence
       ? state.linearFeet * removalRateFor(existingRemovalType())
       : 0;
-
+    const fenceCost = parts.reduce((sum, part) => sum + part.fenceCost, 0);
+    const gateCost = parts.reduce((sum, part) => sum + part.gateCost, 0);
     const total = fenceCost + gateCost + removalCost;
 
     // Existing planning band; this is not a measured prediction of accuracy.
@@ -1245,9 +1244,10 @@
         gates: Math.round(gateCost),
         removal: Math.round(removalCost),
       },
-      billableFeet: billableFeet,
-      sectionSize: rounding.sectionSize,
-      waste: rounding.waste,
+      billableFeet: parts[0].billableFeet,
+      sectionSize: parts[0].sectionSize,
+      waste: parts[0].waste,
+      parts: parts,
     };
   }
 
@@ -1322,17 +1322,20 @@
     state.fenceId = id;
     const fence = FENCE_PRICING[id];
 
-    // Follow a single explicit catalog height on a fresh style choice. Restored
-    // drafts and reselecting the same style retain the customer's chosen height.
-    // This changes selection only: Executive rates and multipliers stay intact.
+    // Each catalog height is its own style with its own price, so a style
+    // that names a height always sets the height. The few styles without
+    // one keep the customer's pick from the 4/5/6/8 ft ladder.
     const namedHeight = supportedStyleHeight(fence.name);
-    if (changedStyle && !preserveHeight && namedHeight !== null) {
-      const heightSelect = el('bp-height');
+    const heightSelect = el('bp-height');
+    if (namedHeight !== null) {
       setHeightControl(heightSelect, namedHeight);
       state.height = String(namedHeight);
-      const heightSummary = el('bp-summary-height');
-      if (heightSummary) heightSummary.textContent = namedHeight + ' ft';
+    } else if (changedStyle && !preserveHeight && heightSelect && ![4, 5, 6, 8].includes(Number(heightSelect.value))) {
+      setHeightControl(heightSelect, 6);
+      state.height = '6';
     }
+    const heightSummary = el('bp-summary-height');
+    if (heightSummary) heightSummary.textContent = state.height + ' ft';
 
     // Update photo-grid visual state
     $$('#bp-fence-options .ballpark-photo-opt').forEach(l => {
@@ -1377,7 +1380,7 @@
     if (![...select.options].some(option => option.value === String(n))) {
       const option = document.createElement('option');
       option.value = String(n);
-      option.textContent = n + ' feet — quote review';
+      option.textContent = n + ' feet';
       select.appendChild(option);
     }
     select.value = String(n);
@@ -1385,6 +1388,9 @@
   }
 
   function heightNeedsReview() {
+    // A style that names its height carries its own price; nothing to review.
+    const fence = FENCE_PRICING[state.fenceId];
+    if (fence && supportedStyleHeight(fence.name) !== null) return false;
     const height = Number(state.height);
     return Number.isFinite(height) && height >= 2 && height <= 12 && ![4, 5, 6, 8].includes(height);
   }
@@ -1425,9 +1431,9 @@
     return rows.filter(row => { row.url=safe(row.url); if (!row.url || seen.has(row.url)) return false; seen.add(row.url); return true; }).slice(0, 3);
   }
   function paintStylePickerSelection() {
-    const id = state.fenceId, fence = FENCE_PRICING[id];
+    const id = state.fenceId, fence = FENCE_PRICING[id], gridId = pickerSelectedId();
     $$('#bp-fence-options .ballpark-photo-opt').forEach(label => {
-      const active = label.dataset.id === id;
+      const active = label.dataset.id === gridId;
       label.style.borderColor = active ? 'var(--cedar)' : 'var(--line)';
       label.style.boxShadow = active ? '0 0 0 1px var(--cedar)' : 'none';
       const check=label.querySelector('.bp-check'),radio=label.querySelector('input[type="radio"]');
@@ -1466,14 +1472,19 @@
     finishStylePickerClose();
   }
   function finishStylePickerClose() {
-    if(!stylePickerWasOpen||el('bp-style-dialog')?.open)return;stylePickerWasOpen=false;
+    if(!stylePickerWasOpen||el('bp-style-dialog')?.open)return;stylePickerWasOpen=false;pickerTarget=null;
     document.body.style.overflow=styleBodyOverflow;
     styleFallbackInert.forEach(([node,value])=>{node.inert=value;});styleFallbackInert=[];
     const focus=styleReturnFocus;styleReturnFocus=null;
     if(focus?.isConnected)focus.focus({preventScroll:true});
   }
-  function openStylePicker() {
+  function openStylePicker(target) {
     ensureStylePicker();const dialog=el('bp-style-dialog');if(!dialog||dialog.open)return;
+    // `target` is an added style from state.sections; anything else (a click
+    // event, nothing) means the main fence.
+    pickerTarget=target&&state.sections.includes(target)?target:null;
+    const pickerTitle=el('bp-style-dialog-title');if(pickerTitle)pickerTitle.textContent=pickerTarget?'Choose the style for this part':'Choose your fence';
+    const pickerSelect=el('bp-fence-select');if(pickerSelect)pickerSelect.value=FENCE_PRICING[pickerSelectedId()]?pickerSelectedId():'';
     styleReturnFocus=document.activeElement;styleBodyOverflow=document.body.style.overflow;stylePickerWasOpen=true;
     document.body.style.overflow='hidden';
     if(typeof dialog.showModal==='function')dialog.showModal();
@@ -1484,7 +1495,7 @@
     if(el('bp-style-dialog'))return;
     const grid=el('bp-fence-options'),filter=el('bp-material-filter'),select=el('bp-fence-select');if(!grid||!filter||!select)return;
     const summary=document.createElement('section');summary.id='bp-style-summary';summary.className='bp-style-summary';summary.setAttribute('aria-label','Your fence style');
-    summary.innerHTML='<div class="bp-style-summary-copy"><span class="bp-style-kicker">YOUR FENCE</span><h3 id="bp-style-selected-name"></h3><p id="bp-style-selected-detail"></p><button type="button" class="btn btn-primary" id="bp-style-browse" aria-haspopup="dialog" aria-controls="bp-style-dialog">Browse fence styles</button></div><div id="bp-style-selected-gallery" class="bp-style-selected-gallery" hidden></div>';
+    summary.innerHTML='<div class="bp-style-summary-copy"><span class="bp-style-kicker">YOUR FENCE</span><h3 id="bp-style-selected-name"></h3><p id="bp-style-selected-detail"></p><div id="bp-style-variants" class="bp-variants" data-gfs-protected></div><button type="button" class="btn btn-primary" id="bp-style-browse" aria-haspopup="dialog" aria-controls="bp-style-dialog">Browse fence styles</button></div><div id="bp-style-selected-gallery" class="bp-style-selected-gallery" hidden></div>';
     filter.before(summary);
     const dialog=document.createElement('dialog');dialog.id='bp-style-dialog';dialog.className='bp-style-dialog';dialog.setAttribute('aria-labelledby','bp-style-dialog-title');dialog.setAttribute('aria-describedby','bp-style-dialog-hint');dialog.setAttribute('aria-modal','true');
     dialog.innerHTML='<header class="bp-style-dialog-header"><div><span class="bp-style-kicker">FENCE COLLECTION</span><h2 id="bp-style-dialog-title">Choose your fence</h2><p id="bp-style-dialog-hint">Compare styles without changing your measurements.</p></div><button type="button" id="bp-style-close" aria-label="Close fence styles">×</button></header><div class="bp-style-dialog-tools"><label class="form-label" for="bp-style-search">Search styles</label><input id="bp-style-search" type="search" class="form-input" placeholder="Try Wellington, cedar, black, or 6ft" autocomplete="off"><div id="bp-style-filter-slot"></div><details class="bp-style-quick"><summary>Choose by name</summary><div id="bp-style-select-slot"></div></details></div><p id="bp-style-results" class="bp-style-results" role="status" aria-live="polite"></p>';
@@ -1492,7 +1503,7 @@
     const selectWrap=select.parentElement;selectWrap.querySelector('label').textContent='All available styles';dialog.querySelector('#bp-style-select-slot').append(selectWrap);
     dialog.append(grid);document.body.append(dialog);
     grid.setAttribute('aria-label','Available fence styles');grid.setAttribute('role','group');
-    el('bp-style-browse').addEventListener('click',openStylePicker);el('bp-style-close').addEventListener('click',closeStylePicker);
+    el('bp-style-browse').addEventListener('click',()=>openStylePicker());el('bp-style-close').addEventListener('click',closeStylePicker);
     grid.addEventListener('click',event=>{if(document.body.classList.contains('editing')&&event.target.closest?.('[data-editable-img]'))closeStylePicker();},true);
     // The existing photo editor can finish after this dialog has closed.
     if(typeof MutationObserver==='function')new MutationObserver(syncStylePickerPhoto).observe(grid,{subtree:true,attributes:true,attributeFilter:['src','alt','style']});
@@ -1595,14 +1606,19 @@
     if (!grid) return;
     if(el('bp-style-dialog')&&!el('bp-style-dialog').open){paintStylePickerSelection();return;}
     const ids = visibleStyleIds();
-    const results=el('bp-style-results');if(results)results.textContent=ids.length+' of '+Object.keys(FENCE_PRICING).length+' styles'+(activeFamily?' · '+(FAMILY_LABELS[activeFamily]||activeFamily):'');
+    // Customers see one tile per model and pick color and height after.
+    // In Edit Mode every catalog entry keeps its own tile so each photo
+    // and name stays editable.
+    const grouped = !document.body.classList.contains('editing');
+    const cards = grouped ? modelCards(ids, pickerSelectedId()) : ids.map(id => ({ id: id, title: FENCE_PRICING[id].name, options: '' }));
+    const results=el('bp-style-results');if(results)results.textContent=(grouped?cards.length+' fence styles'+(cards.length!==ids.length?' · '+ids.length+' color and height options':''):ids.length+' of '+Object.keys(FENCE_PRICING).length+' styles')+(activeFamily?' · '+(FAMILY_LABELS[activeFamily]||activeFamily):'');
     grid.scrollTop=0;
     if (!ids.length) {
       grid.innerHTML = '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--galv);">No styles match. Try another name or material.</div>';
       return;
     }
-    grid.innerHTML = ids.map(id => {
-      const fence = FENCE_PRICING[id];
+    grid.innerHTML = cards.map(card => {
+      const id = card.id, fence = FENCE_PRICING[id];
       return `
         <label class="ballpark-photo-opt" data-id="${esc(id)}" style="position:relative;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid var(--gray-300);transition:all 0.2s ease;display:flex;flex-direction:column;background:var(--white);">
           <input type="radio" name="fenceStyle" value="${esc(id)}" style="position:absolute;opacity:0;pointer-events:none;">
@@ -1611,8 +1627,9 @@
           </div>
           <div style="padding:14px 16px;">
             ${fence.photoCaption?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+esc(fence.photoCaption)+'</p>':!fence.imageKind||fence.imageKind==='material example'?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+(fence.photo.endsWith('photo-needed.svg')?'Reference photo needed for this style':'Example photo — not the exact style')+'</p>':''}
-            <div style="font-family:var(--serif);font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;line-height:1.2;" data-editable="bp.fence.${esc(id)}.name">${esc(fence.name)}</div>
-            <div style="font-size:12px;color:var(--gray-700);line-height:1.4;" data-editable="bp.fence.${esc(id)}.detail">${esc(fence.detail)}</div>
+            <div style="font-family:var(--serif);font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;line-height:1.2;"${grouped?'':' data-editable="bp.fence.'+esc(id)+'.name"'}>${esc(card.title)}</div>
+            <div style="font-size:12px;color:var(--gray-700);line-height:1.4;"${grouped?'':' data-editable="bp.fence.'+esc(id)+'.detail"'}>${esc(fence.detail)}</div>
+            ${card.options?'<div style="margin-top:6px;font-family:var(--mono);font-size:12px;color:var(--cedar-dk,#174a90);line-height:1.4;">'+esc(card.options)+'</div>':''}
           </div>
           <div class="bp-check" style="position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;background:var(--gold);color:var(--navy);font-weight:700;display:none;align-items:center;justify-content:center;font-size:16px;">✓</div>
         </label>
@@ -1622,7 +1639,7 @@
     grid.querySelectorAll('.ballpark-photo-opt').forEach(label => {
       label.addEventListener('change', (e) => {
         if(e.target.type!=='radio'||!e.target.checked)return;
-        selectFenceStyle(label.dataset.id);
+        applyPickedStyle(label.dataset.id);
         if(!document.body.classList.contains('editing'))closeStylePicker();
       });
     });
@@ -1698,7 +1715,7 @@
       });
       sel.innerHTML = html;
       if (!sel._bound) {
-        sel.addEventListener('change', () => { if (sel.value) {selectFenceStyle(sel.value);closeStylePicker();} });
+        sel.addEventListener('change', () => { if (sel.value) {applyPickedStyle(sel.value);closeStylePicker();} });
         sel._bound = true;
       }
       if (state.fenceId) sel.value = state.fenceId;
@@ -1713,6 +1730,9 @@
 
     function update() {
       if (heightSel) state.height = heightSel.value;
+      // A style that names its height sets the height (see selectFenceStyle).
+      const lockedHeight = FENCE_PRICING[state.fenceId] ? supportedStyleHeight(FENCE_PRICING[state.fenceId].name) : null;
+      if (lockedHeight !== null && Number(state.height) !== lockedHeight) { setHeightControl(heightSel, lockedHeight); state.height = String(lockedHeight); }
       if (sgSel)     state.singleGates = Number(sgSel.value);
       if (dgSel)     state.doubleGates = Number(dgSel.value);
       if (removeChk) state.removeOldFence = removeChk.checked;
@@ -1746,6 +1766,7 @@
     }
     if (!message && state.linearFeet > 2000) { message = 'For a fence longer than 2,000 feet, request a detailed quote. The online calculator cannot price this length.'; target = el('bp-linear-feet'); }
     if (!message && state.removeOldFence && !existingFenceMaterialLabel()) { message = 'Choose the material of the existing fence to include its removal.'; target = el('bp-existing-material'); }
+    if (!message) { const sectionIssue = sectionsIssue(); if (sectionIssue) { message = sectionIssue; target = el('bp-sections'); } }
     if (!message && typeof currentMapIssue==='function') { message=currentMapIssue(); if(message)target=el('bp-map-measurements'); }
     let price = null;
     if (!message) {
@@ -1814,6 +1835,14 @@
         notes: [fd.get('notes'), removalScopeNote(), price.requiresReview ? 'Quote review requested: '+state.height+' ft height. No automatic price range was provided.' : 'Ballpark range: '+formatPrice(price.low)+'–'+formatPrice(price.high)].filter(Boolean).join(' · '),
         geometry: collectGeometry(),
         photo: leadPhoto || '',
+        // How to reach them, when they want it built, what they told us
+        // about the yard, and each fence style when there is more than one.
+        contactMethod: fd.get('contactMethod') || '',
+        bestTime: fd.get('bestTime') || '',
+        timeline: fd.get('timeline') || '',
+        siteNotes: state.siteNotes.slice(),
+        sections: state.sections.length ? sectionLines().join('\n') : '',
+        priceRange: price.requiresReview ? '' : formatPrice(price.low)+'–'+formatPrice(price.high),
       };
 
       submitBtn.disabled = true;
@@ -1875,12 +1904,18 @@
         errorEl.classList.add('show');
         submitBtn.disabled = false;
         submitBtn.textContent = quoteSubmitLabel();
+        if (result.field === 'contactMethod' && window.GFSLeads.flagReach) window.GFSLeads.flagReach(form);
       }
     });
   }
 
   // -------- LIVE PRICE REVEAL --------
   function updateAll() {
+    try { normalizeSections(); } catch (e) { console.warn('[Ghareeb Ballpark] section check skipped:', e); }
+    updateAllCore();
+    try { renderPlus(); } catch (e) { console.warn('[Ghareeb Ballpark] control refresh skipped:', e); }
+  }
+  function updateAllCore() {
     saveDraft();
     const reviewHeight = heightNeedsReview();
     const reviewNotice = el('bp-height-review');
@@ -1905,7 +1940,8 @@
       // Not enough info yet
       const needsQuote = state.fenceId && state.linearFeet > 0 && FENCE_PRICING[state.fenceId];
       const missingRemoval = state.removeOldFence && !existingFenceMaterialLabel();
-      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : 'This style needs a custom quote') : 'Complete steps 1–3';
+      const sectionIssue = needsQuote ? sectionsIssue() : '';
+      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : 'This style needs a custom quote') : 'Complete steps 1–3';
       if (priceHint) {
         priceHint.replaceChildren();
         if (state.linearFeet > 2000) {
@@ -1913,6 +1949,8 @@
           quoteLink.href = '/quote/form/'; quoteLink.textContent = 'Request a free detailed quote'; quoteLink.style.color = 'inherit'; priceHint.appendChild(quoteLink);
         } else if (missingRemoval) {
           priceHint.textContent = 'Select the fence being removed in step 3, or turn off removal if it is not needed.';
+        } else if (sectionIssue) {
+          priceHint.textContent = sectionIssue;
         } else if (needsQuote && reviewHeight) {
           priceHint.textContent = state.priceUnlocked ? 'Your request is received. Our team will follow up about specifications and pricing.' : 'Use step 4 to send your plan for a free quote. Your measurements and selections stay with your request.';
         } else if (needsQuote) {
@@ -1941,14 +1979,14 @@
       if (priceBreakdown) {
         priceBreakdown.style.display = 'block';
         priceBreakdown.innerHTML = `
-          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
-            <span style="opacity:0.8;">Fence (${state.linearFeet} ft):</span>
-            <span style="font-weight:600;">${formatPrice(price.breakdown.fence)}</span>
+          ${price.parts.map(part => `<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
+            <span style="opacity:0.8;">${price.parts.length > 1 ? esc(part.name) : 'Fence'} (${part.feet} ft):</span>
+            <span style="font-weight:600;white-space:nowrap;">${formatPrice(Math.round(part.fenceCost))}</span>
           </div>
-          ${price.waste > 0 ? `<div style="padding:6px 0 10px;font-size:12px;color:rgba(250,246,239,0.6);line-height:1.5;border-bottom:1px solid rgba(255,255,255,0.12);">
-            Billed at ${price.billableFeet} ft &mdash; this style installs in ${price.sectionSize} ft sections,
+          ${part.waste > 0 ? `<div style="padding:6px 0 10px;font-size:12px;color:rgba(250,246,239,0.6);line-height:1.5;border-bottom:1px solid rgba(255,255,255,0.12);">
+            Billed at ${part.billableFeet} ft &mdash; this style installs in ${part.sectionSize} ft sections,
             so the last panel is charged whole. Same way we quote it in person.
-          </div>` : ''}
+          </div>` : ''}`).join('')}
           ${price.breakdown.gates ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
             <span style="opacity:0.8;">Gates:</span>
             <span style="font-weight:600;">${formatPrice(price.breakdown.gates)}</span>
@@ -1988,18 +2026,8 @@
       return;
     }
     panel.style.display = 'block';
-    // Re-price the user's spec across all materials
-    const rows = Object.entries(FENCE_PRICING).map(([id, fence]) => {
-      // Temporarily swap fenceId to repurpose calculatePrice
-      const orig = state.fenceId;
-      state.fenceId = id;
-      const p = calculatePrice();
-      state.fenceId = orig;
-      return { id, fence, price: p, low: p?.low, family: categoryForName(fence.name || id) };
-    }).filter(r => r.price);
-
-    // Sort by price ascending so cheaper options come first (helpful for comparison shoppers)
-    rows.sort((a, b) => a.price.total - b.price.total);
+    // Re-price the customer's project with each other style as the main fence
+    const rows = comparisonRows();
 
     const list = panel.querySelector('#bp-compare-list');
     if (!list) return;
@@ -2028,6 +2056,20 @@
         if (priceCard) priceCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
     });
+  }
+
+  // Other styles priced for the same project. Only styles at the same
+  // height as the customer's pick are compared (a 4 ft picket against a
+  // 6 ft privacy fence is not a like-for-like comparison). Cheapest first.
+  function comparisonRows() {
+    const current = FENCE_PRICING[state.fenceId];
+    const height = current ? partHeight(current, state.height) : Number(state.height);
+    return Object.entries(FENCE_PRICING).map(([id, fence]) => {
+      const named = supportedStyleHeight(fence.name);
+      if (id !== state.fenceId && named !== null && named !== height) return null;
+      const price = calculatePrice(id);
+      return price ? { id, fence, price, name: fence.name, low: price.low, high: price.high, family: categoryForName(fence.name || id) } : null;
+    }).filter(Boolean).sort((a, b) => a.price.total - b.price.total);
   }
 
   // ---- POST-UNLOCK ACTIONS: 3D Preview + PDF Download ----
@@ -2064,20 +2106,7 @@
         // With ~100 styles synced from the Executive app, dumping every one
         // would overflow the PDF page (it fits ~10 rows). Instead show the
         // customer's pick plus one representative per fence family.
-        const allPriced = Object.entries(FENCE_PRICING).map(([id, f]) => {
-          const orig = state.fenceId;
-          state.fenceId = id;
-          const p = calculatePrice();
-          state.fenceId = orig;
-          if (!p) return null;
-          return {
-            id,
-            name: f.name,
-            low: p.low,
-            high: p.high,
-            family: categoryForName(f.name || id),
-          };
-        }).filter(Boolean).sort((a, b) => a.low - b.low);
+        const allPriced = comparisonRows().map(row => ({ id: row.id, name: row.name, low: row.low, high: row.high, family: row.family }));
 
         const comparisons = pickComparisonSet(allPriced, state.fenceId, 8);
 
@@ -2086,6 +2115,7 @@
           const form = el('bp-form');
           const customerName = (form && form.querySelector('[name="name"]') && form.querySelector('[name="name"]').value) || '';
           const address = (el('bp-form-address') && el('bp-form-address').value) || state.address || '';
+          const contact = form ? new FormData(form) : null;
           window.GFSEstimatePDF.download({
             customerName, address,
             fenceId: state.fenceId,
@@ -2099,6 +2129,15 @@
             priceLow: price.low,
             priceHigh: price.high,
             comparisons,
+            // Every fence style in the project, what the customer told us
+            // and the drawing, so the printed sheet matches the request.
+            parts: describeParts(),
+            siteNotes: state.siteNotes.slice(),
+            contactMethod: (contact && contact.get('contactMethod')) || '',
+            bestTime: (contact && contact.get('bestTime')) || '',
+            timeline: (contact && contact.get('timeline')) || '',
+            reference: acceptedBallparkReceipt,
+            geometry: collectGeometry(),
           });
         } else {
           alert('PDF generator is still loading — give it a moment and try again.');
@@ -2174,7 +2213,7 @@
       mapReady=ready;
       if(button){button.disabled=ready;button.textContent=ready?'Drawing map open':'Try loading the map again';}
       if(note)note.textContent=ready?'Map measurements are approximate. Final measurements are confirmed on site.':'The map is unavailable right now. You can still enter your approximate length above.';
-      if(ready&&!resuming)initCoach();
+      if(ready&&!resuming){initCoach();openMapForPhone();}
       return ready;
     }).finally(()=>{mapOpening=null;});
     return mapOpening;
@@ -2546,7 +2585,7 @@
       mapTypeId: google.maps.MapTypeId.HYBRID,
       tilt: 0,
       streetViewControl: false,
-      fullscreenControl: true,
+      fullscreenControl: false,   // the tool's own Full screen button keeps the drawing tools with the map
       mapTypeControl: true,
       mapTypeControlOptions: {
         style: google.maps.MapTypeControlStyle.HORIZONTAL_BAR,
@@ -3325,6 +3364,591 @@
   function markActive(id)   { const e = el(id); if (e) e.classList.add('active'); }
   function markComplete(id) { const e = el(id); if (e) { e.classList.add('complete'); e.classList.remove('active'); } }
 
+
+  // =====================================================================
+  //  2026-11 TOOL UPGRADE
+  //  - one tile per model in the picker, with color and height chips
+  //  - more than one fence style in a project (each priced on its own)
+  //  - tap-size gate steppers, site notes, full-screen map
+  //  - a progress bar on phones
+  //  Per-foot rates are still never shown before the contact step.
+  // =====================================================================
+
+  // ---- STYLE VARIANTS ---------------------------------------------------
+  // The price list has one entry per model, color and height
+  // ("Kingston - White 6ft"). Entries that differ only by color or height
+  // are one model: the picker shows it once and the customer taps a color
+  // and a height. Each entry keeps its own price.
+  const COLOR_WORDS = [['white/tan', 'White / Tan'], ['mocha walnut', 'Mocha Walnut'], ['aspen latte', 'Aspen Latte'], ['chai gray', 'Chai Gray'], ['dark gray', 'Dark Gray'], ['adobe', 'Adobe'], ['tan', 'Tan'], ['white', 'White'], ['black', 'Black'], ['blk', 'Black'], ['galvanized', 'Galvanized'], ['galv', 'Galvanized'], ['bronze', 'Bronze']];
+  const HEIGHT_TOKEN = /\b\d+(?:\.\d+)?\s*(?:ft\b|feet\b|foot\b|')/i;
+  const variantCache = new Map();
+  function variantOf(name) {
+    const raw = String(name || '');
+    let info = variantCache.get(raw);
+    if (info) return info;
+    const height = supportedStyleHeight(raw);
+    let text = raw.replace(/[‘’ʼ´′]/g, "'"), model = text, color = '';
+    if (height !== null) { text = text.replace(HEIGHT_TOKEN, ' \u0001 '); model = model.replace(HEIGHT_TOKEN, ' '); }
+    for (const [word, label] of COLOR_WORDS) {
+      const pattern = new RegExp('(^|[^a-z])' + word.replace('/', '\\/') + '(?![a-z])', 'i');
+      if (!pattern.test(text)) continue;
+      text = text.replace(pattern, '$1 \u0002 '); model = model.replace(pattern, '$1 '); color = label;
+      break;
+    }
+    model = model.replace(/\(\s*\)/g, ' ').replace(/\s+/g, ' ').replace(/\s*[-–—]\s*$/, '').replace(/^\s*[-–—]\s*/, '').trim();
+    info = { key: text.toLowerCase().replace(/[^a-z0-9\u0001\u0002]+/g, ''), height: height, color: color, model: model ? model.charAt(0).toUpperCase() + model.slice(1) : raw };
+    variantCache.set(raw, info);
+    return info;
+  }
+  // Every catalog entry of the same model (same family, same name once the
+  // color and height are set aside), in price-list order.
+  function variantGroup(id) {
+    const fence = FENCE_PRICING[id];
+    if (!fence) return [];
+    const key = variantOf(fence.name).key, family = familyOf(id);
+    return Object.keys(FENCE_PRICING).filter(other => familyOf(other) === family && variantOf(FENCE_PRICING[other].name).key === key);
+  }
+  function pickVariant(id, want) {
+    const fence = FENCE_PRICING[id];
+    if (!fence) return id;
+    const me = variantOf(fence.name);
+    const height = want.height !== undefined ? want.height : me.height, color = want.color !== undefined ? want.color : me.color;
+    const group = variantGroup(id).map(other => ({ id: other, info: variantOf(FENCE_PRICING[other].name) }));
+    const exact = group.find(v => v.info.height === height && v.info.color === color);
+    if (exact) return exact.id;
+    if (want.color !== undefined) {
+      const sameColor = group.filter(v => v.info.color === color).sort((a, b) => Math.abs((a.info.height || 0) - (height || 0)) - Math.abs((b.info.height || 0) - (height || 0)));
+      if (sameColor.length) return sameColor[0].id;
+    }
+    if (want.height !== undefined) {
+      const sameHeight = group.find(v => v.info.height === height);
+      if (sameHeight) return sameHeight.id;
+    }
+    return id;
+  }
+  // One card per model for the picker grid. `ids` is what the search and
+  // material filter left; the card shows the customer's current pick when
+  // it is in the model, otherwise white at 6 ft when there is one.
+  function modelCards(ids, selectedId) {
+    const groups = new Map();
+    ids.forEach(id => {
+      const key = familyOf(id) + '|' + variantOf(FENCE_PRICING[id].name).key;
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(id);
+    });
+    return Array.from(groups.values()).map(members => {
+      const all = variantGroup(members[0]).map(id => variantOf(FENCE_PRICING[id].name));
+      const info = id => variantOf(FENCE_PRICING[id].name);
+      const pick = members.includes(selectedId) ? selectedId
+        : members.find(id => info(id).color === 'White' && info(id).height === 6)
+        || members.find(id => info(id).height === 6)
+        || members[0];
+      const colors = Array.from(new Set(all.map(v => v.color).filter(Boolean)));
+      const heights = Array.from(new Set(all.map(v => v.height).filter(h => h !== null))).sort((a, b) => a - b);
+      const several = all.length > 1;
+      return {
+        id: pick,
+        title: several ? info(pick).model : FENCE_PRICING[pick].name,
+        options: several ? [colors.length > 1 ? colors.length + ' colors' : '', heights.length > 1 ? heights.join(', ') + ' ft' : ''].filter(Boolean).join(' · ') : '',
+      };
+    });
+  }
+  function chipButton(label, pressed, onClick) {
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'bp-chip'; button.textContent = label;
+    button.setAttribute('aria-pressed', pressed ? 'true' : 'false');
+    button.addEventListener('click', onClick);
+    return button;
+  }
+  // Color and height chips for one chosen style. `ladder` covers the few
+  // styles whose name carries no height: {value, set(height)}.
+  function renderVariantChips(host, id, onPick, ladder) {
+    if (!host) return;
+    const fence = FENCE_PRICING[id];
+    const signature = fence ? JSON.stringify([id, ladder ? String(ladder.value) : '', Object.keys(FENCE_PRICING).length]) : '';
+    if (host.dataset.signature === signature) return;
+    host.dataset.signature = signature;
+    host.replaceChildren();
+    if (!fence) return;
+    const me = variantOf(fence.name), group = variantGroup(id).map(other => variantOf(FENCE_PRICING[other].name));
+    const row = (label, chips, note) => {
+      const wrap = document.createElement('div'); wrap.className = 'bp-variants__row'; wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', label);
+      const title = document.createElement('span'); title.className = 'bp-variants__label'; title.textContent = label;
+      wrap.append(title, ...chips);
+      host.appendChild(wrap);
+      if (note) { const p = document.createElement('p'); p.className = 'bp-variants__note'; p.textContent = note; host.appendChild(p); }
+    };
+    const colors = Array.from(new Set(group.map(v => v.color).filter(Boolean)));
+    if (colors.length > 1) row('Color', colors.map(color => chipButton(color, color === me.color, () => onPick(pickVariant(id, { color: color })))));
+    if (me.height !== null) {
+      const heights = Array.from(new Set(group.filter(v => v.color === me.color && v.height !== null).map(v => v.height))).sort((a, b) => a - b);
+      row('Height', heights.map(h => chipButton(h + ' ft', h === me.height, () => onPick(pickVariant(id, { height: h })))),
+        heights.length === 1 ? 'This style comes in ' + me.height + ' ft. Need a different height? Tell us in the notes and we will price it.' : '');
+    } else if (ladder) {
+      row('Height', [4, 5, 6, 8].map(h => chipButton(h + ' ft', Number(ladder.value) === h, () => ladder.set(h))));
+    }
+  }
+
+  // ---- STYLE PICKER TARGET ----------------------------------------------
+  // The same picker serves the main fence and any added style.
+  let pickerTarget = null;
+  function pickerSelectedId() { return pickerTarget && state.sections.includes(pickerTarget) ? pickerTarget.fenceId : state.fenceId; }
+  function setSectionStyle(section, id) {
+    if (!FENCE_PRICING[id]) return;
+    section.fenceId = id;
+    const named = supportedStyleHeight(FENCE_PRICING[id].name);
+    if (named !== null) section.height = String(named);
+    else if (![4, 5, 6, 8].includes(Number(section.height))) section.height = '6';
+  }
+  function applyPickedStyle(id) {
+    if (!FENCE_PRICING[id]) return;
+    if (pickerTarget && state.sections.includes(pickerTarget)) { setSectionStyle(pickerTarget, id); track('style-added'); updateAll(); }
+    else selectFenceStyle(id);
+  }
+
+  // ---- PROJECT PARTS: THE MAIN FENCE PLUS ANY ADDED STYLES -------------------
+  // The length from step 1 and the gate counts from step 3 are totals for
+  // the whole project (the map keeps them in sync). An added style takes
+  // its feet and gates out of those totals; the main style gets the rest.
+  let sectionSeq = 0;
+  function newSection() { sectionSeq += 1; return { uid: 's' + sectionSeq, fenceId: '', feet: 0, height: '6', singleGates: 0, doubleGates: 0 }; }
+  function sectionTotals() {
+    return state.sections.reduce((sum, s) => ({ feet: sum.feet + (Number(s.feet) || 0), single: sum.single + (Number(s.singleGates) || 0), double: sum.double + (Number(s.doubleGates) || 0) }), { feet: 0, single: 0, double: 0 });
+  }
+  function normalizeSections() {
+    let single = Math.max(0, Number(state.singleGates) || 0), double = Math.max(0, Number(state.doubleGates) || 0);
+    state.sections.forEach(section => {
+      section.feet = Math.max(0, Math.min(2000, Number(section.feet) || 0));
+      section.singleGates = Math.max(0, Math.min(single, Math.floor(Number(section.singleGates) || 0))); single -= section.singleGates;
+      section.doubleGates = Math.max(0, Math.min(double, Math.floor(Number(section.doubleGates) || 0))); double -= section.doubleGates;
+      const fence = FENCE_PRICING[section.fenceId];
+      if (!fence) { if (section.fenceId && styleCatalogSettled) section.fenceId = ''; return; }
+      const named = supportedStyleHeight(fence.name);
+      if (named !== null) section.height = String(named);
+      else if (![4, 5, 6, 8].includes(Number(section.height))) section.height = '6';
+    });
+  }
+  function sectionsIssue() {
+    if (!state.sections.length) return '';
+    for (let i = 0; i < state.sections.length; i++) {
+      const section = state.sections[i], fence = FENCE_PRICING[section.fenceId];
+      if (!fence) return 'Choose a style for fence style ' + (i + 2) + ', or remove it.';
+      if (!(section.feet > 0)) return 'Enter how many feet of ' + fence.name + ' you need, or remove it.';
+    }
+    const used = sectionTotals().feet;
+    if (Number(state.linearFeet) > 0 && used >= state.linearFeet) return overAllocatedText(used, state.linearFeet);
+    return '';
+  }
+  function overAllocatedText(used, total) {
+    const main = FENCE_PRICING[state.fenceId];
+    return 'Your added styles add up to ' + used + ' ft and the whole fence is ' + total + ' ft, so nothing is left for ' + (main ? main.name : 'the main style') + '. Lower the added feet or raise the total length in step 1.';
+  }
+  function projectParts(primaryId) {
+    const totals = sectionTotals();
+    const parts = [{ primary: true, fenceId: primaryId || state.fenceId, feet: Math.round((Number(state.linearFeet) - totals.feet) * 100) / 100, height: state.height, singleGates: state.singleGates - totals.single, doubleGates: state.doubleGates - totals.double }];
+    state.sections.forEach(section => parts.push({ primary: false, fenceId: section.fenceId, feet: section.feet, height: section.height, singleGates: section.singleGates, doubleGates: section.doubleGates }));
+    return parts;
+  }
+  function partHeight(fence, requested) {
+    const named = fence ? supportedStyleHeight(fence.name) : null;
+    return named !== null ? named : Number(requested);
+  }
+  // A style that names its height is priced at its own rate. Only the few
+  // styles without a height in the name use the 4/5/6/8 ft ladder factors
+  // from the Executive app settings.
+  function pricePart(part) {
+    const fence = FENCE_PRICING[part.fenceId];
+    if (!fence || !Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
+    if (!Number.isFinite(part.feet) || part.feet <= 0) return null;
+    const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
+    if (named === null && ![4, 5, 6, 8].includes(height)) return null;
+    const rounding = roundToSections(part.feet, fence.name);
+    const factor = named !== null ? 1 : heightFactorFor(height);
+    return {
+      primary: !!part.primary, id: part.fenceId, name: fence.name, height: height, heightInName: named !== null,
+      feet: part.feet, billableFeet: rounding.billable, sectionSize: rounding.sectionSize, waste: rounding.waste,
+      singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates),
+      fenceCost: rounding.billable * fence.perFoot * factor,
+      gateCost: Math.max(0, part.singleGates) * fence.singleGate + Math.max(0, part.doubleGates) * fence.doubleGate,
+    };
+  }
+  function gateWords(single, double) {
+    const bits = [];
+    if (single > 0) bits.push(single + ' walk gate' + (single === 1 ? '' : 's'));
+    if (double > 0) bits.push(double + ' drive gate' + (double === 1 ? '' : 's'));
+    return bits.join(', ');
+  }
+  // Plain description of each part, without prices. Used in the lead, the
+  // summary card and the PDF.
+  function describeParts() {
+    return projectParts().filter(part => FENCE_PRICING[part.fenceId] && part.feet > 0).map(part => {
+      const fence = FENCE_PRICING[part.fenceId], named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
+      return { primary: part.primary, id: part.fenceId, name: fence.name, feet: part.feet, height: height, heightInName: named !== null, singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates), gates: gateWords(Math.max(0, part.singleGates), Math.max(0, part.doubleGates)) };
+    });
+  }
+  function sectionLines() {
+    return describeParts().map(part => part.feet + ' ft of ' + part.name + (part.heightInName ? '' : ', ' + part.height + ' ft tall') + (part.gates ? ', ' + part.gates : ''));
+  }
+  // Feet of each run drawn on the map, for one-tap fill of an added style.
+  function mapRunFeet() {
+    try {
+      if (!activeDrawingEngine || !window.GFSMapGeometry) return [];
+      const facts = window.GFSMapGeometry.summary(mapPaths(activeDrawingEngine, false), mapGates(activeDrawingEngine));
+      const runs = [];
+      facts.segments.forEach(row => { runs[row.line] = (runs[row.line] || 0) + row.feet; });
+      return runs.map(feet => Math.round(feet || 0)).filter(feet => feet > 0);
+    } catch (e) { return []; }
+  }
+
+  // ---- STEPPERS ------------------------------------------------------------
+  function stepperHtml(kind, labelId) {
+    return '<div class="bp-stepper" role="group" data-stepper="' + kind + '"' + (labelId ? ' aria-labelledby="' + labelId + '"' : '') + '>' +
+      '<button type="button" data-step="-1" aria-label="One fewer">&minus;</button><output aria-live="polite">0</output><button type="button" data-step="1" aria-label="One more">+</button></div>';
+  }
+  function setStepper(node, value, max) {
+    if (!node) return;
+    const out = node.querySelector('output'), minus = node.querySelector('[data-step="-1"]'), plus = node.querySelector('[data-step="1"]');
+    if (out && out.textContent !== String(value)) out.textContent = String(value);
+    if (minus) minus.disabled = value <= 0;
+    if (plus) plus.disabled = value >= max;
+  }
+  function ensureMainSteppers() {
+    const grid = document.querySelector('.bp-step-3-grid');
+    if (!grid || grid.dataset.plus === 'yes') return;
+    grid.dataset.plus = 'yes';
+    // Height now lives with the style (step 2), as chips.
+    const heightSelect = el('bp-height'), heightCol = heightSelect && heightSelect.parentElement;
+    if (heightCol && heightCol.parentElement === grid) {
+      const review = el('bp-height-review');
+      if (review) grid.after(review);
+      heightCol.classList.add('bp-col-hidden');
+    }
+    [['bp-single-gates', 'single', 'Walk gates', 'About 4 ft wide.', 12, 'walk gate'], ['bp-double-gates', 'double', 'Drive gates', 'Double gate, about 10 ft wide.', 6, 'drive gate']].forEach(([id, kind, title, help, max, noun]) => {
+      const select = el(id), col = select && select.parentElement;
+      if (!select || !col) return;
+      const label = col.querySelector('label');
+      if (label) { label.id = id + '-label'; label.removeAttribute('for'); label.textContent = title; }
+      select.classList.add('bp-visually-hidden'); select.tabIndex = -1; select.setAttribute('aria-hidden', 'true');
+      col.insertAdjacentHTML('beforeend', stepperHtml(kind, id + '-label') + '<p class="bp-stepper__help">' + help + '</p><div class="bp-gate-assign" data-assign="' + kind + '" data-gfs-protected></div>');
+      col.querySelector('.bp-stepper').addEventListener('click', event => {
+        const button = event.target.closest('button[data-step]');
+        if (!button || button.disabled) return;
+        const next = Math.max(0, Math.min(max, (Number(select.value) || 0) + Number(button.dataset.step)));
+        ensureSelectCovers(select, next, noun);
+        select.value = String(next);
+        state.sawDetails = true;
+        select.dispatchEvent(new Event('change'));
+      });
+    });
+  }
+  // With more than one style, say how many of the gates belong to each
+  // added style; the rest stay with the main style.
+  function renderGateAssign() {
+    [['single', 'singleGates', 'walk'], ['double', 'doubleGates', 'drive']].forEach(([kind, key, noun]) => {
+      const host = document.querySelector('.bp-gate-assign[data-assign="' + kind + '"]');
+      if (!host) return;
+      const total = Number(state[key]) || 0, rows = state.sections.filter(section => FENCE_PRICING[section.fenceId]);
+      const signature = JSON.stringify([total > 0, rows.map(section => [section.uid, section.fenceId])]);
+      if (host.dataset.signature !== signature) {
+        host.dataset.signature = signature;
+        host.replaceChildren();
+        if (total > 0) rows.forEach(section => {
+          const row = document.createElement('div'), labelId = 'bp-assign-' + kind + '-' + section.uid;
+          row.className = 'bp-gate-assign__row'; row.dataset.uid = section.uid;
+          row.innerHTML = '<span class="bp-gate-assign__label" id="' + labelId + '">How many ' + noun + ' gates go in the ' + esc(FENCE_PRICING[section.fenceId].name) + '?</span>' + stepperHtml(kind, labelId);
+          row.querySelector('.bp-stepper').addEventListener('click', event => {
+            const button = event.target.closest('button[data-step]');
+            if (!button || button.disabled) return;
+            section[key] = Math.max(0, (Number(section[key]) || 0) + Number(button.dataset.step));
+            updateAll();
+          });
+          host.appendChild(row);
+        });
+      }
+      const used = state.sections.reduce((sum, section) => sum + (Number(section[key]) || 0), 0);
+      rows.forEach(section => setStepper(host.querySelector('[data-uid="' + section.uid + '"] .bp-stepper'), Number(section[key]) || 0, total - (used - (Number(section[key]) || 0))));
+    });
+  }
+
+  // ---- ADDED STYLES (STEP 2) ---------------------------------------------------
+  function ensureSectionsHost() {
+    let host = el('bp-sections');
+    if (host) return host;
+    const summary = el('bp-style-summary');
+    if (!summary) return null;
+    host = document.createElement('div');
+    host.id = 'bp-sections'; host.className = 'bp-sections'; host.tabIndex = -1;
+    host.setAttribute('data-gfs-protected', '');
+    summary.after(host);
+    return host;
+  }
+  function buildSections(host, runs) {
+    host.replaceChildren();
+    state.sections.forEach((section, index) => {
+      const fence = FENCE_PRICING[section.fenceId], card = document.createElement('section');
+      card.className = 'bp-sec'; card.dataset.uid = section.uid; card.setAttribute('aria-label', 'Fence style ' + (index + 2));
+      card.innerHTML =
+        '<div class="bp-sec__head"><strong>Fence style ' + (index + 2) + '</strong><button type="button" class="bp-sec__remove">Remove</button></div>' +
+        '<button type="button" class="bp-sec__style" aria-haspopup="dialog" aria-controls="bp-style-dialog">' +
+          (fence ? '<img alt="" src="' + esc(fence.photoThumb || fence.photo) + '" loading="lazy" decoding="async"><span><b>' + esc(fence.name) + '</b><small>Change style</small></span>'
+                 : '<span><b>Choose the style for this part</b><small>Browse fence styles</small></span>') +
+        '</button>' +
+        '<div class="bp-variants" data-role="variants"></div>' +
+        '<div class="bp-sec__feetwrap"><label class="form-label" for="bp-sec-feet-' + section.uid + '">How many feet of this style?</label>' +
+        '<input id="bp-sec-feet-' + section.uid + '" class="form-input bp-sec__feet" type="number" inputmode="decimal" min="1" max="2000" step="any" placeholder="e.g. 60">' +
+        (runs.length > 1 ? '<div class="bp-sec__runs" role="group" aria-label="Use a run you drew on the map">' + runs.map((feet, i) => '<button type="button" class="bp-chip" data-run-feet="' + feet + '">Run ' + (i + 1) + ' · ' + feet + ' ft</button>').join('') + '</div>' : '') +
+        '</div><p class="bp-sec__issue" role="status" aria-live="polite"></p>';
+      card.querySelector('.bp-sec__remove').addEventListener('click', () => {
+        state.sections = state.sections.filter(other => other !== section);
+        updateAll();
+        el('bp-add-section')?.focus({ preventScroll: true });
+      });
+      card.querySelector('.bp-sec__style').addEventListener('click', () => openStylePicker(section));
+      const feet = card.querySelector('.bp-sec__feet');
+      feet.addEventListener('input', () => { section.feet = Math.max(0, Number(feet.value) || 0); updateAll(); });
+      card.querySelectorAll('[data-run-feet]').forEach(button => button.addEventListener('click', () => { section.feet = Number(button.dataset.runFeet) || 0; feet.value = section.feet; updateAll(); }));
+      host.appendChild(card);
+    });
+    if (state.sections.length) {
+      const split = document.createElement('p');
+      split.className = 'bp-split'; split.id = 'bp-split'; split.setAttribute('role', 'status'); split.setAttribute('aria-live', 'polite');
+      host.appendChild(split);
+    }
+    if (state.sections.length < 3) {
+      const add = document.createElement('button');
+      add.type = 'button'; add.id = 'bp-add-section'; add.className = 'bp-add-section';
+      add.textContent = state.sections.length ? '+ Add another style' : '+ Add a second style for part of the fence';
+      add.addEventListener('click', () => { const section = newSection(); state.sections.push(section); track('style-add'); updateAll(); openStylePicker(section); });
+      host.appendChild(add);
+    }
+    if (!state.sections.length) {
+      const hint = document.createElement('p');
+      hint.className = 'bp-add-hint';
+      hint.textContent = 'For example privacy across the back and chain link down the sides. Each style is priced on its own.';
+      host.appendChild(hint);
+    }
+  }
+  function renderSections() {
+    const host = ensureSectionsHost();
+    if (!host) return;
+    const runs = mapRunFeet();
+    const signature = JSON.stringify([state.sections.map(section => [section.uid, section.fenceId]), Object.keys(FENCE_PRICING).length, runs]);
+    if (host.dataset.signature !== signature) { host.dataset.signature = signature; buildSections(host, runs); }
+    host.hidden = !FENCE_PRICING[state.fenceId] && !state.sections.length;
+    state.sections.forEach(section => {
+      const card = host.querySelector('.bp-sec[data-uid="' + section.uid + '"]');
+      if (!card) return;
+      const fence = FENCE_PRICING[section.fenceId];
+      renderVariantChips(card.querySelector('[data-role="variants"]'), section.fenceId, id => { setSectionStyle(section, id); updateAll(); }, { value: section.height, set: height => { section.height = String(height); updateAll(); } });
+      const feet = card.querySelector('.bp-sec__feet');
+      if (feet && document.activeElement !== feet) feet.value = section.feet > 0 ? String(section.feet) : '';
+      const issue = card.querySelector('.bp-sec__issue');
+      if (issue) issue.textContent = !fence ? 'Choose a style for this part, or remove it.' : !(section.feet > 0) ? 'Enter how many feet of this style you need.' : '';
+    });
+    const split = el('bp-split');
+    if (split) {
+      const total = Number(state.linearFeet) || 0, used = sectionTotals().feet, main = FENCE_PRICING[state.fenceId];
+      split.replaceChildren();
+      if (!total) split.textContent = 'Enter the total fence length in step 1. Your added styles come out of that total.';
+      else if (used >= total) split.textContent = overAllocatedText(used, total);
+      else {
+        const lead = document.createElement('b'); lead.textContent = total + ' ft total';
+        split.append(lead, ' = ' + [(Math.round((total - used) * 100) / 100) + ' ft ' + (main ? main.name : 'main style')].concat(state.sections.filter(section => section.feet > 0).map(section => section.feet + ' ft ' + (FENCE_PRICING[section.fenceId] ? FENCE_PRICING[section.fenceId].name : 'added style'))).join(' + '));
+      }
+    }
+  }
+
+  // ---- SITE NOTES (STEP 3) ------------------------------------------------------
+  function siteNoteButtons() { return $$('#bp-site-notes [data-note]'); }
+  function bindSiteNotes() {
+    siteNoteButtons().forEach(button => {
+      if (button.dataset.bound === 'yes') return;
+      button.dataset.bound = 'yes';
+      button.addEventListener('click', () => {
+        const note = button.dataset.note;
+        state.siteNotes = state.siteNotes.includes(note) ? state.siteNotes.filter(other => other !== note) : state.siteNotes.concat(note);
+        state.sawDetails = true;
+        updateAll();
+      });
+    });
+  }
+  function renderSiteNotes() {
+    siteNoteButtons().forEach(button => button.setAttribute('aria-pressed', state.siteNotes.includes(button.dataset.note) ? 'true' : 'false'));
+  }
+
+  // ---- SUMMARY CARD ---------------------------------------------------------------
+  // Made once at start-up, in place. Edit Mode re-seats the page's original
+  // elements whenever content is applied, which would push a list added
+  // later to the top of the card.
+  function ensureSummaryParts() {
+    let list = el('bp-summary-parts');
+    if (list) return list;
+    const cta = el('bp-summary-cta-area');
+    if (!cta) return null;
+    list = document.createElement('ul');
+    list.id = 'bp-summary-parts'; list.className = 'bp-parts'; list.hidden = true;
+    list.setAttribute('data-gfs-protected', '');
+    cta.before(list);
+    return list;
+  }
+  function renderSummaryParts() {
+    const fence = FENCE_PRICING[state.fenceId], style = el('bp-summary-style');
+    const parts = describeParts(), extra = parts.filter(part => !part.primary);
+    if (style && fence) style.textContent = extra.length ? fence.name + ' + ' + extra.length + ' more' : fence.name;
+    const list = ensureSummaryParts();
+    if (!list) return;
+    list.hidden = !extra.length;
+    if (!extra.length) { list.replaceChildren(); return; }
+    list.replaceChildren(...parts.map(part => {
+      const item = document.createElement('li'), name = document.createElement('b');
+      name.textContent = part.name;
+      item.append(name, part.feet + ' ft' + (part.gates ? ' · ' + part.gates : ''));
+      return item;
+    }));
+  }
+
+  // ---- FULL-SCREEN MAP ------------------------------------------------------------
+  function setMapFullscreen(on) {
+    const tools = el('bp-map-tools'), button = el('bp-map-fullscreen');
+    if (!tools) return;
+    tools.classList.toggle('bp-map-full', !!on);
+    document.documentElement.classList.toggle('bp-map-open', !!on);
+    if (button) { button.textContent = on ? 'Close full screen' : 'Full screen'; button.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    const refresh = () => {
+      try {
+        if (map && typeof map.invalidateSize === 'function') map.invalidateSize();
+        if (gMap && window.google && google.maps && google.maps.event) google.maps.event.trigger(gMap, 'resize');
+      } catch (e) {}
+    };
+    refresh(); setTimeout(refresh, 80); setTimeout(refresh, 400);
+    if (!on) el('bp-map')?.scrollIntoView?.({ block: 'center', behavior: 'auto' });
+  }
+  function ensureMapFullscreen() {
+    const mapNode = el('bp-map'), frame = mapNode && mapNode.parentElement, tools = el('bp-map-tools');
+    if (!frame || !tools || el('bp-map-fullscreen')) return;
+    frame.classList.add('bp-map-frame');
+    const address = el('bp-map-search-row') && el('bp-map-search-row').parentElement;
+    if (address) address.classList.add('bp-map-address');
+    const button = document.createElement('button');
+    button.type = 'button'; button.id = 'bp-map-fullscreen'; button.textContent = 'Full screen';
+    button.setAttribute('aria-pressed', 'false'); button.setAttribute('data-gfs-protected', '');
+    frame.appendChild(button);
+    button.addEventListener('click', () => setMapFullscreen(!tools.classList.contains('bp-map-full')));
+    // Keep the map drawn to its real size whenever the space around it changes
+    // (full screen, a tool group opening, the phone turning).
+    if (typeof ResizeObserver === 'function') new ResizeObserver(() => { try { if (map && typeof map.invalidateSize === 'function') map.invalidateSize({ pan: false }); } catch (e) {} }).observe(mapNode);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape' && tools.classList.contains('bp-map-full') && !el('bp-style-dialog')?.open) setMapFullscreen(false); });
+    // Leaving the map for the style picker or the length box closes it first.
+    document.addEventListener('click', event => { if (tools.classList.contains('bp-map-full') && event.target.closest?.('#bp-drawing-next,#bp-use-length')) setMapFullscreen(false); }, true);
+  }
+  // On a phone the in-page map is too small to draw on, so it opens full screen.
+  function openMapForPhone() {
+    try { if (window.matchMedia && window.matchMedia('(max-width: 760px)').matches && !el('bp-map-tools')?.hidden) setMapFullscreen(true); } catch (e) {}
+  }
+
+  // ---- PHONE PROGRESS BAR ---------------------------------------------------------
+  let barAction = null;
+  function ensureBar() {
+    let bar = el('bp-bar');
+    if (bar) return bar;
+    bar = document.createElement('div');
+    bar.id = 'bp-bar'; bar.setAttribute('data-gfs-protected', ''); bar.setAttribute('role', 'region'); bar.setAttribute('aria-label', 'Your estimate progress');
+    bar.innerHTML = '<div class="bp-bar__text"><span class="bp-bar__step"></span><span class="bp-bar__now"></span></div><button type="button" class="bp-bar__go"></button>';
+    document.body.appendChild(bar);
+    bar.querySelector('.bp-bar__go').addEventListener('click', () => { if (barAction) barAction(); });
+    // Step aside for the on-screen keyboard.
+    const typing = node => !!(node && node.closest && node.closest('input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),textarea'));
+    document.addEventListener('focusin', event => document.body.classList.toggle('bp-typing', typing(event.target)));
+    document.addEventListener('focusout', () => setTimeout(() => document.body.classList.toggle('bp-typing', typing(document.activeElement)), 60));
+    return bar;
+  }
+  function renderBar() {
+    const bar = ensureBar(), step = bar.querySelector('.bp-bar__step'), now = bar.querySelector('.bp-bar__now'), go = bar.querySelector('.bp-bar__go');
+    const feet = Number(state.linearFeet) > 0 ? state.linearFeet + ' ft' : '', fence = FENCE_PRICING[state.fenceId];
+    const jump = (id, focusId) => () => {
+      const node = el(id);
+      if (!node) return;
+      node.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      if (focusId) setTimeout(() => el(focusId)?.focus({ preventScroll: true }), 500);
+    };
+    const name = fence ? fence.name + (state.sections.length ? ' + ' + state.sections.length + ' more' : '') : '';
+    let view;
+    if (state.priceUnlocked) {
+      const price = heightNeedsReview() ? null : calculatePrice();
+      view = ['Your planning range', price ? formatPrice(price.low) + ' – ' + formatPrice(price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
+    } else if (!feet) view = ['Step 1 of 4', 'How long is the fence?', 'Enter length', jump('bp-step-1', 'bp-linear-feet')];
+    else if (!fence) view = ['Step 2 of 4', feet, 'Pick a style', () => openStylePicker()];
+    else if (sectionsIssue()) view = ['Step 2 of 4', 'Finish your added style', 'Go to it', jump('bp-sections')];
+    else if (!state.sawDetails) view = ['Step 3 of 4', feet + ' · ' + name, 'Gates and details', () => { state.sawDetails = true; jump('bp-step-3')(); renderBar(); }];
+    else view = ['Step 4 of 4', feet + ' · ' + name, heightNeedsReview() ? 'Request my quote' : 'See my price', jump('bp-step-4', 'bpf-name')];
+    if (step.textContent !== view[0]) step.textContent = view[0];
+    if (now.textContent !== view[1]) now.textContent = view[1];
+    if (go.textContent !== view[2]) go.textContent = view[2];
+    barAction = view[3];
+  }
+
+  // ---- STYLE REQUESTED BY A LINK (?style=Name) ----------------------------------------
+  // Style pages link straight here with a style name. If the name matches
+  // one catalog model it is selected for the visitor, unless they already
+  // have a saved plan with its own style.
+  let requestedStyle = '';
+  function readRequestedStyle() {
+    try {
+      const values = new URLSearchParams(location.search).getAll('style');
+      const value = values.length === 1 ? values[0].trim() : '';
+      requestedStyle = value && value.length <= 120 && /^[\p{L}\p{N} '’"().,\/#&+–—-]+$/u.test(value) ? value : '';
+    } catch (e) { requestedStyle = ''; }
+  }
+  function matchRequestedStyle(wanted) {
+    const words = wanted.toLowerCase().replace(/[‘’]/g, "'").split(/[^a-z0-9.']+/).filter(Boolean);
+    if (!words.length) return '';
+    const ids = Object.keys(FENCE_PRICING);
+    const exact = ids.find(id => FENCE_PRICING[id].name.toLowerCase() === wanted.toLowerCase());
+    if (exact) return exact;
+    const hits = ids.filter(id => { const name = ' ' + FENCE_PRICING[id].name.toLowerCase().replace(/[‘’]/g, "'").replace(/[^a-z0-9.']+/g, ' ') + ' '; return words.every(word => name.includes(' ' + word + ' ') || name.includes(' ' + word)); });
+    if (!hits.length) return '';
+    // Every hit must be the same model; then take its usual first pick.
+    const models = new Set(hits.map(id => familyOf(id) + '|' + variantOf(FENCE_PRICING[id].name).key));
+    if (models.size !== 1) return '';
+    return modelCards(hits, '')[0].id;
+  }
+  function applyRequestedStyle() {
+    if (!requestedStyle || state.fenceId || pendingDraftStyle) return;
+    const id = matchRequestedStyle(requestedStyle);
+    requestedStyle = '';
+    if (id) { selectFenceStyle(id); track('style-link'); }
+  }
+
+  // ---- ONE PASS AFTER EVERY UPDATE ---------------------------------------------------
+  function renderPlus() {
+    ensureMainSteppers();
+    ensureMapFullscreen();
+    setStepper(document.querySelector('.bp-step-3-grid [data-stepper="single"]'), Number(state.singleGates) || 0, 12);
+    setStepper(document.querySelector('.bp-step-3-grid [data-stepper="double"]'), Number(state.doubleGates) || 0, 6);
+    renderVariantChips(el('bp-style-variants'), state.fenceId, id => selectFenceStyle(id), {
+      value: state.height,
+      set: height => { const select = el('bp-height'); if (!select) return; setHeightControl(select, height); select.dispatchEvent(new Event('change')); },
+    });
+    renderSections();
+    renderGateAssign();
+    renderSummaryParts();
+    renderSiteNotes();
+    renderBar();
+  }
+  function initPlus() {
+    document.body.classList.add('bp-page');
+    ensureSummaryParts();
+    bindSiteNotes();
+    readRequestedStyle();
+    const form = el('bp-form');
+    if (form && window.GFSLeads && typeof window.GFSLeads.wireReach === 'function') window.GFSLeads.wireReach(form);
+    // Reaching step 3 counts as having seen the gate and detail options.
+    const details = el('bp-step-3');
+    if (details && typeof IntersectionObserver === 'function') {
+      new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.6) && FENCE_PRICING[state.fenceId] && !state.sawDetails) { state.sawDetails = true; renderBar(); } }, { threshold: [0.6] }).observe(details);
+    }
+  }
+
   // -------- FIRESTORE PRICING + PHOTOS SYNC (EXACT SAME ENGINE AS EXECUTIVE APP) --------
   // The Executive app stores BOTH pricing and style photos in ONE document:
   //
@@ -3384,6 +4008,7 @@
     } finally {
       styleCatalogSettled = true;
       updateDraftStyleNotice();
+      try { applyRequestedStyle(); updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] post-catalog refresh skipped:', e); }
     }
   }
 
@@ -3618,6 +4243,8 @@
         removeOldFence: state.removeOldFence,
         existingFenceMaterial: state.existingFenceMaterial,
         address: state.address,
+        sections: state.sections.map(section => ({ fenceId: section.fenceId, feet: section.feet, height: section.height, singleGates: section.singleGates, doubleGates: section.doubleGates })),
+        siteNotes: state.siteNotes.slice(0, 12),
         savedAt: Date.now(),
       }));
     } catch (e) { /* private mode or storage full — not worth surfacing */ }
@@ -3650,6 +4277,16 @@
     setSel('bp-double-gates', d.doubleGates);
     const rm = el('bp-remove-old'); if (rm) rm.checked = !!d.removeOldFence;
     const oldMaterial = el('bp-existing-material'); if (oldMaterial) oldMaterial.value = existingFenceMaterialLabel(d.existingFenceMaterial || '') ? d.existingFenceMaterial : '';
+    if (Array.isArray(d.sections)) {
+      state.sections = d.sections.slice(0, 3).filter(saved => saved && typeof saved === 'object').map(saved => Object.assign(newSection(), {
+        fenceId: typeof saved.fenceId === 'string' ? saved.fenceId.slice(0, 200) : '',
+        feet: Math.max(0, Math.min(2000, Number(saved.feet) || 0)),
+        height: String(saved.height || '6').slice(0, 6),
+        singleGates: Math.max(0, Math.floor(Number(saved.singleGates) || 0)),
+        doubleGates: Math.max(0, Math.floor(Number(saved.doubleGates) || 0)),
+      }));
+    }
+    if (Array.isArray(d.siteNotes)) { const known = siteNoteButtons().map(button => button.dataset.note); state.siteNotes = d.siteNotes.filter(note => known.includes(note)); }
     if (d.address) {
       setProjectAddress(d.address);
       const a = el('bp-form-address'); if (a && !a.value) a.value = d.address;
@@ -3762,6 +4399,12 @@
         existingFenceMaterial: state.existingFenceMaterial,
         geometry: collectGeometry(),
         photo: leadPhoto || '',
+        contactMethod: (fd && fd.get('contactMethod')) || '',
+        bestTime: (fd && fd.get('bestTime')) || '',
+        timeline: (fd && fd.get('timeline')) || '',
+        siteNotes: state.siteNotes.slice(),
+        sections: state.sections.length ? sectionLines().join('\n') : '',
+        priceRange: price.requiresReview ? '' : formatPrice(price.low) + '–' + formatPrice(price.high),
         notes: [(fd && fd.get('notes')) || '', removalScopeNote(), 'EMAILED ESTIMATE REQUEST — ' +
                'Style: ' + fence.name + ' · Length: ' + state.linearFeet + ' ft · ' +
                'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none') + ' · ' +
@@ -3806,6 +4449,7 @@
     bindStep4();
     bindEmailEstimate();
     bindMapLauncher();
+    try { initPlus(); } catch (e) { console.warn('[Ghareeb Ballpark] extra controls skipped:', e); }
     markActive('bp-step-1');
     markActive('bp-step-2');
     updateAll();
@@ -3860,6 +4504,7 @@
     getSectionSize: getSectionSize,
     getGeometry: collectGeometry,
     getStyleSpecs: function () { return window.GFS_BALLPARK_MODEL_OVERRIDES; },
+    getParts: function () { return describeParts(); },
     version: BUILD,
   };
 
