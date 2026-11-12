@@ -180,7 +180,7 @@
 <link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
-<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261112a">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261112b">
 </head>
 <body class="bp-page">
 
@@ -283,9 +283,9 @@
   <div class="ph__scrim" aria-hidden="true"></div>
   <div class="container ph__content">
     <div class="breadcrumbs"><a href="../../">Home</a> <span>/</span> <a href="../../quote/">Quote</a> <span>/</span> Ballpark Calculator</div>
-    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="bp.eyebrow">Instant Ballpark Quote</div>
-    <h1 class="display-1" data-editable="bp.title">Plan your fence and explore a price range.</h1>
-    <p class="lede" data-editable="bp.lede.contact-first.v2">Enter an approximate length—no sketch needed. Choose a style, height and gates, then share your name and phone to unlock the planning range where available and request our team’s review. A site review confirms final measurements, scope and pricing.</p>
+    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="bp.eyebrow">Ballpark price</div>
+    <h1 class="display-1" data-editable="bp.title.v2">What will my fence cost?</h1>
+    <p class="lede" data-editable="bp.lede.v3">Draw it on the map or type the length, pick a style, and see a price range. We confirm it with a free measure.</p>
   </div>
 </section>
 
@@ -302,13 +302,15 @@
             <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">1</div>
             <div>
               <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s1.title">Where's your fence going?</h2>
-              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s1.sub">Enter an approximate fence length to get started. You can also open the map to draw your layout.</p>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s1.sub.v2">Draw it on a satellite map of your yard, or type the total length.</p>
             </div>
           </div>
 
-          <!-- Quick estimate: no map download needed -->
+          <button id="bp-open-map" type="button" class="btn btn-primary bp-map-cta" aria-expanded="false" aria-controls="bp-map-tools" style="min-height:48px;white-space:normal;"><span aria-hidden="true">&#9998;</span> Draw my fence on the map</button>
+          <p id="bp-map-load-note" role="status" style="font-size:13px;color:var(--gray-500);margin:8px 0 16px;">Most accurate. Lengths fill in for you.</p>
+<!-- Quick estimate: no map download needed -->
           <div style="margin-bottom:20px;">
-            <label class="form-label" for="bp-linear-feet">Approximate fence length (feet) *</label>
+            <label class="form-label" for="bp-linear-feet">Or type the total length (feet)</label>
             <input id="bp-linear-feet" type="number" inputmode="decimal" class="form-input" placeholder="e.g. 150" min="0" max="2000" step="any" aria-describedby="bp-length-help bp-length-status" required>
             <p id="bp-length-help" style="font-size:14px;line-height:1.6;margin-top:8px;">Online ranges cover up to 2,000 feet. For a longer fence, <a href="/quote/form/" style="display:inline-flex;align-items:center;min-height:44px;text-decoration:underline;text-underline-offset:3px;">request a detailed quote</a>.</p>
             <p id="bp-length-status" role="status" aria-live="polite" hidden style="font-size:14px;line-height:1.6;color:#9b2424;margin-top:8px;"></p>
@@ -317,14 +319,13 @@
                  a phone. These give a usable number in one tap; the map stays
                  for anyone who wants accuracy. -->
             <div style="margin-top:14px;">
-              <span class="spec" style="display:block;margin-bottom:8px;">Not sure? Try an example length</span>
+              <span class="spec" style="display:block;margin-bottom:8px;">Not sure? Tap a typical size</span>
               <div id="bp-size-presets" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
             </div>
-            <p style="font-size:12px;color:var(--gray-500);margin-top:8px;" data-editable="bp.s1.tip.v2">Example lengths are starting points, not measurements of your yard. Lot acreage does not determine fence length. Include your full planned run and gates; your estimator will confirm measurements.</p>
+            <p style="font-size:12px;color:var(--gray-500);margin-top:8px;" data-editable="bp.s1.tip.v3">Rough guesses are fine. We measure before you pay anything.</p>
           </div>
 
-          <button id="bp-open-map" type="button" class="btn btn-outline" aria-expanded="false" aria-controls="bp-map-tools" style="min-height:48px;white-space:normal;">Draw on the map instead</button>
-          <p id="bp-map-load-note" role="status" style="font-size:13px;color:var(--gray-500);margin:8px 0 16px;">Optional: map measurements are approximate and will be confirmed on site.</p>
+          
           <div id="bp-map-tools" hidden>
           <details id="bp-sketch-help" class="bp-sketch-help" open>
             <summary>How to sketch your fence</summary>
@@ -523,7 +524,9 @@
                 <input name="phone" id="bpf-phone" type="tel" class="form-input" required style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="tel">
               </div>
             </div>
-            <div style="margin-bottom:14px;">
+            <div style="margin-bottom:14px;"><label class="form-label" for="bp-form-address" style="color:var(--cream);">Property Address</label>
+              <input id="bp-form-address" name="address" type="text" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="street-address"></div>
+<div style="margin-bottom:14px;">
               <label class="form-label" style="color:var(--cream);" for="bpf-email">Email</label>
               <input name="email" id="bpf-email" type="email" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="email">
               </div>
@@ -555,9 +558,8 @@
               <option>Just getting prices</option>
               </select>
               </div>
-            <div style="margin-bottom:14px;">
-              <label class="form-label" for="bp-form-address" style="color:var(--cream);">Property Address</label>
-              <input id="bp-form-address" name="address" type="text" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="street-address">
+            <details class="bp-more" data-gfs-protected><summary>Add a photo or notes (optional)</summary>
+<div style="margin-bottom:14px;">
               <label class="form-label" for="bp-form-photo" style="margin-top:14px;color:var(--cream);">Photo of your current fence or yard <span style="font-weight:400;opacity:0.7;">(optional — helps us quote faster)</span></label>
               <input id="bp-form-photo" type="file" accept="image/*" aria-describedby="bp-photo-status" style="font-size:15px;max-width:100%;">
               <p id="bp-photo-status" role="status" aria-live="polite" style="font-size:14px;margin:8px 0;color:var(--cream);">Choose a saved photo or take a new one. JPG, PNG and WebP work best.</p>
@@ -568,7 +570,8 @@
               <label class="form-label" for="bpf-notes" style="color:var(--cream);">Notes (optional)</label>
               <textarea name="notes" id="bpf-notes" class="form-textarea" rows="3" placeholder="Anything else we should know?" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);"></textarea>
             </div>
-            <button type="submit" class="btn btn-gold btn-lg" style="width:100%;">Unlock My Price</button>
+            </details>
+<button type="submit" class="btn btn-gold btn-lg" style="width:100%;">Unlock My Price</button>
             <p style="font-size:12px;color:rgba(250,246,239,0.6);text-align:center;margin-top:14px;" data-editable="bp.s4.privacy">
               By submitting, you agree to receive a follow-up from Ghareeb Fencing Solutions. We never sell your info.
             </p>
@@ -763,7 +766,7 @@
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
 <script src="../../assets/js/leads.js?v=20261112-reach" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=20261112-multi-style" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261112-print" defer></script>
+<script src="../../assets/js/ballpark.js?v=20261112b" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261112-print" defer></script>
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
 <script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>

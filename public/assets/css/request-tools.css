@@ -180,3 +180,30 @@ body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar,body:has(di
 .bp-offer{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;padding:14px 16px;border:1.5px solid #1d5eb6;border-radius:10px;background:#f1f6fd}
 .bp-offer[hidden]{display:none}
 .bp-offer p{margin:0;font-size:16px;line-height:1.4;color:#102b46;font-weight:600}
+
+/* ---------- 3. Simpler first screen and shorter steps (Nov 12) ---------- */
+/* hero: short on every screen, text only on phones */
+.bp-page .page-header--photo{min-height:0!important;padding-top:56px!important;padding-bottom:48px!important}
+.bp-page .page-header--photo .display-1{font-size:clamp(30px,4.2vw,52px)!important}
+.bp-page .page-header--photo .eyebrow{margin-bottom:10px!important}
+/* the map is the main way in */
+.bp-map-cta{display:flex!important;align-items:center;justify-content:center;gap:10px;width:100%;max-width:460px;min-height:60px!important;font-size:18px!important}
+#bp-map-load-note{margin:8px 0 22px!important}
+.bp-page #bp-step-1 .form-label[for="bp-linear-feet"]{margin-top:4px}
+.bp-page #bp-length-help{font-size:13px!important;color:#506680}
+/* optional extras folded away in step 4 */
+.bp-more{margin:4px 0 18px;border:1px solid rgba(250,246,239,.25);border-radius:8px;padding:0 14px}
+.bp-more>summary{cursor:pointer;min-height:50px;display:flex;align-items:center;font-weight:600;color:#fbfcfe}
+.bp-more[open]{padding-bottom:12px}
+@media(max-width:600px){
+  .bp-page .announce,.bp-page .project-access{display:none!important}
+  .bp-page .page-header--photo{padding-top:22px!important;padding-bottom:20px!important;background:#102b46}
+  .bp-page .page-header--photo .ph__bg,.bp-page .page-header--photo .ph__scrim,.bp-page .page-header--photo .breadcrumbs{display:none!important}
+  .bp-page .page-header--photo .display-1{font-size:28px!important;line-height:1.15!important}
+  .bp-page .page-header--photo .lede{display:block!important;font-size:15px!important;margin-top:8px!important}
+  .bp-page #bp-step-1 .bp-num+div>p,.bp-page #bp-length-help{display:none}
+  /* the progress bar shows the summary on phones; keep the price card only */
+  .bp-page .ballpark-sidebar>*:not(#bp-price-card){display:none!important}
+  #bp-size-presets{display:grid!important;grid-template-columns:1fr 1fr}
+}
+@media(max-width:600px){body.bp-page:not(.bp-unlocked) .ballpark-sidebar{display:none!important}}

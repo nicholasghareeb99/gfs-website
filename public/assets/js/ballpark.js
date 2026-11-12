@@ -865,7 +865,15 @@
         });
       }
       if (!lines.length) return '';
-      var out = JSON.stringify({ v: 1, lines: lines, gates: gates });
+      // Runs the customer tied to an added style carry that style, so the
+      // Executive app draws each run in its own style. Other runs use the
+      // lead's main style.
+      var runStyles = [];
+      state.sections.forEach(function (section) {
+        var fence = FENCE_PRICING[section.fenceId];
+        if (fence && Number.isInteger(section.run) && section.run >= 0 && section.run < lines.length && !runStyles.some(function (r) { return r.run === section.run; })) runStyles.push({ run: section.run, style: fence.name, height: Number(section.height) || null });
+      });
+      var out = JSON.stringify(runStyles.length ? { v: 1, lines: lines, gates: gates, runStyles: runStyles } : { v: 1, lines: lines, gates: gates });
       // Intake validation reports oversized drawings before submission,
       // preserving the customer's layout rather than silently dropping it.
       return out;
@@ -1654,10 +1662,10 @@
   // Illustrative linear lengths only; acreage does not define the fence run.
   // Customers can adjust the number or draw their actual layout.
   const SIZE_PRESETS = [
-    { label: '100 linear feet', feet: 100, note: 'example length' },
-    { label: '150 linear feet', feet: 150, note: 'example length' },
-    { label: '220 linear feet', feet: 220, note: 'example length' },
-    { label: '320 linear feet', feet: 320, note: 'example length' },
+    { label: '100 ft', feet: 100, note: 'small back yard' },
+    { label: '150 ft', feet: 150, note: 'typical back yard' },
+    { label: '220 ft', feet: 220, note: 'large back yard' },
+    { label: '320 ft', feet: 320, note: 'whole lot' },
   ];
 
   function renderSizePresets() {
@@ -1669,7 +1677,7 @@
       'padding:10px 14px;border:1.5px solid var(--line);background:var(--paper);' +
       'border-radius:5px;cursor:pointer;min-height:48px;font-family:var(--body);color:var(--ink);">' +
       '<span style="font-weight:600;font-size:14px;">' + esc(p.label) + '</span>' +
-      '<span class="num" style="font-size:12px;color:var(--galv);">~' + p.feet + ' ft &middot; ' + esc(p.note) + '</span>' +
+      '<span style="font-size:12px;color:var(--galv);">' + esc(p.note) + '</span>' +
       '</button>').join('');
 
     wrap.querySelectorAll('button[data-feet]').forEach(btn => {
@@ -3597,7 +3605,8 @@
       const facts = window.GFSMapGeometry.summary(mapPaths(activeDrawingEngine, false), mapGates(activeDrawingEngine));
       const runs = [];
       facts.segments.forEach(row => { runs[row.line] = (runs[row.line] || 0) + row.feet; });
-      return runs.map(feet => Math.round(feet || 0)).filter(feet => feet > 0);
+      // Keep each run's own index so a style can be tied to the run it covers.
+      return runs.map((feet, run) => ({ run: run, feet: Math.round(feet || 0) })).filter(row => row.feet > 0);
     } catch (e) { return []; }
   }
 
@@ -3697,7 +3706,7 @@
         '<div class="bp-variants" data-role="variants"></div>' +
         '<div class="bp-sec__feetwrap"><label class="form-label" for="bp-sec-feet-' + section.uid + '">How many feet of this style?</label>' +
         '<input id="bp-sec-feet-' + section.uid + '" class="form-input bp-sec__feet" type="number" inputmode="decimal" min="1" max="2000" step="any" placeholder="e.g. 60">' +
-        (runs.length > 1 ? '<div class="bp-sec__runs" role="group" aria-label="Use a run you drew on the map">' + runs.map((feet, i) => '<button type="button" class="bp-chip" data-run-feet="' + feet + '">Run ' + (i + 1) + ' · ' + feet + ' ft</button>').join('') + '</div>' : '') +
+        (runs.length > 1 ? '<div class="bp-sec__runs" role="group" aria-label="Use a run you drew on the map">' + runs.map((row, i) => '<button type="button" class="bp-chip" aria-pressed="' + (section.run === row.run) + '" data-run-index="' + row.run + '" data-run-feet="' + row.feet + '">Run ' + (i + 1) + ' \u00b7 ' + row.feet + ' ft</button>').join('') + '</div>' : '') +
         '</div><p class="bp-sec__issue" role="status" aria-live="polite"></p>';
       card.querySelector('.bp-sec__remove').addEventListener('click', () => {
         state.sections = state.sections.filter(other => other !== section);
@@ -3706,8 +3715,8 @@
       });
       card.querySelector('.bp-sec__style').addEventListener('click', () => openStylePicker(section));
       const feet = card.querySelector('.bp-sec__feet');
-      feet.addEventListener('input', () => { section.feet = Math.max(0, Number(feet.value) || 0); updateAll(); });
-      card.querySelectorAll('[data-run-feet]').forEach(button => button.addEventListener('click', () => { section.feet = Number(button.dataset.runFeet) || 0; feet.value = section.feet; updateAll(); }));
+      feet.addEventListener('input', () => { section.feet = Math.max(0, Number(feet.value) || 0); section.run = undefined; card.querySelectorAll('[data-run-feet]').forEach(other => other.setAttribute('aria-pressed', 'false')); updateAll(); });
+      card.querySelectorAll('[data-run-feet]').forEach(button => button.addEventListener('click', () => { section.feet = Number(button.dataset.runFeet) || 0; section.run = Number(button.dataset.runIndex); feet.value = section.feet; card.querySelectorAll('[data-run-feet]').forEach(other => other.setAttribute('aria-pressed', String(other === button))); updateAll(); }));
       host.appendChild(card);
     });
     if (state.sections.length) {
@@ -3864,6 +3873,7 @@
     return bar;
   }
   function renderBar() {
+    document.body.classList.toggle('bp-unlocked', !!state.priceUnlocked);
     const bar = ensureBar(), step = bar.querySelector('.bp-bar__step'), now = bar.querySelector('.bp-bar__now'), go = bar.querySelector('.bp-bar__go');
     const feet = Number(state.linearFeet) > 0 ? state.linearFeet + ' ft' : '', fence = FENCE_PRICING[state.fenceId];
     const jump = (id, focusId) => () => {
@@ -4279,7 +4289,7 @@
         removeOldFence: state.removeOldFence,
         existingFenceMaterial: state.existingFenceMaterial,
         address: state.address,
-        sections: state.sections.map(section => ({ fenceId: section.fenceId, feet: section.feet, height: section.height, singleGates: section.singleGates, doubleGates: section.doubleGates })),
+        sections: state.sections.map(section => ({ fenceId: section.fenceId, feet: section.feet, height: section.height, singleGates: section.singleGates, doubleGates: section.doubleGates, run: section.run })),
         siteNotes: state.siteNotes.slice(0, 12),
         savedAt: Date.now(),
       }));
@@ -4320,6 +4330,7 @@
         height: String(saved.height || '6').slice(0, 6),
         singleGates: Math.max(0, Math.floor(Number(saved.singleGates) || 0)),
         doubleGates: Math.max(0, Math.floor(Number(saved.doubleGates) || 0)),
+        run: Number.isInteger(saved.run) && saved.run >= 0 && saved.run < 100 ? saved.run : undefined,
       }));
     }
     if (Array.isArray(d.siteNotes)) { const known = siteNoteButtons().map(button => button.dataset.note); state.siteNotes = d.siteNotes.filter(note => known.includes(note)); }
