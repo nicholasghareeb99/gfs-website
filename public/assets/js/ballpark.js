@@ -3553,9 +3553,9 @@
     const named = fence ? supportedStyleHeight(fence.name) : null;
     return named !== null ? named : Number(requested);
   }
-  // A style that names its height is priced at its own rate. Only the few
-  // styles without a height in the name use the 4/5/6/8 ft ladder factors
-  // from the Executive app settings.
+  // Every style is priced at its own rate. Heights are separate styles in
+  // the Executive app, so no height multiplier is applied, including for
+  // the few styles whose name has no height.
   function pricePart(part) {
     const fence = FENCE_PRICING[part.fenceId];
     if (!fence || !Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
@@ -3563,7 +3563,8 @@
     const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
     if (named === null && ![4, 5, 6, 8].includes(height)) return null;
     const rounding = roundToSections(part.feet, fence.name);
-    const factor = named !== null ? 1 : heightFactorFor(height);
+    // Heights are separate styles with their own prices; no multipliers.
+    const factor = 1;
     return {
       primary: !!part.primary, id: part.fenceId, name: fence.name, height: height, heightInName: named !== null,
       feet: part.feet, billableFeet: rounding.billable, sectionSize: rounding.sectionSize, waste: rounding.waste,
