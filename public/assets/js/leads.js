@@ -231,7 +231,10 @@
       fence_sections: sections.join('\n'),
       site_notes: siteNotes,
       heard_from: oneLine(input.heardFrom, 80),
-      map_link: address ? 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(address.slice(0, 300)) : '',
+      // No links are added to the submission: a web address in a form post
+      // can count against it in spam filtering, and a lost lead costs more
+      // than a shortcut. Phone mail apps already make the street address
+      // above tappable.
       map_drawing: drawingLine(typeof input.geometry === 'string' ? input.geometry : ''),
     };
   }
@@ -712,7 +715,6 @@
       best_time_to_reach: details.best_time_to_reach,
       summary: details.summary,
       heard_from: details.heard_from,
-      map_link: details.map_link,
     };
 
     // Validate required fields
