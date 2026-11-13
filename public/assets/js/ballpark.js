@@ -1949,7 +1949,7 @@
       const needsQuote = state.fenceId && state.linearFeet > 0 && FENCE_PRICING[state.fenceId];
       const missingRemoval = state.removeOldFence && !existingFenceMaterialLabel();
       const sectionIssue = needsQuote ? sectionsIssue() : '';
-      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : 'This style needs a custom quote') : 'Complete steps 1–3';
+      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : 'This style needs a custom quote') : 'Your price in 4 quick steps';
       if (priceHint) {
         priceHint.replaceChildren();
         if (state.linearFeet > 2000) {
@@ -3964,6 +3964,40 @@
     host.hidden = false;
   }
 
+  // ---- PROGRESS: STEP RAIL, DONE CHECKS, PRICE-CARD CHECKLIST ----------------------------
+  const RAIL = [['bp-step-1', 'Length'], ['bp-step-2', 'Style'], ['bp-step-3', 'Gates & details'], ['bp-step-4', 'Your price']];
+  function stepsDone() {
+    return [Number(state.linearFeet) > 0, !!FENCE_PRICING[state.fenceId] && !sectionsIssue(), !!state.sawDetails, !!state.priceUnlocked];
+  }
+  function ensureProgress() {
+    const first = el('bp-step-1');
+    if (first && !el('bp-rail')) {
+      const rail = document.createElement('nav');
+      rail.id = 'bp-rail'; rail.setAttribute('aria-label', 'Estimate steps'); rail.setAttribute('data-gfs-protected', '');
+      rail.innerHTML = RAIL.map(([id, label], i) => '<button type="button" data-step="' + id + '"><span class="bp-rail__n">' + (i + 1) + '</span>' + label + '</button>').join('');
+      rail.addEventListener('click', event => { const button = event.target.closest('button[data-step]'); if (button) el(button.dataset.step)?.scrollIntoView({ block: 'start', behavior: 'smooth' }); });
+      first.before(rail);
+    }
+    const range = el('bp-price-range');
+    if (range && !el('bp-checklist')) {
+      const list = document.createElement('ul');
+      list.id = 'bp-checklist'; list.setAttribute('data-gfs-protected', '');
+      list.innerHTML = ['Fence length', 'Fence style', 'Gates and details', 'Your contact details'].map(text => '<li>' + text + '</li>').join('');
+      range.after(list);
+    }
+  }
+  function renderProgress() {
+    const done = stepsDone(), now = done.indexOf(false);
+    $$('#bp-rail button').forEach((button, i) => {
+      button.classList.toggle('is-done', done[i]);
+      button.classList.toggle('is-now', i === now);
+      if (i === now) button.setAttribute('aria-current', 'step'); else button.removeAttribute('aria-current');
+    });
+    RAIL.forEach(([id], i) => el(id)?.classList.toggle('is-done', done[i]));
+    const list = el('bp-checklist');
+    if (list) { list.hidden = !!state.priceUnlocked; $$('#bp-checklist li').forEach((item, i) => item.classList.toggle('is-done', done[i])); }
+  }
+
   // ---- ONE PASS AFTER EVERY UPDATE ---------------------------------------------------
   function renderPlus() {
     ensureMainSteppers();
@@ -3978,12 +4012,14 @@
     renderGateAssign();
     renderSummaryParts();
     renderSiteNotes();
+    renderProgress();
     renderBar();
   }
   function initPlus() {
     document.body.classList.add('bp-page');
     ensureSummaryParts();
     ensureStyleOffer();
+    ensureProgress();
     bindSiteNotes();
     readRequestedStyle();
     const form = el('bp-form');
