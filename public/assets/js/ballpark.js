@@ -819,7 +819,7 @@
   // Build stamp — visible in DevTools console. If you see an OLD stamp,
   // your browser cached an older ballpark.js. Hard-reload with Ctrl+Shift+R
   // (Windows/Linux) or Cmd+Shift+R (Mac) to force-fetch the latest.
-  const BUILD = 'ballpark-20261112-multi-style';
+  const BUILD = 'ballpark-20261113-audit';
   console.log('%c[Ghareeb Ballpark] ' + BUILD, 'background:#1A2E40;color:#B8945A;padding:3px 8px;border-radius:3px;font-weight:bold;');
 
   // -------- GEOMETRY CAPTURE (Exec-app sketch handoff) --------
@@ -1114,8 +1114,6 @@
     },
   };
 
-  const REMOVAL_COST = { 'wood': 5, 'chain': 3, 'other': 6 };
-
   // -------- STATE --------
   const state = {
     linearFeet: 0,
@@ -1143,16 +1141,13 @@
   // Returns the calculated total + a ±5% range. Returns null if state is
   // insufficient to price.
   // ---- EXECUTIVE APP PRICING ENGINE (faithful port) ----------------------
-  // Mirrors the Executive app's option-total formula exactly:
+  // Mirrors the Executive app's option-total formula:
   //   billable = roundToSections(len, styleName)
-  //   hf       = h===4 ? heightFactor4 : h===5 ? heightFactor5 : h===8 ? heightFactor8 : 1
-  //   total    = billable*price*hf + removalFt*removalRate + sg*sgPrice + dg*dgPrice
-  // All factors come from settings/global so the website and the Executive app
-  // stay in lockstep. Defaults match the Executive app's own fallbacks.
+  //   total    = billable*price + removalFt*removalRate + sg*sgPrice + dg*dgPrice
+  // Each height is its own style with its own price, so there is no height
+  // multiplier. Removal rates come from the Executive app's settings so the
+  // website and the app stay in lockstep; the defaults match its fallbacks.
   const PRICING_FACTORS = {
-    heightFactor4: 0.70,
-    heightFactor5: 0.85,
-    heightFactor8: 1.35,
     remWood: 5,
     remChain: 3,
     remOther: 6,
@@ -1189,13 +1184,6 @@
     const billable = sections * sectionSize;
     return { billable, sections, sectionSize, waste: billable - ft };
   }
-  function heightFactorFor(h) {
-    const n = Number(h);
-    if (n === 4) return PRICING_FACTORS.heightFactor4;
-    if (n === 5) return PRICING_FACTORS.heightFactor5;
-    if (n === 8) return PRICING_FACTORS.heightFactor8;
-    return 1;
-  }
   function removalRateFor(removalType) {
     if (removalType === 'wood')  return PRICING_FACTORS.remWood;
     if (removalType === 'chain') return PRICING_FACTORS.remChain;
@@ -1226,8 +1214,7 @@
     // Each part is billed at the next full panel for styles installed in
     // sections, the way the Executive app does it. A missing rate is not a
     // free fence, so any part that cannot be priced leaves the whole
-    // project unpriced. A style that names its height uses its own price;
-    // only styles without one use the 4/5/6/8 ft ladder (see pricePart).
+    // project unpriced. Every style is priced at its own rate (see pricePart).
     const parts = projectParts(mainId).map(pricePart);
     if (parts.some(part => !part)) return null;
     if (state.removeOldFence && !existingFenceMaterialLabel()) return null;
@@ -1457,7 +1444,7 @@
     const gallery=el('bp-style-selected-gallery');gallery.replaceChildren();gallery.hidden=!photos.length;
     photos.forEach((photo,i)=>{
       const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
-      img.src=photo.url;img.alt=photo.kind==='material example'?'Fence example; not the exact selected style':fence.name+(photo.kind==='product rendering'?' — product rendering':' — style reference '+(i+1));img.loading='lazy';img.decoding='async';
+      img.src=thumbOf(photo.url,800);img.dataset.full=photo.url;img.alt=photo.kind==='material example'?'Fence example; not the exact selected style':fence.name+(photo.kind==='product rendering'?' — product rendering':' — style reference '+(i+1));img.loading='lazy';img.decoding='async';
       if(i===0){img.setAttribute('data-editable-img','bp.fence.'+id+'.photo');img.addEventListener('click',event=>{if(!document.body.classList.contains('editing')||img.hasAttribute('data-editable-img'))return;const card=$$('#bp-fence-options .ballpark-photo-opt').find(card=>card.dataset.id===state.fenceId),target=card?.querySelector('img');if(target){event.preventDefault();event.stopImmediatePropagation();target.click();}});}
       caption.textContent=photo.kind==='material example'?'Example photo — not the exact style':photo.kind==='product rendering'?'Product rendering':'Style reference';
       figure.append(img,caption);gallery.append(figure);
@@ -1549,16 +1536,6 @@
   function familyOf(id) {
     const f = FENCE_PRICING[id];
     return (f && f.category) || categoryForName((f && f.name) || id);
-  }
-
-  // Cheapest per-foot price in a family — gives the customer a sense of
-  // relative cost before they commit to browsing it.
-  function familyFrom(fam) {
-    const prices = Object.keys(FENCE_PRICING)
-      .filter(id => familyOf(id) === fam)
-      .map(id => FENCE_PRICING[id].perFoot)
-      .filter(n => !isNaN(n));
-    return prices.length ? Math.min.apply(null, prices) : null;
   }
 
   function renderMaterialFilter() {
@@ -1687,13 +1664,8 @@
         const lf = el('bp-linear-feet');
         if (!lf) return;
         lf.value = btn.dataset.feet;
+        // The pressed state follows the length (see renderSizePresetState).
         lf.dispatchEvent(new Event('input', { bubbles: true }));
-        // Show which preset is active
-        wrap.querySelectorAll('button[data-feet]').forEach(b => {
-          const on = b === btn;
-          b.style.borderColor = on ? 'var(--cedar)' : 'var(--line)';
-          b.style.background = on ? 'rgba(164,85,43,0.07)' : 'var(--paper)';
-        });
       });
     });
   }
@@ -2149,6 +2121,9 @@
             reference: acceptedBallparkReceipt,
             geometry: collectGeometry(),
             photoUrl: thumbOf(fence.photoThumb || fence.photo, 900),
+            // Say what the picture is: many styles only have a material example.
+            photoCaption: !fence.imageKind || fence.imageKind === 'material example' ? 'Example photo. Not the exact style.'
+              : fence.imageKind === 'product rendering' ? 'Product rendering of ' + fence.name + '.' : fence.name + '.',
           });
         } else {
           alert('PDF generator is still loading — give it a moment and try again.');
@@ -2163,7 +2138,6 @@
   // User draws a polyline along their fence path; we calculate total
   // length from the geo coordinates using each segment's distanceTo.
   let map = null;
-  let drawnItems = null;
 
   // -------- MAP STATUS BANNER --------
   // Shows the user (and us, when debugging) exactly what's happening with
@@ -2283,36 +2257,6 @@
       node.replaceWith(replacement);
     }
     return true;
-  }
-
-  // Polls for Google Maps SDK availability. Returns a promise that resolves
-  // true when ready or false on timeout/failure. Necessary because the SDK
-  // loads async — it may not be ready when this script's init() runs.
-  // Short-circuits if Google Maps signals an auth failure or load failure.
-  function waitForGoogleMaps(timeoutMs) {
-    return new Promise(resolve => {
-      function check() {
-        return !!(window.google && window.google.maps && window.google.maps.Map && window.google.maps.Polyline && window.google.maps.geometry?.spherical && window.google.maps.places);
-      }
-      function failed() {
-        return window.GFS_GOOGLE_MAPS_AUTH_FAILED || window.GFS_GOOGLE_MAPS_LOAD_FAILED;
-      }
-      if (check()) return resolve(true);
-      if (failed()) return resolve(false);
-      const start = Date.now();
-      const interval = setInterval(() => {
-        if (check()) {
-          clearInterval(interval);
-          resolve(true);
-        } else if (failed() || Date.now() - start > timeoutMs) {
-          clearInterval(interval);
-          resolve(false);
-        }
-      }, 100);
-      // Also listen for the failure events for immediate short-circuit
-      window.addEventListener('gfs-gmaps-auth-failed',  () => { clearInterval(interval); resolve(false); }, { once: true });
-      window.addEventListener('gfs-gmaps-load-failed',  () => { clearInterval(interval); resolve(false); }, { once: true });
-    });
   }
 
   // Measurement and placement share one coordinate model; lead/pricing units stay gross feet.
@@ -3378,11 +3322,15 @@
 
   // =====================================================================
   //  2026-11 TOOL UPGRADE
+  //  - resized style photos
   //  - one tile per model in the picker, with color and height chips
-  //  - more than one fence style in a project (each priced on its own)
-  //  - tap-size gate steppers, site notes, full-screen map
-  //  - a progress bar on phones
-  //  Per-foot rates are still never shown before the contact step.
+  //  - more than one fence style in a project (each priced on its own),
+  //    and which drawn run each added style covers
+  //  - gate steppers, yard notes, full-screen map
+  //  - progress: step rail, done checks, checklist, phone bar
+  //  - styles handed in by a link or from the 3D Studio
+  //  Per-foot rates are never shown. Dollar amounts appear only after the
+  //  contact step.
   // =====================================================================
 
   // ---- SMALL PICTURES -----------------------------------------------------------
@@ -3585,13 +3533,11 @@
     const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
     if (named === null && ![4, 5, 6, 8].includes(height)) return null;
     const rounding = roundToSections(part.feet, fence.name);
-    // Heights are separate styles with their own prices; no multipliers.
-    const factor = 1;
     return {
       primary: !!part.primary, id: part.fenceId, name: fence.name, height: height, heightInName: named !== null,
       feet: part.feet, billableFeet: rounding.billable, sectionSize: rounding.sectionSize, waste: rounding.waste,
       singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates),
-      fenceCost: rounding.billable * fence.perFoot * factor,
+      fenceCost: rounding.billable * fence.perFoot,
       gateCost: Math.max(0, part.singleGates) * fence.singleGate + Math.max(0, part.doubleGates) * fence.doubleGate,
     };
   }
@@ -3756,7 +3702,12 @@
     const host = ensureSectionsHost();
     if (!host) return;
     const runs = mapRunFeet();
-    const signature = JSON.stringify([state.sections.map(section => [section.uid, section.fenceId]), Object.keys(FENCE_PRICING).length, runs]);
+    // A style stays tied to a drawn run only while that run still has the
+    // length it had when it was tapped; redrawing the map clears the tie.
+    if (runs.length) state.sections.forEach(section => {
+      if (section.run !== undefined && !runs.some(row => row.run === section.run && row.feet === section.feet)) section.run = undefined;
+    });
+    const signature = JSON.stringify([state.sections.map(section => [section.uid, section.fenceId, section.run]), Object.keys(FENCE_PRICING).length, runs]);
     if (host.dataset.signature !== signature) { host.dataset.signature = signature; buildSections(host, runs); }
     host.hidden = !FENCE_PRICING[state.fenceId] && !state.sections.length;
     state.sections.forEach(section => {
@@ -3780,6 +3731,11 @@
         split.append(lead, ' = ' + [(Math.round((total - used) * 100) / 100) + ' ft ' + (main ? main.name : 'main style')].concat(state.sections.filter(section => section.feet > 0).map(section => section.feet + ' ft ' + (FENCE_PRICING[section.fenceId] ? FENCE_PRICING[section.fenceId].name : 'added style'))).join(' + '));
       }
     }
+  }
+
+  // A typical-size button shows as pressed while the length equals its size.
+  function renderSizePresetState() {
+    $$('#bp-size-presets button[data-feet]').forEach(button => button.setAttribute('aria-pressed', Number(button.dataset.feet) === Number(state.linearFeet) ? 'true' : 'false'));
   }
 
   // ---- SITE NOTES (STEP 3) ------------------------------------------------------
@@ -3837,7 +3793,7 @@
     if (!tools) return;
     tools.classList.toggle('bp-map-full', !!on);
     document.documentElement.classList.toggle('bp-map-open', !!on);
-    if (button) { button.textContent = on ? 'Close full screen' : 'Full screen'; button.setAttribute('aria-pressed', on ? 'true' : 'false'); }
+    if (button) button.textContent = on ? 'Close full screen' : 'Full screen';
     const refresh = () => {
       try {
         if (map && typeof map.invalidateSize === 'function') map.invalidateSize();
@@ -3855,7 +3811,7 @@
     if (address) address.classList.add('bp-map-address');
     const button = document.createElement('button');
     button.type = 'button'; button.id = 'bp-map-fullscreen'; button.textContent = 'Full screen';
-    button.setAttribute('aria-pressed', 'false'); button.setAttribute('data-gfs-protected', '');
+    button.setAttribute('data-gfs-protected', '');
     frame.appendChild(button);
     button.addEventListener('click', () => setMapFullscreen(!tools.classList.contains('bp-map-full')));
     // Keep the map drawn to its real size whenever the space around it changes
@@ -4022,6 +3978,7 @@
       value: state.height,
       set: height => { const select = el('bp-height'); if (!select) return; setHeightControl(select, height); select.dispatchEvent(new Event('change')); },
     });
+    renderSizePresetState();
     renderSections();
     renderGateAssign();
     renderSummaryParts();
@@ -4044,9 +4001,13 @@
     const form = el('bp-form');
     if (form && window.GFSLeads && typeof window.GFSLeads.wireReach === 'function') window.GFSLeads.wireReach(form);
     // Reaching step 3 counts as having seen the gate and detail options.
+    // The step is taller than a phone screen, so a third of it in view counts.
     const details = el('bp-step-3');
     if (details && typeof IntersectionObserver === 'function') {
-      new IntersectionObserver(entries => { if (entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.6) && FENCE_PRICING[state.fenceId] && !state.sawDetails) { state.sawDetails = true; renderBar(); } }, { threshold: [0.6] }).observe(details);
+      new IntersectionObserver(entries => {
+        if (state.sawDetails || !FENCE_PRICING[state.fenceId] || !entries.some(entry => entry.isIntersecting && entry.intersectionRatio >= 0.35)) return;
+        state.sawDetails = true; renderProgress(); renderBar();
+      }, { threshold: [0.35] }).observe(details);
     }
   }
 
@@ -4076,9 +4037,9 @@
       if (snap.exists) {
         const data = snap.data();
         if (data && typeof data.pricing === 'string' && data.pricing.trim()) {
-          // Pull the same pricing factors the Executive app uses, so a change
+          // Pull the same removal rates the Executive app uses, so a change
           // made in its admin settings takes effect here too.
-          ['heightFactor4','heightFactor5','heightFactor8','remWood','remChain','remOther']
+          ['remWood','remChain','remOther']
             .forEach(k => {
               const v = parseFloat(data[k]);
               if (!isNaN(v) && v > 0) PRICING_FACTORS[k] = v;

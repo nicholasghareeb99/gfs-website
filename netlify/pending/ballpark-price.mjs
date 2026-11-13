@@ -1,5 +1,10 @@
 // Ballpark price, worked out on the server.
 //
+// NOT LIVE. This file sits in netlify/pending/ so no deploy can pick it up.
+// To switch it on: set the two environment variables below, move the file
+// to netlify/functions/, and point the ballpark page at it. `npm test`
+// covers its rules (tests/pricing.test.mjs).
+//
 // The per-foot rates live only in Firestore settings/global, which the
 // browser cannot read once the public mirror stops copying `pricing`.
 // This function reads them with a service account, prices the project the
@@ -13,7 +18,7 @@
 //   GFS_FIREBASE_PROJECT_ID       already set for the intake function
 //   GFS_PRICING_SERVICE_ACCOUNT   the service account key JSON (raw or base64)
 //
-// POST /.netlify/functions/ballpark-price
+// Once live: POST /.netlify/functions/ballpark-price
 //   { receipt, parts:[{style, feet, singleGates, doubleGates}],
 //     removal:{on, material}, compare:true }
 // -> { low, high, total, parts:[{style, feet, billableFeet, sectionSize, waste}],
@@ -47,9 +52,10 @@ export function sectionSize(name) {
   return 0;
 }
 function removalRate(factors, material) {
+  // Defaults match the ballpark page and the Executive app's own fallbacks.
   if (material === 'wood') return num(factors.remWood, 5);
   if (material === 'chain') return num(factors.remChain, 3);
-  return num(factors.remOther, 2);
+  return num(factors.remOther, 6);
 }
 function num(v, d) { const n = Number(v); return Number.isFinite(n) ? n : d; }
 const band = total => ({ total: Math.round(total), low: Math.round(total * 0.95 / 100) * 100, high: Math.round(total * 1.05 / 100) * 100 });

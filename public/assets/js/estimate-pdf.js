@@ -10,6 +10,7 @@
    Output: US Letter. Content flows onto as many pages as it needs:
      - who it is for, how to reach them, the range
      - every fence style in the project (length, height, gates)
+     - a photo for the chosen style, with a caption that says what it shows
      - what the customer told us about the yard
      - the sketch they drew on the map
      - other styles priced for the same fence
@@ -224,7 +225,7 @@
       let tallest = 0;
       [facts[i], facts[i + 1]].forEach((fact, c) => {
         if (!fact) return;
-        const x = M + c * (FULL / 2 + 10 - 10 * c);
+        const x = M + c * (FULL / 2);
         font('normal', 8.5); color(GRAY);
         doc.text(fact[0].toUpperCase(), x, y, { charSpace: 0.6 });
         font('bold', 11.5); color(INK);
@@ -281,7 +282,7 @@
         doc.addImage(photo.data, 'JPEG', M, y, pw, ph);
         line(RULE); doc.setLineWidth(0.5); doc.rect(M, y, pw, ph, 'S');
         font('normal', 9); color(GRAY);
-        doc.text(doc.splitTextToSize('Example of ' + (parts[0].name || 'this style') + '. Your fence is built to your yard.', FULL - pw - 18), M + pw + 14, y + 12);
+        doc.text(doc.splitTextToSize(safe(data.photoCaption, 160) || 'Example photo. Not the exact style.', FULL - pw - 18), M + pw + 14, y + 12);
         y += ph + 16;
       } catch (e) { /* the sheet prints fine without it */ }
     }
@@ -299,7 +300,8 @@
       'We measure on site. It is free. We walk the fence line and check grade, gates and access.',
       'You get a written proposal with the firm price.',
     ];
-    need(150);
+    // Keep the heading, the three steps and the booking line together.
+    need(126);
     heading('What happens next');
     steps.forEach((text, i) => {
       const lines = doc.splitTextToSize(text, FULL - 30);
@@ -315,7 +317,7 @@
     y += 26;
 
     // ---------- What the proposal covers ----------
-    need(130);
+    need(96);
     heading('Your written proposal spells out');
     bullets([
       'Selected materials, gates and installation method',

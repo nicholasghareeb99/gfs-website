@@ -601,7 +601,7 @@
     function sync() {
       const chosen = radios.find(radio => radio.checked);
       const box = radios[0] && radios[0].closest('.gfs-reach');
-      if (box) { box.classList.toggle('is-chosen', !!chosen); if (chosen) box.classList.remove('is-missing'); }
+      if (box && chosen) box.classList.remove('is-missing');
       if (email) {
         email.required = emailWasRequired || (!!chosen && chosen.value === 'Email');
         if (emailLabel && !emailWasRequired) emailLabel.innerHTML = email.required ? 'Email * <span class="gfs-reach__hint">so we can email you</span>' : emailLabelText;
