@@ -71,6 +71,28 @@
     return logoPromise;
   }
 
+  // A photo of the chosen style, when the page can give a same-origin copy
+  // (a cross-site image cannot be copied into the PDF).
+  function loadPhoto(url) {
+    return new Promise(resolve => {
+      if (!url || !/^\//.test(url)) return resolve(null);
+      const img = new Image();
+      const done = value => { clearTimeout(timer); resolve(value); };
+      const timer = setTimeout(() => done(null), 4000);
+      img.onload = () => {
+        try {
+          const scale = Math.min(1, 900 / img.naturalWidth);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.round(img.naturalWidth * scale); canvas.height = Math.round(img.naturalHeight * scale);
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          done({ data: canvas.toDataURL('image/jpeg', 0.82), ratio: canvas.width / canvas.height });
+        } catch (e) { done(null); }
+      };
+      img.onerror = () => done(null);
+      img.src = url;
+    });
+  }
+
   // -------- THEME (current brand: ink, one blue, quiet grays) --------
   const INK   = [16, 43, 70];
   const BLUE  = [29, 94, 182];
@@ -111,7 +133,7 @@
   }
 
   // -------- PDF BUILDER --------
-  function buildPDF(data, logo) {
+  function buildPDF(data, logo, photo) {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
     const W = doc.internal.pageSize.getWidth();
@@ -250,6 +272,18 @@
       doc.text(data.linearFeet + ' ft', cols.length, y);
       doc.text(gateText(Number(data.singleGates) || 0, Number(data.doubleGates) || 0), cols.gates, y);
       y += 18;
+    }
+    if (photo && photo.data) {
+      const ph = 150, pw = Math.min(FULL * 0.5, ph * (photo.ratio || 1.33));
+      need(ph + 30);
+      y += 4;
+      try {
+        doc.addImage(photo.data, 'JPEG', M, y, pw, ph);
+        line(RULE); doc.setLineWidth(0.5); doc.rect(M, y, pw, ph, 'S');
+        font('normal', 9); color(GRAY);
+        doc.text(doc.splitTextToSize('Example of ' + (parts[0].name || 'this style') + '. Your fence is built to your yard.', FULL - pw - 18), M + pw + 14, y + 12);
+        y += ph + 16;
+      } catch (e) { /* the sheet prints fine without it */ }
     }
     const removal = removalText(data);
     if (removal) { y += 2; font('bold', 10.5); color(INK); doc.text('Old fence removal:', M, y); paragraph(removal, 10.5, INK, FULL - 110, M + 104); y += 2; }
@@ -426,9 +460,9 @@
       if (button) { button.disabled = wasDisabled; button.textContent = label; button.removeAttribute('aria-busy'); }
     }
     loadJsPDF(() => {
-      loadLogo().then(logo => {
+      Promise.all([loadLogo(), loadPhoto(data.photoUrl)]).then(([logo, photo]) => {
         try {
-          const doc = buildPDF(data, logo);
+          const doc = buildPDF(data, logo, photo);
           const filename = `Ghareeb-Fencing-Estimate-${(data.customerName || 'quote').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'quote'}.pdf`;
           if (isIOS) {
             const url = URL.createObjectURL(doc.output('blob'));

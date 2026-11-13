@@ -2148,6 +2148,7 @@
             timeline: (contact && contact.get('timeline')) || '',
             reference: acceptedBallparkReceipt,
             geometry: collectGeometry(),
+            photoUrl: thumbOf(fence.photoThumb || fence.photo, 900),
           });
         } else {
           alert('PDF generator is still loading — give it a moment and try again.');
