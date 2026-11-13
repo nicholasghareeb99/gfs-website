@@ -819,7 +819,7 @@
   // Build stamp — visible in DevTools console. If you see an OLD stamp,
   // your browser cached an older ballpark.js. Hard-reload with Ctrl+Shift+R
   // (Windows/Linux) or Cmd+Shift+R (Mac) to force-fetch the latest.
-  const BUILD = 'ballpark-20261113-audit';
+  const BUILD = 'ballpark-20261113-pass2';
   console.log('%c[Ghareeb Ballpark] ' + BUILD, 'background:#1A2E40;color:#B8945A;padding:3px 8px;border-radius:3px;font-weight:bold;');
 
   // -------- GEOMETRY CAPTURE (Exec-app sketch handoff) --------
@@ -1006,9 +1006,8 @@
   });
 
   // -------- PRICING DATA (Executive app v23.1 calibrated) --------
-  // perFoot: base $/ft at standard 6 ft tall (the most common build)
+  // perFoot: $/ft for the style as named
   // gates: $ per gate at standard build
-  // heightMod: scaling factor for non-standard heights
   // photo: Squarespace CDN URL for the style preview
   // category: which fence type page the style belongs to
   const FENCE_PRICING = {
@@ -1016,7 +1015,6 @@
       name: 'Cedar Privacy',
       detail: 'Western Red Cedar, classic dog-ear or flat-top',
       perFoot: 35, singleGate: 200, doubleGate: 400,
-      heightMod: { '4': 0.75, '5': 0.85, '6': 1.0, '8': 1.30 },
       photo: 'https://gfs-website.netlify.app/images/gallery/cedar-shadowbox.jpg',
       category: 'cedar',
       style: 'privacy',
@@ -1026,7 +1024,6 @@
       name: 'Cedar Shadowbox',
       detail: 'Alternating boards, privacy from both sides',
       perFoot: 38, singleGate: 200, doubleGate: 400,
-      heightMod: { '4': 0.75, '5': 0.85, '6': 1.0, '8': 1.30 },
       photo: 'https://gfs-website.netlify.app/images/gallery/cedar-lattice-shadowbox.jpg',
       category: 'cedar',
       style: 'shadowbox',
@@ -1036,7 +1033,6 @@
       name: 'Pressure-Treated Wood Privacy',
       detail: 'Budget-friendly privacy, dog-ear pickets',
       perFoot: 22, singleGate: 150, doubleGate: 300,
-      heightMod: { '4': 0.75, '5': 0.85, '6': 1.0, '8': 1.30 },
       photo: 'https://gfs-website.netlify.app/images/gallery/pt-privacy.jpg',
       category: 'wood',
       style: 'privacy',
@@ -1046,7 +1042,6 @@
       name: 'Vinyl Privacy',
       detail: 'Privacy options with simple upkeep',
       perFoot: 55, singleGate: 350, doubleGate: 700,
-      heightMod: { '4': 0.75, '5': 0.85, '6': 1.0, '8': 1.30 },
       photo: 'https://gfs-website.netlify.app/images/gallery/vinyl-white.jpg',
       category: 'vinyl',
       style: 'privacy',
@@ -1056,7 +1051,6 @@
       name: 'Vinyl Picket',
       detail: 'Classic decorative, multiple colors',
       perFoot: 48, singleGate: 350, doubleGate: 700,
-      heightMod: { '3': 0.80, '4': 1.0, '5': 1.10 },
       photo: 'https://gfs-website.netlify.app/images/gallery/vinyl-tan-privacy.jpg',
       category: 'vinyl',
       style: 'picket',
@@ -1066,7 +1060,6 @@
       name: 'Ornamental Aluminum',
       detail: 'Open views with matching gate options',
       perFoot: 45, singleGate: 250, doubleGate: 500,
-      heightMod: { '4': 0.85, '5': 0.95, '6': 1.0 },
       photo: 'https://gfs-website.netlify.app/images/gallery/aluminum-black.jpg',
       category: 'aluminum',
       style: 'ornamental',
@@ -1076,7 +1069,6 @@
       name: 'Chain Link (Galvanized)',
       detail: 'Affordable, durable, fast install',
       perFoot: 18, singleGate: 150, doubleGate: 300,
-      heightMod: { '4': 0.85, '5': 0.95, '6': 1.0, '8': 1.15 },
       photo: 'https://gfs-website.netlify.app/images/gallery/chainlink-1.jpg',
       category: 'chainlink',
       style: 'galvanized',
@@ -1086,7 +1078,6 @@
       name: 'Chain Link (Vinyl-Coated)',
       detail: 'Black, green or brown coating',
       perFoot: 22, singleGate: 175, doubleGate: 350,
-      heightMod: { '4': 0.85, '5': 0.95, '6': 1.0, '8': 1.15 },
       photo: 'https://gfs-website.netlify.app/images/gallery/chainlink-1.jpg',
       category: 'chainlink',
       style: 'vinyl-coated',
@@ -1096,7 +1087,6 @@
       name: 'Split Rail (2-Rail)',
       detail: 'Rustic property line marker',
       perFoot: 15, singleGate: 125, doubleGate: 250,
-      heightMod: { '4': 1.0, '5': 1.10 },
       photo: 'https://gfs-website.netlify.app/images/gallery/split-rail-1.jpg',
       category: 'split-rail',
       style: '2-rail',
@@ -1106,7 +1096,6 @@
       name: 'Split Rail (3-Rail)',
       detail: 'Taller rustic option',
       perFoot: 18, singleGate: 125, doubleGate: 250,
-      heightMod: { '4': 1.0, '5': 1.10 },
       photo: 'https://gfs-website.netlify.app/images/gallery/split-rail-1.jpg',
       category: 'split-rail',
       style: '3-rail',
@@ -1556,7 +1545,7 @@
       'background:' + (active ? 'var(--cedar)' : 'var(--paper)') + ';' +
       'color:' + (active ? '#fff' : 'var(--ink)') + ';min-height:48px;">' +
       '<span style="font-weight:600;font-size:14px;">' + esc(label) + '</span>' +
-      (sub ? '<span style="font-family:var(--mono);font-size:12px;opacity:0.75;">' + esc(sub) + '</span>' : '') +
+      (sub ? '<span style="font-family:var(--mono);font-size:12px;opacity:0.9;">' + esc(sub) + '</span>' : '') +
       '</button>';
 
     // Count models (one per tile), not every color and height entry.
@@ -1748,7 +1737,7 @@
     }
     if (!message && state.linearFeet > 2000) { message = 'For a fence longer than 2,000 feet, request a detailed quote. The online calculator cannot price this length.'; target = el('bp-linear-feet'); }
     if (!message && state.removeOldFence && !existingFenceMaterialLabel()) { message = 'Choose the material of the existing fence to include its removal.'; target = el('bp-existing-material'); }
-    if (!message) { const sectionIssue = sectionsIssue(); if (sectionIssue) { message = sectionIssue; target = el('bp-sections'); } }
+    if (!message) { const sectionIssue = sectionsIssue(); if (sectionIssue) { message = sectionIssue; target = el('bp-sections'); state.sectionsFlagged = true; renderSections(); } }
     if (!message && typeof currentMapIssue==='function') { message=currentMapIssue(); if(message)target=el('bp-map-measurements'); }
     let price = null;
     if (!message) {
@@ -1795,6 +1784,8 @@
       if (!photoReadyForSubmission()) return;
       const price = submissionPrice(errorEl);
       if (!price) return;
+      // A message from an earlier try no longer applies.
+      errorEl.textContent = ''; errorEl.classList.remove('show'); errorEl.style.display = '';
       const fd = new FormData(form);
       const fence = FENCE_PRICING[state.fenceId] || {};
       const payload = {
@@ -1866,7 +1857,7 @@
       if (result.ok) {
         const originalReceipt=result.acquisitionReceipt||result.id;
         acceptedBallparkReceipt = /^web_[a-zA-Z0-9_-]{16,80}$/.test(originalReceipt || '') ? originalReceipt : '';
-        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.':'Your project request has been received. Your planning range is ready below.';
+        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.':'Your planning range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
         // UNLOCK the price reveal
@@ -1908,8 +1899,8 @@
     const submitButton = el('bp-form')?.querySelector('button[type="submit"]');
     if (submitButton && !submitButton.disabled) submitButton.textContent = quoteSubmitLabel();
     const formTitle = el('bp-contact-title'), formHint = el('bp-contact-hint');
-    if (formTitle) formTitle.textContent = reviewHeight ? 'Request your free quote.' : 'Unlock your estimate.';
-    if (formHint) formHint.textContent = reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : 'Share your details to view the range and request a project review from our team.';
+    if (formTitle) formTitle.textContent = state.priceUnlocked ? 'Your request is in.' : reviewHeight ? 'Request your free quote.' : 'Unlock your estimate.';
+    if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : 'Share your details to view the range and request a project review from our team.';
     const price = calculatePrice();
     const priceCard = el('bp-price-card');
     const priceRange = el('bp-price-range');
@@ -3610,6 +3601,22 @@
         select.dispatchEvent(new Event('change'));
       });
     });
+    const note = document.createElement('p');
+    note.id = 'bp-gate-note'; note.className = 'bp-note'; note.hidden = true;
+    note.setAttribute('role', 'status'); note.setAttribute('data-gfs-protected', '');
+    grid.after(note);
+  }
+  // A gentle check, never a block: more gate than fence usually means a
+  // count was tapped by mistake.
+  const GATE_FEET = { single: 4, double: 10 };
+  function renderGateNote() {
+    const note = el('bp-gate-note');
+    if (!note) return;
+    const total = Number(state.linearFeet) || 0;
+    const gateFeet = (Number(state.singleGates) || 0) * GATE_FEET.single + (Number(state.doubleGates) || 0) * GATE_FEET.double;
+    const tooMany = total > 0 && gateFeet > total;
+    note.hidden = !tooMany;
+    note.textContent = tooMany ? 'That is about ' + gateFeet + ' ft of gates on a ' + total + ' ft fence. Check the gate counts.' : '';
   }
   // With more than one style, say how many of the gates belong to each
   // added style; the rest stay with the main style.
@@ -3675,6 +3682,7 @@
       });
       card.querySelector('.bp-sec__style').addEventListener('click', () => openStylePicker(section));
       const feet = card.querySelector('.bp-sec__feet');
+      feet.addEventListener('blur', () => { if (!section.touched) { section.touched = true; updateAll(); } });
       feet.addEventListener('input', () => { section.feet = Math.max(0, Number(feet.value) || 0); section.run = undefined; card.querySelectorAll('[data-run-feet]').forEach(other => other.setAttribute('aria-pressed', 'false')); updateAll(); });
       card.querySelectorAll('[data-run-feet]').forEach(button => button.addEventListener('click', () => { section.feet = Number(button.dataset.runFeet) || 0; section.run = Number(button.dataset.runIndex); feet.value = section.feet; card.querySelectorAll('[data-run-feet]').forEach(other => other.setAttribute('aria-pressed', String(other === button))); updateAll(); }));
       host.appendChild(card);
@@ -3718,7 +3726,10 @@
       const feet = card.querySelector('.bp-sec__feet');
       if (feet && document.activeElement !== feet) feet.value = section.feet > 0 ? String(section.feet) : '';
       const issue = card.querySelector('.bp-sec__issue');
-      if (issue) issue.textContent = !fence ? 'Choose a style for this part, or remove it.' : !(section.feet > 0) ? 'Enter how many feet of this style you need.' : '';
+      if (issue) {
+        issue.textContent = !fence ? 'Choose a style for this part, or remove it.' : !(section.feet > 0) ? 'Enter how many feet of this style you need.' : '';
+        issue.classList.toggle('is-prompt', !section.touched && !state.sectionsFlagged);
+      }
     });
     const split = el('bp-split');
     if (split) {
@@ -3838,8 +3849,16 @@
     bar.querySelector('.bp-bar__go').addEventListener('click', () => { if (barAction) barAction(); });
     // Step aside for the on-screen keyboard.
     const typing = node => !!(node && node.closest && node.closest('input:not([type="radio"]):not([type="checkbox"]):not([type="file"]),textarea'));
-    document.addEventListener('focusin', event => document.body.classList.toggle('bp-typing', typing(event.target)));
-    document.addEventListener('focusout', () => setTimeout(() => document.body.classList.toggle('bp-typing', typing(document.activeElement)), 60));
+    // The bar must not come back between press and release: a button pressed
+    // low on the screen right after typing would have the bar slide in under
+    // the pointer and swallow the click.
+    let pressing = false;
+    const syncTyping = () => document.body.classList.toggle('bp-typing', typing(document.activeElement));
+    const syncSoon = () => setTimeout(() => { if (!pressing) syncTyping(); }, 60);
+    document.addEventListener('pointerdown', () => { pressing = true; }, true);
+    ['pointerup', 'pointercancel'].forEach(type => document.addEventListener(type, () => { pressing = false; syncSoon(); }, true));
+    document.addEventListener('focusin', event => { if (typing(event.target)) document.body.classList.add('bp-typing'); else syncSoon(); });
+    document.addEventListener('focusout', syncSoon);
     return bar;
   }
   function renderBar() {
@@ -3981,6 +4000,7 @@
     renderSizePresetState();
     renderSections();
     renderGateAssign();
+    renderGateNote();
     renderSummaryParts();
     renderSiteNotes();
     renderProgress();
@@ -4109,7 +4129,6 @@
         perFoot: perFoot,
         singleGate: isNaN(singleGate) ? 150 : singleGate,
         doubleGate: isNaN(doubleGate) ? 300 : doubleGate,
-        heightMod: heightModForName(name),
         photo: photo,
         photoThumb: useUpgrade ? photo.replace(/\.webp$/,'-640.webp') : null,
         imageKind: useUpgrade ? 'product rendering' : execPhoto ? execPhotos[0].auditImageKind || 'photo' : 'material example',
@@ -4269,17 +4288,6 @@
     if (n.includes('chain')) return 'chain';
     if (n.includes('vinyl') || n.includes('aluminum') || n.includes('ornamental')) return 'other';
     return 'wood';
-  }
-
-  function heightModForName(name) {
-    const n = name.toLowerCase();
-    // Privacy styles scale strongly with height; picket/ornamental less so
-    if (n.includes('aluminum') || n.includes('ornamental')) return { '4': 0.85, '5': 0.95, '6': 1.0 };
-    if (n.includes('picket')) return { '3': 0.80, '4': 1.0, '5': 1.10 };
-    if (n.includes('chain')) return { '4': 0.85, '5': 0.95, '6': 1.0, '8': 1.15 };
-    if (n.includes('split') || n.includes('ranch')) return { '4': 1.0, '5': 1.10 };
-    // Default privacy-style scaling
-    return { '4': 0.75, '5': 0.85, '6': 1.0, '8': 1.30 };
   }
 
   // ---- DRAFT PERSISTENCE ------------------------------------------

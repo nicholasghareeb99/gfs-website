@@ -32,6 +32,8 @@
 .gfs-reach.is-missing>legend::after{content:"Pick one";margin-left:8px;color:#b3261e;font-weight:700;text-transform:none;letter-spacing:0}
 .gfs-reach__time{margin-top:14px}
 .gfs-reach__hint{font-weight:400;text-transform:none;letter-spacing:0;opacity:.85}
+/* In a form that spaces its fields with .form-group (the contact page). */
+.gfs-reach.form-group{margin:0 0 24px}
 /* Side by side where the form is wide enough (the two quote pages). */
 @media(min-width:720px){
   .gfs-reach--row{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(0,1fr);column-gap:20px;align-items:end}
@@ -181,6 +183,8 @@ html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
 .bp-sec__runs .bp-chip{min-height:40px;padding:6px 12px;font-size:14px}
 .bp-sec__issue{margin:12px 0 0;padding:10px 12px;border-radius:8px;background:#fff4f2;color:#8f1d15;font-size:15px;line-height:1.45}
 .bp-sec__issue:empty{display:none}
+/* Until the customer has had a chance to answer, it is a prompt, not an error. */
+.bp-sec__issue.is-prompt{background:var(--bp-soft);color:#44566a}
 .bp-split{margin:0;padding:14px 16px;border-radius:10px;background:#eef3f9;color:#102b46;font-size:16px;line-height:1.5}
 .bp-split b{font-family:var(--bp-mono)}
 .bp-add-section{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:56px;padding:12px 16px;border:1.5px dashed #6f8aa6;border-radius:14px;background:linear-gradient(180deg,#fff,#f7fafd);color:#102b46;font-weight:600;font-size:16px;line-height:1.3;font-family:inherit;cursor:pointer}
@@ -199,6 +203,8 @@ html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
 .bp-stepper button:focus-visible{outline:3px solid #1d5eb6;outline-offset:-3px}
 .bp-stepper output{flex:1 1 auto;display:flex;align-items:center;justify-content:center;font:700 22px/1 var(--bp-mono);color:#102b46}
 .bp-stepper__help{margin:6px 0 0;font-size:13px;line-height:1.4;color:#506680}
+.bp-note{margin:14px 0;padding:10px 12px;border-radius:8px;background:#fff8e6;color:#6b4a00;font-size:15px;line-height:1.45}
+.bp-note[hidden]{display:none}
 /* gates that belong to an added style */
 .bp-gate-assign__row{margin-top:14px}
 .bp-gate-assign__label{display:block;margin-bottom:6px;font-size:14px;line-height:1.4;color:#102b46}
@@ -269,6 +275,19 @@ html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
   .bp-page .ballpark-sidebar>*:not(#bp-price-card){display:none!important}
   body.bp-page:not(.bp-unlocked) .ballpark-sidebar{display:none!important}
 }
+@media(max-width:1024px){
+  /* Once unlocked, the price sits right under the confirmation, ahead of the
+     buttons and the style comparison. The left column's blocks join the page
+     flow so the price card can be placed between them. */
+  body.bp-unlocked .ballpark-layout{display:flex!important;flex-direction:column;align-items:stretch!important;gap:0!important}
+  body.bp-unlocked .ballpark-layout>div:first-child{display:contents}
+  body.bp-unlocked .ballpark-sidebar{order:1;align-self:stretch!important;margin-bottom:22px}
+  body.bp-unlocked #bp-actions,body.bp-unlocked #bp-email-status{order:2}
+  body.bp-unlocked #bp-compare-panel{order:3}
+}
+
+/* After-unlock buttons: a long label wraps instead of being cut off. */
+.bp-page #bp-actions>.btn{white-space:normal;line-height:1.25;text-align:center}
 
 /* 2j. Phone progress bar */
 #bp-bar{position:fixed;left:0;right:0;bottom:0;z-index:940;display:none;align-items:center;gap:12px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(14,34,56,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid rgba(255,255,255,.08);color:#fff;box-shadow:0 -4px 18px rgba(16,43,70,.28)}
@@ -278,6 +297,8 @@ html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
 #bp-bar .bp-bar__go{flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;min-height:52px;max-width:54%;padding:10px 16px;border:0;border-radius:12px;background:#fff;color:#102b46;font-weight:700;font-size:15px;line-height:1.2;font-family:inherit;text-align:center;cursor:pointer}
 #bp-bar .bp-bar__go:focus-visible{outline:3px solid #8cc7ff;outline-offset:2px}
 @media(max-width:1024px){body.bp-page #bp-bar{display:flex}}
+/* Phone held sideways: the screen is short, so the bar goes to one slim line. */
+@media(max-height:480px){#bp-bar{padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}#bp-bar .bp-bar__step{display:none}#bp-bar .bp-bar__now{margin-top:0}#bp-bar .bp-bar__go{min-height:44px}}
 /* out of the way of the keyboard, the full-screen map, Edit Mode, dialogs and the menu */
 body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar,body:has(dialog[open]) #bp-bar,body:has(#mobileDrawer.open) #bp-bar{display:none!important}
 
