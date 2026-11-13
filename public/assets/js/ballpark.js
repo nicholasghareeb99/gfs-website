@@ -1582,9 +1582,11 @@
       (sub ? '<span style="font-family:var(--mono);font-size:12px;opacity:0.75;">' + esc(sub) + '</span>' : '') +
       '</button>';
 
-    let html = chip('', 'All styles', Object.keys(FENCE_PRICING).length + ' options', activeFamily === '');
+    // Count models (one per tile), not every color and height entry.
+    const models = ids => modelCards(ids, '').length;
+    let html = chip('', 'All styles', models(Object.keys(FENCE_PRICING)) + ' styles', activeFamily === '');
     present.forEach(fam => {
-      const count = Object.keys(FENCE_PRICING).filter(id => familyOf(id) === fam).length;
+      const count = models(Object.keys(FENCE_PRICING).filter(id => familyOf(id) === fam));
       html += chip(fam, FAMILY_LABELS[fam] || fam,
                    count + (count === 1 ? ' style' : ' styles'),
                    activeFamily === fam);
@@ -1631,7 +1633,7 @@
         <label class="ballpark-photo-opt" data-id="${esc(id)}" style="position:relative;cursor:pointer;border-radius:6px;overflow:hidden;border:2px solid var(--gray-300);transition:all 0.2s ease;display:flex;flex-direction:column;background:var(--white);">
           <input type="radio" name="fenceStyle" value="${esc(id)}" style="position:absolute;opacity:0;pointer-events:none;">
           <div style="aspect-ratio:4/3;background:#e5e7eb;overflow:hidden;display:block;">
-            <img src="${esc(fence.photoThumb || fence.photo)}" alt="${!fence.imageKind||fence.imageKind==='material example'?'Fence example; not the exact selected style':esc(fence.name)+(fence.imageKind==='product rendering'?' — product rendering':'')}" data-editable-img="bp.fence.${esc(id)}.photo" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;display:block;">
+            <img src="${esc(thumbOf(fence.photoThumb || fence.photo, 480))}" data-full="${esc(fence.photoThumb || fence.photo)}" alt="${!fence.imageKind||fence.imageKind==='material example'?'Fence example; not the exact selected style':esc(fence.name)+(fence.imageKind==='product rendering'?' — product rendering':'')}" data-editable-img="bp.fence.${esc(id)}.photo" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;display:block;">
           </div>
           <div style="padding:14px 16px;">
             ${fence.photoCaption?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+esc(fence.photoCaption)+'</p>':!fence.imageKind||fence.imageKind==='material example'?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+(fence.photo.endsWith('photo-needed.svg')?'Reference photo needed for this style':'Example photo — not the exact style')+'</p>':''}
@@ -3382,6 +3384,17 @@
   //  Per-foot rates are still never shown before the contact step.
   // =====================================================================
 
+  // ---- SMALL PICTURES -----------------------------------------------------------
+  // Style photos in Firebase Storage are full size (about 1600 px). Tiles get
+  // a resized copy from Netlify's image service; if that ever fails, the
+  // image falls back to the original (see the error listener in initPlus).
+  function thumbOf(url, width) {
+    const src = String(url || '');
+    if (!/^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/ghareeb-fencing\.firebasestorage\.app\//.test(src)) return src;
+    if (!/\.netlify\.app$|ghareebfence\.com$/.test(location.hostname)) return src;
+    return '/.netlify/images?url=' + encodeURIComponent(src) + '&w=' + (width || 480) + '&fm=webp&q=72';
+  }
+
   // ---- STYLE VARIANTS ---------------------------------------------------
   // The price list has one entry per model, color and height
   // ("Kingston - White 6ft"). Entries that differ only by color or height
@@ -3700,7 +3713,7 @@
       card.innerHTML =
         '<div class="bp-sec__head"><strong>Fence style ' + (index + 2) + '</strong><button type="button" class="bp-sec__remove">Remove</button></div>' +
         '<button type="button" class="bp-sec__style" aria-haspopup="dialog" aria-controls="bp-style-dialog">' +
-          (fence ? '<img alt="" src="' + esc(fence.photoThumb || fence.photo) + '" loading="lazy" decoding="async"><span><b>' + esc(fence.name) + '</b><small>Change style</small></span>'
+          (fence ? '<img alt="" src="' + esc(thumbOf(fence.photoThumb || fence.photo, 200)) + '" data-full="' + esc(fence.photoThumb || fence.photo) + '" loading="lazy" decoding="async"><span><b>' + esc(fence.name) + '</b><small>Change style</small></span>'
                  : '<span><b>Choose the style for this part</b><small>Browse fence styles</small></span>') +
         '</button>' +
         '<div class="bp-variants" data-role="variants"></div>' +
@@ -4017,6 +4030,11 @@
   }
   function initPlus() {
     document.body.classList.add('bp-page');
+    // A resized picture that fails to load falls back to the original.
+    document.addEventListener('error', event => {
+      const img = event.target;
+      if (img && img.tagName === 'IMG' && img.dataset.full && img.getAttribute('src') !== img.dataset.full) img.src = img.dataset.full;
+    }, true);
     ensureSummaryParts();
     ensureStyleOffer();
     ensureProgress();

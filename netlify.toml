@@ -7,6 +7,9 @@ command = "npm run build"
   SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE,AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y,1:187837905206:web:1e9a9bc33f745cbeeddb97"
   SECRETS_SCAN_OMIT_PATHS = "build.py,pages/**,README.md,GOOGLE_BUSINESS_PROFILE.md,firestore.rules,_gen_*.py,*.md"
 
+[images]
+remote_images = ["https://firebasestorage\\.googleapis\\.com/v0/b/ghareeb-fencing\\.firebasestorage\\.app/.*"]
+
 [functions]
 directory = "netlify/functions"
 node_bundler = "esbuild"
