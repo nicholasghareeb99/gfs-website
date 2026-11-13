@@ -819,7 +819,7 @@
   // Build stamp — visible in DevTools console. If you see an OLD stamp,
   // your browser cached an older ballpark.js. Hard-reload with Ctrl+Shift+R
   // (Windows/Linux) or Cmd+Shift+R (Mac) to force-fetch the latest.
-  const BUILD = 'ballpark-20261113-pass3';
+  const BUILD = 'ballpark-20261113-pass4';
   console.log('%c[Ghareeb Ballpark] ' + BUILD, 'background:#1A2E40;color:#B8945A;padding:3px 8px;border-radius:3px;font-weight:bold;');
 
   // -------- GEOMETRY CAPTURE (Exec-app sketch handoff) --------
@@ -1005,16 +1005,16 @@
     }
   });
 
-  // -------- PRICING DATA (Executive app v23.1 calibrated) --------
-  // perFoot: $/ft for the style as named
-  // gates: $ per gate at standard build
-  // photo: Squarespace CDN URL for the style preview
-  // category: which fence type page the style belongs to
+  // -------- STYLE LIST --------
+  // Replaced at start-up by the live list from the Executive app, which is
+  // the only source of prices (see syncPricingFromFirestore). The entries
+  // below carry no rates on purpose: they only let a customer pick a general
+  // style and send a request if the live list cannot be reached.
+  // photo: preview image; category: which fence family the style belongs to
   const FENCE_PRICING = {
     'cedar-privacy': {
       name: 'Cedar Privacy',
       detail: 'Western Red Cedar, classic dog-ear or flat-top',
-      perFoot: 35, singleGate: 200, doubleGate: 400,
       photo: 'https://gfs-website.netlify.app/images/gallery/cedar-shadowbox.jpg',
       category: 'cedar',
       style: 'privacy',
@@ -1023,7 +1023,6 @@
     'cedar-shadowbox': {
       name: 'Cedar Shadowbox',
       detail: 'Alternating boards, privacy from both sides',
-      perFoot: 38, singleGate: 200, doubleGate: 400,
       photo: 'https://gfs-website.netlify.app/images/gallery/cedar-lattice-shadowbox.jpg',
       category: 'cedar',
       style: 'shadowbox',
@@ -1032,7 +1031,6 @@
     'wood-privacy': {
       name: 'Pressure-Treated Wood Privacy',
       detail: 'Budget-friendly privacy, dog-ear pickets',
-      perFoot: 22, singleGate: 150, doubleGate: 300,
       photo: 'https://gfs-website.netlify.app/images/gallery/pt-privacy.jpg',
       category: 'wood',
       style: 'privacy',
@@ -1041,7 +1039,6 @@
     'vinyl-privacy': {
       name: 'Vinyl Privacy',
       detail: 'Privacy options with simple upkeep',
-      perFoot: 55, singleGate: 350, doubleGate: 700,
       photo: 'https://gfs-website.netlify.app/images/gallery/vinyl-white.jpg',
       category: 'vinyl',
       style: 'privacy',
@@ -1050,7 +1047,6 @@
     'vinyl-picket': {
       name: 'Vinyl Picket',
       detail: 'Classic decorative, multiple colors',
-      perFoot: 48, singleGate: 350, doubleGate: 700,
       photo: 'https://gfs-website.netlify.app/images/gallery/vinyl-tan-privacy.jpg',
       category: 'vinyl',
       style: 'picket',
@@ -1059,7 +1055,6 @@
     'aluminum': {
       name: 'Ornamental Aluminum',
       detail: 'Open views with matching gate options',
-      perFoot: 45, singleGate: 250, doubleGate: 500,
       photo: 'https://gfs-website.netlify.app/images/gallery/aluminum-black.jpg',
       category: 'aluminum',
       style: 'ornamental',
@@ -1068,7 +1063,6 @@
     'chainlink': {
       name: 'Chain Link (Galvanized)',
       detail: 'Affordable, durable, fast install',
-      perFoot: 18, singleGate: 150, doubleGate: 300,
       photo: 'https://gfs-website.netlify.app/images/gallery/chainlink-1.jpg',
       category: 'chainlink',
       style: 'galvanized',
@@ -1077,7 +1071,6 @@
     'chainlink-vinyl': {
       name: 'Chain Link (Vinyl-Coated)',
       detail: 'Black, green or brown coating',
-      perFoot: 22, singleGate: 175, doubleGate: 350,
       photo: 'https://gfs-website.netlify.app/images/gallery/chainlink-1.jpg',
       category: 'chainlink',
       style: 'vinyl-coated',
@@ -1086,7 +1079,6 @@
     'split-rail': {
       name: 'Split Rail (2-Rail)',
       detail: 'Rustic property line marker',
-      perFoot: 15, singleGate: 125, doubleGate: 250,
       photo: 'https://gfs-website.netlify.app/images/gallery/split-rail-1.jpg',
       category: 'split-rail',
       style: '2-rail',
@@ -1095,7 +1087,6 @@
     'split-rail-3': {
       name: 'Split Rail (3-Rail)',
       detail: 'Taller rustic option',
-      perFoot: 18, singleGate: 125, doubleGate: 250,
       photo: 'https://gfs-website.netlify.app/images/gallery/split-rail-1.jpg',
       category: 'split-rail',
       style: '3-rail',
@@ -1121,6 +1112,12 @@
     sawDetails: false,
   };
   let pendingDraftStyle = '', styleCatalogSettled = false;
+  // Prices come only from the live list the Executive app maintains. The
+  // built-in styles let a customer keep going when that list cannot be
+  // reached, but they are never priced: the request goes to the office
+  // without a range (same path as a height that needs review).
+  let pricesLive = false, pricesSlow = false;
+  function pricesUnavailable() { return !pricesLive && (styleCatalogSettled || pricesSlow); }
   let acceptedBallparkReceipt = '';
 
   // Prices are shown only after the customer contact submission is accepted.
@@ -1198,6 +1195,7 @@
   // by the comparison list); leave it out for the customer's own pick.
   function calculatePrice(primaryId) {
     const mainId = primaryId || state.fenceId;
+    if (!pricesLive) return null;
     if (!mainId || !FENCE_PRICING[mainId] || !Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000) return null;
     if (sectionsIssue()) return null;
     // Each part is billed at the next full panel for styles installed in
@@ -1223,15 +1221,6 @@
       total: Math.round(total),
       low:   Math.round(low / 100) * 100,    // round to nearest $100
       high:  Math.round(high / 100) * 100,
-      breakdown: {
-        fence: Math.round(fenceCost),
-        gates: Math.round(gateCost),
-        removal: Math.round(removalCost),
-      },
-      billableFeet: parts[0].billableFeet,
-      sectionSize: parts[0].sectionSize,
-      waste: parts[0].waste,
-      parts: parts,
     };
   }
 
@@ -1379,8 +1368,14 @@
     return Number.isFinite(height) && height >= 2 && height <= 12 && ![4, 5, 6, 8].includes(height);
   }
 
+  // What the office reads when a request arrives without a price range.
+  function reviewNote(price) {
+    return price && price.reason === 'prices'
+      ? 'Quote review requested: the price list did not load on the customer\'s device, so no price range was shown.'
+      : 'Quote review requested: ' + state.height + ' ft height. No automatic price range was provided.';
+  }
   function quoteSubmitLabel() {
-    return heightNeedsReview() ? 'Request My Free Quote' : 'Unlock My Price';
+    return heightNeedsReview() || pricesUnavailable() ? 'Request My Free Quote' : 'Unlock My Price';
   }
 
   function updateDraftStyleNotice() {
@@ -1780,7 +1775,10 @@
     let price = null;
     if (!message) {
       // Keep the existing contact/receipt flow for heights that need staff pricing.
-      if (heightNeedsReview()) return { requiresReview: true };
+      if (heightNeedsReview()) return { requiresReview: true, reason: 'height' };
+      // No live price list (blocked, offline or still loading): take the
+      // request and let the office price it.
+      if (!pricesLive) return { requiresReview: true, reason: 'prices' };
       price = calculatePrice();
       if (!price || ![price.low, price.high, price.total].every(Number.isFinite) || price.low < 0 || price.high < price.low || price.total <= 0) {
         message = 'Pricing is unavailable for this selection. Choose another style or request an on-site estimate.';
@@ -1843,7 +1841,7 @@
         removeOldFence: state.removeOldFence,
         existingFenceMaterial: state.existingFenceMaterial,
         source: 'ballpark-quote-tool',
-        notes: [fd.get('notes'), removalScopeNote(), price.requiresReview ? 'Quote review requested: '+state.height+' ft height. No automatic price range was provided.' : 'Ballpark range: '+formatPrice(price.low)+'–'+formatPrice(price.high)].filter(Boolean).join(' · '),
+        notes: [fd.get('notes'), removalScopeNote(), price.requiresReview ? reviewNote(price) : 'Ballpark range: '+formatPrice(price.low)+'–'+formatPrice(price.high)].filter(Boolean).join(' · '),
         geometry: collectGeometry(),
         photo: leadPhoto || '',
         // How to reach them, when they want it built, what they told us
@@ -1895,7 +1893,7 @@
       if (result.ok) {
         const originalReceipt=result.acquisitionReceipt||result.id;
         acceptedBallparkReceipt = /^web_[a-zA-Z0-9_-]{16,80}$/.test(originalReceipt || '') ? originalReceipt : '';
-        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.':'Your planning range is ready.';
+        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='prices'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
         // UNLOCK the price reveal
@@ -1929,6 +1927,7 @@
   function updateAllCore() {
     saveDraft();
     const reviewHeight = heightNeedsReview();
+    const noPrices = !reviewHeight && pricesUnavailable();
     const reviewNotice = el('bp-height-review');
     if (reviewNotice) {
       reviewNotice.hidden = !reviewHeight;
@@ -1937,13 +1936,12 @@
     const submitButton = el('bp-form')?.querySelector('button[type="submit"]');
     if (submitButton && !submitButton.disabled) submitButton.textContent = quoteSubmitLabel();
     const formTitle = el('bp-contact-title'), formHint = el('bp-contact-hint');
-    if (formTitle) formTitle.textContent = state.priceUnlocked ? 'Your request is in.' : reviewHeight ? 'Request your free quote.' : 'Unlock your estimate.';
-    if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : 'Share your details to view the range and request a project review from our team.';
+    if (formTitle) formTitle.textContent = state.priceUnlocked ? 'Your request is in.' : reviewHeight || noPrices ? 'Request your free quote.' : 'Unlock your estimate.';
+    if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : noPrices ? 'Our price list is not loading right now. Send your details and we will get your price to you.' : 'Share your details to view the range and request a project review from our team.';
     const price = calculatePrice();
     const priceCard = el('bp-price-card');
     const priceRange = el('bp-price-range');
     const priceHint  = el('bp-price-hint');
-    const priceBreakdown = el('bp-price-breakdown');
 
     if (!priceCard) return;
 
@@ -1952,7 +1950,7 @@
       const needsQuote = state.fenceId && state.linearFeet > 0 && FENCE_PRICING[state.fenceId];
       const missingRemoval = state.removeOldFence && !existingFenceMaterialLabel();
       const sectionIssue = needsQuote ? sectionsIssue() : '';
-      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : 'This style needs a custom quote') : 'Your price in 4 quick steps';
+      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : noPrices ? 'We will send your price' : !pricesLive ? 'Loading prices…' : 'This style needs a custom quote') : 'Your price in 4 quick steps';
       if (priceHint) {
         priceHint.replaceChildren();
         if (state.linearFeet > 2000) {
@@ -1962,6 +1960,10 @@
           priceHint.textContent = 'Select the fence being removed in step 3, or turn off removal if it is not needed.';
         } else if (sectionIssue) {
           priceHint.textContent = sectionIssue;
+        } else if (needsQuote && noPrices) {
+          priceHint.textContent = state.priceUnlocked ? 'Your request is received. We will get your price to you.' : 'Our price list is not loading right now. Use step 4 to send your plan and we will get your price to you.';
+        } else if (needsQuote && !pricesLive) {
+          priceHint.textContent = '';
         } else if (needsQuote && reviewHeight) {
           priceHint.textContent = state.priceUnlocked ? 'Your request is received. Our team will follow up about specifications and pricing.' : 'Use step 4 to send your plan for a free quote. Your measurements and selections stay with your request.';
         } else if (needsQuote) {
@@ -1972,7 +1974,6 @@
           priceHint.appendChild(quoteLink);
         } else priceHint.textContent = 'Then unlock your price in step 4';
       }
-      if (priceBreakdown) priceBreakdown.style.display = 'none';
       renderFinance(null);
       renderComparePanel(false);
       renderPostUnlockActions(false);
@@ -1982,39 +1983,18 @@
     const showDetail = state.priceUnlocked === true;
 
     if (showDetail) {
-      // Show the actual range
+      // Show the range, and only the range: an itemised list of feet and
+      // dollars would let anyone work out the per-foot rate.
       if (priceRange) {
         priceRange.innerHTML = `${formatPrice(price.low)} – ${formatPrice(price.high)}`;
       }
       if (priceHint) priceHint.textContent = 'Planning range. A site review confirms the final scope and price.';
-      if (priceBreakdown) {
-        priceBreakdown.style.display = 'block';
-        priceBreakdown.innerHTML = `
-          ${price.parts.map(part => `<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
-            <span style="opacity:0.8;">${price.parts.length > 1 ? esc(part.name) : 'Fence'} (${part.feet} ft):</span>
-            <span style="font-weight:600;white-space:nowrap;">${formatPrice(Math.round(part.fenceCost))}</span>
-          </div>
-          ${part.waste > 0 ? `<div style="padding:6px 0 10px;font-size:12px;color:rgba(250,246,239,0.6);line-height:1.5;border-bottom:1px solid rgba(255,255,255,0.12);">
-            Billed at ${part.billableFeet} ft &mdash; this style installs in ${part.sectionSize} ft sections,
-            so the last panel is charged whole. Same way we quote it in person.
-          </div>` : ''}`).join('')}
-          ${price.breakdown.gates ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
-            <span style="opacity:0.8;">Gates:</span>
-            <span style="font-weight:600;">${formatPrice(price.breakdown.gates)}</span>
-          </div>` : ''}
-          ${price.breakdown.removal ? `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.12);">
-            <span style="opacity:0.8;">Removal:</span>
-            <span style="font-weight:600;">${formatPrice(price.breakdown.removal)}</span>
-          </div>` : ''}
-        `;
-      }
       renderFinance(price);
       renderComparePanel(true);
       renderPostUnlockActions(true);
     } else {
       if (priceRange) priceRange.textContent = 'Your estimate is ready';
       if (priceHint) priceHint.textContent = 'Add your contact details in step 4 to see your price.';
-      if (priceBreakdown) { priceBreakdown.style.display = 'none'; priceBreakdown.innerHTML = ''; }
       renderFinance(null);
       renderComparePanel(false);
       renderPostUnlockActions(false);
@@ -3569,10 +3549,8 @@
     const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
     if (named === null && ![4, 5, 6, 8].includes(height)) return null;
     const rounding = roundToSections(part.feet, fence.name);
+    // Styles installed in sections are billed at the next full panel.
     return {
-      primary: !!part.primary, id: part.fenceId, name: fence.name, height: height, heightInName: named !== null,
-      feet: part.feet, billableFeet: rounding.billable, sectionSize: rounding.sectionSize, waste: rounding.waste,
-      singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates),
       fenceCost: rounding.billable * fence.perFoot,
       gateCost: Math.max(0, part.singleGates) * fence.singleGate + Math.max(0, part.doubleGates) * fence.doubleGate,
     };
@@ -3921,12 +3899,12 @@
     let view;
     if (state.priceUnlocked) {
       const price = heightNeedsReview() ? null : calculatePrice();
-      view = ['Your planning range', price ? formatPrice(price.low) + ' – ' + formatPrice(price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
+      view = [price ? 'Your planning range' : 'Your request', price ? formatPrice(price.low) + ' – ' + formatPrice(price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
     } else if (!feet) view = ['Step 1 of 4', 'How long is the fence?', 'Enter length', jump('bp-step-1', 'bp-linear-feet')];
     else if (!fence) view = ['Step 2 of 4', feet, 'Pick a style', () => openStylePicker()];
     else if (sectionsIssue()) view = ['Step 2 of 4', 'Finish your added style', 'Go to it', jump('bp-sections')];
     else if (!state.sawDetails) view = ['Step 3 of 4', feet + ' · ' + name, 'Gates and details', () => { state.sawDetails = true; jump('bp-step-3')(); renderBar(); }];
-    else view = ['Step 4 of 4', feet + ' · ' + name, heightNeedsReview() ? 'Request my quote' : 'See my price', jump('bp-step-4', 'bpf-name')];
+    else view = ['Step 4 of 4', feet + ' · ' + name, heightNeedsReview() || pricesUnavailable() ? 'Request my quote' : 'See my price', jump('bp-step-4', 'bpf-name')];
     if (step.textContent !== view[0]) step.textContent = view[0];
     if (now.textContent !== view[1]) now.textContent = view[1];
     if (go.textContent !== view[2]) go.textContent = view[2];
@@ -4110,7 +4088,9 @@
               const v = parseFloat(data[k]);
               if (!isNaN(v) && v > 0) PRICING_FACTORS[k] = v;
             });
-          buildStylesFromExecPricing(data.pricing, data.stylePhotos || {});
+          // Live only if the list actually produced styles; a list with no
+          // usable lines leaves the built-in styles in place, unpriced.
+          pricesLive = buildStylesFromExecPricing(data.pricing, data.stylePhotos || {});
           window.GFS_BALLPARK_MODEL_OVERRIDES = data.styleSpecs && typeof data.styleSpecs === "object" ? data.styleSpecs : undefined;
           if (pendingDraftStyle && FENCE_PRICING[pendingDraftStyle]) selectFenceStyle(pendingDraftStyle, true);
           // If a previously-selected style no longer exists, clear selection
@@ -4145,7 +4125,7 @@
   // Executive app has no photo uploaded for that style.
   function buildStylesFromExecPricing(pricingStr, stylePhotos) {
     const lines = pricingStr.split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return;
+    if (!lines.length) return false;
 
     const built = {};
     lines.forEach(line => {
@@ -4191,7 +4171,9 @@
       // Replace FENCE_PRICING in place (other code holds a reference)
       Object.keys(FENCE_PRICING).forEach(k => delete FENCE_PRICING[k]);
       Object.assign(FENCE_PRICING, built);
+      return true;
     }
+    return false;
   }
 
   function slugify(name) {
@@ -4609,6 +4591,9 @@
     } else {
       window.addEventListener('gfs-firebase-ready', syncPricingFromFirestore, { once: true });
     }
+    // If the list has not arrived after a while (blocked or very slow
+    // connection), stop promising a price. It still applies if it turns up.
+    setTimeout(() => { if (!pricesLive && !pricesSlow) { pricesSlow = true; updateAll(); } }, 8000);
   }
 
   // Public API — lets the 3D preview / PDF modules and console debugging read
