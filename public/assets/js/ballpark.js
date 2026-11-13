@@ -819,7 +819,7 @@
   // Build stamp — visible in DevTools console. If you see an OLD stamp,
   // your browser cached an older ballpark.js. Hard-reload with Ctrl+Shift+R
   // (Windows/Linux) or Cmd+Shift+R (Mac) to force-fetch the latest.
-  const BUILD = 'ballpark-20261113-pass2';
+  const BUILD = 'ballpark-20261113-pass3';
   console.log('%c[Ghareeb Ballpark] ' + BUILD, 'background:#1A2E40;color:#B8945A;padding:3px 8px;border-radius:3px;font-weight:bold;');
 
   // -------- GEOMETRY CAPTURE (Exec-app sketch handoff) --------
@@ -1450,6 +1450,42 @@
     image.removeAttribute('data-editable-img');image.src=source.src;image.alt=source.alt||FENCE_PRICING[state.fenceId].name;
     image.style.objectFit=source.style.objectFit||'contain';image.style.objectPosition=source.style.objectPosition||'50% 50%';
   }
+  // ---- BACK CLOSES OVERLAYS ----
+  // On a phone the full-screen map and the style picker feel like screens of
+  // their own, so Back should close them instead of leaving the page. Each
+  // one adds a history entry while it is open and removes it when closed.
+  const overlays = [];
+  const afterPops = [];
+  let ignorePops = 0;
+  function overlayOpened(name, close) {
+    if (overlays.some(overlay => overlay.name === name)) return;
+    const overlay = { name, close, hasEntry: false };
+    overlays.push(overlay);
+    const addEntry = () => {
+      if (!overlays.includes(overlay)) return; // closed again before we got here
+      try { history.pushState({ bpOverlay: true }, ''); overlay.hasEntry = true; } catch (e) { /* history unavailable: Back simply leaves */ }
+    };
+    // A Back we triggered ourselves (see overlayClosed) may still be on its
+    // way. Adding an entry before it lands would be undone by it.
+    if (ignorePops > 0) afterPops.push(addEntry); else addEntry();
+  }
+  function overlayClosed(name) {
+    const index = overlays.findIndex(overlay => overlay.name === name);
+    if (index < 0) return; // Back already closed it
+    const [overlay] = overlays.splice(index, 1);
+    if (!overlay.hasEntry) return;
+    try { if (history.state && history.state.bpOverlay) { ignorePops += 1; history.back(); } } catch (e) {}
+  }
+  window.addEventListener('popstate', () => {
+    if (ignorePops > 0) {
+      ignorePops -= 1;
+      if (!ignorePops) afterPops.splice(0).forEach(addEntry => addEntry());
+      return;
+    }
+    const top = overlays.pop();
+    if (top) top.close();
+  });
+
   function closeStylePicker() {
     const dialog=el('bp-style-dialog');if(!dialog?.open)return;
     if(typeof dialog.close==='function')dialog.close();else dialog.removeAttribute('open');
@@ -1457,6 +1493,7 @@
   }
   function finishStylePickerClose() {
     if(!stylePickerWasOpen||el('bp-style-dialog')?.open)return;stylePickerWasOpen=false;pickerTarget=null;
+    overlayClosed('picker');
     document.body.style.overflow=styleBodyOverflow;
     styleFallbackInert.forEach(([node,value])=>{node.inert=value;});styleFallbackInert=[];
     const focus=styleReturnFocus;styleReturnFocus=null;
@@ -1473,6 +1510,7 @@
     document.body.style.overflow='hidden';
     if(typeof dialog.showModal==='function')dialog.showModal();
     else{dialog.setAttribute('open','');styleFallbackInert=[...document.body.children].filter(node=>node!==dialog).map(node=>[node,node.inert]);styleFallbackInert.forEach(([node])=>{node.inert=true;});}
+    overlayOpened('picker',closeStylePicker);
     renderMaterialFilter();renderStyleGrid();el('bp-style-search').focus({preventScroll:true});
   }
   function ensureStylePicker() {
@@ -2046,6 +2084,12 @@
   }
 
   // ---- POST-UNLOCK ACTIONS: 3D Preview + PDF Download ----
+  // A line under the buttons, instead of a pop-up, when one is not ready yet.
+  function actionNote(message) {
+    const status = el('bp-email-status');
+    if (!status) return;
+    status.style.display = 'block'; status.style.color = 'var(--stop)'; status.textContent = message;
+  }
   function renderPostUnlockActions(unlocked) {
     const area = el('bp-actions');
     if (!area) return;
@@ -2068,12 +2112,13 @@
           track('3d');
           window.GFSFence3D.open(state.fenceId, parseFloat(state.height), state.linearFeet);
         } else {
-          alert('3D preview is still loading — give it a moment and try again.');
+          actionNote('The 3D preview is still loading. Give it a moment and try again.');
         }
       });
       if (dlPdf) dlPdf.addEventListener('click', () => {
         if (!state.priceUnlocked) return;
         const price = calculatePrice();
+        if (!price) return;
         const fence = FENCE_PRICING[state.fenceId];
         // Build comparisons for the PDF — same spec priced across materials.
         // With ~100 styles synced from the Executive app, dumping every one
@@ -2117,7 +2162,7 @@
               : fence.imageKind === 'product rendering' ? 'Product rendering of ' + fence.name + '.' : fence.name + '.',
           });
         } else {
-          alert('PDF generator is still loading — give it a moment and try again.');
+          actionNote('The estimate is still loading. Give it a moment and try again.');
         }
       });
     }
@@ -3804,6 +3849,7 @@
     if (!tools) return;
     tools.classList.toggle('bp-map-full', !!on);
     document.documentElement.classList.toggle('bp-map-open', !!on);
+    if (on) overlayOpened('map', () => setMapFullscreen(false)); else overlayClosed('map');
     if (button) button.textContent = on ? 'Close full screen' : 'Full screen';
     const refresh = () => {
       try {

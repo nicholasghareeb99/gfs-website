@@ -300,7 +300,9 @@ html.bp-map-open,html.bp-map-open body{overflow:hidden!important}
 /* Phone held sideways: the screen is short, so the bar goes to one slim line. */
 @media(max-height:480px){#bp-bar{padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}#bp-bar .bp-bar__step{display:none}#bp-bar .bp-bar__now{margin-top:0}#bp-bar .bp-bar__go{min-height:44px}}
 /* out of the way of the keyboard, the full-screen map, Edit Mode, dialogs and the menu */
-body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar,body:has(dialog[open]) #bp-bar,body:has(#mobileDrawer.open) #bp-bar{display:none!important}
+body.bp-typing #bp-bar,html.bp-map-open #bp-bar,body.editing #bp-bar{display:none!important}
+/* Kept apart: a browser without :has() drops the whole rule it appears in. */
+body:has(dialog[open]) #bp-bar,body:has(#mobileDrawer.open) #bp-bar{display:none!important}
 
 /* 2k. Motion and print */
 @media(prefers-reduced-motion:reduce){

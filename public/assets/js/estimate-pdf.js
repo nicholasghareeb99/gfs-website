@@ -116,8 +116,8 @@
   function removalText(data) {
     if (!data.removeOldFence) return '';
     const labels = { wood: 'Wood', chain: 'Chain link', vinyl: 'Vinyl', aluminum: 'Aluminum / metal', other: 'Other / mixed materials' };
-    const material = Object.prototype.hasOwnProperty.call(labels, data.existingFenceMaterial) ? labels[data.existingFenceMaterial] : 'Material to confirm';
-    return material + ' fence, allowance for ' + data.linearFeet + ' ft. We confirm the removal scope on site.';
+    const material = Object.prototype.hasOwnProperty.call(labels, data.existingFenceMaterial) ? labels[data.existingFenceMaterial] + ' fence' : 'Material to confirm';
+    return material + ', allowance for ' + data.linearFeet + ' ft. We confirm the removal scope on site.';
   }
   function gateText(single, double) {
     const bits = [];
@@ -238,15 +238,15 @@
     y += 4;
 
     // ---------- The range ----------
-    const hasRange = Number.isFinite(data.priceLow) && Number.isFinite(data.priceHigh);
+    const hasRange = Number.isFinite(data.priceLow) && Number.isFinite(data.priceHigh) && data.priceHigh > 0;
     fill(TINT); doc.rect(M, y, FULL, 92, 'F');
     fill(BLUE); doc.rect(M, y, 4, 92, 'F');
     font('bold', 9); color(BLUE);
-    doc.text('BALLPARK RANGE', M + 20, y + 24, { charSpace: 1.2 });
+    doc.text(hasRange ? 'BALLPARK RANGE' : 'YOUR REQUEST', M + 20, y + 24, { charSpace: 1.2 });
     font('bold', 30); color(INK);
     doc.text(hasRange ? formatRange(data.priceLow, data.priceHigh) : 'We will price this for you', M + 20, y + 58);
     font('normal', 10); color(GRAY);
-    doc.text('Based on the length, style and gates you entered. The firm price comes after we measure on site.', M + 20, y + 78);
+    doc.text(hasRange ? 'Based on the length, style and gates you entered. The firm price comes after we measure on site.' : 'This one needs a closer look. We will send your price after we review it.', M + 20, y + 78);
     y += 118;
 
     // ---------- The fence ----------
