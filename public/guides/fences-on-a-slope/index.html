@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Fences on a Slope: Stepped or Contoured | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Compare stepped and racked fences with an interactive slope diagram. Learn how product limits, bottom gaps, drainage and gate clearance shape the layout.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Fences on a Slope: Stepped or Contoured">
+<meta property="og:description" content="Compare stepped and racked fences with an interactive slope diagram. Learn how product limits, bottom gaps, drainage and gate clearance shape the layout.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/guides/fences-on-a-slope/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fences on a Slope: Stepped or Contoured">
+<meta name="twitter:description" content="Compare stepped and racked fences with an interactive slope diagram. Learn how product limits, bottom gaps, drainage and gate clearance shape the layout.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/guides/fences-on-a-slope/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "nick@ghareebfence.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "About", "item": "https://ghareebfence.com/about/"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Fences on a Slope: Stepped or Contoured", "description": "Compare stepped and racked fences with an interactive slope diagram. Learn how product limits, bottom gaps, drainage and gate clearance shape the layout.", "image": "https://ghareebfence.com/assets/img/work/pine-privacy-stepdown.jpg", "author": {"@type": "Person", "name": "Nick Ghareeb", "jobTitle": "Owner", "worksFor": {"@type": "Organization", "name": "Ghareeb Fencing Solutions"}}, "publisher": {"@type": "Organization", "name": "Ghareeb Fencing Solutions", "url": "https://ghareebfence.com/"}, "datePublished": "2026-09-01", "dateModified": "2026-09-30", "mainEntityOfPage": "https://ghareebfence.com/guides/fences-on-a-slope/"}</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a class="is-active" href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="sl.hero.img" aria-hidden="true"><img src="/assets/img/performance-v12/9ad058aa228713f8-1600.webp" alt="Privacy fence following a grade change on a Toledo yard" loading="eager" decoding="async" srcset="/assets/img/performance-v12/9ad058aa228713f8-480.webp 480w, /assets/img/performance-v12/9ad058aa228713f8-960.webp 960w, /assets/img/performance-v12/9ad058aa228713f8-1600.webp 1600w" sizes="100vw" width="1600" height="1200"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="/">Home</a> <span>/</span> <a href="/guides/">Guides</a> <span>/</span> <span>Fences on a Slope</span></div>
+    <div class="eyebrow" data-editable="sl.eyebrow">Uneven Ground</div>
+    <h1 class="display-1" data-editable="sl.v30.title">Plan a fence that fits your slope</h1>
+    <p class="ph__lede" data-editable="sl.v30.lede">Stepped and racked fences handle elevation changes differently. The right choice depends on your ground, selected style, bottom gaps and gate locations—not simply whether a fence arrives in panels.</p>
+  </div>
+</section>
+
+
+<!-- BUILD-LAB:slope-demo:START --><section class="build-lab-section" id="slope-demo" data-gfs-sec="build-lab-slope-demo" data-gfs-protected><div class="build-lab" data-build-lab="slope-demo" data-scene="0" aria-labelledby="slope-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="slope-demo-title">Same slope. Two different fence lines.</h2><p>Switch between stepped and racked sections. Look at the lower edge as well as the top.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="slope-demo-graphic-title slope-demo-graphic-desc"><title id="slope-demo-graphic-title">Stepped sections versus slope-following rails, with upright posts.</title><desc id="slope-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><path d="M0 327L600 207V360H0Z" fill="#d2e3d3"/><path d="M0 327L600 207" stroke="#668570" stroke-width="4"/><g class="lab-slope-step"><rect x="70" y="118" width="155" height="150" fill="#fff" stroke="#698aa1" stroke-width="3"/><path d="M70 118v150" stroke="#b0c5d2" stroke-width="2"/><path d="M101 118v150" stroke="#b0c5d2" stroke-width="2"/><path d="M132 118v150" stroke="#b0c5d2" stroke-width="2"/><path d="M163 118v150" stroke="#b0c5d2" stroke-width="2"/><path d="M194 118v150" stroke="#b0c5d2" stroke-width="2"/><rect x="225" y="87" width="155" height="150" fill="#fff" stroke="#698aa1" stroke-width="3"/><path d="M225 87v150" stroke="#b0c5d2" stroke-width="2"/><path d="M256 87v150" stroke="#b0c5d2" stroke-width="2"/><path d="M287 87v150" stroke="#b0c5d2" stroke-width="2"/><path d="M318 87v150" stroke="#b0c5d2" stroke-width="2"/><path d="M349 87v150" stroke="#b0c5d2" stroke-width="2"/><rect x="380" y="56" width="155" height="150" fill="#fff" stroke="#698aa1" stroke-width="3"/><path d="M380 56v150" stroke="#b0c5d2" stroke-width="2"/><path d="M411 56v150" stroke="#b0c5d2" stroke-width="2"/><path d="M442 56v150" stroke="#b0c5d2" stroke-width="2"/><path d="M473 56v150" stroke="#b0c5d2" stroke-width="2"/><path d="M504 56v150" stroke="#b0c5d2" stroke-width="2"/></g><g class="lab-slope-rack"><rect x="70" y="149" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="99" y="143.2" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="128" y="137.39999999999998" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="157" y="131.60000000000002" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="186" y="125.80000000000001" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="215" y="120" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="244" y="114.19999999999999" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="273" y="108.39999999999998" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="302" y="102.6" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="331" y="96.80000000000001" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="360" y="91" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="389" y="85.19999999999999" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="418" y="79.39999999999998" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="447" y="73.6" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="476" y="67.80000000000001" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><rect x="505" y="62" width="20" height="150" fill="#fff" stroke="#698aa1" stroke-width="2"/><path d="M70 160L535 67M70 280L535 187" stroke="#496b86" stroke-width="9"/></g><rect x="62" y="116" width="16" height="195" fill="#718fa3"/><rect x="217" y="85" width="16" height="195" fill="#718fa3"/><rect x="372" y="54" width="16" height="195" fill="#718fa3"/><rect x="527" y="23" width="16" height="195" fill="#718fa3"/><text x="30" y="36">Compare the gap along the ground</text></svg><figcaption>Not a slope limit or containment guarantee. Drainage, bottom gaps, product limits and gate clearance need project-specific review.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="Same slope. Two different fence lines. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="slope-demo-notes">Stepped</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="slope-demo-notes">Racked</button></div><ol id="slope-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Stepped</h3><p>Sections remain level and change elevation at posts. Gaps below the fence vary along the slope and need review for pets, privacy and the selected system.</p></li><li data-lab-note="1"><h3>Racked</h3><p>Compatible panels or site-built rails follow the slope while posts and pickets remain upright. Racking limits are product-specific; not every style can follow every slope.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/quote/form/">Discuss my sloped yard <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:slope-demo:END -->
+<section class="section"><div class="container" style="max-width:820px;">
+
+  <h2 data-editable="sl.h1">Two ways to cross a slope</h2>
+  <p data-editable="sl.v30.p1" style="line-height:1.75;"><strong>Stepping</strong> keeps sections level and changes their elevation at posts. <strong>Racking</strong>, also called contouring, lets compatible rails follow a slope while posts and pickets remain upright. Some sites need a combination.</p>
+  <p data-editable="sl.v30.p2" style="line-height:1.75;">Look at the lower edge as well as the top line. A stepped section can leave a widening gap over sloped ground. A racked section also needs a bottom-clearance review where the ground changes irregularly.</p>
+
+  <h2 data-editable="sl.v30.h2" style="margin-top:36px;">Plan the gaps around your yard’s needs</h2>
+  <p data-editable="sl.v30.p3" style="line-height:1.75;">For pets, discuss the animal’s size and behavior and check the full fence line, including gates. Fence height alone does not tell you whether the gaps at ground level are suitable.</p>
+  <p data-editable="sl.v30.p4" style="line-height:1.75;">Do not assume that adding soil against a fence solves a gap. Drainage, moisture exposure and maintenance access matter. Review any bottom treatment as part of the installation design.</p>
+
+  <h2 data-editable="sl.v30.h3" style="margin-top:36px;">The product determines how far it can rack</h2>
+  <p data-editable="sl.v30.p5" style="line-height:1.75;">Some manufactured panels are designed to rack; others are rigid. Limits differ by material, rail and picket design, connections and manufacturer. We review the selected product rather than apply one slope limit to every fence.</p>
+  <p data-editable="sl.v30.p6" style="line-height:1.75;">Site-built wood can allow rails and boards to be fitted to the ground. That flexibility still has limits, and the final line needs to account for strength, appearance and the chosen style.</p>
+
+  <h2 data-editable="sl.v30.h4" style="margin-top:36px;">When stepping makes sense</h2>
+  <p data-editable="sl.v30.p7" style="line-height:1.75;">Stepping can be suitable when a style is designed to stay level, a slope exceeds the selected system’s racking range, or the desired appearance calls for level sections. The ground profile and product requirements guide the decision.</p>
+  <p data-editable="sl.v30.p8" style="line-height:1.75;">Horizontal, lattice and composite designs deserve a closer layout review. Their connections and visual lines can restrict how a section follows a slope. Confirm the specific design before assuming every version must be stepped.</p>
+  <p data-editable="sl.v30.p9" style="line-height:1.75;">A site visit can identify short steep changes, drainage routes and low spots that an overhead image does not show. Those details help determine section lengths, transitions and gate positions.</p>
+
+  <h2 data-editable="sl.v30.h5" style="margin-top:36px;">Upright posts, deliberate transitions</h2>
+  <p data-editable="sl.v30.p10" style="line-height:1.75;">In a typical racked design, the posts and pickets remain upright while the rails follow the slope. Changes between level, stepped and racked runs should be planned as part of the overall layout.</p>
+  <p data-editable="sl.v30.p11" style="line-height:1.75;">A gate needs space for its whole swing arc. Ground that rises in the opening direction can reduce clearance and block travel. Review the swing direction and location before settling on the gate layout.</p>
+
+  <div class="owner-tip" style="margin-top:32px;">
+    <div class="eyebrow" data-editable="sl.v30.tip.k">Walk the full fence line</div>
+    <p data-editable="sl.v30.tip.p">Check high and low spots, drainage paths, bottom gaps and the area where every gate will travel. A satellite drawing is useful for planning, but it does not replace checking the actual grade.</p>
+    
+  </div>
+
+  <div class="related-guides" style="margin-top:44px;">
+    <div class="eyebrow">Keep reading</div>
+    <div class="guide-grid" style="margin-top:14px;">
+      <a href="/guides/gates-that-do-not-sag/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Gates Built for Everyday Use</h3><p class="fence-card-tagline" style="font-size:14px;">Which way the brace runs.</p></div></a>
+      <a href="/guides/property-lines-and-neighbors/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Property Lines &amp; Neighbours</h3><p class="fence-card-tagline" style="font-size:14px;">Which side faces out, and who pays.</p></div></a>
+      <a href="/guides/what-fails-first/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">What Fails First, and When</h3><p class="fence-card-tagline" style="font-size:14px;">Understand supports, material condition and maintenance.</p></div></a>
+      <a href="/guides/choosing-a-fence/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">How to Choose a Fence</h3><p class="fence-card-tagline" style="font-size:14px;">Materials compared honestly, and which can contour.</p></div></a>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px;">
+    <p style="font-size:20px;font-weight:600;margin-bottom:20px;" data-editable="sl.cta.t">Trace your line and we will walk the grade with you.</p>
+    <a href="/quote/ballpark/" class="btn btn-primary btn-lg" data-editable="sl.cta.b">Measure my fence &rarr;</a>
+  </div>
+
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT21aU1ZtWlFNa2RQVVdKMk0ycDRRVFl5UkRJNFZtYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Aluminum fencing</p><blockquote><p>“Nick was great to work with. Great installation and great prices. They contoured the fence to our yard perfectly.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Ryan Walters</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT21aU1ZtWlFNa2RQVVdKMk0ycDRRVFl5UkRJNFZtYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Ryan Walters (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+<script type="module" src="/assets/js/construction-lab.mjs?v=20260930"></script>
+</body>
+</html>

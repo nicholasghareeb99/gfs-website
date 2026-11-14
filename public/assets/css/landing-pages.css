@@ -1,0 +1,60 @@
+/* Project pages share the existing site chrome and owner editing controls. */
+.selling-page { --selling-accent:#a85325; }
+.selling-page .sell-hero { display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);max-width:1440px;margin:0 auto;min-height:660px; }
+.sell-intro { padding:64px clamp(24px,5vw,88px);display:flex;flex-direction:column;justify-content:center; }
+.sell-breadcrumb { font-size:14px;color:var(--ink-mute,#62717c);margin-bottom:32px; }
+.sell-breadcrumb a { color:inherit; }
+.selling-page h1 { font-family:var(--display,'Archivo',sans-serif);font-size:clamp(36px,4.2vw,64px);font-weight:800;letter-spacing:-.045em;line-height:1.06;max-width:13ch;margin:12px 0 24px; }
+.sell-intro p { font-size:18px;line-height:1.65;max-width:58ch; }
+.sell-eyebrow { font-size:14px;font-weight:750;letter-spacing:.1em;text-transform:uppercase;color:var(--selling-accent); }
+.sell-actions { display:flex;gap:12px;flex-wrap:wrap;margin-top:28px; }
+.sell-actions .btn { min-height:48px;font-size:16px; }
+.sell-photo { margin:0;position:relative;min-height:520px;overflow:hidden;background:#e5e9e9; }
+.sell-photo img { width:100%;height:100%;object-fit:cover;position:absolute;inset:0; }
+.sell-photo figcaption { position:absolute;bottom:16px;left:16px;right:16px;padding:10px 14px;background:rgba(11,29,42,.86);color:#fff;font-size:14px;line-height:1.5; }
+.sell-section { padding:72px max(24px,calc((100vw - 1152px)/2));border-top:1px solid var(--line,#d6dee2); }
+.sell-section h2 { font-family:var(--display,'Archivo',sans-serif);font-size:clamp(28px,3vw,40px);line-height:1.14;letter-spacing:-.035em;max-width:23ch;margin:0 0 24px; }
+.sell-section p,.sell-section li { font-size:18px;line-height:1.75;max-width:76ch; }
+.sell-section p + p { margin-top:18px; }
+.sell-section ul { padding-left:24px; }
+.sell-section li { margin:12px 0; }
+.sell-section a:not(.btn) { text-decoration:underline;text-underline-offset:3px;color:#85451f; }
+.sell-section:nth-of-type(even) { background:#f1f4f3; }
+.sell-copy-grid { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(260px,.85fr);gap:64px;align-items:start; }
+.sell-inline-photo { margin:0; }
+.sell-inline-photo img { width:100%;max-height:440px;object-fit:cover;border-radius:8px; }
+.sell-inline-photo figcaption { margin-top:12px;font-size:14px;line-height:1.6;color:#52636e; }
+.sell-faq { max-width:860px; }
+.sell-faq details { padding:22px 0;border-bottom:1px solid #cfd8dc; }
+.sell-faq summary { cursor:pointer;font-size:18px;font-weight:650;line-height:1.5; }
+.sell-faq details p { margin-top:16px; }
+.sell-close { background:#132b3d!important;color:#fff; }
+.sell-close h2 { color:#fff;max-width:26ch; }
+.sell-close p { color:#e0e8eb; }
+.sell-close a:not(.btn) { color:#fff; }
+.sell-close .btn-outline { color:#fff;border-color:#bdcbd4; }
+.sell-close .btn-outline:hover { color:#fff;background:#294457; }
+.sell-related { display:flex;gap:12px 24px;flex-wrap:wrap;margin-top:32px;font-size:16px; }
+.selling-page .legacy-content-anchor { padding:0;border:0;min-height:0; }
+.gfs-project-context { display:flex;flex-wrap:wrap;align-items:center;gap:8px 20px;padding:16px 24px;background:#eaf2f2;border-bottom:1px solid #cadbdc;font-size:16px;color:#172e40; }
+.gfs-project-context span { font-weight:700; }
+.gfs-project-context small { flex:1;font-size:14px; }
+.gfs-project-context button { background:transparent;border:1px solid #6c8592;border-radius:6px;padding:10px 14px;min-height:44px;font:inherit;color:inherit;cursor:pointer; }
+@media(max-width:900px){
+ .selling-page .sell-hero { grid-template-columns:1fr;min-height:0; }
+ .sell-intro { padding:40px 24px; }
+ .selling-page h1 { max-width:20ch;font-size:clamp(36px,7vw,58px); }
+ .sell-photo { min-height:350px; }
+ .sell-copy-grid { grid-template-columns:1fr;gap:32px; }
+ .sell-section { padding:48px 24px; }
+ .sell-inline-photo { max-width:680px; }
+}
+@media(max-width:480px){
+ .sell-breadcrumb { margin-bottom:24px; }
+ .sell-actions { flex-direction:column;align-items:stretch; }
+ .sell-actions .btn { text-align:center; }
+ .sell-photo { min-height:300px; }
+ .sell-section p,.sell-section li,.sell-intro p { font-size:17px; }
+ .gfs-project-context { padding:16px; }
+ .gfs-project-context small { flex-basis:100%; }
+}

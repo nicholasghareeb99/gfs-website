@@ -1,0 +1,98 @@
+/* Fence buying guides: original project photography and accessible browsing. */
+.fence-experience { --selling-accent:#1762aa; }
+.fence-experience .sell-intro { padding:40px clamp(24px,4vw,64px); }
+.fence-experience .sell-hero { min-height:540px; }
+.fence-experience .sell-photo { min-height:480px; }
+.fence-experience .sell-photo img { object-fit:contain; background:#112c49; }
+.fence-experience .sell-photo figcaption { bottom:0;left:0;right:0; margin:0; }
+.fence-experience .sell-breadcrumb { margin-bottom:20px; }
+.fence-jump { display:flex;flex-wrap:wrap;gap:8px 24px;max-width:1200px;margin:auto;padding:16px 24px;border-bottom:1px solid #cbd8e5; }
+.fence-jump a { min-height:44px;display:flex;align-items:center;color:#154e83;font-weight:700;text-decoration:underline;text-underline-offset:5px; }
+.fence-experience section[id] { scroll-margin-top:120px; }
+.fence-collection { padding:64px 0;background:#edf4fb; }
+.fence-collection h2,.fence-decision h2 { font-size:clamp(28px,3.4vw,44px);line-height:1.12;letter-spacing:-.035em;max-width:26ch;margin:12px 0 20px; }
+.fence-collection .growth-heading { max-width:760px; }
+.fence-collection p,.fence-decision p { font-size:17px;line-height:1.7; }
+.fence-collection .photo-authentic { color:#164d7b; }
+.fence-filters { display:flex;gap:10px;flex-wrap:wrap;margin:28px 0 12px; }
+.fence-filters[hidden] { display:none; }
+.fence-filters button { font:inherit;font-size:15px;font-weight:700;padding:11px 18px;min-height:46px;border:1px solid #8caac6;border-radius:24px;background:white;color:#153a60;cursor:pointer; }
+.fence-filters button[aria-pressed="true"] { background:#133d67;color:white;border-color:#133d67; }
+.fence-photo-count { font-size:14px!important;color:#425c72;margin:12px 0 24px; }
+.fence-photo-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 24px;align-items:start; }
+.fence-photo-card { margin:0;min-width:0;background:white;border-radius:12px;overflow:hidden;border:1px solid #d3e0ec;box-shadow:0 6px 18px #123a5d08; }
+.fence-photo-card[hidden] { display:none; }
+.fence-photo-card a { display:block;position:relative;background:#102b46; }
+.fence-photo-card img { display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain; }
+.fence-photo-card a::after { content:'View photo ↗';position:absolute;right:10px;bottom:10px;padding:6px 10px;background:#102b46ed;color:#fff;border-radius:20px;font-size:12px;pointer-events:none; }
+.fence-project-card a::after { content:none; }
+.fence-project-card h3 a { background:transparent;color:#153a60; }
+.fence-photo-card figcaption { padding:18px 20px 22px;color:#334e65;font-size:16px;line-height:1.55; }
+.fence-photo-card .fence-tag { display:block;font-size:12px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#195892;margin-bottom:8px; }
+.fence-decision { padding:64px 0; }
+.fence-summary { max-width:800px; }
+.fence-facts { display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:32px 0; }
+.fence-facts div { padding:22px;background:#f1f6fb;border-top:3px solid #2876bd;border-radius:0 0 8px 8px; }
+.fence-facts dt { font-size:13px;font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:#205b8b;margin-bottom:10px; }
+.fence-facts dd { margin:0;font-size:16px;line-height:1.6;color:#253f56; }
+.fence-detail-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin:32px 0; }
+.fence-detail-grid article { border:1px solid #d4e0eb;border-radius:10px;padding:28px; }
+.fence-detail-grid h3 { font-size:23px;line-height:1.25;margin:0 0 16px;color:#153a60; }
+.fence-detail-grid p { margin:0; }
+.fence-detail-grid dt { margin-top:16px;color:#19578e; }
+.fence-detail-grid dd { margin:6px 0 0;line-height:1.65;font-size:16px; }
+.fence-planning { background:#102f50;color:#f3f8ff;border-radius:14px;padding:32px;margin:40px 0; }
+.fence-planning h3 { color:white;font-size:26px;line-height:1.2;margin:0 0 20px; }
+.fence-planning ol { display:grid;grid-template-columns:1fr 1fr;gap:18px 40px;padding-left:24px;font-size:17px;line-height:1.65; }
+.fence-planning li { padding-left:4px; }
+.fence-sources { border-top:1px solid #cbd8e5;padding-top:20px;color:#4b6276; }
+.fence-sources summary { min-height:44px;cursor:pointer;font-size:15px;font-weight:700; }
+.fence-sources p,.fence-sources li { font-size:14px;line-height:1.7; }
+.fence-sources ul { padding-left:20px; }
+.fence-sources a { color:#19578e;text-decoration:underline;text-underline-offset:3px; }
+.fence-viewer { width:min(1160px,calc(100vw - 24px));max-width:none;max-height:calc(100dvh - 24px);padding:0;border:0;border-radius:12px;background:#0b223a;color:white;overflow:auto; }
+.fence-viewer::backdrop { background:#06111de6; }
+.fence-viewer-bar { display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 16px; }
+.fence-viewer button { min-width:48px;min-height:48px;padding:10px 16px;border:1px solid #7791aa;border-radius:7px;background:#183b5b;color:white;font:inherit;font-weight:700;cursor:pointer; }
+.fence-viewer figure { margin:0; }
+.fence-viewer img { display:block;width:100%;height:min(65dvh,720px);object-fit:contain;background:#061626; }
+.fence-viewer figcaption { padding:16px 24px;line-height:1.6; }
+.fence-viewer-nav { display:flex;gap:12px;justify-content:center;padding:0 16px 18px; }
+.fence-viewer-nav a { display:flex;align-items:center;padding:10px;color:#d5eaff;text-decoration:underline; }
+.fence-experience a:focus-visible,.fence-experience button:focus-visible,.fence-viewer :focus-visible { outline:3px solid #418ee4;outline-offset:4px; }
+@media(max-width:1000px) { .fence-photo-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }.fence-facts { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:900px) {
+ .fence-experience .sell-hero { display:flex;flex-direction:column;min-height:0; }
+ .fence-experience .sell-intro { display:contents; }
+ .fence-experience .sell-breadcrumb { order:1;margin:24px 24px 14px; }
+ .fence-experience .sell-eyebrow { order:2;margin:0 24px;font-size:12px; }
+ .fence-experience h1 { order:3;margin:10px 24px 24px;font-size:clamp(32px,6vw,48px);max-width:22ch; }
+ .fence-experience .sell-photo { order:4;min-height:0;margin:0 24px;border-radius:10px; }
+ .fence-experience .sell-photo img { position:static;aspect-ratio:4/3;height:auto; }
+ .fence-experience .sell-photo figcaption { position:static;font-size:13px;padding:12px 16px;background:#102f50; }
+ .fence-experience .sell-intro>p { order:5;margin:22px 24px 0;max-width:70ch; }
+ .fence-experience .sell-actions { order:6;margin:24px; }
+}
+@media(max-width:600px) {
+ .fence-filters { flex-wrap:nowrap;overflow-x:auto;padding:4px 4px 12px;scroll-padding:4px; }
+ .fence-filters button { flex:0 0 auto; }
+ .fence-photo-grid,.fence-detail-grid { grid-template-columns:1fr; }
+ .fence-collection,.fence-decision { padding:40px 0; }
+ .fence-jump { padding:8px 20px;gap:0 20px;font-size:14px; }
+ .fence-facts { gap:10px; }.fence-facts div { padding:16px; }.fence-facts dd { font-size:15px; }
+ .fence-detail-grid article { padding:22px; }
+ .fence-planning { padding:24px; }.fence-planning ol { grid-template-columns:1fr; }
+ .fence-viewer-bar { font-size:14px; }.fence-viewer img { height:50dvh; }.fence-viewer figcaption { padding:14px 18px;font-size:15px; }
+ .fence-viewer-nav { flex-wrap:wrap; }.fence-viewer-nav a { justify-content:center; }
+}
+@media(prefers-reduced-motion:reduce) { .fence-experience * { scroll-behavior:auto!important; } }
+
+.fence-mobile-filter{display:none}@media(max-width:600px){.fence-collection .fence-filters{display:none}.fence-mobile-filter{display:flex;flex-direction:column;gap:8px;font-size:14px;font-weight:700;color:#163e64;margin:24px 0 12px}.fence-mobile-filter select{width:100%;min-height:48px;border:1px solid #8caac6;border-radius:8px;background:white;color:#153a60;padding:12px;font:inherit;font-size:16px}.fence-mobile-filter select:focus-visible{outline:3px solid #2879bc;outline-offset:3px}}
+
+/* Keep the estimate choices ahead of the photograph and detailed copy on phones. */
+@media(max-width:900px) {
+ .fence-experience .sell-hero--quote-first .sell-intro>.sell-actions { order:4;margin:0 24px 16px; }
+ .fence-experience .sell-hero--quote-first .sell-intro>.ad-entry-note { order:5;margin:0 24px 24px!important; }
+ .fence-experience .sell-hero--quote-first>.sell-photo { order:6; }
+ .fence-experience .sell-hero--quote-first .sell-intro>p:not(.ad-entry-note) { order:7;margin:22px 24px 28px; }
+}

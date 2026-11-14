@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Aluminum fence installation in Toledo &amp; Southeast Michigan | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Keep an open view with an aluminum fence. Compare rail layouts, tops, gates and grade changes, then request a quote for your property.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Aluminum Fence Installation | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Keep an open view with an aluminum fence. Compare rail layouts, tops, gates and grade changes, then request a quote for your property.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/fences/aluminum/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/work/aluminum-pool-winter.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Aluminum Fence Installation | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Keep an open view with an aluminum fence. Compare rail layouts, tops, gates and grade changes, then request a quote for your property.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/work/aluminum-pool-winter.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/fences/aluminum/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/fence-explorer.js?v=caption-sept30" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "nick@ghareebfence.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ghareebfence.com/"},{"@type":"ListItem","position":2,"name":"Aluminum fencing","item":"https://ghareebfence.com/fences/aluminum/"}]}</script>
+
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20260907-landings">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/growth-upgrade.css?v=20260919">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/photo-showcase.css?v=20260919-1">
+<link rel="stylesheet" href="/assets/css/fence-explorer.css?v=20261001-quote-first">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Can I pressure-wash the aluminum coating?", "acceptedAnswer": {"@type": "Answer", "text": "Check the manufacturer's directions first. Ultra Aluminum, for example, recommends a soft cloth or brush with a gentle cleaner and advises against pressure washing. That example should not replace the care instructions for the system actually installed."}}, {"@type": "Question", "name": "Does a rackable panel remove every gap on a slope?", "acceptedAnswer": {"@type": "Answer", "text": "No. Racking describes how the panel can change angle within its design limit. Local dips, transitions and gate openings still need to be checked in the actual layout."}}, {"@type": "Question", "name": "What should I save for a future aluminum-fence repair?", "acceptedAnswer": {"@type": "Answer", "text": "Keep the manufacturer, style, color and project documents, plus any finish-care instructions. Matching the component system and finish matters more than ordering a part described only as black ornamental fencing."}}]}</script>
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/catalogue-expansion.css?v=20260923-v12">
+<link rel="preload" as="image" href="/assets/img/performance-v12/5e3e27622d34167c-1600.webp" imagesrcset="/assets/img/performance-v12/5e3e27622d34167c-480.webp 480w, /assets/img/performance-v12/5e3e27622d34167c-960.webp 960w, /assets/img/performance-v12/5e3e27622d34167c-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars" aria-hidden="true">GFS</span>
+      <span class="spec spec--paper">Local family-owned fence company</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">BBB Accredited</span>
+      <span class="spec spec--paper">Our own project photos</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main" class="selling-page fence-experience">
+<section class="sell-hero sell-hero--quote-first" data-gfs-sec="s0"><div class="sell-intro"><nav class="sell-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/fences/">Fence styles</a></nav><span class="sell-eyebrow">Ornamental aluminum · Toledo &amp; Southeast Michigan</span><h1 data-editable="fence.v2.aluminum.title">Aluminum fencing. Keep the view.</h1><p data-editable="fence.v2.aluminum.intro">Ornamental aluminum defines the yard while preserving an open view. Compare the spacing, top profile, finish and gate details; an attractive open panel is not automatically the right pet enclosure or pool barrier.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/?project=aluminum">Request a free quote</a><a class="btn btn-outline" href="/quote/ballpark/?project=aluminum">Plan a ballpark</a></div><p class="ad-entry-note" style="font-size:16px;line-height:1.6;margin:16px 0 0;">No drawing is required to request an estimate. <a href="#project-photos" style="color:#145f92;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px;">See our project photos ↓</a></p></div><figure class="sell-photo"><img data-editable-img="fence.v2.aluminum.hero" src="/assets/img/performance-v12/5e3e27622d34167c-1600.webp" alt="Black flat-top metal fence turning a corner beside a green lawn and flowering tree." width="1600" height="1200" fetchpriority="high" decoding="async" srcset="/assets/img/performance-v12/5e3e27622d34167c-480.webp 480w, /assets/img/performance-v12/5e3e27622d34167c-960.webp 960w, /assets/img/performance-v12/5e3e27622d34167c-1600.webp 1600w" sizes="100vw"></figure></section>
+<nav class="fence-jump" aria-label="On this page"><a href="#project-photos">Project photos</a><a href="#style-guide">Details &amp; tradeoffs</a><a href="#fence-questions">Common questions</a><a href="/fences/#compare-materials">Compare materials</a><a href="/#fence-finder">Find my style</a></nav>
+<section class="fence-decision" data-gfs-sec="v2-at-a-glance"><div class="growth-inner"><span class="eyebrow">Before you choose</span><h2>How this fits your yard</h2><dl class="fence-facts"><div><dt>privacy</dt><dd data-editable="fence.v2.aluminum.quick.privacy">Open pickets preserve sightlines rather than providing a solid screen.</dd></div><div><dt>upkeep</dt><dd data-editable="fence.v2.aluminum.quick.upkeep">Clean the coating gently and inspect gates and damaged areas.</dd></div><div><dt>access</dt><dd data-editable="fence.v2.aluminum.quick.access">Review latch position, opening and swing independently of the panel style.</dd></div><div><dt>grade</dt><dd data-editable="fence.v2.aluminum.quick.grade">Rackability varies by system; bottom gaps still need review.</dd></div></dl></div></section>
+<section class="fence-collection" id="project-photos" data-fence-collection data-gfs-sec="growth-aluminum-photos"><div class="growth-inner"><div class="growth-heading"><span class="eyebrow">Built by Ghareeb Fencing Solutions</span><h2 data-editable="fence.v2.aluminum.gallery.title">See the details. Find your favorite.</h2><p data-editable="fence.v6.aluminum.gallery.intro">Explore flat-top panels, spear tops and an arched gate in ornamental metal fence photographs from our own work.</p><p class="photo-authentic">All fence installation photos in this collection show our own work.</p><p class="growth-note">The supplied folder includes aluminum and ornamental fencing. A photograph does not establish the metal alloy, and these images do not establish pool-barrier suitability.</p></div><div class="fence-filters" aria-label="Filter project photos" hidden><button type="button" data-photo-filter="all" aria-pressed="true">All photos</button><button type="button" data-photo-filter="Spear top" aria-pressed="false">Spear top</button><button type="button" data-photo-filter="Flat top" aria-pressed="false">Flat top</button><button type="button" data-photo-filter="Arched gate" aria-pressed="false">Arched gate</button></div><p class="fence-photo-count" data-photo-count aria-live="polite">26 project photographs. Select a photo to explore the details.</p><div class="fence-photo-grid"><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="9432"><a href="/assets/img/catalogue-v12/9432.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.9432" src="/assets/img/performance-v12/30f2c64c440ddd16-480.webp" srcset="/assets/img/performance-v12/30f2c64c440ddd16-480.webp 480w, /assets/img/performance-v12/30f2c64c440ddd16-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/9432.webp" data-photo-thumbnail="/assets/img/performance-v12/30f2c64c440ddd16-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Gate detail" data-archive-id="12513"><a href="/assets/img/catalogue-v12/12513.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Ornamental metal fence and gate"><img data-editable-img="fence.v12.12513" src="/assets/img/performance-v12/9581adacdef58450-480.webp" srcset="/assets/img/performance-v12/9581adacdef58450-480.webp 480w, /assets/img/performance-v12/9581adacdef58450-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Ornamental metal fence and gate" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/12513.webp" data-photo-thumbnail="/assets/img/performance-v12/9581adacdef58450-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="4620"><a href="/assets/img/catalogue-v12/4620.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.4620" src="/assets/img/performance-v12/3f86af943035c99a-480.webp" srcset="/assets/img/performance-v12/3f86af943035c99a-480.webp 480w, /assets/img/performance-v12/3f86af943035c99a-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/4620.webp" data-photo-thumbnail="/assets/img/performance-v12/3f86af943035c99a-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="5613"><a href="/assets/img/catalogue-v12/5613.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.5613" src="/assets/img/performance-v12/cef67934f272872c-480.webp" srcset="/assets/img/performance-v12/cef67934f272872c-480.webp 480w, /assets/img/performance-v12/cef67934f272872c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/5613.webp" data-photo-thumbnail="/assets/img/performance-v12/cef67934f272872c-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Spear top" data-archive-id="6507"><a href="/assets/img/catalogue-v12/6507.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Spear-top ornamental metal fencing"><img data-editable-img="fence.v12.6507" src="/assets/img/performance-v12/c4f6cec8825fe22c-480.webp" srcset="/assets/img/performance-v12/c4f6cec8825fe22c-480.webp 480w, /assets/img/performance-v12/c4f6cec8825fe22c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="640" alt="Spear-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/6507.webp" data-photo-thumbnail="/assets/img/performance-v12/c4f6cec8825fe22c-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="6546"><a href="/assets/img/catalogue-v12/6546.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.6546" src="/assets/img/performance-v12/49896361798f6e6a-480.webp" srcset="/assets/img/performance-v12/49896361798f6e6a-480.webp 480w, /assets/img/performance-v12/49896361798f6e6a-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="640" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/6546.webp" data-photo-thumbnail="/assets/img/performance-v12/49896361798f6e6a-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Gate detail" data-archive-id="8627"><a href="/assets/img/catalogue-v12/8627.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Ornamental metal fence and gate"><img data-editable-img="fence.v12.8627" src="/assets/img/performance-v12/9e4699409be8155b-480.webp" srcset="/assets/img/performance-v12/9e4699409be8155b-480.webp 480w, /assets/img/performance-v12/9e4699409be8155b-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Ornamental metal fence and gate" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/8627.webp" data-photo-thumbnail="/assets/img/performance-v12/9e4699409be8155b-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="7684"><a href="/assets/img/catalogue-v12/7684.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.7684" src="/assets/img/performance-v12/f6f43b54bdb61538-480.webp" srcset="/assets/img/performance-v12/f6f43b54bdb61538-480.webp 480w, /assets/img/performance-v12/f6f43b54bdb61538-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/7684.webp" data-photo-thumbnail="/assets/img/performance-v12/f6f43b54bdb61538-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Gate detail" data-archive-id="7909"><a href="/assets/img/catalogue-v12/7909.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Ornamental metal fence and gate"><img data-editable-img="fence.v12.7909" src="/assets/img/performance-v12/dbcf976cb8ad6e6c-480.webp" srcset="/assets/img/performance-v12/dbcf976cb8ad6e6c-480.webp 480w, /assets/img/performance-v12/dbcf976cb8ad6e6c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="640" alt="Ornamental metal fence and gate" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/7909.webp" data-photo-thumbnail="/assets/img/performance-v12/dbcf976cb8ad6e6c-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="8853"><a href="/assets/img/catalogue-v12/8853.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.8853" src="/assets/img/performance-v12/90bac5eb40a067cb-480.webp" srcset="/assets/img/performance-v12/90bac5eb40a067cb-480.webp 480w, /assets/img/performance-v12/90bac5eb40a067cb-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/8853.webp" data-photo-thumbnail="/assets/img/performance-v12/90bac5eb40a067cb-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="9284"><a href="/assets/img/catalogue-v12/9284.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.9284" src="/assets/img/performance-v12/ba81a39f5a35df4e-480.webp" srcset="/assets/img/performance-v12/ba81a39f5a35df4e-480.webp 480w, /assets/img/performance-v12/ba81a39f5a35df4e-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/9284.webp" data-photo-thumbnail="/assets/img/performance-v12/ba81a39f5a35df4e-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top" data-archive-id="9338"><a href="/assets/img/catalogue-v12/9338.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v12.9338" src="/assets/img/performance-v12/32a9b33ff3178eaf-480.webp" srcset="/assets/img/performance-v12/32a9b33ff3178eaf-480.webp 480w, /assets/img/performance-v12/32a9b33ff3178eaf-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/9338.webp" data-photo-thumbnail="/assets/img/performance-v12/32a9b33ff3178eaf-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Arched gate" data-archive-id="9469"><a href="/assets/img/catalogue-v12/9469.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Ornamental metal fence with an arched gate"><img data-editable-img="fence.v12.9469" src="/assets/img/performance-v12/fc1f87b84bf9c535-480.webp" srcset="/assets/img/performance-v12/fc1f87b84bf9c535-480.webp 480w, /assets/img/performance-v12/fc1f87b84bf9c535-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Ornamental metal fence with an arched gate" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/9469.webp" data-photo-thumbnail="/assets/img/performance-v12/fc1f87b84bf9c535-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Spear top" data-archive-id="10881"><a href="/assets/img/catalogue-v12/10881.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Spear-top ornamental metal fencing"><img data-editable-img="fence.v12.10881" src="/assets/img/performance-v12/a451d5c023b738bc-480.webp" srcset="/assets/img/performance-v12/a451d5c023b738bc-480.webp 480w, /assets/img/performance-v12/a451d5c023b738bc-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Spear-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/10881.webp" data-photo-thumbnail="/assets/img/performance-v12/a451d5c023b738bc-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Arched gate" data-archive-id="11961"><a href="/assets/img/catalogue-v12/11961.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Ornamental metal fence with an arched gate"><img data-editable-img="fence.v12.11961" src="/assets/img/performance-v12/43c569a0285ae201-480.webp" srcset="/assets/img/performance-v12/43c569a0285ae201-480.webp 480w, /assets/img/performance-v12/43c569a0285ae201-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Ornamental metal fence with an arched gate" loading="lazy" decoding="async" data-photo-original="/assets/img/catalogue-v12/11961.webp" data-photo-thumbnail="/assets/img/performance-v12/43c569a0285ae201-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/more-projects-sept26/10-11.webp" target="_blank" rel="noopener" aria-label="Enlarge photo: Flat-top ornamental metal fencing"><img data-editable-img="fence.v11.aluminum.10-11" src="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp" srcset="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp 480w, /assets/img/performance-v12/92bca2ca6c061e2a-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async" data-photo-original="/assets/img/more-projects-sept26/10-11.webp" data-photo-thumbnail="/assets/img/performance-v12/92bca2ca6c061e2a-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Spear top"><a href="/assets/img/projects-sept26/10-1.webp" target="_blank" rel="noopener" aria-label="View photo 1: Black spear-top ornamental fence and gate across a brick walkway."><img data-editable-img="fence.v2.aluminum.photo.10-1" src="/assets/img/performance-v12/50712a5a050c7e85-480.webp" alt="Spear-top pickets continue across the ornamental fence and matching gate." width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/50712a5a050c7e85-480.webp 480w, /assets/img/performance-v12/50712a5a050c7e85-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-1.webp" data-photo-thumbnail="/assets/img/performance-v12/50712a5a050c7e85-480.webp"></a><figcaption data-editable-caption="photo.detail.v30.fences.aluminum.index.html.assets.img.projects.sept26.10.1.webp">Spear-top pickets continue across the ornamental fence and matching gate.</figcaption></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-2.webp" target="_blank" rel="noopener" aria-label="View photo 2: Black flat-top metal fence beside a walkway overlooking water."><img data-editable-img="fence.v2.aluminum.photo.10-2" src="/assets/img/performance-v12/39f3c229b31abaa3-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/39f3c229b31abaa3-480.webp 480w, /assets/img/performance-v12/39f3c229b31abaa3-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-2.webp" data-photo-thumbnail="/assets/img/performance-v12/39f3c229b31abaa3-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-3.webp" target="_blank" rel="noopener" aria-label="View photo 3: Black flat-top metal fence turning a corner beside a green lawn and flowering tree."><img data-editable-img="fence.v2.aluminum.photo.10-3" src="/assets/img/performance-v12/5e3e27622d34167c-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/5e3e27622d34167c-480.webp 480w, /assets/img/performance-v12/5e3e27622d34167c-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-3.webp" data-photo-thumbnail="/assets/img/performance-v12/5e3e27622d34167c-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-4.webp" target="_blank" rel="noopener" aria-label="View photo 4: Black flat-top metal fence enclosing a yard beside a blue house."><img data-editable-img="fence.v2.aluminum.photo.10-4" src="/assets/img/performance-v12/5fb60cd69b569bd9-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/5fb60cd69b569bd9-480.webp 480w, /assets/img/performance-v12/5fb60cd69b569bd9-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-4.webp" data-photo-thumbnail="/assets/img/performance-v12/5fb60cd69b569bd9-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-5.webp" target="_blank" rel="noopener" aria-label="View photo 5: Black flat-top metal fence around a lawn corner beside a blue house."><img data-editable-img="fence.v2.aluminum.photo.10-5" src="/assets/img/performance-v12/bb66694ac097da55-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/bb66694ac097da55-480.webp 480w, /assets/img/performance-v12/bb66694ac097da55-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-5.webp" data-photo-thumbnail="/assets/img/performance-v12/bb66694ac097da55-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-6.webp" target="_blank" rel="noopener" aria-label="View photo 6: Long black flat-top metal fence beside a waterfront walkway."><img data-editable-img="fence.v2.aluminum.photo.10-6" src="/assets/img/performance-v12/d3e989c7fbe8fd1f-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/d3e989c7fbe8fd1f-480.webp 480w, /assets/img/performance-v12/d3e989c7fbe8fd1f-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-6.webp" data-photo-thumbnail="/assets/img/performance-v12/d3e989c7fbe8fd1f-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Spear top"><a href="/assets/img/projects-sept26/10-7.webp" target="_blank" rel="noopener" aria-label="View photo 7: Black spear-top ornamental metal fence and gate beside a dark garage and house."><img data-editable-img="fence.v2.aluminum.photo.10-7" src="/assets/img/performance-v12/7545368c2be3cfda-480.webp" alt="Spear-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/7545368c2be3cfda-480.webp 480w, /assets/img/performance-v12/7545368c2be3cfda-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-7.webp" data-photo-thumbnail="/assets/img/performance-v12/7545368c2be3cfda-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-9.webp" target="_blank" rel="noopener" aria-label="View photo 8: Black flat-top metal fence around a green lawn beside a raised deck and woods."><img data-editable-img="fence.v2.aluminum.photo.10-9" src="/assets/img/performance-v12/f9b044a229ad80d7-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/f9b044a229ad80d7-480.webp 480w, /assets/img/performance-v12/f9b044a229ad80d7-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-9.webp" data-photo-thumbnail="/assets/img/performance-v12/f9b044a229ad80d7-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Flat top"><a href="/assets/img/projects-sept26/10-10.webp" target="_blank" rel="noopener" aria-label="View photo 9: Angled view of a black flat-top metal fence around a lawn beside deck stairs."><img data-editable-img="fence.v2.aluminum.photo.10-10" src="/assets/img/performance-v12/3e058ee08cc6dcd0-480.webp" alt="Flat-top ornamental metal fencing" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/3e058ee08cc6dcd0-480.webp 480w, /assets/img/performance-v12/3e058ee08cc6dcd0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/projects-sept26/10-10.webp" data-photo-thumbnail="/assets/img/performance-v12/3e058ee08cc6dcd0-480.webp"></a></figure><figure class="fence-photo-card" data-fence-photo data-photo-tag="Arched gate"><a href="/assets/img/work/aluminum-pool-winter.jpg" target="_blank" rel="noopener" aria-label="View photo 10: Black ornamental metal fence around a covered pool, with an arched gate opposite the house."><img data-editable-img="fence.v6.aluminum.photo.additional-1" src="/assets/img/performance-v12/b978958dcd04a0a0-480.webp" alt="Ornamental metal fence with an arched gate" width="480" height="360" loading="lazy" decoding="async" srcset="/assets/img/performance-v12/b978958dcd04a0a0-480.webp 480w, /assets/img/performance-v12/b978958dcd04a0a0-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/aluminum-pool-winter.jpg" data-photo-thumbnail="/assets/img/performance-v12/b978958dcd04a0a0-480.webp"></a></figure></div><button type="button" class="btn btn-outline catalogue-more" data-fence-more data-gfs-protected hidden>Show more photos</button></div></section><div class="growth-inner"><aside class="catalogue-bridge"><h2>See the possibilities beyond these projects.</h2><p>Explore 4 named styles from our fence catalogue. Open a style in the 3D studio, compare the design, then carry your selection into a quote request.</p><p>Project photos show fences we have built. The catalogue previews are illustrations; colors, dimensions and availability are confirmed with your quote.</p><a class="btn btn-primary" href="/fence-studio/?material=aluminum">Explore these styles in 3D →</a><details><summary>Browse all 4 style names</summary><ul class="catalogue-style-list"><li><a href="/fence-studio/?material=aluminum&amp;style=Aluminum+3-Rail+4ft">Aluminum 3-Rail 4ft</a></li><li><a href="/fence-studio/?material=aluminum&amp;style=Aluminum+2-Rail+LifeGard+4ft">Aluminum 2-Rail LifeGard 4ft</a></li><li><a href="/fence-studio/?material=aluminum&amp;style=Aluminum+uas-101++4%27+Black">Aluminum uas-101  4&#x27; Black</a></li><li><a href="/fence-studio/?material=aluminum&amp;style=5%27+Bronze+ornamental+aluminum">5&#x27; Bronze ornamental aluminum</a></li></ul></details></aside></div>
+<section class="fence-decision" id="planning-details" data-gfs-sec="growth-aluminum-planning-v6"><div class="growth-inner"><div class="growth-heading"><span class="eyebrow">Make the layout your own</span><h2 data-editable="fence.v6.aluminum.planning.title">Give every endpoint a place on the plan</h2><p data-editable="fence.v6.aluminum.planning.intro">The last panel beside a wall or path deserves the same attention as the long, straight run.</p></div><div class="fence-detail-grid"><article><h3 data-editable="fence.v6.aluminum.planning.1.title">Where the fence meets the house</h3><p data-editable="fence.v6.aluminum.planning.1.body">Show the proposed end post, nearby doors, downspouts and any existing fence on your photos or sketch. Ask how the run will end and which connections are included in the proposal; do not leave the meeting point to a style photo.</p></article><article><h3 data-editable="fence.v6.aluminum.planning.2.title">Where a gate meets the path</h3><p data-editable="fence.v6.aluminum.planning.2.body">Mark the walking route and the direction you want the gate to open. Include nearby steps, planting beds and anything that needs to pass through. Review the usable opening and the gate’s open position together, especially on a narrow side yard.</p></article></div></div></section>
+<section class="fence-decision" id="style-guide" data-gfs-sec="growth-aluminum-guide"><div class="growth-inner"><span class="eyebrow">Make a more informed choice</span><h2>Ornamental aluminum: the details that matter</h2><div class="fence-detail-grid"><article><h3 data-editable="fence.v2.aluminum.fact.0.title">Coating still needs care</h3><p data-editable="fence.v2.aluminum.fact.0.text">Powder-coated aluminum can show surface weathering or a duller finish outdoors. Manufacturer guidance calls for gentle cleaning and rinsing; nearby salt exposure deserves attention. Follow the installed product&#x27;s care directions rather than treating it as care-free.</p></article><article><h3 data-editable="fence.v2.aluminum.fact.1.title">Open space is part of the design</h3><p data-editable="fence.v2.aluminum.fact.1.text">Picket spacing, rail placement and the gap beneath the fence all affect what can pass through it. For a pet area, evaluate the smallest animal and each gate gap as well as the appearance of the main panels.</p></article><article><h3 data-editable="fence.v2.aluminum.fact.2.title">Sloped yards need a panel-level answer</h3><p data-editable="fence.v2.aluminum.fact.2.text">Some aluminum panels rack to follow uneven terrain, but the available adjustment is a system-specific limit. Ask to see the proposed bottom line at the steepest section and at each gate.</p></article><article><h3 data-editable="fence.v2.aluminum.fact.3.title">Fence and railing are different products</h3><p data-editable="fence.v2.aluminum.fact.3.text">Do not assume an ornamental yard fence can substitute for a required deck, stair or retaining-wall guard. Explain any drop beside the proposed location so the appropriate product and local requirements are reviewed.</p></article><article><h3 data-editable="fence.v2.aluminum.fact.4.title">Pool suitability involves the entire layout</h3><p data-editable="fence.v2.aluminum.fact.4.text">A pool project needs review of the barrier, openings and access points, not simply an aluminum material label. Confirm the exact proposed design and hardware with the local authority before considering it a pool barrier.</p></article></div><div class="fence-planning"><h3>Bring these questions to your estimate</h3><ol><li data-editable="fence.v2.aluminum.planning.0">Which picket spacing and top profile suit the way this yard will be used?</li><li data-editable="fence.v2.aluminum.planning.1">Where does the ground create the largest opening beneath a panel?</li><li data-editable="fence.v2.aluminum.planning.2">Is any part of the fence beside a drop that needs a separate guard review?</li><li data-editable="fence.v2.aluminum.planning.3">What finish-care and approved touch-up instructions apply to the product?</li></ol></div><div class="growth-actions"><a class="btn btn-primary" href="/quote/form/?project=aluminum">Request my on-site estimate</a><a class="btn btn-outline" href="tel:+14192142107">Call 419-214-2107</a></div><p class="growth-note">A ballpark is a planning range. The final quote depends on measurements, gates, removal, site conditions and the written installation scope.</p></div></section>
+<section class="fence-decision" id="fence-questions" data-gfs-sec="v2-questions"><div class="growth-inner"><h2>Good questions. Clearer answers.</h2><div class="growth-faq"><details><summary data-editable="fence.v2.aluminum.faq.0.q">Can I pressure-wash the aluminum coating?</summary><p data-editable="fence.v2.aluminum.faq.0.a">Check the manufacturer&#x27;s directions first. Ultra Aluminum, for example, recommends a soft cloth or brush with a gentle cleaner and advises against pressure washing. That example should not replace the care instructions for the system actually installed.</p></details><details><summary data-editable="fence.v2.aluminum.faq.1.q">Does a rackable panel remove every gap on a slope?</summary><p data-editable="fence.v2.aluminum.faq.1.a">No. Racking describes how the panel can change angle within its design limit. Local dips, transitions and gate openings still need to be checked in the actual layout.</p></details><details><summary data-editable="fence.v2.aluminum.faq.2.q">What should I save for a future aluminum-fence repair?</summary><p data-editable="fence.v2.aluminum.faq.2.a">Keep the manufacturer, style, color and project documents, plus any finish-care instructions. Matching the component system and finish matters more than ordering a part described only as black ornamental fencing.</p></details></div><details class="fence-sources"><summary>Material guidance &amp; planning references</summary><p>These references explain material behavior and planning considerations. Product examples do not identify the brand in our photos or promise a particular specification. Your proposal and applicable local requirements determine the project details.</p><ul><li><a href="https://www.ultrafence.com/assets/files/global/common/UltraWarranty.pdf" target="_blank" rel="noopener">Ultra Aluminum: Product Cleaning Instructions</a></li><li><a href="https://freedomproduct.com/faq/" target="_blank" rel="noopener">Freedom Outdoor Living: Fence FAQs</a></li><li><a href="https://www.cpsc.gov/safety-education/neighborhood-safety-network/toolkits/drowning-prevention" target="_blank" rel="noopener">U.S. CPSC: Drowning Prevention — Layers of Protection</a></li></ul></details></div></section>
+<section class="gfs-styles" id="style-library" aria-labelledby="gfs-styles-h"><div class="gfs-styles__inner"><p class="gfs-styles__eyebrow">Style library</p><h2 id="gfs-styles-h">Every style: blueprint, 3D model, photo and write-up</h2><p class="gfs-styles__lede">The drawings come from our printed brochure. The 3D models are the same ones that draw your quote.</p><article class="gfs-style"><header><h3>Spear Top</h3><span>EFS-10</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>Every picket runs through the top rail and ends in a pressed spear. Three rails, ⅝ in. pickets and 3-13/16 in. between pickets. Built 3 to 6 ft.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum">Open the 3D Fence Studio →</a></div></div><div class="gfs-style__media"><figure><img src="/assets/img/performance-v12/c4f6cec8825fe22c-960.webp" alt="Spear-top ornamental metal fencing" loading="lazy" decoding="async"><figcaption>Our install: Spear-top ornamental metal fencing</figcaption></figure></div></div><figure class="gfs-style__bp gfs-style__bp--narrow"><a href="/assets/img/brochure/model-43-00.webp" target="_blank" rel="noopener" aria-label="Open the Spear Top blueprint full size"><img class="" src="/assets/img/brochure/model-43-00.webp" width="553" height="356" alt="Spear Top blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Drawn to scale at 4 ft · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>Staggered Spear</h3><span>EFS-15</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>Spears alternate high and low for a hand-forged look. Same rails, pickets and spacing as the Spear Top. Built 3 to 6 ft.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum">Open the 3D Fence Studio →</a></div></div><div class="gfs-style__media"></div></div><figure class="gfs-style__bp gfs-style__bp--narrow"><a href="/assets/img/brochure/model-43-01.webp" target="_blank" rel="noopener" aria-label="Open the Staggered Spear blueprint full size"><img class="" src="/assets/img/brochure/model-43-01.webp" width="554" height="356" alt="Staggered Spear blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Drawn to scale at 4 ft · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>Flat Top</h3><span>EFF-20</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>Pickets stop inside a flat top rail. This is our most common aluminum fence. Three rails, or four at 6 ft, with ⅝ in. pickets on 2 × 2 in. posts set 6 ft ½ in. on center.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum&amp;style=Aluminum+3-Rail+4ft">Open this style in 3D →</a><a class="btn btn-outline gfs-style__price" href="/quote/ballpark/?style=Aluminum%203-Rail%204ft">Get a ballpark for this style →</a></div></div><div class="gfs-style__media"><figure><img src="/assets/img/performance-v12/30f2c64c440ddd16-960.webp" alt="Flat-top ornamental metal fencing" loading="lazy" decoding="async"><figcaption>Our install: Flat-top ornamental metal fencing</figcaption></figure></div></div><figure class="gfs-style__bp"><a href="/assets/img/brochure/blueprint-49a.webp" target="_blank" rel="noopener" aria-label="Open the Flat Top blueprint full size"><img class="" src="/assets/img/brochure/blueprint-49a.webp" width="1500" height="641" alt="Flat Top blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Blueprint · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>Flat Top, 6 ft</h3><span>EFF-20</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>The 72 in. panel adds a fourth rail. Heavier post walls are available for gates and ends, and your quote lists the size and wall of every post. Also built at 3, 3½, 4½ and 5 ft.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum&amp;style=Aluminum+3-Rail+4ft">Open this style in 3D →</a></div></div><div class="gfs-style__media"></div></div><figure class="gfs-style__bp"><a href="/assets/img/brochure/blueprint-49b.webp" target="_blank" rel="noopener" aria-label="Open the Flat Top, 6 ft blueprint full size"><img class="" src="/assets/img/brochure/blueprint-49b.webp" width="1500" height="622" alt="Flat Top, 6 ft blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Blueprint · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>Flat Top with Spear</h3><span>EFF-25</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>A flat top rail with every other picket rising to a spear. Three rails, ⅝ in. pickets. Built 3 to 6 ft.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum">Open the 3D Fence Studio →</a></div></div><div class="gfs-style__media"></div></div><figure class="gfs-style__bp gfs-style__bp--narrow"><a href="/assets/img/brochure/model-43-10.webp" target="_blank" rel="noopener" aria-label="Open the Flat Top with Spear blueprint full size"><img class="" src="/assets/img/brochure/model-43-10.webp" width="553" height="356" alt="Flat Top with Spear blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Drawn to scale at 4 ft · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>2-Rail LifeGard</h3><span>LifeGard</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>Two rails and nothing in between, so there&#x27;s no midrail for a kid to use as a step. ¾ in. pickets on a taller 1-1/8 × 1-3/4 in. rail, with under 4 in. between pickets. Built at 4 ft.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum&amp;style=Aluminum+2-Rail+LifeGard+4ft">Open this style in 3D →</a><a class="btn btn-outline gfs-style__price" href="/quote/ballpark/?style=Aluminum%202-Rail%20LifeGard%204ft">Get a ballpark for this style →</a></div></div><div class="gfs-style__media"></div></div><figure class="gfs-style__bp"><a href="/assets/img/brochure/blueprint-51a.webp" target="_blank" rel="noopener" aria-label="Open the 2-Rail LifeGard blueprint full size"><img class="" src="/assets/img/brochure/blueprint-51a.webp" width="1500" height="641" alt="2-Rail LifeGard blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Blueprint · tap to enlarge</figcaption></figure></article><article class="gfs-style"><header><h3>Pet Panel</h3><span>1-5/8 in. spacing</span></header><div class="gfs-style__body"><div class="gfs-style__text"><p>About twice the pickets and less than half the gap: 1-5/8 in. between pickets instead of 3-13/16. Made for small dogs. It racks only 1 to 2 in. per panel, so on a real slope we step it instead.</p><div class="gfs-style__actions" style="display:flex;flex-wrap:wrap;gap:10px"><a class="btn btn-primary gfs-style__3d" href="/fence-studio/?material=aluminum">Open the 3D Fence Studio →</a></div></div><div class="gfs-style__media"></div></div><figure class="gfs-style__bp"><a href="/assets/img/brochure/blueprint-51b.webp" target="_blank" rel="noopener" aria-label="Open the Pet Panel blueprint full size"><img class="" src="/assets/img/brochure/blueprint-51b.webp" width="1500" height="622" alt="Pet Panel blueprint with dimensions and specifications" loading="lazy" decoding="async"></a><figcaption>Blueprint · tap to enlarge</figcaption></figure></article><article class="gfs-style gfs-style--sheet"><header><h3>Aluminum colors and details</h3><span>From the brochure</span></header><p class="gfs-style__cap">Powder coat, not paint. Seven colors, finials, and picket spacing shown at full size.</p><figure class="gfs-style__bp"><a href="/assets/img/brochure/sheet-44.webp" target="_blank" rel="noopener"><img class="" src="/assets/img/brochure/sheet-44.webp" width="1500" height="1263" alt="Aluminum colors and details brochure sheet" loading="lazy" decoding="async"></a><figcaption>Tap to enlarge</figcaption></figure></article><article class="gfs-style gfs-style--sheet"><header><h3>Elite color range</h3><span>From the brochure</span></header><p class="gfs-style__cap">Every panel, post, gate and cap is powder-coated at the factory.</p><figure class="gfs-style__bp"><a href="/assets/img/brochure/sheet-45.webp" target="_blank" rel="noopener"><img class="" src="/assets/img/brochure/sheet-45.webp" width="1500" height="1263" alt="Elite color range brochure sheet" loading="lazy" decoding="async"></a><figcaption>Tap to enlarge</figcaption></figure></article><article class="gfs-style gfs-style--sheet"><header><h3>Post, rail and picket sections</h3><span>From the brochure</span></header><p class="gfs-style__cap">Wall thickness is the number to compare. These are Elite&#x27;s.</p><figure class="gfs-style__bp"><a href="/assets/img/brochure/sheet-50.webp" target="_blank" rel="noopener"><img class="" src="/assets/img/brochure/sheet-50.webp" width="1500" height="1263" alt="Post, rail and picket sections brochure sheet" loading="lazy" decoding="async"></a><figcaption>Tap to enlarge</figcaption></figure></article><article class="gfs-style gfs-style--sheet"><header><h3>Slopes and gates</h3><span>From the brochure</span></header><p class="gfs-style__cap">Panels follow your yard. Gates match the panel, and the latch and hinges come with them.</p><figure class="gfs-style__bp"><a href="/assets/img/brochure/sheet-52.webp" target="_blank" rel="noopener"><img class="" src="/assets/img/brochure/sheet-52.webp" width="1500" height="1263" alt="Slopes and gates brochure sheet" loading="lazy" decoding="async"></a><figcaption>Tap to enlarge</figcaption></figure></article></div></section>
+<section class="gfs-spec" aria-labelledby="gfs-spec-h"><div class="gfs-spec__inner"><p class="gfs-spec__eyebrow">Build spec</p><h2 id="gfs-spec-h">How we build it</h2><dl class="gfs-spec__list"><div class="gfs-spec__row"><dt>Maker</dt><dd>Elite aluminum, made in Chesterfield, Michigan</dd></div><div class="gfs-spec__row"><dt>Styles</dt><dd>EFS-10 Spear Top, EFS-15 Staggered Spear, EFF-20 Flat Top, EFF-25 Flat Top with Spear, 2-Rail LifeGard, and a pet panel</dd></div><div class="gfs-spec__row"><dt>Pickets</dt><dd>⅝ in. square, .050 in. wall</dd></div><div class="gfs-spec__row"><dt>Picket spacing</dt><dd>3-13/16 in. standard. 1-5/8 in. on the pet panel.</dd></div><div class="gfs-spec__row"><dt>Rails</dt><dd>1-1/8 × 1 in., with .082 in. side walls</dd></div><div class="gfs-spec__row"><dt>Posts</dt><dd>2 × 2 in. in .060, .080 or .125 in. wall, or 2½ in. × .100</dd></div><div class="gfs-spec__row"><dt>Post spacing</dt><dd>6 ft ½ in. on center on EFF-20</dd></div><div class="gfs-spec__row"><dt>Top-rail load rating</dt><dd>350 lb</dd></div><div class="gfs-spec__row"><dt>Finish</dt><dd>Powder coat, 7 colors</dd></div><div class="gfs-spec__row"><dt>Slopes</dt><dd>Panels tilt about 6 in. to follow a grade. Up to about 16 in. as an option.</dd></div><div class="gfs-spec__row"><dt>Single gates</dt><dd>36 to 72 in. wide, built from the same panels</dd></div><div class="gfs-spec__row"><dt>Material warranty</dt><dd>Elite limited lifetime</dd></div><div class="gfs-spec__row"><dt>Workmanship warranty</dt><dd>3 years on every job</dd></div></dl><p class="gfs-spec__note">Same specs as our printed brochure. Your written proposal lists the exact materials for your yard.</p></div></section>
+<section class="sell-section sell-close" data-gfs-sec="v2-close"><span class="eyebrow">From inspiration to a shared plan</span><h2>Keep the fence, gates and next steps on the same page.</h2><p>Review the proposed fence line and gates with our team, then use your project portal to keep the saved plan, project details and communication together. Site-plan property-line references help with planning; they do not replace a boundary survey.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/form/?project=aluminum">Plan my fence</a><a class="btn btn-outline" href="/process/">See how it works</a></div><div class="sell-related"><a href="/fences/">Compare all fence styles</a><a href="/gallery/">More of our work</a><a href="/service-areas/">Find your service area</a></div></section>
+<section class="legacy-content-anchor" data-gfs-sec="s1" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s2" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s3" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s4" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s5" aria-label="Additional project content"></section>
+<section class="legacy-content-anchor" data-gfs-sec="s6" aria-label="Additional project content"></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT21aU1ZtWlFNa2RQVVdKMk0ycDRRVFl5UkRJNFZtYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Aluminum fencing</p><blockquote><p>“Nick was great to work with. Great installation and great prices. They contoured the fence to our yard perfectly.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Ryan Walters</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT21aU1ZtWlFNa2RQVVdKMk0ycDRRVFl5UkRJNFZtYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Ryan Walters (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>3-year workmanship warranty</span>
+        <span>BBB Accredited</span>
+        <span>Family owned</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+
+</body>
+</html>

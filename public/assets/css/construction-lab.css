@@ -1,0 +1,58 @@
+/* Scoped, dependency-free construction explainers. No autoplay or layout animation. */
+.build-lab-section{padding:36px 20px;scroll-margin-top:150px;background:#f4f8fb}
+.build-lab{max-width:1120px;margin:auto;color:#153650;background:#fff;border:1px solid #cddce7;border-radius:20px;padding:clamp(20px,4vw,42px);box-shadow:0 12px 35px #193b5710}
+.build-lab header{max-width:800px;margin-bottom:24px}
+.build-lab .build-lab-eyebrow{font-size:12px;font-weight:750;letter-spacing:.13em;text-transform:uppercase;color:#356987;margin:0 0 12px}
+.build-lab h2{font:700 clamp(24px,3vw,38px)/1.15 var(--sans,system-ui);letter-spacing:-.025em;margin:0 0 15px;color:#123853}
+.build-lab p{font-size:16px;line-height:1.65;margin:0 0 15px;color:#36546a}
+.build-lab-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(20px,4vw,40px);align-items:start}
+.build-lab figure{margin:0;min-width:0}
+.build-lab svg{display:block;width:100%;height:auto;aspect-ratio:5/3;border:1px solid #c9dce8;border-radius:16px;overflow:hidden}
+.build-lab svg text{font:500 20px system-ui;fill:#234d6b}
+.build-lab figcaption{font-size:13px;line-height:1.6;margin:12px 0 0;color:#4d6678}
+.build-lab a{color:#125c8b;text-decoration:underline;text-underline-offset:3px}
+.build-lab-controls{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 20px}
+.build-lab [hidden]{display:none!important}
+.build-lab button{min-height:46px;padding:10px 14px;background:#f0f6fa;border:1px solid #9cb7cb;border-radius:9px;font:650 14px/1.4 system-ui;color:#173d59;cursor:pointer;flex:1 1 auto;white-space:normal}
+.build-lab button:hover{background:#dcecf6}
+.build-lab button[aria-pressed=true]{background:#163e61;border-color:#163e61;color:#fff}
+.build-lab :is(button,input,a):focus-visible{outline:3px solid #077caf;outline-offset:4px}
+.build-lab-notes{padding-left:24px;margin:0 0 20px}
+.build-lab[data-lab-ready=true] .build-lab-notes{list-style:none;padding:0;min-height:145px}
+.build-lab h3{font:700 20px/1.3 system-ui;color:#163e61;margin:0 0 10px}
+.build-lab .build-lab-link{display:inline-flex;align-items:center;gap:12px;min-height:44px;font-weight:700;line-height:1.5}
+.build-lab-status{position:absolute!important;width:1px;height:1px;padding:0!important;margin:-1px!important;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.build-lab-range{margin:0 0 20px;padding:16px;border:1px solid #c1d5e3;border-radius:10px;background:#f6fafc}
+.build-lab-range label{display:flex;gap:12px;justify-content:space-between;font-size:15px;font-weight:650}
+.build-lab-range input{display:block;width:100%;height:44px;accent-color:#146893;cursor:pointer;margin:4px 0}
+.build-lab-range p{font-size:13px;margin:0}
+.build-lab svg g,.build-lab svg rect,.build-lab [data-lab-gate-leaf]{transition:transform .65s ease,opacity .4s ease,fill .35s ease;transform-box:view-box}
+.lab-drive-post{transform:translateY(-65px)}
+[data-scene="1"] .lab-drive-post,[data-scene="2"] .lab-drive-post{transform:translateY(0)}
+.lab-drive-finish,.lab-clean-dug,.lab-gate-vinyl,.lab-gate-hardware,.lab-swing-obstacle,.lab-slope-rack,.lab-replace-inspect,.lab-replace-new,.lab-portal-double{opacity:0}
+[data-scene="2"] .lab-drive-finish,[data-scene="1"] .lab-clean-dug,[data-scene="1"] .lab-gate-vinyl,[data-scene="2"] .lab-gate-hardware,[data-scene="1"] .lab-swing-obstacle,[data-scene="1"] .lab-slope-rack,[data-scene="1"] .lab-replace-inspect,[data-scene="2"] .lab-replace-new,[data-scene="1"] .lab-portal-double{opacity:1}
+[data-scene="2"] .lab-drive-post>rect:first-of-type{opacity:1}
+[data-scene="2"] .lab-drive-post>rect:nth-last-of-type(1),[data-scene="2"] .lab-drive-post>path{opacity:0}
+[data-scene="1"] .lab-clean-driven,[data-scene="1"] .lab-gate-wood,[data-scene="1"] .lab-slope-step,[data-scene="1"] .lab-portal-walk{opacity:0}
+[data-scene="1"] .lab-wood-left{transform:translateX(-75px)}
+[data-scene="1"] .lab-wood-right{transform:translateX(75px)}
+[data-scene="1"] .lab-wood-front{transform:translate(0,-24px);opacity:.55}
+[data-scene="2"] :is(.lab-wood-left,.lab-wood-right,.lab-wood-front){transform:translateY(-50px);opacity:0}
+[data-scene="1"] .lab-ridge-sleeve,[data-scene="2"] .lab-ridge-sleeve{opacity:.13}
+.lab-ridge-rail{opacity:0;transform:translateX(30px)}
+[data-scene="2"] .lab-ridge-rail{opacity:1;transform:translateX(0)}
+.lab-gate-hardware circle{fill:#fff5;stroke:#146f96;stroke-width:6}
+[data-scene="1"] .lab-replace-old,[data-scene="2"] .lab-replace-old{transform:translateY(-220px);opacity:0}
+.lab-replace-new{transform:translateY(-80px)}
+[data-scene="2"] .lab-replace-new{transform:translateY(0)}
+[data-scene="0"] .lab-journey-0 circle,[data-scene="1"] .lab-journey-1 circle,[data-scene="2"] .lab-journey-2 circle,[data-scene="3"] .lab-journey-3 circle{fill:#143e61;stroke:#087eab}
+[data-scene="0"] .lab-journey-0 .lab-node-number,[data-scene="1"] .lab-journey-1 .lab-node-number,[data-scene="2"] .lab-journey-2 .lab-node-number,[data-scene="3"] .lab-journey-3 .lab-node-number{fill:white}
+.build-lab-discover{padding:28px 20px;background:#eef5fa}
+.build-lab-discover>div{max-width:1120px;margin:auto}
+.build-lab-discover h2{font-size:clamp(25px,3vw,36px);margin:0 0 10px;color:#153d5b}
+.build-lab-discover nav{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px}
+.build-lab-discover a{display:flex;align-items:center;justify-content:space-between;gap:15px;flex:1 1 240px;min-height:60px;background:white;border:1px solid #c9dce8;border-radius:12px;padding:15px 20px;font-weight:700;color:#174e74;text-decoration:none}
+.build-lab-discover a:focus-visible{outline:3px solid #087eab;outline-offset:4px}
+@media(max-width:720px){.build-lab-section{padding:20px 14px}.build-lab{padding:20px 16px;border-radius:14px}.build-lab-grid{grid-template-columns:1fr;gap:20px}.build-lab header{margin-bottom:18px}.build-lab[data-lab-ready=true] .build-lab-notes{min-height:0}.build-lab button{flex-basis:42%}.build-lab figure{max-width:560px}.build-lab-controls{margin-bottom:17px}}
+@media(prefers-reduced-motion:reduce){.build-lab svg g,.build-lab svg rect,.build-lab [data-lab-gate-leaf]{transition:none!important;animation:none!important}}
+@media print{.build-lab-controls,.build-lab-range,.build-lab-status{display:none!important}.build-lab .build-lab-notes [hidden]{display:list-item!important}.build-lab-grid{display:block}.build-lab{box-shadow:none;break-inside:avoid}.build-lab-notes{list-style:decimal!important;padding-left:24px!important}}

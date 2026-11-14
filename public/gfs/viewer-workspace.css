@@ -1,0 +1,26 @@
+:root{--navy:#204137;--gold:#a6925d}body{font-family:Inter,system-ui,sans-serif;background:#e8eeea}#brand{border-radius:10px;border:1px solid #d7e1d6;background:#ffffffea;box-shadow:0 4px 20px #1834260d;color:#294937;backdrop-filter:blur(14px)}#brand .ver{display:none}#rail{background:#ffffffed;border:1px solid #d6e2d6;border-radius:12px;padding:5px;box-shadow:0 8px 25px #244b2a18;gap:5px}#rail .rbtn{background:transparent;color:#264838;border:0;border-radius:8px;box-shadow:none;min-width:39px;min-height:40px;font-family:system-ui,sans-serif;font-size:15px}#rail .rbtn:hover,#rail .rbtn.on{background:#e8f1e6}#sheet{background:#fffffff2;border:1px solid #d6e0d5;border-radius:16px 16px 0 0;box-shadow:0 -7px 26px #21452312;backdrop-filter:blur(15px)}#sheet select{border:1px solid #cedbc9;border-radius:8px;background:#f7faf5;color:#2d4935;font-size:14px;font-weight:500}#hRow button{border:1px solid #d2dfcc;border-radius:7px;font-size:12px;background:#f3f7ef;color:#3e5e41;min-height:38px}#hRow button.on{background:#315c41;color:white;border-color:#315c41}#hud{background:#ffffffed;color:#3c5b44;border:1px solid #d7e2d4;box-shadow:none;font-weight:500;border-radius:8px}#loading{background:#e8eeea;color:#3d6047}.ws-viewer-note{position:fixed;right:14px;top:16px;font-size:9px;letter-spacing:.12em;color:#52735b;z-index:3;text-transform:uppercase;pointer-events:none}@media(max-width:600px){.ws-viewer-note{display:none}#rail{gap:2px;padding:3px}#rail .rbtn{min-width:36px;min-height:38px}}
+header{background:#f7faf5eb;color:#254434;border-bottom:1px solid #d6e0d5;backdrop-filter:blur(16px);padding:13px 18px}header b{font-size:12px;letter-spacing:.12em}header b small{display:none}.hint{color:#6b7d6e;text-shadow:none;font-weight:400}#rail{top:118px}#hud{top:62px;max-width:calc(100vw - 320px)}
+.ws-viewer-controls{position:fixed;top:60px;right:12px;z-index:7;display:flex;gap:8px;align-items:center;background:#ffffffed;border:1px solid #d6e0d5;border-radius:10px;padding:6px 8px;color:#57715b;font-size:9px}.ws-viewer-controls label{display:flex;flex-direction:column;gap:2px}.ws-viewer-controls select{border:0;color:#31523b;background:transparent;font:600 11px system-ui;max-width:110px;min-height:28px}.ws-viewer-controls button{font:600 11px system-ui;min-height:40px;border:0;border-left:1px solid #dce5d9;background:transparent;color:#31523b;padding:0 8px}.ws-viewer-controls [role=status]{position:absolute;right:0;top:calc(100% + 5px);white-space:nowrap;color:#3b5d42}.ws-viewer-controls :focus-visible{outline:2px solid #709f73;outline-offset:2px}
+@media(max-width:600px){header{padding:10px 12px}header b{font-size:10px}#meta{font-size:9px}#hud{top:44px;left:7px;max-width:calc(100vw - 14px);font-size:10px;padding:7px 9px}.ws-viewer-controls{top:88px;left:7px;right:auto;padding:3px 5px;gap:4px}#rail{right:7px;top:150px}#rail .rbtn{width:37px;height:38px}.ws-viewer-controls select{font-size:10px;max-width:100px}.ws-viewer-controls button{font-size:10px}#sheet .hint{font-size:9px}}
+/* Keep CSS viewport size independent from the high-resolution drawing buffer. */
+#c{display:block;width:100%;height:100%}
+#hudStyle{white-space:normal;max-width:none;min-width:0}
+@media(max-width:600px){body #hud{right:7px;width:max-content;max-width:calc(100vw - 14px)}body .ws-viewer-controls{top:106px}body #rail{top:170px}.ws-model-review{top:162px!important}body #hRow button{min-height:44px}}
+
+#meta{white-space:pre-line}
+
+/* Stack controls in narrow app panels as well as phones. */
+body.ws-viewer-stacked #hud{left:7px;right:7px;width:max-content;max-width:calc(100vw - 14px)}
+body.ws-viewer-stacked .ws-viewer-controls{left:7px;right:auto;max-width:calc(100vw - 14px);flex-wrap:wrap}
+body.ws-viewer-stacked #rail{right:7px}
+body.ws-viewer-stacked .ws-viewer-controls [role=status]{white-space:normal;max-width:100%}
+
+/* Keep field controls readable and review notices clear of the style picker. */
+body .ws-viewer-controls{font-size:14px;flex-wrap:wrap;max-width:min(580px,calc(100vw - 24px));gap:10px;padding:8px 10px}
+body .ws-viewer-controls select,body .ws-viewer-controls button{font-size:14px;min-height:44px}
+body .ws-viewer-controls select{max-width:132px}
+body .ws-viewer-controls [role=status]{position:static;flex-basis:100%;white-space:normal;font-size:14px;line-height:1.45}
+body .ws-viewer-controls [role=status]:empty{display:none}
+body #hud,body #hRow button{font-size:14px}
+body #rail .rbtn{min-width:44px;min-height:44px;font-size:18px}
+body #sheet .hint{font-size:12px}

@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Fence Cost Calculator | Toledo, OH | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Draw your fence on a map or type the length, pick a style, and see a price range. Toledo and Northwest Ohio. We confirm it with a free measure.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Fence Cost Calculator | Toledo, OH | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Draw your fence on a map or type the length, pick a style, and see a price range. Toledo and Northwest Ohio. We confirm it with a free measure.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/quote/ballpark/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Fence Cost Calculator | Toledo, OH | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Draw your fence on a map or type the length, pick a style, and see a price range. Toledo and Northwest Ohio. We confirm it with a free measure.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/quote/ballpark/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  // Price stays hidden (blurred) until contact info is submitted.
+  window.GFS_PRICE_GATE = 'blur';
+  // Property lines — same county sources as the Executive app. Lucas and
+  // Wayne are exact production layers; the statewide entry is a
+  // best-effort catch-all for the rest of Ohio.
+  window.GFS_PARCELS = {
+    provider: 'arcgis',
+    setbackInches: 6,
+    counties: [
+      { name: 'Lucas County OH',
+        url: 'https://lcaudgis.co.lucas.oh.us/gisaudserver/rest/services/AREIS_Web_Map_MIL1/MapServer/3',
+        bbox: [-84.00, 41.41, -83.06, 41.77] },
+      { name: 'Wayne County MI',
+        url: 'https://www.waynecounty.com/gisserver/rest/services/ParcelViewer/prcls_fullAdd_parsed_FINAL/MapServer/0',
+        bbox: [-83.57, 42.02, -82.86, 42.47] },
+      { name: 'Ohio statewide (best effort)',
+        url: 'https://geo.oit.ohio.gov/arcgis/rest/services/OGRIP_Services/Ohio_Statewide_Parcels/MapServer/0' }
+    ]
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://ghareebfence.com/#business","name":"Ghareeb Fencing Solutions","telephone":"+1-419-214-2107","email":"nick@ghareebfence.com","url":"https://ghareebfence.com/","priceRange":"$$","address":{"@type":"PostalAddress","streetAddress":"5242 Tractor Rd Suite C","addressLocality":"Toledo","addressRegion":"OH","postalCode":"43612","addressCountry":"US"},"areaServed":["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"08:00","closes":"18:00"}],"sameAs":["https://www.facebook.com/GhareebLandscaping/","https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]}</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ghareebfence.com/"},{"@type":"ListItem","position":2,"name":"Get a Quote","item":"https://ghareebfence.com/quote/"},{"@type":"ListItem","position":3,"name":"Instant Estimate","item":"https://ghareebfence.com/quote/ballpark/"}]}</script>
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20260907-landings">
+<link rel="stylesheet" href="/assets/css/map-drawing.css?v=20260930-tools">
+<script src="/assets/js/map-geometry.js" defer></script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261113c">
+</head>
+<body class="bp-page">
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars" aria-hidden="true">GFS</span>
+      <span class="spec spec--paper">Fence installation in Toledo and nearby communities</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Local fence installation</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<aside class="studio-quote-context" id="studio-quote-context" aria-label="Selected fence style" hidden></aside>
+          <div id="bp-success-email" class="form-success" style="background:rgba(26,122,74,0.16);border:1px solid rgba(26,122,74,0.4);color:#c8ecd8;padding:20px;border-radius:5px;margin-top:14px;">
+            <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#8fd3b0;margin-bottom:8px;">Request received</div>
+            <strong style="display:block;font-family:var(--display);font-size:19px;color:#fff;margin-bottom:6px;">Your planning range is ready.</strong>
+            <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#c8ecd8;">
+              The written estimate and material comparison are on the right. Nicholas reviews
+              every request himself and will call to confirm measurements.
+            </p>
+            <div style="border-top:1px solid rgba(255,255,255,0.15);padding-top:16px;">
+              <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#8fd3b0;margin-bottom:10px;">Next step</div>
+              <p style="margin:0 0 12px;font-size:14px;color:#c8ecd8;">
+                Request a site measure so we can review the layout and scope. We will confirm availability.
+              </p>
+              <a href="../../quote/book/" class="btn btn-gold btn-sm" style="text-decoration:none;">Book my free measure</a>
+              <a href="tel:14192142107" class="btn btn-outline btn-sm" style="margin-left:8px;text-decoration:none;color:#c8ecd8;border-color:rgba(255,255,255,0.3);">Call instead</a>
+            </div>
+          </div><section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="pagehero.img" aria-hidden="true"><img src="/assets/img/performance-v12/05d76a7b22cddd6d-1400.webp" alt="Cedar picket fence at a corner" loading="eager" decoding="async" srcset="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp 480w, /assets/img/performance-v12/05d76a7b22cddd6d-960.webp 960w, /assets/img/performance-v12/05d76a7b22cddd6d-1400.webp 1400w" sizes="100vw" width="1400" height="1050"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="../../">Home</a> <span>/</span> <a href="../../quote/">Quote</a> <span>/</span> Ballpark Calculator</div>
+    <div class="eyebrow" style="margin-bottom: 20px;" data-editable="bp.eyebrow">Ballpark price</div>
+    <h1 class="display-1" data-editable="bp.title.v2">What will my fence cost?</h1>
+    <p class="lede" data-editable="bp.lede.v3">Draw it on the map or type the length, pick a style, and see a price range. We confirm it with a free measure.</p>
+  </div>
+</section>
+
+<section class="section" style="padding: 40px 0 80px;">
+  <div class="container">
+    <div class="ballpark-layout" style="display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: start;">
+
+      <!-- ===================== LEFT: WIZARD ===================== -->
+      <div>
+
+        <!-- STEP 1 -->
+        <div id="bp-step-1" class="bp-step active" style="background:var(--white);padding:32px;border-radius:6px;box-shadow:var(--shadow-md);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">1</div>
+            <div>
+              <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s1.title">Where's your fence going?</h2>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s1.sub.v2">Draw it on a satellite map of your yard, or type the total length.</p>
+            </div>
+          </div>
+
+          <button id="bp-open-map" type="button" class="btn btn-primary bp-map-cta" aria-expanded="false" aria-controls="bp-map-tools" style="min-height:48px;white-space:normal;"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2z"/><path d="M9 4v14M15 6v14"/></svg> Draw my fence on the map</button>
+          <p id="bp-map-load-note" role="status" style="font-size:13px;color:var(--gray-500);margin:8px 0 16px;">Most accurate. Lengths fill in for you.</p>
+<!-- Quick estimate: no map download needed -->
+          <div style="margin-bottom:20px;">
+            <label class="form-label" for="bp-linear-feet">Or type the total length (feet)</label>
+            <input id="bp-linear-feet" type="number" inputmode="decimal" class="form-input" placeholder="e.g. 150" min="0" max="2000" step="any" aria-describedby="bp-length-help bp-length-status" required>
+            <p id="bp-length-help" style="font-size:14px;line-height:1.6;margin-top:8px;">Online ranges cover up to 2,000 feet. For a longer fence, <a href="/quote/form/" style="display:inline-flex;align-items:center;min-height:44px;text-decoration:underline;text-underline-offset:3px;">request a detailed quote</a>.</p>
+            <p id="bp-length-status" role="status" aria-live="polite" hidden style="font-size:14px;line-height:1.6;color:#9b2424;margin-top:8px;"></p>
+
+            <!-- Drawing on a satellite map is precise but slow, and awkward on
+                 a phone. These give a usable number in one tap; the map stays
+                 for anyone who wants accuracy. -->
+            <div style="margin-top:14px;">
+              <span class="spec" style="display:block;margin-bottom:8px;">Not sure? Tap a typical size</span>
+              <div id="bp-size-presets" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+            </div>
+            <p style="font-size:12px;color:var(--gray-500);margin-top:8px;" data-editable="bp.s1.tip.v3">Rough guesses are fine. We measure before you pay anything.</p>
+          </div>
+
+          <div id="bp-map-tools" hidden>
+          <details id="bp-sketch-help" class="bp-sketch-help" open>
+            <summary>How to sketch your fence</summary>
+            <div class="bp-sketch-guide">
+              <svg viewBox="0 0 240 145" role="img" aria-label="Example only: tap the start, two corners and the end to draw a U-shaped fence behind a house. Then press Finish line.">
+                <rect x="4" y="4" width="232" height="137" rx="12" fill="#edf4fb"/>
+                <path d="M78 118V90L120 67L162 90V118Z" fill="#c2d0de" stroke="#6c869e" stroke-width="2"/>
+                <text x="120" y="110" text-anchor="middle" fill="#173955" font-size="12">House</text>
+                <path class="bp-example-line" d="M35 110V28H205V110" fill="none" stroke="#1d5eb6" stroke-width="5" stroke-linecap="round" pathLength="100"/>
+                <g fill="#fff" stroke="#1d5eb6" stroke-width="2"><circle cx="35" cy="110" r="12"/><circle cx="35" cy="28" r="12"/><circle cx="205" cy="28" r="12"/><circle cx="205" cy="110" r="12"/></g>
+                <g text-anchor="middle" fill="#173955" font-size="12" font-weight="700"><text x="35" y="114">1</text><text x="35" y="32">2</text><text x="205" y="32">3</text><text x="205" y="114">4</text></g>
+              </svg>
+              <ol><li><strong>Find your property.</strong> Enter the full address, select it and zoom in. Move map lets you position the view.</li><li><strong>Tap your fence route.</strong> Choose Draw fence. Tap the start, every corner and the end. You do not need to trace the whole property.</li><li><strong>Finish the line.</strong> Tap Finish line. Length fills in automatically. Use Undo for a mistake, or Draw fence for another section.</li></ol>
+            </div><p>Example sketch only. After drawing, use Add gates for openings. You can also skip the map and enter a length.</p>
+            <button type="button" id="bp-use-length" class="btn btn-outline btn-sm">Enter a length instead</button>
+          </details>
+
+          <!-- Address search -->
+          <div class="bp-map-address" style="margin-bottom:14px;">
+            <label class="form-label" for="bp-map-search">Property Address</label>
+            <div id="bp-map-search-row" style="display:grid;grid-template-columns:1fr 100px;gap:10px;">
+              <input id="bp-map-search" type="text" class="form-input" placeholder="e.g. 5242 Tractor Rd, Toledo" autocomplete="street-address">
+              <button id="bp-map-search-btn" type="button" class="btn btn-primary" style="white-space:nowrap;">Find</button>
+            </div>
+            <input id="bp-address" type="hidden">
+          </div>
+
+          <!-- Satellite map with custom drawing toolbar -->
+          <div class="bp-map-frame" style="position:relative;border:1px solid var(--gray-300);border-radius:6px;overflow:hidden;background:#e5e7eb;">
+            <div id="bp-map" style="width:100%;height:460px;background:#e5e7eb;"></div>
+
+            <!-- Custom drawing toolbar (floats over the map) -->
+            <div id="bp-draw-toolbar" aria-label="Fence sketch controls"><button type="button" data-mode="idle" class="bp-draw-btn" aria-label="Move map and adjust corners" aria-pressed="true"><span aria-hidden="true">✥</span><span class="bp-btn-label">Move map</span></button><button type="button" data-mode="fence" aria-label="Draw fence line" class="bp-draw-btn" title="Draw fence line — click each corner, tap Finish line when done" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--navy);color:var(--cream);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:16px;">✏️</span><span class="bp-btn-label">Draw fence</span>
+              </button><button type="button" data-mode="finish" aria-label="Finish drawing this fence" class="bp-draw-btn bp-finish-btn" title="Finish the fence line you're drawing" disabled style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--navy);background:var(--success,#1A7A3C);color:#fff;border-radius:5px;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:15px;">✓</span><span class="bp-btn-label">Finish line</span>
+              </button><button type="button" data-mode="undo" aria-label="Undo last action" class="bp-draw-btn" title="Undo last action — removes the most recent point, fence, or gate" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:16px;">↶</span><span class="bp-btn-label">Undo</span>
+              </button><details class="bp-tool-group"><summary>Add gates</summary><div><button type="button" data-mode="walk-gate" aria-label="Place walk-through gate" class="bp-draw-btn" title="Place a walk-through gate — click the fence line where the gate goes" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:16px;">🚶</span><span class="bp-btn-label">Walk Gate</span>
+              </button><button type="button" data-mode="drive-gate" aria-label="Place drive gate" class="bp-draw-btn" title="Place a drive gate — click the fence line where the gate goes" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:16px;">🚗</span><span class="bp-btn-label">Drive Gate</span>
+              </button></div></details><details class="bp-tool-group"><summary>More tools</summary><div><button type="button" data-mode="parcel" aria-label="Show property line" class="bp-draw-btn bp-parcel-btn" title="Look up this address's property line and trace the fence along it" style="display:none;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;"><span style="font-size:15px;">&#9106;</span><span class="bp-btn-label">Property line</span></button><button type="button" data-mode="snap" aria-label="Toggle 90 degree snapping" class="bp-draw-btn" title="Snap to 90° / 45° — keeps fence lines straight and square (most properties)" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:14px;">⊞</span><span class="bp-btn-label">Snap 90°</span>
+              </button><button type="button" data-mode="clear" aria-label="Clear all drawing" class="bp-draw-btn" title="Clear all fence lines and gates" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--danger);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+                <span style="font-size:16px;">🗑</span><span class="bp-btn-label">Clear</span>
+              </button></div></details></div>
+            <div id="bp-live-feet" style="display:none;position:absolute;top:14px;right:14px;z-index:6;background:var(--navy,#1e3a5f);color:#fff;border-radius:20px;padding:9px 16px;font-weight:800;font-size:16px;box-shadow:0 6px 20px rgba(0,0,0,0.25);pointer-events:none;">0 ft</div>
+            <!-- Instructions strip (bottom of map, mode-aware) -->
+            <div id="bp-draw-hint" role="status" aria-live="polite" style="position:absolute;bottom:14px;left:14px;right:14px;background:rgba(26,46,64,0.92);color:var(--cream);padding:10px 16px;border-radius:4px;font-size:13px;text-align:center;z-index:5;backdrop-filter:blur(8px);pointer-events:none;line-height:1.4;">
+              Find your property, zoom in, then choose <strong>Draw fence</strong>. Tap the start and each corner, then <strong>Finish line</strong>.
+            </div>
+
+            <!-- Live stats (top-right corner) -->
+            <div id="bp-setback" style="display:none;position:absolute;bottom:64px;left:14px;background:rgba(255,255,255,0.96);border-radius:6px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,0.16);z-index:5;backdrop-filter:blur(8px);max-width:calc(100% - 28px);">
+              <label class="spec" for="bp-setback-in" style="display:block;margin-bottom:6px;">Set fence inside the line</label>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <input id="bp-setback-in" type="range" min="0" max="36" step="6" value="6" style="width:140px;">
+                <span id="bp-setback-val" class="num" style="font-weight:600;color:var(--ink);min-width:56px;"></span>
+              </div>
+              <div id="bp-parcel-info" class="spec" style="margin-top:8px;text-transform:none;letter-spacing:0.03em;color:var(--galv);"></div>
+            </div>
+
+            <div id="bp-draw-stats" style="position:absolute;top:14px;right:14px;background:var(--navy);color:var(--cream);padding:10px 16px;border-radius:4px;font-size:13px;z-index:5;box-shadow:0 4px 16px rgba(0,0,0,0.25);min-width:140px;">
+              <div style="font-family:var(--serif);font-size: 12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:4px;">Drawn Total</div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="opacity:0.75;">Length:</span><strong id="bp-stat-length" style="color:var(--cream);">0 ft</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="opacity:0.75;">Walk gates:</span><strong id="bp-stat-walk" style="color:var(--cream);">0</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:13px;">
+                <span style="opacity:0.75;">Drive gates:</span><strong id="bp-stat-drive" style="color:var(--cream);">0</strong>
+              </div>
+            </div>
+          </div>
+
+
+          <div id="bp-measure-slot" data-gfs-protected></div>
+          </div><!-- /bp-map-tools -->
+        </div>
+
+        <!-- STEP 2 -->
+        <div id="bp-step-2" class="bp-step active" style="background:var(--white);padding:32px;border-radius:6px;box-shadow:var(--shadow-md);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">2</div>
+            <div>
+              <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s2.title">Pick your fence style.</h2>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s2.sub.v2">Pick a style, then its color and height. Need two styles on one job? Add the second one here.</p>
+            </div>
+          </div>
+          <!-- Material filter. With ~100 styles synced from the Executive app,
+               showing every tile at once is a wall of scrolling. Narrowing by
+               material first cuts it to a handful. -->
+          <div id="bp-material-filter" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;"></div>
+
+          <!-- Quick-pick dropdown for people who already know what they want -->
+          <div style="margin-bottom:18px;">
+            <label class="form-label" for="bp-fence-select">Or search all styles</label>
+            <select id="bp-fence-select" class="form-select" style="font-size:15px;">
+              <option value="">— Choose a style —</option>
+            </select>
+          </div>
+          <div id="bp-fence-options" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px;">
+            <div style="grid-column:1/-1;padding:40px;text-align:center;color:var(--gray-500);">Loading fence styles…</div>
+          </div>
+        </div>
+
+        <!-- STEP 3 -->
+        <div id="bp-step-3" class="bp-step" style="background:var(--white);padding:32px;border-radius:6px;box-shadow:var(--shadow-md);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--navy);color:var(--cream);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">3</div>
+            <div>
+              <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0;" data-editable="bp.s3.title">Customize your project.</h2>
+              <p style="font-size:14px;color:var(--gray-500);margin:0;" data-editable="bp.s3.sub.v2">Gates, old fence removal and anything we should know about the yard.</p>
+            </div>
+          </div>
+          <div class="bp-step-3-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div>
+              <label class="form-label" for="bp-height">Fence Height</label>
+              <select id="bp-height" class="form-select" aria-describedby="bp-height-review">
+                <option value="4">4 feet</option>
+                <option value="5">5 feet</option>
+                <option value="6" selected>6 feet (most common)</option>
+                <option value="8">8 feet</option>
+              </select>
+              <p id="bp-height-review" role="status" hidden style="margin:12px 0 0;font-size:14px;line-height:1.6;color:var(--navy);"></p>
+            </div>
+            <div>
+              <label class="form-label" for="bp-single-gates">Single Gates (walk-thru)</label>
+              <select id="bp-single-gates" class="form-select">
+                <option value="0">None</option>
+                <option value="1">1 gate</option>
+                <option value="2">2 gates</option>
+                <option value="3">3 gates</option>
+              </select>
+            </div>
+            <div>
+              <label class="form-label" for="bp-double-gates">Double Gates (drive-thru)</label>
+              <select id="bp-double-gates" class="form-select">
+                <option value="0">None</option>
+                <option value="1">1 gate</option>
+                <option value="2">2 gates</option>
+              </select>
+            </div>
+          </div>
+          <label style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--cream);border-radius:4px;cursor:pointer;" for="bp-remove-old">
+            <input id="bp-remove-old" type="checkbox" style="width:18px;height:18px;cursor:pointer;">
+            <span style="font-weight:500;color:var(--navy);" data-editable="bp.s3.removal">Include removal of an existing fence in the planning range</span>
+          </label>
+          <div id="bp-removal-fields" hidden style="margin-top:16px;">
+            <label class="form-label" for="bp-existing-material">What is your existing fence made of?</label>
+            <select id="bp-existing-material" class="form-select" aria-describedby="bp-removal-help" disabled>
+              <option value="">Choose existing fence material</option>
+              <option value="wood">Wood</option>
+              <option value="chain">Chain link</option>
+              <option value="vinyl">Vinyl</option>
+              <option value="aluminum">Aluminum / metal</option>
+              <option value="other">Other / mixed materials</option>
+            </select>
+            <p id="bp-removal-help" style="font-size:14px;line-height:1.6;margin:10px 0 0;color:var(--navy);">Choose the fence being removed, not the new style. This allowance uses the same length as your new fence. Tell us in your project notes if the removal length differs or materials are mixed; we will confirm the scope.</p>
+          </div>
+          <div class="bp-notes" id="bp-site-notes" data-gfs-protected>
+            <p class="bp-notes__title">Anything about the yard we should know?</p>
+            <p class="bp-notes__sub">Optional. Tap any that apply so we show up prepared. They do not change the price range.</p>
+            <div class="bp-notes__chips" role="group" aria-label="Yard notes">
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Dog in the yard">Dog in the yard</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Yard slopes">Yard slopes</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Trees or brush on the fence line">Trees or brush on the line</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Tight access to the back yard">Tight access to the back yard</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Not sure where the property line is">Not sure where the property line is</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="HOA approval needed">HOA approval needed</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Has permit questions">Permit questions</button>
+              <button type="button" class="bp-chip" aria-pressed="false" data-note="Interested in financing">Interested in financing</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4 -->
+        <div id="bp-step-4" class="bp-step" style="background:var(--navy);color:var(--cream);padding:32px;border-radius:6px;box-shadow:var(--shadow-lg);margin-bottom:24px;">
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px;">
+            <div class="bp-num" style="flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--navy);display:flex;align-items:center;justify-content:center;font-weight:700;font-family:var(--serif);font-size:18px;">4</div>
+            <div>
+              <h2 id="bp-contact-title" style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--cream);margin:0;" data-gfs-protected>Unlock your estimate.</h2>
+              <p id="bp-contact-hint" style="font-size:14px;color:rgba(250,246,239,0.7);margin:0;" data-gfs-protected>Share your details to view the range and request a project review from our team.</p>
+            </div>
+          </div>
+          <form id="bp-form">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+              <div>
+                <label class="form-label" style="color:var(--cream);" for="bpf-name">Name *</label>
+                <input name="name" id="bpf-name" type="text" class="form-input" required style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="name">
+              </div>
+              <div>
+                <label class="form-label" style="color:var(--cream);" for="bpf-phone">Phone *</label>
+                <input name="phone" id="bpf-phone" type="tel" class="form-input" required style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="tel">
+              </div>
+            </div>
+            <div style="margin-bottom:14px;">
+              <label class="form-label" for="bp-form-address" style="color:var(--cream);">Property Address</label>
+              <input id="bp-form-address" name="address" type="text" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="street-address">
+            </div>
+            <div style="margin-bottom:14px;">
+              <label class="form-label" style="color:var(--cream);" for="bpf-email">Email</label>
+              <input name="email" id="bpf-email" type="email" class="form-input" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="email">
+            </div>
+            <fieldset class="gfs-reach gfs-reach--dark gfs-reach--row" data-gfs-protected style="margin:0 0 14px;">
+              <legend class="form-label">Best way to reach you *</legend>
+              <div class="gfs-reach__opts">
+                <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Call" required><span>Call me</span></label>
+                <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Text"><span>Text me</span></label>
+                <label class="gfs-reach__opt"><input type="radio" name="contactMethod" value="Email"><span>Email me</span></label>
+              </div>
+              <div class="gfs-reach__time">
+                <label class="form-label" for="bpf-best-time">Best time to reach you</label>
+                <select id="bpf-best-time" name="bestTime" class="form-select bp-dark-select">
+                  <option value="">Any time</option>
+                  <option>Morning</option>
+                  <option>Afternoon</option>
+                  <option>Evening</option>
+                </select>
+              </div>
+            </fieldset>
+            <div style="margin-bottom:14px;">
+              <label class="form-label" style="color:var(--cream);" for="bpf-timeline">When do you want it built?</label>
+              <select id="bpf-timeline" name="timeline" class="form-select bp-dark-select">
+                <option value="">Not sure yet</option>
+                <option>As soon as possible</option>
+                <option>Within 1 month</option>
+                <option>1 to 3 months</option>
+                <option>3 to 6 months</option>
+                <option>Just getting prices</option>
+              </select>
+            </div>
+            <details class="bp-more" data-gfs-protected>
+              <summary>Add a photo or notes (optional)</summary>
+              <div style="margin-bottom:14px;">
+                <label class="form-label" for="bp-form-photo" style="margin-top:14px;color:var(--cream);">Photo of your current fence or yard <span style="font-weight:400;opacity:0.7;">(optional — helps us quote faster)</span></label>
+                <input id="bp-form-photo" type="file" accept="image/*" aria-describedby="bp-photo-status" style="font-size:15px;max-width:100%;">
+                <p id="bp-photo-status" role="status" aria-live="polite" style="font-size:14px;margin:8px 0;color:var(--cream);">Choose a saved photo or take a new one. JPG, PNG and WebP work best.</p>
+                <img id="bp-photo-preview" alt="Your selected fence or yard photo" style="display:none;max-width:160px;border-radius:8px;margin-top:8px;">
+                <button id="bp-photo-remove" type="button" class="btn btn-outline" hidden style="display:none;margin-top:8px;min-height:44px;color:var(--cream);border-color:var(--cream);">Remove photo</button>
+              </div>
+              <div style="margin-bottom:18px;">
+                <label class="form-label" for="bpf-notes" style="color:var(--cream);">Notes (optional)</label>
+                <textarea name="notes" id="bpf-notes" class="form-textarea" rows="3" placeholder="Anything else we should know?" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);"></textarea>
+              </div>
+            </details>
+            <button type="submit" class="btn btn-gold btn-lg" style="width:100%;">Unlock My Price</button>
+            <p style="font-size:12px;color:rgba(250,246,239,0.6);text-align:center;margin-top:14px;" data-editable="bp.s4.privacy">
+              By submitting, you agree to receive a follow-up from Ghareeb Fencing Solutions. We never sell your info.
+            </p>
+            <p class="spec" style="display:block;text-align:center;margin:12px 0 0;color:rgba(251,250,247,0.55);line-height:1.6;">
+              We will use your details to follow up on your fence project.
+            </p>
+            <div id="bp-error" class="form-error" role="alert" style="margin-top:14px;"></div>
+          </form>
+          <div id="bp-success" class="form-success" style="background:rgba(16,185,129,0.15);color:#a7f3d0;padding:16px;border-radius:4px;margin-top:14px;text-align:center;">
+            <strong>✓ Request received.</strong> Your planning range is ready below. Our team will review your project details and contact you about the next step.
+          </div>
+        </div>
+
+        <!-- ============ POST-UNLOCK: 3D Preview + PDF Download ============ -->
+        <div id="bp-actions" style="display:none;gap:14px;margin-bottom:24px;flex-wrap:wrap;">
+          <button id="bp-action-3d" type="button" class="btn btn-gold btn-lg" style="flex:1;min-width:200px;">
+            👁  Preview in 3D
+          </button>
+          <button id="bp-action-pdf" type="button" class="btn btn-primary btn-lg" style="flex:1;min-width:200px;">
+            &#11015;  Download or print estimate (PDF)
+          </button>
+          <button id="bp-action-email" type="button" class="btn btn-outline btn-lg" style="flex:1;min-width:200px;">
+            &#9993;  Request emailed estimate
+          </button>
+          <div style="flex:1 0 100%;">
+            <label class="form-label" for="bp-email-address">Email for your estimate request</label>
+            <input id="bp-email-address" type="email" class="form-input" autocomplete="email" placeholder="you@example.com" aria-describedby="bp-email-status">
+          </div>
+        </div>
+        <div id="bp-email-status" class="spec" role="status" aria-live="polite" style="display:none;margin:-10px 0 24px;text-transform:none;letter-spacing:0.03em;"></div>
+
+        <!-- ============ COMPARE MATERIALS PANEL ============ -->
+        <div id="bp-compare-panel" style="display:none;background:var(--white);padding:32px;border-radius:6px;box-shadow:var(--shadow-md);margin-bottom:24px;">
+          <div style="margin-bottom:20px;">
+            <div style="font-family:var(--serif);font-size: 12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:6px;" data-editable="bp.compare.eyebrow">Compare Materials</div>
+            <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0 0 6px;" data-editable="bp.compare.title">Compare a few fence options.</h2>
+            <p style="font-size:14px;color:var(--gray-700);margin:0;" data-editable="bp.compare.sub">Planning ranges for your selected layout. Review product and installation details with your estimator.</p>
+          </div>
+          <div id="bp-compare-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <p style="font-size:12px;color:var(--gray-500);margin-top:18px;line-height:1.5;" data-editable="bp.compare.disclaimer">
+            This is a planning range based on your selections. Removal, site work, permits and any additional requirements need review in the written proposal. A site measure is needed to confirm the final scope and price.
+          </p>
+        </div>
+      </div>
+
+      <!-- ===================== RIGHT: STICKY PRICE PANEL ===================== -->
+      <aside class="ballpark-sidebar" style="position:sticky;top:120px;align-self:start;">
+
+        <!-- Price card -->
+        <div id="bp-price-card" class="price-card-wrap" style="background:var(--navy);color:var(--cream);padding:28px;border-radius:6px;box-shadow:var(--shadow-xl);margin-bottom:20px;">
+          <div style="font-family:var(--serif);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:8px;" data-editable="bp.price.eyebrow">Your Planning Range</div>
+          <div id="bp-price-range" style="font-family:var(--serif);font-size:36px;font-weight:600;line-height:1.1;margin-bottom:8px;">Your price in 4 quick steps</div>
+          <div id="bp-price-hint" style="font-size:13px;color:rgba(250,246,239,0.7);margin-bottom:18px;">Then unlock your price in step 4</div>
+
+          <!-- Offer terms are supplied by the lender, not the planning tool. -->
+          <div id="bp-finance" style="display:none;margin-top:18px;padding-top:18px;border-top:1px solid rgba(250,246,239,0.18);">
+            <div class="spec" style="color:var(--gold-bright);margin-bottom:6px;">Considering financing?</div>
+            <div hidden>
+              <span id="bp-finance-monthly" class="num" style="font-size:26px;font-weight:600;color:var(--cream);"></span>
+              <span style="font-size:13px;color:rgba(250,246,239,0.7);">/mo &middot; <span id="bp-finance-terms"></span></span>
+            </div>
+            <a id="bp-finance-link" href="#" target="_blank" rel="noopener"
+               style="display:inline-block;margin-top:10px;font-family:var(--mono);font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--gold-bright);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:2px;">
+              Explore financing options
+            </a>
+            <p style="font-size:12px;color:rgba(250,246,239,0.5);margin-top:10px;line-height:1.5;">
+              Review the lender’s current offers, eligibility and loan terms before deciding.
+            </p>
+          </div>
+          <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(250,246,239,0.15);">
+            <p style="font-size: 12px;color:rgba(250,246,239,0.5);line-height:1.5;" data-editable="bp.price.disclaimer">Your written proposal confirms the measurements, materials, installation and site requirements. This planning range is not a fixed-price offer.</p>
+          </div>
+        </div>
+
+        <!-- Summary card -->
+        <div style="background:var(--white);padding:24px;border-radius:6px;box-shadow:var(--shadow-md);">
+          <div style="font-family:var(--serif);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:14px;" data-editable="bp.sum.eyebrow">Project Summary</div>
+          <dl style="font-size:14px;">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+              <dt style="color:var(--gray-500);">Style</dt>
+              <dd id="bp-summary-style" style="font-weight:600;color:var(--navy);text-align:right;">—</dd>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+              <dt style="color:var(--gray-500);">Length</dt>
+              <dd id="bp-summary-length" style="font-weight:600;color:var(--navy);">—</dd>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+              <dt style="color:var(--gray-500);">Height</dt>
+              <dd id="bp-summary-height" style="font-weight:600;color:var(--navy);">6 ft</dd>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray-100);">
+              <dt style="color:var(--gray-500);">Gates</dt>
+              <dd id="bp-summary-gates" style="font-weight:600;color:var(--navy);">None</dd>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;">
+              <dt style="color:var(--gray-500);">Remove old fence</dt>
+              <dd id="bp-summary-removal" style="font-weight:600;color:var(--navy);">No</dd>
+            </div>
+          </dl>
+          <div id="bp-summary-cta-area" style="margin-top:20px;padding-top:20px;border-top:1px solid var(--gray-100);">
+            <a href="tel:14192142107" class="btn btn-outline btn-sm" style="width:100%;text-align:center;">Or call (419) 214-2107</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">A backyard transformation</p><blockquote><p>“Competitive price, very easy to work with Nick, job completed on time with no issues. Transformed the look of our backyard.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Frank Powell</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSURINmJLZFZREAE!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Frank Powell (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Fence installation in Toledo and nearby communities. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a class="is-active" href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Business Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>Fence Styles</span>
+        <span>Business Profile</span>
+        <span>Local fence installation</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+<script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
+<script src="../../assets/js/ballpark.js?v=20261113f" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261113c" defer></script>
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+<script type="module" src="/assets/js/studio-quote-context.mjs?v=20260920-1"></script>
+</body>
+</html>

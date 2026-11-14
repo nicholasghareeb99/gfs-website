@@ -1,77 +1,339 @@
-# Netlify Configuration for Ghareeb Fencing Solutions
-# HARDENED SECURITY CONFIGURATION
-# =======================================================
-
 [build]
-  command = "npm run build"
-  publish = "dist"
+publish = "dist"
+command = "npm run build"
 
-[build.environment]
-  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
+  [build.environment]
+  SECRETS_SCAN_OMIT_KEYS = "GFS_FIREBASE_CONFIG,GFS_FIREBASE_API_KEY,GFS_FIREBASE_APP_ID"
+  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE,AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y,1:187837905206:web:1e9a9bc33f745cbeeddb97"
+  SECRETS_SCAN_OMIT_PATHS = "build.py,pages/**,README.md,GOOGLE_BUSINESS_PROFILE.md,firestore.rules,_gen_*.py,*.md"
 
-# Redirect www to non-www
+[images]
+remote_images = ["https://firebasestorage\\.googleapis\\.com/v0/b/ghareeb-fencing\\.firebasestorage\\.app/.*"]
+
+[functions]
+directory = "netlify/functions"
+node_bundler = "esbuild"
+
+[[headers]]
+for = "/*"
+
+  [headers.values]
+  X-Frame-Options = "SAMEORIGIN"
+  X-Content-Type-Options = "nosniff"
+  Referrer-Policy = "strict-origin-when-cross-origin"
+  Permissions-Policy = "geolocation=(self)"
+
+[[headers]]
+for = "/assets/css/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/assets/js/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/assets/img/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/admin/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/gfs/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/admin"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/portal"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/portal/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/p"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/p/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/review"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/review/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/job"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/job/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/share"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/share/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/test"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/test/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/tests"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/tests/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/__test"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/__test/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/_netlify-forms.html"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/404.html"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
+[[headers]]
+for = "/.netlify/functions/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "no-store"
+
 [[redirects]]
-  from = "https://www.ghareebfencing.com/*"
-  to = "https://ghareebfencing.com/:splat"
-  status = 301
-  force = true
+from = "https://gfencing.netlify.app/*"
+to = "https://ghareebfence.com/:splat"
+status = 301
+force = true
 
-# SSR mode - Astro's Netlify adapter handles routing via generated _redirects
+  [redirects.query]
 
-# =======================================================
-# SECURITY HEADERS (HARDENED)
-# =======================================================
-[[headers]]
-  for = "/*"
-  [headers.values]
-    # Prevent clickjacking attacks
-    X-Frame-Options = "DENY"
-    # Enable XSS filtering
-    X-XSS-Protection = "1; mode=block"
-    # Prevent MIME type sniffing
-    X-Content-Type-Options = "nosniff"
-    # Control referrer information
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    # Restrict browser features
-    Permissions-Policy = "accelerometer=(), camera=(), geolocation=(self), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()"
-    # Force HTTPS (HSTS)
-    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
-    # Content Security Policy
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.googleapis.com https://*.gstatic.com https://*.firebaseio.com https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https://*.googleapis.com https://*.gstatic.com https://firebasestorage.googleapis.com https://*.google-analytics.com; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.firebaseapp.com wss://*.firebaseio.com https://www.google-analytics.com; frame-src 'self' https://*.firebaseapp.com;"
+  [redirects.conditions]
 
-# Block admin from search engines and disable caching
-[[headers]]
-  for = "/admin/*"
-  [headers.values]
-    X-Robots-Tag = "noindex, nofollow"
-    Cache-Control = "no-store, no-cache, must-revalidate, private"
+  [redirects.headers]
 
-# =======================================================
-# CACHING FOR STATIC ASSETS
-# =======================================================
-[[headers]]
-  for = "/images/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+[[redirects]]
+from = "/cedar-fence"
+to = "/fences/cedar/"
+status = 301
+force = false
 
-[[headers]]
-  for = "/*.css"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+  [redirects.query]
 
-[[headers]]
-  for = "/*.js"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+  [redirects.conditions]
 
-[[headers]]
-  for = "/*.woff2"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+  [redirects.headers]
 
-# Forms processing
-[build.processing]
-  skip_processing = false
+[[redirects]]
+from = "/vinyl-fence"
+to = "/fences/vinyl/"
+status = 301
+force = false
 
-[build.processing.html]
-  pretty_urls = true
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/aluminum-fence"
+to = "/fences/aluminum/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/chain-link-fence"
+to = "/fences/chainlink/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/split-rail-fence"
+to = "/fences/split-rail/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/wood-fence"
+to = "/fences/wood/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/p/:slug"
+to = "/p/index.html?page=:slug"
+status = 200
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/free-quote"
+to = "/quote/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/get-quote"
+to = "/quote/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/instant-quote"
+to = "/quote/ballpark/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]
+
+[[redirects]]
+from = "/fence-types"
+to = "/fences/"
+status = 301
+force = false
+
+  [redirects.query]
+
+  [redirects.conditions]
+
+  [redirects.headers]

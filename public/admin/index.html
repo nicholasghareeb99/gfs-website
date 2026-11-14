@@ -1,0 +1,1243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1720">
+<title>GFS Control — Ghareeb Fencing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+  ];
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image"></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919"></script>
+<style>
+  :root {
+    --ink: #0E1720; --ink-2: #1B2A38; --ink-3: #2C3E4E;
+    --vellum: #FBFAF7; --vellum-2: #F2EFE9; --vellum-3: #E7E3DA;
+    --cedar: #A4552B; --cedar-lt: #C4703F; --cedar-dk: #7E3F1F;
+    --galv: #5C6873; --galv-lt: #AEB8C1; --line: #D8DCDF;
+    --ok: #1A7A4A; --warn: #B4530F; --stop: #B3261E;
+    --display: 'Archivo', sans-serif; --body: 'Source Sans 3', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: var(--body); background: var(--vellum-2); color: var(--ink); min-height: 100vh; font-size: 15px; }
+  a { color: var(--cedar); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  #gate { position: fixed; inset: 0; background: var(--ink); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+  .gate-box { background: var(--vellum); border-radius: 8px; padding: 40px 36px; max-width: 400px; width: 100%; text-align: center; }
+  .gate-box h1 { font-family: var(--display); font-size: 22px; margin-bottom: 6px; }
+  .gate-box .spec { font-family: var(--mono); font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--galv); display: block; margin-bottom: 22px; }
+  .g-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #fff; color: #1f2937; border: 1px solid #d1d5db; border-radius: 5px; font: 600 15px var(--body); cursor: pointer; }
+  .g-btn:hover { background: #f8f8f8; }
+  #gate-err { color: var(--stop); font-size: 13px; margin-top: 14px; min-height: 18px; }
+
+  header.bar { background: var(--ink); color: var(--vellum); padding: 0 20px; display: flex; align-items: center; gap: 18px; height: 56px; position: sticky; top: 0; z-index: 20; }
+  .bar-title { font-family: var(--display); font-weight: 800; font-size: 16px; white-space: nowrap; }
+  .bar-title small { font-family: var(--mono); font-weight: 400; font-size: 10px; color: var(--galv-lt); display: block; letter-spacing: 0.16em; text-transform: uppercase; }
+  nav.tabs { display: flex; gap: 4px; overflow-x: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+  nav.tabs button { background: none; border: none; color: var(--galv-lt); font: 600 13px var(--body); padding: 8px 14px; border-radius: 4px; cursor: pointer; white-space: nowrap; }
+  nav.tabs button.on { background: var(--ink-3); color: var(--vellum); }
+  #who { font-family: var(--mono); font-size: 11px; color: var(--galv-lt); white-space: nowrap; }
+  #signout { background: none; border: 1px solid var(--ink-3); color: var(--galv-lt); font: 600 12px var(--body); padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+  @media (max-width: 760px) { #who { display: none; } }
+
+  main { max-width: 1160px; margin: 0 auto; padding: 24px 20px 80px; }
+  .panel { display: none; }
+  .panel.on { display: block; }
+  h2.sec { font-family: var(--display); font-size: 19px; margin: 28px 0 14px; }
+  h2.sec:first-child { margin-top: 0; }
+  .spec-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--galv); }
+
+  .tape { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .vital { background: var(--vellum); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; }
+  .vital .num { font-family: var(--mono); font-size: 28px; font-weight: 600; line-height: 1.1; }
+  .vital .num small { font-size: 14px; color: var(--galv); }
+  .vital .key { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--galv); margin-top: 6px; display: block; }
+  .vital.accent { border-top: 3px solid var(--cedar); }
+
+  .card { background: var(--vellum); border: 1px solid var(--line); border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+  .bars { display: flex; align-items: flex-end; gap: 3px; height: 120px; margin-top: 14px; }
+  .bars .b { flex: 1; background: var(--cedar); border-radius: 2px 2px 0 0; min-height: 2px; position: relative; opacity: 0.9; }
+  .bars .b:hover { opacity: 1; }
+  .bars .b .tip { display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--vellum); font-family: var(--mono); font-size: 10px; padding: 4px 8px; border-radius: 3px; white-space: nowrap; z-index: 5; }
+  .bars .b:hover .tip { display: block; }
+  .split { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) { .split { grid-template-columns: 1fr; } }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--galv); text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--line); }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--vellum-3); vertical-align: top; }
+  tr:hover td { background: var(--vellum-2); }
+  .mono { font-family: var(--mono); font-size: 12.5px; }
+  .pill { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--vellum-3); }
+  .pill.new { background: #E8F3EC; color: var(--ok); }
+  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  .btn { display: inline-block; border: none; border-radius: 4px; cursor: pointer; font: 600 13px var(--body); padding: 9px 16px; }
+  .btn-cedar { background: var(--cedar); color: #fff; }
+  .btn-cedar:hover { background: var(--cedar-dk); }
+  .btn-ghost { background: none; border: 1px solid var(--line); color: var(--ink); }
+  .btn-danger { background: none; border: 1px solid var(--stop); color: var(--stop); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  input[type=text], textarea, select { width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 4px; font: 400 14px var(--body); background: #fff; }
+  textarea { min-height: 80px; resize: vertical; }
+  label.f { display: block; margin: 14px 0 5px; font: 600 12px var(--body); color: var(--ink-2); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .chk { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; }
+
+  .blk { background: var(--vellum-2); border: 1px solid var(--line); border-radius: 5px; padding: 12px; margin-bottom: 10px; }
+  .blk-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .blk-type { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cedar); }
+  .quick { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .quick a { display: block; background: var(--vellum); border: 1px solid var(--line); border-radius: 6px; padding: 16px 18px; color: var(--ink); font-weight: 600; }
+  .quick a:hover { border-color: var(--cedar); text-decoration: none; }
+  .quick a small { display: block; font: 400 12px var(--body); color: var(--galv); margin-top: 3px; }
+  #toast { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--ink); color: var(--vellum); padding: 11px 20px; border-radius: 5px; font-size: 13.5px; transition: transform 0.25s; z-index: 60; max-width: 90vw; }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.err { background: var(--stop); }
+  .empty { color: var(--galv); font-size: 13.5px; padding: 18px 0; }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-box">
+    <h1>GFS Control</h1>
+    <span class="spec">Ghareeb Fencing · Owner access only</span>
+    <button class="g-btn" id="gate-signin">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 01-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/></svg>
+      Sign in with Google
+    </button>
+    <div id="gate-err"></div>
+  </div>
+</div>
+
+<header class="bar" style="display:none;" id="topbar">
+  <div class="bar-title">GFS Control<small>Site command</small></div>
+  <nav class="tabs" id="tabs">
+    <button data-tab="dash" class="on">Dashboard</button>
+    <button data-tab="leads">Leads</button>
+    <button data-tab="bookings">Bookings</button>
+    <button data-tab="competitors">Competitors</button>
+    <button data-tab="pages">Pages</button>
+    <button data-tab="content">Content</button>
+    <button data-tab="links">Links</button>
+  </nav>
+  <span id="who"></span>
+  <button id="signout">Sign out</button>
+</header>
+
+<main style="display:none;" id="app">
+
+  <section class="panel on" id="panel-dash">
+    <div class="row" style="justify-content: space-between; margin-bottom: 16px;">
+      <h2 class="sec" style="margin: 0;">Last <span id="dash-days">30</span> days</h2>
+      <div class="row">
+        <select id="dash-range" style="width: auto;">
+          <option value="7">7 days</option>
+          <option value="30" selected>30 days</option>
+          <option value="90">90 days</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" id="dash-refresh">Refresh</button>
+      </div>
+    </div>
+
+    <div class="card" style="padding:12px 20px;">
+      <span class="spec-label">Today so far</span>
+      <span id="today-strip" class="mono" style="margin-left:14px;font-size:14px;">\u2014</span>
+    </div>
+    <div class="tape">
+      <div class="vital accent"><div class="num" id="v-views">—</div><span class="key">Page views</span></div>
+      <div class="vital"><div class="num" id="v-sessions">—</div><span class="key">Visits</span></div>
+      <div class="vital"><div class="num" id="v-leads">—</div><span class="key">Leads</span></div>
+      <div class="vital"><div class="num" id="v-bookings">—</div><span class="key">Bookings</span></div>
+      <div class="vital"><div class="num" id="v-calls">—</div><span class="key">Call taps</span></div>
+      <div class="vital"><div class="num" id="v-conv">—<small>%</small></div><span class="key">Visit → lead</span></div>
+    </div>
+
+    <div class="card">
+      <span class="spec-label">Daily traffic</span>
+      <div class="bars" id="bars"></div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <span class="spec-label">Top pages</span>
+        <div class="table-scroll"><table id="t-pages"><thead><tr><th>Page</th><th style="text-align:right;">Views</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="card">
+        <span class="spec-label">Traffic sources</span>
+        <div class="table-scroll"><table id="t-sources"><thead><tr><th>Source</th><th style="text-align:right;">Visits</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="spec-label">Device split</span>
+      <div id="devsplit" style="margin-top: 10px; font-family: var(--mono); font-size: 13px;">—</div>
+    </div>
+    <div class="card">
+      <span class="spec-label">Ballpark quote funnel</span>
+      <div class="tape" style="margin: 14px 0 0;">
+        <div class="vital"><div class="num" id="f-view">—</div><span class="key">Opened tool</span></div>
+        <div class="vital"><div class="num" id="f-style">—</div><span class="key">Picked style</span></div>
+        <div class="vital"><div class="num" id="f-drew">—</div><span class="key">Drew fence</span></div>
+        <div class="vital accent"><div class="num" id="f-unlock">—</div><span class="key">Unlocked price</span></div>
+        <div class="vital"><div class="num" id="f-3d">—</div><span class="key">Viewed 3D</span></div>
+        <div class="vital"><div class="num" id="f-resume">—</div><span class="key">Resumed draft</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <span class="spec-label">Which sources turn into leads</span>
+      <div class="table-scroll" style="margin-top:10px;">
+        <table id="t-src"><thead><tr><th>Source</th><th style="text-align:right;">Visits</th><th style="text-align:right;">Leads</th><th style="text-align:right;">Conv.</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;">
+        <span class="spec-label">Live activity — last 50 events</span>
+        <button class="btn btn-ghost btn-sm" id="feed-refresh">Refresh</button>
+      </div>
+      <div class="table-scroll" style="margin-top:10px;">
+        <table id="t-feed"><thead><tr><th>When</th><th>Event</th><th>Page</th><th>Source</th><th>Detail</th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+    <p class="empty" id="dash-note" style="display:none;">No traffic data yet. Analytics starts recording once the updated site (with analytics.js) is deployed and the <span class="mono">siteHits</span> Firestore rule is in place.</p>
+  </section>
+
+  <section class="panel" id="panel-leads">
+    <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
+      <h2 class="sec" style="margin:0;">Website leads</h2>
+      <div class="row">
+        <button class="btn btn-ghost btn-sm" id="leads-csv">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" id="leads-refresh">Refresh</button>
+      </div>
+    </div>
+    <div class="card table-scroll">
+      <input id="leads-search" type="search" placeholder="Search leads \u2014 name, phone, address, style\u2026" style="width:100%;margin-bottom:10px;padding:10px 12px;font-size:14px;">
+      <table id="t-leads">
+        <thead><tr><th>When</th><th>Name</th><th>Phone</th><th>Project</th><th>Source</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="leads-empty" style="display:none;">No leads yet — or your account doesn't have read access (deploy the rules addition).</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-bookings">
+    <div class="card" style="margin-bottom:14px;">
+      <span class="spec-label">Published booking slots — next 21 days</span>
+      <p style="font-size:12.5px;color:var(--galv);margin:8px 0 10px;">Green = open for online booking · Orange 🔒 = a customer took it. Publish and remove slots from the Exec app → Website Leads → 📅 Booking Slots.</p>
+      <div id="slot-strip" style="display:flex;flex-wrap:wrap;gap:6px;">loading…</div>
+    </div>
+    <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
+      <h2 class="sec" style="margin:0;">Measure bookings</h2>
+      <div class="row">
+        <button class="btn btn-ghost btn-sm" id="bookings-csv">Export CSV</button>
+        <button class="btn btn-ghost btn-sm" id="bookings-refresh">Refresh</button>
+      </div>
+    </div>
+    <div class="card table-scroll">
+      <table id="t-bookings">
+        <thead><tr><th>When booked</th><th>Name</th><th>Phone</th><th>Date</th><th>Time</th><th>Address</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="bookings-empty" style="display:none;">No bookings yet — or your account doesn't have read access (deploy the rules addition).</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-pages">
+    <div class="row" style="justify-content: space-between; margin-bottom: 12px;">
+      <h2 class="sec" style="margin:0;">Site pages</h2>
+      <button class="btn btn-cedar" id="page-new">＋ New page</button>
+    </div>
+    <p style="font-size: 13.5px; color: var(--galv); margin-bottom: 16px;">
+      Pages you create here go live instantly at <span class="mono">/p/?page=slug</span> — no redeploy.
+      Turn on "Show in nav" and the link appears in the menu on every page of the site.
+    </p>
+    <div class="card table-scroll">
+      <table id="t-sitepages">
+        <thead><tr><th>Title</th><th>Slug</th><th>Status</th><th>Nav</th><th>Updated</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="pages-empty" style="display:none;">No custom pages yet. Click "＋ New page" to create one.</p>
+    </div>
+
+    <div class="card" id="page-editor" style="display:none;">
+      <h2 class="sec" id="pe-heading">New page</h2>
+      <label class="f">Title</label>
+      <input type="text" id="pe-title" placeholder="e.g. Pool Fencing Guide">
+      <label class="f">Slug (URL) — lowercase, dashes only</label>
+      <input type="text" id="pe-slug" placeholder="pool-fencing-guide">
+      <label class="f">Description (shows under the title)</label>
+      <textarea id="pe-desc" placeholder="One or two sentences."></textarea>
+      <label class="f">Nav label (optional — defaults to title)</label>
+      <input type="text" id="pe-navlabel" placeholder="Pool Fencing">
+      <div class="row" style="margin-top: 14px;">
+        <label class="chk"><input type="checkbox" id="pe-published"> Published (visible to everyone)</label>
+        <label class="chk"><input type="checkbox" id="pe-nav"> Show in nav</label>
+      </div>
+
+      <h2 class="sec">Content blocks</h2>
+      <div id="pe-blocks"></div>
+      <div class="row" style="margin-top: 10px;">
+        <button class="btn btn-ghost btn-sm" data-add="h2">＋ Heading</button>
+        <button class="btn btn-ghost btn-sm" data-add="p">＋ Paragraph</button>
+        <button class="btn btn-ghost btn-sm" data-add="img">＋ Image</button>
+        <button class="btn btn-ghost btn-sm" data-add="list">＋ List</button>
+        <button class="btn btn-ghost btn-sm" data-add="quote">＋ Quote</button>
+        <button class="btn btn-ghost btn-sm" data-add="cta">＋ Button</button>
+      </div>
+
+      <div class="row" style="margin-top: 22px; justify-content: space-between;">
+        <div class="row">
+          <button class="btn btn-cedar" id="pe-save">Save page</button>
+          <a class="btn btn-ghost" id="pe-preview" target="_blank" rel="noopener" style="display:none;">Preview →</a>
+          <button class="btn btn-ghost" id="pe-cancel">Close</button>
+        </div>
+        <button class="btn btn-danger" id="pe-delete" style="display:none;">Delete page</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-competitors">
+    <h2 class="sec">Competitor referrals</h2>
+    <p style="font-size: 13.5px; color: var(--galv); margin-bottom: 16px; max-width: 720px;">
+      Browsers only reveal the page a visitor <em>came from</em> — so this shows every visitor who
+      arrived at your site directly from a competitor's website (they were comparison-shopping and
+      clicked through to you). Any referring domain containing "fenc" is flagged automatically;
+      add specific competitors to the watchlist to catch names that don't say "fence".
+    </p>
+
+    <div class="card">
+      <span class="spec-label">Watchlist domains</span>
+      <div class="row" style="margin-top: 12px;">
+        <input type="text" id="comp-add" placeholder="e.g. toledofencepros.com" style="max-width: 320px;">
+        <button class="btn btn-cedar btn-sm" id="comp-add-btn">Add</button>
+      </div>
+      <div id="comp-list" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+      <button class="btn btn-ghost btn-sm" id="comp-seed" style="margin-top:10px;">⚡ Add the 8 known Toledo competitors</button>
+      <p style="font-size: 12px; color: var(--galv); margin-top: 10px;">Saved to Firestore — synced across your devices.</p>
+    </div>
+
+    <div class="card table-scroll">
+      <span class="spec-label">Visitors referred by competitors (last <span id="comp-days">30</span> days)</span>
+      <table id="t-comp" style="margin-top: 10px;">
+        <thead><tr><th>When</th><th>Came from</th><th>Landed on</th><th>Pages viewed</th><th>Converted</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="comp-empty" style="display:none;">No competitor-referred visits in this window.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-content">
+    <h2 class="sec">Publish &amp; website versions</h2>
+    <div class="card" style="margin-bottom:20px">
+      <p><strong>Text, photos and layout edits publish directly from Edit Mode.</strong> Click <strong>Publish changes</strong> on the page you edit. A successful publish is stored online and survives a Netlify release. Unsaved drafts stay in the browser where you created them.</p>
+      <div class="row" style="gap:12px;flex-wrap:wrap">
+        <a class="btn btn-primary" href="/?edit=1">Edit &amp; publish homepage</a>
+        <a class="btn btn-primary" href="https://app.netlify.com/projects/gfencing/deploys" target="_blank" rel="noopener">Open Netlify releases ↗</a>
+        <button class="btn" type="button" id="refresh-published-content">Refresh published edits</button>
+      </div>
+      <p style="font-size:13px;color:var(--galv)">Use Netlify releases for a reviewed website code update or rollback. This button opens Netlify; it does not upload drafts. Website releases must include the existing form and server-function configuration.</p>
+      <p id="last-content-publish" role="status" style="font-size:13px"></p>
+    </div>
+    <h2 class="sec">All site pages</h2>
+    <div class="card" style="margin-bottom:14px;">
+      <p style="font-size:12.5px;color:var(--galv);margin:0 0 10px;">Every page, how many live edits it carries, and a one-tap door into edit mode.</p>
+      <div class="table-scroll"><table id="t-pages-all"><thead><tr><th>Page</th><th style="text-align:right;">Edits</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+    <h2 class="sec">Published content edits</h2>
+    <p style="font-size: 13.5px; color: var(--galv); margin-bottom: 16px;">
+      Every static page you've edited with Edit Mode. "Open in Edit Mode" jumps straight there.
+    </p>
+    <div class="card table-scroll">
+      <table id="t-content">
+        <thead><tr><th>Page</th><th style="text-align:right;">Edits</th><th></th><th></th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="empty" id="content-empty" style="display:none;">No published edits yet.</p>
+    </div>
+    <div class="card" id="inspector" style="display:none;">
+      <div class="row" style="justify-content:space-between;">
+        <h2 class="sec" style="margin:0;" id="insp-title">Overrides</h2>
+        <button class="btn btn-danger btn-sm" id="insp-wipe">Wipe page — reset to original</button>
+      </div>
+      <div class="table-scroll" style="margin-top:12px;">
+        <table id="t-insp"><thead><tr><th>Key</th><th>Value</th><th></th></tr></thead><tbody></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-links">
+    <h2 class="sec">System</h2>
+    <div class="card">
+      <span class="spec-label">Exec app \u2194 website pricing sync</span>
+      <div id="sync-status" class="mono" style="margin-top:10px;font-size:13px;">checking\u2026</div>
+    </div>
+    <div class="card">
+      <span class="spec-label">Analytics maintenance</span>
+      <p style="font-size:13px;color:var(--galv);margin:10px 0;">Delete recorded hits older than 90 days to keep reads fast and storage tiny.</p>
+      <button class="btn btn-danger btn-sm" id="purge-old">Purge hits older than 90 days</button>
+      <span id="purge-status" class="mono" style="margin-left:10px;font-size:12px;"></span>
+    </div>
+    <h2 class="sec">Quick links</h2>
+    <div class="quick">
+      <a href="https://gfestimate.netlify.app" target="_blank" rel="noopener">Executive App<small>CRM · quotes · scheduling</small></a>
+      <a href="https://console.firebase.google.com/project/ghareeb-fencing/firestore" target="_blank" rel="noopener">Firestore Console<small>Raw data + rules</small></a>
+      <a href="https://analytics.google.com/" target="_blank" rel="noopener">Google Analytics 4<small>Long-term traffic history</small></a>
+      <a href="https://app.netlify.com/" target="_blank" rel="noopener">Netlify<small>Deploys + domains</small></a>
+      <a href="../" target="_blank" rel="noopener">Live site<small>ghareebfencingsolutions.com</small></a>
+      <a href="../?edit" target="_blank" rel="noopener">Homepage in Edit Mode<small>Sign-in prompt opens automatically</small></a>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+  var db = firebase.firestore();
+  var AUTH_EMAILS = (window.GFS_AUTHORIZED_EMAILS || []).map(function (e) { return String(e).toLowerCase().trim(); });
+
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+
+  function toast(msg, err) {
+    var t = $('#toast');
+    t.textContent = msg;
+    t.className = err ? 'err show' : 'show';
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function () { t.className = ''; }, err ? 6000 : 2500);
+  }
+  function esc(s) { var d = document.createElement('div'); d.textContent = String(s == null ? '' : s); return d.innerHTML.replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  function fmtWhen(ms) {
+    if (!ms) return '—';
+    var d = new Date(ms);
+    return (d.getMonth() + 1) + '/' + d.getDate() + ' ' + d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  }
+  function dayKeyOffset(daysAgo) {
+    var d = new Date(); d.setDate(d.getDate() - daysAgo);
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+
+  function authorized(user) {
+    if (!user || !user.email) return false;
+    if (!AUTH_EMAILS.length) return true;
+    return AUTH_EMAILS.indexOf(user.email.toLowerCase()) >= 0;
+  }
+
+  $('#gate-signin').addEventListener('click', function () {
+    var provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider).catch(function (e) {
+      $('#gate-err').textContent = 'Sign-in failed: ' + (e.code || e.message);
+    });
+  });
+
+  $('#signout').addEventListener('click', function () { firebase.auth().signOut(); });
+  function showLastPublish(){let saved;try{saved=JSON.parse(localStorage.getItem('gfs_last_publish')||'null');}catch(_){}const el=$('#last-content-publish');el.textContent=saved&&saved.owner===firebase.auth().currentUser?.uid?'Last successful publish from this browser: '+saved.page+' · '+new Date(saved.at).toLocaleString():'Publish a page in Edit Mode, then return here to review its saved content.';}
+  $('#refresh-published-content').addEventListener('click',function(){loadContent();loadPageDirectory();showLastPublish();});
+  window.addEventListener('focus',function(){if(authorized(firebase.auth().currentUser))showLastPublish();});
+
+
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (user && authorized(user)) {
+      try { localStorage.setItem('gfs_owner', '1'); } catch (e) {}
+      $('#gate').style.display = 'none';
+      $('#topbar').style.display = 'flex';
+      $('#app').style.display = 'block';
+      $('#who').textContent = user.email;
+      loadLeads();
+      loadBookings();
+      loadSitePages();
+      loadContent();showLastPublish();
+      loadWatchlist().then(loadDashboard);
+      loadFeed();
+      loadSlots();
+      loadPageDirectory();
+      loadSyncStatus();
+      if (location.hash === '#pages') switchTab('pages');
+      if (location.hash === '#content') switchTab('content');
+    } else {
+      if (user) {
+        $('#gate-err').textContent = user.email + ' is not authorized.';
+        firebase.auth().signOut();
+      }
+      $('#gate').style.display = 'flex';
+      $('#topbar').style.display = 'none';
+      $('#app').style.display = 'none';
+    }
+  });
+
+  function switchTab(name) {
+    $$('#tabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === name); });
+    $$('.panel').forEach(function (p) { p.classList.toggle('on', p.id === 'panel-' + name); });
+  }
+  $('#tabs').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (b) switchTab(b.dataset.tab);
+  });
+
+  function loadDashboard() {
+    var days = parseInt($('#dash-range').value, 10) || 30;
+    $('#dash-days').textContent = days;
+    var startDay = dayKeyOffset(days - 1);
+
+    db.collection('siteHits').where('day', '>=', startDay).get().then(function (snap) {
+      var hits = [];
+      snap.forEach(function (d) { hits.push(d.data()); });
+
+      $('#dash-note').style.display = hits.length ? 'none' : 'block';
+
+      var views = 0, leads = 0, bookings = 0, calls = 0;
+      var sessions = {}, byDay = {}, byPage = {}, bySrc = {}, byDev = { mobile: 0, desktop: 0 };
+      var funnel = {};
+      window.__lastHits = hits;  // competitors tab reuses the same query
+
+      hits.forEach(function (h) {
+        if (h.t === 'pv') {
+          views++;
+          byDay[h.day] = (byDay[h.day] || 0) + 1;
+          byPage[h.path] = (byPage[h.path] || 0) + 1;
+          if (h.sid && !sessions[h.sid]) {
+            sessions[h.sid] = true;
+            bySrc[h.src || 'direct'] = (bySrc[h.src || 'direct'] || 0) + 1;
+            if (h.dev) byDev[h.dev] = (byDev[h.dev] || 0) + 1;
+          }
+        } else if (h.t === 'tool' && h.label && h.label.indexOf('bp:') === 0) {
+          var fk = h.label.slice(3);
+          funnel[fk] = funnel[fk] || {};
+          if (h.sid) funnel[fk][h.sid] = 1;
+        } else if (h.t === 'lead') leads++;
+        else if (h.t === 'booking') bookings++;
+        else if (h.t === 'cta' && h.label === 'call') calls++;
+      });
+
+      var sessionCount = Object.keys(sessions).length;
+      $('#v-views').textContent = views;
+      $('#v-sessions').textContent = sessionCount;
+      $('#v-leads').textContent = leads;
+      $('#v-bookings').textContent = bookings;
+      $('#v-calls').textContent = calls;
+      $('#v-conv').innerHTML = (sessionCount ? ((leads + bookings) / sessionCount * 100).toFixed(1) : '0') + '<small>%</small>';
+
+      var barWrap = $('#bars');
+      barWrap.innerHTML = '';
+      var maxDay = 1;
+      var keys = [];
+      for (var i = days - 1; i >= 0; i--) {
+        var k = dayKeyOffset(i);
+        keys.push(k);
+        if ((byDay[k] || 0) > maxDay) maxDay = byDay[k];
+      }
+      keys.forEach(function (k) {
+        var v = byDay[k] || 0;
+        var b = document.createElement('div');
+        b.className = 'b';
+        b.style.height = Math.max(2, Math.round(v / maxDay * 100)) + '%';
+        if (!v) b.style.background = 'var(--vellum-3)';
+        b.innerHTML = '<span class="tip">' + k.slice(5) + ' · ' + v + ' views</span>';
+        barWrap.appendChild(b);
+      });
+
+      function fillTable(sel, obj, limit) {
+        var tb = $(sel + ' tbody');
+        tb.innerHTML = '';
+        Object.keys(obj).sort(function (a, b) { return obj[b] - obj[a]; }).slice(0, limit).forEach(function (k) {
+          var tr = document.createElement('tr');
+          tr.innerHTML = '<td class="mono">' + esc(k || '/') + '</td><td class="mono" style="text-align:right;">' + obj[k] + '</td>';
+          tb.appendChild(tr);
+        });
+      }
+      fillTable('#t-pages', byPage, 12);
+      fillTable('#t-sources', bySrc, 12);
+
+      // Ballpark funnel — unique sessions per milestone. "Opened tool" is
+      // pageviews of the ballpark page itself.
+      var bpViews = {};
+      hits.forEach(function (h) {
+        if (h.t === 'pv' && h.path && h.path.indexOf('/quote/ballpark') === 0 && h.sid) bpViews[h.sid] = 1;
+      });
+      var fCount = function (k) { return Object.keys(funnel[k] || {}).length; };
+      $('#f-view').textContent = Object.keys(bpViews).length;
+      $('#f-style').textContent = fCount('style');
+      $('#f-drew').textContent = fCount('drew');
+      $('#f-unlock').textContent = fCount('unlocked');
+      $('#f-3d').textContent = fCount('3d');
+      $('#f-resume').textContent = fCount('resumed');
+      // Today strip
+      var todayKey = dayKeyOffset(0);
+      var tv = 0, ts = {}, tl = 0, tc = 0;
+      hits.forEach(function (h) {
+        if (h.day !== todayKey) return;
+        if (h.t === 'pv') { tv++; if (h.sid) ts[h.sid] = 1; }
+        else if (h.t === 'lead' || h.t === 'booking') tl++;
+        else if (h.t === 'cta' && h.label === 'call') tc++;
+      });
+      $('#today-strip').textContent = tv + ' views \u00b7 ' + Object.keys(ts).length + ' visits \u00b7 ' + tl + ' leads \u00b7 ' + tc + ' call taps';
+
+      // Week-over-week visitors delta
+      try {
+        var _now = Date.now();
+        var wk = 7 * 86400000;
+        var cur = {}, prev = {};
+        hits.forEach(function (x) {
+          if (x.t !== 'pv' || !x.sid || !x.tsMs) return;
+          if (x.tsMs >= _now - wk) cur[x.sid] = 1;
+          else if (x.tsMs >= _now - 2 * wk) prev[x.sid] = 1;
+        });
+        var cN = Object.keys(cur).length, pN = Object.keys(prev).length;
+        var vv = $('#v-sessions');
+        if (vv && pN > 0 && !vv.parentNode.querySelector('[data-wow]')) {
+          var delta = Math.round((cN - pN) / pN * 100);
+          var span = document.createElement('span');
+          span.setAttribute('data-wow', '1');
+          span.style.cssText = 'font-size:12px;font-weight:700;margin-left:6px;color:' + (delta >= 0 ? '#1A7A4A' : '#B3261E') + ';';
+          span.textContent = (delta >= 0 ? '\u2191' : '\u2193') + Math.abs(delta) + '% wk';
+          vv.parentNode.appendChild(span);
+        }
+      } catch (e) {}
+
+      // Conversion by source
+      var bySrc = {};
+      hits.forEach(function (x) {
+        var s = x.src || 'direct';
+        if (!bySrc[s]) bySrc[s] = { sids: {}, leads: 0 };
+        if (x.t === 'pv' && x.sid) bySrc[s].sids[x.sid] = 1;
+        if (x.t === 'lead' || x.t === 'booking') bySrc[s].leads++;
+      });
+      var st = $('#t-src tbody');
+      if (st) {
+        st.innerHTML = '';
+        Object.keys(bySrc).sort(function (x, y) { return bySrc[y].leads - bySrc[x].leads; }).slice(0, 10).forEach(function (s) {
+          var visits = Object.keys(bySrc[s].sids).length;
+          var conv = visits ? Math.round(bySrc[s].leads / visits * 100) : 0;
+          var tr2 = document.createElement('tr');
+          tr2.innerHTML = '<td class="mono">' + esc(s) + '</td><td class="mono" style="text-align:right;">' + visits + '</td>' +
+            '<td class="mono" style="text-align:right;">' + bySrc[s].leads + '</td><td class="mono" style="text-align:right;">' + conv + '%</td>';
+          st.appendChild(tr2);
+        });
+      }
+
+      renderCompetitors(hits, days);
+
+      var totDev = byDev.mobile + byDev.desktop;
+      $('#devsplit').textContent = totDev
+        ? 'Mobile ' + Math.round(byDev.mobile / totDev * 100) + '%  ·  Desktop ' + Math.round(byDev.desktop / totDev * 100) + '%'
+        : '—';
+    }).catch(function (e) {
+      console.error(e);
+      $('#dash-note').style.display = 'block';
+      toast('Could not load analytics: ' + (e.message || e), true);
+    });
+  }
+  function loadFeed() {
+    db.collection('siteHits').orderBy('tsMs', 'desc').limit(50).get().then(function (snap) {
+      var tb = $('#t-feed tbody');
+      tb.innerHTML = '';
+      var icons = { pv: '👁', cta: '🖱', lead: '🎯', booking: '📅', tool: '🛠' };
+      snap.forEach(function (d) {
+        var v = d.data();
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td class="mono">' + fmtWhen(v.tsMs) + '</td>' +
+          '<td>' + (icons[v.t] || '') + ' ' + esc(v.t) + '</td>' +
+          '<td class="mono">' + esc(v.path || '') + '</td>' +
+          '<td class="mono">' + esc(v.src || '') + '</td>' +
+          '<td style="font-size:12px;">' + esc(v.label || '') + '</td>';
+        tb.appendChild(tr);
+      });
+    }).catch(function (e) { console.error(e); });
+  }
+  $('#feed-refresh').addEventListener('click', loadFeed);
+
+    $('#dash-refresh').addEventListener('click', loadDashboard);
+  $('#dash-range').addEventListener('change', loadDashboard);
+
+  var LEAD_STATUSES = ['new','contacted','quoted','scheduled','won','lost'];
+  var leadsCache = [];
+
+  function loadLeads() {
+    db.collection('websiteLeads').orderBy('createdAtMs', 'desc').limit(100).get().then(function (snap) {
+      var tb = $('#t-leads tbody');
+      tb.innerHTML = '';
+      leadsCache = [];
+      var n = 0;
+      snap.forEach(function (d) {
+        n++;
+        var v = d.data(); v.__id = d.id;
+        leadsCache.push(v);
+        var proj = [v.fenceStyle, v.linearFeet ? v.linearFeet + ' ft' : '', v.height ? v.height + ' ft tall' : ''].filter(Boolean).join(' \u00b7 ');
+        var opts = LEAD_STATUSES.map(function (s) {
+          return '<option value="' + s + '"' + ((v.status||'new') === s ? ' selected' : '') + '>' + s + '</option>';
+        }).join('');
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td class="mono">' + fmtWhen(v.createdAtMs) + '</td>' +
+          '<td><strong>' + esc(v.name) + '</strong>' + (v.address ? '<br><span style="font-size:12px;color:var(--galv);">' + esc(v.address) + '</span>' : '') +
+            (v.geometry ? '<br><span class="pill" title="Customer drew their fence on the map">\uD83D\uDDFA drawing attached</span>' : '') +
+            (v.photo ? '<br><img src="' + v.photo.replace(/"/g, '&quot;') + '" style="width:46px;height:46px;object-fit:cover;border-radius:5px;margin-top:4px;cursor:pointer;" title="Customer photo" onclick="window.open(this.src)">' : '') + '</td>' +
+          '<td class="mono"><a href="tel:' + esc(v.phone) + '">' + esc(v.phone) + '</a><br>' +
+            '<a href="sms:' + esc(v.phone) + '?&body=' + encodeURIComponent('Hi ' + (v.name || '').split(' ')[0] + ', this is Nick from Ghareeb Fencing Solutions — saw your fence quote request and wanted to reach out. When works for a quick call?') + '" style="font-size:12px;">💬 text</a></td>' +
+          '<td>' + esc(proj || (v.notes || '').slice(0, 60)) + '</td>' +
+          '<td class="mono">' + esc(v.source || '') + '</td>' +
+          '<td><select data-lead="' + esc(d.id) + '" style="padding:5px 8px;font-size:12px;width:auto;">' + opts + '</select><br>' +
+            '<input type="text" data-note="' + esc(d.id) + '" placeholder="note\u2026" value="' + esc(v.ownerNote || '') + '" style="margin-top:5px;padding:5px 8px;font-size:12px;"></td>';
+        tb.appendChild(tr);
+      });
+      $('#leads-empty').style.display = n ? 'none' : 'block';
+      tb.querySelectorAll('select[data-lead]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          db.collection('websiteLeads').doc(sel.dataset.lead).update({ status: sel.value, statusChangedAtMs: Date.now() })
+            .then(function(){ toast('Status \u2192 ' + sel.value); })
+            .catch(function(e){ toast('Update failed: ' + (e.message||e), true); });
+        });
+      });
+      tb.querySelectorAll('input[data-note]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+          db.collection('websiteLeads').doc(inp.dataset.note).update({ ownerNote: inp.value.slice(0, 500) })
+            .then(function(){ toast('Note saved'); })
+            .catch(function(e){ toast('Note failed: ' + (e.message||e), true); });
+        });
+      });
+    }).catch(function (e) {
+      $('#leads-empty').style.display = 'block';
+      console.error(e);
+    });
+  }
+
+  $('#leads-csv').addEventListener('click', function () {
+    if (!leadsCache.length) { toast('Nothing to export', true); return; }
+    var cols = ['createdAt','name','phone','email','address','fenceStyle','linearFeet','height','singleGates','doubleGates','timeline','status','source','ownerNote','notes'];
+    var rows = [cols.join(',')].concat(leadsCache.map(function (v) {
+      return cols.map(function (c) {
+        var val = v[c] == null ? '' : String(v[c]);
+        return '"' + val.replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+      }).join(',');
+    }));
+    var blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    var aEl = document.createElement('a');
+    aEl.href = URL.createObjectURL(blob);
+    aEl.download = 'gfs-website-leads-' + dayKeyOffset(0) + '.csv';
+    aEl.click();
+    URL.revokeObjectURL(aEl.href);
+  });
+
+  $('#leads-refresh').addEventListener('click', loadLeads);
+
+  function loadBookings() {
+    db.collection('bookings').orderBy('createdAtMs', 'desc').limit(50).get().then(function (snap) {
+      var tb = $('#t-bookings tbody');
+      tb.innerHTML = '';
+      bookingsCache = [];
+      var n = 0;
+      snap.forEach(function (d) {
+        n++;
+        var v = d.data();
+        bookingsCache.push(v);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td class="mono">' + fmtWhen(v.createdAtMs) + '</td>' +
+          '<td><strong>' + esc(v.name) + '</strong></td>' +
+          '<td class="mono"><a href="tel:' + esc(v.phone) + '">' + esc(v.phone) + '</a></td>' +
+          '<td class="mono">' + esc(v.date) + '</td>' +
+          '<td>' + esc(v.time) + '</td>' +
+          '<td style="font-size:12.5px;">' + esc(v.address || '') + '</td>' +
+          '<td><select data-bk="' + esc(d.id) + '" style="padding:5px 8px;font-size:12px;width:auto;">' +
+            ['pending','confirmed','done','cancelled'].map(function (s) {
+              return '<option value="' + s + '"' + ((v.status || 'pending') === s ? ' selected' : '') + '>' + s + '</option>';
+            }).join('') + '</select></td>';
+        tb.appendChild(tr);
+      });
+      $('#bookings-empty').style.display = n ? 'none' : 'block';
+      tb.querySelectorAll('select[data-bk]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          db.collection('bookings').doc(sel.dataset.bk).update({ status: sel.value })
+            .then(function () { toast('Booking → ' + sel.value); })
+            .catch(function (e) { toast('Update failed: ' + (e.message || e), true); });
+        });
+      });
+    }).catch(function (e) {
+      $('#bookings-empty').style.display = 'block';
+      console.error(e);
+    });
+  }
+  $('#bookings-refresh').addEventListener('click', loadBookings);
+
+  var bookingsCache = [];
+  $('#bookings-csv').addEventListener('click', function () {
+    if (!bookingsCache.length) { toast('Nothing to export', true); return; }
+    var cols = ['createdAt','name','phone','email','address','date','time','status','notes'];
+    var rows = [cols.join(',')].concat(bookingsCache.map(function (v) {
+      return cols.map(function (c2) {
+        var val = v[c2] == null ? '' : String(v[c2]);
+        return '"' + val.replace(/"/g, '""').replace(/\r?\n/g, ' ') + '"';
+      }).join(',');
+    }));
+    var blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    var aEl = document.createElement('a');
+    aEl.href = URL.createObjectURL(blob);
+    aEl.download = 'gfs-bookings-' + dayKeyOffset(0) + '.csv';
+    aEl.click();
+    URL.revokeObjectURL(aEl.href);
+  });
+
+  var STATIC_PAGES = ["/", "/about/", "/blog/", "/blog/cedar-vs-vinyl-fence-ohio/", "/blog/do-i-need-permit-fence-toledo/", "/blog/fence-cost-ohio-2026/", "/blog/pool-fence-code-lucas-county/", "/brochure/", "/careers/", "/contact/", "/faq/", "/fences/", "/fences/aluminum/", "/fences/cedar/", "/fences/chainlink/", "/fences/no-dig/", "/fences/pet-fencing/", "/fences/pool-fencing/", "/fences/replacement/", "/fences/split-rail/", "/fences/vinyl/", "/fences/wood/", "/financing/", "/gallery/", "/guides/", "/guides/choosing-a-fence/", "/guides/fence-care/", "/guides/fences-on-a-slope/", "/guides/gates-that-do-not-sag/", "/guides/installation-process/", "/guides/no-dig-vs-concrete/", "/guides/open-style-fences/", "/guides/property-lines-and-neighbors/", "/guides/reading-a-fence-quote/", "/guides/what-fails-first/", "/guides/winter-fence-installation/", "/guides/wood-vs-vinyl/", "/permits/", "/portal/", "/privacy/", "/process/", "/quote/", "/quote/ballpark/", "/quote/book/", "/quote/form/", "/review/", "/reviews/", "/service-areas/", "/service-areas/bowling-green-oh/", "/service-areas/dundee-mi/", "/service-areas/erie-mi/", "/service-areas/holland-oh/", "/service-areas/ida-mi/", "/service-areas/lambertville-mi/", "/service-areas/maumee-oh/", "/service-areas/monroe-mi/", "/service-areas/northwood-oh/", "/service-areas/oregon-oh/", "/service-areas/perrysburg-oh/", "/service-areas/petersburg-mi/", "/service-areas/rossford-oh/", "/service-areas/sylvania-oh/", "/service-areas/temperance-mi/", "/service-areas/toledo-oh/", "/service-areas/waterville-oh/", "/service-areas/whiteford-mi/", "/terms/", "/why-us/"];
+  function loadPageDirectory() {
+    var tb = $('#t-pages-all tbody');
+    if (!tb) return;
+    db.collection('siteContent').get().then(function (snap) {
+      var counts = {};
+      snap.forEach(function (d) {
+        var id = decodeURIComponent(d.id);
+        var data = d.data() || {};
+        var n = Object.keys(data).filter(function (k) { return k !== '_blocks' && k.charAt(0) !== '_'; }).length;
+        n += (data._blocks || []).length;
+        counts[id] = n;
+      });
+      tb.innerHTML = '';
+      STATIC_PAGES.forEach(function (p) {
+        var c = counts[p.replace(/\/$/, '') || '/'] || counts[p] || 0;
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td class="mono">' + esc(p) + '</td>' +
+          '<td class="mono" style="text-align:right;">' + (c ? '<strong>' + c + '</strong>' : '<span style="opacity:0.4;">0</span>') + '</td>' +
+          '<td style="text-align:right;white-space:nowrap;">' +
+            '<a class="btn btn-ghost btn-sm" target="_blank" href="' + esc(p) + '?edit">\u270E edit</a> ' +
+            '<a class="btn btn-ghost btn-sm" target="_blank" href="' + esc(p) + '">view</a></td>';
+        tb.appendChild(tr);
+      });
+    }).catch(function (e) { tb.innerHTML = '<tr><td colspan="3" class="empty">read failed: ' + esc(e.message || e) + '</td></tr>'; });
+  }
+
+  (function bindLeadSearch() {
+    document.addEventListener('input', function (ev) {
+      if (!ev.target || ev.target.id !== 'leads-search') return;
+      var q = ev.target.value.toLowerCase();
+      document.querySelectorAll('#t-leads tbody tr').forEach(function (tr) {
+        tr.style.display = tr.textContent.toLowerCase().indexOf(q) > -1 ? '' : 'none';
+      });
+    });
+  })();
+
+  function loadSlots() {
+    var strip = $('#slot-strip');
+    var today = new Date().toISOString().slice(0, 10);
+    db.collection('availableSlots').where('date', '>=', today).get().then(function (snap) {
+      var items = [];
+      snap.forEach(function (d) { items.push(d.data()); });
+      items.sort(function (x, y) { return (x.date + x.time).localeCompare(y.date + y.time); });
+      if (!items.length) { strip.innerHTML = '<span class="empty">No slots published yet — open the Exec app → Website Leads → 📅 Booking Slots.</span>'; return; }
+      strip.innerHTML = items.map(function (s) {
+        var d2 = new Date(s.date + 'T12:00:00');
+        var lbl = d2.toLocaleDateString([], { weekday: 'short', month: 'numeric', day: 'numeric' });
+        var short = (s.time || '').split(' ')[0];
+        return '<span style="padding:6px 11px;border-radius:14px;font-size:12px;font-weight:600;' +
+          (s.booked ? 'background:#B4530F;color:#fff;' : 'background:#1A7A4A;color:#fff;') + '">' +
+          (s.booked ? '🔒 ' : '') + lbl + ' ' + short + '</span>';
+      }).join('');
+    }).catch(function (e) { strip.innerHTML = '<span class="empty">slots read failed: ' + esc(e.message || e) + '</span>'; });
+  }
+
+  var peCurrentSlug = null, peBase = null, peEpoch = 0, peBusy = false, peUid = null, peUploads = 0;
+  function pageUser(){var u=firebase.auth().currentUser;if(!u||u.uid!==peUid||u.email!=='nicholasghareeb99@gmail.com')throw Error('Sign in again with the page owner account.');return u;}
+  function lockPage(locked){peBusy=locked;$$('#page-editor input, #page-editor textarea, #page-editor button, #page-editor select').forEach(function(e){e.disabled=locked;});$('#pe-slug').disabled=locked||!!peCurrentSlug;}
+  function draftKey(slug){return 'gfs-page-editor:'+peUid+':'+(slug||'new');}
+  function pageValues(){return {title:$('#pe-title').value.trim(),description:$('#pe-desc').value.trim(),navLabel:$('#pe-navlabel').value.trim(),published:$('#pe-published').checked,nav:$('#pe-nav').checked,blocks:collectBlocks()};}
+  function fillPage(v){$('#pe-title').value=v.title||'';$('#pe-desc').value=v.description||'';$('#pe-navlabel').value=v.navLabel||'';$('#pe-published').checked=!!v.published;$('#pe-nav').checked=!!v.nav;$('#pe-blocks').replaceChildren();(v.blocks||[]).forEach(function(b){$('#pe-blocks').appendChild(blockEl(b));});}
+  function savePageDraft(){if(peBase===null||peBusy)return;try{localStorage.setItem(draftKey(peCurrentSlug),JSON.stringify({base:peBase,local:pageValues(),slug:$('#pe-slug').value,at:Date.now()}));}catch(e){toast('Device storage is full. Keep this page open until saved.',true);}}
+  $('#page-editor').addEventListener('input',savePageDraft);
+  $('#page-editor').addEventListener('change',savePageDraft);
+  window.addEventListener('beforeunload',savePageDraft);
+
+  function loadSitePages() {
+    db.collection('sitePages').get().then(function (snap) {
+      var tb = $('#t-sitepages tbody');
+      tb.innerHTML = '';
+      var n = 0;
+      var docs = [];
+      snap.forEach(function (d) { docs.push({ id: d.id, v: d.data() || {} }); });
+      docs.sort(function (a, b) { return (b.v.updatedAtMs || 0) - (a.v.updatedAtMs || 0); });
+      docs.forEach(function (row) {
+        n++;
+        var v = row.v;
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td><strong>' + esc(v.title || row.id) + '</strong></td>' +
+          '<td class="mono">' + esc(row.id) + '</td>' +
+          '<td><span class="pill ' + (v.published ? 'new' : '') + '">' + (v.published ? 'live' : 'draft') + '</span></td>' +
+          '<td>' + (v.nav ? '✓' : '') + '</td>' +
+          '<td class="mono">' + fmtWhen(v.updatedAtMs) + '</td>' +
+          '<td style="white-space:nowrap;"><button class="btn btn-ghost btn-sm" data-edit="' + esc(row.id) + '">Edit</button> ' +
+          '<a class="btn btn-ghost btn-sm" href="../p/?page=' + encodeURIComponent(row.id) + '" target="_blank" rel="noopener">View</a></td>';
+        tb.appendChild(tr);
+      });
+      $('#pages-empty').style.display = n ? 'none' : 'block';
+      $$('#t-sitepages [data-edit]').forEach(function (b) {
+        b.addEventListener('click', function () { openEditor(b.dataset.edit); });
+      });
+    }).catch(function (e) {
+      $('#pages-empty').style.display = 'block';
+      toast('Could not load pages: ' + (e.message || e), true);
+    });
+  }
+
+  function blockEl(b) {
+    var div = document.createElement('div');
+    div.className = 'blk';
+    div.dataset.type = b.type;
+    div._original = JSON.parse(JSON.stringify(b));
+    var fields = '';
+    if (b.type === 'img') {
+      fields =
+        '<label style="display:block;margin-bottom:8px">Upload photo<input type="file" class="bf-file" accept="image/*"></label><img class="bf-preview" alt="Photo preview" style="display:block;max-width:100%;max-height:240px;object-fit:contain;margin-bottom:8px">' +
+        '<input type="text" class="bf-url" placeholder="Image URL (https://...)" value="' + esc(b.url || '') + '">' +
+        '<input type="text" class="bf-alt" placeholder="Alt text" value="' + esc(b.alt || '') + '" style="margin-top:6px;">' +
+        '<input type="text" class="bf-cap" placeholder="Caption (optional)" value="' + esc(b.caption || '') + '" style="margin-top:6px;">';
+    } else if (b.type === 'cta') {
+      fields =
+        '<input type="text" class="bf-text" placeholder="Button label" value="' + esc(b.text || '') + '">' +
+        '<input type="text" class="bf-url" placeholder="Link (e.g. ../quote/ or https://...)" value="' + esc(b.url || '') + '" style="margin-top:6px;">';
+    } else if (b.type === 'p' || b.type === 'list') {
+      fields = '<textarea class="bf-text" placeholder="' + (b.type === 'list' ? 'One item per line' : 'Paragraph text') + '">' + esc(b.text || '') + '</textarea>';
+    } else {
+      fields = '<input type="text" class="bf-text" placeholder="Text" value="' + esc(b.text || '') + '">';
+    }
+    var names = { h2: 'Heading', h3: 'Subheading', p: 'Paragraph', img: 'Image', cta: 'Button', quote: 'Quote', list: 'List' };
+    div.innerHTML =
+      '<div class="blk-head"><span class="blk-type">' + (names[b.type] || b.type) + '</span>' +
+      '<span><button class="btn btn-ghost btn-sm bmove" data-dir="-1">↑</button> ' +
+      '<button class="btn btn-ghost btn-sm bmove" data-dir="1">↓</button> ' +
+      '<button class="btn btn-danger btn-sm bdel">✕</button></span></div>' + fields;
+    if(b.type==='img'){
+      const url=div.querySelector('.bf-url'),preview=div.querySelector('.bf-preview');
+      const show=()=>{const value=GFSSanitize.imageURL(url.value);preview.hidden=!value;if(value)preview.src=value;else preview.removeAttribute('src');};show();url.addEventListener('input',show);
+      div.querySelector('.bf-file').addEventListener('change',async function(){
+        if(!this.files[0])return;const file=this.files[0],epoch=peEpoch,uid=peUid;this.disabled=true;peUploads++;$('#pe-save').disabled=true;
+        try{pageUser();const blob=await GFSCMS.preparePhoto(file);const uploaded=await GFSCMS.uploadPhoto(blob,uid);if(epoch!==peEpoch||!div.isConnected)return;pageUser();url.value=uploaded;show();savePageDraft();toast('Photo uploaded. Save the page to publish it.');}
+        catch(e){toast('Photo upload failed: '+e.message,true);}
+        finally{this.disabled=false;this.value='';peUploads--;if(!peBusy)$('#pe-save').disabled=peUploads>0;}
+      });
+    }
+    div.querySelector('.bdel').addEventListener('click', function () { div.remove(); savePageDraft(); });
+    Array.prototype.slice.call(div.querySelectorAll('.bmove')).forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var dir = parseInt(btn.dataset.dir, 10);
+        var sib = dir < 0 ? div.previousElementSibling : div.nextElementSibling;
+        if (!sib) return;
+        if (dir < 0) div.parentNode.insertBefore(div, sib);
+        else div.parentNode.insertBefore(sib, div);
+        savePageDraft();
+      });
+    });
+    return div;
+  }
+
+  function collectBlocks() {
+    return $$('#pe-blocks .blk').map(function (div) {
+      var t = div.dataset.type;
+      var get = function (cls) { var el = div.querySelector(cls); return el ? el.value.trim() : ''; };
+      if (t === 'img') return Object.assign({},div._original,{ type: t, url: GFSSanitize.imageURL(get('.bf-url')), alt: get('.bf-alt'), caption: get('.bf-cap') });
+      if (t === 'cta') return Object.assign({},div._original,{ type: t, text: get('.bf-text'), url: GFSSanitize.href(get('.bf-url')) });
+      return Object.assign({},div._original,{ type: t, text: get('.bf-text') });
+    }).filter(function (b) { return b.text || b.url; });
+  }
+
+  async function openEditor(slug) {
+    if(peBusy||peUploads)return toast('Wait for the current save or upload to finish.');
+    savePageDraft();const epoch=++peEpoch;peCurrentSlug=slug||null;peBase=null;peUid=firebase.auth().currentUser?.uid;
+    $('#page-editor').style.display='block';$('#pe-heading').textContent=slug?'Edit page':'New page';
+    $('#pe-delete').style.display=slug?'inline-block':'none';$('#pe-preview').style.display=slug?'inline-block':'none';
+    if(slug)$('#pe-preview').href='../p/'+encodeURIComponent(slug)+'/';
+    fillPage({});$('#pe-slug').value=slug||'';lockPage(true);
+    try{
+      pageUser();const doc=slug?await db.collection('sitePages').doc(slug).get():null;
+      if(epoch!==peEpoch)return;pageUser();if(slug&&!doc.exists)throw Error('This page no longer exists. Reload the page list.');
+      peBase=doc?doc.data():{};fillPage(peBase);lockPage(false);
+      let draft;try{draft=JSON.parse(localStorage.getItem(draftKey(slug))||'null');}catch{}
+      if(draft&&confirm('Restore the unsaved draft for this page?')){peBase=draft.base;fillPage(draft.local);if(!slug)$('#pe-slug').value=draft.slug||'';}
+    }catch(e){toast('Page could not load: '+e.message,true);peBusy=false;$('#pe-cancel').disabled=false;}
+    $('#page-editor').scrollIntoView({behavior:'smooth'});
+  }
+
+  $('#page-new').addEventListener('click', function () { openEditor(null); });
+  $('#pe-cancel').addEventListener('click', function () { if(peUploads||peBusy)return;savePageDraft();++peEpoch;$('#page-editor').style.display = 'none'; });
+  $$('#panel-pages [data-add]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      if(peBusy||peBase===null)return;$('#pe-blocks').appendChild(blockEl({ type: b.dataset.add }));savePageDraft();
+    });
+  });
+
+  $('#pe-save').addEventListener('click',async function(){
+    if(peBusy||peUploads||peBase===null)return;
+    const slug=(peCurrentSlug||$('#pe-slug').value.trim().toLowerCase()).replace(/[^a-z0-9-]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,'');
+    const local=pageValues(),base=JSON.parse(JSON.stringify(peBase)),previousKey=draftKey(peCurrentSlug),isNew=!peCurrentSlug;
+    if(!local.title||!slug)return toast('A title and page address are required.',true);
+    savePageDraft();lockPage(true);
+    try{
+      pageUser();const ref=db.collection('sitePages').doc(slug),stamp={updatedAtMs:Date.now(),updatedAt:new Date().toISOString()};
+      const saved=await db.runTransaction(async tx=>{pageUser();const snap=await tx.get(ref);pageUser();if(isNew&&snap.exists)throw Error('That page address already exists. Choose another address.');if(!isNew&&!snap.exists)throw Error('This page was deleted on another device.');
+        const values=Object.assign({},base,local),merged=Object.assign(GFSCMS.merge(base,values,snap.exists?snap.data():{}),stamp);GFSCMS.sizeCheck(merged);tx.set(ref,merged);return merged;
+      });
+      pageUser();peCurrentSlug=slug;peBase=saved;fillPage(saved);localStorage.removeItem(previousKey);localStorage.removeItem('gfs_dynpages_v1');
+      $('#pe-preview').style.display='inline-block';$('#pe-preview').href='../p/'+encodeURIComponent(slug)+'/';$('#pe-delete').style.display='inline-block';
+      toast('Page saved'+(saved.published?' — live at /p/'+slug+'/':' (draft)'));loadSitePages();
+    }catch(e){toast('Save failed: '+e.message+' Your draft is kept.',true);}
+    finally{lockPage(false);}
+  });
+  $('#pe-delete').addEventListener('click',async function(){
+    if(!peCurrentSlug||peBusy||peUploads||peBase===null)return;
+    if(!confirm('Delete the page "'+peCurrentSlug+'"? This cannot be undone.'))return;
+    const ref=db.collection('sitePages').doc(peCurrentSlug),baseline=JSON.stringify(peBase);lockPage(true);
+    try{pageUser();await db.runTransaction(async tx=>{pageUser();const snap=await tx.get(ref);pageUser();if(snap.exists&&JSON.stringify(snap.data())!==baseline)throw Error('This page changed on another device. Reload it before deleting.');tx.delete(ref);});
+      localStorage.removeItem(draftKey(peCurrentSlug));localStorage.removeItem('gfs_dynpages_v1');$('#page-editor').style.display='none';peBase=null;toast('Page deleted');loadSitePages();
+    }catch(e){toast('Delete failed: '+e.message,true);}finally{lockPage(false);}
+  });
+
+  // ---------- COMPETITOR REFERRALS ----------
+  var compWatchlist = [];
+
+  function loadWatchlist() {
+    return db.collection('siteConfig').doc('competitorWatchlist').get().then(function (doc) {
+      compWatchlist = (doc.exists && Array.isArray(doc.data().domains)) ? doc.data().domains : [];
+      renderWatchlist();
+    }).catch(function () { compWatchlist = []; renderWatchlist(); });
+  }
+  function saveWatchlist() {
+    return db.collection('siteConfig').doc('competitorWatchlist')
+      .set({ domains: compWatchlist, updatedAtMs: Date.now() })
+      .then(function () { renderWatchlist(); if (window.__lastHits) renderCompetitors(window.__lastHits, parseInt($('#dash-range').value, 10) || 30); })
+      .catch(function (e) { toast('Could not save watchlist: ' + (e.message || e), true); });
+  }
+  function renderWatchlist() {
+    var wrap = $('#comp-list');
+    wrap.innerHTML = '';
+    if (!compWatchlist.length) {
+      wrap.innerHTML = '<span style="font-size:13px;color:var(--galv);">No domains yet — "fenc*" referrers are still auto-flagged.</span>';
+      return;
+    }
+    compWatchlist.forEach(function (d2, i) {
+      var chip = document.createElement('span');
+      chip.className = 'pill';
+      chip.style.cssText = 'font-size:12px;padding:5px 10px;display:inline-flex;align-items:center;gap:8px;';
+      chip.innerHTML = esc(d2) + ' <button data-i="' + i + '" style="background:none;border:none;color:var(--stop);cursor:pointer;font-weight:700;">\u00d7</button>';
+      chip.querySelector('button').addEventListener('click', function () {
+        compWatchlist.splice(i, 1); saveWatchlist();
+      });
+      wrap.appendChild(chip);
+    });
+  }
+  $('#comp-add-btn').addEventListener('click', function () {
+    var v = $('#comp-add').value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+    if (!v || compWatchlist.indexOf(v) >= 0) return;
+    compWatchlist.push(v);
+    $('#comp-add').value = '';
+    saveWatchlist();
+  });
+  $('#comp-add').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('#comp-add-btn').click(); });
+
+  $('#comp-seed').addEventListener('click', function () {
+    var seeds = ['superiorfenceandrail.com','straitline-fence.com','toledofence.com','marleauherculesfence.com','nicefence.com','patriotfences.net','fencingtoledo.com','andjfencing.com'];
+    var added = 0;
+    seeds.forEach(function (s) { if (compWatchlist.indexOf(s) < 0) { compWatchlist.push(s); added++; } });
+    if (added) saveWatchlist().then(function(){ toast(added + ' competitor domain(s) added'); });
+    else toast('All 8 already on the watchlist');
+  });
+
+  function isCompetitorRef(ref) {
+    if (!ref) return false;
+    var r = String(ref).toLowerCase().replace(/^www\./, '');
+    if (r.indexOf(location.hostname.replace(/^www\./, '')) >= 0) return false;
+    for (var i = 0; i < compWatchlist.length; i++) {
+      if (r === compWatchlist[i] || r.indexOf(compWatchlist[i]) >= 0) return true;
+    }
+    // Auto-flag: any external referrer whose domain mentions fencing,
+    // excluding the big platforms that just happen to carry the word.
+    if (/fenc/.test(r) && !/google|bing|facebook|yelp|bbb\.org|nextdoor|instagram/.test(r)) return true;
+    return false;
+  }
+
+  function renderCompetitors(hits, days) {
+    $('#comp-days').textContent = days;
+    // Group by session; a session counts if its FIRST pv has a competitor ref.
+    var bySid = {};
+    hits.forEach(function (h) {
+      if (!h.sid) return;
+      (bySid[h.sid] = bySid[h.sid] || []).push(h);
+    });
+    var rows = [];
+    Object.keys(bySid).forEach(function (sid) {
+      var evs = bySid[sid].slice().sort(function (a, b) { return (a.tsMs || 0) - (b.tsMs || 0); });
+      var firstPv = null;
+      for (var i = 0; i < evs.length; i++) { if (evs[i].t === 'pv') { firstPv = evs[i]; break; } }
+      if (!firstPv || !isCompetitorRef(firstPv.ref)) return;
+      var pv = evs.filter(function (h) { return h.t === 'pv'; }).length;
+      var conv = evs.some(function (h) { return h.t === 'lead' || h.t === 'booking'; });
+      rows.push({ ts: firstPv.tsMs, ref: firstPv.ref, path: firstPv.path, pv: pv, conv: conv });
+    });
+    rows.sort(function (a, b) { return b.ts - a.ts; });
+    var tb = $('#t-comp tbody');
+    tb.innerHTML = '';
+    rows.slice(0, 100).forEach(function (r) {
+      var tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="mono">' + fmtWhen(r.ts) + '</td>' +
+        '<td class="mono" style="color:var(--warn);font-weight:600;">' + esc(r.ref) + '</td>' +
+        '<td class="mono">' + esc(r.path) + '</td>' +
+        '<td class="mono" style="text-align:center;">' + r.pv + '</td>' +
+        '<td>' + (r.conv ? '<span class="pill new">lead \u2713</span>' : '') + '</td>';
+      tb.appendChild(tr);
+    });
+    $('#comp-empty').style.display = rows.length ? 'none' : 'block';
+  }
+
+  function loadSyncStatus() {
+    db.collection('settings').doc('global').get().then(function (doc) {
+      if (!doc.exists) { $('#sync-status').textContent = 'settings/global missing'; return; }
+      var v = doc.data() || {};
+      var priced = v.pricing ? Object.keys(v.pricing).length : 0;
+      var photos = v.stylePhotos ? Object.keys(v.stylePhotos).length : 0;
+      $('#sync-status').innerHTML =
+        'pricing entries: <b>' + priced + '</b> \u00b7 style photos: <b>' + photos + '</b><br>' +
+        'The website ballpark tool reads this document live \u2014 change a price in the Exec app and the site follows immediately.';
+    }).catch(function (e) { $('#sync-status').textContent = 'read failed: ' + (e.message || e); });
+  }
+
+  $('#purge-old').addEventListener('click', function () {
+    if (!confirm('Delete all recorded analytics hits older than 90 days?')) return;
+    var cutoff = dayKeyOffset(90);
+    $('#purge-status').textContent = 'purging\u2026';
+    db.collection('siteHits').where('day', '<', cutoff).limit(400).get().then(function (snap) {
+      var batch = db.batch();
+      var n = 0;
+      snap.forEach(function (d) { batch.delete(d.ref); n++; });
+      return batch.commit().then(function () {
+        $('#purge-status').textContent = n + ' deleted' + (n === 400 ? ' \u2014 click again for more' : '');
+        toast(n + ' old hits purged');
+      });
+    }).catch(function (e) { $('#purge-status').textContent = 'failed: ' + (e.message || e); });
+  });
+
+  function contentPageURL(path){return /^\/(?:[a-z0-9-]+\/?)*$/i.test(path)?path.replace(/\/+$/,'')+'/':null;}
+  function loadContent() {
+    db.collection('siteContent').get().then(function (snap) {
+      var tb = $('#t-content tbody');
+      tb.innerHTML = '';
+      var n = 0;
+      snap.forEach(function (d) {
+        n++;
+        var path = decodeURIComponent(d.id) || '/';
+        var count = Object.keys(d.data() || {}).length;
+        var pageURL=contentPageURL(path);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td class="mono">' + esc(path || '/') + '</td>' +
+          '<td class="mono" style="text-align:right;">' + count + '</td>' +
+          (pageURL ? '<td><a href="' + esc(pageURL) + '" target="_blank" rel="noopener">View</a></td><td><a href="' + esc(pageURL) + '?edit" target="_blank" rel="noopener">Open in Edit Mode</a></td>' : '<td colspan="2">Shared settings or legacy record — use Inspect</td>') +
+          '<td><button class="btn btn-ghost btn-sm" data-inspect="' + esc(d.id) + '">Inspect</button></td>';
+        tb.appendChild(tr);
+      });
+      $('#content-empty').style.display = n ? 'none' : 'block';
+      tb.querySelectorAll('[data-inspect]').forEach(function (btn) {
+        btn.addEventListener('click', function () { inspectPage(btn.dataset.inspect); });
+      });
+    }).catch(function (e) {
+      $('#content-empty').style.display = 'block';
+      console.error(e);
+    });
+  }
+
+  // ---------- OVERRIDE INSPECTOR ----------
+  // See EVERY saved change on a page and delete any one of them —
+  // or wipe the page back to its original design.
+  function inspectPage(docId) {
+    var box = $('#inspector');
+    box.style.display = 'block';
+    var pretty = decodeURIComponent(docId);
+    $('#insp-title').textContent = 'Overrides on ' + (pretty === '_chrome' ? 'HEADER & FOOTER (site-wide)' : (pretty || '/'));
+    var tb = $('#t-insp tbody');
+    tb.innerHTML = '<tr><td colspan="3" class="empty">loading…</td></tr>';
+    db.collection('siteContent').doc(docId).get().then(function (doc) {
+      tb.innerHTML = '';
+      if (!doc.exists) { tb.innerHTML = '<tr><td colspan="3" class="empty">no overrides</td></tr>'; return; }
+      var data = doc.data() || {};
+      var keys = Object.keys(data).sort();
+      keys.forEach(function (k) {
+        var v = data[k];
+        var desc;
+        if (k === '_blocks') desc = (Array.isArray(v) ? v.length : 0) + ' added block(s)';
+        else if (k === '_hidden') desc = (Array.isArray(v) ? v.length : 0) + ' hidden element(s)';
+        else if (k === '_sectionOrder') desc = 'section order changed';
+        else if (k === '_domOrder') desc = Object.keys(v || {}).length + ' element move group(s)';
+        else if (k === '_styles') desc = Object.keys(v || {}).length + ' styled element(s)';
+        else if (k === '_dupes') desc = (Array.isArray(v) ? v.length : 0) + ' duplicated element(s)';
+        else if (v && v.type === 'img') desc = 'image (' + (String(v.value || '').indexOf('data:') === 0 ? Math.round(String(v.value).length * 0.73 / 1024) + ' KB uploaded' : 'URL') + ')';
+        else desc = String((v && v.value) != null ? v.value : v).replace(/<[^>]*>/g, '').slice(0, 90);
+        var editable = v && (v.type === 'text' || v.type === 'caption' || v.type === 'href');
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td class="mono" style="white-space:nowrap;">' + esc(k) + '</td>' +
+          (editable
+            ? '<td><textarea data-editkey="' + esc(k) + '" style="width:100%;min-height:44px;font-size:12.5px;padding:6px 8px;">' + esc(v.value || '') + '</textarea></td>' +
+              '<td style="white-space:nowrap;"><button class="btn btn-primary btn-sm" data-savekey="' + esc(k) + '">save</button> ' +
+              '<button class="btn btn-danger btn-sm" data-delkey="' + esc(k) + '">delete</button></td>'
+            : '<td style="font-size:12.5px;">' + esc(desc) + '</td>' +
+              '<td><button class="btn btn-danger btn-sm" data-delkey="' + esc(k) + '">delete</button></td>');
+        tb.appendChild(tr);
+      });
+      tb.querySelectorAll('[data-savekey]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var ta = tb.querySelector('textarea[data-editkey="' + btn.dataset.savekey.replace(/"/g, '\\"') + '"]');
+          if (!ta) return;
+          var upd = {};
+          upd[btn.dataset.savekey + '.value'] = ta.value;
+          db.collection('siteContent').doc(docId).update(upd).then(function () {
+            toast('Saved — live on the site now');
+          }).catch(function (e) { toast('Save failed: ' + (e.message || e), true); });
+        });
+      });
+      tb.querySelectorAll('[data-delkey]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (!confirm('Delete the override "' + btn.dataset.delkey + '"? The original design content returns for that item.')) return;
+          var upd = {};
+          upd[btn.dataset.delkey] = firebase.firestore.FieldValue.delete();
+          db.collection('siteContent').doc(docId).update(upd).then(function () {
+            toast('Override deleted');
+            inspectPage(docId);
+            loadContent();
+          }).catch(function (e) { toast('Delete failed: ' + (e.message || e), true); });
+        });
+      });
+    });
+    $('#insp-wipe').onclick = function () {
+      if (!confirm('WIPE every override on this page? It returns fully to the original design for all visitors. This cannot be undone.')) return;
+      db.collection('siteContent').doc(docId).delete().then(function () {
+        toast('Page reset to original');
+        box.style.display = 'none';
+        loadContent();
+      }).catch(function (e) { toast('Wipe failed: ' + (e.message || e), true); });
+    };
+    box.scrollIntoView({ behavior: 'smooth' });
+  }
+})();
+</script>
+</body>
+</html>
