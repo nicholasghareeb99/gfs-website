@@ -33,7 +33,7 @@
 
   // ---- CONFIG ---------------------------------------------------
   const CFG = {
-    password: window.GFS_EDIT_PASSWORD || 'ghareeb2026',
+    password: window.GFS_EDIT_PASSWORD || '',
     storageKey: 'gfs_content_v1',
     sessionKey: 'gfs_edit_session',
     firestoreEnabled: !!(window.GFS_FIREBASE_CONFIG || (window.GFS_LEADS_CONFIG && window.GFS_LEADS_CONFIG.firestoreEnabled)),
@@ -262,7 +262,7 @@
 
   // ---- PASSWORD FALLBACK FLOW (LOCAL-ONLY) ----------------------
   function attemptPasswordLogin(pw) {
-    if (pw === CFG.password) {
+    if (CFG.password && pw === CFG.password) {
       sessionStorage.setItem(CFG.sessionKey, 'yes');
       hideLogin();
       enterEditMode();
