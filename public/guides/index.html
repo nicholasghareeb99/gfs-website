@@ -124,8 +124,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -136,7 +136,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}
@@ -294,7 +294,7 @@
       <p class="fence-card-tagline" data-editable="guides.c7.tag">Why a stepped fence leaves a gap under every section, what contouring costs, and why crews hanging prefab panels cannot do it.</p></div></a>
     <a href="./property-lines-and-neighbors/" class="fence-card"><div class="fence-card-body">
       <div class="fence-card-eyebrow" data-editable="guides.c4.eyebrow">The line between you</div>
-      <h2 data-editable="guides.c4.title">Property Lines &amp; Neighbours</h2>
+      <h2 data-editable="guides.c4.title">Property Lines &amp; Neighbors</h2>
       <p class="fence-card-tagline" data-editable="guides.c4.tag">Which side of the fence Toledo makes you face outward, where the line actually is, who pays, and the corner-lot rule that catches people.</p></div></a>
     <a href="./gates-that-do-not-sag/" class="fence-card"><div class="fence-card-body">
       <div class="fence-card-eyebrow" data-editable="guides.c8.eyebrow">The moving part</div>

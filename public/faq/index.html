@@ -18,7 +18,7 @@
 <link rel="dns-prefetch" href="https://unpkg.com">
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
-<title>Fence FAQ — Costs, Permits & Warranties in Toledo | Ghareeb Fencing Solutions</title>
+<title>Fence FAQ — Costs, Permits & Warranties in Toledo</title>
 <meta name="description" content="How much does a fence cost in Toledo? Do you need a permit? Who marks utilities? Straight answers from Toledo's owner-supervised fence contractor.">
 <meta name="theme-color" content="#1A2E40">
 
@@ -124,8 +124,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -136,7 +136,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}

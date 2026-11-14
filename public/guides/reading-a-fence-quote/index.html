@@ -124,8 +124,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -136,7 +136,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}
@@ -295,7 +295,7 @@
     <div class="guide-grid" style="margin-top:14px;">
       <a href="/guides/what-fails-first/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">What Fails First, and When</h3><p class="fence-card-tagline" style="font-size:14px;">Review installation details and ongoing care.</p></div></a>
       <a href="/guides/winter-fence-installation/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">A Fence in January</h3><p class="fence-card-tagline" style="font-size:14px;">Discuss timing and site conditions.</p></div></a>
-      <a href="/guides/property-lines-and-neighbors/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Property Lines &amp; Neighbours</h3><p class="fence-card-tagline" style="font-size:14px;">Which side faces out, and who pays.</p></div></a>
+      <a href="/guides/property-lines-and-neighbors/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Property Lines &amp; Neighbors</h3><p class="fence-card-tagline" style="font-size:14px;">Which side faces out, and who pays.</p></div></a>
       <a href="/why-us/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">How We Compare</h3><p class="fence-card-tagline" style="font-size:14px;">Questions to ask when comparing contractors.</p></div></a>
     </div>
   </div>
