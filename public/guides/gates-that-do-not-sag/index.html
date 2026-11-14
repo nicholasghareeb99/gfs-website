@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Gates Built for Everyday Use | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Explore our wood compression braces, internal aluminum frames for vinyl gates, hinge-post support and swing clearance with interactive diagrams.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Gates Built for Everyday Use">
+<meta property="og:description" content="Explore our wood compression braces, internal aluminum frames for vinyl gates, hinge-post support and swing clearance with interactive diagrams.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/guides/gates-that-do-not-sag/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Gates Built for Everyday Use">
+<meta name="twitter:description" content="Explore our wood compression braces, internal aluminum frames for vinyl gates, hinge-post support and swing clearance with interactive diagrams.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/guides/gates-that-do-not-sag/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "nick@ghareebfence.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "About", "item": "https://ghareebfence.com/about/"}
+  ]
+}
+</script>
+
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Article", "headline": "Gates Built for Everyday Use", "description": "Explore our wood compression braces, internal aluminum frames for vinyl gates, hinge-post support and swing clearance with interactive diagrams.", "image": "https://ghareebfence.com/assets/img/work/privacy-double-gate.jpg", "author": {"@type": "Person", "name": "Nick Ghareeb", "jobTitle": "Owner", "worksFor": {"@type": "Organization", "name": "Ghareeb Fencing Solutions"}}, "publisher": {"@type": "Organization", "name": "Ghareeb Fencing Solutions", "url": "https://ghareebfence.com/"}, "datePublished": "2026-09-01", "dateModified": "2026-09-30", "mainEntityOfPage": "https://ghareebfence.com/guides/gates-that-do-not-sag/"}</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a class="is-active" href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="page-header page-header--photo">
+  <div class="ph__bg" data-editable-img="gt.hero.img" aria-hidden="true"><img src="/assets/img/performance-v12/2cc0f5f65ed31f0e-1400.webp" alt="Double drive gate on a completed Toledo privacy fence" loading="eager" decoding="async" srcset="/assets/img/performance-v12/2cc0f5f65ed31f0e-480.webp 480w, /assets/img/performance-v12/2cc0f5f65ed31f0e-960.webp 960w, /assets/img/performance-v12/2cc0f5f65ed31f0e-1400.webp 1400w" sizes="100vw" width="1400" height="1050"></div>
+  <div class="ph__scrim" aria-hidden="true"></div>
+  <div class="container ph__content">
+    <div class="breadcrumbs"><a href="/">Home</a> <span>/</span> <a href="/guides/">Guides</a> <span>/</span> <span>Gates</span></div>
+    <div class="eyebrow" data-editable="gt.eyebrow">The Moving Part</div>
+    <h1 class="display-1" data-editable="gt.v30.title">Gates built for everyday use</h1>
+    <p class="ph__lede" data-editable="gt.v30.lede">A gate should open smoothly, close cleanly and suit the way you use your yard. See how our wood braces, internal vinyl-gate frames and site planning work together.</p>
+  </div>
+</section>
+
+
+
+<!-- BUILD-LAB:gate-support-demo:START --><section class="build-lab-section" id="gate-support-demo" data-gfs-sec="build-lab-gate-support-demo" data-gfs-protected><div class="build-lab" data-build-lab="gate-support-demo" data-scene="0" aria-labelledby="gate-support-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="gate-support-demo-title">Built to carry the gate’s weight.</h2><p>Our wood gates use diagonal wood braces in compression. Our vinyl gates use an aluminum frame inside. Explore both approaches.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="gate-support-demo-graphic-title gate-support-demo-graphic-desc"><title id="gate-support-demo-graphic-title">Wood compression brace slopes from bottom hinge to top latch; vinyl cutaway reveals an internal aluminum frame.</title><desc id="gate-support-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><rect x="78" y="55" width="40" height="259" fill="#718fa3"/><g class="lab-gate-wood"><rect x="146" y="80" width="354" height="194" rx="4" fill="#d9b791" stroke="#855c36" stroke-width="12"/><path d="M153 265L490 90" stroke="#80542e" stroke-width="17"/><text x="204" y="320">Wood brace · compression</text></g><g class="lab-gate-vinyl"><rect x="146" y="80" width="354" height="194" rx="4" fill="#fff" stroke="#92aabd" stroke-width="4"/><path d="M195 87v180m50-180v180m50-180v180m50-180v180m50-180v180m50-180v180" stroke="#c3d4df" stroke-width="2"/><rect x="162" y="96" width="322" height="162" fill="none" stroke="#627f96" stroke-width="15"/><path d="M169 109H477M169 245H477" stroke="#b7cedd" stroke-width="4"/><text x="182" y="320">Cutaway · internal aluminum</text></g><path d="M114 103h55m-55 148h55" stroke="#143e61" stroke-width="14"/><g class="lab-gate-hardware"><circle cx="132" cy="103" r="30"/><circle cx="132" cy="251" r="30"/><circle cx="499" cy="166" r="30"/></g><rect x="484" y="157" width="42" height="17" rx="4" fill="#143e61"/><text x="54" y="35">Hinges</text><text x="460" y="35">Latch</text></svg><figcaption>Our gate construction, shown schematically. Dimensions, connections and hardware are selected for the actual gate; this is not a fabrication drawing.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="Built to carry the gate’s weight. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="gate-support-demo-notes">Wood brace</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="gate-support-demo-notes">Inside a vinyl gate</button><button type="button" data-lab-step="2" aria-pressed="false" aria-controls="gate-support-demo-notes">Supports and hardware</button></div><ol id="gate-support-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Wood brace</h3><p>With the hinges on the left, our compression brace runs from the lower hinge corner toward the upper latch corner. Its fitted ends transfer load back toward the supported side.</p></li><li data-lab-note="1"><h3>Inside a vinyl gate</h3><p>Our vinyl gates have an internal aluminum frame. The cutaway reveals that reinforcement behind the vinyl finish; final connections follow the specified gate system.</p></li><li data-lab-note="2"><h3>Supports and hardware</h3><p>A brace or frame works with the rest of the gate: suitable hinges and fasteners, aligned latching, and a hinge-post assembly selected for its width, weight, wind exposure and site.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/quote/form/">Plan my gate with the team <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:gate-support-demo:END -->
+<!-- BUILD-LAB:gate-swing-demo:START --><section class="build-lab-section" id="gate-swing-demo" data-gfs-sec="build-lab-gate-swing-demo" data-gfs-protected><div class="build-lab" data-build-lab="gate-swing-demo" data-scene="0" aria-labelledby="gate-swing-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="gate-swing-demo-title">A gate opening is more than its width.</h2><p>Move the gate through its arc, then add a garden bed. Clear width, slope and the entire swing path all need a site check.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="gate-swing-demo-graphic-title gate-swing-demo-graphic-desc"><title id="gate-swing-demo-graphic-title">Top view of a swinging gate and an optional garden-bed obstruction.</title><desc id="gate-swing-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><rect x="40" y="45" width="520" height="250" rx="16" fill="#dce8dc"/><path d="M125 275L335 275A210 210 0 0 0 125 65Z" fill="#b9dcec"/><path d="M335 275A210 210 0 0 0 125 65" fill="none" stroke="#537e99" stroke-width="3" stroke-dasharray="8 5"/><g class="lab-swing-obstacle"><rect x="230" y="105" width="140" height="90" rx="12" fill="#af8060"/><circle cx="263" cy="144" r="22" fill="#557b57"/><circle cx="327" cy="150" r="26" fill="#557b57"/></g><path d="M40 275h85m210 0h225" stroke="#49677f" stroke-width="10"/><line data-lab-gate-leaf x1="125" y1="275" x2="335" y2="275" stroke="#0b6495" stroke-width="13" transform="rotate(-45 125 275)"/><circle cx="125" cy="275" r="11" fill="#143e61"/><text x="37" y="332">Top view · not a measured site plan</text></svg><figcaption>Illustrative geometry only. Final width, ground clearance, travel stops and hardware must be checked on site.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="A gate opening is more than its width. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="gate-swing-demo-notes">Open space</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="gate-swing-demo-notes">Garden in the path</button></div><div class="build-lab-range" data-lab-controls hidden><label for="gate-swing-angle">Open the sample gate <output id="gate-swing-value" for="gate-swing-angle">45°</output></label><input id="gate-swing-angle" data-lab-angle type="range" min="0" max="90" value="45" step="5" aria-describedby="gate-swing-help"><p id="gate-swing-help">Use the slider or arrow keys. This demonstrates motion; it does not certify clearance.</p></div><ol id="gate-swing-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Open space</h3><p>Plan access for people, equipment and the direction of travel. Check the complete swing area, not only the opening between posts.</p></li><li data-lab-note="1"><h3>Garden in the path</h3><p>A bed, wall or parked vehicle can occupy the swing area. A rising grade can also reduce clearance below the gate. Review layout and support options before installation.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/guides/fences-on-a-slope/">Explore slopes and ground clearance <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:gate-swing-demo:END -->
+<section class="section"><div class="container" style="max-width:820px;">
+
+  <h2 data-editable="gt.v30.h1">The moving part needs its own plan</h2>
+  <p data-editable="gt.v30.p1" style="line-height:1.75;">A swinging gate carries its weight through the hinges and hinge post. The unsupported latch side creates leverage, so gate width and weight matter as much as the fence style.</p>
+  <p data-editable="gt.v30.p2" style="line-height:1.75;">A gate can sag when its frame racks out of square. Worn or loose hinges, moving posts and failed connections can also cause misalignment. Fixing the right problem starts with checking the whole assembly.</p>
+  <p data-editable="gt.v30.p3" style="line-height:1.75;">We plan the gate as an assembly: frame, bracing, supports, hardware and clearance. Adding hinges to an ordinary fence section does not establish that those parts are suitable.</p>
+
+  <h2 data-editable="gt.v30.h2" style="margin-top:36px;">Our wood gates: a brace that works in compression</h2>
+  <p data-editable="gt.v30.p4" style="line-height:1.75;">We use diagonal wood braces in compression. The important details are the direction of the brace, fitted bearing at its ends and secure connections to a suitable frame.</p>
+
+  <p data-editable="gt.v30.p5" style="line-height:1.75;">The brace runs from the <strong>lower hinge-side corner toward the upper latch-side corner</strong>. As the latch side loads downward, the brace transfers compression toward the supported side. Reverse the illustration for a gate hinged on the right.</p>
+  <p data-editable="gt.v30.p6" style="line-height:1.75;">A diagonal board alone does not establish strength. Its fit, condition, connections and the surrounding frame all matter. The interactive illustration shows the load direction without prescribing a universal board size.</p>
+  <p data-editable="gt.v30.p7" style="line-height:1.75;">Other engineered gate systems may use tension cables or different reinforcement. Those have their own connection and loading requirements; a cable on a new gate is not by itself evidence of poor construction.</p>
+
+  <figure style="margin:28px 0 8px;" data-editable-img="gt.photo1.img">
+    <img src="/assets/img/performance-v12/ffab2a46bddcb681-480.webp" alt="Ghareeb Fencing Solutions wood double gate shown closed" loading="lazy" decoding="async" style="width:100%;height:auto;border-radius:6px;display:block;" srcset="/assets/img/performance-v12/ffab2a46bddcb681-480.webp 480w, /assets/img/performance-v12/ffab2a46bddcb681-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" data-photo-original="/assets/img/work/pt-double-drive-gate-closed.jpg" data-photo-thumbnail="/assets/img/performance-v12/ffab2a46bddcb681-480.webp">
+    
+  </figure>
+
+  <h2 data-editable="gt.v30.h3" style="margin-top:36px;">The hinge post is part of the gate system</h2>
+  <p data-editable="gt.v30.p8" style="line-height:1.75;">The hinge post receives the weight and movement of the gate. If that support shifts, a well-braced leaf can still stop lining up with its latch. Support selection belongs in the plan from the beginning.</p>
+  <p data-editable="gt.v30.p9" style="line-height:1.75;">Gate width, weight, wind exposure, soil and hardware determine the support requirements. A gate post may need a different assembly from a line post. Driven steel is one option where the specified system and site are suitable. <a href="/fences/no-dig/">Explore our no-dig approach</a>.</p>
+
+  <h2 data-editable="gt.v30.h4" style="margin-top:36px;">Details to review before installation</h2>
+  <ul class="spec-list">
+    <li data-editable="gt.v30.l1"><strong>Hinges suited to the gate.</strong> Match their rating and adjustment range to the actual leaf and its intended use.</li>
+    <li data-editable="gt.v30.l2"><strong>The specified hinge count and spacing.</strong> Follow the gate and hardware requirements; there is no universal rule that every heavy gate needs three hinges.</li>
+    <li data-editable="gt.v30.l3"><strong>Compatible fasteners and connections.</strong> Use the connection design required for the frame, support and hardware. Through-bolts and engineered screws each have appropriate applications.</li>
+    <li data-editable="gt.v30.l4"><strong>Smooth latching.</strong> Check alignment without having to lift or force the leaf into place.</li>
+    <li data-editable="gt.v30.l5"><strong>Double-gate control.</strong> Review drop rods, stops or other specified hardware for holding leaves securely in their intended positions.</li>
+    <li data-editable="gt.v30.l6"><strong>A clear swing path.</strong> Rising ground, landscaping and parked equipment can interfere with travel. Check the whole arc. <a href="/guides/fences-on-a-slope/">Explore slope planning</a>.</li>
+  </ul>
+
+  <figure style="margin:28px 0 8px;" data-editable-img="gt.photo2.img">
+    <img src="/assets/img/performance-v12/223c5d1eaf9bf9ba-480.webp" alt="Double drive gate standing open, showing the frame and brace on each leaf" loading="lazy" decoding="async" style="width:100%;height:auto;border-radius:6px;display:block;" srcset="/assets/img/performance-v12/223c5d1eaf9bf9ba-480.webp 480w, /assets/img/performance-v12/223c5d1eaf9bf9ba-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="640" data-photo-original="/assets/img/work/pt-double-drive-gate-open.jpg" data-photo-thumbnail="/assets/img/performance-v12/223c5d1eaf9bf9ba-480.webp">
+    
+  </figure>
+
+  <h2 data-editable="gt.v30.h5" style="margin-top:36px;">Our vinyl gates: aluminum reinforcement inside</h2>
+  <p data-editable="gt.v30.p10" style="line-height:1.75;">We use an internal aluminum gate frame within the vinyl finish. The reinforcement supports the assembly while preserving the appearance of the selected vinyl style.</p>
+  <p data-editable="gt.v30.p11" style="line-height:1.75;">The internal frame still needs compatible connections, hinges and post support. The cutaway above explains the concept; the project proposal identifies the actual gate, opening and hardware.</p>
+
+  <div class="owner-tip" style="margin-top:32px;">
+    <div class="eyebrow" data-editable="gt.v30.tip.k">The final gate check</div>
+    <p data-editable="gt.v30.tip.p">Open and close each leaf through its intended travel. Check clearances, hinge security, latch operation and any hold-open or double-gate hardware. Report changes in operation so the cause can be assessed.</p>
+    
+  </div>
+
+  <div class="related-guides" style="margin-top:44px;">
+    <div class="eyebrow">Keep reading</div>
+    <div class="guide-grid" style="margin-top:14px;">
+      <a href="/guides/what-fails-first/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">What Fails First, and When</h3><p class="fence-card-tagline" style="font-size:14px;">Understand supports, material condition and maintenance.</p></div></a>
+      <a href="/guides/fences-on-a-slope/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Fences on a Slope</h3><p class="fence-card-tagline" style="font-size:14px;">Compare stepped and racked sections on uneven ground.</p></div></a>
+      <a href="/guides/reading-a-fence-quote/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">How to Read a Fence Quote</h3><p class="fence-card-tagline" style="font-size:14px;">The eight things a quote should name.</p></div></a>
+      <a href="/faq/" class="fence-card"><div class="fence-card-body"><h3 style="font-size:17px;margin:0 0 6px;">Fence FAQ</h3><p class="fence-card-tagline" style="font-size:14px;">The questions we get asked most, answered short.</p></div></a>
+    </div>
+  </div>
+
+  <div style="text-align:center;margin-top:48px;">
+    <p style="font-size:20px;font-weight:600;margin-bottom:20px;" data-editable="gt.v30.cta.t">Plan your gate openings along with the fence.</p>
+    <a href="/quote/ballpark/" class="btn btn-primary btn-lg" data-editable="gt.cta.b">Measure my fence &rarr;</a>
+  </div>
+
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChdDSUhNMG9nS0VJQ0FnSUNYcUkzcWd3RRAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Communication</p><blockquote><p>“Very professional and quick service. He communicated very well with overall project.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Rachael Easterwood</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChdDSUhNMG9nS0VJQ0FnSUNYcUkzcWd3RRAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Rachael Easterwood (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+<script type="module" src="/assets/js/construction-lab.mjs?v=20260930"></script>
+</body>
+</html>

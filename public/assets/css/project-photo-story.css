@@ -1,0 +1,13 @@
+/* Additional installation photographs, with full-image framing and reserved space. */
+.project-photo-story{padding:clamp(48px,7vw,88px) 0;background:#f0f5fa;color:#102b46}
+.project-photo-story h2{font-family:var(--serif,Georgia,serif);font-size:clamp(28px,4vw,44px);line-height:1.15;max-width:780px;margin:12px 0 18px}
+.project-photo-story-lede{font-size:17px;line-height:1.7;max-width:760px;margin-bottom:14px}
+.project-photo-story .photo-authentic{font-weight:650;margin-bottom:28px}
+.project-photo-story-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin:0 0 30px}
+.project-photo-story figure{margin:0;min-width:0;background:#fff;border:1px solid #d8e3ed;border-radius:12px;overflow:hidden}
+.project-photo-story figure a{display:block;background:#e9eff5}
+.project-photo-story img{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:contain}
+.project-photo-story figcaption{padding:16px 18px;font-size:15px;line-height:1.55}
+.project-photo-story a:focus-visible{outline:3px solid #1977bd;outline-offset:3px}
+@media(max-width:900px){.project-photo-story-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.project-photo-story-grid{grid-template-columns:minmax(0,1fr);gap:20px}.project-photo-story .btn{max-width:100%;white-space:normal}}

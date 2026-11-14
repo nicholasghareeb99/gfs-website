@@ -1,0 +1,456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>No-Dig and Concrete Footings: Choosing for Your Fence | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Compare installation approaches for your fence, gates and ground conditions. The right post system depends on the complete design and the property.">
+<link rel="canonical" href="https://ghareebfence.com/guides/no-dig-vs-concrete/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="No-Dig and Concrete Footings: Choosing for Your Fence | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Compare installation approaches for your fence, gates and ground conditions. The right post system depends on the complete design and the property.">
+<meta property="og:url" content="https://ghareebfence.com/guides/no-dig-vs-concrete/">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Semi+Condensed:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/v38.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"No-Dig and Concrete Footings: Choosing for Your Fence","description":"Compare installation approaches for your fence, gates and ground conditions. The right post system depends on the complete design and the property.","author":{"@type":"Organization","name":"Ghareeb Fencing Solutions"},"mainEntityOfPage":"https://ghareebfence.com/guides/no-dig-vs-concrete/"}</script>
+<link rel="stylesheet" href="/assets/css/system.css?v=20260907-photos">
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+<script src="/assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="preload" as="image" href="/assets/img/performance-v12/f84fae316e3c60bb-1600.webp" imagesrcset="/assets/img/performance-v12/f84fae316e3c60bb-480.webp 480w, /assets/img/performance-v12/f84fae316e3c60bb-960.webp 960w, /assets/img/performance-v12/f84fae316e3c60bb-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+</head>
+<body class="no-js">
+<a class="skip" href="#main">Skip to content</a>
+<div class="announce"><div class="announce-inner">
+  <div class="announce-rating">
+    <span class="announce-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+    <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+  </div>
+  <div class="announce-trust">
+    <span class="spec spec--paper">Licensed &amp; insured</span>
+    <span class="spec spec--paper">3-year workmanship warranty</span>
+    <span class="spec spec--paper">Financing options</span>
+  </div>
+</div></div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="/fences/" class="has-menu" aria-haspopup="true">Fence Styles</a>
+        <ul class="nav-sub"><li><a href="/fences/cedar/">Cedar Privacy</a></li><li><a href="/fences/wood/">Wood Privacy</a></li><li><a href="/fences/vinyl/">Vinyl Fencing</a></li><li><a href="/fences/aluminum/">Ornamental Aluminum</a></li><li><a href="/fences/chainlink/">Chain Link</a></li><li><a href="/fences/split-rail/">Split Rail</a></li><li><a href="/fences/no-dig/">No-Dig Fencing</a></li><li><a href="/fences/">All styles &rarr;</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="/guides/">Guides</a></li>
+      <li><a href="/gallery/">Gallery</a></li>
+      <li><a href="/why-us/">Why Us</a></li>
+      <li class="nav-opt"><a href="/reviews/">Reviews</a></li>
+      <li class="nav-opt"><a href="/about/">About</a></li>
+      <li><a href="/contact/">Contact</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="/financing/" class="btn btn-financing btn-sm">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer"><button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">&times;</button><ul><li><a href="/">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li><li><a href="/fences/">Fence Styles</a></li><li><a href="/fences/cedar/">Cedar Privacy</a></li><li><a href="/fences/wood/">Wood Privacy</a></li><li><a href="/fences/vinyl/">Vinyl Fencing</a></li><li><a href="/fences/aluminum/">Ornamental Aluminum</a></li><li><a href="/fences/chainlink/">Chain Link</a></li><li><a href="/fences/split-rail/">Split Rail</a></li><li><a href="/fences/no-dig/">No-Dig Fencing</a></li><li><a href="/guides/">Guides</a></li><li><a href="/guides/choosing-a-fence/">Choosing a Fence</a></li><li><a href="/guides/no-dig-vs-concrete/">No-Dig vs. Concrete</a></li><li><a href="/guides/wood-vs-vinyl/">Wood vs. Vinyl</a></li><li><a href="/guides/open-style-fences/">Open-Style Fences</a></li><li><a href="/guides/installation-process/">The Install Process</a></li><li><a href="/guides/fence-care/">Fence Care</a></li><li><a href="/gallery/">Gallery</a></li><li><a href="/why-us/">Why Us</a></li><li><a href="/reviews/">Reviews</a></li><li><a href="/faq/">FAQ</a></li><li><a href="/blog/">Blog</a></li><li><a href="/service-areas/">Service Areas</a></li><li><a href="/financing/">Financing</a></li><li><a href="/brochure/">Brochure</a></li><li><a href="/about/">About</a></li><li><a href="/careers/">Careers</a></li><li><a href="/contact/">Contact</a></li><li><a href="/quote/ballpark/">Measure my fence</a></li><li><a href="/quote/" data-quote-chooser>Request a free quote</a></li></ul></div>
+<main id="main">
+
+<header class="pagehero">
+  <div class="pagehero__bg" data-editable-img="pagehero.img" aria-hidden="true">
+    <img src="/assets/img/performance-v12/f84fae316e3c60bb-1600.webp" alt="No-Dig and Concrete Footings: Choosing for Your Fence" fetchpriority="high" decoding="async" srcset="/assets/img/performance-v12/f84fae316e3c60bb-480.webp 480w, /assets/img/performance-v12/f84fae316e3c60bb-960.webp 960w, /assets/img/performance-v12/f84fae316e3c60bb-1600.webp 1600w" sizes="100vw" width="1600" height="1200">
+  </div>
+  <div class="container pagehero__inner">
+    <div class="eyebrow">Guide</div>
+    <h1>No-Dig and Concrete Footings: Choosing for Your Fence</h1>
+    <p>Compare installation approaches for your fence, gates and ground conditions. The right post system depends on the complete design and the property.</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="nodig.eyebrow">Installation methods</div>
+      <h2 class="display-2" data-editable="nodig.title">Choose the post system for the whole fence.</h2>
+      <p data-editable="nodig.lede">A driven post or anchor can reduce excavation where the system and site are suitable. Another footing may be needed for a particular fence design, gate, ground condition or access constraint. We review those details before recommending how your fence should be installed.</p>
+    </div>
+<div class="readout">
+  <div><div class="readout__val"><span data-editable="nodig.stat1.num">Fence</span><sup data-editable="nodig.stat1.unit"></sup></div><span class="readout__key" data-editable="nodig.stat1.label">Design and connections</span></div>
+  <div><div class="readout__val"><span data-editable="nodig.stat2.num">Ground</span><sup data-editable="nodig.stat2.unit"></sup></div><span class="readout__key" data-editable="nodig.stat2.label">Conditions and access</span></div>
+  <div><div class="readout__val"><span data-editable="nodig.stat3.num">Gates</span><sup data-editable="nodig.stat3.unit"></sup></div><span class="readout__key" data-editable="nodig.stat3.label">Openings and loads</span></div>
+</div>
+
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="nodig.cmp.eyebrow">Compare the scope</div>
+      <h2 class="display-2" data-editable="nodig.cmp.title">Questions for each installation approach.</h2>
+    </div>
+
+<div class="spec-table" role="region" tabindex="0" aria-label="Post installation methods compared">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col"><span class="spec spec--paper" data-editable="nodig.cmp.h0">Question</span></th>
+        <th scope="col"><span data-editable="nodig.cmp.h1">Wood post with a footing</span></th>
+        <th scope="col"><span data-editable="nodig.cmp.h2">Steel post with a footing</span></th>
+        <th scope="col" class=""><span data-editable="nodig.cmp.h3">Compatible driven system</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r0.k">What must be specified?</th>
+        <td data-editable="nodig.cmp.r0.c0">Post, treatment and connection</td>
+        <td data-editable="nodig.cmp.r0.c1">Post, finish and connection</td>
+        <td class="" data-editable="nodig.cmp.r0.c2">Post or anchor and connections</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r1.k">How is embedment chosen?</th>
+        <td data-editable="nodig.cmp.r1.c0">According to the design and site</td>
+        <td data-editable="nodig.cmp.r1.c1">According to the design and site</td>
+        <td class="" data-editable="nodig.cmp.r1.c2">According to the system and site</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r2.k">What sets spacing?</th>
+        <td data-editable="nodig.cmp.r2.c0">Fence design and loads</td>
+        <td data-editable="nodig.cmp.r2.c1">Fence design and loads</td>
+        <td class="" data-editable="nodig.cmp.r2.c2">Fence design and loads</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r3.k">What affects durability?</th>
+        <td data-editable="nodig.cmp.r3.c0">Material, exposure and installation</td>
+        <td data-editable="nodig.cmp.r3.c1">Material, exposure and installation</td>
+        <td class="" data-editable="nodig.cmp.r3.c2">Material, exposure and installation</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r4.k">What affects movement?</th>
+        <td data-editable="nodig.cmp.r4.c0">Ground, drainage and foundation detail</td>
+        <td data-editable="nodig.cmp.r4.c1">Ground, drainage and foundation detail</td>
+        <td class="" data-editable="nodig.cmp.r4.c2">Ground, drainage and foundation detail</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r5.k">What ground review is needed?</th>
+        <td data-editable="nodig.cmp.r5.c0">Support, drainage and obstructions</td>
+        <td data-editable="nodig.cmp.r5.c1">Support, drainage and obstructions</td>
+        <td class="" data-editable="nodig.cmp.r5.c2">Support, drainage and obstructions</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r6.k">What is the excavation scope?</th>
+        <td data-editable="nodig.cmp.r6.c0">Confirm in the written scope</td>
+        <td data-editable="nodig.cmp.r6.c1">Confirm in the written scope</td>
+        <td class="" data-editable="nodig.cmp.r6.c2">May reduce excavation where suitable</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r7.k">What happens to the yard?</th>
+        <td data-editable="nodig.cmp.r7.c0">Agree access and restoration scope</td>
+        <td data-editable="nodig.cmp.r7.c1">Agree access and restoration scope</td>
+        <td class="" data-editable="nodig.cmp.r7.c2">Agree access and restoration scope</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.cmp.r8.k">How are later repairs handled?</th>
+        <td data-editable="nodig.cmp.r8.c0">Depends on the installed detail</td>
+        <td data-editable="nodig.cmp.r8.c1">Depends on the installed detail</td>
+        <td class="" data-editable="nodig.cmp.r8.c2">Depends on the installed detail</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="owner-tip">
+  <div class="eyebrow" data-editable="nodig.soil.tip.eyebrow">Site assessment</div>
+  <p data-editable="nodig.soil.tip.body">Look beyond the soil label. Ground conditions, drainage, fill, buried obstructions, exposure and fence loads can change the recommendation.</p>
+</div>
+<div class="spec-table" role="region" tabindex="0" aria-label="Post method by soil type">
+  <table>
+    <thead>
+      <tr>
+        <th scope="col"><span class="spec spec--paper" data-editable="nodig.soil.h0">What we review</span></th>
+        <th scope="col"><span data-editable="nodig.soil.h1">Why it matters</span></th>
+        <th scope="col"><span data-editable="nodig.soil.h2">What to discuss</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r0.k">Support and drainage</th>
+        <td data-editable="nodig.soil.r0.c0">Ground conditions affect the recommendation</td>
+        <td data-editable="nodig.soil.r0.c1">How the selected design addresses the site</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r1.k">Fill and obstructions</th>
+        <td data-editable="nodig.soil.r1.c0">Previous work can affect installation</td>
+        <td data-editable="nodig.soil.r1.c1">Any areas needing a different detail</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r2.k">Fence height and openness</th>
+        <td data-editable="nodig.soil.r2.c0">Design and exposure affect loads</td>
+        <td data-editable="nodig.soil.r2.c1">The specified fence and post system</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r3.k">Gate openings</th>
+        <td data-editable="nodig.soil.r3.c0">Width and use affect the supporting detail</td>
+        <td data-editable="nodig.soil.r3.c1">Gate posts, hardware and access</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r4.k">Equipment access</th>
+        <td data-editable="nodig.soil.r4.c0">The crew must reach the proposed line</td>
+        <td data-editable="nodig.soil.r4.c1">Access and site preparation</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r5.k">Connections</th>
+        <td data-editable="nodig.soil.r5.c0">The visible fence must fit its supports</td>
+        <td data-editable="nodig.soil.r5.c1">Rails, panels, boards and fasteners</td>
+      </tr>
+      <tr>
+        <th scope="row" data-editable="nodig.soil.r6.k">Maintenance</th>
+        <td data-editable="nodig.soil.r6.c0">Products have different care requirements</td>
+        <td data-editable="nodig.soil.r6.c1">Care information for the selected product</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="nodig.heave.eyebrow">Design questions</div>
+      <h2 class="display-2" data-editable="nodig.heave.title">Ask how the design addresses the site.</h2>
+      <p data-editable="nodig.heave.lede">Review ground, materials, connections and access as parts of the complete installation.</p>
+    </div>
+<div class="diff-grid">
+  <div class="diff-cell"><div class="diff-num" data-editable="nodig.heave.1.num">01 / Ground &amp; water</div><p data-editable="nodig.heave.1.body">Ground and water: discuss drainage, ground movement and exposure along the proposed line.</p></div>
+  <div class="diff-cell"><div class="diff-num" data-editable="nodig.heave.2.num">02 / Materials &amp; connections</div><p data-editable="nodig.heave.2.body">Materials and connections: confirm the specified posts, rails, fasteners and finishes.</p></div>
+  <div class="diff-cell"><div class="diff-num" data-editable="nodig.heave.3.num">03 / Gate loads</div><p data-editable="nodig.heave.3.body">Gate loads: an opening may need a different foundation or connection from the adjacent fence.</p></div>
+  <div class="diff-cell"><div class="diff-num" data-editable="nodig.heave.4.num">04 / Maintenance &amp; access</div><p data-editable="nodig.heave.4.body">Maintenance and access: ask about product care and how equipment will reach the line.</p></div>
+</div>
+
+  </div>
+</section>
+
+<section class="section section-navy">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="nodig.method.eyebrow">Written scope</div>
+      <h2 class="display-2" data-editable="nodig.method.title">Put the installation detail in writing.</h2>
+    </div>
+<ul class="spec-list">
+  <li><strong data-editable="nodig.method.1.lbl">Named system.</strong> <span data-editable="nodig.method.1.body">Identify the proposed post or anchor and its requirements.</span></li>
+  <li><strong data-editable="nodig.method.2.lbl">Compatible connections.</strong> <span data-editable="nodig.method.2.body">Confirm how the fence attaches to its supports.</span></li>
+  <li><strong data-editable="nodig.method.3.lbl">Site review.</strong> <span data-editable="nodig.method.3.body">Discuss ground conditions, access and obstructions.</span></li>
+  <li><strong data-editable="nodig.method.4.lbl">Gate detail.</strong> <span data-editable="nodig.method.4.body">Confirm any different foundation or connection at an opening.</span></li>
+  <li><strong data-editable="nodig.method.5.lbl">Access and cleanup.</strong> <span data-editable="nodig.method.5.body">Put preparation and restoration responsibilities in the written scope.</span></li>
+</ul>
+<div class="owner-tip">
+  <div class="eyebrow" data-editable="nodig.tip1.eyebrow">Planning note</div>
+  <p data-editable="nodig.tip1.body">Fence appearance and foundation details are separate choices. Confirm the rail layout, visible style and post system in the same written quote.</p>
+  <span class="owner-sig" data-editable="nodig.tip1.sig">Project planning</span>
+</div>
+<figure class="photo-figure" data-editable-img="nodig.crew">
+  <img src="/assets/img/performance-v12/e55c15c4e017d015-480.webp" alt="Wood pickets being fitted to the fence rails." loading="lazy" decoding="async" srcset="/assets/img/performance-v12/e55c15c4e017d015-480.webp 480w, /assets/img/performance-v12/e55c15c4e017d015-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" width="480" height="360" data-photo-original="/assets/img/work/crew-setting-pickets-on-site.jpg" data-photo-thumbnail="/assets/img/performance-v12/e55c15c4e017d015-480.webp">
+  <figcaption data-editable-caption="photo.detail.v30.guides.no.dig.vs.concrete.index.html.assets.img.work.crew.setting.pickets.on.site.jpg">Wood pickets being fitted to the fence rails.</figcaption>
+</figure>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="nodig.limits.eyebrow">Site-specific details</div>
+      <h2 class="display-2" data-editable="nodig.limits.title">Where another detail may be needed.</h2>
+      <p data-editable="nodig.limits.lede">An obstruction, unsuitable support, limited access or a demanding gate or fence design may change the recommendation. We will explain the proposed approach.</p>
+    </div>
+<ul class="spec-list">
+  <li><strong data-editable="nodig.limits.1.lbl">Ground conditions.</strong> <span data-editable="nodig.limits.1.body">Review support, drainage and the selected system requirements.</span></li>
+  <li><strong data-editable="nodig.limits.2.lbl">Fill and buried obstructions.</strong> <span data-editable="nodig.limits.2.body">Existing site conditions may change the installation detail.</span></li>
+  <li><strong data-editable="nodig.limits.3.lbl">Equipment access.</strong> <span data-editable="nodig.limits.3.body">Confirm how the proposed line can be reached and prepared.</span></li>
+  <li><strong data-editable="nodig.limits.4.lbl">Gate and fence loads.</strong> <span data-editable="nodig.limits.4.body">Review the openings, height and exposure before choosing foundations.</span></li>
+</ul>
+<div class="owner-tip">
+  <div class="eyebrow" data-editable="nodig.tip2.eyebrow">At your estimate</div>
+  <p data-editable="nodig.tip2.body">Ask which post or anchor is proposed, what requirements apply, and whether any gates or sections need another detail.</p>
+</div>
+  </div>
+</section>
+
+<section class="section section-cream">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="display-2" data-editable="nodig.ask.title">Bring these questions to your estimate.</h2>
+      <p data-editable="nodig.ask.lede">Which system is proposed? How does it connect to the fence? What access and restoration work is included? Put the answers in the written scope.</p>
+    </div>
+<p><a href="/quote/form/?project=no-dig" class="btn btn-outline" data-editable-href="nodig.ask.href"><span data-editable="nodig.ask.link">Check options for my yard</span></a></p>
+<div class="cta-row">
+  <a href="/quote/ballpark/?project=no-dig" class="btn2 btn2--cedar">Measure my fence</a>
+  <a href="tel:+14192142107" class="btn2 btn2--ghost">Call (419) 214-2107</a>
+</div>
+  </div>
+</section>
+
+
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="Ci9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Care on the job</p><blockquote><p>“They were on time, professional, and clean.”</p></blockquote>
+<footer class="gfs-review-credit"><strong>doug holben</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by doug holben (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+<section class="cta-banner">
+  <div class="container cta-banner-inner">
+    <div>
+      <h2>Plan your fence and explore the options.</h2>
+      <p class="cta-banner-lede">Use the map to plan your fence and explore a ballpark range, or request a site visit. We will contact you to confirm the next step.</p>
+    </div>
+    <div class="cta-banner-actions">
+      <a href="/quote/ballpark/?project=no-dig" class="btn2 btn2--cedar">Measure my fence</a>
+      <a href="tel:14192142107" class="btn2 btn2--ghost">Call (419) 214-2107</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div><h3>Fence Styles</h3><ul><li><a href="/fences/cedar/">Cedar Privacy</a></li><li><a href="/fences/wood/">Wood Privacy</a></li><li><a href="/fences/vinyl/">Vinyl Fencing</a></li><li><a href="/fences/aluminum/">Ornamental Aluminum</a></li><li><a href="/fences/chainlink/">Chain Link</a></li><li><a href="/fences/split-rail/">Split Rail</a></li><li><a href="/fences/no-dig/">No-Dig Fencing</a></li></ul></div>
+      <div><h3>Guides</h3><ul><li><a href="/guides/choosing-a-fence/">Choosing a Fence</a></li><li><a href="/guides/no-dig-vs-concrete/">No-Dig vs. Concrete</a></li><li><a href="/guides/wood-vs-vinyl/">Wood vs. Vinyl</a></li><li><a href="/guides/open-style-fences/">Open-Style Fences</a></li><li><a href="/guides/installation-process/">The Install Process</a></li><li><a href="/guides/fence-care/">Fence Care</a></li></ul></div>
+      <div><h3>Company</h3><ul><li><a href="/about/">About</a></li><li><a href="/why-us/">Why Us</a></li><li><a href="/reviews/">Reviews</a></li><li><a href="/gallery/">Gallery</a></li><li><a href="/faq/">FAQ</a></li><li><a href="/blog/">Blog</a></li><li><a href="/careers/">Careers</a></li><li><a href="/permits/">Permits</a></li><li><a href="/portal/">Customer Portal</a></li></ul></div>
+      <div>
+        <h3>Get in touch</h3>
+        <ul>
+          <li><a href="tel:14192142107">(419) 214-2107</a></li>
+          <li><a href="/quote/">Free on-site estimate</a></li>
+          <li><a href="/quote/ballpark/">Measure my fence</a></li>
+          <li><a href="/service-areas/">Service areas</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Ghareeb Fencing Solutions &middot; Toledo, Ohio &middot; Licensed &amp; insured</span>
+      <span><a href="/privacy/">Privacy</a> &middot; <a href="/terms/">Terms</a> &middot; <a href="/sitemap.xml">Sitemap</a></span>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="/assets/js/leads.js?v=20261113a" defer></script>
+<script src="/assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="/assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="/assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="/assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="/assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+</body>
+</html>

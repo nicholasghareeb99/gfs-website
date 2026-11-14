@@ -1,0 +1,811 @@
+/* ============================================================
+   GHAREEB FENCING SOLUTIONS — DESIGN SYSTEM v2
+   ============================================================
+   Direction: drafting-table. The vernacular of this trade is
+   measurement — plats, dimension callouts, gate swing arcs,
+   posts on 8-ft centers, price per linear foot. The page is
+   built like a fence elevation drawing, not a brochure.
+
+   Replaces the previous navy/gold/cream + serif system, which
+   read as generic "premium contractor".
+
+   Legacy token names are aliased at the bottom so the existing
+   45 pages inherit the new look without being rewritten.
+   ============================================================ */
+
+:root {
+  /* ---- COLOR ------------------------------------------------
+     Materials, not moods. Ink is galvanized steel in shadow.
+     Vellum is drafting paper. Cedar is the product itself and
+     is the ONLY accent — everything else is structure. */
+  --ink:        #0E1720;
+  --ink-2:      #1B2A38;
+  --ink-3:      #2C3E4E;
+
+  --vellum:     #FBFAF7;
+  --vellum-2:   #F2EFE9;          /* drafting paper, one step down */
+  --vellum-3:   #E7E3DA;
+
+  --cedar:      #A4552B;          /* cedar heartwood — the accent */
+  --cedar-lt:   #C4703F;
+  --cedar-dk:   #7E3F1F;
+
+  --galv:       #5C6873;          /* galvanized steel — darkened from #7E8B97
+                                     so mono spec labels clear WCAG AA (5.46:1) */
+  --galv-lt:    #AEB8C1;          /* on dark backgrounds only — 8.97:1 on ink */
+  --galv-rule:  #9AA5AF;          /* decorative rules/hairlines, never text */
+  --line:       #D8DCDF;          /* hairline rule */
+  --line-soft:  #E9ECEE;
+
+  --paper:      #FFFFFF;
+  --ok:         #1A7A4A;
+  --warn:       #B4530F;
+  --stop:       #B3261E;
+
+  /* ---- TYPE -------------------------------------------------
+     Display: Archivo — industrial grotesque with signage
+     lineage, set heavy and tight.
+     Body: Source Sans 3 — plain, legible, gets out of the way.
+     Mono: IBM Plex Mono — every measurement, price, and spec.
+     Numbers are the product here, so they get their own voice. */
+  --display: 'Archivo', 'Helvetica Neue', Arial, sans-serif;
+  --body:    'Source Sans 3', -apple-system, system-ui, sans-serif;
+  --mono:    'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Type scale — 1.25 ratio, clamped for fluid sizing */
+  --t-hero:  clamp(2.75rem, 7vw, 5.25rem);
+  --t-h1:    clamp(2.25rem, 5vw, 3.5rem);
+  --t-h2:    clamp(1.75rem, 3.4vw, 2.5rem);
+  --t-h3:    clamp(1.25rem, 2.2vw, 1.6rem);
+  --t-body:  1.0625rem;
+  --t-sm:    0.9375rem;
+  --t-xs:    0.8125rem;
+  --t-spec:  0.75rem;    /* mono labels / dimension callouts */
+
+  /* ---- SPACE ------------------------------------------------
+     8-ft post spacing is the trade's unit. The layout rhythm
+     mirrors it: an 8-step scale off a 4px base. */
+  --s1: 4px;   --s2: 8px;   --s3: 12px;  --s4: 16px;
+  --s5: 24px;  --s6: 32px;  --s7: 48px;  --s8: 64px;
+  --s9: 96px;  --s10: 128px;
+
+  --wrap: 1200px;
+  --wrap-tight: 860px;
+
+  --r-sm: 3px;
+  --r-md: 5px;
+  --r-lg: 8px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --sh-1: 0 1px 2px rgba(14,23,32,0.06), 0 1px 3px rgba(14,23,32,0.04);
+  --sh-2: 0 4px 12px rgba(14,23,32,0.07), 0 2px 4px rgba(14,23,32,0.04);
+  --sh-3: 0 12px 32px rgba(14,23,32,0.10), 0 4px 10px rgba(14,23,32,0.05);
+  --sh-4: 0 28px 64px rgba(14,23,32,0.16);
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+body {
+  font-family: var(--body);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--ink);
+  background: var(--vellum);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .display {
+  font-family: var(--display);
+  font-weight: 800;
+  letter-spacing: -0.022em;
+  line-height: 1.04;
+  color: var(--ink);
+}
+
+/* ============================================================
+   SPEC LABEL — the mono voice
+   ------------------------------------------------------------
+   Used for eyebrows, field labels, and anything that behaves
+   like an annotation on a drawing. Uppercase, tracked out,
+   always mono. This is what makes the page read as drafted
+   rather than typeset.
+   ============================================================ */
+.spec {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--galv);
+  font-weight: 500;
+}
+.spec--cedar { color: var(--cedar); }
+.spec--paper { color: var(--galv-lt); }
+
+/* Numbers always render in mono — prices, footage, counts */
+.num, .price, .measure {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+/* ============================================================
+   SIGNATURE: THE DIMENSION LINE
+   ------------------------------------------------------------
+   ├──────── 148 ft ────────┤
+   The one element this site is remembered by. It's how a fence
+   is annotated on a plan, and it's also the exact thing the
+   customer is buying. Used as a section divider and to caption
+   figures. Everything else on the page stays quiet.
+   ============================================================ */
+.dim {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  width: 100%;
+  color: var(--galv);
+}
+.dim__rule {
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  position: relative;
+  opacity: 0.5;
+}
+/* End ticks — the ├ and ┤ of a dimension callout */
+.dim__rule::before,
+.dim__rule::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  width: 1px;
+  height: 9px;
+  background: currentColor;
+}
+.dim__rule::before { left: 0; }
+.dim__rule::after  { right: 0; }
+.dim__label {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--galv);
+}
+.dim--cedar { color: var(--cedar); }
+.dim--cedar .dim__label { color: var(--cedar); }
+.dim--onDark { color: var(--galv-lt); }
+.dim--onDark .dim__label { color: var(--galv-lt); }
+
+/* Single-sided variant for section headers */
+.dim--lead .dim__rule { max-width: 72px; flex: 0 0 72px; }
+
+/* ============================================================
+   PICKET RULE — the fence rhythm
+   ------------------------------------------------------------
+   A repeating vertical measure standing in for pickets on
+   consistent centers. Used as a top/bottom edge on dark
+   panels. Pure CSS, no images.
+   ============================================================ */
+.picket {
+  height: 14px;
+  width: 100%;
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0 2px,
+    transparent 2px 11px
+  );
+  color: var(--cedar);
+  opacity: 0.85;
+}
+.picket--galv { color: var(--galv-rule); opacity: 0.6; }
+.picket--tall { height: 22px; }
+
+/* ============================================================
+   LAYOUT
+   ============================================================ */
+.wrap { width: 100%; max-width: var(--wrap); margin: 0 auto; padding: 0 var(--s5); }
+.wrap--tight { max-width: var(--wrap-tight); }
+
+.band { padding: var(--s9) 0; }
+.band--tight { padding: var(--s8) 0; }
+.band--ink { background: var(--ink); color: var(--vellum); }
+.band--ink h1, .band--ink h2, .band--ink h3 { color: var(--vellum); }
+.band--vellum2 { background: var(--vellum-2); }
+.band--paper { background: var(--paper); }
+
+/* Section header: spec eyebrow + heading + optional dimension */
+.sec-head { margin-bottom: var(--s7); }
+.sec-head .spec { display: block; margin-bottom: var(--s3); }
+.sec-head h2 { font-size: var(--t-h2); max-width: 20ch; }
+.sec-head p {
+  margin-top: var(--s4);
+  max-width: 58ch;
+  color: var(--ink-3);
+  font-size: var(--t-body);
+}
+.band--ink .sec-head p { color: var(--galv-lt); }
+
+/* ============================================================
+   BUTTONS — flat, industrial, no gradients
+   ============================================================ */
+.btn2 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s2);
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  padding: 15px var(--s6);
+  border-radius: var(--r-md);
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: background 0.16s var(--ease), border-color 0.16s var(--ease), color 0.16s var(--ease);
+  text-decoration: none;
+  min-height: 48px;
+}
+.btn2--cedar { background: var(--cedar); color: #fff; }
+.btn2--cedar:hover { background: var(--cedar-dk); }
+.btn2--ink { background: var(--ink); color: var(--vellum); }
+.btn2--ink:hover { background: var(--ink-2); }
+.btn2--ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+.btn2--ghost:hover { border-color: var(--ink); }
+.btn2--onDark { background: var(--vellum); color: var(--ink); }
+.btn2--onDark:hover { background: #fff; }
+.btn2--outlineDark { background: transparent; color: var(--vellum); border-color: rgba(251,250,247,0.35); }
+.btn2--outlineDark:hover { border-color: var(--vellum); }
+
+/* ============================================================
+   SPEC CARD — content as a drawing callout
+   ============================================================ */
+.scard {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s6);
+  position: relative;
+}
+.scard__label {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--galv);
+  display: block;
+  margin-bottom: var(--s3);
+}
+.scard h3 { font-size: var(--t-h3); margin-bottom: var(--s3); }
+.scard p { color: var(--ink-3); font-size: var(--t-sm); }
+
+/* Cedar edge marker — a single hairline that reads as a
+   material callout, used sparingly on the active/primary card */
+.scard--marked { border-left: 3px solid var(--cedar); }
+
+/* ============================================================
+   ACCESSIBILITY FLOOR
+   ============================================================ */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--cedar);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+.band--ink :where(a, button):focus-visible { outline-color: var(--cedar-lt); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Skip link — keyboard users land here first */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--ink);
+  color: var(--vellum);
+  padding: var(--s3) var(--s5);
+  z-index: 10000;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+}
+.skip-link:focus { left: var(--s4); top: var(--s4); }
+
+/* ============================================================
+   LEGACY TOKEN ALIASES
+   ------------------------------------------------------------
+   The existing 45 pages reference --navy / --gold / --cream and
+   the old font vars inline. Rather than rewrite every page at
+   once, we remap those names onto the new system so the whole
+   site shifts together and stays visually coherent during the
+   migration.
+   ============================================================ */
+:root {
+  --navy:        var(--ink);
+  --navy-deep:   #070E14;
+  --navy-soft:   var(--ink-3);
+  --gold:        var(--cedar);
+  --gold-bright: var(--cedar-lt);
+  --gold-deep:   var(--cedar-dk);
+  --cream:       var(--vellum);
+  --cream-warm:  var(--vellum-2);
+  --charcoal:    var(--ink);
+  --gray-700:    var(--ink-3);
+  --gray-500:    var(--galv);
+  --gray-300:    var(--line);
+  --gray-100:    var(--line-soft);
+  --white:       var(--paper);
+  --success:     var(--ok);
+  --danger:      var(--stop);
+  --serif:       var(--display);
+  --sans:        var(--body);
+  --shadow-sm:   var(--sh-1);
+  --shadow-md:   var(--sh-2);
+  --shadow-lg:   var(--sh-3);
+  --shadow-xl:   var(--sh-4);
+}
+
+/* ============================================================
+   HERO — "the drawing"
+   ------------------------------------------------------------
+   Thesis: the thing that makes GFS different is that you can
+   get a real number without a salesperson in your kitchen.
+   So the hero sells the measurement, and the photograph is
+   annotated like a shop drawing — dimension line, spec stamp.
+   ============================================================ */
+.hero2 {
+  background: var(--vellum);
+  border-bottom: 1px solid var(--line);
+  padding: var(--s9) 0 0;
+  overflow: hidden;
+}
+.hero2__grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: var(--s8);
+  align-items: center;
+}
+.hero2__eyebrow { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s5); }
+.hero2__eyebrow .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--cedar); flex: none; }
+
+.hero2 h1 {
+  font-size: var(--t-hero);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  margin-bottom: var(--s5);
+}
+.hero2 h1 em {
+  font-style: normal;
+  color: var(--cedar);
+}
+.hero2__lede {
+  font-size: 1.1875rem;
+  line-height: 1.55;
+  color: var(--ink-3);
+  max-width: 46ch;
+  margin-bottom: var(--s6);
+}
+.hero2__cta { display: flex; flex-wrap: wrap; gap: var(--s3); margin-bottom: var(--s7); }
+
+/* Spec readout — the stats, set as drawing annotations */
+.readout {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: var(--s7);
+  padding-top: var(--s5);
+  border-top: 1px solid var(--line);
+  justify-content: start;
+}
+.readout__val {
+  font-family: var(--mono);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+.readout__val sup {
+  font-size: 0.9rem;
+  color: var(--cedar);
+  vertical-align: super;
+  margin-left: 1px;
+}
+.readout__key {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--galv);
+  margin-top: var(--s2);
+  display: block;
+}
+
+/* --- The annotated photograph: the signature moment --------- */
+.plate { position: relative; }
+.plate__img {
+  position: relative;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--vellum-3);
+  aspect-ratio: 4 / 5;
+  box-shadow: var(--sh-3);
+}
+.plate__img img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Spec stamp sitting on the image corner, like a title block */
+.plate__stamp {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  background: var(--ink);
+  color: var(--vellum);
+  padding: var(--s3) var(--s5);
+  display: flex;
+  gap: var(--s5);
+  align-items: baseline;
+  border-top-right-radius: var(--r-md);
+}
+.plate__stamp span {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--galv-lt);
+}
+.plate__stamp strong {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vellum);
+  font-weight: 600;
+}
+/* Dimension caption under the plate — the signature device */
+.plate__dim { margin-top: var(--s4); }
+
+@media (max-width: 900px) {
+  .hero2 { padding-top: var(--s7); }
+  .hero2__grid { grid-template-columns: 1fr; gap: var(--s7); }
+  .plate__img { aspect-ratio: 4 / 3; }
+  .readout { gap: var(--s6); }
+}
+@media (max-width: 520px) {
+  .readout { grid-template-columns: repeat(3, 1fr); gap: var(--s4); }
+  .readout__val { font-size: 1.375rem; }
+  .hero2__cta .btn2 { width: 100%; }
+}
+
+/* ============================================================
+   SITE CHROME — announce bar, nav, footer
+   ============================================================ */
+.announce {
+  background: var(--ink);
+  color: var(--galv-lt);
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(251,250,247,0.08);
+}
+.announce-inner { display: flex; justify-content: space-between; align-items: center; gap: var(--s5); }
+.announce-rating { display: flex; align-items: center; gap: var(--s3); }
+.announce-stars { color: var(--cedar-lt); font-size: 12px; letter-spacing: 2px; }
+.announce-trust { display: flex; gap: var(--s6); }
+.announce .spec--paper { color: var(--galv-lt); }
+
+.nav { background: var(--vellum); border-bottom: 1px solid var(--line); }
+.logo {
+  font-family: var(--display);
+  font-weight: 800;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+  text-decoration: none;
+  line-height: 1.05;
+}
+.logo small { display: block; margin-top: 3px; }
+.nav-links a {
+  font-family: var(--body);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--ink-3);
+  text-decoration: none;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--cedar); }
+
+@media (max-width: 860px) { .announce-trust { display: none; } }
+
+/* ============================================================
+   SHARED COMPONENT UPGRADE
+   ------------------------------------------------------------
+   These classes appear across all 45 pages. Restyling them here
+   migrates the whole site to the new language in one pass,
+   instead of rewriting every page's markup.
+   ============================================================ */
+
+/* Eyebrows become drawing annotations */
+.eyebrow {
+  font-family: var(--mono) !important;
+  font-size: var(--t-spec) !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase;
+  color: var(--cedar);
+  font-weight: 500 !important;
+  font-style: normal !important;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s3);
+}
+/* Tick mark before each eyebrow — reads as a callout leader */
+.eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.6;
+  flex: none;
+}
+.section-navy .eyebrow, .band--ink .eyebrow { color: var(--cedar-lt); }
+
+/* Display sizes on the Archivo scale */
+.display-1 { font-family: var(--display); font-weight: 900; font-size: var(--t-hero); letter-spacing: -0.035em; line-height: 0.98; }
+.display-2 { font-family: var(--display); font-weight: 800; font-size: var(--t-h1);   letter-spacing: -0.03em;  line-height: 1.04; }
+.display-3 { font-family: var(--display); font-weight: 800; font-size: var(--t-h2);   letter-spacing: -0.025em; line-height: 1.08; }
+.display-4 { font-family: var(--display); font-weight: 700; font-size: var(--t-h3);   letter-spacing: -0.018em; line-height: 1.15; }
+
+/* The old serif italic accent has no place in a grotesque system —
+   emphasis now comes from the cedar accent instead. */
+.italic-accent {
+  font-style: normal;
+  color: var(--cedar);
+  font-family: inherit;
+}
+.section-navy .italic-accent { color: var(--cedar-lt); }
+
+.lede { font-size: 1.125rem; line-height: 1.6; color: var(--ink-3); max-width: 62ch; }
+.section-navy .lede { color: var(--galv-lt); }
+
+/* Sections */
+.section { padding: var(--s9) 0; }
+.section-cream { background: var(--vellum-2); }
+.section-navy  { background: var(--ink); color: var(--vellum); }
+.section-navy h1, .section-navy h2, .section-navy h3, .section-navy h4 { color: var(--vellum); }
+.section-navy p { color: var(--galv-lt); }
+
+/* Section header gets a hairline above it — a drawing register mark */
+.section-header { position: relative; padding-top: var(--s5); }
+.section-header::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 56px; height: 2px;
+  background: var(--cedar);
+}
+.section-navy .section-header::before { background: var(--cedar-lt); }
+
+/* Buttons — flat and square-ish, no gradients or lifts */
+.btn {
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: 0.005em;
+  border-radius: var(--r-md);
+  transition: background 0.16s var(--ease), color 0.16s var(--ease), border-color 0.16s var(--ease);
+}
+.btn-primary { background: var(--ink); color: var(--vellum); }
+.btn-primary:hover { background: var(--ink-2); transform: none; box-shadow: none; }
+.btn-gold { background: var(--cedar); color: #fff; }
+.btn-gold:hover { background: var(--cedar-dk); transform: none; box-shadow: none; }
+.btn-outline { border: 1.5px solid var(--line); color: var(--ink); background: transparent; }
+.btn-outline:hover { background: transparent; border-color: var(--ink); color: var(--ink); }
+.page-header--photo .btn-outline { color: #fff; border-color: rgba(255,255,255,.8); background: rgba(6,20,31,.35); }
+.page-header--photo .btn-outline:hover { color: #fff; border-color: #fff; background: rgba(6,20,31,.7); }
+.page-header--photo .btn-outline:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.photo-strip > figure:only-child { grid-column: 1 / -1; }
+.btn-ghost { color: var(--ink); }
+.btn-ghost:hover { background: rgba(14,23,32,0.05); }
+
+/* Cards read as spec sheets: hairline border, no soft shadow bloom */
+.fence-card, .faq-item, .gallery-item {
+  border-radius: var(--r-md);
+  border: 1px solid var(--line);
+}
+.fence-card-tagline, .gallery-item-tag {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--galv);
+}
+
+/* Link arrows in the mono voice */
+.link-arrow {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cedar);
+  text-decoration: none;
+  font-weight: 500;
+}
+.link-arrow:hover { color: var(--cedar-dk); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Forms */
+.form-label {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--galv);
+  display: block;
+  margin-bottom: var(--s2);
+}
+.form-input, .form-select, .form-textarea {
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line);
+  font-family: var(--body);
+  font-size: 16px;   /* prevents iOS zoom on focus */
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--cedar);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(164,85,43,0.12);
+}
+
+/* Breadcrumbs as a drawing path */
+.breadcrumbs {
+  font-family: var(--mono);
+  font-size: var(--t-spec);
+  letter-spacing: 0.08em;
+  color: var(--galv);
+}
+.breadcrumbs a { color: var(--galv); text-decoration: none; }
+.breadcrumbs a:hover { color: var(--cedar); }
+
+/* Page header — hairline register mark, consistent with sections */
+.page-header { border-bottom: 1px solid var(--line); }
+
+/* CTA banner reads as a title block */
+.cta-banner { background: var(--ink); color: var(--vellum); position: relative; }
+.cta-banner::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0;
+  height: 14px;
+  background-image: repeating-linear-gradient(to right, var(--cedar) 0 2px, transparent 2px 11px);
+  opacity: 0.8;
+}
+.cta-banner h2, .cta-banner .display-2 { color: var(--vellum); }
+.cta-banner p { color: var(--galv-lt); }
+
+/* Trust strip */
+.trust-strip { background: var(--vellum-2); border-bottom: 1px solid var(--line); }
+.trust-strip strong { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Footer */
+.footer { background: var(--ink); color: var(--galv-lt); }
+.footer h4, .footer strong { color: var(--vellum); font-family: var(--display); }
+.footer a { color: var(--galv-lt); text-decoration: none; }
+.footer a:hover { color: var(--cedar-lt); }
+
+/* ============================================================
+   PRINT
+   ------------------------------------------------------------
+   People print quotes to compare contractors at the kitchen
+   table, and print a fence page to show a spouse. Without this
+   they get navigation, map controls and dark panels burning ink,
+   with link destinations invisible.
+   ============================================================ */
+@media print {
+  /* Chrome removes backgrounds by default; force readable ink */
+  *, *::before, *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Interface furniture has no meaning on paper */
+  .announce, .nav, .mobile-drawer, .footer, .skip-link,
+  #bp-draw-toolbar, #bp-draw-hint, #bp-setback, #bp-map,
+  #edit-bar, #edit-trigger, #gfs-toast, .cta-banner,
+  #bp-size-presets, #bp-material-filter, .bp-draw-btn {
+    display: none !important;
+  }
+
+  body { font-size: 11pt; line-height: 1.4; }
+  .band, .section { padding: 12pt 0 !important; }
+  .wrap { max-width: none; padding: 0; }
+
+  /* Keep related content together */
+  h1, h2, h3 { page-break-after: avoid; break-after: avoid; }
+  .scard, .fence-card, .faq-item, #bp-price-card, .bp-step {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    border: 1px solid #999 !important;
+  }
+  img { max-width: 100% !important; page-break-inside: avoid; }
+
+  /* A printed link is useless without its destination */
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; }
+  a[href^="tel:"]::after { content: ""; }
+  a[href^="/"]::after { content: " (ghareebfencingsolutions.com" attr(href) ")"; font-size: 9pt; }
+
+  /* The estimate is the thing worth printing — make it lead */
+  #bp-price-card { border: 2px solid #000 !important; padding: 12pt !important; }
+
+  @page { margin: 1.5cm; }
+}
+
+/* ============================================================
+   LAYOUT CLASSES THAT WERE NEVER DEFINED
+   ------------------------------------------------------------
+   These are used in the page markup but had no styles anywhere,
+   so paired form fields (first/last name) stacked instead of
+   sitting side by side, and the card grids collapsed to one
+   column on every screen size.
+   ============================================================ */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s4);
+}
+@media (max-width: 620px) {
+  .form-grid { grid-template-columns: 1fr; }
+}
+
+.careers-grid,
+.financing-grid,
+.permit-grid,
+.portal-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s5);
+}
+
+.permit-card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: var(--s6);
+}
+.permit-card h3 { font-size: var(--t-h3); margin-bottom: var(--s3); }
+.permit-card p { color: var(--ink-3); font-size: var(--t-sm); }
+
+/* Compact ballpark style collection: uses the existing website tokens. */
+.bp-style-summary{display:grid;gap:20px;background:var(--vellum);border:1px solid var(--line);border-radius:var(--r-lg);padding:22px}
+.bp-style-kicker{font:500 11px var(--mono);letter-spacing:.13em;color:var(--cedar)}
+.bp-style-summary h3{font:700 21px/1.25 var(--display);color:var(--ink);margin:8px 0}
+.bp-style-summary p{color:var(--galv);font:400 16px/1.5 var(--body);margin:0 0 16px}
+.bp-style-summary .btn{min-height:46px}
+.bp-style-selected-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;max-width:460px}
+.bp-style-selected-gallery[hidden]{display:none}
+.bp-style-selected-gallery figure{margin:0;min-width:0}
+.bp-style-selected-gallery figure:only-child{grid-column:1/-1}
+.bp-style-selected-gallery img{display:block;width:100%;height:110px;object-fit:contain;background:var(--paper);border:1px solid var(--line);border-radius:4px}
+.bp-style-selected-gallery figcaption{font:400 11px/1.35 var(--body);color:var(--galv);margin-top:4px}
+.bp-style-dialog{box-sizing:border-box;position:fixed;inset:0;margin:auto;width:min(1020px,calc(100vw - 40px));max-width:none;height:min(880px,calc(100vh - 40px));height:min(880px,calc(100dvh - 40px));max-height:calc(100dvh - 40px);padding:0;border:1px solid var(--line);border-radius:12px;background:var(--vellum);color:var(--ink);box-shadow:0 24px 90px #0e172055;overflow:hidden}
+.bp-style-dialog[open]{display:flex;flex-direction:column}
+.bp-style-dialog::backdrop{background:#0e1720a6;backdrop-filter:blur(3px)}
+.bp-style-dialog-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 26px 14px;background:var(--paper);flex-shrink:0}
+.bp-style-dialog-header h2{font:700 28px/1.2 var(--display);margin:5px 0 7px}
+.bp-style-dialog-header p{font:400 15px/1.4 var(--body);color:var(--galv);margin:0}
+#bp-style-close{font:400 30px/1 var(--body);width:46px;min-width:46px;height:46px;border:1px solid var(--line);border-radius:5px;color:var(--ink);background:var(--paper);cursor:pointer}
+.bp-style-dialog-tools{padding:0 26px 12px;background:var(--paper);flex-shrink:0;max-height:44%;overflow:auto;overscroll-behavior:contain}
+#bp-style-search{width:100%;min-height:46px;font:400 16px var(--body)}
+.bp-style-dialog #bp-material-filter{display:flex!important;flex-wrap:nowrap!important;overflow-x:auto;gap:8px!important;margin:12px 0 8px!important;padding:2px 1px 6px;overscroll-behavior:contain}
+.bp-style-dialog #bp-material-filter button{flex-shrink:0;min-height:46px!important}
+.bp-style-quick{font:400 14px var(--body);color:var(--galv)}
+.bp-style-quick summary{cursor:pointer;padding:10px 0;min-height:40px}
+.bp-style-quick select{min-height:46px;font-size:16px!important}
+.bp-style-results{font:500 12px var(--mono);color:var(--galv);padding:14px 26px;margin:0;border-top:1px solid var(--line);flex-shrink:0}
+.bp-style-dialog #bp-fence-options{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;grid-auto-rows:max-content;gap:14px!important;padding:0 26px 26px;overflow-y:auto;overscroll-behavior:contain;min-height:100px;align-content:start;flex:1}
+.bp-style-dialog .ballpark-photo-opt{min-height:230px;align-self:start}
+.bp-style-dialog .ballpark-photo-opt>div:first-of-type{flex-shrink:0;width:100%}
+.bp-style-dialog .ballpark-photo-opt:focus-within{outline:3px solid var(--cedar);outline-offset:2px}
+.bp-style-dialog :focus-visible,.bp-style-summary :focus-visible{outline:3px solid var(--cedar);outline-offset:3px}
+@media(min-width:760px){.bp-style-summary:has(.bp-style-selected-gallery:not([hidden])){grid-template-columns:minmax(0,1fr) minmax(170px,.7fr);align-items:center}.bp-style-selected-gallery img{height:120px}}
+@media(max-width:600px){.bp-style-dialog{width:100%;height:94dvh;max-height:94dvh;margin:auto 0 0;border-radius:14px 14px 0 0;border-bottom:0}.bp-style-dialog-header{padding:18px 16px 12px}.bp-style-dialog-header h2{font-size:24px}.bp-style-dialog-header p{font-size:14px}.bp-style-dialog-tools{padding:0 16px 8px}.bp-style-results{padding:12px 16px}.bp-style-dialog #bp-fence-options{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;padding:0 16px max(20px,env(safe-area-inset-bottom))}.bp-style-dialog .ballpark-photo-opt>div:nth-of-type(2){padding:12px!important}.bp-style-dialog .ballpark-photo-opt>div:nth-of-type(2)>div:first-child{font-size:15px!important}.bp-style-summary{padding:16px}.bp-style-summary .btn{width:100%}.bp-style-selected-gallery img{height:95px}}

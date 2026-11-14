@@ -1,0 +1,262 @@
+/* hero-fullbleed.css — GFS, Nov 2026
+   Full-width photo heroes with white text on top.
+   Load this LAST, after construction-lab.css. No HTML changes needed. */
+
+/* ---------- Homepage hero ---------- */
+html .home-experience .hero2--photo{
+  display:flex; align-items:flex-end; position:relative;
+  min-height:min(88vh,820px); padding:0;
+  background:#0e1720; isolation:isolate; overflow:hidden;
+}
+html .home-experience .hero2--photo .hero2__bg{
+  position:absolute; inset:0; z-index:0;
+  width:100%; height:100%; margin:0;
+  aspect-ratio:auto; border-radius:0; box-shadow:none; grid-area:auto;
+}
+html .home-experience .hero2--photo .hero2__bg img{
+  width:100%; height:100%; object-fit:cover;
+}
+html .home-experience .hero2--photo .hero2__scrim{
+  display:block; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.38) 0%, rgba(8,14,20,.12) 32%, rgba(8,14,20,.80) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 68%);
+}
+html .home-experience .hero2--photo .hero2__grid{
+  position:relative; z-index:2; grid-area:auto;
+  width:100%; max-width:1248px; margin:0 auto;
+  padding:clamp(96px,14vh,170px) clamp(20px,4vw,54px) clamp(34px,7vh,72px);
+}
+html .home-experience .hero2--photo .hero2__content{ width:100%; max-width:700px; }
+html .home-experience .hero2--photo .hero2__content h1{
+  color:#fff; font-size:clamp(40px,6vw,78px); line-height:1.02;
+  letter-spacing:-.035em; margin:16px 0 18px; max-width:none;
+  text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .home-experience .hero2--photo .hero2__lede{
+  color:#fff; font-size:clamp(17px,1.5vw,20px); max-width:54ch;
+  text-shadow:0 1px 12px rgba(0,0,0,.55);
+}
+html .home-experience .hero2--photo .spec{ color:#fff; }
+html .home-experience .hero2--photo .dot{ background:#fff; }
+html .home-experience .hero2--photo #hero-quote-alt,
+html .home-experience .hero2--photo .hero-review-link,
+html .home-experience .hero2--photo .hero-review-link *{ color:#fff !important; }
+html .home-experience .hero2--photo .hero-review-link > span:first-child{ color:#ffd166 !important; }
+html .home-experience .hero2--photo .btn2--ghost{
+  border:1.5px solid rgba(255,255,255,.85); color:#fff;
+  background:rgba(8,14,20,.28); backdrop-filter:blur(4px);
+}
+
+@media (max-width:800px){
+  html .home-experience .hero2--photo{ min-height:82svh; padding:0; }
+  html .home-experience .hero2--photo .hero2__bg{
+    width:100%; height:100%; margin:0; aspect-ratio:auto; border-radius:0;
+  }
+  html .home-experience .hero2--photo .hero2__scrim{
+    display:block;
+    background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%);
+  }
+  html .home-experience .hero2--photo .hero2__grid{ padding:110px 20px 26px; }
+  html .home-experience .hero2--photo .hero2__content h1{ font-size:clamp(36px,10vw,50px); max-width:none; }
+}
+
+/* ---------- Fence style pages (.sell-hero) ---------- */
+html .sell-hero{
+  position:relative; display:grid; grid-template-columns:1fr; align-items:end;
+  min-height:min(80vh,720px); background:#0e1720; overflow:hidden; isolation:isolate;
+}
+html .sell-hero .sell-photo{
+  position:absolute; inset:0; z-index:0; width:100%; height:100%; margin:0; background:#0e1720;
+}
+html .sell-hero .sell-photo img{ width:100%; height:100%; object-fit:cover; }
+html .sell-hero .sell-photo::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.38) 0%, rgba(8,14,20,.14) 30%, rgba(8,14,20,.82) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 70%);
+}
+html .sell-hero .sell-intro{
+  position:relative; z-index:2; width:100%; max-width:780px;
+  justify-content:flex-end; background:none;
+  padding:clamp(96px,13vh,160px) clamp(20px,4vw,54px) clamp(30px,6vh,64px);
+}
+html .sell-hero .sell-intro,
+html .sell-hero .sell-intro :is(h1,p,span,nav,a:not(.btn)){ color:#fff; }
+html .sell-hero .sell-intro h1{
+  font-size:clamp(38px,5.6vw,72px); line-height:1.03; text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .sell-hero .sell-intro p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+
+/* ---------- City, guide, about, financing, gallery, why-us (.page-header--photo) ---------- */
+html .page-header--photo{
+  background:#0e1720; display:flex; align-items:flex-end;
+  min-height:min(74vh,660px);
+  padding:clamp(96px,13vh,160px) 0 clamp(30px,6vh,60px);
+}
+html .page-header--photo .ph__bg img{ width:100%; height:100%; object-fit:cover; }
+html .page-header--photo .ph__scrim{
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.16) 30%, rgba(8,14,20,.84) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 72%);
+}
+html .page-header--photo .ph__content{ width:100%; }
+html .page-header--photo .ph__content,
+html .page-header--photo .ph__content :is(h1,p,span,div,a:not(.btn)){ color:#fff; }
+html .page-header--photo h1{ max-width:18ch; text-shadow:0 2px 24px rgba(0,0,0,.45); }
+html .page-header--photo p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+
+/* ---------- Reviews page (had no photo) ---------- */
+html .gfs-reviews-hero{
+  position:relative; isolation:isolate; overflow:hidden;
+  display:flex; align-items:flex-end; min-height:min(70vh,620px);
+  background:#0e1720 url(/assets/img/performance-v12/7b29998db19a45dd-1600.webp) center/cover no-repeat;
+}
+html .gfs-reviews-hero::before{
+  content:""; position:absolute; inset:0; z-index:0;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.20) 30%, rgba(8,14,20,.85) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.60) 0%, rgba(8,14,20,0) 70%);
+}
+html .gfs-reviews-hero .gfs-reviews-inner{
+  position:relative; z-index:1; width:100%;
+  padding:clamp(96px,13vh,160px) clamp(20px,4vw,54px) clamp(30px,6vh,64px);
+}
+html .gfs-reviews-hero :is(h1,p,span,strong){ color:#fff; }
+html .gfs-reviews-hero h1{
+  font-size:clamp(38px,5.6vw,72px); line-height:1.03; text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+html .gfs-reviews-hero .gfs-review-score{
+  padding:14px 20px; color:#fff; background:rgba(8,14,20,.35);
+  border:1.5px solid rgba(255,255,255,.8); backdrop-filter:blur(4px);
+}
+html .gfs-reviews-hero .gfs-review-score strong{ font-size:clamp(40px,5vw,60px); }
+
+/* ---------- Shared: outline buttons on photos ---------- */
+html :is(.sell-hero,.page-header--photo) .btn-outline{
+  color:#fff; border:1.5px solid rgba(255,255,255,.85);
+  background:rgba(8,14,20,.28); backdrop-filter:blur(4px);
+}
+
+@media (max-width:800px){
+  html .sell-hero, html .page-header--photo, html .gfs-reviews-hero{ min-height:76svh; }
+  html .sell-hero .sell-photo::after,
+  html .page-header--photo .ph__scrim,
+  html .gfs-reviews-hero::before{
+    background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%);
+  }
+}
+
+/* Phone layout: the style pages flatten .sell-intro with display:contents,
+   which would leave the text under the photo. Restore it as a real box. */
+html body .sell-hero{ display:grid !important; grid-template-columns:1fr !important; }
+html body .sell-hero .sell-intro{
+  display:flex !important; flex-direction:column; justify-content:flex-end; align-self:end;
+}
+html body .sell-hero .sell-photo{ order:0; }
+html .sell-hero .sell-intro a:not(.btn){ color:#fff !important; text-decoration-color:rgba(255,255,255,.7); }
+
+/* ---------- Winter line in the homepage hero ---------- */
+html .hero2--photo .hero-winter{
+  display:inline-block; max-width:54ch; margin:0 0 22px; padding:10px 14px;
+  color:#fff; font-size:16px; line-height:1.45;
+  background:rgba(8,14,20,.45); border-left:3px solid #fff; border-radius:4px;
+  backdrop-filter:blur(4px);
+}
+html .hero2--photo .hero-winter strong{ color:#fff; }
+
+/* ---------- Build spec block on fence style pages ---------- */
+.gfs-spec{ background:#0e1720; color:#fff; padding:clamp(48px,7vw,88px) 0; }
+.gfs-spec__inner{ max-width:1100px; margin:0 auto; padding:0 clamp(20px,4vw,54px); }
+.gfs-spec__eyebrow{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.72); margin:0 0 10px; }
+.gfs-spec h2{ color:#fff; font-size:clamp(28px,3.6vw,44px); line-height:1.08; margin:0 0 28px; }
+.gfs-spec__list{ margin:0; border-top:1px solid rgba(255,255,255,.22); }
+.gfs-spec__row{ display:grid; grid-template-columns:minmax(150px,280px) 1fr; gap:8px 28px; padding:16px 0; border-bottom:1px solid rgba(255,255,255,.22); }
+.gfs-spec__row dt{ font-family:"IBM Plex Mono",monospace; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:rgba(255,255,255,.72); }
+.gfs-spec__row dd{ margin:0; font-size:18px; line-height:1.45; color:#fff; }
+.gfs-spec__note{ margin:20px 0 0; font-size:15px; color:rgba(255,255,255,.72); }
+@media (max-width:640px){ .gfs-spec__row{ grid-template-columns:1fr; gap:4px; } }
+
+/* ---------- Comparison guides (.pagehero) ---------- */
+html .pagehero{
+  position:relative; isolation:isolate; overflow:hidden; background:#0e1720;
+  display:flex; align-items:flex-end; min-height:min(74vh,660px);
+  padding:clamp(96px,13vh,160px) 0 clamp(30px,6vh,60px);
+}
+html .pagehero .pagehero__bg{ position:absolute; inset:0; z-index:0; opacity:1; }
+html .pagehero .pagehero__bg img{ width:100%; height:100%; object-fit:cover; opacity:1; filter:none; }
+html .pagehero::after{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    linear-gradient(180deg, rgba(8,14,20,.40) 0%, rgba(8,14,20,.16) 30%, rgba(8,14,20,.84) 100%),
+    linear-gradient(90deg, rgba(8,14,20,.62) 0%, rgba(8,14,20,0) 72%);
+}
+html .pagehero .pagehero__inner{ position:relative; z-index:2; width:100%; }
+html .pagehero .pagehero__inner,
+html .pagehero .pagehero__inner :is(h1,p,div,span,a:not(.btn)){ color:#fff; }
+html .pagehero h1{ text-shadow:0 2px 24px rgba(0,0,0,.45); }
+html .pagehero p{ text-shadow:0 1px 12px rgba(0,0,0,.55); }
+@media (max-width:800px){
+  html .pagehero{ min-height:76svh; }
+  html .pagehero::after{ background:linear-gradient(180deg, rgba(8,14,20,.30) 0%, rgba(8,14,20,.45) 38%, rgba(8,14,20,.88) 100%); }
+}
+.gfs-spec__src{ display:block; margin-top:6px; }
+
+/* Guides use class="skip" for the skip link, which had no styles and showed as plain text. */
+a.skip{ position:absolute; left:-9999px; top:0; z-index:1000; padding:10px 14px; background:#fff; color:#0e1720; }
+a.skip:focus{ left:8px; top:8px; }
+
+/* ---------- Style library: blueprint, 3D model, photo and write-up per style ---------- */
+.gfs-styles{ background:#fbfaf7; padding:clamp(48px,7vw,96px) 0; }
+.gfs-styles__inner{ max-width:1180px; margin:0 auto; padding:0 clamp(16px,4vw,54px); }
+.gfs-styles__eyebrow{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:#5a6672; margin:0 0 10px; }
+.gfs-styles h2{ font-size:clamp(28px,3.8vw,46px); line-height:1.08; margin:0 0 12px; color:#0e1720; }
+.gfs-styles__lede{ font-size:18px; color:#3c4854; max-width:60ch; margin:0 0 36px; }
+.gfs-style{ background:#fff; border:1px solid #dfe3e6; border-radius:10px; padding:clamp(16px,2.6vw,30px); margin:0 0 26px; }
+.gfs-style > header{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; border-bottom:2px solid #0e1720; padding-bottom:10px; margin-bottom:18px; }
+.gfs-style h3{ font-size:clamp(22px,2.6vw,30px); line-height:1.1; margin:0; color:#0e1720; }
+.gfs-style > header span{ font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:#a4552b; white-space:nowrap; }
+.gfs-style__body{ display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); gap:24px; align-items:start; }
+.gfs-style__text p, .gfs-style__cap{ font-size:18px; line-height:1.55; color:#1c2630; margin:0 0 18px; }
+.gfs-style__media{ display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:14px; }
+.gfs-style figure{ margin:0; }
+.gfs-style__media img{ display:block; width:100%; height:220px; object-fit:cover; border-radius:6px; background:#efefed; }
+.gfs-style figcaption{ font-size:13px; line-height:1.4; color:#5a6672; margin-top:6px; }
+.gfs-style__bp{ margin-top:22px !important; }
+.gfs-style__bp img{ display:block; width:100%; height:auto; border:1px solid #dfe3e6; border-radius:6px; background:#fff; }
+.gfs-style__media:empty{ display:none; }
+@media (max-width:820px){
+  .gfs-style__body{ grid-template-columns:1fr; }
+  .gfs-style__media img{ height:180px; }
+  .gfs-style > header{ flex-direction:column; gap:4px; }
+  /* blueprints are wide drawings: let them scroll sideways on a phone so the numbers stay readable */
+  .gfs-style__bp a{ display:block; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .gfs-style__bp img{ width:820px; max-width:none; }
+}
+.gfs-style__model img{ object-fit:contain; background:#efefed; }
+.gfs-style__bp--narrow{ max-width:520px; }
+@media (max-width:820px){ .gfs-style__bp--narrow a{ overflow:visible; } .gfs-style__bp--narrow img{ width:100%; max-width:100%; } }
+.gfs-style__media .gfs-style__model img{ height:auto; aspect-ratio:auto; }
+
+/* ---------- Brochure downloads and online reader ---------- */
+.gfs-read{ background:#fbfaf7; padding:clamp(40px,6vw,80px) 0; }
+.gfs-read__inner{ max-width:1100px; margin:0 auto; padding:0 clamp(16px,4vw,54px); }
+.gfs-read h2{ font-size:clamp(26px,3.4vw,40px); line-height:1.1; color:#0e1720; margin:0 0 18px; }
+.gfs-read__lede{ font-size:18px; color:#1c2630; margin:0 0 24px; }
+.gfs-dl-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(170px,1fr)); gap:18px; margin:0 0 48px; }
+.gfs-dl{ display:flex; flex-direction:column; gap:6px; text-decoration:none; color:#0e1720; background:#fff; border:1px solid #dfe3e6; border-radius:8px; padding:10px; }
+.gfs-dl:hover, .gfs-dl:focus-visible{ border-color:#0e1720; }
+.gfs-dl img{ width:100%; height:auto; border-radius:4px; display:block; }
+.gfs-dl strong{ font-size:17px; line-height:1.2; }
+.gfs-dl span{ font-size:14px; line-height:1.4; color:#3c4854; }
+.gfs-dl em{ font-style:normal; font-family:"IBM Plex Mono",monospace; font-size:12px; color:#a4552b; margin-top:auto; }
+.gfs-read__toc{ display:flex; flex-wrap:wrap; gap:8px; margin:0 0 28px; padding:0; }
+.gfs-read__toc a{ font-size:14px; padding:8px 12px; border:1px solid #0e1720; border-radius:999px; color:#0e1720; text-decoration:none; background:#fff; }
+.gfs-read__section{ margin-top:48px !important; padding-top:16px; border-top:2px solid #0e1720; scroll-margin-top:90px; }
+.gfs-read__page{ margin:0 auto 34px; max-width:900px; scroll-margin-top:90px; }
+.gfs-read__page img{ display:block; width:100%; height:auto; border:1px solid #dfe3e6; border-radius:6px; background:#fff; box-shadow:0 6px 24px rgba(14,23,32,.08); }
+.gfs-read__page figcaption{ font-size:14px; color:#3c4854; margin:8px 0 4px; }
+.gfs-read__page summary{ cursor:pointer; font-size:14px; color:#0e1720; text-decoration:underline; padding:6px 0; }
+.gfs-read__text p{ font-size:16px; line-height:1.5; margin:0 0 6px; color:#1c2630; }
+.gfs-read__end{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:40px; }
+.gfs-read--teaser .gfs-dl-grid{ margin-bottom:0; }

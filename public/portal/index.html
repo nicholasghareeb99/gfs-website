@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Customer Portal | Ghareeb Fencing Solutions</title>
+<meta name="description" content="Explore the Ghareeb Fencing Solutions customer portal: shared fence options, site plans, 3D designs, files and project conversations. View the sample tour or open your project.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Customer Portal | Ghareeb Fencing Solutions">
+<meta property="og:description" content="Explore the Ghareeb Fencing Solutions customer portal: shared fence options, site plans, 3D designs, files and project conversations. View the sample tour or open your project.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/portal/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Customer Portal | Ghareeb Fencing Solutions">
+<meta name="twitter:description" content="Explore the Ghareeb Fencing Solutions customer portal: shared fence options, site plans, 3D designs, files and project conversations. View the sample tour or open your project.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/portal/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
+  window.GFS_AUTHORIZED_EMAILS = [
+    "nicholasghareeb99@gmail.com",
+    // add more authorized editors here
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "nick@ghareebfence.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Portal", "item": "https://ghareebfence.com/portal/"}
+  ]
+}
+</script>
+
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/portal-tour.css?v=20261001-label">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="preload" as="image" href="/assets/img/portal-demo/tour-design-full.webp" imagesrcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=1440&amp;fit=contain&amp;fm=webp&amp;q=85 1440w" imagesizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px" fetchpriority="high">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../reviews/">Reviews</a></li>
+      <li><a href="../guides/">Guides</a></li>
+      <li><a href="../about/">About</a></li>
+      <li><a href="../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+      <li><a href="../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
+      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../fences/">Fence Styles</a></li>
+    <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../reviews/">Reviews</a></li>
+    <li><a href="../about/">About</a></li>
+    <li><a href="../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+    <li><a href="../contact/">Contact</a></li>
+    <li><a href="../guides/">Guides</a></li>
+    <li><a href="../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="section project-path portal-opening"><div class="container">
+<div class="breadcrumbs"><a href="/">Home</a> / Customer portal</div><p class="eyebrow">Your project, in one place</p>
+<h1 class="display-1" data-editable="portal.v2.title">Your fence.<br>Your plan. Your portal.</h1><figure class="portal-opening-preview"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-design-full.webp" target="_blank" rel="noopener" aria-label="Enlarge the sample 3D design viewer"><img data-editable-img="portal.v3.opening.image" src="/assets/img/portal-demo/tour-design-full.webp" alt="Actual GFS 3D viewer displaying a sample fence layout in an illustrative property setting" width="1440" height="1000" fetchpriority="high" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=1440&amp;fit=contain&amp;fm=webp&amp;q=85 1440w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption>Sample project · Actual 3D design viewer</figcaption></figure>
+<p class="lede" data-editable="portal.v2.lede">Compare the options our team shares, explore the drawing and keep project questions with the details they refer to. Take a look inside the portal before your project begins.</p>
+<div class="path-actions"><a href="https://portal.ghareebfence.com/" class="btn btn-primary btn-lg">Open my project →</a><a href="/quote/" class="btn btn-outline btn-lg">New project? Get an estimate</a></div>
+<p class="path-note">Open <a href="https://portal.ghareebfence.com/">portal.ghareebfence.com</a> and enter your job number and the last name on your quote. Your original proposal link still works. Need help finding your project? Call <a href="tel:14192142107">(419) 214-2107</a>.</p>
+</div></section>
+
+<!-- BUILD-LAB:portal-plan-demo:START --><section class="build-lab-section" id="portal-plan-demo" data-gfs-sec="build-lab-portal-plan-demo" data-gfs-protected><div class="build-lab" data-build-lab="portal-plan-demo" data-scene="0" aria-labelledby="portal-plan-demo-title"><header><p class="build-lab-eyebrow">The details behind your fence</p><h2 id="portal-plan-demo-title">Keep the gate conversation with the plan.</h2><p>Try a sample gate choice and see the drawing, scope reminder and project note together.</p></header><div class="build-lab-grid"><figure><svg viewBox="0 0 600 360" role="img" aria-labelledby="portal-plan-demo-graphic-title portal-plan-demo-graphic-desc"><title id="portal-plan-demo-graphic-title">Sample site drawing switches from one gate leaf to two gate leaves.</title><desc id="portal-plan-demo-graphic-desc">Concept diagram. Not to scale. The controls and written explanation describe the selected view.</desc><rect width="600" height="360" rx="16" fill="#edf4f9"/><rect x="50" y="45" width="500" height="265" rx="15" fill="#dce8dc"/><rect x="95" y="88" width="160" height="113" rx="4" fill="#d5e0e8" stroke="#607f96" stroke-width="3"/><text x="133" y="149">House</text><path d="M330 89H500V273H330M330 89H70V273H235" fill="none" stroke="#164f76" stroke-width="7"/><g class="lab-portal-walk"><path d="M235 273l67-67" stroke="#0a7892" stroke-width="7"/><path d="M330 273a95 95 0 0 0-28-67" fill="none" stroke="#0a7892" stroke-dasharray="5 5" stroke-width="3"/></g><g class="lab-portal-double"><path d="M235 273l34-34m61 34l-34-34" stroke="#0a7892" stroke-width="7"/><path d="M282 273a47 47 0 0 0-13-34m13 34a47 47 0 0 1 14-34" fill="none" stroke="#0a7892" stroke-dasharray="5 5" stroke-width="3"/></g><text x="34" y="340">Sample project · no live customer data</text></svg><figcaption>Interactive demonstration only. This does not edit a project, approve a change or send a notification. Actual portal details depend on what our team shares.</figcaption></figure><div class="build-lab-explain"><div class="build-lab-controls" role="group" aria-label="Keep the gate conversation with the plan. views" data-lab-controls hidden><button type="button" data-lab-step="0" aria-pressed="true" aria-controls="portal-plan-demo-notes">Walk gate example</button><button type="button" data-lab-step="1" aria-pressed="false" aria-controls="portal-plan-demo-notes">Double gate example</button></div><ol id="portal-plan-demo-notes" class="build-lab-notes"><li data-lab-note="0"><h3>Walk gate example</h3><p>Plan: one pedestrian opening. Scope reminder: confirm clear width, latch and swing direction. Project note: check the everyday path between the house and yard.</p></li><li data-lab-note="1"><h3>Double gate example</h3><p>Plan: two leaves for wider access. Scope reminder: confirm equipment width, support, hardware and ground clearance. Project note: review the full swing area on site.</p></li></ol><p class="build-lab-status" role="status" aria-live="polite" data-lab-status></p><a class="build-lab-link" href="/portal/#portal-tour">See the actual portal screenshots <span aria-hidden="true">→</span></a></div></div></div></section><!-- BUILD-LAB:portal-plan-demo:END -->
+<section class="portal-visual-tour" id="portal-tour"><div class="container">
+<div class="portal-tour-heading"><p class="eyebrow">Actual portal interface · Sample project</p><h2 data-editable="portal.v3.tour.title">See the details. Picture the fence.</h2><p data-editable="portal.v3.tour.intro">These screenshots show our actual portal with a sample project. Names, address, amounts and dates are illustrative. Available information and actions depend on your project stage and what our team has shared.</p><p class="portal-sample-note">Select any screenshot to enlarge it. These images are a tour, not a live project session.</p></div>
+<div class="portal-shot-grid"><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-overview.webp" aria-label="Sample project; enlarge: Pick up where you left off." target="_blank" rel="noopener"><img data-editable-img="portal.v3.overview.image" src="/assets/img/portal-demo/tour-overview.webp" alt="Actual customer portal showing a sample project overview, quote status and project navigation." width="1425" height="990" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.overview.title">Pick up where you left off.</h3><p data-editable="portal.v3.overview.caption">Your shared quote, project status and next steps have a home. Return to the details when you are ready to review them with our team.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-design-full.webp" aria-label="Sample project; enlarge: Picture the layout from another angle." target="_blank" rel="noopener"><img data-editable-img="portal.v3.design-full.image" src="/assets/img/portal-demo/tour-design-full.webp" alt="Actual Ghareeb 3D design viewer showing a sample white fence layout, gate, view controls and illustrative property context." width="1440" height="1000" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=1440&amp;fit=contain&amp;fm=webp&amp;q=85 1440w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.design-full.title">Picture the layout from another angle.</h3><p data-editable="portal.v3.design-full.caption">Explore a shared 3D design to see the fence runs and gate position more clearly. This sample uses an illustrative property setting; the trees and surroundings are not a surveyed site model. Exploring a view does not change your saved plan or quote.</p></figcaption></figure></div>
+</div></section>
+<section class="portal-visual-tour" id="portal-details"><div class="container">
+<div class="portal-tour-heading"><p class="eyebrow">From the big picture to the small details</p><h2 data-editable="portal.v2.features">What you can review in your portal</h2><p data-editable="portal.v3.details.intro">Your team's shared proposal, drawing, files and conversation come together in one project workspace. Here is how the sample project looks along the way.</p></div>
+<div class="portal-shot-grid"><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-options.webp" aria-label="Sample project; enlarge: Compare more than a price." target="_blank" rel="noopener"><img data-editable-img="portal.v3.options.image" src="/assets/img/portal-demo/tour-options.webp" alt="Sample portal displaying two fence options with product illustrations, dimensions, gate details and illustrative totals." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.options.title">Compare more than a price.</h3><p data-editable="portal.v3.options.caption">Review the shared style, height, fence length and gate details together. Product illustrations help show design differences. The amounts in this sample are illustrative, not advertised prices; viewing an option does not sign a proposal or make a payment.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-plan.webp" aria-label="Sample project; enlarge: Put the fence line in context." target="_blank" rel="noopener"><img data-editable-img="portal.v3.plan.image" src="/assets/img/portal-demo/tour-plan.webp" alt="Actual portal showing the shared sample fence drawing, marked as not an actual property." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.plan.title">Put the fence line in context.</h3><p data-editable="portal.v3.plan.caption">Review the drawing our team shares and discuss the fence runs, gate location and access together. Site drawings and parcel mapping support planning; they do not replace a boundary survey or final site measurements.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-scope.webp" aria-label="Sample project; enlarge: Know what is included." target="_blank" rel="noopener"><img data-editable-img="portal.v3.scope.image" src="/assets/img/portal-demo/tour-scope.webp" alt="Sample customer portal showing the shared written fence scope and project details." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-scope.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.scope.title">Know what is included.</h3><p data-editable="portal.v3.scope.caption">Return to the written scope when you want to check a detail or discuss a change. Confirm the final work with our team so the proposal and your expectations describe the same project.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-files.webp" aria-label="Sample project; enlarge: Keep the paperwork with the plan." target="_blank" rel="noopener"><img data-editable-img="portal.v3.files.image" src="/assets/img/portal-demo/tour-files.webp" alt="Sample portal Files and documents section listing shared proposal, layout and supporting project files." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.files.title">Keep the paperwork with the plan.</h3><p data-editable="portal.v3.files.caption">Find the proposal, site plan and supporting files our team has shared. Available documents depend on your project and its current stage.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-conversation.webp" aria-label="Sample project; enlarge: Keep the question with the project." target="_blank" rel="noopener"><img data-editable-img="portal.v3.conversation.image" src="/assets/img/portal-demo/tour-conversation.webp" alt="Actual customer portal showing a sample conversation about fence privacy, the gate and project planning." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.conversation.title">Keep the question with the project.</h3><p data-editable="portal.v3.conversation.caption">Ask about a gate, clarify a detail or discuss what happens next. Return to the shared conversation alongside the plan and proposal.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-permits.webp" aria-label="Sample project; enlarge: Make the next approval clear." target="_blank" rel="noopener"><img data-editable-img="portal.v3.permits.image" src="/assets/img/portal-demo/tour-permits.webp" alt="Sample portal Permits and approvals section showing statuses to confirm and controls for sharing a permit update." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-permits.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-permits.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-permits.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.permits.title">Make the next approval clear.</h3><p data-editable="portal.v3.permits.caption">Review the permit and approval status recorded for the project, and share an update when that action is available. Confirm who handles each requirement with our team; uploading a file here is not an application to a permitting office.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-schedule.webp" aria-label="Sample project; enlarge: Make your timing preferences clear." target="_blank" rel="noopener"><img data-editable-img="portal.v3.schedule.image" src="/assets/img/portal-demo/tour-schedule.webp" alt="Sample portal installation details showing a preferred week and a scheduled date still to be confirmed." width="1425" height="1175" loading="lazy" decoding="async" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-schedule.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-schedule.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-schedule.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a><figcaption><h3 data-editable="portal.v3.schedule.title">Make your timing preferences clear.</h3><p data-editable="portal.v3.schedule.caption">See the scheduling information shared for your project and the preferred week on record. A requested week helps the team plan; the installation date still needs confirmation.</p></figcaption></figure></div>
+</div></section>
+<section class="portal-visual-tour" id="portal-on-your-phone"><div class="container">
+<div class="portal-tour-heading"><p class="eyebrow">At home or on the go</p><h2 data-editable="portal.v3.mobile.title">The same project, on your phone.</h2><p data-editable="portal.v3.mobile.intro">Return to the shared details and conversation from a smaller screen. These mobile views use the same sample project.</p></div>
+<div class="portal-phone-grid"><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-mobile-overview.webp" aria-label="Sample project; enlarge: Your project, within reach." target="_blank" rel="noopener"><img data-editable-img="portal.v3.mobile-overview.image" src="/assets/img/portal-demo/tour-mobile-overview.webp" alt="Mobile view of the actual portal showing a sample project overview and requested installation week." width="375" height="812" loading="lazy" decoding="async"></a><figcaption><h3 data-editable="portal.v3.mobile-overview.title">Your project, within reach.</h3><p data-editable="portal.v3.mobile-overview.caption">Check the shared project summary from your phone when you have a moment to review it.</p></figcaption></figure><figure class="portal-shot-card"><a class="portal-shot-media" data-portal-shot href="/assets/img/portal-demo/tour-mobile-messages.webp" aria-label="Sample project; enlarge: A question does not have to wait." target="_blank" rel="noopener"><img data-editable-img="portal.v3.mobile-messages.image" src="/assets/img/portal-demo/tour-mobile-messages.webp" alt="Mobile view of the actual portal showing a sample project conversation and message field." width="375" height="812" loading="lazy" decoding="async"></a><figcaption><h3 data-editable="portal.v3.mobile-messages.title">A question does not have to wait.</h3><p data-editable="portal.v3.mobile-messages.caption">Keep the conversation with your project, whether you are at a computer or using your phone.</p></figcaption></figure></div>
+</div></section>
+<section class="section project-path"><div class="container"><h2 class="display-2" data-editable="portal.v2.process">A clearer process from the start.</h2><p>You should know what you are choosing, what is included and what happens next. See how we take your fence from an initial idea through planning, installation and follow-up.</p><div class="path-links"><a href="/process/">Explore our installation process →</a><a href="/gallery/">See completed fence projects →</a></div></div></section>
+<!-- GFS-GOOGLE-REVIEWS:START -->
+<section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
+<div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
+
+<a class="gfs-review-all" href="/reviews/">See all 27 Google reviews <span aria-hidden="true">→</span></a></div>
+<div class="gfs-review-grid"><article class="gfs-review-card" data-google-review="ChdDSUhNMG9nS0VQckN5S1AtMHRxMDlnRRAB">
+<div class="gfs-review-top"><span class="gfs-review-stars" role="img" aria-label="5 out of 5 stars"><span aria-hidden="true">★★★★★</span></span><span class="gfs-review-platform">Google</span></div>
+<p class="gfs-review-topic">Communication and planning</p><blockquote><p>“Their team provided outstanding communication and made the process seamless. Highly recommend!”</p></blockquote>
+<footer class="gfs-review-credit"><strong>Jenna Spetz</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChdDSUhNMG9nS0VQckN5S1AtMHRxMDlnRRAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by Jenna Spetz (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
+</div></section>
+<!-- GFS-GOOGLE-REVIEWS:END -->
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../about/">About Nick</a></li>
+          <li><a href="../reviews/">Reviews</a></li>
+          <li><a href="../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../brochure/">Brochure</a></li>
+          <li><a href="../service-areas/">Service Areas</a></li>
+          <li><a href="../faq/">FAQ</a></li>
+    <li><a href="../guides/">Fence Guides</a></li>
+    <li><a href="../why-us/">Why Choose Us</a></li>
+          <li><a href="../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../privacy/" style="color:inherit;">Privacy</a> · <a href="../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta">
+  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
+  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../assets/js/leads.js?v=20261113a" defer></script>
+
+<script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+<script src="/assets/js/portal-tour.js?v=20260920-v3" defer></script>
+
+<script type="module" src="/assets/js/construction-lab.mjs?v=20260930"></script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+/* Black September wordmark, navy surfaces, cool white and blue actions. */
+:root{--ink:#102d50;--ink-2:#174775;--ink-3:#3e5976;--vellum:#f8fafc;--vellum-2:#eef3f9;--vellum-3:#dfeaf7;--cedar:#225fbe;--cedar-lt:#8cc7ff;--cedar-dk:#174b99;--galv:#506680;--galv-lt:#c9d9ec;--line:#cbd9e9;--line-soft:#e2eaf4;--navy:#102d50;--navy-light:#174775;--gold:#225fbe;--cream:#f8fafc}
+.nav{background:var(--vellum);border-bottom:1px solid var(--line)}.nav .nav-inner{height:auto;min-height:100px;padding-block:6px;gap:20px}.nav .logo-with-mark{padding:0;flex:none}.nav .logo-with-mark .brand-mark{display:block;width:132px;height:88px;object-fit:contain}.logo-with-mark>.logo__name,.logo-with-mark>small{display:none}
+.brand-mark--footer{display:block;width:190px;height:126px;object-fit:contain;filter:brightness(0) invert(1);margin-bottom:20px}.footer-brand-h{font-size:20px}
+.project-access{background:#194c7b}.project-access a{color:#f1f7ff}.announce{background:var(--ink)}.btn-primary{background:var(--ink);border-color:var(--ink)}.btn-primary:hover{background:var(--ink-2);border-color:var(--ink-2)}.btn-outline{color:var(--ink);border-color:var(--ink)}.section-cream{background:#eef4fb}.section-navy{background:var(--ink)}
+.growth-local{background:#eaf2fc}.project-evidence{background:#eff5fc}.growth-local a{color:#194c7b}.growth-local .btn-primary{color:#fff}.growth-local .btn-outline{color:#194c7b}
+:is(a,button,input,select,textarea,summary):focus-visible{outline:3px solid #225fbe;outline-offset:4px}
+.nav-links>li>a.has-menu::after{position:static;display:inline-block;height:auto;background:none;margin-left:5px;content:'⌄'}
+@media(max-width:680px){.owner-img::before{top:12px;left:12px;right:-12px;bottom:-12px}}
+@media(max-width:680px){.nav .nav-inner{min-height:86px;gap:12px}.nav .logo-with-mark .brand-mark{width:110px;height:73px}.nav .btn{font-size:12px;padding:12px 13px}.nav .nav-toggle{flex:none;min-width:44px;min-height:44px}.brand-mark--footer{width:165px;height:110px}}
+/* Phone controls leave room for the keyboard, safe area and privacy choice. */
+.mobile-drawer{z-index:1200}.mobile-drawer:not(.open){visibility:hidden;pointer-events:none}.mobile-drawer.open{visibility:visible;pointer-events:auto}
+.mobile-drawer{background:#102d50}.mobile-fence-summary{display:flex;align-items:center;justify-content:space-between;min-height:56px;cursor:pointer;font-size:17px;list-style:none;color:#f8fafc}.mobile-fence-summary::-webkit-details-marker{display:none}.mobile-fence-summary::after{content:'+';font-size:24px}.mobile-fence-disclosure[open]>.mobile-fence-summary::after{content:'−'}.mobile-fence-links{padding:0 0 12px 14px!important}.mobile-fence-links a{font-size:16px!important}.mobile-fence-menu{border-bottom:1px solid #ffffff14}
+@media(max-width:768px){
+ body{padding-bottom:calc(88px + env(safe-area-inset-bottom))}
+ .mobile-cta{background:#102d50;padding:10px 16px calc(10px + env(safe-area-inset-bottom));gap:10px}
+ .mobile-cta .btn{min-height:48px;display:flex;align-items:center;justify-content:center;font-size:15px;padding:12px 10px}
+ body>button[data-gfs-protected]{bottom:calc(88px + env(safe-area-inset-bottom))!important;min-height:44px}
+ body:has(#mobileDrawer.open) .mobile-cta,body:has(input:focus,textarea:focus,select:focus) .mobile-cta,body.editing .mobile-cta,body:has(dialog[open]) .mobile-cta{display:none}
+ body:has(#mobileDrawer.open)>button[data-gfs-protected],body:has(dialog[open])>button[data-gfs-protected]{visibility:hidden}
+ body:has(input:focus,textarea:focus,select:focus)>button[data-gfs-protected]{bottom:12px!important}
+ body.mobile-form-visible .mobile-cta{display:none}
+ body.mobile-form-visible>button[data-gfs-protected]{bottom:12px!important}
+ body:has(input:focus,textarea:focus,select:focus)>button[data-gfs-protected]{visibility:hidden}
+ input:not([type=checkbox]):not([type=radio]):not([type=range]),textarea,select{font-size:16px!important}
+ input[type=file]{width:100%;max-width:100%;min-width:0}
+ .project-access a{min-height:44px;display:inline-flex;align-items:center}
+ .nav .nav-inner{min-height:76px;padding-block:4px}.nav .logo-with-mark .brand-mark{width:100px;height:67px}
+ .mobile-drawer{padding:76px 24px calc(32px + env(safe-area-inset-bottom));overscroll-behavior:contain}
+ .mobile-drawer-close{top:18px;right:18px}.mobile-drawer a{min-height:48px}
+ .section[id],main [id]{scroll-margin-top:96px}
+}
+@media(max-width:380px){.nav-cta-group>.btn-primary{display:none}.nav .nav-inner{gap:10px}}
+
+/* September 30: consistent blue actions, neutral photo surfaces and clearer rhythm. */
+:root{--ink:#102b46;--ink-2:#174572;--ink-3:#425b73;--vellum:#fbfcfe;--vellum-2:#f2f6fa;--vellum-3:#e6eff9;--cedar:#1d5eb6;--cedar-dk:#174a90;--gold:#1d5eb6;--navy:#102b46;--navy-light:#174572;--cream:#fbfcfe;--line:#cbd7e3;--line-soft:#e5ebf1}
+body{background:var(--vellum)}
+.btn.btn-primary{background:var(--cedar);border-color:var(--cedar);color:#fff;box-shadow:0 3px 8px #102b4612}
+.btn.btn-primary:hover{background:var(--cedar-dk);border-color:var(--cedar-dk);color:#fff}
+.btn.btn-outline{border-radius:7px}.btn.btn-primary,.btn2{border-radius:7px}
+.nav{background:#fff}.project-access{background:var(--ink)}
+.home-experience .section-cream,.growth-local,.project-evidence{background:#f2f6fa}
+.home-experience .local-promise,.home-experience .portal-experience{background:#f2f6fa}
+.home-experience .local-promise article,.fence-experience .fence-photo-card{box-shadow:0 4px 16px #102b4606}
+.fence-experience .fence-collection{background:#f2f6fa}
+.fence-experience .fence-detail-grid article{background:#fff;border-color:var(--line);padding:clamp(22px,3vw,32px)}
+.fence-experience .fence-facts div{background:#f2f6fa;border-top-color:var(--cedar)}
+.selling-page .sell-eyebrow,.selling-page .sell-section a:not(.btn){color:var(--cedar-dk)}
+.selling-page .sell-close a:not(.btn){color:#fff}
+.selling-page .sell-close .btn-outline{color:#fff;border-color:#b9ccdf}
+:is(.fence-filters,.style-controls,.tour-controls) button{transition:background-color .15s,border-color .15s,color .15s}
+:is(.fence-filters,.style-controls,.tour-controls) button[aria-pressed=true]{background:#1d5eb6;color:#fff;border-color:#1d5eb6}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #3575cc;outline-offset:4px}
+:is(.hero2,.section-navy,.sell-close,.mobile-drawer,.fence-planning) :is(a,button,summary):focus-visible{outline-color:#a5d3ff}
+@media(max-width:768px){
+ .nav .nav-inner{box-shadow:none}
+ .fence-experience .fence-collection,.fence-experience .fence-decision{padding-block:44px}
+ .fence-experience .fence-photo-grid{gap:20px}
+ .fence-experience .fence-jump{gap:2px 20px;padding-block:12px}
+ .mobile-cta{box-shadow:0 -3px 16px #102b4614;border-top:1px solid #ffffff24}
+ .mobile-cta .btn-outline{color:#fff;border-color:#8aa9c8}
+ .section[id],main [id]{scroll-margin-top:142px}
+}
+@media(prefers-reduced-motion:reduce){:is(.fence-filters,.style-controls,.tour-controls) button{transition:none}}
+@media(min-width:769px){.nav .nav-inner{min-height:84px}.nav .logo-with-mark .brand-mark{width:110px;height:72px}.project-access{padding-block:0}}
+@media(min-width:1180px) and (max-width:1500px){.nav.nav .nav-links{display:flex;gap:18px}.nav.nav .nav-links>li:nth-child(n+4){display:none}.nav.nav .nav-links>li>a{font-size:14px}.nav.nav .nav-toggle{display:flex}}
+
+/* Financing remains available without competing with the main quote action. */
+.nav .btn-financing{background:#edf4fb;color:#173f6b;border:1px solid #b8ccdf;box-shadow:none}
+.nav .btn-financing:hover{background:#dfeaf6;color:#102b46;border-color:#91aac3;box-shadow:none}
+
+/* Photo headers need light accents independently of the gallery stylesheet. */
+.page-header--photo .eyebrow,.page-header--photo .display-1 .italic-accent,.page-header--photo h1 em,.page-header--photo .breadcrumbs a:hover{color:#8cc7ff}
+.page-header--photo .ph__scrim{background:linear-gradient(90deg,rgba(8,28,51,.94),rgba(8,28,51,.82))}
+.page-header--photo :is(a,button):focus-visible{outline-color:#a5d3ff}
