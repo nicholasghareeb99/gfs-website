@@ -4203,7 +4203,9 @@
     // "Chain Link Vinyl Coated" contains "vinyl" too, and matching that
     // first showed a vinyl privacy photo on a chain link style.
     if (n.includes('chain')) return '/assets/img/style-references/chain-link-'+(/black|blk|coated/.test(n)?'black':'galvanized')+'.jpg';
-    if (n.includes('split') || n.includes('ranch rail')) return '/assets/img/style-references/photo-needed.svg';
+    // Our own split rail installs; board ranch rail has no install photo yet.
+    if (n.includes('split')) return '/assets/img/performance-v12/'+(/p\/?t\b|treated/.test(n)?'f8cb44a377cf0fb7':'a28b06ea0a819472')+'-960.webp';
+    if (n.includes('ranch rail')) return '/assets/img/style-references/photo-needed.svg';
     if (/spaced.*picket|picket.*spaced/i.test(n) && !/vinyl|pvc/i.test(n)) return '/assets/img/style-references/wood-spaced-picket.jpg';
     const material=woodMaterialName(name);
     if (material.includes('cedar')) return base + 'cedar-shadowbox.jpg';
