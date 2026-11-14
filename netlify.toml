@@ -496,13 +496,13 @@ force = true
 
 [[redirects]]
 from = "/service-areas/london-township-mi"
-to = "/service-areas/milan-township-mi/"
+to = "/service-areas/milan-mi/"
 status = 301
 force = true
 
 [[redirects]]
 from = "/service-areas/london-township-mi/*"
-to = "/service-areas/milan-township-mi/"
+to = "/service-areas/milan-mi/"
 status = 301
 force = true
 
@@ -527,5 +527,89 @@ force = true
 [[redirects]]
 from = "/service-areas/river-rouge-mi/*"
 to = "/service-areas/wyandotte-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/perrysburg-township-oh"
+to = "/service-areas/perrysburg-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/perrysburg-township-oh/*"
+to = "/service-areas/perrysburg-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/sylvania-township-oh"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/sylvania-township-oh/*"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/waterville-township-oh"
+to = "/service-areas/waterville-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/waterville-township-oh/*"
+to = "/service-areas/waterville-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/swanton-township-oh"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/swanton-township-oh/*"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/dundee-township-mi"
+to = "/service-areas/dundee-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/dundee-township-mi/*"
+to = "/service-areas/dundee-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/milan-township-mi"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/milan-township-mi/*"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/monroe-township-mi"
+to = "/service-areas/monroe-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/monroe-township-mi/*"
+to = "/service-areas/monroe-mi/"
 status = 301
 force = true
