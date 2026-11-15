@@ -1124,6 +1124,125 @@
   function pricesOnRequest() { return pricesByRequest && !pricesLive; }
   let acceptedBallparkReceipt = '';
 
+  // -------- SERVER PRICE (only when the public catalogue has no prices) --------
+  // With prices off the public document, the planning range comes from the
+  // ballpark-price function instead, after the contact form is accepted. It
+  // answers with the same low/high and comparison rows the browser used to
+  // work out itself. Nothing here runs while the page has prices of its own.
+  const SERVER_PRICE_URL = '/.netlify/functions/ballpark-price';
+  let serverPriceCapable = null, serverPriceChecking = false;   // null = not asked yet; asked once per page
+  const serverPrice = { key: '', req: null, phase: 'idle', result: null, timer: 0, deadline: 0, controller: null };
+  function serverPriceExpected() { return pricesOnRequest() && serverPriceCapable === true; }
+  // Does the function answer, i.e. is it switched on? No receipt, no data.
+  function checkServerPrice() {
+    if (!pricesOnRequest() || serverPriceCapable !== null || serverPriceChecking || typeof fetch !== 'function') return;
+    serverPriceChecking = true;
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    const timer = setTimeout(() => { if (controller) controller.abort(); }, 5000);
+    fetch(SERVER_PRICE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"ping":true}', credentials: 'omit', signal: controller ? controller.signal : undefined })
+      .then(res => res.ok ? res.json() : null)
+      .then(json => { serverPriceCapable = !!(json && json.ok === true); })
+      .catch(() => { serverPriceCapable = false; })
+      .then(() => { clearTimeout(timer); serverPriceChecking = false; try { updateAll(); } catch (e) { /* page redraw is best effort */ } });
+  }
+  // The project as the function wants it, or null when the page itself
+  // already knows it cannot be priced (same checks calculatePrice makes).
+  function serverPriceRequest() {
+    if (!state.fenceId || !FENCE_PRICING[state.fenceId]) return null;
+    if (!Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000) return null;
+    if (sectionsIssue()) return null;
+    if (state.removeOldFence && !existingFenceMaterialLabel()) return null;
+    const parts = [];
+    for (const part of projectParts()) {
+      const fence = FENCE_PRICING[part.fenceId];
+      if (!fence || !Number.isFinite(part.feet) || part.feet <= 0) return null;
+      // The height as the customer set it: the function applies a style's named height itself.
+      const height = Number(part.height);
+      if (!Number.isFinite(height) || (supportedStyleHeight(fence.name) === null && ![4, 5, 6, 8].includes(height))) return null;
+      parts.push({ style: fence.name, feet: part.feet, height: height, singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates) });
+    }
+    const removal = state.removeOldFence ? { on: true, material: state.existingFenceMaterial, feet: state.linearFeet } : { on: false };
+    return { parts: parts, removal: removal, compare: true };
+  }
+  function serverPriceKey() {
+    if (!serverPriceExpected() || !state.priceUnlocked || !acceptedBallparkReceipt) return '';
+    const req = serverPriceRequest();
+    return req ? acceptedBallparkReceipt + '|' + JSON.stringify(req) : '';
+  }
+  function serverPriceCancel() {
+    clearTimeout(serverPrice.timer); serverPrice.timer = 0;
+    clearTimeout(serverPrice.deadline); serverPrice.deadline = 0;
+    if (serverPrice.controller) { try { serverPrice.controller.abort(); } catch (e) { /* already finished */ } serverPrice.controller = null; }
+  }
+  function serverPriceSettle(key, phase, result) {
+    if (serverPrice.key !== key) return;   // the project changed: latest wins
+    clearTimeout(serverPrice.deadline); serverPrice.deadline = 0;
+    serverPrice.phase = phase; serverPrice.result = result; serverPrice.controller = null;
+    const note = el('bp-success');
+    if (note && note.classList.contains('show')) note.textContent = phase === 'ok' ? 'Your planning range is ready.' : 'Your request has been received. We will get your price to you.';
+    try { updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] redraw skipped:', e); }
+  }
+  // A range and rows the page can trust the shape of, or null.
+  function serverPriceAnswer(json) {
+    const money = n => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n < 1e9;
+    if (!json || typeof json !== 'object' || !money(json.low) || !money(json.high) || json.high < json.low) return null;
+    const rows = [];
+    for (const row of Array.isArray(json.comparisons) ? json.comparisons.slice(0, 1000) : []) {
+      if (row && typeof row.style === 'string' && money(row.low) && money(row.high) && row.high >= row.low) rows.push({ style: row.style, low: row.low, high: row.high });
+    }
+    return { low: json.low, high: json.high, rows: rows };
+  }
+  function serverPriceRun(key, attempt) {
+    serverPrice.timer = 0;
+    if (serverPrice.key !== key) return;
+    const controller = typeof AbortController === 'function' ? new AbortController() : null;
+    serverPrice.controller = controller;
+    // A request that never answers ends as a failure, not a spinner.
+    serverPrice.deadline = setTimeout(() => { if (controller) controller.abort(); serverPriceSettle(key, 'failed', null); }, 12000);
+    const body = JSON.stringify(Object.assign({ receipt: acceptedBallparkReceipt }, serverPrice.req));
+    fetch(SERVER_PRICE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, credentials: 'omit', signal: controller ? controller.signal : undefined })
+      .then(res => {
+        if (serverPrice.key !== key) return;
+        // The office record can take a few seconds to appear: ask again.
+        if (res.status === 409 && attempt < 5) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), 2000); return; }
+        if (!res.ok) { serverPriceSettle(key, 'failed', null); return; }
+        return res.json().then(json => { const answer = serverPriceAnswer(json); serverPriceSettle(key, answer ? 'ok' : 'failed', answer); });
+      })
+      .catch(() => { serverPriceSettle(key, 'failed', null); });
+  }
+  // Called on every redraw: when the project (or receipt) differs from the one
+  // last asked about, drop the old answer and ask again after a short pause.
+  function serverPriceSync() {
+    const key = serverPriceKey();
+    if (key === serverPrice.key) return;
+    serverPriceCancel();
+    serverPrice.key = key; serverPrice.result = null;
+    if (!key) { serverPrice.phase = 'idle'; serverPrice.req = null; return; }
+    serverPrice.phase = 'working'; serverPrice.req = serverPriceRequest();
+    serverPrice.timer = setTimeout(() => serverPriceRun(key, 0), 400);
+  }
+  // The range for the project as it is right now; null while it is being worked out.
+  function serverPriceNow() {
+    const key = serverPriceKey();
+    if (!key || key !== serverPrice.key || serverPrice.phase !== 'ok' || !serverPrice.result) return null;
+    // `total` only keeps the price card's own checks working; it is not a figure from the server.
+    return { low: serverPrice.result.low, high: serverPrice.result.high, total: (serverPrice.result.low + serverPrice.result.high) / 2, fromServer: true };
+  }
+  function serverComparisonRows() {
+    if (!serverPriceNow()) return [];
+    return serverPrice.result.rows.map(row => {
+      const id = slugify(row.style), fence = FENCE_PRICING[id];
+      return fence && fence.name === row.style ? { id, fence, price: { low: row.low, high: row.high, total: (row.low + row.high) / 2 }, name: fence.name, low: row.low, high: row.high, family: categoryForName(fence.name || id) } : null;
+    }).filter(Boolean);
+  }
+  // What the price card says while the project has no range yet: 'ready'
+  // (before the contact step), 'working' or 'failed'. '' when this path is not in play.
+  function serverPricePhase() {
+    if (!serverPriceExpected()) return '';
+    if (!state.priceUnlocked) return 'ready';
+    return serverPrice.phase === 'working' ? 'working' : 'failed';
+  }
+
   // Prices are shown only after the customer contact submission is accepted.
   // Legacy page overrides must not bypass this requirement.
 
@@ -1199,7 +1318,7 @@
   // by the comparison list); leave it out for the customer's own pick.
   function calculatePrice(primaryId) {
     const mainId = primaryId || state.fenceId;
-    if (!pricesLive) return null;
+    if (!pricesLive) return primaryId ? null : serverPriceNow();
     if (!mainId || !FENCE_PRICING[mainId] || !Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000) return null;
     if (sectionsIssue()) return null;
     // Each part is billed at the next full panel for styles installed in
@@ -1374,12 +1493,14 @@
 
   // What the office reads when a request arrives without a price range.
   function reviewNote(price) {
+    if (price && price.reason === 'server') return 'Planning range worked out on the website after this request was sent. No range was stored with it.';
+    if (price && price.reason === 'request') return 'Price by request: this website does not show price ranges, so no range was shown. Please send the price.';
     return price && price.reason === 'prices'
       ? 'Quote review requested: the price list did not load on the customer\'s device, so no price range was shown.'
       : 'Quote review requested: ' + state.height + ' ft height. No automatic price range was provided.';
   }
   function quoteSubmitLabel() {
-    return heightNeedsReview() || pricesUnavailable() ? 'Request My Free Quote' : 'Unlock My Price';
+    return heightNeedsReview() || (pricesUnavailable() && !serverPriceExpected()) ? 'Request My Free Quote' : 'Unlock My Price';
   }
 
   function updateDraftStyleNotice() {
@@ -1782,7 +1903,11 @@
       if (heightNeedsReview()) return { requiresReview: true, reason: 'height' };
       // No live price list (blocked, offline or still loading): take the
       // request and let the office price it.
-      if (!pricesLive) return { requiresReview: true, reason: 'prices' };
+      if (!pricesLive) {
+        // Server range: the contact form goes in first, the range follows it.
+        if (serverPriceExpected() && !state.priceUnlocked) return { requiresReview: true, reason: 'server' };
+        if (!serverPriceNow()) return { requiresReview: true, reason: pricesOnRequest() ? 'request' : 'prices' };
+      }
       price = calculatePrice();
       if (!price || ![price.low, price.high, price.total].every(Number.isFinite) || price.low < 0 || price.high < price.low || price.total <= 0) {
         message = 'Pricing is unavailable for this selection. Choose another style or request an on-site estimate.';
@@ -1859,7 +1984,7 @@
       };
 
       submitBtn.disabled = true;
-      submitBtn.textContent = price.requiresReview ? 'Sending your quote request…' : 'Unlocking your quote…';
+      submitBtn.textContent = price.requiresReview && price.reason !== 'server' ? 'Sending your quote request…' : 'Unlocking your quote…';
       successEl.classList.remove('show');
       errorEl.classList.remove('show');
       errorEl.style.display = '';
@@ -1897,12 +2022,12 @@
       if (result.ok) {
         const originalReceipt=result.acquisitionReceipt||result.id;
         acceptedBallparkReceipt = /^web_[a-zA-Z0-9_-]{16,80}$/.test(originalReceipt || '') ? originalReceipt : '';
-        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='prices'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
+        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
         // UNLOCK the price reveal
         state.priceUnlocked = true;
-        if(!result.reused&&!result.requestAction&&!price.requiresReview)track('unlocked');
+        if(!result.reused&&!result.requestAction&&(!price.requiresReview||price.reason==='server'))track('unlocked');
         clearDraft();
         updateAll();
         successEl.classList.add('show');
@@ -1930,8 +2055,9 @@
   }
   function updateAllCore() {
     saveDraft();
+    try { serverPriceSync(); } catch (e) { console.warn('[Ghareeb Ballpark] server price skipped:', e); }
     const reviewHeight = heightNeedsReview();
-    const noPrices = !reviewHeight && pricesUnavailable();
+    const noPrices = !reviewHeight && pricesUnavailable() && !serverPriceExpected();
     const reviewNotice = el('bp-height-review');
     if (reviewNotice) {
       reviewNotice.hidden = !reviewHeight;
@@ -1954,7 +2080,8 @@
       const needsQuote = state.fenceId && state.linearFeet > 0 && FENCE_PRICING[state.fenceId];
       const missingRemoval = state.removeOldFence && !existingFenceMaterialLabel();
       const sectionIssue = needsQuote ? sectionsIssue() : '';
-      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : noPrices ? 'We will send your price' : !pricesLive ? 'Loading prices…' : 'This style needs a custom quote') : pricesOnRequest() ? 'Your quote in 4 quick steps' : 'Your price in 4 quick steps';
+      const srv = needsQuote && !sectionIssue && !missingRemoval && !reviewHeight && state.linearFeet <= 2000 ? serverPricePhase() : '';
+      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : srv === 'ready' ? 'Your estimate is ready' : srv === 'working' ? 'Working out your range…' : srv === 'failed' ? 'We will send your price' : noPrices ? 'We will send your price' : !pricesLive ? 'Loading prices…' : 'This style needs a custom quote') : pricesOnRequest() ? 'Your quote in 4 quick steps' : 'Your price in 4 quick steps';
       if (priceHint) {
         priceHint.replaceChildren();
         if (state.linearFeet > 2000) {
@@ -1966,6 +2093,8 @@
           priceHint.textContent = sectionIssue;
         } else if (needsQuote && noPrices) {
           priceHint.textContent = state.priceUnlocked ? 'Your request is received. We will get your price to you.' : pricesOnRequest() ? 'Use step 4 to send your plan and our team will get your price to you.' : 'Our price list is not loading right now. Use step 4 to send your plan and we will get your price to you.';
+        } else if (srv) {
+          priceHint.textContent = srv === 'ready' ? 'Add your contact details in step 4 to see your price.' : srv === 'working' ? 'This only takes a moment.' : 'Your request is received. We will get your price to you.';
         } else if (needsQuote && !pricesLive) {
           priceHint.textContent = '';
         } else if (needsQuote && reviewHeight) {
@@ -1980,7 +2109,9 @@
       }
       renderFinance(null);
       renderComparePanel(false);
-      renderPostUnlockActions(false);
+      // With no price (a quote-only page, or a range still being worked out)
+      // everything that does not need a dollar figure stays available.
+      renderPostUnlockActions(!pricesLive && state.priceUnlocked === true && !!FENCE_PRICING[state.fenceId] && state.linearFeet > 0 && state.linearFeet <= 2000 && !sectionsIssue() && !(state.removeOldFence && !existingFenceMaterialLabel()), false);
       return;
     }
 
@@ -2057,6 +2188,7 @@
   // height as the customer's pick are compared (a 4 ft picket against a
   // 6 ft privacy fence is not a like-for-like comparison). Cheapest first.
   function comparisonRows() {
+    if (!pricesLive) return serverComparisonRows();
     const current = FENCE_PRICING[state.fenceId];
     const height = current ? partHeight(current, state.height) : Number(state.height);
     return Object.entries(FENCE_PRICING).map(([id, fence]) => {
@@ -2074,7 +2206,7 @@
     if (!status) return;
     status.style.display = 'block'; status.style.color = 'var(--stop)'; status.textContent = message;
   }
-  function renderPostUnlockActions(unlocked) {
+  function renderPostUnlockActions(unlocked, hasPrice = true) {
     const area = el('bp-actions');
     if (!area) return;
     if (!unlocked) {
@@ -2082,6 +2214,12 @@
       return;
     }
     area.style.display = 'flex';
+    // Without a price the emailed copy is a project request, not an estimate.
+    const emailButton = el('bp-action-email');
+    if (emailButton && !emailButton.disabled && !/^\u2713/.test(emailButton.textContent)) emailButton.textContent = hasPrice ? 'Request emailed estimate' : 'Email me this project request';
+    const pdfButton = el('bp-action-pdf');
+    if (pdfButton && !hasPrice) pdfButton.textContent = 'Download or print your project summary (PDF)';
+    else if (pdfButton && /project summary/.test(pdfButton.textContent)) pdfButton.textContent = '\u2B07  Download or print estimate (PDF)';
     const bookingLink=area.querySelector('a[href*="quote/book"]');
     if(bookingLink&&window.GFSRequestFlow)bookingLink.href=window.GFSRequestFlow.bookingUrl(el('bp-form'));
     // Wire buttons (only once)
@@ -2101,7 +2239,7 @@
       });
       if (dlPdf) dlPdf.addEventListener('click', () => {
         if (!state.priceUnlocked) return;
-        const price = calculatePrice();
+        const price = calculatePrice() || (pricesLive ? null : {});   // no price: the PDF says we will price it
         if (!price) return;
         const fence = FENCE_PRICING[state.fenceId];
         // Build comparisons for the PDF — same spec priced across materials.
@@ -3908,7 +4046,7 @@
     else if (!fence) view = ['Step 2 of 4', feet, 'Pick a style', () => openStylePicker()];
     else if (sectionsIssue()) view = ['Step 2 of 4', 'Finish your added style', 'Go to it', jump('bp-sections')];
     else if (!state.sawDetails) view = ['Step 3 of 4', feet + ' · ' + name, 'Gates and details', () => { state.sawDetails = true; jump('bp-step-3')(); renderBar(); }];
-    else view = ['Step 4 of 4', feet + ' · ' + name, heightNeedsReview() || pricesUnavailable() ? 'Request my quote' : 'See my price', jump('bp-step-4', 'bpf-name')];
+    else view = ['Step 4 of 4', feet + ' · ' + name, heightNeedsReview() || (pricesUnavailable() && !serverPriceExpected()) ? 'Request my quote' : 'See my price', jump('bp-step-4', 'bpf-name')];
     if (step.textContent !== view[0]) step.textContent = view[0];
     if (now.textContent !== view[1]) now.textContent = view[1];
     if (go.textContent !== view[2]) go.textContent = view[2];
@@ -4104,6 +4242,7 @@
           if (names.length) {
             built = buildStylesFromNames(names, photoMap);
             pricesByRequest = built;
+            if (built) checkServerPrice();
           }
         }
         if (built) {
@@ -4536,6 +4675,10 @@
       const original = btn.textContent;
       btn.textContent = 'Requesting…';
 
+      // Everything from here runs under the clean-up below, so no error can
+      // leave the button or the email field stuck.
+      try {
+      const hasRange = !price.requiresReview && Number.isFinite(price.low) && Number.isFinite(price.high);
       const gates = [];
       if (state.singleGates) gates.push(state.singleGates + ' walk');
       if (state.doubleGates) gates.push(state.doubleGates + ' drive');
@@ -4564,22 +4707,21 @@
         timeline: (fd && fd.get('timeline')) || '',
         siteNotes: state.siteNotes.slice(),
         sections: state.sections.length ? sectionLines().join('\n') : '',
-        priceRange: price.requiresReview ? '' : formatPrice(price.low) + '–' + formatPrice(price.high),
-        notes: [(fd && fd.get('notes')) || '', removalScopeNote(), 'EMAILED ESTIMATE REQUEST — ' +
+        priceRange: hasRange ? formatPrice(price.low) + '–' + formatPrice(price.high) : '',
+        notes: [(fd && fd.get('notes')) || '', removalScopeNote(), (hasRange ? 'EMAILED ESTIMATE REQUEST — ' : 'EMAILED PROJECT REQUEST (no price shown) — ') +
                'Style: ' + fence.name + ' · Length: ' + state.linearFeet + ' ft · ' +
-               'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none') + ' · ' +
-               'Range: ' + formatPrice(price.low) + '-' + formatPrice(price.high)].filter(Boolean).join(' · '),
+               'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none') +
+               (hasRange ? ' · Range: ' + formatPrice(price.low) + '-' + formatPrice(price.high) : '')].filter(Boolean).join(' · '),
       };
 
       window.GFSRequestFlow?.setBusy(form,true);
-      try {
         if (!window.GFSLeads || typeof window.GFSLeads.submit !== 'function') {
           throw new Error('lead module unavailable');
         }
         const result = await window.GFSLeads.submit(payload,window.GFSRequestFlow?.optionsFor(form)||{});
         if (result.ok) {
-          show('Your estimate request reached our office. We will review it and email you at ' + email + '.', 'ok');
-          btn.textContent = '\u2713 Estimate requested';
+          show(hasRange ? 'Your estimate request reached our office. We will review it and email you at ' + email + '.' : 'Your request reached our office. We will email you at ' + email + '.', 'ok');
+          btn.textContent = hasRange ? '\u2713 Estimate requested' : '\u2713 Request sent';
           return;
         }
         show((result.errors || ['Could not send that']).join('. ') + ' — call (419) 214-2107 and we will send it over.', 'error');
