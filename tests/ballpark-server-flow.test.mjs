@@ -16,15 +16,17 @@ const ANSWER = { low: 5700, high: 6300, comparisons: [
 ] };
 const json = (body, status = 200, headers = {}) => ({ ok: status >= 200 && status < 300, status, headers: { get: name => headers[name] ?? null }, json: async () => body });
 
-function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage, step4 = null } = {}) {
+function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage, step4 = null, startAt = Date.now() } = {}) {
   const listeners = {}, timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
+  // The page's clock moves with the timer queue, so waiting 120 s in a test is 120 s of Date.now() too.
+  const PageDate = class extends Date { static now() { return startAt + timers.time(); } };
   const node = () => Object.defineProperty({ textContent: '', hidden: false, style: {}, children: [], dataset: {},
     classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } },
     replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, setAttribute() {}, scrollIntoView() {}, querySelectorAll: () => [], addEventListener(t, fn) { (this.handlers = this.handlers || {})[t] = fn; }, querySelector: () => null },
     'innerHTML', { set(v) { this.textContent = v; }, get() { return this.textContent; } });
   const abortable = signal => new Promise((_, reject) => { if (signal) signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
   const globals = {
-    ...timers,
+    ...timers, Date: PageDate,
     ...(storage ? { sessionStorage: storage } : {}),
     el: id => nodes[id] || (nodes[id] = node()),
     window: Object.assign(step4 ? step4.window : {}, { addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } }),
@@ -45,7 +47,7 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
   const code = `
     const FENCE_PRICING = {};
     const state = { linearFeet: 0, fenceId: '', height: '6', singleGates: 0, doubleGates: 0, removeOldFence: false, existingFenceMaterial: '', sections: [], siteNotes: [], address: '', priceUnlocked: false };
-    let pricesLive = false, pricesSlow = false, pricesByRequest = false, styleCatalogSettled = true, pendingDraftStyle = '', acceptedBallparkReceipt = '', pricingReceipt = '';
+    let pricesLive = false, pricesSlow = false, pricesByRequest = false, styleCatalogSettled = true, pendingDraftStyle = '', acceptedBallparkReceipt = '', pricingReceipt = '', pricingReceiptAt = 0;
     ${slice('  function pricesUnavailable()', '  let acceptedBallparkReceipt')}
     function buildStyleEntry(name, perFoot, singleGate, doubleGate) { return { name, perFoot, singleGate, doubleGate, detail: '' }; }
     function categoryForName() { return ''; }
@@ -63,7 +65,7 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
       state, FENCE_PRICING, updateAll, calculatePrice, comparisonRows, submissionPrice, checkServerPrice, serverPriceExpected,
       setCatalogue(names) { names.forEach(n => { FENCE_PRICING[slugify(n)] = buildStyleEntry(n, null, null, null); }); },
       set(flags) { ({ pricesLive = pricesLive, pricesByRequest = pricesByRequest } = flags); },
-      receipt(v) { acceptedBallparkReceipt = v; pricingReceipt = v; },
+      receipt(v) { acceptedBallparkReceipt = v; pricingReceipt = v; pricingReceiptAt = 0; },
       acceptedReceipt: () => acceptedBallparkReceipt, ${step4 ? 'bindStep4,' : ''}
       pricingReceipt: () => pricingReceipt, retryNow: () => serverPriceRetryNow(), recheck: () => serverPriceRecheck(), bindRecovery: () => bindServerPriceRecovery(),
     };
@@ -686,7 +688,12 @@ test('Continue this project after 25 hours: the update is priced with its own fr
 test('the real page code uses the accepted update for pricing and the original for the emailed follow-up', () => {
   const code = slice('  function bindStep4() {', '  // -------- LIVE PRICE REVEAL');
   assert.match(code, /acceptedBallparkReceipt = [^;]*originalReceipt/);
-  assert.match(code, /pricingReceipt = [^;]*result\.id/);
-  assert.doesNotMatch(SRC.slice(SRC.indexOf('  function serverPriceRun'), SRC.indexOf('  function serverPriceSync')), /acceptedBallparkReceipt/);
+  assert.match(code, /nextPricing = [^;]*result\.id/);
+  assert.match(code, /pricingReceipt = nextPricing/);
+  // The price call names the pricing receipt; the original request is only used to ask for a session.
+  const run = SRC.slice(SRC.indexOf('  function serverPriceRun'), SRC.indexOf('  function serverPriceSync'));
+  assert.equal(run.match(/acceptedBallparkReceipt/g).length, 1);
+  assert.match(run, /const original = \(\) => acceptedBallparkReceipt;/);
+  assert.match(run, /receipt: session \? session\.receipt : serverPrice\.receipt/);
   assert.match(SRC, /parentReceipt: acceptedBallparkReceipt/);
 });
