@@ -50,10 +50,12 @@ test('a two-style project adds up to the right range: own rate per style, gates,
   assert.deepEqual([answer.low, answer.high], [8500, 9400]);
 });
 
-test('the answer is {low, high, comparisons} and nothing a rate follows from', async () => {
+test('the answer is {low, high, parts, comparisons} and nothing a rate follows from', async () => {
   const answer = await (await ask({ ...project, compare: true })).json();
-  assert.deepEqual(Object.keys(answer).sort(), ['comparisons', 'low', 'high'].sort());
-  assert.ok(!('total' in answer) && !('parts' in answer) && !('billableFeet' in answer));
+  assert.deepEqual(Object.keys(answer).sort(), ['comparisons', 'low', 'high', 'parts'].sort());
+  assert.ok(!('total' in answer) && !('billableFeet' in answer) && !('waste' in answer));
+  assert.deepEqual(answer.parts.map(p => p.feet), project.parts.map(p => p.feet), 'parts echo the feet the customer sent, not billable feet');
+  for (const part of answer.parts) assert.deepEqual(Object.keys(part).sort(), ['feet', 'style']);
   for (const row of answer.comparisons) {
     assert.deepEqual(Object.keys(row).sort(), ['high', 'low', 'style']);
     assert.ok(!('total' in row));

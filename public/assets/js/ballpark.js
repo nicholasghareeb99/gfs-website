@@ -1130,12 +1130,18 @@
   // answers with the same low/high and comparison rows the browser used to
   // work out itself. Nothing here runs while the page has prices of its own.
   const SERVER_PRICE_URL = '/.netlify/functions/ballpark-price';
+  const SERVER_PRICE_RETRY = [600, 1500, 3000, 4000];   // pauses before asking again when the office record is not there yet
   let serverPriceCapable = null, serverPriceChecking = false;   // null = not asked yet; asked once per page
   const serverPrice = { key: '', req: null, phase: 'idle', result: null, timer: 0, deadline: 0, controller: null };
   function serverPriceExpected() { return pricesOnRequest() && serverPriceCapable === true; }
   // Does the function answer, i.e. is it switched on? No receipt, no data.
   function checkServerPrice() {
     if (!pricesOnRequest() || serverPriceCapable !== null || serverPriceChecking || typeof fetch !== 'function') return;
+    // Asked once per browser session: the answer is kept for half an hour.
+    try {
+      const kept = typeof sessionStorage !== 'undefined' ? JSON.parse(sessionStorage.getItem('gfs_bp_server_price') || 'null') : null;
+      if (kept && typeof kept.ok === 'boolean' && Date.now() - kept.at < 1800000 && Date.now() >= kept.at) { serverPriceCapable = kept.ok; return; }
+    } catch (e) { /* storage is optional */ }
     serverPriceChecking = true;
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
     const timer = setTimeout(() => { if (controller) controller.abort(); }, 5000);
@@ -1143,6 +1149,7 @@
       .then(res => res.ok ? res.json() : null)
       .then(json => { serverPriceCapable = !!(json && json.ok === true); })
       .catch(() => { serverPriceCapable = false; })
+      .then(() => { try { if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('gfs_bp_server_price', JSON.stringify({ ok: serverPriceCapable, at: Date.now() })); } catch (e) { /* storage is optional */ } })
       .then(() => { clearTimeout(timer); serverPriceChecking = false; try { updateAll(); } catch (e) { /* page redraw is best effort */ } });
   }
   // The project as the function wants it, or null when the page itself
@@ -1190,6 +1197,11 @@
     for (const row of Array.isArray(json.comparisons) ? json.comparisons.slice(0, 1000) : []) {
       if (row && typeof row.style === 'string' && money(row.low) && money(row.high) && row.high >= row.low) rows.push({ style: row.style, low: row.low, high: row.high });
     }
+    // The answer says which layout it priced; if that is not the one asked about, do not use it.
+    if (Array.isArray(json.parts)) {
+      const asked = serverPrice.req ? serverPrice.req.parts : [];
+      if (json.parts.length !== asked.length || json.parts.some((p, i) => !p || typeof p.style !== 'string' || slugify(p.style) !== slugify(asked[i].style) || p.feet !== asked[i].feet)) return null;
+    }
     return { low: json.low, high: json.high, rows: rows };
   }
   function serverPriceRun(key, attempt) {
@@ -1204,7 +1216,7 @@
       .then(res => {
         if (serverPrice.key !== key) return;
         // The office record can take a few seconds to appear: ask again.
-        if (res.status === 409 && attempt < 5) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), 2000); return; }
+        if (res.status === 409 && attempt < SERVER_PRICE_RETRY.length) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), SERVER_PRICE_RETRY[attempt]); return; }
         if (!res.ok) { serverPriceSettle(key, 'failed', null); return; }
         return res.json().then(json => { const answer = serverPriceAnswer(json); serverPriceSettle(key, answer ? 'ok' : 'failed', answer); });
       })
