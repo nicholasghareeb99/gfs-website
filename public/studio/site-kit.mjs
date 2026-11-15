@@ -90,9 +90,26 @@ export function bagsPerHole({ holeDiaIn, holeDepthIn, postWIn = 3.5, postDIn = 3
   return Math.max(0, (hole - post) / 0.6);
 }
 
+/** Makes a scene-level group ride along with the viewer's fence group (the viewer lets the user slide
+ *  and turn the whole fence). Call it right after the group is (re)built from world positions: from then
+ *  on, each frame, group.matrix = fenceNow x inverse(fenceAtBuild). One hook per scene, shared. */
+export function followFence(w, T, group) {
+  const scene = w.__f3d.scene, fg = w.__f3d.fenceGroup; fg.updateWorldMatrix(true, false);
+  group.matrixAutoUpdate = false; group.userData.followBase = new T.Matrix4().copy(fg.matrixWorld).invert();
+  group.matrix.identity(); group.matrixWorldNeedsUpdate = true;
+  const reg = scene.userData.__gfsFollow || (scene.userData.__gfsFollow = new Set()); reg.add(group);
+  if (!scene.userData.__gfsFollowHook) {
+    const prev = scene.onBeforeRender; scene.userData.__gfsFollowHook = true;
+    scene.onBeforeRender = function () {
+      try { const f = w.__f3d.fenceGroup; f.updateWorldMatrix(true, false); reg.forEach(g => { if (!g.parent) { reg.delete(g); return } g.matrix.multiplyMatrices(f.matrixWorld, g.userData.followBase); g.matrixWorldNeedsUpdate = true }) } catch (_) { }
+      return prev && prev.apply(this, arguments);
+    };
+  }
+}
+
 export function createSiteKit(viewer, opts = {}) {
   const cfg = { ...DEFAULTS, ...opts };
-  let T = null, group = null, soil = null, mats = null, unsub = null, on = false, win = null;
+  let T = null, group = null, parts = null, soil = null, mats = null, unsub = null, on = false, win = null, sceneHook = null;
   const undo = [];                       // functions that put the viewer's own objects back
   let last = { posts: 0, concrete: 0, driven: 0, tamped: 0, steelGateParts: 0, bags: 0 };
 
@@ -103,7 +120,7 @@ export function createSiteKit(viewer, opts = {}) {
     if (mats && mats.T === T) return mats;
     mats = {
       T,
-      concrete: new T.MeshStandardMaterial({ color: 0xb9b6ad, roughness: 0.96, metalness: 0, transparent: true, opacity: 0.62, depthWrite: false }),
+      concrete: new T.MeshStandardMaterial({ color: 0x9f9c94, roughness: 1, metalness: 0, envMapIntensity: 0.15, transparent: true, opacity: 0.9 }),
       steel: new T.MeshStandardMaterial({ color: 0xb8c5ce, roughness: 0.42, metalness: 0.85 }),
       tube: new T.MeshStandardMaterial({ color: 0x23262a, roughness: 0.5, metalness: 0.6 }),
       soil: new T.MeshStandardMaterial({ color: 0x6f5438, roughness: 1, metalness: 0, fog: false }),
@@ -130,10 +147,24 @@ export function createSiteKit(viewer, opts = {}) {
 
   function build() {
     const w = W(); if (!w || !on) return;
-    if (w !== win) { win = w; group = null; mats = null; undo.length = 0 }
+    if (w.document !== win) { win = w.document; group = null; parts = null; mats = null; undo.length = 0; sceneHook = null }   // a reloaded viewer is a new document
     restoreAll(); clearGroup();
     if (!group) { group = new T.Group(); group.name = 'gfsSiteKit'; group.userData.noShadow = 1 }
     if (group.parent !== w.__f3d.scene) w.__f3d.scene.add(group);
+    // Everything built for the fence lives in `parts`, kept in the fence group's own coordinates and
+    // carried with it every frame, so sliding or turning the fence in the viewer takes the buried posts
+    // and concrete along. It is not parented into the fence group: the viewer owns and walks that group.
+    const fg0 = w.__f3d.fenceGroup;
+    parts = new T.Group(); parts.name = 'gfsSiteKitParts'; parts.matrixAutoUpdate = false; group.add(parts);
+    fg0.updateWorldMatrix(true, false);
+    const toFence = new T.Matrix4().copy(fg0.matrixWorld).invert();
+    parts.matrix.copy(fg0.matrixWorld); parts.matrixWorldNeedsUpdate = true;
+    if (!sceneHook) {
+      const scene = w.__f3d.scene, prev = scene.onBeforeRender;
+      sceneHook = { scene, prev };
+      scene.onBeforeRender = function () { try { if (on && parts && parts.parent) { const f = w.__f3d.fenceGroup; f.updateWorldMatrix(true, false); parts.matrix.copy(f.matrixWorld); parts.matrixWorldNeedsUpdate = true } } catch (_) { } return prev && prev.apply(this, arguments) };
+    }
+    const place = mesh => { mesh.updateMatrix(); mesh.matrix.premultiply(toFence); mesh.matrix.decompose(mesh.position, mesh.quaternion, mesh.scale); parts.add(mesh) };
     const M = materials(), fg = w.__f3d.fenceGroup;
     const stat = { posts: 0, concrete: 0, driven: 0, tamped: 0, steelGateParts: 0, bags: 0 };
     const specOf = name => { try { return w.__f3dStyleSpec(name) || {} } catch (_) { return {} } };
@@ -176,11 +207,11 @@ export function createSiteKit(viewer, opts = {}) {
             ? new T.Mesh(new T.CylinderGeometry(2.375 * IN / 2, 2.375 * IN / 2, depth, 18), M.steel)
             : new T.Mesh(round ? new T.CylinderGeometry(wX / 2, wX / 2, depth, 18) : new T.BoxGeometry(wX, depth, wZ), o.material);
           stub.position.set(p.x, bottom - depth / 2, p.z); stub.quaternion.copy(q); stub.userData.kit = 'buriedPost';
-          group.add(stub);
+          place(stub);
           if (how === 'concrete') {
             const dia = (gate ? cfg.gateHoleDiaIn : cfg.holeDiaIn) * IN, hd = cfg.holeDepthIn * IN;
             const c = new T.Mesh(new T.CylinderGeometry(dia / 2, dia / 2 * 0.94, hd, 24), M.concrete);
-            c.position.set(p.x, bottom - hd / 2 + 0.01, p.z); c.userData.kit = 'concrete'; c.renderOrder = 2; group.add(c);
+            c.position.set(p.x, bottom - hd / 2 + 0.01, p.z); c.userData.kit = 'concrete'; c.renderOrder = 2; place(c);
             stat.concrete++; stat.bags += bagsPerHole({ holeDiaIn: gate ? cfg.gateHoleDiaIn : cfg.holeDiaIn, holeDepthIn: cfg.holeDepthIn, postWIn: wX * 12, postDIn: wZ * 12, postDepthIn: cfg.postDepthIn });
           } else stat[how]++;
           stat.posts++;
@@ -214,7 +245,7 @@ export function createSiteKit(viewer, opts = {}) {
 
   const api = {
     async enable() { T = await viewer.three(); on = true; if (!unsub) unsub = viewer.onRebuild(() => setTimeout(build, 60)); build(); return api.state() },
-    clear() { on = false; if (unsub) { unsub(); unsub = null } restoreAll(); clearGroup(); if (group && group.parent) group.parent.remove(group); viewer.redraw && viewer.redraw() },
+    clear() { on = false; if (unsub) { unsub(); unsub = null } restoreAll(); clearGroup(); if (group && group.parent) group.parent.remove(group); if (sceneHook) { try { sceneHook.scene.onBeforeRender = sceneHook.prev } catch (_) { } sceneHook = null } viewer.redraw && viewer.redraw() },
     set(patch) { Object.assign(cfg, patch || {}); if (on) build(); return api.state() },
     refresh: build,
     state: () => ({ on, config: { ...cfg }, built: { ...last } }),

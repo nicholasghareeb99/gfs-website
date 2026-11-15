@@ -1,4 +1,4 @@
-// The 3D viewer add-on (below-grade view, steel gate frames). These three modules are reviewed
+// The 3D viewer add-on (below-grade view, steel gate frames). These modules are reviewed
 // copies of gfence-app's pending/executive-ipad-pencil/source/studio/ files and are pinned by hash:
 // change them there first, review, then copy and update the pins here in the same change.
 import test from 'node:test';
@@ -11,8 +11,9 @@ import { execFileSync } from 'node:child_process';
 import { ROOT } from './helpers.mjs';
 
 const PINS = {
-  'studio/in-viewer.mjs': '525f8ed90b3303cb37a54e71639ac610dfc907802baf92a8c266d3ab4565a191',
-  'studio/site-kit.mjs': 'e20fddddb0e2bbe183a0b6d593755dbd4fd3c8b670ca6342be1954aff11a2b4f',
+  'studio/in-viewer.mjs': '3137d7f69e7269ca8e4dfbe9b6187dbf5451fec2ece0e3acb6679260a562253d',
+  'studio/site-kit.mjs': '5271151f2990931aea1442095678fdd2cb5dd0670216f88a273ef53ba02f205e',
+  'studio/hardware-kit.mjs': '3dca55da7705a8110917448889b5891cade27ebd2e1768cfada852f4cc7a0e5d',
   'studio/realism.mjs': '371c304f0f519f05eff9a50e1a726da4e0b5f16b1da2e1829571df15aaa9303b',
 };
 const IMPORT = '(function _gfsModelStudio(){try{import("./studio/in-viewer.mjs").then(m=>m.boot(window)).catch(()=>{})}catch(_){}})();';
@@ -20,7 +21,7 @@ const ANCHOR = 'window.__cam=()=>cam;window.__rend=()=>renderer;';
 const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
 const count = (text, part) => text.split(part).length - 1;
 
-test('the three add-on modules are exactly the reviewed copies', () => {
+test('the add-on modules are exactly the reviewed copies', () => {
   for (const [rel, want] of Object.entries(PINS)) assert.equal(sha(path.join(ROOT, 'public', rel)), want, rel);
   assert.deepEqual(fs.readdirSync(path.join(ROOT, 'public/studio')).sort(), Object.keys(PINS).map(p => path.basename(p)).sort(), 'nothing else lives in public/studio');
 });

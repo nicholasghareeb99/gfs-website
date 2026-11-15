@@ -5,6 +5,7 @@
 // If the file is missing on a site, that import fails quietly and the viewer is unchanged.
 
 import { createSiteKit } from './site-kit.mjs';
+import { createHardwareKit } from './hardware-kit.mjs';
 
 export function viewerAdapter(w) {
   const listeners = new Set(); let sig = '';
@@ -35,10 +36,16 @@ export async function boot(w) {
   const kit = createSiteKit(viewer, { ...store.get('kitCfg', {}), xray: false, footings: false });
   w.__gfsSiteKit = kit; w.__gfsViewerAdapter = viewer;
   await kit.enable();                                                      // steel gate frames draw from here on
+  // Detailed gate hardware (Nationwide hinges, latches, drop rods). The customer portal keeps the plain
+  // hardware until this has been looked over there; host pages (the Model Studio) switch it themselves.
+  const hardware = createHardwareKit(viewer, {}); w.__gfsHardwareKit = hardware;
   if (hosted || q.get('portal') === '1') return kit;                       // host pages bring their own buttons
+  if (store.get('viewerHardware', true)) { try { await hardware.enable() } catch (e) { console.warn('[gfs] hardware', e) } }
   const rail = w.document.getElementById('rail'); if (!rail) return kit;
   const mk = (label, title, fn) => { const b = w.document.createElement('button'); b.className = 'rbtn'; b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.setAttribute('aria-pressed', 'false'); b.textContent = label; b.addEventListener('click', () => fn(b)); rail.insertBefore(b, rail.firstChild); return b };   // at the top: the rail runs off short screens
   mk('⏚', 'Below grade: see the posts in the ground and the concrete', b => { const on = !kit.state().config.xray; kit.set({ xray: on, footings: on }); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on) });
+  const hw = mk('⚙', 'Detailed gate hardware', async b => { const on = b.getAttribute('aria-pressed') !== 'true'; try { if (on) await hardware.enable(); else hardware.clear(); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); store.set('viewerHardware', on) } catch (e) { console.warn('[gfs] hardware', e) } });
+  if (hardware.state().on !== false && store.get('viewerHardware', true)) { hw.setAttribute('aria-pressed', 'true'); hw.classList.add('on') }
   // Photo-real materials are opt-in per device until they have been looked over on real hardware.
   let realism = null;
   const real = mk('◈', 'Photo-real materials (this device)', async b => {
