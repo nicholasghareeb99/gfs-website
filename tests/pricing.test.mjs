@@ -172,7 +172,7 @@ test('errors carry no rates, paths or stack traces', async () => {
 
 test('the price list is cached for five minutes and the token until it expires', async () => {
   resetCaches();
-  const g = google();
+  const g = google({ createdAtMs: 900_000 });
   const send = now => handle(new Request('https://example.test/x', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(project) }), { fetcher: g.fetcher, env: ENV, now });
   const count = what => g.calls.filter(u => u.includes(what)).length;
   await send(1000); await send(1100); await send(1290);
@@ -230,14 +230,14 @@ test('the counter writes only its own collection, with no rate in it, and the pi
   await sendWith(g, { ping: true });
   assert.equal(g.commits.length, 0);
   await sendWith(g, { ...project, compare: true });
-  assert.equal(g.commits.length, 1);
-  const text = JSON.stringify(g.commits[0]);
-  const names = g.commits[0].writes.map(w => w.update.name);
+  assert.equal(g.commits.length, 2, 'one attempt counter, one priced-range counter');
+  const text = JSON.stringify(g.commits);
+  const names = g.commits.flatMap(c => c.writes.map(w => w.update.name));
   assert.ok(names.every(n => n.includes('/documents/ballparkPriceUse/' + RECEIPT)), names.join());
   assert.doesNotMatch(text, /settings|websiteLeads|perFoot|"low"|"high"/);
   // Refused requests (bad input, unknown receipt) are not counted.
   await ask({ ...project, receipt: 'bad' }, g); await ask({ ...project, receipt: 'web_zzzzzzzzzzzzzzzz9999' }, g);
-  assert.equal(g.commits.length, 1);
+  assert.equal(g.commits.length, 2);
 });
 
 test('if the counter cannot be written the answer is 503 (the page falls back), unless the owner turns the limit off', async () => {
@@ -248,7 +248,7 @@ test('if the counter cannot be written the answer is 503 (the page falls back), 
   assert.doesNotMatch(await response.text(), /403|ballparkPriceUse|permission/i);
   resetCaches();
   assert.equal((await sendWith(g, project, 1_800_000_000, { ...ENV, GFS_PRICING_LIMIT: 'off' })).status, 200);
-  assert.equal(g.commits.length, 1, 'with the limit off nothing more is written');
+  assert.equal(g.commits.length, 1, 'with the limit off nothing more is written (the one failed commit above)');
 });
 
 test('a lead that is not there yet gives 409 and is priced on a later try (the page retries)', async () => {
