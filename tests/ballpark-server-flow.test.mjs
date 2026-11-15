@@ -13,7 +13,7 @@ const ANSWER = { low: 5700, high: 6300, comparisons: [
 ] };
 const json = (body, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 
-function page({ mode = 'by-request', reply, ping = () => json({ ok: true }) } = {}) {
+function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage } = {}) {
   const timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
   const node = () => Object.defineProperty({ textContent: '', hidden: false, style: {}, children: [], dataset: {},
     classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } },
@@ -22,6 +22,7 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }) } = 
   const abortable = signal => new Promise((_, reject) => { if (signal) signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
   const globals = {
     ...timers,
+    ...(storage ? { sessionStorage: storage } : {}),
     el: id => nodes[id] || (nodes[id] = node()),
     document: { createElement: node },
     fetch: (url, options) => {
@@ -138,9 +139,9 @@ test('a not-found-yet receipt (409) is asked again after a pause, then the range
   p.api.checkServerPrice(); await settle(p, 0);
   p.choose(); p.unlock();
   await settle(p, 400); assert.equal(p.priceCalls().length, 1);
-  await settle(p, 2000); assert.equal(p.priceCalls().length, 2);
+  await settle(p, 600); assert.equal(p.priceCalls().length, 2);
   assert.equal(p.text('bp-price-range'), 'Working out your range…');
-  await settle(p, 2000); assert.equal(p.priceCalls().length, 3);
+  await settle(p, 1500); assert.equal(p.priceCalls().length, 3);
   assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
 });
 
@@ -226,10 +227,10 @@ test('delayed lead: a few spaced retries, then the by-request wording, never an 
   p.api.checkServerPrice(); await settle(p, 0);
   p.choose(); p.unlock();
   await settle(p, 400);
-  for (let i = 1; i <= 5; i++) { assert.equal(p.priceCalls().length, i); assert.equal(p.text('bp-price-range'), 'Working out your range…'); await settle(p, 2000); }
-  assert.equal(p.priceCalls().length, 6, 'first ask plus five retries, two seconds apart');
+  for (const [i, pause] of [[1, 600], [2, 1500], [3, 3000], [4, 4000]]) { assert.equal(p.priceCalls().length, i); assert.equal(p.text('bp-price-range'), 'Working out your range…'); await settle(p, pause); }
+  assert.equal(p.priceCalls().length, 5, 'first ask plus four retries, spaced 0.6 s, 1.5 s, 3 s, 4 s');
   await settle(p, 20000);
-  assert.equal(p.priceCalls().length, 6);
+  assert.equal(p.priceCalls().length, 5);
   assert.deepEqual(card(p), ['We will send your price', 'Your request is received. We will get your price to you.']);
 });
 
@@ -341,4 +342,27 @@ test('an error while sending leaves the button and the email field usable again'
   assert.equal(e.nodes['bp-email-address'].disabled, false);
   assert.equal(e.nodes['bp-action-email'].textContent, 'Request emailed estimate');
   assert.match(e.nodes['bp-email-status'].textContent, /Could not send that right now/);
+});
+
+test('an answer that priced a different layout than the one asked about is not used', async () => {
+  const p = page({ reply: () => json({ ...ANSWER, parts: [{ style: 'Galv Chain Link 4ft', feet: 999 }] }) });
+  p.api.checkServerPrice(); await settle(p, 0);
+  p.choose(); p.unlock(); await settle(p);
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+  const ok = page({ reply: () => json({ ...ANSWER, parts: [{ style: 'galv chain link 4ft', feet: 120 }] }) });
+  ok.api.checkServerPrice(); await settle(ok, 0);
+  ok.choose(); ok.unlock(); await settle(ok);
+  assert.equal(ok.text('bp-price-range'), '$5,700 – $6,300');
+});
+
+test('the capability answer is kept for the browser session, so a second page load does not ask again', async () => {
+  const store = new Map();
+  const keep = { getItem: k => store.has(k) ? store.get(k) : null, setItem: (k, v) => store.set(k, v) };
+  const first = page({ reply: () => json(ANSWER), storage: keep });
+  first.api.checkServerPrice(); await settle(first, 0);
+  assert.equal(first.fetches.length, 1);
+  const second = page({ reply: () => json(ANSWER), storage: keep });
+  second.api.checkServerPrice(); await settle(second, 0);
+  assert.equal(second.fetches.length, 0);
+  assert.equal(second.api.serverPriceExpected(), true);
 });

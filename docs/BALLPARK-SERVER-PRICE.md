@@ -4,7 +4,7 @@
 
 The instant ballpark range used to be worked out in the visitor's browser from a public price list. This moves the math to a Netlify function (`netlify/functions/ballpark-price.mjs`) so the per-foot and gate rates no longer have to be public. Customers see the same range, the same way: they send the contact form, then the range and the comparison list appear.
 
-- The function reads the rates from Firestore `settings/global` with a service account, prices the project with the same rules as the page, and answers with `low`, `high` and a comparison list (`style`, `low`, `high`). It never sends a total, a rate, billable feet or waste.
+- The function reads the rates from Firestore `settings/global` with a service account, prices the project with the same rules as the page, and answers with `low`, `high`, `parts` (the style and feet it priced, so the page can check the answer is for its layout) and a comparison list (`style`, `low`, `high`). It never sends a total, a rate, billable feet or waste.
 - It only prices a project for a receipt that exists in `websiteLeads` and is under 24 hours old.
 - Each receipt is limited to 60 priced requests, and 20 in any one minute (a comparison list counts as one). Past that it answers 429 and the page says "We will send your price".
 - Until the key is added it answers 503 `not-configured`, so deploying it changes nothing.
@@ -16,7 +16,7 @@ The instant ballpark range used to be worked out in the visitor's browser from a
 1. **Owner:** create the service account key (see the role below) and add it in Netlify as `GFS_PRICING_SERVICE_ACCOUNT` (the JSON, raw or base64). `GFS_FIREBASE_PROJECT_ID` is already set. Do not paste the key anywhere else.
 2. **Deploy the website.** Open the ballpark page and confirm it still shows the same range as before (it still comes from the public list, and the function is not called).
 3. **Publisher:** stop emitting `pricing` in `settings/public` (keep `styleNames`, photos and specs).
-4. **Check:** reload the ballpark page, do a test request, and confirm the range appears after the form. In the browser network tab there should be a POST to `/.netlify/functions/ballpark-price` returning 200 with only `low`, `high`, `comparisons`.
+4. **Check:** reload the ballpark page, do a test request, and confirm the range appears after the form. In the browser network tab there should be a POST to `/.netlify/functions/ballpark-price` returning 200 with only `low`, `high`, `parts`, `comparisons`.
 
 Optional: turn on a Firestore TTL policy for field `expireAt` on collection `ballparkPriceUse` so the small counter documents clean themselves up.
 
@@ -31,8 +31,20 @@ IAM cannot limit these to particular collections, and Firestore security rules d
 
 ## What this does not stop
 
-Someone with one valid receipt can still ask many different footages, up to the cap, and the answers are rounded to $100 with a 5% band, which is the remaining protection against working a rate backwards. Getting a receipt needs a real contact form submission, which leaves a lead behind. The caps keep that to at most 60 questions per lead.
+The range is the product, so it always says something about the rate. At a long length the answer is a 5% band rounded to $100, which pins the per-foot rate for that style to within a fraction of a percent; at short lengths the $100 rounding hides more. Anyone who really sends the contact form can work out a rate for the styles that way. What the function stops is doing it in bulk with no lead: a price needs a real receipt, under 24 hours old, and each receipt gets at most 60 priced requests (20 a minute). The remaining protection is the cost of leaving a real lead per 60 questions, not the rounding.
 
 ## Rolling back
 
 Quickest: remove `GFS_PRICING_SERVICE_ACCOUNT` in Netlify (the function answers 503, the page uses "We will send your price"). To get the old public range back, have the publisher emit `pricing` again; the page uses it the moment it is present. To remove the function entirely, delete `netlify/functions/ballpark-price.mjs` and redeploy.
+
+## Page wording that still promises a price range
+
+Left as it is, for aligning later (after the switch-on these still match what the page does when the function is on; if it is turned off the page says "We will send your price" instead).
+
+- `public/quote/ballpark/index.html:22`, `:27`, `:37` meta, og and twitter descriptions: "...pick a style, and see a price range."
+- `public/quote/ballpark/index.html:288` lede: "Draw it on the map or type the length, pick a style, and see a price range."
+- `public/llms.txt:28`: "...and see a planning price range"
+- `public/quote/index.html:285` lede and `:295` card: "planning range" / "planning price range"
+- `public/brochure/index.html:290`: "Share your contact details to see a planning range for review."
+- `public/contact/index.html:486`, `public/guides/installation-process/index.html:285`, `public/terms/index.html:284`: "instant ballpark quote tool" / "instant range" / "instant quote tool ... price range"
+- `public/build.txt`: no current promise. Lines 106 and 107 are an old release note ("PRICE FULLY GATED ... the range mode that showed numbers to everyone is off").

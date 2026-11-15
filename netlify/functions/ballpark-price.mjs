@@ -16,7 +16,7 @@
 // POST /.netlify/functions/ballpark-price   (same-origin, application/json, 8 kB max)
 //   { ping:true }                                  -> 200 {ok:true} when configured. No data, no receipt.
 //   { receipt, parts:[{style, feet, height, singleGates, doubleGates}],
-//     removal:{on, material, feet}, compare:true }       -> 200 {low, high, comparisons:[{style, low, high}]}
+//     removal:{on, material, feet}, compare:true }       -> 200 {low, high, parts:[{style, feet}], comparisons:[{style, low, high}]}
 //                                                     or 200 {needsQuote:true}
 // A price is only given for a receipt that exists in websiteLeads (and is
 // under a day old), so a price always leaves a lead behind, and each receipt
@@ -287,7 +287,9 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     const { styles, factors } = await loadSettings(fetcher, config.project, token, now);
     const price = priceProject(styles, factors, input);
     if (!price) return reply(200, { needsQuote: true });
-    const out = { low: price.low, high: price.high };
+    // parts echoes what was priced (the style as named on the list, and the feet
+    // the customer sent) so the page can check the answer is for its layout.
+    const out = { low: price.low, high: price.high, parts: input.parts.map(p => ({ style: (styles[slugify(p.style)] || {}).name || p.style, feet: p.feet })) };
     if (input.compare) out.comparisons = compareStyles(styles, factors, input);
     return reply(200, out);
   } catch (e) {
