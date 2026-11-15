@@ -20,8 +20,9 @@
 //                                                     or 200 {needsQuote:true}
 // A price is only given for a receipt that exists in websiteLeads (and is
 // under a day old), so a price always leaves a lead behind, and each receipt
-// is limited to 60 priced requests (20 a minute) by a counter in the
-// ballparkPriceUse collection. Over the limit: 429.
+// gets at most 60 priced ranges (a failed or needs-quote answer does not count)
+// and 20 attempts a minute, by counters in the ballparkPriceUse collection.
+// Over the limit: 429 (with Retry-After for the minute limit).
 //
 // The answer never carries a total, a per-foot figure, billable feet or
 // anything else a rate follows from directly.
@@ -32,10 +33,11 @@ const MAX_FEET = 2000;
 const MAX_BODY = 8192;
 const RECEIPT_RE = /^web_[a-zA-Z0-9_-]{16,80}$/;
 const RECEIPT_MAX_AGE_MS = 24 * 3600 * 1000;
+const CLOCK_SKEW_MS = 5 * 60 * 1000;   // a lead stamped slightly in the future is clock skew; further is not trusted
 const SETTINGS_TTL = 300; // seconds
-// Bound on repeated pricing questions for one receipt (see countUse below).
-const LIFETIME_CAP = 60;   // priced requests per receipt; a comparison list counts as one
-const MINUTE_CAP = 20;     // priced requests per receipt in one clock minute
+// Two separate bounds for one receipt (see countAttempt and takePricedSlot below).
+const LIFETIME_CAP = 60;   // priced ranges actually returned per receipt; a comparison list counts as one
+const MINUTE_CAP = 20;     // attempts (any outcome) per receipt in one clock minute
 const USE_COLLECTION = 'ballparkPriceUse';
 
 // ---- pricing math: a port of assets/js/ballpark.js, kept in step with it ---
@@ -218,44 +220,67 @@ async function loadSettings(fetcher, project, token, now) {
   settingsCache = { at: now, project, value };
   return value;
 }
-// 'ok', 'missing' or 'expired'. A receipt is only good for a day.
+// How old the lead is, from the best time we can trust. Firestore's own
+// createTime (set by the database when the document was created, so the
+// sender cannot choose it) wins when the REST answer carries it. Otherwise the
+// createdAtMs the intake function wrote (also server time) is used. Anything
+// missing, not a number, zero or negative, or more than a few minutes in the
+// future is refused: an unreadable age never authorises a price.
+// Returns 'ok', 'expired' or 'invalid'.
+export function leadAgeStatus(doc, nowMs) {
+  let made;
+  if (doc && doc.createTime !== undefined) made = typeof doc.createTime === 'string' ? Date.parse(doc.createTime) : NaN;
+  else {
+    const field = doc && doc.fields ? doc.fields.createdAtMs : undefined;
+    made = field && typeof plain(field) === 'number' ? plain(field) : NaN;
+  }
+  if (!Number.isFinite(made) || made <= 0 || made > nowMs + CLOCK_SKEW_MS) return 'invalid';
+  return nowMs - made > RECEIPT_MAX_AGE_MS ? 'expired' : 'ok';
+}
+// 'ok', 'missing', 'expired' or 'invalid'. A receipt is only good for a day.
 async function leadStatus(fetcher, project, token, receipt, now) {
   const res = await fetcher(docUrl(project, 'websiteLeads/' + encodeURIComponent(receipt)), { headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
   if (res.status === 404) return 'missing';
   if (!res.ok) throw Error('Could not check the request (HTTP ' + res.status + ')');
-  const made = Number(plain(((await res.json()).fields || {}).createdAtMs));
-  return Number.isFinite(made) && made > 0 && now * 1000 - made > RECEIPT_MAX_AGE_MS ? 'expired' : 'ok';
+  return leadAgeStatus(await res.json(), now * 1000);
 }
-// Counts one priced request against the receipt, atomically, in a collection
-// of its own (not the lead, which the Executive app reads). The commit's
-// increment transforms return the new values, so there is no read-modify-write
-// to race: two requests at once each get their own number. Returns
-// {lifetime, minute}. Counts are kept even for refused requests.
-// Needs write access to this one collection (docs/BALLPARK-SERVER-PRICE.md).
-// expireAt lets a Firestore TTL policy clean the small documents up.
-async function countUse(fetcher, project, token, receipt, now) {
-  const base = 'projects/' + project + '/databases/(default)/documents/' + USE_COLLECTION + '/';
-  const minute = Math.floor(now / 60);
-  const write = (id, keepSeconds) => ({
-    update: { name: base + id, fields: { expireAt: { timestampValue: new Date((now + keepSeconds) * 1000).toISOString() } } },
-    updateMask: { fieldPaths: ['expireAt'] },
-    updateTransforms: [{ fieldPath: 'count', increment: { integerValue: '1' } }],
-  });
+// One atomic increment of a counter document in a collection of its own (not
+// the lead, which the Executive app reads). The commit's increment transform
+// returns the new value, so there is no read-modify-write to race: two requests
+// at once each get their own number. expireAt lets a Firestore TTL policy clean
+// the small documents up. Needs write access to this one collection
+// (docs/BALLPARK-SERVER-PRICE.md).
+async function increment(fetcher, project, token, id, now, keepSeconds) {
+  const name = 'projects/' + project + '/databases/(default)/documents/' + USE_COLLECTION + '/' + id;
   const res = await fetcher('https://firestore.googleapis.com/v1/projects/' + project + '/databases/(default)/documents:commit', {
     method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ writes: [write(receipt, 2 * 86400), write(receipt + '_m' + minute, 3600)] }), signal: AbortSignal.timeout(10000),
+    body: JSON.stringify({ writes: [{
+      update: { name, fields: { expireAt: { timestampValue: new Date((now + keepSeconds) * 1000).toISOString() } } },
+      updateMask: { fieldPaths: ['expireAt'] },
+      updateTransforms: [{ fieldPath: 'count', increment: { integerValue: '1' } }],
+    }] }), signal: AbortSignal.timeout(10000),
   });
   if (!res.ok) throw Error('Could not count the request (HTTP ' + res.status + ')');
   const results = (await res.json()).writeResults || [];
-  const value = i => Number(((results[i] || {}).transformResults || [])[0] && results[i].transformResults[0].integerValue);
-  const lifetime = value(0), perMinute = value(1);
-  if (!Number.isFinite(lifetime) || !Number.isFinite(perMinute)) throw Error('Count was not returned');
-  return { lifetime, minute: perMinute };
+  const n = Number(((results[0] || {}).transformResults || [])[0] && results[0].transformResults[0].integerValue);
+  if (!Number.isFinite(n)) throw Error('Count was not returned');
+  return n;
 }
+// Attempt throttle: every request that gets this far (a real, fresh lead)
+// counts in this clock minute, whatever its outcome. It only bounds how fast a
+// receipt can ask; it never touches the lifetime allowance.
+const countAttempt = (fetcher, project, token, receipt, now) => increment(fetcher, project, token, receipt + '_m' + Math.floor(now / 60), now, 3600);
+// Lifetime allowance: taken only when a priced range is about to be returned,
+// in one atomic increment sent after the range has been worked out. The
+// returned number is this request's own place in line, so of any number of
+// simultaneous requests only those numbered 1..LIFETIME_CAP get a range, and a
+// range is never returned unless its increment committed. An outage before this
+// point, a minute throttle, or a project the function cannot price takes nothing.
+const takePricedSlot = (fetcher, project, token, receipt, now) => increment(fetcher, project, token, receipt, now, 2 * 86400);
 export function resetCaches() { tokenCache = null; settingsCache = null; }
 
 // ---- handler --------------------------------------------------------------
-const reply = (status, body) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
+const reply = (status, body, extra = {}) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...extra } });
 
 export async function handle(request, { fetcher = fetch, env = process.env, now = Math.floor(Date.now() / 1000) } = {}) {
   if (request.method !== 'POST') return reply(405, { error: 'POST only' });
@@ -280,9 +305,10 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     const lead = await leadStatus(fetcher, config.project, token, input.receipt, now);
     if (lead === 'missing') return reply(409, { error: 'Request not found yet' });
     if (lead === 'expired') return reply(403, { error: 'Request too old' });
-    if (env.GFS_PRICING_LIMIT !== 'off') {
-      const used = await countUse(fetcher, config.project, token, input.receipt, now);
-      if (used.lifetime > LIFETIME_CAP || used.minute > MINUTE_CAP) return reply(429, { error: 'Too many price requests for this project. Please try again later, or we will send your price.' });
+    if (lead === 'invalid') return reply(403, { error: 'Request not valid' });
+    const limited = env.GFS_PRICING_LIMIT !== 'off';
+    if (limited && await countAttempt(fetcher, config.project, token, input.receipt, now) > MINUTE_CAP) {
+      return reply(429, { error: 'Too many price requests for this project. Please try again in a minute.' }, { 'Retry-After': String(60 - (now % 60)) });
     }
     const { styles, factors } = await loadSettings(fetcher, config.project, token, now);
     const price = priceProject(styles, factors, input);
@@ -291,6 +317,10 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     // the customer sent) so the page can check the answer is for its layout.
     const out = { low: price.low, high: price.high, parts: input.parts.map(p => ({ style: (styles[slugify(p.style)] || {}).name || p.style, feet: p.feet })) };
     if (input.compare) out.comparisons = compareStyles(styles, factors, input);
+    // Only now, with the range in hand and nothing left that can fail, take the lifetime slot.
+    if (limited && await takePricedSlot(fetcher, config.project, token, input.receipt, now) > LIFETIME_CAP) {
+      return reply(429, { error: 'Too many price requests for this project. We will send your price.' });
+    }
     return reply(200, out);
   } catch (e) {
     console.error('ballpark-price', e && e.message);

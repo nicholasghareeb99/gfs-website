@@ -66,7 +66,7 @@ export function priceFunctionEnv(extra = {}) {
     ...extra,
   };
 }
-export function fakeGoogle({ pricing, receipts = [], factors = { remWood: 5, remChain: 3, remOther: 6 }, createdAtMs = Date.now(), commitStatus = 200, leadDelay = 0 }) {
+export function fakeGoogle({ pricing, receipts = [], factors = { remWood: 5, remChain: 3, remOther: 6 }, createdAtMs = Date.now(), commitStatus = 200, leadDelay = 0, leadDoc = null, commitFor = null, onCommit = null }) {
   const calls = [], counts = new Map(), commits = [];
   let leadChecks = 0;
   const fetcher = async (url, options = {}) => {
@@ -79,7 +79,9 @@ export function fakeGoogle({ pricing, receipts = [], factors = { remWood: 5, rem
     if (url.endsWith('documents:commit')) {
       const body = JSON.parse(options.body);
       commits.push(body);
-      if (commitStatus !== 200) return new Response('{}', { status: commitStatus });
+      const forced = commitFor ? commitFor(body, commits.length) : commitStatus;
+      if (forced !== 200) return new Response('{}', { status: forced });
+      if (onCommit) await onCommit(body);
       return new Response(JSON.stringify({ writeResults: body.writes.map(w => {
         const id = w.update.name.split('/').pop();
         counts.set(id, (counts.get(id) || 0) + 1);
@@ -89,6 +91,7 @@ export function fakeGoogle({ pricing, receipts = [], factors = { remWood: 5, rem
     const lead = decodeURIComponent(url.split('websiteLeads/')[1] || '');
     // leadDelay: the lead document does not exist yet for the first few checks (the intake function is slow).
     if (receipts.includes(lead) && ++leadChecks <= leadDelay) return new Response('{}', { status: 404 });
+    if (leadDoc && receipts.includes(lead)) { const doc = leadDoc(lead); if (doc) return new Response(JSON.stringify(doc)); }
     return receipts.includes(lead) ? new Response(JSON.stringify({ fields: { createdAtMs: { doubleValue: createdAtMs } } })) : new Response('{}', { status: 404 });
   };
   return { calls, fetcher, counts, commits };

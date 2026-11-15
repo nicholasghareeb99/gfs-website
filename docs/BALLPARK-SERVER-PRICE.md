@@ -5,11 +5,25 @@
 The instant ballpark range used to be worked out in the visitor's browser from a public price list. This moves the math to a Netlify function (`netlify/functions/ballpark-price.mjs`) so the per-foot and gate rates no longer have to be public. Customers see the same range, the same way: they send the contact form, then the range and the comparison list appear.
 
 - The function reads the rates from Firestore `settings/global` with a service account, prices the project with the same rules as the page, and answers with `low`, `high`, `parts` (the style and feet it priced, so the page can check the answer is for its layout) and a comparison list (`style`, `low`, `high`). It never sends a total, a rate, billable feet or waste.
-- It only prices a project for a receipt that exists in `websiteLeads` and is under 24 hours old.
-- Each receipt is limited to 60 priced requests, and 20 in any one minute (a comparison list counts as one). Past that it answers 429 and the page says "We will send your price".
+- It only prices a project for a receipt that exists in `websiteLeads` and is under 24 hours old (see "How old a lead is" below).
+- Two separate limits apply to each receipt (see "Limits" below): 20 attempts in any one clock minute, and 60 priced ranges for the life of the receipt. Past a limit it answers 429 and the page falls back to "We will send your price".
 - Until the key is added it answers 503 `not-configured`, so deploying it changes nothing.
 - The page only uses it when the public price document has no prices (the "by request" state). While prices are still public, the page never calls it.
 - If the function is off, slow, over its limit or errors, the page falls back to "We will send your price" and the office quotes by hand. Nothing shows an error.
+
+## Limits (attempts and priced ranges are counted apart)
+
+- **Attempts, per clock minute: 20.** Every request for a real, fresh lead counts here, whatever happens to it (priced, needs a quote, 503). It is only a cheap bound on how fast one receipt can ask. Over it: 429 with a `Retry-After` header (seconds to the next minute). The next minute starts a new window and prices normally. Counter document: `ballparkPriceUse/{receipt}_m{minute}`.
+- **Priced ranges, lifetime: 60.** Counted only when a range is actually returned. The function works out the range first (nothing is written), then takes one slot with a single atomic Firestore increment on `ballparkPriceUse/{receipt}`, and sends the range only if the number that increment returned is 60 or less. Why this is safe: the increment returns that request's own place in line, so of any number of simultaneous requests only the ones numbered 1 to 60 get a range (two requests cannot both get the last slot, there is no read-then-write to race), and a range is never sent unless its increment committed (if the commit fails the customer gets a 503 and no range, and a retry takes one slot, not two). A 503, a minute throttle, a needs-a-quote answer, a bad request or a missing lead take nothing from the 60. Past 60: 429 with no `Retry-After` (waiting does not help) and no range in the body; the counter keeps rising but nothing more is sent.
+- `GFS_PRICING_LIMIT=off` skips both counters.
+
+## How old a lead is
+
+The age comes from the lead document's own Firestore `createTime` when the REST answer has it (the database sets it, the sender cannot). If it is absent the intake function's `createdAtMs` (also written with server time) is used. A lead is refused with 403 `Request not valid` when the time is missing, not a number (text is refused), zero or negative, unreadable, or more than 5 minutes in the future (a little clock skew is allowed). A readable time older than 24 hours gives 403 `Request too old`. A time that cannot be read never authorises a price.
+
+## Returning customers after 24 hours (renewal rule)
+
+Pricing authority and marketing attribution are kept apart. `acquisitionReceipt` (the original lead, used as the parent of follow-ups and for reporting) is unchanged. The page prices with a separate pricing receipt: the `id` of the document the customer's last submission just produced. When "Continue this project" is followed by an accepted project update, that is the new `project_update` document, written by the real intake a moment ago, so it is under 24 hours old and is priced like any fresh lead. No duplicate marketing lead is created: the update was already going to be written. Rule in one line: a lead older than 24 hours is never priced, and the only renewal is a newer accepted update document, which is itself the receipt. Limit counters belong to the receipt asked about, so an update starts its own counters; each fresh set of limits costs the customer a real submission. One case stays by-request on purpose: resending the exact same project after 24 hours is recognised as already received, creates nothing new, and so has nothing fresh to price against (the page says "We will send your price"); any change to the project creates the update that renews it.
 
 ## Switch-on order
 
