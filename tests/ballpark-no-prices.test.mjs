@@ -20,7 +20,10 @@ function oldSource() {
   for (const ref of ['origin/main', 'main']) {
     try { return execFileSync('git', ['show', `${ref}:${FILE}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26, stdio: ['ignore', 'pipe', 'ignore'] }); } catch (_) {}
   }
-  return null;
+  // A checkout without a main ref (a shallow or single-branch clone, CI on the PR branch) used to skip the
+  // comparison. The page as it was on main when this branch was cut is kept beside the tests instead, so the
+  // check always runs; when a main ref exists it is still preferred.
+  return fs.readFileSync(path.join(ROOT, 'tests/fixtures/ballpark.main-482cac1.js'), 'utf8');
 }
 
 function slice(src, startPattern, endMarker) {
@@ -89,7 +92,6 @@ const plain = value => JSON.parse(JSON.stringify(value));
 
 test('(a) with pricing present the catalogue is identical to the code on origin/main', async t => {
   const before = oldSource();
-  if (!before) return t.skip('no origin/main available to compare against');
   const oldRun = harness(before, withPricing), newRun = harness(SRC, withPricing);
   await oldRun.api.sync(); await newRun.api.sync();
   assert.deepEqual(plain(newRun.api.FENCE_PRICING), plain(oldRun.api.FENCE_PRICING));
