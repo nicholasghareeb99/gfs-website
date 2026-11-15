@@ -9,7 +9,17 @@ The instant ballpark range used to be worked out in the visitor's browser from a
 - Two separate limits apply to each receipt (see "Limits" below): 20 attempts in any one clock minute, and 60 priced ranges for the life of the receipt. Past a limit it answers 429 and the page falls back to "We will send your price".
 - Until the key is added it answers 503 `not-configured`, so deploying it changes nothing.
 - The page only uses it when the public price document has no prices (the "by request" state). While prices are still public, the page never calls it.
-- If the function is off, slow, over its limit or errors, the page falls back to "We will send your price" and the office quotes by hand. Nothing shows an error.
+- If the function is off, slow, over its limit or errors, the page falls back to "We will send your price" and the office quotes by hand. Nothing shows an error. A failure that may pass is not final (see "When something fails" below).
+
+## When something fails (page behaviour)
+
+- **Capability check.** Only a definite answer is remembered for the browser session: `{ok:true}` for 30 minutes, an explicit 503 `not-configured` for 2 minutes. A network error, a timeout, or any other status is not an answer: nothing is stored, the page stays undecided (it shows the by-request wording meanwhile), asks again at 5 s, 15 s and 45 s, and then stops. A healthy reload always makes its own check. If the check starts working, a customer who already sent the form gets the range without sending anything again.
+- **Asking for the range.** If the lead is not there yet (409) the page asks four times in the first ~9 s, then at 5 s, 15 s and 45 s after that. A 503, a network error or a 12 s timeout is retried at the same 5 s, 15 s and 45 s. A 429 with `Retry-After` (the minute limit) waits that many seconds (at least the normal pause; over 120 s is left to the button). Then it stops. Each ask is for the unchanged project and the same receipt, so no new contact submission is needed.
+- **Not retried** because asking again cannot change the answer: needs a quote, a 429 with no `Retry-After` (the 60 ranges are used), 400, 403 (too old or not valid).
+- **Try again.** While the by-request wording is showing after a failure that may pass, a plain "Try again" button sits under it. It asks again straight away and starts a fresh set of recovery pauses.
+- **Back online / back in the tab.** On `online`, and on `visibilitychange` to visible, a failed ask (or an undecided capability check) is tried again, at most three extra times per failure.
+- **Changed project.** A change cancels any pending retry for the old project and asks for the new one; a late answer for an old project is ignored, so an old range is never shown for a changed project.
+- **Public prices.** While the price document still has prices the page never calls the function, including on these events.
 
 ## Limits (attempts and priced ranges are counted apart)
 

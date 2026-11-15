@@ -3,28 +3,32 @@
 // switched on. Pieces of ballpark.js are cut out and run in node:vm with a
 // stub fetch, a timer queue and a bare-bones page (see ballpark-slices.mjs).
 import test from 'node:test';
+import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { SRC, PRICING_CODE, SERVER_PRICE_CODE, slice, run, fakeTimers } from './ballpark-slices.mjs';
+import { handle, resetCaches } from '../netlify/functions/ballpark-price.mjs';
+import { fakeGoogle, priceFunctionEnv, read } from './helpers.mjs';
 
 const RECEIPT = 'web_flowflowflowflow01';
 const NAMES = ['Full Cedar Privacy 6ft', 'Galv Chain Link 4ft', 'Galv Chain Link 6ft', 'Kingston - White 6ft', 'Ranch Rail'];
 const ANSWER = { low: 5700, high: 6300, comparisons: [
   { style: 'Galv Chain Link 4ft', low: 5700, high: 6300 }, { style: 'Full Cedar Privacy 6ft', low: 9000, high: 9900 }, { style: 'Not In Catalogue', low: 9100, high: 9999 },
 ] };
-const json = (body, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
+const json = (body, status = 200, headers = {}) => ({ ok: status >= 200 && status < 300, status, headers: { get: name => headers[name] ?? null }, json: async () => body });
 
-function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage } = {}) {
+function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage, step4 = null } = {}) {
   const listeners = {}, timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
   const node = () => Object.defineProperty({ textContent: '', hidden: false, style: {}, children: [], dataset: {},
     classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } },
-    replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, addEventListener(t, fn) { (this.handlers = this.handlers || {})[t] = fn; }, querySelector: () => null },
+    replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, setAttribute() {}, scrollIntoView() {}, querySelectorAll: () => [], addEventListener(t, fn) { (this.handlers = this.handlers || {})[t] = fn; }, querySelector: () => null },
     'innerHTML', { set(v) { this.textContent = v; }, get() { return this.textContent; } });
   const abortable = signal => new Promise((_, reject) => { if (signal) signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
   const globals = {
     ...timers,
     ...(storage ? { sessionStorage: storage } : {}),
     el: id => nodes[id] || (nodes[id] = node()),
-    window: { addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } },
+    window: Object.assign(step4 ? step4.window : {}, { addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } }),
+    ...(step4 ? step4.globals(nodes) : {}),
     document: { createElement: node, visibilityState: 'visible', addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } },
     fetch: (url, options) => {
       const call = { url, body: JSON.parse(options.body), signal: options.signal, aborted: false };
@@ -40,7 +44,7 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
   };
   const code = `
     const FENCE_PRICING = {};
-    const state = { linearFeet: 0, fenceId: '', height: '6', singleGates: 0, doubleGates: 0, removeOldFence: false, existingFenceMaterial: '', sections: [], priceUnlocked: false };
+    const state = { linearFeet: 0, fenceId: '', height: '6', singleGates: 0, doubleGates: 0, removeOldFence: false, existingFenceMaterial: '', sections: [], siteNotes: [], address: '', priceUnlocked: false };
     let pricesLive = false, pricesSlow = false, pricesByRequest = false, styleCatalogSettled = true, pendingDraftStyle = '', acceptedBallparkReceipt = '', pricingReceipt = '';
     ${slice('  function pricesUnavailable()', '  let acceptedBallparkReceipt')}
     function buildStyleEntry(name, perFoot, singleGate, doubleGate) { return { name, perFoot, singleGate, doubleGate, detail: '' }; }
@@ -54,16 +58,19 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
     ${slice('  function updateAllCore() {', '  // ---- COMPARE MATERIALS PANEL')}
     function updateAll() { normalizeSections(); updateAllCore(); }
     function currentMapIssue() { return ''; }
+    ${step4 ? `let leadPhoto = '';\n    function photoReadyForSubmission() { return true; }\n    function collectGeometry() { return ''; }\n    function removalScopeNote() { return ''; }\n    function sectionLines() { return []; }\n    function clearDraft() {}\n    ${slice('  function bindStep4() {', '  // -------- LIVE PRICE REVEAL')}` : ''}
     globalThis.api = {
       state, FENCE_PRICING, updateAll, calculatePrice, comparisonRows, submissionPrice, checkServerPrice, serverPriceExpected,
       setCatalogue(names) { names.forEach(n => { FENCE_PRICING[slugify(n)] = buildStyleEntry(n, null, null, null); }); },
       set(flags) { ({ pricesLive = pricesLive, pricesByRequest = pricesByRequest } = flags); },
       receipt(v) { acceptedBallparkReceipt = v; pricingReceipt = v; },
+      acceptedReceipt: () => acceptedBallparkReceipt, ${step4 ? 'bindStep4,' : ''}
       pricingReceipt: () => pricingReceipt, retryNow: () => serverPriceRetryNow(), recheck: () => serverPriceRecheck(), bindRecovery: () => bindServerPriceRecovery(),
     };
   `;
   const context = run(globals, code), api = context.api;
   api.setCatalogue(NAMES);
+  api.bindRecovery();
   if (mode === 'by-request') api.set({ pricesByRequest: true });
   if (mode === 'public') api.set({ pricesLive: true, pricesByRequest: false });
   const text = id => nodes[id] ? nodes[id].textContent : undefined;
@@ -368,4 +375,318 @@ test('the capability answer is kept for the browser session, so a second page lo
   second.api.checkServerPrice(); await settle(second, 0);
   assert.equal(second.fetches.length, 0);
   assert.equal(second.api.serverPriceExpected(), true);
+});
+
+// ---- recovery from transient failures ------------------------------------------
+const store = () => { const data = new Map(); return { data, getItem: k => data.has(k) ? data.get(k) : null, setItem: (k, v) => data.set(k, v) }; };
+const hintButton = p => (p.nodes['bp-price-hint'].children || []).find(c => c.textContent === 'Try again');
+const KEY = 'gfs_bp_server_price';
+
+test('a failed capability check is not remembered as "off": the same session recovers and a reload asks again', async () => {
+  const keep = store();
+  let up = false;
+  const p = page({ storage: keep, ping: () => up ? json({ ok: true }) : Promise.reject(new Error('offline')), reply: () => json(ANSWER) });
+  p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(p.api.serverPriceExpected(), false);
+  assert.equal(keep.data.has(KEY), false, 'nothing is stored for a network failure');
+  p.choose(); p.unlock();
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+  up = true;
+  await settle(p, 5000);   // the check is asked again after 5 s
+  assert.equal(p.api.serverPriceExpected(), true);
+  assert.equal(keep.data.has(KEY), true);
+  await settle(p, 500);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300', 'the customer who already sent the form gets the range, no new submission');
+  // A reload after a failed check (503 without the explicit body, timeout) still asks.
+  for (const ping of [() => json({}, 503), () => json({ error: 'boom' }, 500), () => new Promise(() => {})]) {
+    const kept = store(), first = page({ storage: kept, ping, reply: () => json(ANSWER) });
+    first.api.checkServerPrice(); await settle(first, 6000);
+    assert.equal(kept.data.has(KEY), false);
+    const again = page({ storage: kept, reply: () => json(ANSWER) });
+    again.api.checkServerPrice(); await settle(again, 0);
+    assert.equal(again.fetches.length, 1, 'the healthy reload makes its own check');
+    assert.equal(again.api.serverPriceExpected(), true);
+  }
+});
+
+test('the capability check retries at 5 s, 15 s and 45 s and then stops', async () => {
+  const p = page({ ping: () => Promise.reject(new Error('offline')), reply: () => json(ANSWER) });
+  p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(p.fetches.length, 1);
+  await settle(p, 4900); assert.equal(p.fetches.length, 1);
+  await settle(p, 200); assert.equal(p.fetches.length, 2);
+  await settle(p, 15000); assert.equal(p.fetches.length, 3);
+  await settle(p, 45000); assert.equal(p.fetches.length, 4);
+  await settle(p, 600000); assert.equal(p.fetches.length, 4, 'bounded');
+  p.fire('online'); await settle(p, 0);
+  assert.equal(p.fetches.length, 5, 'coming back online asks once more');
+});
+
+test('only a definite "not configured" is remembered, and only for two minutes', async () => {
+  const keep = store();
+  const off = page({ storage: keep, ping: () => json({ error: 'not-configured' }, 503), reply: () => json(ANSWER) });
+  off.api.checkServerPrice(); await settle(off, 0);
+  assert.equal(off.api.serverPriceExpected(), false);
+  assert.equal(JSON.parse(keep.data.get(KEY)).ok, false);
+  await settle(off, 600000); assert.equal(off.fetches.length, 1, 'a definite answer is not asked again in this page');
+  const soon = page({ storage: keep, reply: () => json(ANSWER) });
+  soon.api.checkServerPrice(); await settle(soon, 0);
+  assert.equal(soon.fetches.length, 0, 'within two minutes');
+  keep.data.set(KEY, JSON.stringify({ ok: false, at: Date.now() - 121000 }));
+  const later = page({ storage: keep, reply: () => json(ANSWER) });
+  later.api.checkServerPrice(); await settle(later, 0);
+  assert.equal(later.fetches.length, 1, 'after two minutes it asks again');
+  keep.data.set(KEY, JSON.stringify({ ok: true, at: Date.now() - 1500000 }));
+  const yes = page({ storage: keep, reply: () => json(ANSWER) });
+  yes.api.checkServerPrice(); await settle(yes, 0);
+  assert.equal(yes.fetches.length, 0, 'a yes is kept for half an hour');
+});
+
+async function ready(reply) {
+  const p = page({ reply });
+  p.api.checkServerPrice(); await settle(p, 0);
+  p.choose(); p.unlock();
+  return p;
+}
+
+test('one 503 on a healthy service: the unchanged project is asked again at 5 s and the range appears with no field change', async () => {
+  const p = await ready((call, n) => n === 1 ? json({ error: 'Pricing is unavailable right now.' }, 503) : json(ANSWER));
+  await settle(p, 500);
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+  assert.ok(hintButton(p), 'a plain Try again control sits next to the wording');
+  assert.equal(p.priceCalls().length, 1);
+  await settle(p, 4400); assert.equal(p.priceCalls().length, 1);
+  await settle(p, 600); assert.equal(p.priceCalls().length, 2);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+  assert.equal(p.priceCalls()[0].body.receipt, p.priceCalls()[1].body.receipt);
+  assert.deepEqual(p.priceCalls()[0].body.parts, p.priceCalls()[1].body.parts);
+  await settle(p, 120000); assert.equal(p.priceCalls().length, 2, 'no more asks once it has a range');
+});
+
+test('429 with Retry-After: waits at least that long, then succeeds', async () => {
+  const p = await ready((call, n) => n === 1 ? json({ error: 'Too many' }, 429, { 'Retry-After': '20' }) : json(ANSWER));
+  await settle(p, 500);
+  await settle(p, 19000); assert.equal(p.priceCalls().length, 1, 'longer than the normal 5 s pause');
+  await settle(p, 1500); assert.equal(p.priceCalls().length, 2);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+  // A 503 carrying Retry-After is honoured the same way; a huge one is left to the button.
+  const busy = await ready((call, n) => n === 1 ? json({}, 503, { 'Retry-After': '30' }) : json(ANSWER));
+  await settle(busy, 500); await settle(busy, 29000); assert.equal(busy.priceCalls().length, 1);
+  await settle(busy, 1500); assert.equal(busy.priceCalls().length, 2);
+  const long = await ready(() => json({}, 429, { 'Retry-After': '3600' }));
+  await settle(long, 600000); assert.equal(long.priceCalls().length, 1);
+  assert.ok(hintButton(long), 'the button is still there');
+});
+
+test('a lead that first exists after the quick retries is still priced, without any field change', async () => {
+  const p = await ready((call, n) => n < 7 ? json({ error: 'Request not found yet' }, 409) : json(ANSWER));
+  await settle(p, 400 + 600 + 1500 + 3000 + 4000);
+  assert.equal(p.priceCalls().length, 5);
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+  await settle(p, 5000); assert.equal(p.priceCalls().length, 6);
+  await settle(p, 15000); assert.equal(p.priceCalls().length, 7);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+});
+
+test('retries stop after the bound; Try again starts a fresh set, for the same project', async () => {
+  const p = await ready(() => json({ error: 'down' }, 503));
+  await settle(p, 500 + 5000 + 15000 + 45000 + 1000);
+  assert.equal(p.priceCalls().length, 4, 'first ask plus retries at 5 s, 15 s, 45 s');
+  await settle(p, 600000); assert.equal(p.priceCalls().length, 4);
+  const before = JSON.stringify(p.priceCalls()[0].body);
+  hintButton(p).handlers.click(); await settle(p, 0);
+  assert.equal(p.priceCalls().length, 5, 'the click asks straight away');
+  assert.equal(JSON.stringify(p.priceCalls()[4].body), before, 'the unchanged project, same receipt');
+  await settle(p, 5000 + 15000 + 45000 + 1000); assert.equal(p.priceCalls().length, 8);
+  await settle(p, 600000); assert.equal(p.priceCalls().length, 8, 'bounded again');
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+});
+
+test('Try again on a service that has recovered shows the range; the working state shows meanwhile', async () => {
+  let up = false;
+  const p = await ready(() => up ? json(ANSWER) : json({}, 503));
+  await settle(p, 500 + 66000 + 1000);
+  up = true;
+  hintButton(p).handlers.click();
+  assert.equal(p.text('bp-price-range'), 'Working out your range…');
+  await settle(p, 0);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+});
+
+test('coming back online or to the front of the tab asks again after a failure, a few times at most', async () => {
+  let up = false;
+  const p = await ready(() => up ? json(ANSWER) : json({}, 503));
+  await settle(p, 500 + 66000 + 1000);
+  assert.equal(p.priceCalls().length, 4);
+  p.fire('visibilitychange'); await settle(p, 0);
+  assert.equal(p.priceCalls().length, 5, 'tab came back');
+  p.fire('online'); await settle(p, 0);
+  assert.equal(p.priceCalls().length, 6);
+  up = true;
+  p.fire('online'); await settle(p, 0);
+  assert.equal(p.priceCalls().length, 7);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+  p.fire('online'); p.fire('visibilitychange'); await settle(p, 0);
+  assert.equal(p.priceCalls().length, 7, 'nothing to recheck once there is a range');
+  // A hidden tab does nothing; so does a flapping connection past the bound.
+  const q = await ready(() => json({}, 503));
+  await settle(q, 500 + 66000 + 1000);
+  for (let i = 0; i < 10; i++) q.fire('online');
+  await settle(q, 0);
+  assert.ok(q.priceCalls().length <= 4 + 3, 'at most three extra tries per failure');
+});
+
+test('definite answers are not retried: needs a quote, the project allowance used up, a refused request', async () => {
+  for (const reply of [() => json({ needsQuote: true }), () => json({ error: 'limit' }, 429), () => json({ error: 'old' }, 403), () => json({ error: 'bad' }, 400), () => json({ low: 9, high: 3 })]) {
+    const p = await ready(reply);
+    await settle(p, 600000);
+    assert.equal(p.priceCalls().length, 1);
+    assert.equal(hintButton(p), undefined, 'trying again cannot help, so no button');
+    p.fire('online'); p.fire('visibilitychange'); await settle(p, 0);
+    assert.equal(p.priceCalls().length, 1);
+    assert.equal(p.text('bp-price-range'), 'We will send your price');
+  }
+});
+
+test('a changed project cancels pending recovery and never shows an old range or answer', async () => {
+  const late = [];
+  const p = await ready((call, n) => n === 1 ? json({}, 503) : new Promise(resolve => late.push(() => resolve(json({ low: 1000 + call.body.parts[0].feet, high: 2000 + call.body.parts[0].feet, comparisons: [] })))));
+  await settle(p, 500);
+  p.api.state.linearFeet = 130; p.api.updateAll();
+  assert.equal(p.api.calculatePrice(), null);
+  await settle(p, 450);
+  assert.equal(p.priceCalls().length, 2);
+  assert.equal(p.priceCalls()[1].body.parts[0].feet, 130, 'the old project is not asked about again');
+  p.api.state.linearFeet = 140; p.api.updateAll();
+  late[0] && late[0](); await settle(p, 0);
+  assert.equal(p.api.calculatePrice(), null, 'the answer for 130 ft is not shown for 140 ft');
+  await settle(p, 450);
+  assert.equal(p.priceCalls().length, 3);
+  await settle(p, 4000);
+  assert.ok(p.priceCalls().slice(1).every(c => c.body.parts[0].feet !== 120), 'the first project\'s recovery timer was cancelled');
+  late[1](); await settle(p, 0);
+  assert.equal(p.text('bp-price-range'), '$1,140 – $2,140');
+});
+
+test('a stale answer arriving after the request was timed out does not double up the retries', async () => {
+  const p = await ready((call, n) => n === 1 ? new Promise(() => {}) : json(ANSWER));
+  await settle(p, 400 + 12100);
+  assert.equal(p.priceCalls().length, 1);
+  await settle(p, 5000); assert.equal(p.priceCalls().length, 2, 'one retry, not two');
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
+});
+
+test('public prices: no call to the function, whatever happens to the network or the tab', async () => {
+  const p = page({ mode: 'public', reply: () => json(ANSWER) });
+  p.api.checkServerPrice(); p.choose(); p.unlock();
+  p.fire('online'); p.fire('visibilitychange'); await settle(p, 600000);
+  p.api.updateAll(); p.fire('online');
+  assert.equal(p.fetches.length, 0);
+  assert.equal(p.text('bp-price-hint') === undefined || !hintButton(p), true);
+});
+
+// ---- a returning customer after 24 hours -----------------------------------------
+// The real request-flow.js and the real bindStep4 submit handler, with the real
+// price function behind the page's fetch and a Firestore stand-in that knows how
+// old each lead document is.
+const HOUR = 3600e3;
+const RETURN_PRICING = ['Galv Chain Link 4ft : 15 : 150 : 300', 'Full Cedar Privacy 6ft : 40 : 300 : 600'].join('\n');
+function returnKit() {
+  const clock = { now: 1_800_000_000_000 }, keep = store(), timers = fakeTimers();
+  const FakeDate = class extends Date { static now() { return clock.now; } };
+  const dom = tag => { const n = { tag, style: {}, children: [], textContent: '', handlers: {}, setAttribute() {}, scrollIntoView() {}, insertBefore(c) { this.children.push(c); }, appendChild(c) { this.children.push(c); }, replaceChildren() { this.children.length = 0; this.textContent = ''; }, addEventListener(t, fn) { this.handlers[t] = fn; }, querySelector: () => null,
+    querySelectorAll(sel) { const out = []; const walk = c => { if (c.tag === 'button') out.push(c); c.children.forEach(walk); }; this.children.forEach(walk); return out; } }; return n; };
+  const submitButton = Object.assign(dom('button'), { disabled: false, textContent: 'Unlock my price' });
+  const form = Object.assign(dom('form'), { parentElement: dom('div'), elements: [], fields: { name: 'Pat Smith', phone: '4195550100', email: 'pat@example.com', address: '1 Main St' }, querySelector: () => submitButton });
+  const window = {};
+  const context = vm.createContext({ window, document: { createElement: dom }, sessionStorage: keep, location: { search: '', pathname: '/quote/ballpark/' }, crypto: globalThis.crypto, TextEncoder, URLSearchParams, Date: FakeDate,
+    Uint8Array, JSON, Array, Number, Object, Math, String, RegExp, Set, WeakMap, Error, Promise, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
+  vm.runInContext(read('public/assets/js/request-flow.js'), context, { filename: 'request-flow.js' });
+  const created = new Map(), submitted = [];
+  let counter = 0;
+  window.GFSLeads = { async submit(payload, options) {
+    submitted.push(payload);
+    const record = { name: payload.name, phone: payload.phone, email: payload.email, address: payload.address, notes: '', source: payload.source, fenceStyle: payload.fenceStyle, linearFeet: payload.linearFeet, height: payload.height, meta: '' };
+    const prepared = await window.GFSRequestFlow.prepare(record, 'ballpark', options);
+    if (prepared.decision) return { ok: false, errors: prepared.errors, requiresDecision: prepared.decision };
+    if (prepared.reuse) return prepared.reuse;
+    const id = 'web_returnflow' + String(++counter).padStart(8, '0');
+    created.set(id, clock.now);   // the intake writes the lead with the server's time
+    return window.GFSRequestFlow.commit(prepared, { ok: true, id, receipt: 'netlify', sync: 'pending' }, prepared.record);
+  } };
+  return { clock, keep, timers, form, submitButton, window, created, submitted, nodeGlobals: { FormData: class { constructor(f) { this.f = f.fields; } get(k) { return this.f[k] ?? null; } } } };
+}
+
+test('Continue this project after 25 hours: the update is priced with its own fresh receipt, the original stays the attribution', async () => {
+  resetCaches();
+  const kit = returnKit(), env = priceFunctionEnv();
+  const google = fakeGoogle({ pricing: RETURN_PRICING, receipts: ['web_returnflow00000001', 'web_returnflow00000002', 'web_returnflow00000003'], createdAtMs: 1,
+    leadDoc: id => ({ createTime: new Date(kit.created.get(id)).toISOString(), fields: {} }) });
+  const askServer = call => handle(new Request('https://example.test/.netlify/functions/ballpark-price', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(call.body) }), { fetcher: google.fetcher, env, now: Math.floor(kit.clock.now / 1000) });
+  const p = page({ reply: askServer, step4: { window: kit.window, globals: nodes => { nodes['bp-form'] = kit.form; return kit.nodeGlobals; } } });
+  p.api.checkServerPrice(); await settle(p, 0);
+  p.choose();
+  p.api.bindStep4();
+  const submit = async () => { await kit.form.handlers.submit({ preventDefault() {} }); await p.timers.advance(0); };
+  const panelButtons = () => kit.form.parentElement.children.flatMap(panel => panel.querySelectorAll('button'));
+  const click = label => { const b = panelButtons().find(x => x.textContent === label); assert.ok(b, 'button: ' + label); b.handlers.click(); };
+
+  // 1. The first request: priced with the original lead, which is also the acquisition receipt.
+  await submit(); await settle(p, 500);
+  const original = p.api.acceptedReceipt();
+  assert.equal(original, 'web_returnflow00000001');
+  assert.equal(p.api.pricingReceipt(), original);
+  assert.match(p.text('bp-price-range'), /^\$[\d,]+ – \$[\d,]+$/, 'the first range is given');
+  assert.equal(p.priceCalls().at(-1).body.receipt, original);
+
+  // 2. Twenty-five hours later the customer continues the project and changes a length.
+  kit.clock.now += 25 * HOUR;
+  kit.window.GFSRequestFlow.showResult(kit.form, { ok: true, reused: true });   // the panel redraws as the browser does when the customer comes back
+  assert.ok(panelButtons().some(b => b.textContent === 'Continue this project'), 'the expired project offers Continue');
+  const lead = await (await askServer({ body: { ...p.priceCalls()[0].body, receipt: original } })).json();
+  assert.equal(lead.error, 'Request too old', 'the old receipt can no longer be priced against');
+  click('Continue this project');
+  p.api.state.linearFeet = 130; p.api.updateAll();
+  await submit();
+  assert.equal(kit.created.size, 2, 'one new update document, no extra marketing lead');
+  const update = p.api.pricingReceipt();
+  assert.equal(update, 'web_returnflow00000002');
+  assert.notEqual(update, original, 'pricing uses the document just written');
+  assert.equal(p.api.acceptedReceipt(), original, 'attribution still points at the original request');
+  await settle(p, 500);
+  const asked = p.priceCalls().at(-1);
+  assert.equal(asked.body.receipt, update);
+  assert.equal(asked.body.parts[0].feet, 130);
+  assert.match(p.text('bp-price-range'), /^\$[\d,]+ – \$[\d,]+$/, 'the update is priced (200, not 403)');
+  assert.equal(hintButton(p), undefined);
+
+  // 3. Sending the identical project again creates nothing new and keeps both receipts straight.
+  kit.window.GFSRequestFlow.showResult(kit.form, { ok: true, reused: true });
+  click('Update this project');
+  await submit(); await settle(p, 500);
+  assert.equal(kit.created.size, 2, 'an unchanged resend is recognised and creates no lead');
+  assert.equal(p.api.pricingReceipt(), update);
+  assert.equal(p.api.acceptedReceipt(), original);
+  assert.match(p.text('bp-price-range'), /^\$/);
+
+  // 4. A day later the same unchanged resend creates no lead, keeps pricing on the update's receipt, and the range
+  // already on screen for that unchanged project stays (nothing new is asked, nothing loops).
+  kit.clock.now += 25 * HOUR;
+  kit.window.GFSRequestFlow.showResult(kit.form, { ok: true, reused: true });
+  click('Continue this project');
+  const calls = p.priceCalls().length;
+  await submit(); await settle(p, 600000);
+  assert.equal(kit.created.size, 2, 'still no duplicate lead');
+  assert.equal(p.api.pricingReceipt(), update);
+  assert.equal(p.api.acceptedReceipt(), original);
+  assert.equal(p.priceCalls().length, calls, 'nothing new to ask for an unchanged project');
+  assert.match(p.text('bp-price-range'), /^\$[\d,]+ – \$[\d,]+$/);
+});
+
+test('the real page code uses the accepted update for pricing and the original for the emailed follow-up', () => {
+  const code = slice('  function bindStep4() {', '  // -------- LIVE PRICE REVEAL');
+  assert.match(code, /acceptedBallparkReceipt = [^;]*originalReceipt/);
+  assert.match(code, /pricingReceipt = [^;]*result\.id/);
+  assert.doesNotMatch(SRC.slice(SRC.indexOf('  function serverPriceRun'), SRC.indexOf('  function serverPriceSync')), /acceptedBallparkReceipt/);
+  assert.match(SRC, /parentReceipt: acceptedBallparkReceipt/);
 });
