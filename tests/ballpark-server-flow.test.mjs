@@ -16,10 +16,10 @@ const ANSWER = { low: 5700, high: 6300, comparisons: [
 ] };
 const json = (body, status = 200, headers = {}) => ({ ok: status >= 200 && status < 300, status, headers: { get: name => headers[name] ?? null }, json: async () => body });
 
-function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage, step4 = null, startAt = Date.now() } = {}) {
+function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage, step4 = null, startAt = Date.now(), clock = null } = {}) {
   const listeners = {}, timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
   // The page's clock moves with the timer queue, so waiting 120 s in a test is 120 s of Date.now() too.
-  const PageDate = class extends Date { static now() { return startAt + timers.time(); } };
+  const PageDate = class extends Date { static now() { return clock ? clock() : startAt + timers.time(); } };
   const node = () => Object.defineProperty({ textContent: '', hidden: false, style: {}, children: [], dataset: {},
     classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } },
     replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, setAttribute() {}, scrollIntoView() {}, querySelectorAll: () => [], addEventListener(t, fn) { (this.handlers = this.handlers || {})[t] = fn; }, querySelector: () => null },
@@ -593,8 +593,8 @@ test('public prices: no call to the function, whatever happens to the network or
 // old each lead document is.
 const HOUR = 3600e3;
 const RETURN_PRICING = ['Galv Chain Link 4ft : 15 : 150 : 300', 'Full Cedar Privacy 6ft : 40 : 300 : 600'].join('\n');
-function returnKit() {
-  const clock = { now: 1_800_000_000_000 }, keep = store(), timers = fakeTimers();
+function returnKit(shared = null) {
+  const clock = shared ? shared.clock : { now: 1_800_000_000_000 }, keep = shared ? shared.keep : store(), timers = fakeTimers();
   const FakeDate = class extends Date { static now() { return clock.now; } };
   const dom = tag => { const n = { tag, style: {}, children: [], textContent: '', handlers: {}, setAttribute() {}, scrollIntoView() {}, insertBefore(c) { this.children.push(c); }, appendChild(c) { this.children.push(c); }, replaceChildren() { this.children.length = 0; this.textContent = ''; }, addEventListener(t, fn) { this.handlers[t] = fn; }, querySelector: () => null,
     querySelectorAll(sel) { const out = []; const walk = c => { if (c.tag === 'button') out.push(c); c.children.forEach(walk); }; this.children.forEach(walk); return out; } }; return n; };
@@ -604,19 +604,18 @@ function returnKit() {
   const context = vm.createContext({ window, document: { createElement: dom }, sessionStorage: keep, location: { search: '', pathname: '/quote/ballpark/' }, crypto: globalThis.crypto, TextEncoder, URLSearchParams, Date: FakeDate,
     Uint8Array, JSON, Array, Number, Object, Math, String, RegExp, Set, WeakMap, Error, Promise, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
   vm.runInContext(read('public/assets/js/request-flow.js'), context, { filename: 'request-flow.js' });
-  const created = new Map(), submitted = [];
-  let counter = 0;
+  const created = shared ? shared.created : new Map(), submitted = [], count = shared ? shared.count : { n: 0 };
   window.GFSLeads = { async submit(payload, options) {
     submitted.push(payload);
     const record = { name: payload.name, phone: payload.phone, email: payload.email, address: payload.address, notes: '', source: payload.source, fenceStyle: payload.fenceStyle, linearFeet: payload.linearFeet, height: payload.height, meta: '' };
     const prepared = await window.GFSRequestFlow.prepare(record, 'ballpark', options);
     if (prepared.decision) return { ok: false, errors: prepared.errors, requiresDecision: prepared.decision };
     if (prepared.reuse) return prepared.reuse;
-    const id = 'web_returnflow' + String(++counter).padStart(8, '0');
+    const id = 'web_returnflow' + String(++count.n).padStart(8, '0');
     created.set(id, clock.now);   // the intake writes the lead with the server's time
     return window.GFSRequestFlow.commit(prepared, { ok: true, id, receipt: 'netlify', sync: 'pending' }, prepared.record);
   } };
-  return { clock, keep, timers, form, submitButton, window, created, submitted, nodeGlobals: { FormData: class { constructor(f) { this.f = f.fields; } get(k) { return this.f[k] ?? null; } } } };
+  return { clock, keep, timers, form, submitButton, window, created, count, submitted, nodeGlobals: { FormData: class { constructor(f) { this.f = f.fields; } get(k) { return this.f[k] ?? null; } } } };
 }
 
 test('Continue this project after 25 hours: the update is priced with its own fresh receipt, the original stays the attribution', async () => {
@@ -696,4 +695,187 @@ test('the real page code uses the accepted update for pricing and the original f
   assert.match(run, /const original = \(\) => acceptedBallparkReceipt;/);
   assert.match(run, /receipt: session \? session\.receipt : serverPrice\.receipt/);
   assert.match(SRC, /parentReceipt: acceptedBallparkReceipt/);
+});
+
+// ---- an unchanged project sent again after 24 hours keeps its instant range ----------
+// Two page loads in one browser tab (the request-flow state and the session live in
+// sessionStorage), the real request-flow.js, the real submit handler, and the real
+// price function behind fetch. Only Firestore and the clock are stand-ins.
+const LEAD_IDS = ['web_returnflow00000001', 'web_returnflow00000002', 'web_returnflow00000003', 'web_returnflow00000004'];
+function returningWorld({ renewReply = null, mode = 'by-request' } = {}) {
+  resetCaches();
+  const first = returnKit(), env = priceFunctionEnv(), calls = [];
+  const google = fakeGoogle({ pricing: RETURN_PRICING, receipts: LEAD_IDS, createdAtMs: 1, leadDoc: id => ({ createTime: new Date(first.created.get(id)).toISOString(), fields: {} }) });
+  const askServer = call => {
+    calls.push(call.body);
+    if (call.body.renew && renewReply) { const early = renewReply(); if (early) return early; }
+    return handle(new Request('https://example.test/.netlify/functions/ballpark-price', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(call.body) }), { fetcher: google.fetcher, env, now: Math.floor(first.clock.now / 1000) });
+  };
+  const load = async kit => {
+    const p = page({ mode, reply: askServer, storage: kit.keep, clock: () => kit.clock.now, step4: { window: kit.window, globals: nodes => { nodes['bp-form'] = kit.form; return kit.nodeGlobals; } } });
+    p.api.checkServerPrice(); await settle(p, 0);
+    p.choose(); p.api.bindStep4();
+    const submit = async () => { await kit.form.handlers.submit({ preventDefault() {} }); await p.timers.advance(0); };
+    const click = label => { const b = kit.form.parentElement.children.flatMap(panel => panel.querySelectorAll('button')).find(x => x.textContent === label); assert.ok(b, 'button: ' + label); b.handlers.click(); };
+    return { p, submit, click, kit };
+  };
+  const renewals = () => calls.filter(c => c.renew);
+  const prices = () => calls.filter(c => !c.renew && !c.ping);
+  return { first, google, calls, load, renewals, prices };
+}
+const RANGE = /^\$[\d,]+ – \$[\d,]+$/;
+
+test('returning visitor, unchanged project after 25 hours: one lead in all, one renewal, then the same instant range', async () => {
+  const w = returningWorld();
+  const day1 = await w.load(w.first);
+  await day1.submit(); await settle(day1.p, 500);
+  const original = day1.p.api.acceptedReceipt(), range = day1.p.text('bp-price-range');
+  assert.match(range, RANGE);
+  assert.equal(w.renewals().length, 0, 'no renewal on the first day');
+
+  // A day and an hour later, a fresh page in the same tab: Continue this project, the project unchanged.
+  w.first.clock.now += 25 * HOUR;
+  const second = returnKit(w.first);
+  const day2 = await w.load(second);
+  day2.click('Continue this project');
+  await day2.submit(); await settle(day2.p, 500);
+  assert.equal(w.first.created.size, 1, 'no duplicate marketing lead: the unchanged project writes nothing');
+  assert.equal(day2.p.api.acceptedReceipt(), original, 'the acquisition receipt is the original');
+  assert.equal(w.renewals().length, 1, 'exactly one renewal');
+  assert.deepEqual(w.renewals()[0], { renew: true, receipt: original });
+  assert.equal(day2.p.text('bp-price-range'), range, 'the same range as the first day, and not "We will send your price"');
+  assert.equal(hintButton(day2.p), undefined);
+  const last = w.prices().at(-1);
+  assert.equal(last.receipt, original);
+  assert.match(last.session, /^v1\./);
+  assert.equal(w.prices().length, 3, 'day one, the old receipt (refused as too old), then the session ask');
+
+  // The session is kept for the tab: another visit within its day makes no second renewal.
+  w.first.clock.now += 3 * HOUR;
+  const third = await w.load(returnKit(w.first));
+  third.click('Continue this project');
+  await third.submit(); await settle(third.p, 500);
+  assert.equal(w.first.created.size, 1);
+  assert.equal(w.renewals().length, 1, 'the held session is used');
+  assert.equal(third.p.text('bp-price-range'), range);
+  assert.equal(w.prices().at(-1).session, last.session);
+});
+
+test('returning visitor who changes the project: the update is priced with its own fresh receipt and no renewal is made', async () => {
+  const w = returningWorld();
+  const day1 = await w.load(w.first);
+  await day1.submit(); await settle(day1.p, 500);
+  const original = day1.p.api.acceptedReceipt();
+  w.first.clock.now += 25 * HOUR;
+  const day2 = await w.load(returnKit(w.first));
+  day2.click('Continue this project');
+  day2.p.api.state.linearFeet = 140; day2.p.api.updateAll();
+  await day2.submit(); await settle(day2.p, 500);
+  assert.equal(w.first.created.size, 2, 'the update is the one new document');
+  assert.equal(day2.p.api.pricingReceipt(), 'web_returnflow00000002');
+  assert.equal(day2.p.api.acceptedReceipt(), original);
+  assert.equal(w.renewals().length, 0, 'no renewal for a changed project');
+  assert.match(day2.p.text('bp-price-range'), RANGE);
+  assert.equal(w.prices().at(-1).session, undefined);
+});
+
+test('returning visitor: a renewal outage shows the by-request wording, recovers on the usual pause, and takes nothing from the allowance', async () => {
+  let down = true;
+  const w = returningWorld({ renewReply: () => down ? json({ error: 'Pricing is unavailable right now.' }, 503) : null });
+  const day1 = await w.load(w.first);
+  await day1.submit(); await settle(day1.p, 500);
+  const range = day1.p.text('bp-price-range');
+  w.first.clock.now += 25 * HOUR;
+  const day2 = await w.load(returnKit(w.first));
+  day2.click('Continue this project');
+  await day2.submit(); await settle(day2.p, 500);
+  assert.equal(day2.p.text('bp-price-range'), 'We will send your price');
+  assert.ok(hintButton(day2.p), 'a plain Try again is offered');
+  assert.equal(w.renewals().length, 1);
+  down = false;
+  await settle(day2.p, 5000);   // the usual first pause
+  assert.equal(w.renewals().length, 2);
+  assert.equal(day2.p.text('bp-price-range'), range);
+  assert.equal(w.google.counts.get(LEAD_IDS[0] + '_rl'), 1, 'one session issued, one slot used');
+  assert.equal(w.first.created.size, 1);
+});
+
+test('returning visitor: a renewal that is refused (limit used) or a lead too old ends as the by-request wording, never an error, and is not repeated', async () => {
+  const w = returningWorld({ renewReply: () => json({ error: 'Too many requests for this project. We will send your price.' }, 429) });
+  const day1 = await w.load(w.first);
+  await day1.submit(); await settle(day1.p, 500);
+  w.first.clock.now += 25 * HOUR;
+  const day2 = await w.load(returnKit(w.first));
+  day2.click('Continue this project');
+  await day2.submit(); await settle(day2.p, 600000);
+  assert.equal(day2.p.text('bp-price-range'), 'We will send your price');
+  assert.equal(hintButton(day2.p), undefined, 'asking again cannot help');
+  assert.equal(w.renewals().length, 1, 'not repeated');
+});
+
+test('public prices after 25 hours: no call to the function at all, no renewal, whatever the tab does', async () => {
+  const w = returningWorld({ mode: 'public' });
+  w.first.keep.data.set('gfs_bp_pricing_session', JSON.stringify({ receipt: LEAD_IDS[0], token: 'v1.' + 'a'.repeat(30) + '.' + 'b'.repeat(43), until: w.first.clock.now + 3600e3 }));
+  const day = await w.load(w.first);
+  day.p.api.state.priceUnlocked = true; day.p.api.receipt(LEAD_IDS[0]); day.p.api.updateAll();
+  day.p.fire('online'); day.p.fire('visibilitychange');
+  await settle(day.p, 600000);
+  assert.equal(w.calls.length, 0);
+});
+
+// ---- the capability check after an explicit "not configured" -----------------------
+test('capability: an explicit not-configured expires after 120 s; return to the tab, online and Try again may then ask once more, bounded', async () => {
+  let serving = false;
+  const p = page({ ping: () => serving ? json({ ok: true }) : json({ error: 'not-configured' }, 503), reply: () => json(ANSWER) });
+  const pings = () => p.fetches.filter(f => f.body.ping).length;
+  p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(pings(), 1);
+  assert.equal(p.api.serverPriceExpected(), false);
+  p.choose(); p.unlock();
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
+  serving = true;   // service restored
+  // Before 120 s nothing is asked, however often the tab comes back.
+  for (let i = 0; i < 5; i++) { await settle(p, 20000); p.fire('visibilitychange'); p.fire('online'); }
+  await settle(p, 0);
+  assert.equal(pings(), 1, 'no ping inside the two minutes');
+  assert.equal(p.priceCalls().length, 0);
+  await settle(p, 21000);   // 121 s since the answer
+  p.fire('visibilitychange'); await settle(p, 0);
+  assert.equal(pings(), 2, 'one ping after expiry');
+  await settle(p, 500);
+  assert.equal(p.api.serverPriceExpected(), true);
+  assert.equal(p.text('bp-price-range'), '$5,700 – $6,300', 'the project is priced');
+  assert.equal(p.priceCalls().length, 1);
+});
+
+test('capability: flipping the tab again and again after expiry makes one ping, and a still-off service waits another 120 s', async () => {
+  const p = page({ ping: () => json({ error: 'not-configured' }, 503), reply: () => json(ANSWER) });
+  const pings = () => p.fetches.filter(f => f.body.ping).length;
+  p.api.checkServerPrice(); await settle(p, 0);
+  await settle(p, 125000);
+  for (let i = 0; i < 20; i++) { p.fire('visibilitychange'); p.fire('online'); }
+  await settle(p, 0);
+  assert.equal(pings(), 2, 'one in flight at a time: twenty flips, one ping');
+  for (let i = 0; i < 20; i++) { p.fire('visibilitychange'); await settle(p, 5000); }
+  assert.equal(pings(), 2, 'off again: nothing for another 120 s');
+  await settle(p, 30000); p.fire('online'); await settle(p, 0);
+  assert.equal(pings(), 3);
+  // A ping that fails outright (no answer) is spaced too: ten flips in five seconds are one ask.
+  const q = page({ ping: () => Promise.reject(new Error('offline')), reply: () => json(ANSWER) });
+  q.api.checkServerPrice(); await settle(q, 0);
+  await settle(q, 100000);
+  const before = q.fetches.length;
+  for (let i = 0; i < 10; i++) { q.fire('online'); await settle(q, 500); }
+  assert.ok(q.fetches.length - before <= 2, 'ten events in five seconds: one ask, plus at most the 5 s retry the failure already scheduled');
+});
+
+test('capability: a stored "off" is believed for 120 s and no longer, in memory and in sessionStorage', async () => {
+  const keep = store();
+  const p = page({ storage: keep, ping: () => json({ error: 'not-configured' }, 503), reply: () => json(ANSWER) });
+  p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(JSON.parse(keep.data.get(KEY)).ok, false);
+  await settle(p, 119000); p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(p.fetches.length, 1);
+  await settle(p, 2000); p.api.checkServerPrice(); await settle(p, 0);
+  assert.equal(p.fetches.length, 2, 'the catalogue-sync check asks again too');
 });
