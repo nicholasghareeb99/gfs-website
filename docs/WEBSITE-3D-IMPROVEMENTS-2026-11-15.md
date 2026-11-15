@@ -1,5 +1,13 @@
 # 3D style sweep, 2026-11-15
 
+> **Scope correction, 15 Nov (after independent QA).** The "Exec" column in this sweep was rendered from the Executive App repo's ROOT `fence3d.html`, which is stale source. The deployed Executive viewer is built from the patch chain and differs. Read the comparison below with these corrections, and re-run the sweep against the release build before assigning fixes:
+>
+> - **Wood lattice-top gates.** The deployed Executive viewer already draws the gate lattice (five gate-topper parts: lattice plus four frame parts). The website viewer does not. This is a WEBSITE gap. Port the built Executive implementation into the website's persistent source; do not write a second one. Add run/gate parity tests on the release build, with double-gate, open-gate and saved-override cases.
+> - **Four spaced-picket styles** (PT/CEDAR spaced picket 4'; 3'/4' wood spaced picket; 6' spaced 4in/w pickets P/T; 6' spaced cedar 4in picket). The two DEPLOYED viewers already match: 48 pickets on 24 ft, 4 in boards, about 2 in gaps. The difference in this doc is root-versus-built drift, not a live defect. Do not change the website's spacing from the table below.
+> - Capped shadowbox / cap-and-trim and vinyl shadowbox gate differences were also measured against the root file and need re-checking on the release build.
+>
+> These measurements show visual parity between viewers. They are not verified construction dimensions.
+
 Read-only survey of all 249 catalog styles in two viewers: the Executive App
 viewer (this worktree, `fence3d.html` plus `gfs/`) and the public website
 viewer (`gfs-website` at `origin/main` 482cac1, `public/fence3d.html` plus
