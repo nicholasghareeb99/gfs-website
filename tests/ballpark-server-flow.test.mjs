@@ -14,17 +14,18 @@ const ANSWER = { low: 5700, high: 6300, comparisons: [
 const json = (body, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => body });
 
 function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), storage } = {}) {
-  const timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
+  const listeners = {}, timers = fakeTimers(), nodes = {}, fetches = [], draws = { compare: [], actions: [], finance: [] };
   const node = () => Object.defineProperty({ textContent: '', hidden: false, style: {}, children: [], dataset: {},
     classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } },
-    replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, querySelector: () => null },
+    replaceChildren() { this.textContent = ''; }, appendChild(c) { this.children.push(c); }, removeAttribute() {}, addEventListener(t, fn) { (this.handlers = this.handlers || {})[t] = fn; }, querySelector: () => null },
     'innerHTML', { set(v) { this.textContent = v; }, get() { return this.textContent; } });
   const abortable = signal => new Promise((_, reject) => { if (signal) signal.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' }))); });
   const globals = {
     ...timers,
     ...(storage ? { sessionStorage: storage } : {}),
     el: id => nodes[id] || (nodes[id] = node()),
-    document: { createElement: node },
+    window: { addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } },
+    document: { createElement: node, visibilityState: 'visible', addEventListener(type, fn) { (listeners[type] = listeners[type] || []).push(fn); } },
     fetch: (url, options) => {
       const call = { url, body: JSON.parse(options.body), signal: options.signal, aborted: false };
       options.signal && options.signal.addEventListener('abort', () => { call.aborted = true; });
@@ -40,7 +41,7 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
   const code = `
     const FENCE_PRICING = {};
     const state = { linearFeet: 0, fenceId: '', height: '6', singleGates: 0, doubleGates: 0, removeOldFence: false, existingFenceMaterial: '', sections: [], priceUnlocked: false };
-    let pricesLive = false, pricesSlow = false, pricesByRequest = false, styleCatalogSettled = true, pendingDraftStyle = '', acceptedBallparkReceipt = '';
+    let pricesLive = false, pricesSlow = false, pricesByRequest = false, styleCatalogSettled = true, pendingDraftStyle = '', acceptedBallparkReceipt = '', pricingReceipt = '';
     ${slice('  function pricesUnavailable()', '  let acceptedBallparkReceipt')}
     function buildStyleEntry(name, perFoot, singleGate, doubleGate) { return { name, perFoot, singleGate, doubleGate, detail: '' }; }
     function categoryForName() { return ''; }
@@ -57,7 +58,8 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
       state, FENCE_PRICING, updateAll, calculatePrice, comparisonRows, submissionPrice, checkServerPrice, serverPriceExpected,
       setCatalogue(names) { names.forEach(n => { FENCE_PRICING[slugify(n)] = buildStyleEntry(n, null, null, null); }); },
       set(flags) { ({ pricesLive = pricesLive, pricesByRequest = pricesByRequest } = flags); },
-      receipt(v) { acceptedBallparkReceipt = v; },
+      receipt(v) { acceptedBallparkReceipt = v; pricingReceipt = v; },
+      pricingReceipt: () => pricingReceipt, retryNow: () => serverPriceRetryNow(), recheck: () => serverPriceRecheck(), bindRecovery: () => bindServerPriceRecovery(),
     };
   `;
   const context = run(globals, code), api = context.api;
@@ -68,7 +70,8 @@ function page({ mode = 'by-request', reply, ping = () => json({ ok: true }), sto
   const choose = (o = {}) => Object.assign(api.state, { fenceId: 'galv-chain-link-4ft', linearFeet: 120, height: '4', ...o });
   const unlock = () => { api.state.priceUnlocked = true; api.receipt(RECEIPT); api.updateAll(); };
   const priceCalls = () => fetches.filter(f => !f.body.ping);
-  return { api, timers, fetches, priceCalls, text, nodes, draws, choose, unlock };
+  const fire = type => (listeners[type] || []).forEach(fn => fn());
+  return { api, timers, fetches, priceCalls, text, nodes, draws, choose, unlock, fire, listeners };
 }
 const settle = async (p, ms = 500) => { await p.timers.advance(ms); };
 const card = p => [p.text('bp-price-range'), p.text('bp-price-hint')];
@@ -200,8 +203,7 @@ test('the capability check is asked once, only from the by-request branch of the
   p.api.checkServerPrice(); p.api.checkServerPrice(); await settle(p, 0); p.api.checkServerPrice();
   assert.equal(p.fetches.length, 1);
   assert.deepEqual(JSON.parse(JSON.stringify(p.fetches[0].body)), { ping: true });
-  const calls = SRC.match(/checkServerPrice\(\)/g).length;
-  assert.equal(calls, 2, 'the definition and the single caller');
+  assert.equal(SRC.match(/\bcheckServerPrice\(\)/g).length, 4, 'the definition, the catalogue sync, the ping retry and the recheck on return');
   assert.match(slice('pricesByRequest = built;', 'if (built) {'), /if \(built\) checkServerPrice\(\);/);
 });
 
@@ -222,16 +224,17 @@ test('a 429 (too many price requests) falls back to the by-request wording like 
   assert.equal(p.priceCalls().length, 1);
 });
 
-test('delayed lead: a few spaced retries, then the by-request wording, never an error', async () => {
+test('delayed lead: fast retries, then a few slower ones, then it stops; never an error', async () => {
   const p = page({ reply: () => json({ error: 'Request not found yet' }, 409) });
   p.api.checkServerPrice(); await settle(p, 0);
   p.choose(); p.unlock();
   await settle(p, 400);
   for (const [i, pause] of [[1, 600], [2, 1500], [3, 3000], [4, 4000]]) { assert.equal(p.priceCalls().length, i); assert.equal(p.text('bp-price-range'), 'Working out your range…'); await settle(p, pause); }
   assert.equal(p.priceCalls().length, 5, 'first ask plus four retries, spaced 0.6 s, 1.5 s, 3 s, 4 s');
-  await settle(p, 20000);
-  assert.equal(p.priceCalls().length, 5);
-  assert.deepEqual(card(p), ['We will send your price', 'Your request is received. We will get your price to you.']);
+  assert.deepEqual(card(p).map(t => t.replace(/\n.*/, '')), ['We will send your price', 'Your request is received. We will get your price to you.']);
+  await settle(p, 120000);
+  assert.equal(p.priceCalls().length, 8, 'then three slower asks (5 s, 15 s, 45 s) and no more');
+  assert.equal(p.text('bp-price-range'), 'We will send your price');
 });
 
 test('a request that never answers ends as the by-request wording, and is aborted', async () => {
