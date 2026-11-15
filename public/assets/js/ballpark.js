@@ -1117,7 +1117,11 @@
   // reached, but they are never priced: the request goes to the office
   // without a range (same path as a height that needs review).
   let pricesLive = false, pricesSlow = false;
+  // True when the public catalogue lists styles but carries no prices on
+  // purpose: the office sends every price. A normal way of working, not an outage.
+  let pricesByRequest = false;
   function pricesUnavailable() { return !pricesLive && (styleCatalogSettled || pricesSlow); }
+  function pricesOnRequest() { return pricesByRequest && !pricesLive; }
   let acceptedBallparkReceipt = '';
 
   // Prices are shown only after the customer contact submission is accepted.
@@ -1275,7 +1279,7 @@
   // ---- HTML ESCAPING ----------------------------------------------
   // Anything interpolated into innerHTML must be escaped first. Two sources
   // here are outside our control:
-  //   * style names/details from settings/global (owner-written, but a name
+  //   * style names/details from settings/public (owner-written, but a name
   //     like 'Chain Link 2" Mesh' silently truncated every alt attribute)
   //   * geocoder results from OpenStreetMap (third-party, publicly editable)
   function esc(v) {
@@ -1937,7 +1941,7 @@
     if (submitButton && !submitButton.disabled) submitButton.textContent = quoteSubmitLabel();
     const formTitle = el('bp-contact-title'), formHint = el('bp-contact-hint');
     if (formTitle) formTitle.textContent = state.priceUnlocked ? 'Your request is in.' : reviewHeight || noPrices ? 'Request your free quote.' : 'Unlock your estimate.';
-    if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : noPrices ? 'Our price list is not loading right now. Send your details and we will get your price to you.' : 'Share your details to view the range and request a project review from our team.';
+    if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : noPrices ? (pricesOnRequest() ? 'Send your plan and our team will get your price to you.' : 'Our price list is not loading right now. Send your details and we will get your price to you.') : 'Share your details to view the range and request a project review from our team.';
     const price = calculatePrice();
     const priceCard = el('bp-price-card');
     const priceRange = el('bp-price-range');
@@ -1950,7 +1954,7 @@
       const needsQuote = state.fenceId && state.linearFeet > 0 && FENCE_PRICING[state.fenceId];
       const missingRemoval = state.removeOldFence && !existingFenceMaterialLabel();
       const sectionIssue = needsQuote ? sectionsIssue() : '';
-      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : noPrices ? 'We will send your price' : !pricesLive ? 'Loading prices…' : 'This style needs a custom quote') : 'Your price in 4 quick steps';
+      if (priceRange) priceRange.textContent = state.linearFeet > 2000 ? 'This length needs a custom quote' : missingRemoval ? 'Choose the existing fence material' : sectionIssue ? 'Finish your added fence style' : needsQuote ? (reviewHeight ? 'This height needs a quote review' : noPrices ? 'We will send your price' : !pricesLive ? 'Loading prices…' : 'This style needs a custom quote') : pricesOnRequest() ? 'Your quote in 4 quick steps' : 'Your price in 4 quick steps';
       if (priceHint) {
         priceHint.replaceChildren();
         if (state.linearFeet > 2000) {
@@ -1961,7 +1965,7 @@
         } else if (sectionIssue) {
           priceHint.textContent = sectionIssue;
         } else if (needsQuote && noPrices) {
-          priceHint.textContent = state.priceUnlocked ? 'Your request is received. We will get your price to you.' : 'Our price list is not loading right now. Use step 4 to send your plan and we will get your price to you.';
+          priceHint.textContent = state.priceUnlocked ? 'Your request is received. We will get your price to you.' : pricesOnRequest() ? 'Use step 4 to send your plan and our team will get your price to you.' : 'Our price list is not loading right now. Use step 4 to send your plan and we will get your price to you.';
         } else if (needsQuote && !pricesLive) {
           priceHint.textContent = '';
         } else if (needsQuote && reviewHeight) {
@@ -1972,7 +1976,7 @@
           quoteLink.textContent = 'Request a free detailed quote';
           quoteLink.style.color = 'inherit';
           priceHint.appendChild(quoteLink);
-        } else priceHint.textContent = 'Then unlock your price in step 4';
+        } else priceHint.textContent = pricesOnRequest() ? 'Then send your plan in step 4' : 'Then unlock your price in step 4';
       }
       renderFinance(null);
       renderComparePanel(false);
@@ -4055,32 +4059,35 @@
     }
   }
 
-  // -------- FIRESTORE PRICING + PHOTOS SYNC (EXACT SAME ENGINE AS EXECUTIVE APP) --------
-  // The Executive app stores BOTH pricing and style photos in ONE document:
+  // -------- FIRESTORE STYLE CATALOGUE SYNC --------
+  // The website reads ONE public document, settings/public, which the
+  // Executive app publishes:
   //
-  //   /settings/global
-  //   ├── .pricing        (string, newline-separated "Name : perFoot : sg : dg")
-  //   └── .stylePhotos    (object, keyed by style name)
-  //                       { "Cedar Privacy": [ { url, name }, ... ], ... }
+  //   /settings/public
+  //   ├── .styleNames     (array of style names, owner's order)
+  //   ├── .stylePhotos    (object, keyed by style name)
+  //   │                   { "Cedar Privacy": [ { url, name }, ... ], ... }
+  //   ├── .styleSpecs     (object, 3D model overrides keyed by style name)
+  //   └── .pricing        (string, "Name : perFoot : sg : dg" per line)
+  //                       LEGACY and optional. Per-style prices are not
+  //                       meant to be public; once the publisher stops
+  //                       emitting this field the site quotes by request.
   //
-  // The deployed Firestore rules make settings/ publicly readable, so the
-  // website reads the SAME document the Executive app reads and writes.
-  // Whatever styles, prices, AND photos the owner manages in the Executive
-  // app's admin panel show up here automatically.
+  // settings/global is never read here: the security rules deny it to
+  // visitors, so a read could only fail.
+  //   * pricing present   -> styles AND prices go live (pricesLive).
+  //   * only styleNames   -> same styles and photos, no prices at all
+  //                          (pricesByRequest): the office sends the price.
+  //   * neither           -> built-in styles stay, outage wording applies.
   async function syncPricingFromFirestore() {
     if (!window.GFS_DB) return;
     try {
-      // v7.8: prefer the trimmed public mirror (pricing + photos only);
-      // fall back to the legacy global doc until the exec app has
-      // mirrored at least once.
-      let snap = await window.GFS_DB.collection('settings').doc('public').get()
-        .catch(() => ({ exists: false }));
-      if (!snap.exists || !(snap.data() && snap.data().pricing)) {
-        snap = await window.GFS_DB.collection('settings').doc('global').get();
-      }
-      if (snap.exists) {
-        const data = snap.data();
-        if (data && typeof data.pricing === 'string' && data.pricing.trim()) {
+      const snap = await window.GFS_DB.collection('settings').doc('public').get();
+      const data = snap && snap.exists ? snap.data() : null;
+      if (data && typeof data === 'object') {
+        const photoMap = plainMap(data.stylePhotos);
+        let built = false;
+        if (typeof data.pricing === 'string' && data.pricing.trim()) {
           // Pull the same removal rates the Executive app uses, so a change
           // made in its admin settings takes effect here too.
           ['remWood','remChain','remOther']
@@ -4090,8 +4097,19 @@
             });
           // Live only if the list actually produced styles; a list with no
           // usable lines leaves the built-in styles in place, unpriced.
-          pricesLive = buildStylesFromExecPricing(data.pricing, data.stylePhotos || {});
+          pricesLive = buildStylesFromExecPricing(data.pricing, photoMap);
+          built = pricesLive;
+        } else {
+          const names = cleanStyleNames(data.styleNames);
+          if (names.length) {
+            built = buildStylesFromNames(names, photoMap);
+            pricesByRequest = built;
+          }
+        }
+        if (built) {
           window.GFS_BALLPARK_MODEL_OVERRIDES = data.styleSpecs && typeof data.styleSpecs === "object" ? data.styleSpecs : undefined;
+          // Settled before any redraw so the wording is right on first paint.
+          styleCatalogSettled = true;
           if (pendingDraftStyle && FENCE_PRICING[pendingDraftStyle]) selectFenceStyle(pendingDraftStyle, true);
           // If a previously-selected style no longer exists, clear selection
           if (state.fenceId && !FENCE_PRICING[state.fenceId]) {
@@ -4104,20 +4122,85 @@
           // Count how many have real photos vs keyword-inferred fallback
           const styleCount = Object.keys(FENCE_PRICING).length;
           const withRealPhotos = Object.values(FENCE_PRICING).filter(f => f._hasExecPhoto).length;
-          console.log('%c[Ghareeb Ballpark] Synced from settings/global — ' +
+          console.log('%c[Ghareeb Ballpark] Synced from settings/public (' + (pricesLive ? 'with prices' : 'prices by request') + ') — ' +
             styleCount + ' styles (' + withRealPhotos + ' with Executive app photos)',
             'color:#1A7A3C;font-weight:bold;');
           return;
         }
       }
-      console.log('[Ghareeb Ballpark] settings/global has no pricing field; using built-in defaults');
+      console.log('[Ghareeb Ballpark] settings/public has no usable styles; using built-in defaults');
     } catch (e) {
-      console.log('[Ghareeb Ballpark] Could not read settings/global (using defaults):', e.message || e);
+      console.log('[Ghareeb Ballpark] Could not read settings/public (using defaults):', e.message || e);
     } finally {
       styleCatalogSettled = true;
       updateDraftStyleNotice();
       try { applyRequestedStyle(); offerStudioStyle(); updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] post-catalog refresh skipped:', e); }
     }
+  }
+
+  // A plain object map, or an empty one. Style names are owner-written but
+  // arrive from a public document, so nothing here is trusted by shape.
+  function plainMap(v) { return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; }
+  function photosFor(map, name) {
+    return Object.prototype.hasOwnProperty.call(map, name) && Array.isArray(map[name]) ? map[name] : [];
+  }
+
+  // Strings only, trimmed, non-empty, at most 200 characters, no repeats,
+  // at most 1000 names. Anything else is ignored; this never throws.
+  function cleanStyleNames(raw) {
+    const out = [], seen = new Set();
+    if (!Array.isArray(raw)) return out;
+    for (let i = 0; i < raw.length && out.length < 1000; i++) {
+      const v = raw[i];
+      if (typeof v !== 'string') continue;
+      const name = v.trim();
+      if (!name || name.length > 200 || seen.has(name)) continue;
+      seen.add(name);
+      out.push(name);
+    }
+    return out;
+  }
+
+  // One style object, the same for priced and by-request catalogues. Pass
+  // null prices for by-request: nothing is ever computed from them.
+  function buildStyleEntry(name, perFoot, singleGate, doubleGate, stylePhotos) {
+    // Look up the photo from settings/public.stylePhotos[styleName]
+    // It's an array of { url, name } — use the first one as the preview
+    const rawPhotos = photosFor(stylePhotos, name);
+    const execPhotos = window.GFSAuditedPhotos.select(name, publicStylePhotos(rawPhotos));
+    const execPhoto = execPhotos[0]?.url || null;
+    const upgrades = window.GFS_STYLE_IMAGE_UPGRADES;
+    const upgraded = upgrades && Object.prototype.hasOwnProperty.call(upgrades, name) ? upgrades[name] : undefined;
+    let originalPhoto = execPhoto?.split('?')[0] || '';
+    try { originalPhoto = decodeURIComponent(originalPhoto); } catch (_) { originalPhoto = ''; }
+    const useUpgrade = upgraded && (!execPhoto || originalPhoto.endsWith('/'+upgraded.original));
+    const knownMismatch = rawPhotos.some(p=>window.GFSAuditedPhotos.excluded(name,p));
+    const photo = useUpgrade ? upgraded.image : execPhoto || (knownMismatch?'/assets/img/style-references/photo-needed.svg':photoForName(name));
+
+    return {
+      name: name,
+      detail: detailForName(name),
+      perFoot: perFoot,
+      singleGate: singleGate,
+      doubleGate: doubleGate,
+      photo: photo,
+      photoThumb: useUpgrade ? photo.replace(/\.webp$/,'-640.webp') : null,
+      imageKind: useUpgrade ? 'product rendering' : execPhoto ? execPhotos[0].auditImageKind || 'photo' : 'material example',
+      photoCaption: execPhotos[0]?.auditCaption || '',
+      category: categoryForName(name),
+      style: '',
+      removalType: removalTypeForName(name),
+      _hasExecPhoto: !!execPhoto,   // diagnostic flag
+      _allPhotos: Array.isArray(execPhotos) ? execPhotos : [],  // keep all photos for future gallery use
+    };
+  }
+
+  // Replace FENCE_PRICING in place (other code holds a reference)
+  function installCatalogue(built) {
+    if (!Object.keys(built).length) return false;
+    Object.keys(FENCE_PRICING).forEach(k => delete FENCE_PRICING[k]);
+    Object.assign(FENCE_PRICING, built);
+    return true;
   }
 
   // Parse the Executive app's pricing string AND map each style to its photo
@@ -4136,44 +4219,22 @@
       const singleGate = parseFloat(parts[2]);
       const doubleGate = parseFloat(parts[3]);
       if (!name || isNaN(perFoot)) return;
-
-      // Look up the photo from settings/global.stylePhotos[styleName]
-      // It's an array of { url, name } — use the first one as the preview
-      const execPhotos = window.GFSAuditedPhotos.select(name, publicStylePhotos(stylePhotos[name]));
-      const execPhoto = execPhotos[0]?.url || null;
-      const upgraded = window.GFS_STYLE_IMAGE_UPGRADES?.[name];
-      let originalPhoto = execPhoto?.split('?')[0] || '';
-      try { originalPhoto = decodeURIComponent(originalPhoto); } catch (_) { originalPhoto = ''; }
-      const useUpgrade = upgraded && (!execPhoto || originalPhoto.endsWith('/'+upgraded.original));
-      const knownMismatch = (stylePhotos[name] || []).some(p=>window.GFSAuditedPhotos.excluded(name,p));
-      const photo = useUpgrade ? upgraded.image : execPhoto || (knownMismatch?'/assets/img/style-references/photo-needed.svg':photoForName(name));
-
-      const id = slugify(name);
-      built[id] = {
-        name: name,
-        detail: detailForName(name),
-        perFoot: perFoot,
-        singleGate: isNaN(singleGate) ? 150 : singleGate,
-        doubleGate: isNaN(doubleGate) ? 300 : doubleGate,
-        photo: photo,
-        photoThumb: useUpgrade ? photo.replace(/\.webp$/,'-640.webp') : null,
-        imageKind: useUpgrade ? 'product rendering' : execPhoto ? execPhotos[0].auditImageKind || 'photo' : 'material example',
-        photoCaption: execPhotos[0]?.auditCaption || '',
-        category: categoryForName(name),
-        style: '',
-        removalType: removalTypeForName(name),
-        _hasExecPhoto: !!execPhoto,   // diagnostic flag
-        _allPhotos: Array.isArray(execPhotos) ? execPhotos : [],  // keep all photos for future gallery use
-      };
+      built[slugify(name)] = buildStyleEntry(name, perFoot, isNaN(singleGate) ? 150 : singleGate, isNaN(doubleGate) ? 300 : doubleGate, stylePhotos);
     });
+    return installCatalogue(built);
+  }
 
-    if (Object.keys(built).length) {
-      // Replace FENCE_PRICING in place (other code holds a reference)
-      Object.keys(FENCE_PRICING).forEach(k => delete FENCE_PRICING[k]);
-      Object.assign(FENCE_PRICING, built);
-      return true;
-    }
-    return false;
+  // Same styles, photos and details, but no prices: perFoot and the gate
+  // rates are null, so pricePart() and calculatePrice() can never produce a
+  // figure from them. `names` must already be through cleanStyleNames().
+  function buildStylesFromNames(names, stylePhotos) {
+    const built = {};
+    names.forEach(name => {
+      const id = slugify(name);
+      if (!id || Object.prototype.hasOwnProperty.call(built, id)) return;
+      built[id] = buildStyleEntry(name, null, null, null, stylePhotos);
+    });
+    return installCatalogue(built);
   }
 
   function slugify(name) {
