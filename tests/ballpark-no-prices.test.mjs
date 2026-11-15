@@ -58,6 +58,7 @@ function harness(src, doc, { readError = null } = {}) {
     function selectFenceStyle(id) { calls.selected.push(id); }
     function renderFenceOptions() { calls.renderFenceOptions++; }
     function updateAll() { calls.updateAll++; }
+    function checkServerPrice() { calls.pings = (calls.pings || 0) + 1; }
     function updateDraftStyleNotice() {} function applyRequestedStyle() {} function offerStudioStyle() {}
     ${catalogueCode}
     globalThis.api = {
@@ -101,6 +102,7 @@ test('(a) with pricing present the catalogue is identical to the code on origin/
   assert.equal(Object.keys(newRun.api.FENCE_PRICING).length, 4);
   assert.equal(newRun.api.PRICING_FACTORS.remWood, 6);
   assert.deepEqual([...newRun.calls.docId], ['public']);
+  assert.equal(newRun.calls.pings || 0, 0, 'with public prices the price function is never checked');
 });
 
 test('(b) styleNames only: same styles and photos, no prices, by-request flag', async () => {
@@ -118,6 +120,7 @@ test('(b) styleNames only: same styles and photos, no prices, by-request flag', 
   assert.deepEqual(plain(bare.window.GFS_BALLPARK_MODEL_OVERRIDES), SPECS);
   assert.equal(bare.api.PRICING_FACTORS.remWood, 4, 'removal rates are not read without pricing');
   assert.ok(bare.calls.renderFenceOptions >= 1 && bare.calls.updateAll >= 1);
+  assert.equal(bare.calls.pings, 1, 'by-request: the page asks once whether the price function is on');
 });
 
 test('(c) hostile styleNames never throw and never pollute prototypes', async () => {
