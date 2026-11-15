@@ -18,11 +18,14 @@
 //   { receipt, parts:[{style, feet, height, singleGates, doubleGates}],
 //     removal:{on, material, feet}, compare:true }       -> 200 {low, high, parts:[{style, feet}], comparisons:[{style, low, high}]}
 //                                                     or 200 {needsQuote:true}
+//   { renew:true, receipt }                        -> 200 {session, expiresIn}   (a returning customer; see docs)
+//   { receipt, session, parts, ... }               -> as above, priced under the session instead of the 24 hour lead age
 // A price is only given for a receipt that exists in websiteLeads (and is
-// under a day old), so a price always leaves a lead behind, and each receipt
-// gets at most 60 priced ranges (a failed or needs-quote answer does not count)
-// and 20 attempts a minute, by counters in the ballparkPriceUse collection.
-// Over the limit: 429 (with Retry-After for the minute limit).
+// under a day old, or comes with a session this function issued for it), so a
+// price always leaves a lead behind. Each receipt gets at most 60 priced ranges
+// per 24 hour block of its life (180 in all; a failed or needs-quote answer does
+// not count) and 20 attempts a minute, by counters in the ballparkPriceUse
+// collection. Over the limit: 429 (with Retry-After for the minute limit).
 //
 // The answer never carries a total, a per-foot figure, billable feet or
 // anything else a rate follows from directly.
@@ -35,9 +38,17 @@ const RECEIPT_RE = /^web_[a-zA-Z0-9_-]{16,80}$/;
 const RECEIPT_MAX_AGE_MS = 24 * 3600 * 1000;
 const CLOCK_SKEW_MS = 5 * 60 * 1000;   // a lead stamped slightly in the future is clock skew; further is not trusted
 const SETTINGS_TTL = 300; // seconds
-// Two separate bounds for one receipt (see countAttempt and takePricedSlot below).
-const LIFETIME_CAP = 60;   // priced ranges actually returned per receipt; a comparison list counts as one
+// Two separate bounds for one receipt (see countAttempt and takeSlots below).
+const DAY_CAP = 60;        // priced ranges actually returned per receipt in one 24 hour block of its life; a comparison list counts as one
+const LIFETIME_CAP = 180;  // hard cap on priced ranges for the life of a receipt (three full blocks)
 const MINUTE_CAP = 20;     // attempts (any outcome) per receipt in one clock minute
+// Returning customers (see "Returning customers" in docs/BALLPARK-SERVER-PRICE.md).
+const BLOCK_MS = 24 * 3600 * 1000;             // blocks are counted from the lead's own trusted creation time
+const SESSION_MAX_MS = 24 * 3600 * 1000;       // longest a pricing session lives
+const RENEW_HORIZON_MS = 180 * 24 * 3600 * 1000; // oldest lead that can still be renewed
+const RENEW_DAY_CAP = 3, RENEW_LIFETIME_CAP = 20, RENEW_MINUTE_CAP = 5;
+const SESSION_LABEL = 'gfs-ballpark-session-v1';
+const SESSION_RE = /^v1\.[A-Za-z0-9_-]{20,400}\.[A-Za-z0-9_-]{43}$/;
 const USE_COLLECTION = 'ballparkPriceUse';
 
 // ---- pricing math: a port of assets/js/ballpark.js, kept in step with it ---
@@ -145,14 +156,16 @@ const isObject = v => v && typeof v === 'object' && !Array.isArray(v);
 const onlyKeys = (obj, keys) => Object.keys(obj).every(k => keys.includes(k));
 const wholeNumber = (v, max) => typeof v === 'number' && Number.isInteger(v) && v >= 0 && v <= max;
 
-// Returns {ping:true}, a clean request, or null. Never throws.
+// Returns {ping:true}, {renew:true, receipt}, a clean request, or null. Never throws.
 export function readRequest(body) {
   let data;
   try { data = JSON.parse(body); } catch { return null; }
   if (!isObject(data)) return null;
   if (data.ping === true) return Object.keys(data).length === 1 ? { ping: true } : null;
-  if (!onlyKeys(data, ['receipt', 'parts', 'removal', 'compare'])) return null;
+  if (data.renew === true) return onlyKeys(data, ['renew', 'receipt']) && typeof data.receipt === 'string' && RECEIPT_RE.test(data.receipt) ? { renew: true, receipt: data.receipt } : null;
+  if (!onlyKeys(data, ['receipt', 'parts', 'removal', 'compare', 'session'])) return null;
   if (typeof data.receipt !== 'string' || !RECEIPT_RE.test(data.receipt)) return null;
+  if (data.session !== undefined && (typeof data.session !== 'string' || !SESSION_RE.test(data.session))) return null;
   if (!Array.isArray(data.parts) || !data.parts.length || data.parts.length > 4) return null;
   const parts = [];
   for (const p of data.parts) {
@@ -170,7 +183,7 @@ export function readRequest(body) {
   if (removal.feet !== undefined && (typeof removal.feet !== 'number' || !(removal.feet > 0) || removal.feet > MAX_FEET || Math.abs(removal.feet - sum) > 0.011)) return null;
   if (removal.on && !['wood', 'chain', 'vinyl', 'aluminum', 'other'].includes(removal.material)) return null;
   if (data.compare !== undefined && typeof data.compare !== 'boolean') return null;
-  return { receipt: data.receipt, parts, removal: { on: removal.on, material: removal.on ? removal.material : '', feet: removal.feet }, compare: data.compare === true };
+  return { receipt: data.receipt, session: data.session, parts, removal: { on: removal.on, material: removal.on ? removal.material : '', feet: removal.feet }, compare: data.compare === true };
 }
 
 // ---- Google access with the service account -------------------------------
@@ -227,22 +240,30 @@ async function loadSettings(fetcher, project, token, now) {
 // missing, not a number, zero or negative, or more than a few minutes in the
 // future is refused: an unreadable age never authorises a price.
 // Returns 'ok', 'expired' or 'invalid'.
-export function leadAgeStatus(doc, nowMs) {
+// The lead's trusted creation time in ms, or null when it cannot be trusted.
+export function leadMadeAt(doc, nowMs) {
   let made;
   if (doc && doc.createTime !== undefined) made = typeof doc.createTime === 'string' ? Date.parse(doc.createTime) : NaN;
   else {
     const field = doc && doc.fields ? doc.fields.createdAtMs : undefined;
     made = field && typeof plain(field) === 'number' ? plain(field) : NaN;
   }
-  if (!Number.isFinite(made) || made <= 0 || made > nowMs + CLOCK_SKEW_MS) return 'invalid';
+  return !Number.isFinite(made) || made <= 0 || made > nowMs + CLOCK_SKEW_MS ? null : made;
+}
+export function leadAgeStatus(doc, nowMs) {
+  const made = leadMadeAt(doc, nowMs);
+  if (made === null) return 'invalid';
   return nowMs - made > RECEIPT_MAX_AGE_MS ? 'expired' : 'ok';
 }
-// 'ok', 'missing', 'expired' or 'invalid'. A receipt is only good for a day.
-async function leadStatus(fetcher, project, token, receipt, now) {
+// {status:'missing'|'invalid'|'ok'|'expired', made, doc}. A fresh receipt is good for a day;
+// a session (or a renewal) may use an older one, within the horizon.
+async function fetchLead(fetcher, project, token, receipt, now) {
   const res = await fetcher(docUrl(project, 'websiteLeads/' + encodeURIComponent(receipt)), { headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
-  if (res.status === 404) return 'missing';
+  if (res.status === 404) return { status: 'missing' };
   if (!res.ok) throw Error('Could not check the request (HTTP ' + res.status + ')');
-  return leadAgeStatus(await res.json(), now * 1000);
+  const doc = await res.json();
+  const made = leadMadeAt(doc, now * 1000);
+  return made === null ? { status: 'invalid' } : { status: now * 1000 - made > RECEIPT_MAX_AGE_MS ? 'expired' : 'ok', made, doc };
 }
 // One atomic increment of a counter document in a collection of its own (not
 // the lead, which the Executive app reads). The commit's increment transform
@@ -250,14 +271,14 @@ async function leadStatus(fetcher, project, token, receipt, now) {
 // at once each get their own number. expireAt lets a Firestore TTL policy clean
 // the small documents up. Needs write access to this one collection
 // (docs/BALLPARK-SERVER-PRICE.md).
-async function increment(fetcher, project, token, id, now, keepSeconds) {
+async function increment(fetcher, project, token, id, now, keepSeconds, delta = 1) {
   const name = 'projects/' + project + '/databases/(default)/documents/' + USE_COLLECTION + '/' + id;
   const res = await fetcher('https://firestore.googleapis.com/v1/projects/' + project + '/databases/(default)/documents:commit', {
     method: 'POST', headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
     body: JSON.stringify({ writes: [{
       update: { name, fields: { expireAt: { timestampValue: new Date((now + keepSeconds) * 1000).toISOString() } } },
       updateMask: { fieldPaths: ['expireAt'] },
-      updateTransforms: [{ fieldPath: 'count', increment: { integerValue: '1' } }],
+      updateTransforms: [{ fieldPath: 'count', increment: { integerValue: String(delta) } }],
     }] }), signal: AbortSignal.timeout(10000),
   });
   if (!res.ok) throw Error('Could not count the request (HTTP ' + res.status + ')');
@@ -270,13 +291,61 @@ async function increment(fetcher, project, token, id, now, keepSeconds) {
 // counts in this clock minute, whatever its outcome. It only bounds how fast a
 // receipt can ask; it never touches the lifetime allowance.
 const countAttempt = (fetcher, project, token, receipt, now) => increment(fetcher, project, token, receipt + '_m' + Math.floor(now / 60), now, 3600);
-// Lifetime allowance: taken only when a priced range is about to be returned,
-// in one atomic increment sent after the range has been worked out. The
+// Allowance slots (priced ranges, renewals): each is one atomic increment sent
+// only after the answer is worked out and nothing is left that can fail. The
 // returned number is this request's own place in line, so of any number of
-// simultaneous requests only those numbered 1..LIFETIME_CAP get a range, and a
-// range is never returned unless its increment committed. An outage before this
-// point, a minute throttle, or a project the function cannot price takes nothing.
-const takePricedSlot = (fetcher, project, token, receipt, now) => increment(fetcher, project, token, receipt, now, 2 * 86400);
+// simultaneous requests only those numbered 1..cap get a slot. Slots are taken in
+// the order given (the narrower window first); if a later one is refused or its
+// commit fails, the earlier ones are handed back (best effort) so a denied or
+// failed request keeps nothing. Returns true when every slot was taken.
+async function takeSlots(fetcher, project, token, now, slots) {
+  const held = [];
+  const giveBack = async () => { for (const s of held) { try { await increment(fetcher, project, token, s.id, now, s.keep, -1); } catch { /* a slot left taken is the safe side */ } } };
+  try {
+    for (const s of slots) {
+      if (await increment(fetcher, project, token, s.id, now, s.keep) > s.cap) { await giveBack(); return false; }
+      held.push(s);
+    }
+    return true;
+  } catch (e) { await giveBack(); throw e; }
+}
+const blockOf = (made, now) => Math.max(0, Math.floor((now * 1000 - made) / BLOCK_MS));
+const KEEP_LIFE = Math.ceil((RENEW_HORIZON_MS + 3 * BLOCK_MS) / 1000);   // the lifetime counters must outlive the longest renewable receipt
+const pricedSlots = (receipt, made, now) => [
+  { id: receipt + '_d' + blockOf(made, now), cap: DAY_CAP, keep: 3 * 86400 },
+  { id: receipt, cap: LIFETIME_CAP, keep: KEEP_LIFE },
+];
+const renewSlots = (receipt, made, now) => [
+  { id: receipt + '_rd' + blockOf(made, now), cap: RENEW_DAY_CAP, keep: 3 * 86400 },
+  { id: receipt + '_rl', cap: RENEW_LIFETIME_CAP, keep: KEEP_LIFE },
+];
+
+// ---- pricing sessions -----------------------------------------------------
+// A session is not a login. It is a receipt for "this lead was checked and may be
+// priced until expiresAt": base64url JSON {r receipt, i issuedAt, e expiresAt, n nonce}
+// plus an HMAC-SHA256 of that text. The HMAC key is derived from the service account
+// private key the function already holds (HMAC of the key with a fixed label), so
+// there is no new secret to manage and the key itself never leaves the function.
+// Rotating the service account key ends every session, which is the intended effect.
+const sessionSecret = key => crypto.createHmac('sha256', key.private_key).update(SESSION_LABEL).digest();
+export function mintSession(key, receipt, nowSec) {
+  const payload = b64url(JSON.stringify({ r: receipt, i: nowSec, e: nowSec + SESSION_MAX_MS / 1000, n: crypto.randomBytes(12).toString('base64url') }));
+  return 'v1.' + payload + '.' + crypto.createHmac('sha256', sessionSecret(key)).update(payload).digest('base64url');
+}
+// 'ok', 'expired' or 'invalid'. Constant-time comparison of the MAC; the receipt
+// inside must be the one asked about.
+export function checkSession(key, token, receipt, nowSec) {
+  if (typeof token !== 'string' || !SESSION_RE.test(token)) return 'invalid';
+  const [, payload, mac] = token.split('.');
+  const want = crypto.createHmac('sha256', sessionSecret(key)).update(payload).digest();
+  const got = Buffer.from(mac, 'base64url');
+  if (got.length !== want.length || !crypto.timingSafeEqual(got, want)) return 'invalid';
+  let data;
+  try { data = JSON.parse(Buffer.from(payload, 'base64url').toString('utf8')); } catch { return 'invalid'; }
+  if (!isObject(data) || data.r !== receipt || !Number.isInteger(data.i) || !Number.isInteger(data.e)) return 'invalid';
+  if (data.e - data.i > SESSION_MAX_MS / 1000 || data.i > nowSec + CLOCK_SKEW_MS / 1000) return 'invalid';
+  return nowSec >= data.e ? 'expired' : 'ok';
+}
 export function resetCaches() { tokenCache = null; settingsCache = null; }
 
 // ---- handler --------------------------------------------------------------
@@ -298,15 +367,25 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
   const input = readRequest(body);
   if (!input) return reply(400, { error: 'Check the project details and try again.' });
   if (input.ping) return reply(200, { ok: true });
+  // A session is checked before any network call: it is a signature, not a lookup.
+  let session = false;
+  if (input.session) {
+    const status = checkSession(config.key, input.session, input.receipt, now);
+    if (status !== 'ok') return reply(403, { error: status === 'expired' ? 'Session expired' : 'Session not valid' });
+    session = true;
+  }
   try {
     const token = await accessToken(fetcher, config.key, now);
     // The intake function writes the lead a few seconds after the form is
     // sent; the page retries on 409.
-    const lead = await leadStatus(fetcher, config.project, token, input.receipt, now);
-    if (lead === 'missing') return reply(409, { error: 'Request not found yet' });
-    if (lead === 'expired') return reply(403, { error: 'Request too old' });
-    if (lead === 'invalid') return reply(403, { error: 'Request not valid' });
+    const lead = await fetchLead(fetcher, config.project, token, input.receipt, now);
+    if (lead.status === 'missing') return input.renew ? reply(404, { error: 'Request not found' }) : reply(409, { error: 'Request not found yet' });
+    if (lead.status === 'invalid') return reply(403, { error: 'Request not valid' });
     const limited = env.GFS_PRICING_LIMIT !== 'off';
+    if (input.renew) return await renew(input, { fetcher, config, token, lead, now, limited });
+    // A fresh receipt is good for a day. A session this function issued for the receipt replaces that
+    // age check (its own expiry applies), but the lead must still be within the renewal horizon.
+    if (session ? now * 1000 - lead.made > RENEW_HORIZON_MS + SESSION_MAX_MS : lead.status === 'expired') return reply(403, { error: 'Request too old' });
     if (limited && await countAttempt(fetcher, config.project, token, input.receipt, now) > MINUTE_CAP) {
       return reply(429, { error: 'Too many price requests for this project. Please try again in a minute.' }, { 'Retry-After': String(60 - (now % 60)) });
     }
@@ -317,8 +396,8 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     // the customer sent) so the page can check the answer is for its layout.
     const out = { low: price.low, high: price.high, parts: input.parts.map(p => ({ style: (styles[slugify(p.style)] || {}).name || p.style, feet: p.feet })) };
     if (input.compare) out.comparisons = compareStyles(styles, factors, input);
-    // Only now, with the range in hand and nothing left that can fail, take the lifetime slot.
-    if (limited && await takePricedSlot(fetcher, config.project, token, input.receipt, now) > LIFETIME_CAP) {
+    // Only now, with the range in hand and nothing left that can fail, take the allowance slots.
+    if (limited && !await takeSlots(fetcher, config.project, token, now, pricedSlots(input.receipt, lead.made, now))) {
       return reply(429, { error: 'Too many price requests for this project. We will send your price.' });
     }
     return reply(200, out);
@@ -326,6 +405,26 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     console.error('ballpark-price', e && e.message);
     return reply(503, { error: 'Pricing is unavailable right now.' });
   }
+}
+
+// A returning customer asks for a pricing session for the lead they already have.
+// Nothing is written but counters. Who may renew: anyone who holds the receipt id
+// (unguessable, as for a fresh lead) of a website lead (never a booking) that the
+// database created within the horizon. Allowance: 5 attempts a minute, 3 sessions per
+// 24 hour block of the lead's life, 20 in all; a slot is taken only once the session
+// is ready, so an outage or a refused request costs nothing.
+async function renew(input, { fetcher, config, token, lead, now, limited }) {
+  const f = lead.doc && lead.doc.fields ? lead.doc.fields : {};
+  if (f.date !== undefined || f.time !== undefined) return reply(403, { error: 'Request not valid' });   // shaped like a visit booking
+  if (now * 1000 - lead.made > RENEW_HORIZON_MS) return reply(403, { error: 'Request too old to continue' });
+  if (limited && await increment(fetcher, config.project, token, input.receipt + '_rm' + Math.floor(now / 60), now, 3600) > RENEW_MINUTE_CAP) {
+    return reply(429, { error: 'Too many requests. Please try again in a minute.' }, { 'Retry-After': String(60 - (now % 60)) });
+  }
+  const session = mintSession(config.key, input.receipt, now);
+  if (limited && !await takeSlots(fetcher, config.project, token, now, renewSlots(input.receipt, lead.made, now))) {
+    return reply(429, { error: 'Too many requests for this project. We will send your price.' });
+  }
+  return reply(200, { session, expiresIn: SESSION_MAX_MS / 1000 });
 }
 
 export default request => handle(request);

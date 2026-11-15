@@ -200,7 +200,7 @@ test('a dozen changes by a normal customer are all answered, comparisons count a
   assert.equal(g.counts.get(RECEIPT), 12);
 });
 
-test('the lifetime cap: 60 priced requests per receipt, then 429 with a plain message', async () => {
+test('the day cap: 60 priced requests per receipt in a 24 hour block, then 429 with a plain message', async () => {
   resetCaches();
   const g = young();
   for (let i = 0; i < 60; i++) assert.equal((await sendWith(g, project, 1_800_000_000 + i * 60)).status, 200, 'request ' + (i + 1));
@@ -230,14 +230,14 @@ test('the counter writes only its own collection, with no rate in it, and the pi
   await sendWith(g, { ping: true });
   assert.equal(g.commits.length, 0);
   await sendWith(g, { ...project, compare: true });
-  assert.equal(g.commits.length, 2, 'one attempt counter, one priced-range counter');
+  assert.equal(g.commits.length, 3, 'one attempt counter, then the day and lifetime priced-range counters');
   const text = JSON.stringify(g.commits);
   const names = g.commits.flatMap(c => c.writes.map(w => w.update.name));
   assert.ok(names.every(n => n.includes('/documents/ballparkPriceUse/' + RECEIPT)), names.join());
   assert.doesNotMatch(text, /settings|websiteLeads|perFoot|"low"|"high"/);
   // Refused requests (bad input, unknown receipt) are not counted.
   await ask({ ...project, receipt: 'bad' }, g); await ask({ ...project, receipt: 'web_zzzzzzzzzzzzzzzz9999' }, g);
-  assert.equal(g.commits.length, 2);
+  assert.equal(g.commits.length, 3);
 });
 
 test('if the counter cannot be written the answer is 503 (the page falls back), unless the owner turns the limit off', async () => {
