@@ -48,6 +48,7 @@ export function fakeTimers() {
       now = end;
     },
     pending: () => jobs.size,
+    time: () => now,
   };
 }
 

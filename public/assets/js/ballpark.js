@@ -1123,6 +1123,7 @@
   function pricesUnavailable() { return !pricesLive && (styleCatalogSettled || pricesSlow); }
   function pricesOnRequest() { return pricesByRequest && !pricesLive; }
   let acceptedBallparkReceipt = '';   // acquisition: the project's original request (parent of follow-ups, reporting)
+  let pricingReceiptAt = 0;           // when the pricing receipt was written (0 = not known: a resend of an unchanged project)
   let pricingReceipt = '';            // pricing: the request just accepted, fresh enough for the price service (see docs/BALLPARK-SERVER-PRICE.md)
 
   // -------- SERVER PRICE (only when the public catalogue has no prices) --------
@@ -1139,24 +1140,37 @@
   const SERVER_PRICE_MAX_WAIT = 120000;    // a Retry-After longer than this is left to the button
   const SERVER_PING_RETRY = [5000, 15000, 45000];   // same idea for the capability check
   const SERVER_PRICE_EVENT_RETRIES = 3;    // extra tries allowed from coming back online or returning to the tab, per failure
+  const SERVER_PING_FALSE_MS = 120000;     // an explicit "not configured" is believed for this long, then the next check may ask again
+  const SERVER_PING_MIN_GAP = 10000;       // returning to the tab or coming back online never pings more often than this
+  const SERVER_SESSION_KEY = 'gfs_bp_pricing_session';
+  const SERVER_SESSION_SPARE = 60000;      // a session this close to its end is treated as ended
+  const SERVER_RECEIPT_FRESH_MS = 23 * 3600 * 1000;   // the function prices a lead for 24 hours; ask for a session a little before that
   let serverPriceCapable = null, serverPriceChecking = false;   // null = not known yet (never "off" because of a hiccup)
+  let serverPriceCheckedAt = 0, serverPriceLastPingAt = 0;      // when the capability answer was got, and when a ping was last sent
   let serverPricePingTries = 0, serverPricePingTimer = 0;
-  const serverPrice = { key: '', req: null, receipt: '', phase: 'idle', result: null, timer: 0, deadline: 0, controller: null, runId: 0, recovery: 0, retryable: false, eventRetries: 0 };
+  // A pricing session for the original request, issued by the function for a returning customer (see docs/BALLPARK-SERVER-PRICE.md).
+  let pricingSession = null;               // { receipt, token, until (ms) }
+  const serverPrice = { key: '', req: null, receipt: '', phase: 'idle', result: null, timer: 0, deadline: 0, controller: null, runId: 0, recovery: 0, retryable: false, eventRetries: 0, useSession: false, sessionRetried: false };
   function serverPriceExpected() { return pricesOnRequest() && serverPriceCapable === true; }
   // Does the function answer, i.e. is it switched on? No receipt, no data.
   // Only a definite answer is remembered: {ok:true} for half an hour, and an
-  // explicit "not configured" for two minutes. A network error, a timeout or any
+  // explicit "not configured" for two minutes (after which a check, a return to
+  // the tab or coming back online may ask again, at most once in flight and
+  // never closer than SERVER_PING_MIN_GAP). A network error, a timeout or any
   // other failure is not an answer: the page stays undecided and asks again a little later.
   function checkServerPrice() {
-    if (!pricesOnRequest() || serverPriceCapable !== null || serverPriceChecking || typeof fetch !== 'function') return;
+    if (!pricesOnRequest() || serverPriceChecking || typeof fetch !== 'function') return;
+    // An explicit "not configured" is only believed for two minutes: after that the service may have been switched on.
+    if (serverPriceCapable === false && !(Date.now() - serverPriceCheckedAt < SERVER_PING_FALSE_MS && Date.now() >= serverPriceCheckedAt)) serverPriceCapable = null;
+    if (serverPriceCapable !== null) return;
     try {
       const kept = typeof sessionStorage !== 'undefined' ? JSON.parse(sessionStorage.getItem('gfs_bp_server_price') || 'null') : null;
-      if (kept && typeof kept.ok === 'boolean' && Date.now() >= kept.at && Date.now() - kept.at < (kept.ok ? 1800000 : 120000)) { serverPriceCapable = kept.ok; return; }
+      if (kept && typeof kept.ok === 'boolean' && Date.now() >= kept.at && Date.now() - kept.at < (kept.ok ? 1800000 : SERVER_PING_FALSE_MS)) { serverPriceCapable = kept.ok; serverPriceCheckedAt = kept.at; return; }
     } catch (e) { /* storage is optional */ }
-    serverPriceChecking = true;
+    serverPriceChecking = true; serverPriceLastPingAt = Date.now();
     const controller = typeof AbortController === 'function' ? new AbortController() : null;
     const timer = setTimeout(() => { if (controller) controller.abort(); }, 5000);
-    const keep = ok => { serverPriceCapable = ok; try { if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('gfs_bp_server_price', JSON.stringify({ ok: ok, at: Date.now() })); } catch (e) { /* storage is optional */ } };
+    const keep = ok => { serverPriceCapable = ok; serverPriceCheckedAt = Date.now(); try { if (typeof sessionStorage !== 'undefined') sessionStorage.setItem('gfs_bp_server_price', JSON.stringify({ ok: ok, at: Date.now() })); } catch (e) { /* storage is optional */ } };
     fetch(SERVER_PRICE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{"ping":true}', credentials: 'omit', signal: controller ? controller.signal : undefined })
       .then(res => res.json().then(json => ({ status: res.status, ok: res.ok, json: json }), () => ({ status: res.status, ok: res.ok, json: null })))
       .then(answer => {
@@ -1236,7 +1250,11 @@
   // when something failed, without waiting for the next pause.
   function serverPriceRecheck() {
     if (!pricesOnRequest()) return;
-    if (serverPriceCapable === null) { serverPricePingTries = 0; clearTimeout(serverPricePingTimer); serverPricePingTimer = 0; checkServerPrice(); return; }
+    if (serverPriceCapable === false && !(Date.now() - serverPriceCheckedAt < SERVER_PING_FALSE_MS && Date.now() >= serverPriceCheckedAt)) serverPriceCapable = null;   // the explicit "off" has expired
+    if (serverPriceCapable === null) {
+      if (serverPriceChecking || (serverPriceLastPingAt && Date.now() - serverPriceLastPingAt < SERVER_PING_MIN_GAP)) return;
+      serverPricePingTries = 0; clearTimeout(serverPricePingTimer); serverPricePingTimer = 0; checkServerPrice(); return;
+    }
     const key = serverPriceKey();
     if (!key || key !== serverPrice.key || serverPrice.phase !== 'failed' || !serverPrice.retryable || serverPrice.controller || serverPrice.eventRetries >= SERVER_PRICE_EVENT_RETRIES) return;
     serverPrice.eventRetries++;
@@ -1279,36 +1297,86 @@
       return Number.isFinite(seconds) && seconds >= 0 ? Math.round(seconds * 1000) : 0;
     } catch (e) { return 0; }
   }
+  // The pricing session for the project's original request, if one is held and not about to end.
+  function heldPricingSession(receipt) {
+    const usable = v => v && v.receipt === receipt && typeof v.token === 'string' && Number.isFinite(v.until) && v.until - SERVER_SESSION_SPARE > Date.now() && v.until - Date.now() <= 86400000 + SERVER_SESSION_SPARE;
+    if (usable(pricingSession)) return pricingSession;
+    try {
+      const kept = typeof sessionStorage !== 'undefined' ? JSON.parse(sessionStorage.getItem(SERVER_SESSION_KEY) || 'null') : null;
+      if (usable(kept)) { pricingSession = { receipt: kept.receipt, token: kept.token, until: kept.until }; return pricingSession; }
+    } catch (e) { /* storage is optional */ }
+    return null;
+  }
+  function keepPricingSession(session) {
+    pricingSession = session;
+    try { if (typeof sessionStorage !== 'undefined') { if (session) sessionStorage.setItem(SERVER_SESSION_KEY, JSON.stringify(session)); else if (typeof sessionStorage.removeItem === 'function') sessionStorage.removeItem(SERVER_SESSION_KEY); } } catch (e) { /* storage is optional */ }
+  }
+  // Prices with the receipt of the request the customer just sent (the usual case) or, for a returning
+  // customer whose receipt is over a day old, with a pricing session the function issued for the original
+  // request. A session is asked for only when the receipt is known to be old, or the function says it is
+  // ("Request too old"); an unchanged project then gets its range again without a new lead being written.
   function serverPriceRun(key, attempt) {
     serverPrice.timer = 0;
     if (serverPrice.key !== key) return;
     const run = ++serverPrice.runId;
     const current = () => serverPrice.runId === run && serverPrice.key === key;
-    const controller = typeof AbortController === 'function' ? new AbortController() : null;
-    serverPrice.controller = controller;
-    // A request that never answers ends as a failure, not a spinner.
-    serverPrice.deadline = setTimeout(() => { if (!current()) return; if (controller) controller.abort(); serverPriceFail(key, true, 0); }, 12000);
-    const body = JSON.stringify(Object.assign({ receipt: serverPrice.receipt }, serverPrice.req));
-    fetch(SERVER_PRICE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, credentials: 'omit', signal: controller ? controller.signal : undefined })
-      .then(res => {
-        if (!current()) return;
-        // The office record can take a few seconds to appear: ask again.
-        if (res.status === 409 && attempt < SERVER_PRICE_RETRY.length) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), SERVER_PRICE_RETRY[attempt]); return; }
-        if (!res.ok) {
-          const wait = serverPriceRetryAfter(res);
-          // 409 (record still not there), 429 for this minute or a busy service, and server errors may clear up.
-          // A 429 with no Retry-After is the project's allowance, and 400, 403 and the like will not change.
-          const maybeLater = res.status === 409 || res.status >= 500 || (res.status === 429 && wait > 0);
-          serverPriceFail(key, maybeLater, wait);
-          return;
-        }
-        return res.json().then(json => {
+    // Every request has its own 12 s limit: one that never answers ends as a failure, not a spinner.
+    const post = payload => {
+      clearTimeout(serverPrice.deadline);
+      const controller = typeof AbortController === 'function' ? new AbortController() : null;
+      serverPrice.controller = controller;
+      serverPrice.deadline = setTimeout(() => { if (!current()) return; if (controller) controller.abort(); serverPriceFail(key, true, 0); }, 12000);
+      return fetch(SERVER_PRICE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), credentials: 'omit', signal: controller ? controller.signal : undefined });
+    };
+    const failed = res => {
+      const wait = serverPriceRetryAfter(res);
+      // 409 (record still not there), 429 for this minute or a busy service, and server errors may clear up.
+      // A 429 with no Retry-After is the project's allowance, and 400, 403 and the like will not change.
+      serverPriceFail(key, res.status === 409 || res.status >= 500 || (res.status === 429 && wait > 0), wait);
+    };
+    const original = () => acceptedBallparkReceipt;
+    // Ask for a session for the original request. Resolves to it, or null after recording the failure.
+    const renew = () => post({ renew: true, receipt: original() }).then(res => {
+      if (!current()) return null;
+      if (!res.ok) { failed(res); return null; }
+      return res.json().then(json => {
+        if (!current()) return null;
+        const seconds = json && typeof json.expiresIn === 'number' ? json.expiresIn : NaN;
+        if (!json || typeof json.session !== 'string' || !(seconds > 0) || seconds > 86400) { serverPriceFail(key, false, 0); return null; }
+        const session = { receipt: original(), token: json.session, until: Date.now() + seconds * 1000 };
+        keepPricingSession(session);
+        return session;
+      });
+    });
+    const price = session => post(Object.assign({ receipt: session ? session.receipt : serverPrice.receipt }, session ? { session: session.token } : {}, serverPrice.req)).then(res => {
+      if (!current()) return;
+      // The office record can take a few seconds to appear: ask again.
+      if (res.status === 409 && attempt < SERVER_PRICE_RETRY.length) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), SERVER_PRICE_RETRY[attempt]); return; }
+      if (res.status === 403 && original()) {
+        // Over a day old: a returning customer gets a session for the original request, once.
+        return res.json().then(json => json, () => null).then(json => {
           if (!current()) return;
-          const answer = serverPriceAnswer(json);
-          if (answer) serverPriceSettle(key, 'ok', answer); else serverPriceFail(key, false, 0);   // needs a quote or an unusable answer: asking again will not change it
+          const why = json && json.error;
+          if (!session && why === 'Request too old') { serverPrice.useSession = true; return begin(); }
+          if (session && (why === 'Session expired' || why === 'Session not valid') && !serverPrice.sessionRetried) { serverPrice.sessionRetried = true; keepPricingSession(null); return begin(); }
+          failed(res);
         });
-      })
-      .catch(() => { if (current()) serverPriceFail(key, true, 0); });
+      }
+      if (!res.ok) { failed(res); return; }
+      return res.json().then(json => {
+        if (!current()) return;
+        const answer = serverPriceAnswer(json);
+        if (answer) serverPriceSettle(key, 'ok', answer); else serverPriceFail(key, false, 0);   // needs a quote or an unusable answer: asking again will not change it
+      });
+    });
+    function begin() {
+      const old = pricingReceiptAt > 0 && Date.now() - pricingReceiptAt > SERVER_RECEIPT_FRESH_MS;
+      if (!(serverPrice.useSession || old) || !original()) return price(null);
+      serverPrice.useSession = true;
+      const held = heldPricingSession(original());
+      return held ? price(held) : renew().then(session => { if (session && current()) return price(session); });
+    }
+    try { Promise.resolve(begin()).catch(() => { if (current()) serverPriceFail(key, true, 0); }); } catch (e) { serverPriceFail(key, true, 0); }
   }
   // Called on every redraw: when the project (or receipt) differs from the one
   // last asked about, drop the old answer and ask again after a short pause.
@@ -1316,7 +1384,7 @@
     const key = serverPriceKey();
     if (key === serverPrice.key) return;
     serverPriceCancel();
-    serverPrice.key = key; serverPrice.result = null; serverPrice.recovery = 0; serverPrice.eventRetries = 0; serverPrice.retryable = false;
+    serverPrice.key = key; serverPrice.result = null; serverPrice.recovery = 0; serverPrice.eventRetries = 0; serverPrice.retryable = false; serverPrice.useSession = false; serverPrice.sessionRetried = false;
     if (!key) { serverPrice.phase = 'idle'; serverPrice.req = null; serverPrice.receipt = ''; return; }
     serverPrice.phase = 'working'; serverPrice.req = serverPriceRequest(); serverPrice.receipt = pricingReceipt;
     serverPrice.timer = setTimeout(() => serverPriceRun(key, 0), 400);
@@ -2036,7 +2104,7 @@
     if (!form) return;
     window.GFSRequestFlow?.bindForm(form,'ballpark',{
       onUpdate(){const button=form.querySelector('button[type="submit"]');if(button)button.disabled=false;resetEmailRequest();},
-      onNew(){acceptedBallparkReceipt='';pricingReceipt='';state.priceUnlocked=false;resetEmailRequest();el('bp-success')?.classList.remove('show');updateAll();}
+      onNew(){acceptedBallparkReceipt='';pricingReceipt='';pricingReceiptAt=0;keepPricingSession(null);state.priceUnlocked=false;resetEmailRequest();el('bp-success')?.classList.remove('show');updateAll();}
     });
     function resetEmailRequest(){const emailButton=el('bp-action-email'),emailInput=el('bp-email-address');if(emailButton){emailButton.disabled=false;emailButton.textContent='Request emailed estimate';}if(emailInput)emailInput.disabled=false;const status=el('bp-email-status');if(status){status.textContent='';status.style.display='none';}}
 
@@ -2124,7 +2192,10 @@
         acceptedBallparkReceipt = /^web_[a-zA-Z0-9_-]{16,80}$/.test(originalReceipt || '') ? originalReceipt : '';
         // Pricing is authorised by the document this submission just produced (a fresh project update after
         // "Continue this project"), never by the original request, which may be over a day old.
-        pricingReceipt = /^web_[a-zA-Z0-9_-]{16,80}$/.test(result.id || '') ? result.id : acceptedBallparkReceipt;
+        const nextPricing = /^web_[a-zA-Z0-9_-]{16,80}$/.test(result.id || '') ? result.id : acceptedBallparkReceipt;
+        // A newly written document is fresh now; the id of an unchanged resend may be old, so its age is unknown (the function says).
+        pricingReceiptAt = result.reused ? (nextPricing === pricingReceipt ? pricingReceiptAt : 0) : Date.now();
+        pricingReceipt = nextPricing;
         successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
