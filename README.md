@@ -13,3 +13,5 @@ Netlify site: gfencing (b06c8983-3e76-4ff1-8f19-206155103a97), ghareebfence.com.
 For this consolidated source, the equivalent CLI production command is: netlify deploy --prod --build --site b06c8983-3e76-4ff1-8f19-206155103a97 --dir dist --functions netlify/functions
 
 No deployment was performed when creating this repository branch. Credentials belong in local/provider environment settings and are excluded.
+
+3D viewer add-on: public/fence3d.html loads public/studio/in-viewer.mjs with one guarded import (below-grade view, steel gate frames). The three files in public/studio/ are reviewed copies from gfence-app (pending/executive-ipad-pencil/source/studio/) and are pinned by hash in tests/studio-addon.test.mjs. Change them in gfence-app first, then copy and update the pins here in the same change. If the import or the files are removed, the viewer works as before without the add-on.
