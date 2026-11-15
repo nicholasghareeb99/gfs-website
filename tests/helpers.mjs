@@ -84,7 +84,7 @@ export function fakeGoogle({ pricing, receipts = [], factors = { remWood: 5, rem
       if (onCommit) await onCommit(body);
       return new Response(JSON.stringify({ writeResults: body.writes.map(w => {
         const id = w.update.name.split('/').pop();
-        counts.set(id, (counts.get(id) || 0) + 1);
+        counts.set(id, (counts.get(id) || 0) + Number(w.updateTransforms[0].increment.integerValue));
         return { transformResults: [{ integerValue: String(counts.get(id)) }] };
       }) }));
     }

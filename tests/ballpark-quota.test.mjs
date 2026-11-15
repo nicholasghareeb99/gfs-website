@@ -16,7 +16,9 @@ const unpriceable = { ...project, parts: [part('Not On The List', 100)] };
 const google = (o = {}) => fakeGoogle({ pricing: PRICING, receipts: [RECEIPT], createdAtMs: NOW_MS - 1000, ...o });
 const send = (g, body = project, now = NOW) => handle(new Request('https://example.test/x', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }), { fetcher: g.fetcher, env: ENV, now });
 const minute = i => NOW + i * 60;
-const isLifetimeCommit = body => !body.writes[0].update.name.includes('_m');
+const isSlotCommit = body => !body.writes[0].update.name.includes('_m');   // not an attempt counter
+const isLifetimeCommit = body => body.writes[0].update.name.endsWith('/' + RECEIPT);
+const DAY = RECEIPT + '_d0';
 
 // ---- 4. the age of the lead is read from something trustworthy ----------------
 test('lead age: missing, unreadable, zero, negative and future timestamps never authorise a price', async () => {
@@ -83,8 +85,9 @@ test('quota: twenty answers plus forty minute-blocked attempts leave 40 priced r
   assert.equal(burst.filter(s => s === 429).length, 40);
   assert.equal(g.counts.get(RECEIPT), 20, 'only the 20 ranges that were given are counted');
   for (let i = 1; i <= 40; i++) assert.equal((await send(g, project, minute(i))).status, 200, 'later minute ' + i);
-  assert.equal((await send(g, project, minute(41))).status, 429, 'now the 60 ranges are used');
-  assert.equal(g.counts.get(RECEIPT), 61);
+  assert.equal((await send(g, project, minute(41))).status, 429, 'now the 60 ranges of this day are used');
+  assert.equal(g.counts.get(DAY), 61);
+  assert.equal(g.counts.get(RECEIPT), 60, 'a refused request leaves the lifetime count alone');
 });
 
 test('quota: the minute limit says when to come back, and the next minute prices again', async () => {
@@ -149,7 +152,7 @@ test('quota: simultaneous requests for the last slot cannot both get a range', a
   resetCaches();
   const slow = () => new Promise(resolve => setImmediate(resolve));   // let the requests interleave inside the database stand-in
   const g = google({ onCommit: slow });
-  g.counts.set(RECEIPT, 59);
+  g.counts.set(DAY, 59);
   const results = await Promise.all(Array.from({ length: 6 }, () => send(g)));
   const bodies = await Promise.all(results.map(r => r.text()));
   assert.equal(results.filter(r => r.status === 200).length, 1, 'exactly one request got slot 60');
@@ -157,7 +160,7 @@ test('quota: simultaneous requests for the last slot cannot both get a range', a
   assert.equal(bodies.filter(b => b.includes('"low"')).length, 1, 'no range leaked with a refusal');
   // At 58 two ranges go out, the third and later are refused.
   const h = google({ onCommit: slow });
-  h.counts.set(RECEIPT, 57);
+  h.counts.set(DAY, 57);
   const more = await Promise.all(Array.from({ length: 5 }, () => send(h, project, minute(5))));
   assert.equal(more.filter(r => r.status === 200).length, 3);
 });
@@ -165,11 +168,12 @@ test('quota: simultaneous requests for the last slot cannot both get a range', a
 test('quota: if taking the slot fails the customer gets no range, nothing is counted, and the retry is counted once', async () => {
   resetCaches();
   let failLifetime = true;
-  const g = google({ commitFor: body => failLifetime && isLifetimeCommit(body) ? 503 : 200 });
+  const g = google({ commitFor: body => failLifetime && isSlotCommit(body) ? 503 : 200 });
   const first = await send(g, project, minute(1));
   assert.equal(first.status, 503);
   assert.doesNotMatch(await first.text(), /"low"|"high"/);
   assert.equal(g.counts.get(RECEIPT), undefined);
+  assert.equal(g.counts.get(DAY), undefined);
   failLifetime = false;
   const retry = await send(g, project, minute(2));
   assert.equal(retry.status, 200);
