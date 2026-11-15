@@ -54,3 +54,11 @@ test('a clean build keeps the add-on: dist has the same viewer and modules', () 
     assert.equal(count(fs.readFileSync(path.join(tmp, 'dist/fence3d.html'), 'utf8'), ANCHOR + IMPORT), 1);
   } finally { fs.rmSync(tmp, { recursive: true, force: true }); }
 });
+
+test('the viewer keeps the noindex directive the live site serves', () => {
+  // ghareebfence.com/fence3d.html carries this; the source must not drop it on the next build.
+  const html = fs.readFileSync(path.join(ROOT, 'public/fence3d.html'), 'utf8');
+  const head = html.slice(0, html.indexOf('</head>') > 0 ? html.indexOf('</head>') : 2000);
+  assert.equal(count(html, '<meta name="robots" content="noindex">'), 1);
+  assert.ok(head.includes('<meta name="robots" content="noindex">'), 'in the head');
+});
