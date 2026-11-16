@@ -1,0 +1,82 @@
+{
+  "id": "vinyl-picket",
+  "slug": "vinyl-picket",
+  "name": "Vinyl Picket & Ranch Rail Fence",
+  "shortName": "Vinyl Picket",
+  "icon": "🏡",
+  "tagline": "Classic American Style",
+  "heroTitle": "Vinyl Picket Fence Installation",
+  "heroSubtitle": "The classic American white picket fence with zero maintenance. Perfect for front yards, decorative boundaries, and curb appeal.",
+  "seo": {
+    "title": "Vinyl Picket Fence Installation Toledo OH | Ranch Rail & Picket | Ghareeb Fencing",
+    "description": "Maintenance-free vinyl picket fence installation in Toledo OH. White picket, ranch rail, decorative styles. Lifetime warranty. Call (419) 902-8257.",
+    "keywords": ["vinyl picket fence Toledo", "white picket fence Ohio", "decorative fence Toledo", "ranch rail vinyl"]
+  },
+  "overview": {
+    "title": "Classic Style, Modern Materials",
+    "content": "Nothing says 'home' quite like a white picket fence. Our vinyl picket and ranch rail options give you that timeless curb appeal with absolutely zero maintenance—no painting, no rotting, no hassle.",
+    "additionalContent": "Perfect for front yards, decorative boundaries, garden borders, and property definition. Available in white, tan, and gray to complement any home exterior.",
+    "features": [
+      "Lifetime manufacturer warranty",
+      "Zero maintenance - never paint or stain",
+      "UV-resistant - won't yellow or fade",
+      "Multiple styles: picket, scalloped, ranch",
+      "Available in white, tan, gray",
+      "Pool-code compliant options"
+    ]
+  },
+  "specs": {
+    "lifespan": "30+ years",
+    "maintenance": "None required",
+    "warranty": "Lifetime (transferable)",
+    "heights": ["3 ft", "4 ft", "5 ft"],
+    "material": "Homeland Premium Vinyl",
+    "colors": ["White", "Tan", "Gray"]
+  },
+  "styles": [
+    {
+      "name": "Traditional Picket",
+      "description": "Classic pointed-top pickets. The timeless American look for front yards and decorative boundaries.",
+      "image": "/images/gallery/vinyl-white.jpg"
+    },
+    {
+      "name": "Scalloped Picket",
+      "description": "Curved top rail creates elegant waves along the fence line. Perfect for garden borders.",
+      "image": "/images/gallery/vinyl-white.jpg"
+    },
+    {
+      "name": "Ranch Rail",
+      "description": "Two or three horizontal rails for open, modern property definition. Great for large lots.",
+      "image": "/images/gallery/vinyl-ranch-rail.jpg"
+    },
+    {
+      "name": "Post & Rail",
+      "description": "Horizontal rails through posts create classic rural aesthetic with vinyl durability.",
+      "image": "/images/gallery/vinyl-ranch-combo.jpg"
+    }
+  ],
+  "gallery": [
+    { "src": "/images/gallery/vinyl-white.jpg", "alt": "White vinyl picket", "caption": "Traditional Picket" },
+    { "src": "/images/gallery/vinyl-ranch-rail.jpg", "alt": "Vinyl ranch rail", "caption": "Ranch Rail" },
+    { "src": "/images/gallery/vinyl-ranch-combo.jpg", "alt": "Post and rail", "caption": "Post & Rail" },
+    { "src": "/images/gallery/vinyl-ranch-white.jpg", "alt": "White ranch fence", "caption": "White Ranch" }
+  ],
+  "faqs": [
+    {
+      "question": "Will a white vinyl fence turn yellow?",
+      "answer": "No. Our Homeland vinyl is manufactured with titanium dioxide UV stabilizers that prevent yellowing and fading. The white stays bright for decades."
+    },
+    {
+      "question": "Is vinyl picket fence good for pets?",
+      "answer": "Traditional picket spacing doesn't contain small pets. For pet containment, consider adding wire mesh behind the pickets or choosing a privacy style instead."
+    },
+    {
+      "question": "How tall should a front yard fence be?",
+      "answer": "Most Toledo neighborhoods allow 3-4 feet in front yards (open style required). Check with your HOA and review our permits page for local regulations."
+    },
+    {
+      "question": "Can vinyl ranch rail replace wood split rail?",
+      "answer": "Yes! Vinyl ranch rail gives you the same open, country aesthetic as wood split rail but with zero maintenance and a lifetime warranty."
+    }
+  ]
+}

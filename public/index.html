@@ -42,9 +42,7 @@
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://images.squarespace-cdn.com">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
 
 <!-- Site styles -->
 <!-- site.css first (legacy component styles), then system.css so the
@@ -59,7 +57,7 @@
      ================================================================ -->
 <script>
   // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
-  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+  window.GFS_EDIT_PASSWORD = ""; // password preview removed; use Google sign-in
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
@@ -126,8 +124,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -138,7 +136,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}
@@ -163,7 +161,7 @@
 <link rel="preload" as="image" href="/assets/img/performance-v12/d398bddf2d6fecb7-1600.webp" imagesrcset="/assets/img/performance-v12/d398bddf2d6fecb7-480.webp 480w, /assets/img/performance-v12/d398bddf2d6fecb7-960.webp 960w, /assets/img/performance-v12/d398bddf2d6fecb7-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
-<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
 </head>
 <body class="home-experience">
 
@@ -599,6 +597,18 @@
 <footer class="gfs-review-credit"><strong>doug holben</strong><span>Review excerpt</span><a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB!2m1!1s0x0:0xcfd5c85e63391463" target="_blank" rel="noopener noreferrer" aria-label="Read original review on Google by doug holben (opens in new tab)">Read original review on Google <span aria-hidden="true">↗</span></a></footer></article></div>
 <p class="gfs-review-note">Google: 4.9 out of 5 from 27 reviews, checked September 24, 2026. Read each original review for the full context.</p></div></section>
 <!-- GFS-GOOGLE-REVIEWS:END -->
+<!-- BROCHURE DOWNLOADS -->
+<section class="section" id="brochure" data-gfs-sec="brochure-dl">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow" data-editable="home.brochure.eyebrow">Our brochure</div>
+      <h2 class="display-2" data-editable="home.brochure.title">Take the whole brochure home.</h2>
+      <p data-editable="home.brochure.lede">The same book we hand out at estimates: every style, blueprint and spec sheet. Download it free, no sign-up.</p>
+    </div>
+    <div class="gfs-dl-grid" style="grid-template-columns:repeat(auto-fit,minmax(130px,1fr));max-width:1000px;margin-left:auto;margin-right:auto"><a class="gfs-dl" href="/assets/brochure/gfs-fence-brochure.pdf" download><img src="/assets/brochure/cover-gfs-fence-brochure.webp" width="480" height="621" alt="Cover of the main brochure" loading="lazy" decoding="async"><strong>Main brochure</strong><span>Everything in one book.</span><em>PDF · 92 pages · 19 MB</em></a><a class="gfs-dl" href="/assets/brochure/gfs-wood-cedar-booklet.pdf" download><img src="/assets/brochure/cover-gfs-wood-cedar-booklet.webp" width="480" height="621" alt="Cover of the wood and cedar booklet" loading="lazy" decoding="async"><strong>Wood and cedar booklet</strong><span>Wood and cedar styles, specs and no-dig posts.</span><em>PDF · 40 pages · 10 MB</em></a><a class="gfs-dl" href="/assets/brochure/gfs-vinyl-privacy-booklet.pdf" download><img src="/assets/brochure/cover-gfs-vinyl-privacy-booklet.webp" width="480" height="621" alt="Cover of the vinyl privacy booklet" loading="lazy" decoding="async"><strong>Vinyl privacy booklet</strong><span>Vinyl privacy styles, toppers and colors.</span><em>PDF · 32 pages · 6 MB</em></a><a class="gfs-dl" href="/assets/brochure/gfs-aluminum-booklet.pdf" download><img src="/assets/brochure/cover-gfs-aluminum-booklet.webp" width="480" height="621" alt="Cover of the aluminum booklet" loading="lazy" decoding="async"><strong>Aluminum booklet</strong><span>The Elite styles, colors and gates.</span><em>PDF · 28 pages · 6 MB</em></a><a class="gfs-dl" href="/assets/brochure/gfs-split-rail-booklet.pdf" download><img src="/assets/brochure/cover-gfs-split-rail-booklet.webp" width="480" height="621" alt="Cover of the split rail booklet" loading="lazy" decoding="async"><strong>Split rail booklet</strong><span>Cedar and pressure-treated split rail.</span><em>PDF · 24 pages · 6 MB</em></a></div>
+    <p style="display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:-24px auto 0;max-width:none"><a class="btn btn-outline" href="/brochure/read/">Read it online first</a> <a class="btn btn-outline" href="/brochure/">All booklets</a></p>
+  </div>
+</section>
 <!-- SERVICE AREAS -->
 <section class="section section-navy" id="service-areas" data-gfs-sec="s9">
   <div class="container">
@@ -720,7 +730,7 @@
 
 <script src="./assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="./assets/js/cms-core.js?v=photos-20260919" defer></script>
-<script src="./assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="./assets/js/edit-mode.js?v=20261114-nopw" defer></script>
 <script src="./assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
 <script src="./assets/js/motion.js?v=kit-498f7a820e24" defer></script>
 

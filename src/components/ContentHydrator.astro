@@ -1,0 +1,153 @@
+<!-- ContentHydrator: fetches latest Firestore content and patches the DOM -->
+<!-- This runs on EVERY page load (not just edit mode) so visitors always see the latest content -->
+<script is:inline>
+(function() {
+  const PROJECT_ID = 'ghareeb-fencing';
+  const BASE = 'https://firestore.googleapis.com/v1/projects/' + PROJECT_ID + '/databases/(default)/documents';
+  const CACHE_TTL = 60000; // 1 minute cache to avoid hammering Firestore
+
+  // Simple in-memory + sessionStorage cache
+  const cache = {};
+
+  function getCached(docPath) {
+    const key = 'gfs_hydrate_' + docPath;
+    if (cache[key] && Date.now() - cache[key].ts < CACHE_TTL) return cache[key].data;
+    try {
+      const stored = sessionStorage.getItem(key);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Date.now() - parsed.ts < CACHE_TTL) {
+          cache[key] = parsed;
+          return parsed.data;
+        }
+      }
+    } catch(e) {}
+    return null;
+  }
+
+  function setCache(docPath, data) {
+    const key = 'gfs_hydrate_' + docPath;
+    const entry = { data: data, ts: Date.now() };
+    cache[key] = entry;
+    try { sessionStorage.setItem(key, JSON.stringify(entry)); } catch(e) {}
+  }
+
+  function parseFirestoreValue(v) {
+    if (!v) return null;
+    if (v.stringValue !== undefined) return v.stringValue;
+    if (v.integerValue !== undefined) return parseInt(v.integerValue);
+    if (v.doubleValue !== undefined) return v.doubleValue;
+    if (v.booleanValue !== undefined) return v.booleanValue;
+    if (v.nullValue !== undefined) return null;
+    if (v.arrayValue) return (v.arrayValue.values || []).map(parseFirestoreValue);
+    if (v.mapValue) {
+      var obj = {};
+      var fields = v.mapValue.fields || {};
+      for (var k in fields) {
+        if (fields.hasOwnProperty(k)) obj[k] = parseFirestoreValue(fields[k]);
+      }
+      return obj;
+    }
+    return null;
+  }
+
+  function parseFirestoreDoc(doc) {
+    if (!doc || !doc.fields) return null;
+    var obj = {};
+    for (var k in doc.fields) {
+      if (doc.fields.hasOwnProperty(k)) obj[k] = parseFirestoreValue(doc.fields[k]);
+    }
+    return obj;
+  }
+
+  // Resolve a dot-notation path like "hero.badge" on an object
+  function resolvePath(obj, path) {
+    if (!obj || !path) return undefined;
+    var parts = path.split('.');
+    var current = obj;
+    for (var i = 0; i < parts.length; i++) {
+      if (current === null || current === undefined) return undefined;
+      current = current[parts[i]];
+    }
+    return current;
+  }
+
+  async function fetchDoc(docPath) {
+    var cached = getCached(docPath);
+    if (cached) return cached;
+    try {
+      var res = await fetch(BASE + '/' + docPath);
+      if (!res.ok) return null;
+      var data = parseFirestoreDoc(await res.json());
+      if (data) setCache(docPath, data);
+      return data;
+    } catch(e) {
+      console.warn('[Hydrator] fetch failed for ' + docPath + ':', e.message);
+      return null;
+    }
+  }
+
+  async function hydrate() {
+    // Find all elements that have data-edit-doc and data-edit-field
+    var editables = document.querySelectorAll('[data-edit-doc][data-edit-field]');
+    if (!editables.length) return;
+
+    // Group by document path to minimize fetches
+    var docGroups = {};
+    editables.forEach(function(el) {
+      var doc = el.dataset.editDoc;
+      if (!docGroups[doc]) docGroups[doc] = [];
+      docGroups[doc].push(el);
+    });
+
+    // Fetch each document and patch elements
+    var docPaths = Object.keys(docGroups);
+    var fetches = docPaths.map(function(path) { return fetchDoc(path); });
+    var results = await Promise.all(fetches);
+
+    for (var i = 0; i < docPaths.length; i++) {
+      var docData = results[i];
+      if (!docData) continue;
+      var elements = docGroups[docPaths[i]];
+      for (var j = 0; j < elements.length; j++) {
+        var el = elements[j];
+        var field = el.dataset.editField;
+        var value = resolvePath(docData, field);
+        if (value !== undefined && value !== null) {
+          var isHTML = el.dataset.editType === 'html' || el.dataset.editType === 'richtext';
+          if (el.tagName === 'IMG') {
+            el.src = value;
+          } else if (el.style && el.style.backgroundImage && field.toLowerCase().includes('image')) {
+            el.style.backgroundImage = 'url(' + value + ')';
+          } else if (isHTML) {
+            el.innerHTML = value;
+          } else {
+            // Preserve child elements (like the star ★ span inside stat-value)
+            var childElements = [];
+            el.childNodes.forEach(function(node) {
+              if (node.nodeType === 1) childElements.push(node); // Element nodes
+            });
+            if (childElements.length > 0) {
+              // Replace only text nodes, keep child elements
+              el.childNodes.forEach(function(node) {
+                if (node.nodeType === 3 && node.textContent.trim()) { // Text nodes
+                  node.textContent = value;
+                }
+              });
+            } else {
+              el.textContent = value;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Run hydration after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrate);
+  } else {
+    hydrate();
+  }
+})();
+</script>

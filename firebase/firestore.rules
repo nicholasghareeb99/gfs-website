@@ -1,0 +1,13 @@
+// NOT THE LIVE RULES. Do not deploy from this file.
+//
+// The live Cloud Firestore security rules are managed in the Firebase console
+// (project ghareeb-fencing). They were last released Sep 16, 2026 and
+// require a named owner/office staff account (the 'staff' collection,
+// fullExecutive()) for all business data, and the site owner's verified
+// Google account for website content.
+//
+// An older copy here allowed any signed-in user, including anonymous
+// sessions, to read and write almost everything. It was replaced with this
+// note on Nov 15, 2026 so it can never be deployed by accident. This file
+// is intentionally not valid rules syntax, so 'firebase deploy' fails
+// instead of overwriting the live rules.

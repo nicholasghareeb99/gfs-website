@@ -1,0 +1,676 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import fencesData from '../../content/fences.json';
+import { getFences } from '../../lib/firestore.js';
+
+const { slug } = Astro.params;
+const fenceTypes = await getFences();
+const allFences = fenceTypes.length ? fenceTypes : fencesData.fenceTypes;
+const fence = allFences.find(f => f.slug === slug);
+if (!fence) return Astro.redirect('/fences/');
+
+const relatedFences = allFences.filter(f => f.slug !== fence.slug).slice(0, 3);
+---
+
+<BaseLayout 
+    title={fence.seo?.title || `${fence.name} Fence Installation | Ghareeb Fencing Solutions`}
+    description={fence.seo?.description || `Professional ${fence.name.toLowerCase()} fence installation in Toledo & Northwest Ohio. ${fence.tagline}`}
+    canonical={`/fences/${fence.slug}/`}
+>
+    <!-- Hero Section -->
+    <section class="fence-hero" style={`background-image: linear-gradient(rgba(30, 58, 95, 0.85), rgba(30, 58, 95, 0.9)), url('${fence.heroImage || fence.image}')`}>
+        <div class="container">
+            <nav class="breadcrumb">
+                <a href="/">Home</a>
+                <span>/</span>
+                <a href="/fences/">Fence Types</a>
+                <span>/</span>
+                <span>{fence.name}</span>
+            </nav>
+            <h1>{fence.name} Fencing</h1>
+            <p class="hero-tagline">{fence.tagline}</p>
+            <div class="hero-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Starting at</span>
+                    <span class="meta-value">{fence.priceRange}</span>
+                </div>
+                {fence.warranty && (
+                    <div class="meta-item">
+                        <span class="meta-label">Warranty</span>
+                        <span class="meta-value">{fence.warranty}</span>
+                    </div>
+                )}
+                {fence.lifespan && (
+                    <div class="meta-item">
+                        <span class="meta-label">Lifespan</span>
+                        <span class="meta-value">{fence.lifespan}</span>
+                    </div>
+                )}
+            </div>
+            <div class="hero-actions">
+                <a href="/quote/ballpark/" class="btn btn-primary btn-lg">Get Instant Quote</a>
+                <a href="/contact/" class="btn btn-outline-light btn-lg">Schedule Consultation</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Section -->
+    <section class="section">
+        <div class="container">
+            <div class="overview-grid">
+                <div class="overview-content">
+                    <h2>About {fence.name} Fencing</h2>
+                    <p class="lead">{fence.description}</p>
+                    
+                    {fence.benefits && fence.benefits.length > 0 && (
+                        <div class="benefits-list">
+                            <h3>Key Benefits</h3>
+                            <ul>
+                                {fence.benefits.map(benefit => (
+                                    <li>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="20 6 9 17 4 12"/></svg>
+                                        {benefit}
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+                <div class="overview-image">
+                    <img src={fence.image} alt={`${fence.name} fence installation`} loading="lazy" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    {fence.features && fence.features.length > 0 && (
+        <section class="section bg-light">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Features & Specifications</h2>
+                    <p>What makes our {fence.name.toLowerCase()} fencing stand out</p>
+                </div>
+                <div class="features-grid">
+                    {fence.features.map((feature, index) => (
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="28" height="28"><polyline points="20 6 9 17 4 12"/></svg>
+                            </div>
+                            <h4>{feature}</h4>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
+
+    <!-- Styles Section -->
+    {fence.styles && fence.styles.length > 0 && (
+        <section class="section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Available Styles</h2>
+                    <p>Choose the perfect look for your property</p>
+                </div>
+                <div class="styles-grid">
+                    {fence.styles.map(style => (
+                        <div class="style-card">
+                            {style.image && <img src={style.image} alt={style.name} loading="lazy" />}
+                            <h4>{style.name}</h4>
+                            {style.description && <p>{style.description}</p>}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
+
+    <!-- Specifications Table -->
+    {fence.specifications && (
+        <section class="section bg-light">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Technical Specifications</h2>
+                </div>
+                <div class="specs-table-wrapper">
+                    <table class="specs-table">
+                        <tbody>
+                            {fence.specifications.heights && (
+                                <tr>
+                                    <th>Available Heights</th>
+                                    <td>{fence.specifications.heights.join(', ')}</td>
+                                </tr>
+                            )}
+                            {fence.specifications.materials && (
+                                <tr>
+                                    <th>Materials</th>
+                                    <td>{fence.specifications.materials.join(', ')}</td>
+                                </tr>
+                            )}
+                            {fence.specifications.colors && (
+                                <tr>
+                                    <th>Colors</th>
+                                    <td>{fence.specifications.colors.join(', ')}</td>
+                                </tr>
+                            )}
+                            {fence.specifications.postSpacing && (
+                                <tr>
+                                    <th>Post Spacing</th>
+                                    <td>{fence.specifications.postSpacing}</td>
+                                </tr>
+                            )}
+                            {fence.lifespan && (
+                                <tr>
+                                    <th>Expected Lifespan</th>
+                                    <td>{fence.lifespan}</td>
+                                </tr>
+                            )}
+                            {fence.warranty && (
+                                <tr>
+                                    <th>Warranty</th>
+                                    <td>{fence.warranty}</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    )}
+
+    <!-- Maintenance Tips -->
+    {fence.maintenance && fence.maintenance.length > 0 && (
+        <section class="section">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Maintenance Tips</h2>
+                    <p>Keep your {fence.name.toLowerCase()} fence looking great for years</p>
+                </div>
+                <div class="maintenance-grid">
+                    {fence.maintenance.map((tip, index) => (
+                        <div class="maintenance-item">
+                            <span class="maintenance-number">{index + 1}</span>
+                            <p>{tip}</p>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
+
+    <!-- FAQs -->
+    {fence.faqs && fence.faqs.length > 0 && (
+        <section class="section bg-light">
+            <div class="container">
+                <div class="section-header text-center">
+                    <h2>Frequently Asked Questions</h2>
+                </div>
+                <div class="faqs-list">
+                    {fence.faqs.map((faq, index) => (
+                        <details class="faq-item">
+                            <summary>
+                                <span>{faq.question}</span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><polyline points="6 9 12 15 18 9"/></svg>
+                            </summary>
+                            <p>{faq.answer}</p>
+                        </details>
+                    ))}
+                </div>
+            </div>
+        </section>
+    )}
+
+    <!-- Related Fences -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Explore Other Fence Types</h2>
+                <p>Compare your options to find the perfect fence for your property</p>
+            </div>
+            <div class="related-grid">
+                {relatedFences.map(related => (
+                    <a href={`/fences/${related.slug}/`} class="related-card">
+                        <img src={related.image} alt={related.name} loading="lazy" />
+                        <div class="related-content">
+                            <h4>{related.name}</h4>
+                            <p>{related.tagline}</p>
+                            <span class="price">{related.priceRange}</span>
+                        </div>
+                    </a>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready for Your {fence.name} Fence?</h2>
+            <p>Get a free, no-obligation quote in just 60 seconds</p>
+            <div class="cta-buttons">
+                <a href="/quote/ballpark/" class="btn btn-accent btn-lg">Get Instant Quote</a>
+                <a href="tel:4199028257" class="btn btn-outline-light btn-lg">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+                    (419) 902-8257
+                </a>
+            </div>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .fence-hero {
+        padding: 160px 0 80px;
+        background-size: cover;
+        background-position: center;
+        color: white;
+    }
+
+    .breadcrumb {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 24px;
+        font-size: 0.9rem;
+    }
+
+    .breadcrumb a {
+        color: rgba(255,255,255,0.7);
+        text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+        color: var(--accent);
+    }
+
+    .breadcrumb span {
+        color: rgba(255,255,255,0.5);
+    }
+
+    .breadcrumb span:last-child {
+        color: white;
+    }
+
+    .fence-hero h1 {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        margin-bottom: 12px;
+    }
+
+    .hero-tagline {
+        font-size: 1.25rem;
+        color: rgba(255,255,255,0.9);
+        margin-bottom: 32px;
+        max-width: 600px;
+    }
+
+    .hero-meta {
+        display: flex;
+        gap: 32px;
+        flex-wrap: wrap;
+        margin-bottom: 32px;
+    }
+
+    .meta-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .meta-label {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.7);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .meta-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .hero-actions {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+
+    .btn-outline-light {
+        background: transparent;
+        border: 2px solid white;
+        color: white;
+    }
+
+    .btn-outline-light:hover {
+        background: white;
+        color: var(--primary);
+    }
+
+    /* Overview */
+    .overview-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 60px;
+        align-items: center;
+    }
+
+    @media (max-width: 900px) {
+        .overview-grid {
+            grid-template-columns: 1fr;
+            gap: 40px;
+        }
+    }
+
+    .overview-content h2 {
+        margin-bottom: 20px;
+    }
+
+    .overview-content .lead {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        line-height: 1.8;
+        margin-bottom: 32px;
+    }
+
+    .benefits-list h3 {
+        font-size: 1.1rem;
+        margin-bottom: 16px;
+    }
+
+    .benefits-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .benefits-list li {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .benefits-list li:last-child {
+        border-bottom: none;
+    }
+
+    .benefits-list svg {
+        color: var(--accent);
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .overview-image img {
+        width: 100%;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+    }
+
+    /* Features */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 24px;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 28px;
+        border-radius: var(--radius);
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .feature-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .feature-card h4 {
+        margin: 0;
+        font-size: 1rem;
+        line-height: 1.5;
+    }
+
+    /* Styles */
+    .styles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .style-card {
+        background: white;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .style-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .style-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .style-card h4,
+    .style-card p {
+        padding: 0 20px;
+    }
+
+    .style-card h4 {
+        margin: 16px 0 8px;
+    }
+
+    .style-card p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+
+    /* Specs Table */
+    .specs-table-wrapper {
+        max-width: 700px;
+        margin: 0 auto;
+    }
+
+    .specs-table {
+        width: 100%;
+        background: white;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .specs-table tr {
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .specs-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .specs-table th,
+    .specs-table td {
+        padding: 16px 24px;
+        text-align: left;
+    }
+
+    .specs-table th {
+        width: 200px;
+        background: #f8fafc;
+        font-weight: 600;
+    }
+
+    /* Maintenance */
+    .maintenance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        max-width: 900px;
+        margin: 0 auto;
+    }
+
+    .maintenance-item {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .maintenance-number {
+        width: 36px;
+        height: 36px;
+        background: var(--primary);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .maintenance-item p {
+        margin: 0;
+        padding-top: 6px;
+    }
+
+    /* FAQs */
+    .faqs-list {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .faq-item {
+        background: white;
+        border-radius: var(--radius);
+        margin-bottom: 12px;
+        overflow: hidden;
+    }
+
+    .faq-item summary {
+        padding: 20px 24px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        list-style: none;
+    }
+
+    .faq-item summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .faq-item summary svg {
+        transition: transform 0.2s;
+        flex-shrink: 0;
+    }
+
+    .faq-item[open] summary svg {
+        transform: rotate(180deg);
+    }
+
+    .faq-item p {
+        padding: 0 24px 20px;
+        margin: 0;
+        color: var(--text-muted);
+        line-height: 1.7;
+    }
+
+    /* Related */
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .related-card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: white;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .related-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .related-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .related-content {
+        padding: 20px;
+    }
+
+    .related-content h4 {
+        margin: 0 0 8px;
+    }
+
+    .related-content p {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-bottom: 12px;
+    }
+
+    .related-content .price {
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    /* CTA */
+    .cta-section {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        padding: 80px 0;
+        text-align: center;
+        color: white;
+    }
+
+    .cta-section h2 {
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        margin-bottom: 12px;
+    }
+
+    .cta-section p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 32px;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .btn-accent {
+        background: var(--accent);
+        color: var(--primary-dark);
+    }
+
+    .btn-accent:hover {
+        background: #c9a431;
+    }
+</style>

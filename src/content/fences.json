@@ -1,0 +1,826 @@
+{
+  "fenceTypes": [
+    {
+      "id": "wood",
+      "name": "Wood Fences",
+      "shortName": "Wood",
+      "slug": "wood-fence",
+      "tagline": "Classic Beauty & Natural Warmth",
+      "description": "Wood fencing offers timeless beauty and natural warmth that complements any property. Our premium cedar and pressure-treated wood fences are built to last, providing privacy, security, and curb appeal for decades.",
+      "heroImage": "/images/fences/wood-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/wood-1.jpg",
+        "/images/gallery/wood-2.jpg",
+        "/images/gallery/wood-3.jpg",
+        "/images/gallery/wood-4.jpg"
+      ],
+      "features": [
+        "Premium Western Red Cedar or Pressure-Treated Pine",
+        "Multiple styles: Privacy, Semi-Privacy, Picket, Board-on-Board",
+        "Custom heights from 4ft to 8ft",
+        "Natural beauty that ages gracefully",
+        "Paintable and stainable to match your home",
+        "Eco-friendly and biodegradable material"
+      ],
+      "benefits": [
+        {
+          "title": "Customizable",
+          "description": "Wood can be cut, shaped, stained, or painted to achieve any look"
+        },
+        {
+          "title": "Cost-Effective",
+          "description": "Lower upfront cost compared to many other materials"
+        },
+        {
+          "title": "Natural Aesthetic",
+          "description": "Warm, organic appearance that blends with landscaping"
+        },
+        {
+          "title": "Easy Repairs",
+          "description": "Individual boards can be replaced without affecting the whole fence"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Privacy",
+          "description": "Solid boards with no gaps for maximum privacy"
+        },
+        {
+          "name": "Board-on-Board",
+          "description": "Overlapping boards look great from both sides"
+        },
+        {
+          "name": "Shadow Box",
+          "description": "Alternating boards allow airflow while maintaining privacy"
+        },
+        {
+          "name": "Picket",
+          "description": "Classic American style with spaced vertical boards"
+        }
+      ],
+      "specs": {
+        "materials": ["Western Red Cedar", "Pressure-Treated Pine", "White Oak"],
+        "heights": ["4 ft", "5 ft", "6 ft", "8 ft"],
+        "warranty": "5-year workmanship warranty",
+        "lifespan": "15-25 years with proper maintenance"
+      },
+      "priceRange": {
+        "min": 25,
+        "max": 45,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Apply stain or sealant every 2-3 years",
+        "Inspect for rot or insect damage annually",
+        "Keep soil and mulch away from the base",
+        "Trim vegetation growing on or near the fence"
+      ],
+      "faqs": [
+        {
+          "question": "How long does a wood fence last?",
+          "answer": "With proper maintenance, a quality wood fence can last 15-25 years. Cedar naturally resists rot and insects, while pressure-treated pine offers excellent durability at a lower cost."
+        },
+        {
+          "question": "Should I stain or paint my wood fence?",
+          "answer": "Both options work well. Stain penetrates the wood and highlights natural grain, while paint provides more color options. Either will protect your fence from weather damage."
+        },
+        {
+          "question": "What's the difference between cedar and pressure-treated?",
+          "answer": "Cedar is naturally rot and insect resistant with a beautiful appearance. Pressure-treated pine is more affordable and equally durable but has a greenish tint that weathers to gray."
+        }
+      ],
+      "seo": {
+        "title": "Wood Fence Installation Toledo OH | Cedar & Privacy Fences",
+        "description": "Professional wood fence installation in Toledo OH. Cedar privacy fences, picket fences, and custom designs. Free estimates from Ghareeb Fencing Solutions.",
+        "keywords": ["wood fence Toledo", "cedar fence installation", "privacy fence Toledo OH", "wood fence contractor"]
+      },
+      "cta": {
+        "primary": "Get Free Wood Fence Quote",
+        "secondary": "View Wood Fence Gallery"
+      },
+      "featured": true,
+      "order": 1
+    },
+    {
+      "id": "vinyl",
+      "name": "Vinyl Fences",
+      "shortName": "Vinyl",
+      "slug": "vinyl-fence",
+      "tagline": "Maintenance-Free Beauty That Lasts",
+      "description": "Vinyl fencing provides the classic look of wood without the maintenance. Our premium vinyl fences won't rot, warp, or fade, giving you a beautiful fence that looks great year after year with minimal upkeep.",
+      "heroImage": "/images/fences/vinyl-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/vinyl-1.jpg",
+        "/images/gallery/vinyl-2.jpg",
+        "/images/gallery/vinyl-3.jpg",
+        "/images/gallery/vinyl-4.jpg"
+      ],
+      "features": [
+        "Premium virgin vinyl - no recycled materials",
+        "UV inhibitors prevent fading and yellowing",
+        "Won't rot, warp, splinter, or crack",
+        "Never needs painting or staining",
+        "Multiple colors and styles available",
+        "Backed by manufacturer lifetime warranty"
+      ],
+      "benefits": [
+        {
+          "title": "Zero Maintenance",
+          "description": "Simply rinse with a garden hose to clean"
+        },
+        {
+          "title": "Lifetime Durability",
+          "description": "Won't rot, rust, or deteriorate like wood or metal"
+        },
+        {
+          "title": "Color Options",
+          "description": "Available in white, tan, gray, and wood-grain textures"
+        },
+        {
+          "title": "Child & Pet Safe",
+          "description": "No splinters, sharp edges, or toxic treatments"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Privacy",
+          "description": "Solid panels for complete privacy"
+        },
+        {
+          "name": "Semi-Privacy",
+          "description": "Spaced boards allow light and airflow"
+        },
+        {
+          "name": "Picket",
+          "description": "Classic style in maintenance-free vinyl"
+        },
+        {
+          "name": "Ranch Rail",
+          "description": "Open design for property boundaries"
+        }
+      ],
+      "specs": {
+        "materials": ["Premium Virgin Vinyl PVC"],
+        "heights": ["4 ft", "5 ft", "6 ft", "8 ft"],
+        "warranty": "Lifetime manufacturer warranty + 5-year workmanship",
+        "lifespan": "30+ years"
+      },
+      "priceRange": {
+        "min": 28,
+        "max": 55,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Rinse with garden hose as needed",
+        "Use mild soap for stubborn dirt",
+        "Inspect after severe storms for damage",
+        "Avoid harsh chemicals or pressure washers"
+      ],
+      "faqs": [
+        {
+          "question": "Is vinyl fencing strong enough?",
+          "answer": "Yes! Quality vinyl fencing is 5x stronger than wood. It's engineered to withstand high winds, impacts, and extreme temperatures without breaking."
+        },
+        {
+          "question": "Does vinyl fade over time?",
+          "answer": "Our premium vinyl includes UV inhibitors that prevent fading and yellowing. Your fence will look great for decades."
+        },
+        {
+          "question": "Can vinyl fencing handle Ohio winters?",
+          "answer": "Absolutely. Vinyl is specifically designed to handle freeze-thaw cycles, snow, and ice without cracking or warping."
+        }
+      ],
+      "seo": {
+        "title": "Vinyl Fence Installation Toledo OH | Maintenance-Free Fencing",
+        "description": "Premium vinyl fence installation in Toledo OH. Maintenance-free privacy fences with lifetime warranty. Get a free quote from Ghareeb Fencing Solutions.",
+        "keywords": ["vinyl fence Toledo", "PVC fence installation", "maintenance free fence", "vinyl privacy fence"]
+      },
+      "cta": {
+        "primary": "Get Free Vinyl Fence Quote",
+        "secondary": "View Vinyl Fence Gallery"
+      },
+      "featured": true,
+      "order": 2
+    },
+    {
+      "id": "chainlink",
+      "name": "Chain Link Fences",
+      "shortName": "Chain Link",
+      "slug": "chain-link-fence",
+      "tagline": "Affordable Security & Durability",
+      "description": "Chain link fencing is the most economical fencing option while still providing excellent security and durability. Perfect for residential yards, commercial properties, and sports facilities.",
+      "heroImage": "/images/fences/chainlink-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/chainlink-1.jpg",
+        "/images/gallery/chainlink-2.jpg",
+        "/images/gallery/chainlink-3.jpg",
+        "/images/gallery/chainlink-4.jpg"
+      ],
+      "features": [
+        "Galvanized steel for rust resistance",
+        "Vinyl-coated options in black, green, brown",
+        "Various heights from 4ft to 12ft",
+        "Privacy slats available for added screening",
+        "Commercial-grade options for high-security",
+        "Most affordable fencing option"
+      ],
+      "benefits": [
+        {
+          "title": "Budget-Friendly",
+          "description": "Lowest cost per linear foot of any fence type"
+        },
+        {
+          "title": "Highly Durable",
+          "description": "Galvanized steel lasts 20+ years with minimal maintenance"
+        },
+        {
+          "title": "See-Through Design",
+          "description": "Maintains visibility while providing boundary definition"
+        },
+        {
+          "title": "Quick Installation",
+          "description": "Fastest fence type to install"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Galvanized",
+          "description": "Classic silver finish, most economical"
+        },
+        {
+          "name": "Vinyl Coated",
+          "description": "Color options with extra corrosion protection"
+        },
+        {
+          "name": "Privacy Slats",
+          "description": "Add privacy to existing chain link"
+        },
+        {
+          "name": "Commercial Grade",
+          "description": "Heavier gauge for high-security applications"
+        }
+      ],
+      "specs": {
+        "materials": ["Galvanized Steel", "Vinyl-Coated Steel"],
+        "heights": ["4 ft", "5 ft", "6 ft", "8 ft", "10 ft", "12 ft"],
+        "warranty": "5-year workmanship warranty",
+        "lifespan": "20-30 years"
+      },
+      "priceRange": {
+        "min": 15,
+        "max": 30,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Check for rust spots annually",
+        "Touch up with rust-resistant paint as needed",
+        "Ensure tension wires remain tight",
+        "Clear debris from bottom of fence"
+      ],
+      "faqs": [
+        {
+          "question": "Can I add privacy to chain link?",
+          "answer": "Yes! Privacy slats, mesh screens, or hedge planting can all add privacy to an existing chain link fence without replacing it."
+        },
+        {
+          "question": "What's the difference between galvanized and vinyl-coated?",
+          "answer": "Galvanized is the classic silver look and most affordable. Vinyl-coated comes in colors (black, green, brown) and offers extra corrosion protection."
+        },
+        {
+          "question": "How high can chain link go?",
+          "answer": "Residential typically goes up to 6ft. We can install up to 12ft for commercial and industrial applications with proper permitting."
+        }
+      ],
+      "seo": {
+        "title": "Chain Link Fence Installation Toledo OH | Affordable Fencing",
+        "description": "Affordable chain link fence installation in Toledo OH. Galvanized and vinyl-coated options. Commercial and residential. Free estimates from Ghareeb Fencing.",
+        "keywords": ["chain link fence Toledo", "affordable fence installation", "galvanized fence", "commercial chain link"]
+      },
+      "cta": {
+        "primary": "Get Free Chain Link Quote",
+        "secondary": "View Chain Link Gallery"
+      },
+      "featured": false,
+      "order": 3
+    },
+    {
+      "id": "aluminum",
+      "name": "Aluminum Fences",
+      "shortName": "Aluminum",
+      "slug": "aluminum-fence",
+      "tagline": "Elegant Wrought-Iron Look Without the Rust",
+      "description": "Aluminum fencing provides the elegant appearance of traditional wrought iron without the maintenance concerns. Powder-coated aluminum never rusts and maintains its beauty for decades.",
+      "heroImage": "/images/fences/aluminum-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/aluminum-1.jpg",
+        "/images/gallery/aluminum-2.jpg",
+        "/images/gallery/aluminum-3.jpg",
+        "/images/gallery/aluminum-4.jpg"
+      ],
+      "features": [
+        "Powder-coated finish resists rust and corrosion",
+        "Elegant ornamental designs available",
+        "Pool-code compliant options",
+        "Multiple colors: black, bronze, white",
+        "Lightweight yet strong construction",
+        "Adapts to sloped terrain easily"
+      ],
+      "benefits": [
+        {
+          "title": "Rust-Free",
+          "description": "Unlike iron, aluminum never rusts even in wet climates"
+        },
+        {
+          "title": "Elegant Appearance",
+          "description": "Classic wrought-iron look adds property value"
+        },
+        {
+          "title": "Pool Safe",
+          "description": "Available in pool-code compliant designs"
+        },
+        {
+          "title": "Low Maintenance",
+          "description": "Powder coating means no painting required"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Classic",
+          "description": "Traditional picket design with flat or spear tops"
+        },
+        {
+          "name": "Ornamental",
+          "description": "Decorative scrolls and finials"
+        },
+        {
+          "name": "Pool Fence",
+          "description": "Code-compliant with self-closing gates"
+        },
+        {
+          "name": "Estate",
+          "description": "Wider picket spacing for open views"
+        }
+      ],
+      "specs": {
+        "materials": ["Powder-Coated Aluminum"],
+        "heights": ["3 ft", "4 ft", "5 ft", "6 ft"],
+        "warranty": "Lifetime manufacturer warranty + 5-year workmanship",
+        "lifespan": "30+ years"
+      },
+      "priceRange": {
+        "min": 30,
+        "max": 60,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Rinse with water to remove dirt and debris",
+        "Inspect powder coating for chips annually",
+        "Touch up chips with matching paint",
+        "Lubricate gate hinges and latches"
+      ],
+      "faqs": [
+        {
+          "question": "Is aluminum strong enough for security?",
+          "answer": "Yes. Modern aluminum fencing is engineered with reinforced rails and posts. While not as heavy as steel, it's more than adequate for residential security needs."
+        },
+        {
+          "question": "What colors are available?",
+          "answer": "Standard colors include black, bronze, and white. Custom powder coating in other colors is available for an additional cost."
+        },
+        {
+          "question": "Can aluminum fencing go around a pool?",
+          "answer": "Yes! We install pool-code compliant aluminum fencing with self-closing, self-latching gates that meet all Ohio pool safety requirements."
+        }
+      ],
+      "seo": {
+        "title": "Aluminum Fence Installation Toledo OH | Ornamental Fencing",
+        "description": "Elegant aluminum fence installation in Toledo OH. Rust-free ornamental fencing for homes and pools. Lifetime warranty. Free quotes from Ghareeb Fencing.",
+        "keywords": ["aluminum fence Toledo", "ornamental fence installation", "pool fence Toledo", "rust free fence"]
+      },
+      "cta": {
+        "primary": "Get Free Aluminum Fence Quote",
+        "secondary": "View Aluminum Fence Gallery"
+      },
+      "featured": true,
+      "order": 4
+    },
+    {
+      "id": "composite",
+      "name": "Composite Fences",
+      "shortName": "Composite",
+      "slug": "composite-fence",
+      "tagline": "The Best of Both Worlds",
+      "description": "Composite fencing combines recycled wood fibers with plastic polymers to create a fence that looks like wood but performs like vinyl. Eco-friendly, durable, and beautiful.",
+      "heroImage": "/images/fences/composite-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/composite-1.jpg",
+        "/images/gallery/composite-2.jpg",
+        "/images/gallery/composite-3.jpg",
+        "/images/gallery/composite-4.jpg"
+      ],
+      "features": [
+        "Made from recycled wood and plastic",
+        "Natural wood grain texture and appearance",
+        "Won't rot, warp, splinter, or crack",
+        "Resistant to insects and moisture",
+        "Multiple colors and wood-grain patterns",
+        "Eco-friendly and sustainable"
+      ],
+      "benefits": [
+        {
+          "title": "Authentic Wood Look",
+          "description": "Realistic grain patterns mimic natural wood"
+        },
+        {
+          "title": "Environmentally Friendly",
+          "description": "Made from recycled materials"
+        },
+        {
+          "title": "Extreme Durability",
+          "description": "Resists rot, insects, and weather damage"
+        },
+        {
+          "title": "Color Retention",
+          "description": "UV protection prevents fading"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Privacy",
+          "description": "Solid panels with no gaps"
+        },
+        {
+          "name": "Semi-Privacy",
+          "description": "Spaced boards for airflow"
+        },
+        {
+          "name": "Horizontal",
+          "description": "Modern horizontal board design"
+        },
+        {
+          "name": "Lattice Top",
+          "description": "Solid bottom with decorative lattice"
+        }
+      ],
+      "specs": {
+        "materials": ["Wood-Plastic Composite (WPC)"],
+        "heights": ["4 ft", "6 ft", "8 ft"],
+        "warranty": "25-year manufacturer warranty + 5-year workmanship",
+        "lifespan": "25-30 years"
+      },
+      "priceRange": {
+        "min": 35,
+        "max": 65,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Clean with soap and water annually",
+        "Remove mold or mildew with appropriate cleaner",
+        "Inspect hardware for corrosion",
+        "No painting, staining, or sealing needed"
+      ],
+      "faqs": [
+        {
+          "question": "Is composite more expensive than wood?",
+          "answer": "Yes, the upfront cost is higher. However, with zero maintenance costs over its lifetime, composite often costs less than wood in the long run."
+        },
+        {
+          "question": "Does composite fade in the sun?",
+          "answer": "Quality composite fencing includes UV inhibitors that minimize fading. Some initial lightening is normal but stabilizes within the first year."
+        },
+        {
+          "question": "Can composite be painted?",
+          "answer": "While possible, it's not recommended. The factory color is designed to last the life of the fence and painting may void the warranty."
+        }
+      ],
+      "seo": {
+        "title": "Composite Fence Installation Toledo OH | Eco-Friendly Fencing",
+        "description": "Sustainable composite fence installation in Toledo OH. Wood-look fencing that never rots or fades. 25-year warranty. Free estimates from Ghareeb Fencing.",
+        "keywords": ["composite fence Toledo", "eco friendly fence", "wood plastic fence", "Trex fence installation"]
+      },
+      "cta": {
+        "primary": "Get Free Composite Quote",
+        "secondary": "View Composite Gallery"
+      },
+      "featured": false,
+      "order": 5
+    },
+    {
+      "id": "steel",
+      "name": "Steel Fences",
+      "shortName": "Steel",
+      "slug": "steel-fence",
+      "tagline": "Maximum Security & Strength",
+      "description": "Steel fencing provides the ultimate in security and durability. Industrial-grade steel construction stands up to the toughest conditions and provides unmatched protection for commercial and residential properties.",
+      "heroImage": "/images/fences/steel-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/steel-1.jpg",
+        "/images/gallery/steel-2.jpg",
+        "/images/gallery/steel-3.jpg",
+        "/images/gallery/steel-4.jpg"
+      ],
+      "features": [
+        "Heavy-duty galvanized steel construction",
+        "Powder-coated for corrosion resistance",
+        "Welded construction for maximum strength",
+        "Security spear tops available",
+        "Commercial and industrial grade options",
+        "Custom heights up to 12 feet"
+      ],
+      "benefits": [
+        {
+          "title": "Unmatched Strength",
+          "description": "Strongest fencing material available"
+        },
+        {
+          "title": "Security Features",
+          "description": "Anti-climb designs and security tops available"
+        },
+        {
+          "title": "Long Lifespan",
+          "description": "Properly maintained steel lasts 50+ years"
+        },
+        {
+          "title": "Fire Resistant",
+          "description": "Non-combustible material adds safety"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Ornamental",
+          "description": "Decorative steel with elegant finials"
+        },
+        {
+          "name": "Industrial",
+          "description": "Heavy-duty for commercial applications"
+        },
+        {
+          "name": "Security",
+          "description": "Anti-climb features and security spikes"
+        },
+        {
+          "name": "Estate",
+          "description": "Classic wrought-iron styling"
+        }
+      ],
+      "specs": {
+        "materials": ["Galvanized Steel", "Powder-Coated Steel"],
+        "heights": ["4 ft", "6 ft", "8 ft", "10 ft", "12 ft"],
+        "warranty": "10-year manufacturer warranty + 5-year workmanship",
+        "lifespan": "50+ years"
+      },
+      "priceRange": {
+        "min": 40,
+        "max": 100,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Inspect for rust spots annually",
+        "Touch up scratches immediately to prevent rust",
+        "Apply rust inhibitor spray as preventive measure",
+        "Keep vegetation trimmed away from fence"
+      ],
+      "faqs": [
+        {
+          "question": "Will steel rust?",
+          "answer": "Modern steel fencing is galvanized and powder-coated to resist rust. With proper maintenance and touch-ups, rust is rarely an issue."
+        },
+        {
+          "question": "Is steel fencing good for security?",
+          "answer": "Yes, steel is the strongest fencing option available. We offer anti-climb designs and security spear tops for maximum protection."
+        },
+        {
+          "question": "How does steel compare to aluminum?",
+          "answer": "Steel is heavier and stronger, making it better for high-security needs. Aluminum is lighter, never rusts, and is better for decorative residential use."
+        }
+      ],
+      "seo": {
+        "title": "Steel Fence Installation Toledo OH | Security Fencing",
+        "description": "Heavy-duty steel fence installation in Toledo OH. Commercial security fencing, ornamental steel, industrial grade. Free quotes from Ghareeb Fencing Solutions.",
+        "keywords": ["steel fence Toledo", "security fence installation", "commercial fencing Toledo", "industrial fence contractor"]
+      },
+      "cta": {
+        "primary": "Get Free Steel Fence Quote",
+        "secondary": "View Steel Fence Gallery"
+      },
+      "featured": false,
+      "order": 6
+    },
+    {
+      "id": "farm",
+      "name": "Farm & Ranch Fences",
+      "shortName": "Farm",
+      "slug": "farm-fence",
+      "tagline": "Protecting Livestock & Property",
+      "description": "Farm and ranch fencing designed for agricultural properties. From horse fencing to cattle containment, we install durable fencing that keeps your animals safe and your property secure.",
+      "heroImage": "/images/fences/farm-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/farm-1.jpg",
+        "/images/gallery/farm-2.jpg",
+        "/images/gallery/farm-3.jpg",
+        "/images/gallery/farm-4.jpg"
+      ],
+      "features": [
+        "Split rail, post and rail, and board fencing",
+        "High-tensile wire and woven wire options",
+        "Electric fence installation available",
+        "Horse-safe no-climb designs",
+        "Field fence for livestock containment",
+        "Custom gate systems for equipment access"
+      ],
+      "benefits": [
+        {
+          "title": "Animal Safety",
+          "description": "Designed to contain animals without injury"
+        },
+        {
+          "title": "Large Area Coverage",
+          "description": "Cost-effective for multi-acre properties"
+        },
+        {
+          "title": "Durability",
+          "description": "Built to withstand animal pressure and weather"
+        },
+        {
+          "title": "Customizable",
+          "description": "Options for every type of livestock"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Split Rail",
+          "description": "Classic rustic look with wooden rails"
+        },
+        {
+          "name": "Board Fence",
+          "description": "Traditional horizontal boards"
+        },
+        {
+          "name": "No-Climb",
+          "description": "Woven wire safe for horses"
+        },
+        {
+          "name": "High-Tensile",
+          "description": "Wire fence for large properties"
+        }
+      ],
+      "specs": {
+        "materials": ["Wood", "High-Tensile Wire", "Woven Wire", "Electric"],
+        "heights": ["3 ft", "4 ft", "5 ft", "6 ft"],
+        "warranty": "3-year workmanship warranty",
+        "lifespan": "10-25 years depending on material"
+      },
+      "priceRange": {
+        "min": 8,
+        "max": 35,
+        "unit": "per linear foot installed"
+      },
+      "maintenanceTips": [
+        "Walk fence lines regularly to check for damage",
+        "Keep wire tension properly adjusted",
+        "Replace rotted or broken posts promptly",
+        "Clear vegetation from electric fence lines"
+      ],
+      "faqs": [
+        {
+          "question": "What's the best fence for horses?",
+          "answer": "We recommend no-climb woven wire or board fencing for horses. These designs prevent horses from getting legs caught and reduce injury risk."
+        },
+        {
+          "question": "How much does farm fencing cost?",
+          "answer": "Farm fencing is our most affordable option, starting around $8 per linear foot for basic wire fencing. Board and split rail cost more but offer better aesthetics."
+        },
+        {
+          "question": "Do you install electric fencing?",
+          "answer": "Yes, we install electric fence systems for livestock containment. We can also add electric strands to existing fence for added security."
+        }
+      ],
+      "seo": {
+        "title": "Farm Fence Installation Toledo OH | Ranch & Horse Fencing",
+        "description": "Farm and ranch fence installation in Northwest Ohio. Horse fencing, cattle fencing, split rail, and electric fence. Free estimates from Ghareeb Fencing.",
+        "keywords": ["farm fence Toledo", "horse fence installation", "ranch fencing Ohio", "livestock fence contractor"]
+      },
+      "cta": {
+        "primary": "Get Free Farm Fence Quote",
+        "secondary": "View Farm Fence Gallery"
+      },
+      "featured": false,
+      "order": 7
+    },
+    {
+      "id": "gates",
+      "name": "Gates & Access Control",
+      "shortName": "Gates",
+      "slug": "gates",
+      "tagline": "Secure Entry Solutions",
+      "description": "Complete your fence with the perfect gate. From simple walk gates to automated driveway systems, we design and install gates that provide convenient access with reliable security.",
+      "heroImage": "/images/fences/gates-hero.jpg",
+      "galleryImages": [
+        "/images/gallery/gates-1.jpg",
+        "/images/gallery/gates-2.jpg",
+        "/images/gallery/gates-3.jpg",
+        "/images/gallery/gates-4.jpg"
+      ],
+      "features": [
+        "Walk gates, drive gates, and double gates",
+        "Automatic gate operators available",
+        "Keypad, remote, and smartphone access",
+        "Custom designs to match any fence style",
+        "Heavy-duty hardware for smooth operation",
+        "Self-closing options for pool safety"
+      ],
+      "benefits": [
+        {
+          "title": "Convenience",
+          "description": "Automatic systems open at the push of a button"
+        },
+        {
+          "title": "Security",
+          "description": "Control who enters your property"
+        },
+        {
+          "title": "Custom Fit",
+          "description": "Gates designed to match your fence perfectly"
+        },
+        {
+          "title": "Safety",
+          "description": "Self-closing gates meet pool code requirements"
+        }
+      ],
+      "styles": [
+        {
+          "name": "Walk Gate",
+          "description": "Standard pedestrian access gate"
+        },
+        {
+          "name": "Drive Gate",
+          "description": "Single or double for vehicle access"
+        },
+        {
+          "name": "Sliding Gate",
+          "description": "Space-efficient automated option"
+        },
+        {
+          "name": "Cantilever Gate",
+          "description": "No track for smooth operation"
+        }
+      ],
+      "specs": {
+        "materials": ["Matches fence material"],
+        "heights": ["Matches fence height"],
+        "warranty": "5-year workmanship warranty, varies by operator",
+        "lifespan": "Matches fence lifespan"
+      },
+      "priceRange": {
+        "min": 175,
+        "max": 5000,
+        "unit": "per gate installed"
+      },
+      "maintenanceTips": [
+        "Lubricate hinges and latches quarterly",
+        "Test auto-reverse sensors monthly",
+        "Keep tracks clean for sliding gates",
+        "Check gate operator battery backup annually"
+      ],
+      "faqs": [
+        {
+          "question": "Can you automate an existing gate?",
+          "answer": "In many cases, yes. We can retrofit automatic operators to existing gates. We'll assess your gate to determine if it's a good candidate for automation."
+        },
+        {
+          "question": "What access options are available?",
+          "answer": "We offer keypads, remote controls, smartphone apps, intercom systems, and card readers. We can help you choose the right system for your needs."
+        },
+        {
+          "question": "How wide should a driveway gate be?",
+          "answer": "Most residential driveways need gates 10-16 feet wide. We'll measure your driveway and recommend the appropriate size for your vehicles."
+        }
+      ],
+      "seo": {
+        "title": "Gate Installation Toledo OH | Automatic & Custom Gates",
+        "description": "Custom gate installation in Toledo OH. Automatic driveway gates, walk gates, and access control systems. Free quotes from Ghareeb Fencing Solutions.",
+        "keywords": ["gate installation Toledo", "automatic gate", "driveway gate", "fence gate contractor"]
+      },
+      "cta": {
+        "primary": "Get Free Gate Quote",
+        "secondary": "View Gate Gallery"
+      },
+      "featured": false,
+      "order": 8
+    }
+  ],
+  "comparison": {
+    "headers": ["Material", "Cost", "Maintenance", "Lifespan", "Privacy", "Security"],
+    "rows": [
+      ["Wood", "$$", "High", "15-25 yrs", "Excellent", "Good"],
+      ["Vinyl", "$$$", "None", "30+ yrs", "Excellent", "Good"],
+      ["Chain Link", "$", "Low", "20-30 yrs", "Low*", "Good"],
+      ["Aluminum", "$$$", "Low", "30+ yrs", "Low", "Good"],
+      ["Composite", "$$$$", "None", "25-30 yrs", "Excellent", "Good"],
+      ["Steel", "$$$$", "Medium", "50+ yrs", "Low", "Excellent"],
+      ["Farm", "$", "Medium", "10-25 yrs", "None", "Medium"],
+      ["Gates", "Varies", "Low", "Varies", "N/A", "Excellent"]
+    ],
+    "footnote": "*Privacy slats available for chain link"
+  }
+}

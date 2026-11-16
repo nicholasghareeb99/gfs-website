@@ -1,0 +1,248 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../lib/firestore.js';
+const site = await getSiteSettings();
+---
+
+<BaseLayout
+  title="Download Our Brochure | Ghareeb Fencing Solutions"
+  description="Download the Ghareeb Fencing Solutions brochure. View our fence styles, pricing, and services for Northwest Ohio and Southeast Michigan."
+  site={site}
+>
+
+<style>
+  .brochure-hero {
+    background: linear-gradient(135deg, #1e3a5f 0%, #152a45 50%, #0f3460 100%);
+    color: #fff;
+    padding: 80px 20px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .brochure-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    pointer-events: none;
+  }
+  .brochure-hero h1 {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    margin: 0 0 16px;
+    letter-spacing: -0.5px;
+  }
+  .brochure-hero p {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    opacity: 0.85;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .brochure-card {
+    max-width: 700px;
+    margin: -40px auto 60px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+    padding: 48px 40px;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .file-icon {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+    box-shadow: 0 8px 24px rgba(231, 76, 60, 0.3);
+  }
+  .file-icon svg {
+    width: 36px;
+    height: 36px;
+    fill: #fff;
+  }
+
+  .brochure-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 8px;
+  }
+  .brochure-card .file-info {
+    font-size: 0.95rem;
+    color: var(--color-gray);
+    margin: 0 0 32px;
+  }
+
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, var(--color-secondary), var(--color-secondary-light));
+    color: var(--color-primary-dark);
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    font-weight: 700;
+    padding: 16px 40px;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(212, 175, 55, 0.4);
+  }
+  .download-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(212, 175, 55, 0.5);
+    color: var(--color-primary-dark);
+  }
+  .download-btn:active {
+    transform: translateY(0);
+  }
+  .download-btn svg {
+    width: 22px;
+    height: 22px;
+    fill: currentColor;
+  }
+
+  .brochure-details {
+    max-width: 800px;
+    margin: 0 auto 60px;
+    padding: 0 20px;
+  }
+  .brochure-details h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-align: center;
+    margin: 0 0 32px;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+  .detail-item {
+    background: var(--color-off-white);
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+  }
+  .detail-item .icon {
+    font-size: 2rem;
+    margin-bottom: 12px;
+    display: block;
+  }
+  .detail-item h4 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 6px;
+  }
+  .detail-item p {
+    font-size: 0.9rem;
+    color: var(--color-gray);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .brochure-cta {
+    background: var(--color-off-white);
+    padding: 48px 20px;
+    text-align: center;
+  }
+  .brochure-cta h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 12px;
+  }
+  .brochure-cta p {
+    color: var(--color-gray);
+    margin: 0 0 24px;
+    font-size: 1.05rem;
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 600px) {
+    .brochure-hero { padding: 60px 16px 50px; }
+    .brochure-card { margin: -30px 16px 40px; padding: 32px 24px; }
+    .download-btn { padding: 14px 28px; font-size: 1.05rem; }
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<section class="brochure-hero">
+  <h1>Our Brochure</h1>
+  <p>Everything you need to know about our fence styles, pricing, services, and what makes Ghareeb Fencing Solutions the top-rated contractor in the region.</p>
+</section>
+
+<div class="brochure-card">
+  <div class="file-icon">
+    <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM6 20V4h5v7h7v9H6z"/></svg>
+  </div>
+  <h2>GFS Brochure</h2>
+  <p class="file-info">PDF &bull; Fence styles, pricing tiers, service areas &amp; more</p>
+  <a
+    class="download-btn"
+    href="https://firebasestorage.googleapis.com/v0/b/ghareeb-fencing.firebasestorage.app/o/brochure%2FGFS_Brochure_v5.pptx.pdf?alt=media"
+    target="_blank"
+    rel="noopener"
+  >
+    <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    Download Brochure
+  </a>
+</div>
+
+<div class="brochure-details">
+  <h3>What's Inside</h3>
+  <div class="detail-grid">
+    <div class="detail-item">
+      <span class="icon">🏡</span>
+      <h4>Fence Styles</h4>
+      <p>Wood, vinyl, aluminum, and chain link — with Good, Better, Best options for every budget.</p>
+    </div>
+    <div class="detail-item">
+      <span class="icon">💰</span>
+      <h4>Transparent Pricing</h4>
+      <p>Clear pricing tiers so you know exactly what to expect. No surprises, no hidden fees.</p>
+    </div>
+    <div class="detail-item">
+      <span class="icon">📍</span>
+      <h4>Service Areas</h4>
+      <p>Northwest Ohio and Southeast Michigan — Lucas, Wood, Fulton, Monroe counties and more.</p>
+    </div>
+    <div class="detail-item">
+      <span class="icon">⭐</span>
+      <h4>Our Promise</h4>
+      <p>Owner on every job, premium materials, 3-year craftsmanship warranty, and 4.9-star rated.</p>
+    </div>
+  </div>
+</div>
+
+<section class="brochure-cta">
+  <h3>Ready to Get Started?</h3>
+  <p>Get a free quote or call us to discuss your project.</p>
+  <div class="cta-buttons">
+    <a class="btn btn-primary btn-lg" href="/quote/">Get Free Quote</a>
+    <a class="btn btn-secondary btn-lg" href="tel:4199028257">(419) 902-8257</a>
+  </div>
+</section>
+
+</BaseLayout>

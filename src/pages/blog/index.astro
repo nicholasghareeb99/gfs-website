@@ -1,0 +1,369 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getSiteSettings } from '../../lib/firestore.js';
+const site = await getSiteSettings();
+
+// Blog posts data - can be moved to a JSON file or Firebase
+const posts = [
+    {
+        slug: 'how-to-choose-fence-material',
+        title: 'How to Choose the Right Fence Material for Your Toledo Home',
+        excerpt: 'Discover the pros and cons of wood, vinyl, aluminum, and chain link fencing to make the best choice for your property and budget.',
+        date: '2025-12-15',
+        author: 'Ghareeb Fencing Team',
+        category: 'Guides',
+        image: '/images/gallery/cedar-full-yard.jpg',
+        readTime: '5 min read'
+    },
+    {
+        slug: 'fence-maintenance-tips',
+        title: '10 Essential Fence Maintenance Tips for Ohio Winters',
+        excerpt: 'Learn how to protect your fence investment from harsh Ohio winters with these expert maintenance tips.',
+        date: '2025-11-28',
+        author: 'Ghareeb Fencing Team',
+        category: 'Maintenance',
+        image: '/images/gallery/vinyl-privacy-white.jpg',
+        readTime: '4 min read'
+    },
+    {
+        slug: 'fence-permit-guide-ohio',
+        title: 'Complete Guide to Fence Permits in Toledo & Northwest Ohio',
+        excerpt: 'Everything you need to know about fence permits, setback requirements, and HOA rules in the Toledo area.',
+        date: '2025-11-10',
+        author: 'Ghareeb Fencing Team',
+        category: 'Permits',
+        image: '/images/gallery/aluminum-pool.jpg',
+        readTime: '6 min read'
+    },
+    {
+        slug: 'privacy-fence-benefits',
+        title: '7 Benefits of Installing a Privacy Fence',
+        excerpt: 'From increased home value to better security, discover why privacy fences are a smart investment for homeowners.',
+        date: '2025-10-22',
+        author: 'Ghareeb Fencing Team',
+        category: 'Benefits',
+        image: '/images/gallery/pt-privacy.jpg',
+        readTime: '4 min read'
+    },
+    {
+        slug: 'vinyl-vs-wood-fence',
+        title: 'Vinyl vs Wood Fence: Which is Right for You?',
+        excerpt: 'A detailed comparison of vinyl and wood fencing including costs, maintenance, durability, and aesthetics.',
+        date: '2025-10-05',
+        author: 'Ghareeb Fencing Team',
+        category: 'Comparisons',
+        image: '/images/gallery/vinyl-hero.jpg',
+        readTime: '7 min read'
+    }
+];
+
+// Schema.org BlogPosting structured data
+const blogSchema = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Ghareeb Fencing Solutions Blog",
+    "description": "Expert fence installation tips, guides, and advice for Toledo and Northwest Ohio homeowners.",
+    "url": `${site.company.website}/blog/`,
+    "publisher": {
+        "@type": "Organization",
+        "name": site.company.name,
+        "logo": {
+            "@type": "ImageObject",
+            "url": `${site.company.website}/images/logo.png`
+        }
+    },
+    "blogPost": posts.map(post => ({
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "description": post.excerpt,
+        "datePublished": post.date,
+        "author": {
+            "@type": "Organization",
+            "name": post.author
+        }
+    }))
+};
+---
+
+<BaseLayout 
+    title="Fence Blog | Tips, Guides & Expert Advice | Ghareeb Fencing"
+    description="Expert fence installation tips, maintenance guides, and advice for Toledo and Northwest Ohio homeowners. Learn about wood, vinyl, aluminum, and chain link fencing."
+    keywords={['fence blog', 'fence tips', 'fence maintenance', 'toledo fence', 'ohio fence guide']}
+>
+    <script type="application/ld+json" set:html={JSON.stringify(blogSchema)} />
+    
+    <section class="hero-mini">
+        <div class="container">
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+                <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                        <a itemprop="item" href="/"><span itemprop="name">Home</span></a>
+                        <meta itemprop="position" content="1" />
+                    </li>
+                    <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                        <span itemprop="name">Blog</span>
+                        <meta itemprop="position" content="2" />
+                    </li>
+                </ol>
+            </nav>
+            <h1>Fence Tips & Guides</h1>
+            <p class="subtitle">Expert advice from Toledo's trusted fence professionals</p>
+        </div>
+    </section>
+
+    <section class="blog-section">
+        <div class="container">
+            <div class="blog-grid">
+                {posts.map((post, index) => (
+                    <article class={`blog-card ${index === 0 ? 'featured' : ''}`}>
+                        <div class="blog-card-image">
+                            <img src={post.image} alt={post.title} loading="lazy" />
+                            <span class="category-badge">{post.category}</span>
+                        </div>
+                        <div class="blog-card-content">
+                            <div class="blog-meta">
+                                <time datetime={post.date}>
+                                    {new Date(post.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                </time>
+                                <span class="read-time">{post.readTime}</span>
+                            </div>
+                            <h2><a href={`/blog/${post.slug}/`}>{post.title}</a></h2>
+                            <p>{post.excerpt}</p>
+                            <a href={`/blog/${post.slug}/`} class="read-more">
+                                Read More 
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </article>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Start Your Fence Project?</h2>
+            <p>Get a free instant estimate in 60 seconds</p>
+            <a href="/quote/ballpark/" class="btn btn-accent">Get Your Quote</a>
+        </div>
+    </section>
+</BaseLayout>
+
+<style>
+    .hero-mini {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 60px 0 40px;
+        text-align: center;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 20px;
+    }
+    
+    .breadcrumb ol {
+        list-style: none;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .breadcrumb li:not(:last-child)::after {
+        content: '/';
+        margin-left: 8px;
+        opacity: 0.5;
+    }
+    
+    .breadcrumb a {
+        color: rgba(255,255,255,0.8);
+        text-decoration: none;
+    }
+    
+    .breadcrumb a:hover {
+        color: white;
+    }
+    
+    h1 {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .blog-section {
+        padding: 80px 0;
+        background: #f8fafc;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+    }
+
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 30px;
+    }
+
+    .blog-card {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+    }
+
+    .blog-card.featured {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .blog-card-image {
+        position: relative;
+        aspect-ratio: 16/10;
+        overflow: hidden;
+    }
+
+    .blog-card.featured .blog-card-image {
+        aspect-ratio: auto;
+        min-height: 300px;
+    }
+
+    .blog-card-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .category-badge {
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        background: var(--accent);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .blog-card-content {
+        padding: 24px;
+    }
+
+    .blog-card.featured .blog-card-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 40px;
+    }
+
+    .blog-meta {
+        display: flex;
+        gap: 16px;
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-bottom: 12px;
+    }
+
+    .blog-card h2 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+        line-height: 1.4;
+    }
+
+    .blog-card.featured h2 {
+        font-size: 1.75rem;
+    }
+
+    .blog-card h2 a {
+        color: var(--primary);
+        text-decoration: none;
+    }
+
+    .blog-card h2 a:hover {
+        color: var(--accent);
+    }
+
+    .blog-card p {
+        color: #64748b;
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .read-more {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .read-more:hover {
+        gap: 10px;
+    }
+
+    .cta-section {
+        background: var(--primary);
+        color: white;
+        padding: 60px 0;
+        text-align: center;
+    }
+
+    .cta-section h2 {
+        font-size: 2rem;
+        margin-bottom: 12px;
+    }
+
+    .cta-section p {
+        opacity: 0.9;
+        margin-bottom: 24px;
+    }
+
+    .btn-accent {
+        display: inline-block;
+        background: var(--accent);
+        color: white;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-accent:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4);
+    }
+
+    @media (max-width: 768px) {
+        .blog-card.featured {
+            grid-template-columns: 1fr;
+        }
+        
+        .blog-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+    }
+</style>

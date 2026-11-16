@@ -42,9 +42,7 @@
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://images.squarespace-cdn.com">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
 
 <!-- Site styles -->
 <!-- site.css first (legacy component styles), then system.css so the
@@ -59,7 +57,7 @@
      ================================================================ -->
 <script>
   // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
-  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+  window.GFS_EDIT_PASSWORD = ""; // password preview removed; use Google sign-in
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
@@ -145,8 +143,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -157,7 +155,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}
@@ -170,7 +168,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://ghareebfence.com/#business","name":"Ghareeb Fencing Solutions","telephone":"+1-419-214-2107","email":"nick@ghareebfence.com","url":"https://ghareebfence.com/","priceRange":"$$","address":{"@type":"PostalAddress","streetAddress":"5242 Tractor Rd Suite C","addressLocality":"Toledo","addressRegion":"OH","postalCode":"43612","addressCountry":"US"},"areaServed":["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"08:00","closes":"18:00"}],"sameAs":["https://www.facebook.com/GhareebLandscaping/","https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]}</script>
 <!-- Schema: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ghareebfence.com/"},{"@type":"ListItem","position":2,"name":"Get a Quote","item":"https://ghareebfence.com/quote/"},{"@type":"ListItem","position":3,"name":"Instant Estimate","item":"https://ghareebfence.com/quote/ballpark/"}]}</script>
-<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20260907-landings">
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20261114">
 <link rel="stylesheet" href="/assets/css/map-drawing.css?v=20260930-tools">
 <script src="/assets/js/map-geometry.js" defer></script>
 <link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
@@ -179,7 +177,7 @@
 <link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
-<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
 <link rel="stylesheet" href="/assets/css/request-tools.css?v=20261113c">
 </head>
 <body class="bp-page">
@@ -767,10 +765,10 @@
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
 <script src="../../assets/js/leads.js?v=20261113a" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=20261113f" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261113c" defer></script>
+<script src="../../assets/js/ballpark.js?v=20261114a" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261113c" defer></script>
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
-<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
 <script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
 <script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
 

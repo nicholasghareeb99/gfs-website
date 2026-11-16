@@ -31,6 +31,7 @@
 .sell-close { background:#132b3d!important;color:#fff; }
 .sell-close h2 { color:#fff;max-width:26ch; }
 .sell-close p { color:#e0e8eb; }
+.sell-close .eyebrow { color:#f0b48c; }
 .sell-close a:not(.btn) { color:#fff; }
 .sell-close .btn-outline { color:#fff;border-color:#bdcbd4; }
 .sell-close .btn-outline:hover { color:#fff;background:#294457; }

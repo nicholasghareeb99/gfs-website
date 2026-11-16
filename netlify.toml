@@ -39,7 +39,7 @@ for = "/assets/js/*"
 for = "/assets/img/*"
 
   [headers.values]
-  Cache-Control = "public, max-age=0, must-revalidate"
+  Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
 
 [[headers]]
 for = "/admin/*"
@@ -194,6 +194,24 @@ for = "/.netlify/functions/*"
   X-Robots-Tag = "noindex, nofollow"
   Cache-Control = "no-store"
 
+[[headers]]
+for = "/assets/b/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/assets/fonts/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+for = "/assets/brochure/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
+
 [[redirects]]
 from = "https://gfencing.netlify.app/*"
 to = "https://ghareebfence.com/:splat"
@@ -337,3 +355,279 @@ force = false
   [redirects.conditions]
 
   [redirects.headers]
+
+[[redirects]]
+from = "/service-areas/harbor-view-oh"
+to = "/service-areas/oregon-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/harbor-view-oh/*"
+to = "/service-areas/oregon-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/jerusalem-township-oh"
+to = "/service-areas/oregon-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/jerusalem-township-oh/*"
+to = "/service-areas/oregon-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/berkey-oh"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/berkey-oh/*"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/richfield-township-oh"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/richfield-township-oh/*"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/spencer-township-oh"
+to = "/service-areas/holland-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/spencer-township-oh/*"
+to = "/service-areas/holland-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/middleton-township-oh"
+to = "/service-areas/bowling-green-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/middleton-township-oh/*"
+to = "/service-areas/bowling-green-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/harding-township-oh"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/harding-township-oh/*"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/providence-township-oh"
+to = "/service-areas/whitehouse-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/providence-township-oh/*"
+to = "/service-areas/whitehouse-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/estral-beach-mi"
+to = "/service-areas/rockwood-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/estral-beach-mi/*"
+to = "/service-areas/rockwood-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/berlin-township-mi"
+to = "/service-areas/rockwood-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/berlin-township-mi/*"
+to = "/service-areas/rockwood-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/maybee-mi"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/maybee-mi/*"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/exeter-township-mi"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/exeter-township-mi/*"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/ash-township-mi"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/ash-township-mi/*"
+to = "/service-areas/carleton-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/london-township-mi"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/london-township-mi/*"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/melvindale-mi"
+to = "/service-areas/allen-park-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/melvindale-mi/*"
+to = "/service-areas/allen-park-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/river-rouge-mi"
+to = "/service-areas/wyandotte-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/river-rouge-mi/*"
+to = "/service-areas/wyandotte-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/perrysburg-township-oh"
+to = "/service-areas/perrysburg-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/perrysburg-township-oh/*"
+to = "/service-areas/perrysburg-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/sylvania-township-oh"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/sylvania-township-oh/*"
+to = "/service-areas/sylvania-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/waterville-township-oh"
+to = "/service-areas/waterville-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/waterville-township-oh/*"
+to = "/service-areas/waterville-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/swanton-township-oh"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/swanton-township-oh/*"
+to = "/service-areas/swanton-oh/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/dundee-township-mi"
+to = "/service-areas/dundee-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/dundee-township-mi/*"
+to = "/service-areas/dundee-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/milan-township-mi"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/milan-township-mi/*"
+to = "/service-areas/milan-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/monroe-township-mi"
+to = "/service-areas/monroe-mi/"
+status = 301
+force = true
+
+[[redirects]]
+from = "/service-areas/monroe-township-mi/*"
+to = "/service-areas/monroe-mi/"
+status = 301
+force = true

@@ -1,0 +1,196 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  tagline: string;
+  image: string;
+  priceRange?: string;
+  features?: string[];
+  featured?: boolean;
+}
+
+const { name, slug, tagline, image, priceRange, features, featured = false } = Astro.props;
+---
+
+<article class={`fence-card ${featured ? 'fence-card--featured' : ''}`}>
+  <div class="fence-card__image">
+    <img src={image} alt={`${name} fence installation`} loading="lazy" />
+    {featured && <span class="fence-card__badge">Popular</span>}
+  </div>
+  <div class="fence-card__content">
+    <h3 class="fence-card__title">{name}</h3>
+    <p class="fence-card__tagline">{tagline}</p>
+    
+    {priceRange && (
+      <div class="fence-card__price">
+        <span class="fence-card__price-label">Starting at</span>
+        <span class="fence-card__price-value">{priceRange}</span>
+      </div>
+    )}
+    
+    {features && features.length > 0 && (
+      <ul class="fence-card__features">
+        {features.slice(0, 3).map((feature) => (
+          <li>
+            <i class="fas fa-check"></i>
+            {feature}
+          </li>
+        ))}
+      </ul>
+    )}
+    
+    <a href={`/fences/${slug}`} class="fence-card__link">
+      Learn More <i class="fas fa-arrow-right"></i>
+    </a>
+  </div>
+</article>
+
+<style>
+  .fence-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .fence-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .fence-card--featured {
+    border: 2px solid var(--color-secondary);
+  }
+
+  .fence-card__image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .fence-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  .fence-card:hover .fence-card__image img {
+    transform: scale(1.05);
+  }
+
+  .fence-card__badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--color-secondary);
+    color: var(--color-primary);
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border-radius: 4px;
+  }
+
+  .fence-card__content {
+    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fence-card__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0 0 0.5rem;
+  }
+
+  .fence-card__tagline {
+    color: #666;
+    font-size: 0.95rem;
+    margin: 0 0 1rem;
+    line-height: 1.5;
+  }
+
+  .fence-card__price {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+  }
+
+  .fence-card__price-label {
+    font-size: 0.8rem;
+    color: #666;
+  }
+
+  .fence-card__price-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .fence-card__features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+    flex: 1;
+  }
+
+  .fence-card__features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+  }
+
+  .fence-card__features i {
+    color: var(--color-secondary);
+    margin-top: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .fence-card__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-primary);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-top: auto;
+  }
+
+  .fence-card__link:hover {
+    color: var(--color-secondary);
+    gap: 0.75rem;
+  }
+
+  .fence-card__link i {
+    transition: transform 0.2s ease;
+  }
+
+  .fence-card__link:hover i {
+    transform: translateX(4px);
+  }
+
+  @media (max-width: 768px) {
+    .fence-card__image {
+      height: 180px;
+    }
+
+    .fence-card__content {
+      padding: 1.25rem;
+    }
+  }
+</style>

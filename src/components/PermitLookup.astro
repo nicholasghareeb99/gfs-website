@@ -1,0 +1,499 @@
+---
+import permitsData from '../content/permits.json';
+
+const { municipalities } = permitsData;
+---
+
+<div class="permit-lookup">
+  <div class="permit-lookup__search">
+    <label for="permit-search">Find Your Municipality</label>
+    <div class="permit-lookup__input-wrapper">
+      <i class="fas fa-search"></i>
+      <input 
+        type="text" 
+        id="permit-search" 
+        placeholder="Enter city or township name..."
+        autocomplete="off"
+      />
+    </div>
+    <div id="permit-suggestions" class="permit-lookup__suggestions" style="display: none;"></div>
+  </div>
+  
+  <div id="permit-result" class="permit-lookup__result" style="display: none;">
+    <div class="permit-result__header">
+      <h3 id="result-municipality"></h3>
+      <span id="result-verified" class="permit-result__badge"></span>
+    </div>
+    
+    <div class="permit-result__content">
+      <div class="permit-result__section">
+        <h4><i class="fas fa-clipboard-check"></i> Permit Requirements</h4>
+        <div id="result-requirements"></div>
+      </div>
+      
+      <div class="permit-result__grid">
+        <div class="permit-result__section">
+          <h4><i class="fas fa-ruler-vertical"></i> Height Restrictions</h4>
+          <div id="result-heights"></div>
+        </div>
+        
+        <div class="permit-result__section">
+          <h4><i class="fas fa-arrows-alt-h"></i> Setback Requirements</h4>
+          <div id="result-setbacks"></div>
+        </div>
+      </div>
+      
+      <div id="result-materials" class="permit-result__section" style="display: none;">
+        <h4><i class="fas fa-exclamation-triangle"></i> Material Restrictions</h4>
+        <div id="result-materials-content"></div>
+      </div>
+      
+      <div class="permit-result__section">
+        <h4><i class="fas fa-info-circle"></i> Contact Information</h4>
+        <div id="result-contact"></div>
+      </div>
+      
+      <div id="result-notes" class="permit-result__notes" style="display: none;"></div>
+    </div>
+    
+    <div class="permit-result__disclaimer">
+      <i class="fas fa-exclamation-circle"></i>
+      <p>This information is provided as a general guide. Requirements may change. Always verify current requirements with your local building/zoning department before starting your project.</p>
+    </div>
+  </div>
+  
+  <div id="no-result" class="permit-lookup__no-result" style="display: none;">
+    <i class="fas fa-map-marker-alt"></i>
+    <h4>Municipality Not Found</h4>
+    <p>We don't have permit information for this area in our database. Please contact us and we'll research the requirements for your location.</p>
+    <a href="/contact" class="btn btn--primary">Contact Us</a>
+  </div>
+</div>
+
+<style>
+  .permit-lookup {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .permit-lookup__search {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .permit-lookup__search label {
+    display: block;
+    font-weight: 600;
+    color: var(--color-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .permit-lookup__input-wrapper {
+    position: relative;
+  }
+
+  .permit-lookup__input-wrapper i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+  }
+
+  .permit-lookup__search input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 2.75rem;
+    font-size: 1.1rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .permit-lookup__search input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+  }
+
+  .permit-lookup__suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 2px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 250px;
+    overflow-y: auto;
+    z-index: 100;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .permit-lookup__suggestion {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .permit-lookup__suggestion:last-child {
+    border-bottom: none;
+  }
+
+  .permit-lookup__suggestion:hover {
+    background: #f8f9fa;
+  }
+
+  .permit-lookup__suggestion-name {
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  .permit-lookup__suggestion-location {
+    font-size: 0.85rem;
+    color: #666;
+  }
+
+  /* Result styles */
+  .permit-lookup__result {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  .permit-result__header {
+    background: var(--color-primary);
+    color: #fff;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .permit-result__header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  .permit-result__badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+  }
+
+  .permit-result__badge.verified {
+    background: #28a745;
+    color: #fff;
+  }
+
+  .permit-result__badge.unverified {
+    background: #ffc107;
+    color: #000;
+  }
+
+  .permit-result__content {
+    padding: 1.5rem;
+  }
+
+  .permit-result__section {
+    margin-bottom: 1.5rem;
+  }
+
+  .permit-result__section:last-child {
+    margin-bottom: 0;
+  }
+
+  .permit-result__section h4 {
+    color: var(--color-primary);
+    font-size: 1rem;
+    margin: 0 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .permit-result__section h4 i {
+    color: var(--color-secondary);
+  }
+
+  .permit-result__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .permit-result__item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+  }
+
+  .permit-result__item:last-child {
+    border-bottom: none;
+  }
+
+  .permit-result__item-label {
+    color: #666;
+  }
+
+  .permit-result__item-value {
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  .permit-result__notes {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 1rem;
+  }
+
+  .permit-result__disclaimer {
+    background: #fff3cd;
+    padding: 1rem 1.5rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    border-top: 1px solid #eee;
+  }
+
+  .permit-result__disclaimer i {
+    color: #856404;
+    margin-top: 0.15rem;
+  }
+
+  .permit-result__disclaimer p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #856404;
+  }
+
+  /* No result */
+  .permit-lookup__no-result {
+    text-align: center;
+    padding: 3rem 2rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+  }
+
+  .permit-lookup__no-result i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 1rem;
+  }
+
+  .permit-lookup__no-result h4 {
+    color: var(--color-primary);
+    margin: 0 0 0.5rem;
+  }
+
+  .permit-lookup__no-result p {
+    color: #666;
+    margin: 0 0 1.5rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .btn--primary {
+    background-color: var(--color-secondary);
+    color: var(--color-primary);
+  }
+
+  .btn--primary:hover {
+    background-color: #c9a432;
+  }
+
+  @media (max-width: 768px) {
+    .permit-result__grid {
+      grid-template-columns: 1fr;
+    }
+
+    .permit-result__header {
+      flex-direction: column;
+      gap: 0.5rem;
+      text-align: center;
+    }
+  }
+</style>
+
+<script define:vars={{ municipalities }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('permit-search');
+    const suggestionsEl = document.getElementById('permit-suggestions');
+    const resultEl = document.getElementById('permit-result');
+    const noResultEl = document.getElementById('no-result');
+    
+    // Search functionality
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.trim().toLowerCase();
+      
+      if (query.length < 2) {
+        suggestionsEl.style.display = 'none';
+        return;
+      }
+      
+      const matches = municipalities.filter(m => 
+        m.name.toLowerCase().includes(query) ||
+        m.county.toLowerCase().includes(query)
+      ).slice(0, 8);
+      
+      if (matches.length > 0) {
+        suggestionsEl.innerHTML = matches.map(m => `
+          <div class="permit-lookup__suggestion" data-slug="${m.slug}">
+            <span class="permit-lookup__suggestion-name">${m.name}</span>
+            <span class="permit-lookup__suggestion-location">${m.county}, ${m.state}</span>
+          </div>
+        `).join('');
+        suggestionsEl.style.display = 'block';
+      } else {
+        suggestionsEl.style.display = 'none';
+      }
+    });
+    
+    // Click on suggestion
+    suggestionsEl.addEventListener('click', (e) => {
+      const suggestion = e.target.closest('.permit-lookup__suggestion');
+      if (suggestion) {
+        const slug = suggestion.dataset.slug;
+        const municipality = municipalities.find(m => m.slug === slug);
+        if (municipality) {
+          showResult(municipality);
+          searchInput.value = municipality.name;
+          suggestionsEl.style.display = 'none';
+        }
+      }
+    });
+    
+    // Hide suggestions on outside click
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.permit-lookup__search')) {
+        suggestionsEl.style.display = 'none';
+      }
+    });
+    
+    function showResult(m) {
+      resultEl.style.display = 'block';
+      noResultEl.style.display = 'none';
+      
+      // Header
+      document.getElementById('result-municipality').textContent = `${m.name}, ${m.state}`;
+      const verifiedBadge = document.getElementById('result-verified');
+      if (m.verified) {
+        verifiedBadge.textContent = '✓ Verified';
+        verifiedBadge.className = 'permit-result__badge verified';
+      } else {
+        verifiedBadge.textContent = 'Unverified';
+        verifiedBadge.className = 'permit-result__badge unverified';
+      }
+      
+      // Requirements
+      const requirementsEl = document.getElementById('result-requirements');
+      requirementsEl.innerHTML = `
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Permit Required</span>
+          <span class="permit-result__item-value">${m.permitRequired ? 'Yes' : 'No'}</span>
+        </div>
+        ${m.permitRequired ? `
+          <div class="permit-result__item">
+            <span class="permit-result__item-label">Permit Fee</span>
+            <span class="permit-result__item-value">${m.fee || 'Contact office'}</span>
+          </div>
+          <div class="permit-result__item">
+            <span class="permit-result__item-label">Processing Time</span>
+            <span class="permit-result__item-value">${m.processingTime || 'Varies'}</span>
+          </div>
+        ` : ''}
+      `;
+      
+      // Heights
+      const heightsEl = document.getElementById('result-heights');
+      heightsEl.innerHTML = `
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Front Yard</span>
+          <span class="permit-result__item-value">${m.heightRestrictions?.front || 'Contact office'}</span>
+        </div>
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Side/Rear Yard</span>
+          <span class="permit-result__item-value">${m.heightRestrictions?.sideRear || 'Contact office'}</span>
+        </div>
+      `;
+      
+      // Setbacks
+      const setbacksEl = document.getElementById('result-setbacks');
+      setbacksEl.innerHTML = `
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Property Line</span>
+          <span class="permit-result__item-value">${m.setbackRequirements?.propertyLine || 'Contact office'}</span>
+        </div>
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Corner Lots</span>
+          <span class="permit-result__item-value">${m.setbackRequirements?.cornerLot || 'Contact office'}</span>
+        </div>
+      `;
+      
+      // Material restrictions
+      const materialsSection = document.getElementById('result-materials');
+      const materialsContent = document.getElementById('result-materials-content');
+      if (m.materialRestrictions && m.materialRestrictions.length > 0) {
+        materialsSection.style.display = 'block';
+        materialsContent.innerHTML = m.materialRestrictions.map(r => 
+          `<div class="permit-result__item"><span class="permit-result__item-value">${r}</span></div>`
+        ).join('');
+      } else {
+        materialsSection.style.display = 'none';
+      }
+      
+      // Contact
+      const contactEl = document.getElementById('result-contact');
+      contactEl.innerHTML = `
+        <div class="permit-result__item">
+          <span class="permit-result__item-label">Department</span>
+          <span class="permit-result__item-value">${m.contact?.department || 'Building Department'}</span>
+        </div>
+        ${m.contact?.phone ? `
+          <div class="permit-result__item">
+            <span class="permit-result__item-label">Phone</span>
+            <span class="permit-result__item-value"><a href="tel:${m.contact.phone}">${m.contact.phone}</a></span>
+          </div>
+        ` : ''}
+        ${m.contact?.website ? `
+          <div class="permit-result__item">
+            <span class="permit-result__item-label">Website</span>
+            <span class="permit-result__item-value"><a href="${m.contact.website}" target="_blank" rel="noopener">Visit Website</a></span>
+          </div>
+        ` : ''}
+      `;
+      
+      // Notes
+      const notesEl = document.getElementById('result-notes');
+      if (m.notes) {
+        notesEl.style.display = 'block';
+        notesEl.innerHTML = `<strong>Note:</strong> ${m.notes}`;
+      } else {
+        notesEl.style.display = 'none';
+      }
+      
+      // Scroll to result
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+</script>

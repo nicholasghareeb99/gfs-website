@@ -42,9 +42,7 @@
 
 <!-- Fonts -->
 <link rel="preconnect" href="https://images.squarespace-cdn.com">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
 
 <!-- Site styles -->
 <!-- site.css first (legacy component styles), then system.css so the
@@ -59,7 +57,7 @@
      ================================================================ -->
 <script>
   // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
-  window.GFS_EDIT_PASSWORD = "ghareeb2026";
+  window.GFS_EDIT_PASSWORD = ""; // password preview removed; use Google sign-in
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
@@ -126,8 +124,8 @@
 </script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
-<script src="/assets/js/tracking-policy.js?v=domain-oct03" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
 <script defer>
   // Auto-initialize Firebase
   window.addEventListener('DOMContentLoaded', function() {
@@ -138,7 +136,7 @@
       try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
       // Initialize Analytics if measurementId is configured
       try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId && firebase.analytics) {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
           window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
         }
       } catch (e) {}
@@ -239,7 +237,7 @@
 <style id="municipal-permit-styles">
 .permit-jump{max-width:1200px;margin:0 auto;padding:12px 24px}.permit-jump a,.municipal-permit a{color:#124ca1;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px;overflow-wrap:anywhere}.permit-jump a:focus-visible,.municipal-permit a:focus-visible,.municipal-permit summary:focus-visible{outline:3px solid #124ca1;outline-offset:4px}.municipal-permit{scroll-margin-top:140px;background:#f0f6fd;color:#172d48;padding:48px 24px}.municipal-permit__inner{max-width:1100px;margin:auto}.municipal-permit h2{font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.2;margin:8px 0 16px;color:#112d50}.municipal-permit h3{font-size:1.1rem;margin:0 0 12px;color:#112d50}.municipal-permit p,.municipal-permit li{line-height:1.65}.municipal-permit__grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:24px;margin:24px 0}.municipal-permit__card{background:#fff;padding:24px;border:1px solid #cbdcf1;border-radius:12px;min-width:0}.municipal-permit__status{font-size:1.15rem;font-weight:650;max-width:70ch}.municipal-permit__eyebrow,.municipal-permit__note{font-size:.875rem;color:#39546e}.municipal-permit ul{padding-left:20px;margin:12px 0}.municipal-permit li+li{margin-top:8px}.municipal-permit__sources{list-style:none;padding:0!important}.municipal-permit__sources a{padding:6px 0}.municipal-permit details{border-top:1px solid #cbdcf1;padding-top:8px;margin-top:16px}.municipal-permit summary{cursor:pointer;min-height:44px;padding:10px 0;font-weight:650}.municipal-permit__jurisdiction{margin-top:16px}.municipal-permit__note{max-width:90ch;margin-top:20px}.municipal-permit__note time{white-space:nowrap}@media(max-width:700px){.municipal-permit{padding:32px 20px}.municipal-permit__grid{grid-template-columns:minmax(0,1fr);gap:16px}.municipal-permit__card{padding:20px}.permit-jump{padding:8px 20px}}
 </style>
-<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261111c">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
 </head>
 <body>
 
@@ -494,7 +492,7 @@
 
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
-<script src="../../assets/js/edit-mode.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
 <script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
 <script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
 

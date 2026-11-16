@@ -139,8 +139,19 @@
     if(window.GFS_ANALYTICS?.setAnalyticsCollectionEnabled){try{window.GFS_ANALYTICS.setAnalyticsCollectionEnabled(enabled);}catch{}}
     return enabled;
   }
+  // The Analytics SDK is only downloaded once a visitor allows analytics.
+  let sdkLoading=null;
+  function loadSdk(){
+    if(sdkLoading)return sdkLoading;
+    sdkLoading=new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js';s.async=true;s.onload=resolve;s.onerror=()=>{sdkLoading=null;reject();};document.head.appendChild(s);});
+    return sdkLoading;
+  }
   function initialize(firebase){
-    if(!enforce()||!window.GFS_FIREBASE_CONFIG?.measurementId||typeof firebase?.analytics!=='function')return null;
+    if(!enforce()||!window.GFS_FIREBASE_CONFIG?.measurementId||!firebase)return null;
+    if(typeof firebase.analytics!=='function'){
+      loadSdk().then(()=>{if(!window.GFS_ANALYTICS&&enforce()&&typeof firebase.analytics==='function'){window.GFS_ANALYTICS=firebase.analytics();enforce();if(typeof Event==='function')window.dispatchEvent(new Event('gfs-tracking-ready'));}}).catch(()=>{});
+      return null;
+    }
     return window.GFS_ANALYTICS||firebase.analytics();
   }
   function refresh(){

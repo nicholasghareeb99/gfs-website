@@ -1,0 +1,240 @@
+---
+interface Props {
+  author: string;
+  location: string;
+  rating: number;
+  text: string;
+  date: string;
+  fenceType?: string;
+  verified?: boolean;
+  platform?: string;
+  compact?: boolean;
+}
+
+const { 
+  author, 
+  location, 
+  rating, 
+  text, 
+  date, 
+  fenceType, 
+  verified = false,
+  platform,
+  compact = false
+} = Astro.props;
+
+// Generate star rating HTML
+const fullStars = Math.floor(rating);
+const hasHalfStar = rating % 1 >= 0.5;
+const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+
+// Format date
+const formattedDate = new Date(date).toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short'
+});
+---
+
+<article class={`review-card ${compact ? 'review-card--compact' : ''}`}>
+  <div class="review-card__header">
+    <div class="review-card__rating" aria-label={`${rating} out of 5 stars`}>
+      {Array(fullStars).fill(null).map(() => (
+        <i class="fas fa-star"></i>
+      ))}
+      {hasHalfStar && <i class="fas fa-star-half-alt"></i>}
+      {Array(emptyStars).fill(null).map(() => (
+        <i class="far fa-star"></i>
+      ))}
+    </div>
+    {platform && (
+      <span class="review-card__platform">
+        {platform === 'google' && <i class="fab fa-google"></i>}
+        {platform === 'facebook' && <i class="fab fa-facebook"></i>}
+        {platform === 'homeadvisor' && <i class="fas fa-home"></i>}
+        {platform === 'bbb' && <span class="bbb-badge">BBB</span>}
+      </span>
+    )}
+  </div>
+  
+  <blockquote class="review-card__text">
+    <p>"{text}"</p>
+  </blockquote>
+  
+  <div class="review-card__footer">
+    <div class="review-card__author">
+      <div class="review-card__avatar">
+        {author.charAt(0).toUpperCase()}
+      </div>
+      <div class="review-card__info">
+        <span class="review-card__name">
+          {author}
+          {verified && (
+            <i class="fas fa-check-circle review-card__verified" title="Verified Customer"></i>
+          )}
+        </span>
+        <span class="review-card__meta">
+          {location} • {formattedDate}
+        </span>
+      </div>
+    </div>
+    {fenceType && (
+      <span class="review-card__fence-type">
+        <i class="fas fa-fence"></i>
+        {fenceType}
+      </span>
+    )}
+  </div>
+</article>
+
+<style>
+  .review-card {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .review-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .review-card--compact {
+    padding: 1rem;
+  }
+
+  .review-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  .review-card__rating {
+    display: flex;
+    gap: 0.15rem;
+  }
+
+  .review-card__rating i {
+    color: var(--color-secondary);
+    font-size: 1rem;
+  }
+
+  .review-card__platform {
+    color: #666;
+    font-size: 1.1rem;
+  }
+
+  .review-card__platform .bbb-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: #005a78;
+    color: #fff;
+    padding: 0.15rem 0.35rem;
+    border-radius: 2px;
+  }
+
+  .review-card__text {
+    margin: 0 0 1.25rem;
+    flex: 1;
+  }
+
+  .review-card__text p {
+    color: #444;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0;
+    font-style: italic;
+  }
+
+  .review-card--compact .review-card__text p {
+    font-size: 0.9rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .review-card__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+  }
+
+  .review-card__author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .review-card__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .review-card--compact .review-card__avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+  }
+
+  .review-card__info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .review-card__name {
+    font-weight: 600;
+    color: var(--color-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .review-card__verified {
+    color: #28a745;
+    font-size: 0.85rem;
+  }
+
+  .review-card__meta {
+    font-size: 0.8rem;
+    color: #888;
+  }
+
+  .review-card__fence-type {
+    font-size: 0.75rem;
+    color: #666;
+    background: #f0f0f0;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  @media (max-width: 768px) {
+    .review-card {
+      padding: 1.25rem;
+    }
+
+    .review-card__footer {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
