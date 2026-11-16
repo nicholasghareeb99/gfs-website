@@ -1,0 +1,36 @@
+/* Static customer proof: no carousel, tracking widget or remote avatars. */
+.gfs-customer-reviews{background:#edf4fb;color:#153650;padding:clamp(40px,6vw,80px) 0;margin:0;scroll-margin-top:150px;}
+.gfs-reviews-inner{width:min(1160px,calc(100% - 40px));margin-inline:auto;min-width:0;}
+.gfs-reviews-intro{max-width:760px;margin-bottom:28px;}
+.gfs-review-eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#255c89;margin:0 0 12px;}
+.gfs-reviews-intro h2,.gfs-reviews-next h2{font-size:clamp(26px,3.5vw,42px);line-height:1.15;letter-spacing:-.025em;margin:0 0 14px;color:#153650;}
+.gfs-reviews-intro>p:not(.gfs-review-eyebrow){line-height:1.65;font-size:17px;color:#40586c;}
+.gfs-review-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;}
+.gfs-review-card{display:flex;flex-direction:column;min-width:0;background:#fff;border:1px solid #d4e2ef;border-radius:16px;padding:clamp(22px,3vw,32px);box-shadow:0 4px 16px #17395b06;}
+.gfs-review-top{display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.gfs-review-stars{color:#996500;letter-spacing:2px;font-size:19px;white-space:nowrap;}
+.gfs-review-platform{color:#4a5b69;font-size:13px;font-weight:600;}
+.gfs-review-topic{font-size:12px;font-weight:700;letter-spacing:.045em;text-transform:uppercase;color:#28618c;margin:20px 0 12px;}
+.gfs-review-card blockquote{border:0;padding:0;margin:0 0 24px;}
+.gfs-review-card blockquote p{font-family:inherit;font-style:normal;font-size:clamp(18px,1.7vw,21px);line-height:1.55;color:#193c56;margin:0;overflow-wrap:break-word;}
+.gfs-review-credit{display:flex;flex-direction:column;gap:5px;margin-top:auto;background:transparent;padding:0;}
+.gfs-review-credit strong{font-size:15px;line-height:1.4;color:#153650;}
+.gfs-review-credit>span{font-size:12px;color:#566d80;}
+.gfs-review-credit a,.gfs-review-all{font-size:14px;font-weight:600;color:#185888;text-decoration:underline;text-underline-offset:4px;line-height:1.5;display:inline-flex;align-items:center;gap:6px;min-height:44px;}
+.gfs-review-credit a:focus-visible,.gfs-review-all:focus-visible,.gfs-review-score:focus-visible{outline:3px solid #176ba7;outline-offset:4px;border-radius:4px;}
+.gfs-review-note{font-size:13px;line-height:1.6;color:#4b657a;max-width:760px;margin:24px 0 0;}
+.gfs-customer-reviews--compact .gfs-reviews-inner{display:grid;grid-template-columns:minmax(200px,.65fr) minmax(0,1.35fr);align-items:center;gap:clamp(24px,5vw,72px);}
+.gfs-customer-reviews--compact .gfs-reviews-intro{margin:0;}
+.gfs-customer-reviews--compact .gfs-reviews-intro h2{font-size:clamp(25px,3vw,34px);}
+.gfs-customer-reviews--compact .gfs-review-grid{grid-template-columns:1fr;}
+.gfs-customer-reviews--all{background:#f6f9fc;}
+.gfs-customer-reviews--all .gfs-review-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+.gfs-reviews-hero{background:#123b62;color:white;padding:clamp(56px,7vw,100px) 0;}
+.gfs-reviews-hero .gfs-review-eyebrow,.gfs-reviews-hero .gfs-review-note{color:#c8def0;}
+.gfs-reviews-hero h1{font-size:clamp(36px,5vw,64px);line-height:1.07;letter-spacing:-.035em;max-width:800px;color:#fff;margin:0 0 22px;}
+.gfs-reviews-hero>.gfs-reviews-inner>p:not(.gfs-review-eyebrow):not(.gfs-review-note){font-size:20px;line-height:1.55;max-width:640px;}
+.gfs-review-score{display:inline-flex;align-items:center;gap:24px;border-top:1px solid #7797b5;border-bottom:1px solid #7797b5;padding:18px 0;margin:12px 0 0;color:#fff;text-decoration:none;flex-wrap:wrap;}
+.gfs-review-score strong{font-size:42px;line-height:1.2;}.gfs-review-score strong span{font-size:21px;font-weight:400;color:#c8def0;}
+.gfs-review-empty{font-size:18px;line-height:1.6;color:#40586c;margin-bottom:24px;}
+.gfs-reviews-next{padding:60px 0;background:#fff;}.gfs-reviews-next p{margin-bottom:24px;}.gfs-reviews-next .btn{margin-right:22px;}
+@media(max-width:800px){.gfs-review-grid{grid-template-columns:1fr;}.gfs-customer-reviews--compact .gfs-reviews-inner{grid-template-columns:1fr;gap:22px;}.gfs-customer-reviews--all .gfs-review-grid{grid-template-columns:1fr;}.gfs-review-card{padding:24px;}.gfs-review-score{gap:16px;}.gfs-reviews-next .btn{margin-bottom:12px;}}

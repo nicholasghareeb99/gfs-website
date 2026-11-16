@@ -1,0 +1,13 @@
+/* Project access: independent of position-based owner navigation edits. */
+.project-access{background:#152c39;color:#fff;padding:0 20px;display:flex;justify-content:flex-end;gap:24px;flex-wrap:wrap}
+.project-access a{display:inline-flex;align-items:center;min-height:44px;color:inherit;font-size:14px;font-weight:600;text-decoration:none}
+.project-access a:hover{text-decoration:underline}.project-access a:focus-visible,.project-path a:focus-visible{outline:3px solid #d7b46a;outline-offset:3px}
+.project-access a:last-child{color:#f2d898}.project-footer{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;padding:20px}
+.project-footer a{display:inline-flex;align-items:center;min-height:44px;color:inherit}.project-path{background:#f3f6f5;color:#172d37}
+.project-path .path-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:32px}
+.project-path .path-card{background:white;border:1px solid #dce5e4;border-radius:16px;padding:28px;min-width:0}
+.project-path .path-card h3{font-size:23px;margin:12px 0}.project-path p{line-height:1.7}.project-path .path-num{font-family:monospace;color:#087b6d;font-weight:bold}
+.project-path .path-actions{display:flex;gap:16px;flex-wrap:wrap;margin-top:28px}.project-path .path-note{max-width:760px;margin-top:24px;color:#52656d}
+.project-path .path-links a{display:inline-flex;align-items:center;min-height:44px;margin-right:20px;color:#086b61;font-weight:600}
+.project-path details{background:white;border:1px solid #dce5e4;border-radius:12px;padding:20px;margin:12px 0}.project-path summary{font-weight:700;cursor:pointer;min-height:44px;display:list-item}
+@media(max-width:700px){.project-access{justify-content:center;gap:16px;padding:0 10px}.project-access a{font-size:12px}.project-path .path-grid{grid-template-columns:1fr}.project-path .path-card{padding:24px}.project-path .path-actions .btn{width:100%}.project-footer{gap:14px}}

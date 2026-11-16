@@ -1,29 +1,9 @@
 {
-  "name": "ghareeb-fencing-solutions",
+  "name": "gfs-live-website",
+  "private": true,
   "type": "module",
-  "version": "1.0.0",
-  "description": "Ghareeb Fencing Solutions - Professional Fence Installation Toledo OH",
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
-  },
-  "keywords": [
-    "fence",
-    "toledo",
-    "ohio",
-    "contractor",
-    "fencing"
-  ],
-  "author": "Ghareeb Fencing Solutions",
-  "license": "UNLICENSED",
-  "dependencies": {
-    "@astrojs/netlify": "^6.6.4",
-    "@astrojs/sitemap": "^3.7.0",
-    "astro": "^5.17.1",
-    "firebase": "^12.8.0"
-  },
-  "main": "index.js"
+    "build": "node scripts/build.mjs",
+    "test": "node --test \"tests/*.test.mjs\""
+  }
 }

@@ -1,0 +1,47 @@
+/* Keep both quote choices available without modifying shared navigation styles. */
+.nav-cta-group>.header-quote-button{display:inline-flex!important;min-height:44px;background:#eaf2fc;border:1px solid #9bb9d7;color:#173f6b}
+.nav-cta-group>.header-measure-button{display:inline-flex!important;min-height:44px}
+.nav-cta-group>.header-quote-button:hover{background:#d9e9fa;color:#102d50}
+.header-quote-dialog{box-sizing:border-box;margin:auto;width:min(720px,calc(100% - 32px));max-width:720px;max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;padding:28px;border:1px solid #c0d3e8;border-radius:14px;background:#f8fbff;color:#173955;box-shadow:0 30px 100px #06172c66}
+.header-quote-dialog:not([open]){display:none}
+.header-quote-dialog::backdrop{background:#071b34b8}
+.header-quote-dialog__head{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.header-quote-dialog__eyebrow{font-size:12px;line-height:1.5;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:#225fbe;margin:0}
+.header-quote-dialog__close{flex:none;width:44px;height:44px;min-width:44px;display:grid;place-items:center;border:1px solid #aac3dc;border-radius:50%;background:#fff;color:#173955;font:400 30px/1 system-ui;cursor:pointer}
+.header-quote-dialog h2{font-size:clamp(27px,4vw,36px);line-height:1.12;letter-spacing:-.025em;margin:12px 0 14px;color:#102d50}
+.header-quote-dialog>p{font-size:16px;line-height:1.55;margin:0 0 20px}
+.header-quote-dialog__options{display:grid;gap:12px}
+.header-quote-dialog__options>a{display:flex;gap:18px;align-items:flex-start;border:1px solid #b9cfe5;border-radius:9px;padding:18px;background:white;color:#173955;text-decoration:none}
+.header-quote-dialog__options>a:hover{background:#eef5fc;border-color:#225fbe}
+.header-quote-dialog__number{font-weight:700;font-size:17px;color:#225fbe;padding-top:2px}
+.header-quote-dialog__options strong{display:block;font-size:20px;line-height:1.25;margin-bottom:6px}
+.header-quote-dialog__options a>span>span{display:block;font-size:15px;line-height:1.5;color:#425e7b}
+.header-quote-dialog__options b{display:block;font-size:15px;margin-top:8px;color:#174e89}
+.header-quote-dialog .header-quote-dialog__note{font-size:13px;color:#425e7b;margin:20px 0 0}
+.header-quote-dialog :is(a,button):focus-visible,.nav .header-quote-button:focus-visible{outline:3px solid #225fbe;outline-offset:3px}
+@media(max-width:1500px){.nav-cta-group>.btn-financing{display:none}.nav .nav-links{gap:14px}}
+@media(min-width:1101px) and (max-width:1250px){.nav .nav-links{display:none}.nav .nav-toggle{display:flex}}
+@media(max-width:600px){
+ .nav .nav-inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) 44px;gap:8px 10px;padding-block:6px 10px;min-height:0}
+ .nav .logo-with-mark{grid-column:1/3;grid-row:1;justify-self:start}.nav .logo-with-mark .brand-mark{width:90px;height:60px}
+ .nav .nav-cta-group{display:contents}.nav .nav-cta-group>.btn-financing,.nav .nav-cta-group>.nav-phone{display:none}
+ .nav .nav-toggle{display:flex;grid-column:3;grid-row:1;justify-self:end;min-width:44px;min-height:44px}
+ .nav .header-measure-button{grid-column:1;grid-row:2;min-width:0;white-space:normal;text-align:center;padding:10px 6px;font-size:13px;line-height:1.3}
+ .nav .header-quote-button{grid-column:2/4;grid-row:2;min-width:0;padding:10px;font-size:14px;line-height:1.3}
+ .header-quote-dialog{padding:20px;width:calc(100% - 24px);max-height:calc(100dvh - 24px)}
+ .header-quote-dialog__options>a{padding:16px 13px;gap:12px}.header-quote-dialog__options strong{font-size:18px}
+}
+@media(prefers-reduced-motion:reduce){.header-quote-dialog,.header-quote-dialog *,.nav .header-quote-button,.nav .header-measure-button{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* Quote is the primary action; retain a equally reachable planning option. */
+.nav-cta-group>.header-quote-button{background:#1d5eb6;border-color:#1d5eb6;color:#fff;box-shadow:0 3px 8px #102b4612}
+.nav-cta-group>.header-quote-button:hover{background:#174a90;border-color:#174a90;color:#fff}
+.nav-cta-group>.header-measure-button{background:#fff;border:1px solid #91aac3;color:#173f6b;box-shadow:none}
+.nav-cta-group>.header-measure-button:hover{background:#edf4fb;color:#102b46}
+@media(max-width:600px){
+ .nav .nav-inner{grid-template-columns:1fr 1fr;gap:4px 10px;padding:5px 20px 9px}
+ .nav .logo-with-mark{grid-column:1;grid-row:1}.nav .logo-with-mark .brand-mark{width:78px;height:52px}
+ .nav .nav-toggle{grid-column:2;grid-row:1;justify-self:end}
+ .nav .header-measure-button{grid-column:1;grid-row:2;padding:10px 5px;font-size:13px;white-space:nowrap;min-height:44px}
+ .nav .header-quote-button{grid-column:2;grid-row:2;min-height:44px}
+}

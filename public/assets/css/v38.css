@@ -1,0 +1,258 @@
+/* ============================================================
+   GFS v38 — APPEND TO system.css
+   Supersedes the CSS block in GFS_v38_BLOCKS.html.
+   Fixes ISSUE 4 (sticky background) and ISSUE 5 (a11y) from the audit.
+
+   TOKENS: --cell-bg is a local fallback chain. Replace the three
+   literals with your real system.css tokens once and it's done.
+   ============================================================ */
+
+/* ---------------- spec table ---------------- */
+
+.spec-table {
+  --cell-bg: var(--paper, #FFFFFF);          /* ← your light band token */
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 2.5rem 0;
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 4px;
+}
+.section-cream .spec-table { --cell-bg: var(--cream, #F6F3EC); }   /* ← cream token */
+.section-navy  .spec-table { --cell-bg: var(--navy,  #1A2E40); }   /* ← navy token  */
+
+/* Keyboard focus, since the wrapper is now tabbable (audit ISSUE 5) */
+.spec-table:focus-visible { outline: 2px solid var(--gold, #C8A44D); outline-offset: 2px; }
+
+.spec-table table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: .95rem; }
+
+.spec-table thead th {
+  text-align: left; vertical-align: bottom; padding: 1rem .9rem;
+  font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 700; font-size: .9rem; line-height: 1.25;
+  border-bottom: 2px solid currentColor;
+}
+.spec-table thead th small {
+  display: block; margin-top: .25rem; font-weight: 400; opacity: .65;
+  font-family: 'IBM Plex Mono', monospace; font-size: .78rem; letter-spacing: .02em;
+}
+
+.spec-table tbody th {
+  text-align: left; font-weight: 600; white-space: nowrap;
+  padding: .85rem .9rem; opacity: .85;
+}
+.spec-table tbody td {
+  padding: .85rem .9rem; vertical-align: top; font-variant-numeric: tabular-nums;
+}
+.spec-table tbody tr + tr th,
+.spec-table tbody tr + tr td { border-top: 1px solid rgba(0,0,0,.08); }
+.spec-table tbody tr:nth-child(even) { background: rgba(0,0,0,.025); }
+
+/* Highlight. Must stay AFTER :nth-child(even) — equal specificity, order decides. */
+.spec-table .is-best { font-weight: 700; }
+.spec-table thead th.is-best { background: rgba(0,0,0,.05); }
+.spec-table tbody tr.is-best { background: rgba(0,0,0,.05); font-weight: 600; }
+
+/* Dark band inversions */
+.section-navy .spec-table { border-color: rgba(255,255,255,.18); }
+.section-navy .spec-table tbody tr + tr th,
+.section-navy .spec-table tbody tr + tr td { border-top-color: rgba(255,255,255,.14); }
+.section-navy .spec-table tbody tr:nth-child(even) { background: rgba(255,255,255,.05); }
+.section-navy .spec-table thead th.is-best,
+.section-navy .spec-table tbody tr.is-best { background: rgba(255,255,255,.09); }
+
+/* Mobile: pin the label column. FIXED — was background:inherit, which resolves
+   to the transparent <tr> on odd rows and let scrolling cells show through. */
+@media (max-width: 720px) {
+  .spec-table table { min-width: 560px; font-size: .9rem; }
+  .spec-table tbody th,
+  .spec-table thead th:first-child {
+    position: sticky; left: 0; z-index: 1;
+    background: var(--cell-bg);
+    box-shadow: 1px 0 0 rgba(0,0,0,.08);
+  }
+  .section-navy .spec-table tbody th,
+  .section-navy .spec-table thead th:first-child { box-shadow: 1px 0 0 rgba(255,255,255,.14); }
+  /* Striped and highlighted rows need their own opaque pin, or the stripe
+     shows a seam where the sticky cell sits on top. */
+  .spec-table tbody tr:nth-child(even) th {
+    background: linear-gradient(rgba(0,0,0,.025), rgba(0,0,0,.025)), var(--cell-bg);
+  }
+  .section-navy .spec-table tbody tr:nth-child(even) th {
+    background: linear-gradient(rgba(255,255,255,.05), rgba(255,255,255,.05)), var(--cell-bg);
+  }
+  .spec-table tbody tr.is-best th {
+    background: linear-gradient(rgba(0,0,0,.05), rgba(0,0,0,.05)), var(--cell-bg);
+  }
+}
+
+/* ---------------- spec sheet (mirrors the brochure CAD sheet) ---------------- */
+
+.spec-sheet {
+  margin: 2.5rem 0; padding: 1.75rem;
+  border: 1px solid rgba(0,0,0,.12); border-radius: 4px;
+}
+.spec-sheet__head {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 1rem; flex-wrap: wrap;
+  padding-bottom: .9rem; margin-bottom: .4rem;
+  border-bottom: 2px solid currentColor;
+}
+.spec-sheet__head h3 {
+  margin: 0; font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 700; letter-spacing: .01em;
+}
+.spec-sheet dl { margin: 0; }
+.spec-sheet dl > div {
+  display: grid; grid-template-columns: minmax(9rem, 26%) 1fr; gap: 1rem;
+  padding: .8rem 0; border-bottom: 1px solid rgba(0,0,0,.07);
+}
+.spec-sheet dl > div:last-child { border-bottom: 0; }
+.spec-sheet dt {
+  font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+  font-size: .82rem; letter-spacing: .06em; text-transform: uppercase; opacity: .75;
+}
+.spec-sheet dd { margin: 0; font-variant-numeric: tabular-nums; }
+.spec-sheet__note { margin: 1.1rem 0 0; font-size: .92rem; opacity: .75; font-style: italic; }
+.section-navy .spec-sheet { border-color: rgba(255,255,255,.2); }
+.section-navy .spec-sheet dl > div { border-bottom-color: rgba(255,255,255,.14); }
+@media (max-width: 560px) { .spec-sheet dl > div { grid-template-columns: 1fr; gap: .2rem; } }
+
+/* ---------------- spec list (bullets with a bold lead-in) ---------------- */
+
+.spec-list { margin: 1.75rem 0; padding-left: 1.15rem; }
+.spec-list li { margin-bottom: .7rem; line-height: 1.6; }
+.spec-list li strong { font-family: 'Archivo', system-ui, sans-serif; font-weight: 700; }
+
+/* ---------------- photos ---------------- */
+
+.photo-figure { margin: 2.5rem 0; }
+.photo-figure img,
+.photo-duo img,
+.photo-strip img {
+  display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 4px;
+}
+.photo-figure img { aspect-ratio: 16 / 9; }
+.photo-figure figcaption,
+.photo-duo figcaption,
+.photo-strip figcaption {
+  margin-top: .7rem; font-size: .92rem; opacity: .75; line-height: 1.45;
+}
+.photo-duo, .photo-strip { display: grid; gap: 1.25rem; margin: 2.5rem 0; }
+.photo-duo   { grid-template-columns: repeat(2, 1fr); }
+.photo-strip { grid-template-columns: repeat(3, 1fr); }
+.photo-duo figure, .photo-strip figure { margin: 0; }
+.photo-duo img, .photo-strip img { aspect-ratio: 4 / 3; }
+
+@media (max-width: 760px) {
+  .photo-strip { grid-template-columns: 1fr 1fr; }
+  .photo-strip figure:last-child { grid-column: 1 / -1; }
+  .photo-strip figure:last-child img { aspect-ratio: 16 / 9; }
+}
+@media (max-width: 520px) {
+  .photo-duo, .photo-strip { grid-template-columns: 1fr; }
+  .photo-strip figure:last-child img { aspect-ratio: 4 / 3; }
+}
+
+/* ---------------- fence3d lazy embed ---------------- */
+/* The poster reserves the full 16:9 box before anything loads, so
+   swapping in the iframe causes zero layout shift. */
+
+.fence3d {
+  position: relative;
+  margin: 2.5rem 0;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 4px;
+  background: var(--navy, #1A2E40);
+}
+.fence3d__poster { margin: 0; height: 100%; }
+.fence3d__poster img {
+  display: block; width: 100%; height: 100%; object-fit: cover;
+}
+.fence3d__frame {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%; border: 0; display: block;
+}
+.fence3d__overlay {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: flex-end;
+  gap: .6rem; padding: clamp(1rem, 4vw, 2.25rem);
+  color: #fff;
+  background: linear-gradient(to top, rgba(10,18,26,.85) 0%, rgba(10,18,26,.35) 55%, rgba(10,18,26,.1) 100%);
+}
+.fence3d__overlay[hidden] { display: none; }
+.fence3d__overlay h3 {
+  margin: 0; color: #fff;
+  font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+  font-size: clamp(1.15rem, 2.6vw, 1.6rem);
+}
+.fence3d__overlay p { margin: 0; max-width: 46ch; font-size: .95rem; opacity: .9; }
+.fence3d__go { margin-top: .35rem; }
+.fence3d__go[disabled] { opacity: .7; cursor: progress; }
+.fence3d__note { font-size: .875rem !important; opacity: .72 !important; }
+
+/* Ken-Burns-free: no animation here on purpose. This element is
+   already the heaviest thing on the page once activated. */
+@media (max-width: 560px) {
+  .fence3d { aspect-ratio: 4 / 3; }
+  .fence3d__overlay p { display: none; }   /* headline + button only */
+}
+
+/* ---------------- "your fence" summary panel ---------------- */
+/* Plan and counts paint from data already in hand; the price band is the
+   only thing that waits on the network, so it is the only thing that gets a
+   pending state. */
+
+.fs { margin: 2.5rem 0; }
+.fs__head { margin-bottom: 1.5rem; }
+.fs__title {
+  margin: .35rem 0 .5rem; font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 700; font-size: clamp(1.4rem, 3.4vw, 2.1rem); line-height: 1.15;
+}
+.fs__sub { margin: 0; opacity: .78; max-width: 52ch; }
+
+.fs__plan {
+  margin: 1.5rem 0; border: 1px solid rgba(0,0,0,.12); border-radius: 4px;
+  overflow: hidden; background: var(--paper, #FBFAF7);
+}
+.fs__plan svg { display: block; width: 100%; height: auto; }
+
+.fs__chips {
+  display: grid; gap: .75rem; margin: 1.5rem 0;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+}
+.fs-chip {
+  padding: .8rem .9rem; border: 1px solid rgba(0,0,0,.10); border-radius: 4px;
+  display: flex; flex-direction: column; gap: .25rem;
+}
+.fs-chip__k {
+  font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+  font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; opacity: .62;
+}
+.fs-chip__v { font-variant-numeric: tabular-nums; font-size: 1.05rem; font-weight: 600; }
+.fs-chip--wide { grid-column: 1 / -1; }
+
+.fs__price {
+  margin: 1.75rem 0; padding: 1.25rem 1.4rem; border-radius: 4px;
+  background: var(--navy, #1A2E40); color: #fff;
+}
+.fs__price-label {
+  font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+  font-size: .72rem; letter-spacing: .07em; text-transform: uppercase; opacity: .7;
+}
+.fs__price-val {
+  margin-top: .3rem; font-family: 'Archivo', system-ui, sans-serif;
+  font-weight: 700; font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-variant-numeric: tabular-nums;
+}
+.fs__price[data-state="pending"] .fs__price-val { opacity: .55; font-size: 1.1rem; }
+.fs__price[data-state="failed"] .fs__price-val { font-size: 1.1rem; opacity: .8; }
+
+.fs__cta { display: flex; flex-wrap: wrap; gap: .75rem; margin: 1.5rem 0 1rem; }
+.fs__note { font-size: .9rem; opacity: .68; max-width: 56ch; margin: 0; }
+
+@media (max-width: 560px) {
+  .fs__chips { grid-template-columns: 1fr 1fr; }
+  .fs__cta > * { flex: 1 1 100%; text-align: center; }
+}

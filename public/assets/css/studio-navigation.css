@@ -1,0 +1,3 @@
+/* Room for the dedicated studio destination; the drawer retains every link. */
+.nav .nav-links .nav-studio-link{color:#174e89;font-weight:700;white-space:nowrap}
+@media(max-width:1500px){.nav .nav-links{display:none}.nav .nav-toggle{display:flex}}

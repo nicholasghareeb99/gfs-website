@@ -1,72 +1,13 @@
-rules_version = '2';
-service firebase.storage {
-  match /b/{bucket}/o {
-
-    // WEBSITE — Public read, auth write
-    match /gallery/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-    match /pages/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-    match /website-images/{fileName} {
-      allow read: if true;
-      allow write: if request.auth != null
-                   && request.resource.size < 5 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // EXECUTIVE APP — Job photos, style photos, contracts
-    match /photos/{jobId}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-    match /stylePhotos/{styleName}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-    match /contracts/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('application/pdf');
-    }
-    match /signatures/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 2 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // CREW APP — jobs/{jobId}/crew/{filename}.jpg
-    match /jobs/{jobId}/crew/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // CUSTOMER PORTAL — customerPhotos/{jobId}/{filename}.jpg
-    match /customerPhotos/{jobId}/{fileName} {
-      allow read: if request.auth != null;
-      allow write: if request.auth != null
-                   && request.resource.size < 10 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-    }
-
-    // CATCH-ALL — Deny everything else
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
-  }
-}
+// NOT THE LIVE RULES. Do not deploy from this file.
+//
+// The live Storage security rules are managed in the Firebase console
+// (project ghareeb-fencing). They were last released Sep 16, 2026 and
+// require a named owner/office staff account (the 'staff' collection,
+// fullExecutive()) for all business data, and the site owner's verified
+// Google account for website content.
+//
+// An older copy here allowed any signed-in user, including anonymous
+// sessions, to read and write almost everything. It was replaced with this
+// note on Nov 15, 2026 so it can never be deployed by accident. This file
+// is intentionally not valid rules syntax, so 'firebase deploy' fails
+// instead of overwriting the live rules.
