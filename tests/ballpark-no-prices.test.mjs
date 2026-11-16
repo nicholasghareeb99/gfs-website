@@ -3,7 +3,7 @@
 // published). ballpark.js is one browser script, so this test does not run
 // the page: it slices the catalogue-building code out of the source text by
 // marker comments and evaluates it in node:vm with small stand-ins. The
-// same slice is taken from the version on origin/main (git) so "nothing
+// same slice is taken from the pinned base copy of the page (see oldSource) so "nothing
 // changes while pricing is still present" is checked against the old code.
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -17,13 +17,11 @@ const FILE = 'public/assets/js/ballpark.js';
 const SRC = read(FILE);
 
 function oldSource() {
-  for (const ref of ['origin/main', 'main']) {
-    try { return execFileSync('git', ['show', `${ref}:${FILE}`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26, stdio: ['ignore', 'pipe', 'ignore'] }); } catch (_) {}
-  }
-  // A checkout without a main ref (a shallow or single-branch clone, CI on the PR branch) used to skip the
-  // comparison. The page as it was on main when this branch was cut is kept beside the tests instead, so the
-  // check always runs; when a main ref exists it is still preferred.
-  return fs.readFileSync(path.join(ROOT, 'tests/fixtures/ballpark.main-482cac1.js'), 'utf8');
+  // The base is pinned: tests/fixtures/ballpark.main-fb85641.js is public/assets/js/ballpark.js exactly as it
+  // was on claude/main-equals-live (fb85641, the live site's tree) before any of this work. A moving git ref
+  // is not used because origin/main changes (it was an older tree before main-equals-live was merged), and
+  // a shallow or single-branch checkout may have no main ref at all, so the comparison always runs.
+  return fs.readFileSync(path.join(ROOT, 'tests/fixtures/ballpark.main-fb85641.js'), 'utf8');
 }
 
 function slice(src, startPattern, endMarker) {
@@ -90,7 +88,7 @@ const namesOnly = { styleNames: NAMES, stylePhotos: PHOTOS, styleSpecs: SPECS };
 
 const plain = value => JSON.parse(JSON.stringify(value));
 
-test('(a) with pricing present the catalogue is identical to the code on origin/main', async t => {
+test('(a) with pricing present the catalogue is identical to the base page pinned in tests/fixtures', async t => {
   const before = oldSource();
   const oldRun = harness(before, withPricing), newRun = harness(SRC, withPricing);
   await oldRun.api.sync(); await newRun.api.sync();
