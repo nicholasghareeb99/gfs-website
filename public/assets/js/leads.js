@@ -324,18 +324,27 @@
   // Netlify retains the submission and emails the office. Its verified event
   // creates the matching Firestore intake independently of the visitor's browser.
   const inflight=new Map();
+  // Requests not yet confirmed, kept in this tab's memory too: when this browser cannot save (storage blocked or
+  // full), a retry of the same unchanged request must still send the same receipt id, or a request whose reply
+  // was lost would reach the office twice. Cleared when confirmed; never outlives the tab.
+  const memoryPending=new Map();
+  function readPending(key){try{const rows=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(rows)?rows:[];}catch{return[];}}
   async function routeIntake(record,kind,requestScope={}){
     const baseFingerprint=JSON.stringify([kind,record.name,record.phone,record.email,record.address,record.notes,record.geometry,record.photo,record.date,record.time]);
     const fingerprint=requestScope.scope?baseFingerprint+'|flow='+requestScope.scope:baseFingerprint;
     if(inflight.has(fingerprint))return inflight.get(fingerprint);
     const run=(async()=>{
-      const storageKey='gfs-intake-pending-v1';let pending=[];
-      try{pending=JSON.parse(localStorage.getItem(storageKey)||'[]');if(!Array.isArray(pending))pending=[];}catch{}
-      let row=requestScope.retryId?pending.find(x=>x.id===requestScope.retryId&&x.fingerprint===fingerprint):pending.find(x=>x.fingerprint===fingerprint);
+      const storageKey='gfs-intake-pending-v1';const pending=readPending(storageKey),remembered=[...memoryPending.values()];
+      const find=test=>pending.find(test)||remembered.find(test);
+      let row=requestScope.retryId?find(x=>x.id===requestScope.retryId&&x.fingerprint===fingerprint):find(x=>x.fingerprint===fingerprint);
       if(requestScope.retryId&&!row)return{ok:false,errors:['This saved request changed or is no longer pending. Review the form before sending.']};
-      if(!row&&requestScope.scope&&requestScope.legacyRecoveryAllowed)row=pending.find(x=>x.fingerprint===baseFingerprint);
-      if(!row){row={id:crypto.randomUUID(),kind,record,fingerprint,at:Date.now(),origin:location.origin};if(requestScope.flowId&&/^[a-f0-9]{64}$/.test(requestScope.key||''))row.flowKey=requestScope.key;pending.push(row);}
-      try{localStorage.setItem(storageKey,JSON.stringify(pending.slice(-25)));}catch{}
+      if(!row&&requestScope.scope&&requestScope.legacyRecoveryAllowed)row=find(x=>x.fingerprint===baseFingerprint);
+      if(!row){row={id:crypto.randomUUID(),kind,record,fingerprint,at:Date.now(),origin:location.origin};if(requestScope.flowId&&/^[a-f0-9]{64}$/.test(requestScope.key||''))row.flowKey=requestScope.key;}
+      memoryPending.delete(row.id);memoryPending.set(row.id,row);while(memoryPending.size>25)memoryPending.delete(memoryPending.keys().next().value);
+      if(!pending.some(x=>x.id===row.id))pending.push(row);
+      // Durable only when the row was written AND reads back; otherwise it lives in this tab's memory alone.
+      let durable=false;
+      try{localStorage.setItem(storageKey,JSON.stringify(pending.slice(-25)));durable=readPending(storageKey).some(x=>x&&x.id===row.id);}catch{durable=false;}
       // An ambiguous prior acknowledgement must retry the same receipt payload,
       // including its original acquisition, rather than attach a later visit.
       const submittedRecord=row.record;
@@ -352,9 +361,15 @@
       try{
         const response=await fetch('/_netlify-forms.html',{method:'POST',headers,body,signal:AbortSignal.timeout(18000)});
         if(!response.ok)throw Error('Form delivery failed');
-        try{const current=JSON.parse(localStorage.getItem(storageKey)||'[]');localStorage.setItem(storageKey,JSON.stringify(current.filter(x=>x.id!==row.id)));}catch{}
+        memoryPending.delete(row.id);
+        try{const current=readPending(storageKey);if(current.some(x=>x&&x.id===row.id))localStorage.setItem(storageKey,JSON.stringify(current.filter(x=>x.id!==row.id)));}catch{}
         return {ok:true,id:'web_'+row.id,receipt:'netlify',sync:'pending',acceptedRecord:submittedRecord};
-      }catch{return {ok:false,errors:['Your request has not been confirmed. Please retry or call (419) 214-2107. Your details remain on this device.']};}
+      }catch{
+        // The reply may have been lost after the office received it: a retry from here sends the same receipt id.
+        return {ok:false,pendingRetention:durable?'browser':'tab',errors:[durable
+          ?'Your request has not been confirmed. Please retry or call (419) 214-2107. Your details are saved in this browser, and retrying resends the same request rather than a new one.'
+          :'Your request has not been confirmed. Please retry from this page or call (419) 214-2107. This browser is not saving your details: they are kept only in this open tab, so closing or reloading it loses them.']};
+      }
     })();inflight.set(fingerprint,run);try{return await run;}finally{inflight.delete(fingerprint);}
   }
   async function submitRecordWithFlow(record,kind,options={}){
