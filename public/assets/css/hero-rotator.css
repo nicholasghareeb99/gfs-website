@@ -29,22 +29,22 @@ html .home-experience .hero2--photo .hero-slide__title{
 }
 .hero-rotator .hero-slide .hero2__cta{ margin-top:6px; }
 
-.hero-rotator .hero-controls{ display:flex; align-items:center; gap:4px; margin:6px 0 14px -10px; }
-.hero-rotator .hero-dot{
-  position:relative; width:44px; height:44px; padding:0; border:0; background:none; cursor:pointer;
+.hero-rotator .hero-controls{ display:flex; align-items:center; gap:2px; margin:6px 0 14px -12px; }
+.hero-rotator .hero-arrow{
+  width:44px; height:44px; padding:0; border:0; background:none; cursor:pointer;
+  color:#fff; font-size:22px; line-height:1; text-shadow:0 1px 8px rgba(0,0,0,.6);
 }
-.hero-rotator .hero-dot::before{
-  content:""; position:absolute; left:50%; top:50%; width:34px; height:5px; margin:-2.5px 0 0 -17px;
-  border-radius:3px; background:rgba(255,255,255,.45); transition:background .2s;
+.hero-rotator .hero-arrow:hover{ background:rgba(255,255,255,.14); border-radius:4px; }
+.hero-rotator .hero-count{
+  min-width:58px; text-align:center; color:#fff; font-weight:600; font-size:14px;
+  font-variant-numeric:tabular-nums; text-shadow:0 1px 8px rgba(0,0,0,.6);
 }
-.hero-rotator .hero-dot.is-active::before{ background:#fff; }
-.hero-rotator .hero-dot:hover::before{ background:rgba(255,255,255,.85); }
 .hero-rotator .hero-pause{
   min-height:44px; padding:0 14px; margin-left:6px; border:0; background:none; cursor:pointer;
   color:#fff; font-weight:600; font-size:13px; line-height:1; font-family:inherit; letter-spacing:.06em; text-transform:uppercase; text-decoration:underline;
   text-underline-offset:3px; text-shadow:0 1px 8px rgba(0,0,0,.6);
 }
-.hero-rotator .hero-dot:focus-visible,
+.hero-rotator .hero-arrow:focus-visible,
 .hero-rotator .hero-pause:focus-visible{ outline:2px solid #fff; outline-offset:-4px; }
 
 @media (max-width:800px){

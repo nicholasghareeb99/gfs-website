@@ -19,7 +19,8 @@
     if (!hero || hero.getAttribute('data-hero-ready')) return null;
     var slides = [].slice.call(hero.querySelectorAll('.hero-slide'));
     var bgs = [].slice.call(hero.querySelectorAll('.hero-bg'));
-    var dots = [].slice.call(hero.querySelectorAll('[data-hero-go]'));
+    var count = hero.querySelector('[data-hero-count]');
+    var prevBtn = hero.querySelector('[data-hero-prev]'), nextBtn = hero.querySelector('[data-hero-next]');
     var pauseBtn = hero.querySelector('[data-hero-pause]');
     if (slides.length < 2) return null;
     hero.setAttribute('data-hero-ready', '1');
@@ -30,16 +31,23 @@
 
     function show(i) {
       index = (i + slides.length) % slides.length;
+      load(index);
       slides.forEach(function (s, k) {
         var on = k === index;
         s.classList.toggle('is-active', on);
         s.setAttribute('aria-hidden', on ? 'false' : 'true');
       });
       bgs.forEach(function (b, k) { b.classList.toggle('is-active', k === index); });
-      dots.forEach(function (d, k) {
-        d.classList.toggle('is-active', k === index);
-        if (k === index) d.setAttribute('aria-current', 'true'); else d.removeAttribute('aria-current');
-      });
+      if (count) count.textContent = String(index + 1);
+      load(next(index, slides.length));
+    }
+    /* Photos after the first are fetched one slide ahead, not at page load. */
+    function load(i) {
+      var im = bgs[i] && bgs[i].querySelector('img[data-src]');
+      if (!im) return;
+      im.setAttribute('srcset', im.getAttribute('data-srcset'));
+      im.setAttribute('src', im.getAttribute('data-src'));
+      im.removeAttribute('data-src'); im.removeAttribute('data-srcset');
     }
     function stop() { if (timer) { win.clearTimeout(timer); timer = null; } }
     function schedule() {
@@ -57,9 +65,8 @@
       schedule();
     }
 
-    dots.forEach(function (d) {
-      d.addEventListener('click', function () { show(parseInt(d.getAttribute('data-hero-go'), 10) || 0); schedule(); });
-    });
+    if (prevBtn) prevBtn.addEventListener('click', function () { show(index - 1); schedule(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { show(index + 1); schedule(); });
     if (pauseBtn) pauseBtn.addEventListener('click', function () { setPaused(!userPaused); });
 
     var content = hero.querySelector('.hero2__content') || hero;
@@ -78,6 +85,7 @@
     }, { passive: true });
 
     setPaused(userPaused);
+    if (win.requestIdleCallback) win.requestIdleCallback(function () { load(1); }); else win.setTimeout(function () { load(1); }, 2500);
     return { show: show, get index() { return index; } };
   }
 
