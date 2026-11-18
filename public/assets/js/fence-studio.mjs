@@ -63,6 +63,7 @@ function init() {
     installationLink.style.display=selected?'inline-flex':'none';
     if(selected){const material=studioInstallationMaterial(selected);installationLink.href='/fences/'+material+'/#project-photos';installationLink.textContent='See our '+(material==='vinyl'?'vinyl':selected.materialLabel.toLowerCase())+' installation photos →';}
     if(requestStyle){requestStyle.hidden=!selected;if(selected)requestStyle.href=withStudioStyle('/quote/form/',location.href,selected.name);}
+    const priceStyle=get('studio-price-style');if(priceStyle){priceStyle.hidden=!selected;if(selected)priceStyle.href=withStudioStyle('/quote/ballpark/',location.href,selected.name);}
     refreshQuoteLinks();
     if(!selected){ui.name.textContent='No styles match these filters';ui.facts.textContent='Try a broader search or reset the filters.';ui.full.hidden=true;stop('No preview selected.');return;}
     ui.name.textContent=selected.name;
