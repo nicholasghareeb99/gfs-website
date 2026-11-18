@@ -12,12 +12,12 @@ vm.runInContext(fs.readFileSync(new URL('../public/assets/js/hero-rotator.js', i
 const Rot = sandbox.GFSHeroRotator;
 const parts = hero.split(/<div class="hero-slide(?: is-active)?" role=/);
 
-test('home hero has ten slides, ten photos, arrows and a counter', () => {
-  assert.equal((hero.match(/class="hero-slide[ "]/g) || []).length, 10);
-  assert.equal((hero.match(/class="hero-bg[ "]/g) || []).length, 10);
+test('home hero has eleven slides, eleven photos, arrows and a counter', () => {
+  assert.equal((hero.match(/class="hero-slide[ "]/g) || []).length, 11);
+  assert.equal((hero.match(/class="hero-bg[ "]/g) || []).length, 11);
   assert.match(hero, /data-hero-prev/);
   assert.match(hero, /data-hero-next/);
-  assert.match(hero, /data-hero-count>1<\/span> \/ 10/);
+  assert.match(hero, /data-hero-count>1<\/span> \/ 11/);
 });
 
 test('exactly one h1; only the first photo loads with the page', () => {
@@ -25,16 +25,16 @@ test('exactly one h1; only the first photo loads with the page', () => {
   assert.match(hero, /<picture>[\s\S]*?data-lcp[^>]*loading="eager"[^>]*fetchpriority="high"/);
   assert.match(hero, /speed-round-2\/d398bddf2d6fecb7-480\.avif/);
   assert.equal((hero.match(/<img src=/g) || []).length, 1);
-  assert.equal((hero.match(/<img data-src=/g) || []).length, 9);
+  assert.equal((hero.match(/<img data-src=/g) || []).length, 10);
 });
 
 test('every hero photo exists in three sizes and has alt text', () => {
   const ids = [...hero.matchAll(/performance-v12\/([0-9a-f]{16})-1600\.webp" (?:data-lcp|data-srcset)/g)].map((m) => m[1]);
-  assert.equal(new Set(ids).size, 10);
+  assert.equal(new Set(ids).size, 11);
   for (const id of ids) for (const w of [480, 960, 1600]) {
     assert.ok(fs.existsSync(new URL(`../public/assets/img/performance-v12/${id}-${w}.webp`, import.meta.url)), `${id}-${w}`);
   }
-  assert.equal((hero.match(/<img [^>]*alt="[^"]{15,}"/g) || []).length, 10);
+  assert.equal((hero.match(/<img [^>]*alt="[^"]{15,}"/g) || []).length, 11);
 });
 
 test('style slides link to their style pages', () => {
@@ -54,7 +54,7 @@ test('financing slide leads with the offer, states the catch, and links to /fina
 
 test('hidden slides are not read out or focusable', () => {
   const slides = parts.slice(2);
-  assert.equal(slides.length, 9);
+  assert.equal(slides.length, 10);
   slides.forEach((s) => assert.match(s, /aria-hidden="true"/));
   const css = fs.readFileSync(new URL('../public/assets/css/hero-rotator.css', import.meta.url), 'utf8');
   assert.match(css, /\.hero-slide\{[^}]*visibility:hidden/);
