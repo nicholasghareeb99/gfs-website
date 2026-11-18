@@ -28,6 +28,10 @@ html .home-experience .hero2--photo .hero2__grid{
   padding:clamp(96px,14vh,170px) clamp(20px,4vw,54px) clamp(34px,7vh,72px);
 }
 html .home-experience .hero2--photo .hero2__content{ width:100%; max-width:700px; }
+html .home-experience .hero2--photo .hero2__content > *,
+html .bp-page .page-header--photo .ph__content > *{
+  animation:none; opacity:1; transform:none;
+}
 html .home-experience .hero2--photo .hero2__content h1{
   color:#fff; font-size:clamp(40px,6vw,78px); line-height:1.02;
   letter-spacing:-.035em; margin:16px 0 18px; max-width:none;

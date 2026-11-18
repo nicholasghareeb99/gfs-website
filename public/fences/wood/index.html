@@ -3,22 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<link rel="preload" as="image" href="/assets/img/performance-v12/173f363a1b02c472-1600.webp" imagesrcset="/assets/img/performance-t09/173f363a1b02c472-480.webp 480w, /assets/img/performance-t09/173f363a1b02c472-840.webp 840w, /assets/img/performance-v12/173f363a1b02c472-960.webp 960w, /assets/img/performance-v12/173f363a1b02c472-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="image" type="image/avif" media="(max-width: 800px)" href="/assets/img/speed-round-2/173f363a1b02c472-840.avif" imagesrcset="/assets/img/speed-round-2/173f363a1b02c472-480.avif 480w, /assets/img/speed-round-2/173f363a1b02c472-840.avif 840w" imagesizes="100vw" fetchpriority="high">
+<link rel="preload" as="image" media="(width > 800px)" href="/assets/img/performance-v12/173f363a1b02c472-1600.webp" imagesrcset="/assets/img/performance-t09/173f363a1b02c472-480.webp 480w, /assets/img/performance-t09/173f363a1b02c472-840.webp 840w, /assets/img/performance-v12/173f363a1b02c472-960.webp 960w, /assets/img/performance-v12/173f363a1b02c472-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
 <meta name="theme-color" content="#1A2E40">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
-     before the actual asset requests fire, saving 100-300ms on first paint) -->
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
-<link rel="dns-prefetch" href="https://maps.googleapis.com">
-<link rel="dns-prefetch" href="https://unpkg.com">
-<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
 <title>Wood fence installation in Toledo &amp; Southeast Michigan</title>
 <meta name="description" content="Compare wood privacy, shadowbox and decorative fence layouts. Review boards, gates, installation and finishing for your Toledo-area property.">
 <meta name="theme-color" content="#1A2E40">
@@ -42,8 +33,8 @@
 <link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
 
 <!-- Fonts -->
-<link rel="preconnect" href="https://images.squarespace-cdn.com">
-<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- Site styles -->
 <!-- site.css first (legacy component styles), then system.css so the
@@ -52,7 +43,6 @@
 <link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
 <link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
 
-<!-- Page styles -->
 <link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
 <link rel="stylesheet" href="/assets/css/growth-upgrade.css?v=20260919">
 <link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
@@ -116,51 +106,12 @@
   };
 </script>
 
-<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
-     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
 <script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
 <script src="/assets/js/fence-explorer.js?v=caption-sept30" defer></script>
 <script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
-<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
-     (owner sign-in). Loading it for every visitor was the single largest
-     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
-<script>
-  window.GFS_LOAD_AUTH = function () {
-    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
-    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
-      if (window.firebase && window.firebase.auth) return resolve();
-      var s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
-      s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
-      document.head.appendChild(s);
-    });
-    return window.__gfsAuthPromise;
-  };
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
 <script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
-
-<script defer>
-  // Auto-initialize Firebase
-  window.addEventListener('DOMContentLoaded', function() {
-    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
-      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
-      window.GFS_DB = firebase.firestore();
-      // Persist Google sign-in across reloads
-      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
-      // Initialize Analytics if measurementId is configured
-      try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId) {
-          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
-        }
-      } catch (e) {}
-      window.dispatchEvent(new Event('gfs-firebase-ready'));
-    }
-  });
-</script>
+<script src="/assets/js/firebase-after-paint.js" defer></script>
 
 <!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://ghareebfence.com/#business","name":"Ghareeb Fencing Solutions","telephone":"+1-419-214-2107","email":"nick@ghareebfence.com","url":"https://ghareebfence.com/","priceRange":"$$","address":{"@type":"PostalAddress","streetAddress":"5242 Tractor Rd Suite C","addressLocality":"Toledo","addressRegion":"OH","postalCode":"43612","addressCountry":"US"},"areaServed":["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"08:00","closes":"18:00"}],"sameAs":["https://www.facebook.com/GhareebLandscaping/","https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]}</script>
@@ -249,7 +200,7 @@
 </div>
 
 <main id="main" class="selling-page fence-experience">
-<section class="sell-hero sell-hero--quote-first" data-gfs-sec="s0"><div class="sell-intro"><nav class="sell-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/fences/">Fence styles</a></nav><span class="sell-eyebrow">Pressure-treated wood · Toledo &amp; Southeast Michigan</span><h1 data-editable="fence.v2.wood.title">Wood fencing made for your yard.</h1><p data-editable="fence.v2.wood.intro">Pressure-treated wood lets you compare familiar privacy layouts while keeping the lumber, treatment and finish clearly specified. The board pattern controls sightlines; treatment choice and moisture behavior are separate decisions.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/?project=wood">Request a free quote</a><a class="btn btn-outline" href="/quote/ballpark/?project=wood">Plan a ballpark</a></div><p class="ad-entry-note" style="font-size:16px;line-height:1.6;margin:16px 0 0;">No drawing is required to request an estimate. <a href="#project-photos" style="color:#145f92;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px;">See our project photos ↓</a></p></div><figure class="sell-photo"><img data-editable-img="hero.v5.wood" loading="eager" src="/assets/img/performance-v12/173f363a1b02c472-1600.webp" alt="Long dog-ear wood privacy fence bordering a green backyard." width="1600" height="1200" fetchpriority="high" decoding="async" srcset="/assets/img/performance-t09/173f363a1b02c472-480.webp 480w, /assets/img/performance-t09/173f363a1b02c472-840.webp 840w, /assets/img/performance-v12/173f363a1b02c472-960.webp 960w, /assets/img/performance-v12/173f363a1b02c472-1600.webp 1600w" sizes="100vw"></figure></section>
+<section class="sell-hero sell-hero--quote-first" data-gfs-sec="s0"><div class="sell-intro"><nav class="sell-breadcrumb" aria-label="Breadcrumb"><a href="/">Home</a> / <a href="/fences/">Fence styles</a></nav><span class="sell-eyebrow">Pressure-treated wood · Toledo &amp; Southeast Michigan</span><h1 data-editable="fence.v2.wood.title">Wood fencing made for your yard.</h1><p data-editable="fence.v2.wood.intro">Pressure-treated wood lets you compare familiar privacy layouts while keeping the lumber, treatment and finish clearly specified. The board pattern controls sightlines; treatment choice and moisture behavior are separate decisions.</p><div class="sell-actions"><a class="btn btn-primary" href="/quote/?project=wood">Request a free quote</a><a class="btn btn-outline" href="/quote/ballpark/?project=wood">Plan a ballpark</a></div><p class="ad-entry-note" style="font-size:16px;line-height:1.6;margin:16px 0 0;">No drawing is required to request an estimate. <a href="#project-photos" style="color:#145f92;text-decoration:underline;text-underline-offset:3px;display:inline-flex;align-items:center;min-height:44px;">See our project photos ↓</a></p></div><figure class="sell-photo"><picture><source type="image/avif" media="(max-width: 800px)" srcset="/assets/img/speed-round-2/173f363a1b02c472-480.avif 480w, /assets/img/speed-round-2/173f363a1b02c472-840.avif 840w" sizes="100vw"><img data-editable-img="hero.v5.wood" loading="eager" src="/assets/img/performance-v12/173f363a1b02c472-1600.webp" alt="Long dog-ear wood privacy fence bordering a green backyard." width="1600" height="1200" fetchpriority="high" decoding="async" srcset="/assets/img/performance-t09/173f363a1b02c472-480.webp 480w, /assets/img/performance-t09/173f363a1b02c472-840.webp 840w, /assets/img/performance-v12/173f363a1b02c472-960.webp 960w, /assets/img/performance-v12/173f363a1b02c472-1600.webp 1600w" sizes="100vw"></picture></figure></section>
 <nav class="fence-jump" aria-label="On this page"><a href="#project-photos">Project photos</a><a href="#style-guide">Details &amp; tradeoffs</a><a href="#fence-questions">Common questions</a><a href="/fences/#compare-materials">Compare materials</a><a href="/#fence-finder">Find my style</a></nav>
 <section class="fence-decision" data-gfs-sec="v2-at-a-glance"><div class="growth-inner"><span class="eyebrow">Before you choose</span><h2>How this fits your yard</h2><dl class="fence-facts"><div><dt>privacy</dt><dd data-editable="fence.v2.wood.quick.privacy">Butted boards can develop gaps as wet lumber dries; overlap changes the sightline.</dd></div><div><dt>upkeep</dt><dd data-editable="fence.v2.wood.quick.upkeep">Inspect wood and hardware; plan coating care if a finished color matters.</dd></div><div><dt>access</dt><dd data-editable="fence.v2.wood.quick.access">Price gate framing and hardware along with the boards.</dd></div><div><dt>grade</dt><dd data-editable="fence.v2.wood.quick.grade">Discuss sloped runs and the bottom gap before fixing the board layout.</dd></div></dl></div></section>
 <section class="section section-cream" id="cap-and-trim" data-gfs-sec="wood-cap-and-trim" aria-labelledby="wood-cap-title">
@@ -259,11 +210,11 @@
     <p class="lede" style="max-width:65ch" data-editable="wood.cap.body">Add cap and trim to your wood fence for a more finished architectural look. A flat cap defines the top edge; horizontal face trim adds a clean line below it. Choose the detail with your privacy or shadowbox style, then confirm materials, sides and price in your proposal.</p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:28px;margin-top:32px">
       <figure style="margin:0;background:var(--white);border:1px solid var(--gray-200);border-radius:12px;overflow:hidden">
-        <div data-editable-img="wood.cap.privacy.img"><img src="/assets/img/performance-v12/2520da0b8b513b31-480.webp" width="480" height="360" loading="lazy" fetchpriority="low" decoding="async" alt="Cedar privacy fence with a defined top edge and horizontal trim" style="display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover" srcset="/assets/img/performance-v12/2520da0b8b513b31-480.webp 480w, /assets/img/performance-t09/2520da0b8b513b31-740.webp 740w, /assets/img/performance-v12/2520da0b8b513b31-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/cedar-captop-boardonboard.jpg" data-photo-thumbnail="/assets/img/performance-v12/2520da0b8b513b31-480.webp"></div>
+        <div data-editable-img="wood.cap.privacy.img"><img src="/assets/img/performance-v12/2520da0b8b513b31-480.webp" width="480" height="360" loading="lazy" fetchpriority="low" decoding="async" alt="Cedar privacy fence with a defined top edge and horizontal trim" style="display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover" srcset="/assets/img/performance-v12/2520da0b8b513b31-480.webp 480w, /assets/img/speed-round-2/2520da0b8b513b31-740.webp 740w, /assets/img/performance-v12/2520da0b8b513b31-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/cedar-captop-boardonboard.jpg" data-photo-thumbnail="/assets/img/performance-v12/2520da0b8b513b31-480.webp"></div>
         
       </figure>
       <figure style="margin:0;background:var(--white);border:1px solid var(--gray-200);border-radius:12px;overflow:hidden">
-        <div data-editable-img="wood.cap.shadowbox.img"><img src="/assets/img/performance-v12/0461e749cf9a7797-480.webp" width="480" height="360" loading="lazy" fetchpriority="low" decoding="async" alt="Pressure-treated shadowbox fence showing its flat top cap at a corner" style="display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover" srcset="/assets/img/performance-v12/0461e749cf9a7797-480.webp 480w, /assets/img/performance-t09/0461e749cf9a7797-740.webp 740w, /assets/img/performance-v12/0461e749cf9a7797-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/pt-shadowbox-cap-corner.jpg" data-photo-thumbnail="/assets/img/performance-v12/0461e749cf9a7797-480.webp"></div>
+        <div data-editable-img="wood.cap.shadowbox.img"><img src="/assets/img/performance-v12/0461e749cf9a7797-480.webp" width="480" height="360" loading="lazy" fetchpriority="low" decoding="async" alt="Pressure-treated shadowbox fence showing its flat top cap at a corner" style="display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover" srcset="/assets/img/performance-v12/0461e749cf9a7797-480.webp 480w, /assets/img/speed-round-2/0461e749cf9a7797-740.webp 740w, /assets/img/performance-v12/0461e749cf9a7797-960.webp 960w" sizes="(max-width:600px) calc(100vw - 40px), (max-width:1000px) 46vw, 400px" data-photo-original="/assets/img/work/pt-shadowbox-cap-corner.jpg" data-photo-thumbnail="/assets/img/performance-v12/0461e749cf9a7797-480.webp"></div>
         
       </figure>
     </div>
@@ -383,7 +334,7 @@
 
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
-<script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
+<script src="../../assets/js/edit-mode.js?v=speed-round-2" defer></script>
 <script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
 <script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
 

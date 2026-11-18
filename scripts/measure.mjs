@@ -94,7 +94,7 @@ try {
         origin + route, '--only-categories=performance', '--output=json',
         `--output-path=${reportPath}`, '--disable-full-page-screenshot',
         `--chrome-flags=--headless --disable-dev-shm-usage ${process.env.LIGHTHOUSE_CHROME_FLAGS ?? ''}`,
-        `--blocked-url-patterns=${blocked.join(',')}`, '--quiet',
+        ...blocked.map(pattern => `--blocked-url-patterns=${pattern}`), '--quiet',
       ]);
     } catch (error) {
       throw new Error(`Lighthouse failed on ${route}. Check that Chrome or Chromium is installed and set CHROME_PATH if needed.\n${error.stderr || error.message}`);
