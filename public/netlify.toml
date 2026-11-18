@@ -52,6 +52,12 @@ for = "/gfs/*"
   Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
+for = "/x3d/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
 for = "/admin"
 
   [headers.values]
