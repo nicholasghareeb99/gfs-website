@@ -22,7 +22,8 @@ test('home hero has ten slides, ten photos, arrows and a counter', () => {
 
 test('exactly one h1; only the first photo loads with the page', () => {
   assert.equal((hero.match(/<h1[ >]/g) || []).length, 1);
-  assert.match(hero, /data-lcp loading="eager" fetchpriority="high"/);
+  assert.match(hero, /<picture>[\s\S]*?data-lcp[^>]*loading="eager"[^>]*fetchpriority="high"/);
+  assert.match(hero, /speed-round-2\/d398bddf2d6fecb7-480\.avif/);
   assert.equal((hero.match(/<img src=/g) || []).length, 1);
   assert.equal((hero.match(/<img data-src=/g) || []).length, 9);
 });

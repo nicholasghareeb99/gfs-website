@@ -3,21 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="preload" as="image" media="(width > 600px)" href="/assets/img/performance-v12/05d76a7b22cddd6d-1400.webp" imagesrcset="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp 480w, /assets/img/performance-v12/05d76a7b22cddd6d-960.webp 960w, /assets/img/performance-v12/05d76a7b22cddd6d-1400.webp 1400w" imagesizes="100vw" fetchpriority="high">
 <meta name="theme-color" content="#1A2E40">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
-     before the actual asset requests fire, saving 100-300ms on first paint) -->
-<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
-<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
-<link rel="dns-prefetch" href="https://maps.googleapis.com">
-<link rel="dns-prefetch" href="https://unpkg.com">
-<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
-<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
 <title>Fence Cost Calculator | Toledo, OH | Ghareeb Fencing Solutions</title>
 <meta name="description" content="Draw your fence on a map or type the length, pick a style, and see a price range. Toledo and Northwest Ohio. We confirm it with a free measure.">
 <meta name="theme-color" content="#1A2E40">
@@ -41,14 +32,25 @@
 <link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
 
 <!-- Fonts -->
-<link rel="preconnect" href="https://images.squarespace-cdn.com">
-<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 
 <!-- Site styles -->
 <!-- site.css first (legacy component styles), then system.css so the
      design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="/assets/css/fonts.css">
 <link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
 <link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20261114">
+<link rel="stylesheet" href="/assets/css/map-drawing.css?v=20260930-tools">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
+<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261113c">
 
 <!-- ================================================================
      CONFIG INJECTION — Edit this single block to wire up Firebase
@@ -119,66 +121,17 @@
   };
 </script>
 
-<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
-     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
 <script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
 <script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
-<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
-     (owner sign-in). Loading it for every visitor was the single largest
-     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
-<script>
-  window.GFS_LOAD_AUTH = function () {
-    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
-    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
-      if (window.firebase && window.firebase.auth) return resolve();
-      var s = document.createElement('script');
-      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
-      s.onload = function () { resolve(); };
-      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
-      document.head.appendChild(s);
-    });
-    return window.__gfsAuthPromise;
-  };
-</script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
 <script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
-
-<script defer>
-  // Auto-initialize Firebase
-  window.addEventListener('DOMContentLoaded', function() {
-    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
-      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
-      window.GFS_DB = firebase.firestore();
-      // Persist Google sign-in across reloads
-      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
-      // Initialize Analytics if measurementId is configured
-      try {
-        if (window.GFS_FIREBASE_CONFIG.measurementId) {
-          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
-        }
-      } catch (e) {}
-      window.dispatchEvent(new Event('gfs-firebase-ready'));
-    }
-  });
-</script>
+<script src="/assets/js/firebase-after-paint.js" defer></script>
 
 <!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"LocalBusiness","@id":"https://ghareebfence.com/#business","name":"Ghareeb Fencing Solutions","telephone":"+1-419-214-2107","email":"nick@ghareebfence.com","url":"https://ghareebfence.com/","priceRange":"$$","address":{"@type":"PostalAddress","streetAddress":"5242 Tractor Rd Suite C","addressLocality":"Toledo","addressRegion":"OH","postalCode":"43612","addressCountry":"US"},"areaServed":["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],"openingHoursSpecification":[{"@type":"OpeningHoursSpecification","dayOfWeek":["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"opens":"08:00","closes":"18:00"}],"sameAs":["https://www.facebook.com/GhareebLandscaping/","https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]}</script>
 <!-- Schema: BreadcrumbList -->
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://ghareebfence.com/"},{"@type":"ListItem","position":2,"name":"Get a Quote","item":"https://ghareebfence.com/quote/"},{"@type":"ListItem","position":3,"name":"Instant Estimate","item":"https://ghareebfence.com/quote/ballpark/"}]}</script>
-<link rel="stylesheet" href="/assets/css/landing-pages.css?v=20261114">
-<link rel="stylesheet" href="/assets/css/map-drawing.css?v=20260930-tools">
 <script src="/assets/js/map-geometry.js" defer></script>
-<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
-<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
-<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
-<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
-<link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
-<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
-<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
-<link rel="stylesheet" href="/assets/css/request-tools.css?v=20261113c">
 </head>
 <body class="bp-page">
 
@@ -201,7 +154,7 @@
 <div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" srcset="/assets/img/performance-t09/ghareeb-logo-156.webp 156w, /assets/img/performance-t09/ghareeb-logo-300.webp 300w, /assets/img/performance-v12/ghareeb-logo-396.webp 396w" sizes="(max-width: 600px) 78px, (max-width: 768px) 110px, 165px" alt="Ghareeb Fencing Solutions" width="396" height="264">
       <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
       <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
     </a>
@@ -277,7 +230,7 @@
               <a href="tel:14192142107" class="btn btn-outline btn-sm" style="margin-left:8px;text-decoration:none;color:#c8ecd8;border-color:rgba(255,255,255,0.3);">Call instead</a>
             </div>
           </div><section class="page-header page-header--photo">
-  <div class="ph__bg" data-editable-img="pagehero.img" aria-hidden="true"><img src="/assets/img/performance-v12/05d76a7b22cddd6d-1400.webp" alt="Cedar picket fence at a corner" loading="eager" decoding="async" srcset="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp 480w, /assets/img/performance-v12/05d76a7b22cddd6d-960.webp 960w, /assets/img/performance-v12/05d76a7b22cddd6d-1400.webp 1400w" sizes="100vw" width="1400" height="1050"></div>
+  <div class="ph__bg" data-editable-img="pagehero.img" aria-hidden="true"><img src="/assets/img/performance-v12/05d76a7b22cddd6d-1400.webp" alt="Cedar picket fence at a corner" loading="lazy" fetchpriority="high" decoding="async" srcset="/assets/img/performance-v12/05d76a7b22cddd6d-480.webp 480w, /assets/img/performance-v12/05d76a7b22cddd6d-960.webp 960w, /assets/img/performance-v12/05d76a7b22cddd6d-1400.webp 1400w" sizes="100vw" width="1400" height="1050"></div>
   <div class="ph__scrim" aria-hidden="true"></div>
   <div class="container ph__content">
     <div class="breadcrumbs"><a href="../../">Home</a> <span>/</span> <a href="../../quote/">Quote</a> <span>/</span> Ballpark Calculator</div>
@@ -696,7 +649,7 @@
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">
-      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" srcset="/assets/img/performance-t09/ghareeb-logo-300.webp 300w, /assets/img/performance-v12/ghareeb-logo-396.webp 396w" sizes="(max-width: 680px) 165px, 190px" alt="" width="396" height="264" loading="lazy" decoding="async">
         <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
         <p>Fence installation in Toledo and nearby communities. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
         <div style="margin-top: 24px;">
@@ -765,10 +718,10 @@
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
 <script src="../../assets/js/leads.js?v=20261113a" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=20261114a" defer></script><script src="../../assets/js/financing-example.js?v=20261117" defer></script><script src="../../assets/js/fence-3d.js?v=kit-880cde3e6716" defer></script><script src="../../assets/js/estimate-pdf.js?v=20261113c" defer></script>
+<script src="../../assets/js/ballpark.js?v=kit-63e694f8b168" defer></script><script src="../../assets/js/financing-example.js?v=20261117" defer></script>
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
-<script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
+<script src="../../assets/js/edit-mode.js?v=speed-round-2" defer></script>
 <script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
 <script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
 
