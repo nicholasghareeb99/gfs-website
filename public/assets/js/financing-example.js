@@ -4,6 +4,9 @@
  * payment under "Considering financing?". The numbers are not ours: they are
  * the illustration Slice by FNBO publishes for its own loans (payments per
  * $10,000 borrowed at one example APR), applied to the range on screen.
+ * Above it sits the promotion Ghareeb offers (no interest if paid in full
+ * within 18 months) with its conditions, and the plain payment that clears
+ * the range in that time.
  * Source: https://www.fnbo.com/pos-lending/slice/how-financing-works
  * Checked November 17, 2026. FNBO changes its pricing from time to time:
  * re-check the page and update EXAMPLE when it does.
@@ -27,6 +30,9 @@
   // smaller example would show a payment nobody can actually get.
   var MIN_PAYMENT = 99;
   var DEFAULT_MONTHS = 120;
+  // The promotion Ghareeb offers through Slice. "after" is the fixed rate that
+  // applies if the balance is not paid off inside the promotion.
+  var PROMO = { months: 18, after: 18.99 };
 
   function money(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
 
@@ -73,6 +79,20 @@
       'Loans are made by First National Bank of Omaha and are subject to credit approval.';
   }
 
+  // What it takes to clear this range inside the promotion: the price split
+  // evenly over its months. Plain division, no interest.
+  function payoffText(range) {
+    if (!range) return '';
+    var low = money(range.low / PROMO.months), high = money(range.high / PROMO.months);
+    return 'To pay this off in ' + PROMO.months + ' months: about ' + (low === high ? low : low + ' – ' + high) + ' a month.';
+  }
+
+  function promoTerms() {
+    return 'Interest builds from the start. If any balance is left after ' + PROMO.months + ' months, that interest is owed and the rate is ' +
+      PROMO.after + '% fixed from then on. Monthly payments are required, and the minimum payment alone may not pay it off in time. ' +
+      'For qualified customers, subject to credit approval.';
+  }
+
   function start(doc) {
     var box = doc.getElementById('bp-finance');
     var rangeEl = doc.getElementById('bp-price-range');
@@ -81,6 +101,25 @@
     var wrap = doc.createElement('div');
     wrap.id = 'bp-finance-example';
     wrap.style.cssText = 'margin:6px 0 4px;';
+    var promo = doc.createElement('div');
+    promo.id = 'bp-finance-promo';
+    promo.style.cssText = 'margin:6px 0 4px;';
+    var headline = doc.createElement('div');
+    headline.style.cssText = 'font-size:18px;font-weight:600;line-height:1.3;color:var(--cream);';
+    headline.textContent = 'No interest if paid in full within ' + PROMO.months + ' months.';
+    var payoff = doc.createElement('div');
+    payoff.style.cssText = 'font-size:14px;color:var(--cream);margin-top:6px;';
+    var terms = doc.createElement('p');
+    terms.style.cssText = 'font-size:12px;color:rgba(250,246,239,0.6);margin:8px 0 0;line-height:1.5;';
+    terms.textContent = promoTerms();
+    promo.appendChild(headline);
+    promo.appendChild(payoff);
+    promo.appendChild(terms);
+    var longer = doc.createElement('div');
+    longer.className = 'spec';
+    longer.style.cssText = 'color:var(--gold-bright);margin:16px 0 6px;';
+    longer.textContent = 'Or spread it out longer';
+    wrap.appendChild(longer);
     var line = doc.createElement('div');
     var amount = doc.createElement('span');
     amount.className = 'num';
@@ -109,10 +148,14 @@
       return b;
     });
     var link = doc.getElementById('bp-finance-link');
-    if (link && link.parentNode === box) box.insertBefore(wrap, link); else box.appendChild(wrap);
+    if (link && link.parentNode === box) { box.insertBefore(promo, link); box.insertBefore(wrap, link); }
+    else { box.appendChild(promo); box.appendChild(wrap); }
 
     function update() {
-      var list = options(parseRange(rangeEl.textContent));
+      var range = parseRange(rangeEl.textContent);
+      promo.style.display = range ? '' : 'none';
+      payoff.textContent = payoffText(range);
+      var list = options(range);
       var chosen = pick(list, wanted);
       if (!chosen) { wrap.style.display = 'none'; return; }
       wrap.style.display = '';
@@ -138,7 +181,7 @@
     return { update: update, element: wrap };
   }
 
-  var api = { EXAMPLE: EXAMPLE, MIN_PAYMENT: MIN_PAYMENT, parseRange: parseRange, options: options, pick: pick, amountText: amountText, noteText: noteText, start: start };
+  var api = { EXAMPLE: EXAMPLE, MIN_PAYMENT: MIN_PAYMENT, PROMO: PROMO, payoffText: payoffText, promoTerms: promoTerms, parseRange: parseRange, options: options, pick: pick, amountText: amountText, noteText: noteText, start: start };
   root.GFSFinancingExample = api;
   if (root.document) {
     if (root.document.readyState === 'loading') root.document.addEventListener('DOMContentLoaded', function () { start(root.document); });

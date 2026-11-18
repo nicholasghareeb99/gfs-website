@@ -66,17 +66,29 @@ test('the ballpark page loads it after the tool, and the tool itself is untouche
   assert.ok(!/FENCE_PRICING|pricesLive|linearFeet/.test(read('public/assets/js/financing-example.js')), 'the example script never touches the price list or the footage');
 });
 
-// Which promotion and base plan Ghareeb has switched on is not confirmed, and FNBO has not
-// approved public wording for them. Until both are, no page names a specific offer, and the
-// contractor-only figures (dealer fees, rates by credit score) never appear anywhere public.
-test('no public file names a specific Slice offer or a contractor-only figure', () => {
+// The owner chose to offer the 18-month promotion (Nov 18, 2026). It is deferred interest, so it is
+// never called 0% APR or 0% interest, and wherever it is named the catch is stated beside it.
+// Lender-internal figures (dealer fees, rates by credit score, other plans) never appear anywhere public.
+test('the 18-month promotion is always stated with its conditions, and nothing internal is public', () => {
   const files = ['public/contact/index.html', 'public/financing/index.html', 'public/faq/index.html', 'public/quote/ballpark/index.html', 'public/assets/js/financing-example.js'];
   for (const file of files) {
     const text = read(file);
-    for (const banned of [/no interest if paid/i, /same as cash/i, /12 or 18 months/i, /deferred interest/i, /dealer fee/i, /merchant fee/i, /FICO/i, /18\.99%/, /9\.99%/, /12\.99%/, /auto-?pay discount/i]) {
+    for (const banned of [/0% (APR|interest)/i, /zero interest/i, /interest[- ]free/i, /same as cash/i, /12 months/i, /dealer fee/i, /merchant fee/i, /FICO/i, /9\.99%/, /12\.99%/, /auto-?pay discount/i]) {
       assert.ok(!banned.test(text), file + ' contains ' + banned);
     }
+    if (/no interest/i.test(text)) {
+      assert.match(text, /paid in full within/i, file + ': "no interest" must say "if paid in full within"');
+      assert.match(text, /balance is left after/i, file + ': must say what happens if a balance is left');
+    }
   }
+  const f = load();
+  assert.equal(f.PROMO.months, 18);
+  assert.match(f.promoTerms(), /Interest builds from the start/);
+  assert.match(f.promoTerms(), /18\.99% fixed from then on/);
+  assert.match(f.promoTerms(), /Monthly payments are required/);
+  assert.match(f.promoTerms(), /subject to credit approval/);
+  assert.equal(f.payoffText({ low: 9000, high: 12600 }), 'To pay this off in 18 months: about $500 – $700 a month.');
+  assert.equal(f.payoffText(null), '');
 });
 
 test('no page still promises 0% APR or a 60-second application', () => {
