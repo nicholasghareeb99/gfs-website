@@ -6,6 +6,8 @@ Build: npm run build (copies public/ to dist/).
 
 Test: npm test (Node 20 or newer, no installs). tests/forms.test.mjs follows a customer request from the page's lead script through the hidden Netlify forms into the intake function. tests/pricing.test.mjs covers the server-side price function.
 
+Run `npm run measure` with Node 22.19 or newer and Chrome or Chromium installed. It builds and serves `dist/` on your computer, then prints mobile Lighthouse results for the home page, quote page, ballpark tool and wood fence page. The first run downloads the pinned Lighthouse CLI through npm. Set `CHROME_PATH` if Lighthouse needs help finding the browser.
+
 netlify/pending/ holds functions that are written but not switched on. Nothing in that folder is deployed.
 
 Netlify site: gfencing (b06c8983-3e76-4ff1-8f19-206155103a97), ghareebfence.com. No automatic Git repository deployment is configured. The existing release used a reviewed static upload with preserved prebuilt functions, followed by publication of that exact deploy through restoreSiteDeploy.
