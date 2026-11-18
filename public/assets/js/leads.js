@@ -352,6 +352,7 @@
       if(!submittedRecord||validate(submittedRecord).length)return{ok:false,errors:['This saved request needs review. Re-enter your details before retrying.']};
       const fields={'form-name':'gfs-'+kind,gfs_contract:'gfs-intake-v1',intake_kind:kind,submission_id:row.id,'bot-field':'',...officeEmailFields(submittedRecord,kind),...submittedRecord};
       delete fields.photo;
+      delete fields.status; // The intake function sets the office status.
       let body=new URLSearchParams(fields).toString(),headers={'Content-Type':'application/x-www-form-urlencoded'};
       if(submittedRecord.photo){
         const [prefix,encoded]=submittedRecord.photo.split(','),binary=atob(encoded),bytes=Uint8Array.from(binary,c=>c.charCodeAt(0));
