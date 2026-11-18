@@ -66,6 +66,19 @@ test('the ballpark page loads it after the tool, and the tool itself is untouche
   assert.ok(!/FENCE_PRICING|pricesLive|linearFeet/.test(read('public/assets/js/financing-example.js')), 'the example script never touches the price list or the footage');
 });
 
+// Which promotion and base plan Ghareeb has switched on is not confirmed, and FNBO has not
+// approved public wording for them. Until both are, no page names a specific offer, and the
+// contractor-only figures (dealer fees, rates by credit score) never appear anywhere public.
+test('no public file names a specific Slice offer or a contractor-only figure', () => {
+  const files = ['public/contact/index.html', 'public/financing/index.html', 'public/faq/index.html', 'public/quote/ballpark/index.html', 'public/assets/js/financing-example.js'];
+  for (const file of files) {
+    const text = read(file);
+    for (const banned of [/no interest if paid/i, /same as cash/i, /12 or 18 months/i, /deferred interest/i, /dealer fee/i, /merchant fee/i, /FICO/i, /18\.99%/, /9\.99%/, /12\.99%/, /auto-?pay discount/i]) {
+      assert.ok(!banned.test(text), file + ' contains ' + banned);
+    }
+  }
+});
+
 test('no page still promises 0% APR or a 60-second application', () => {
   for (const page of ['public/contact/index.html', 'public/financing/index.html', 'public/faq/index.html', 'public/quote/ballpark/index.html']) {
     const html = read(page);
