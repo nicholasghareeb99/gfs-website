@@ -27,7 +27,7 @@
 
     var win = doc.defaultView || window;
     var reduced = !!(win.matchMedia && win.matchMedia('(prefers-reduced-motion: reduce)').matches);
-    var index = 0, timer = null, userPaused = reduced, hold = false;
+    var index = 0, timer = null, prefetchTimer = null, userPaused = reduced, hold = false;
 
     function show(i) {
       index = (i + slides.length) % slides.length;
@@ -49,11 +49,17 @@
       im.setAttribute('src', im.getAttribute('data-src'));
       im.removeAttribute('data-src'); im.removeAttribute('data-srcset');
     }
-    function stop() { if (timer) { win.clearTimeout(timer); timer = null; } }
+    function stop() {
+      if (timer) { win.clearTimeout(timer); timer = null; }
+      if (prefetchTimer) { win.clearTimeout(prefetchTimer); prefetchTimer = null; }
+    }
     function schedule() {
       stop();
       if (userPaused || hold || doc.hidden) return;
-      timer = win.setTimeout(function () { show(next(index, slides.length)); schedule(); }, DELAY);
+      var upcoming = next(index, slides.length);
+      // Prefetch the second photo shortly before the first rotation.
+      if (index === 0) prefetchTimer = win.setTimeout(function () { load(upcoming); }, DELAY - 1500);
+      timer = win.setTimeout(function () { show(upcoming); schedule(); }, DELAY);
     }
     function setPaused(p) {
       userPaused = p;
@@ -85,7 +91,6 @@
     }, { passive: true });
 
     setPaused(userPaused);
-    if (win.requestIdleCallback) win.requestIdleCallback(function () { load(1); }); else win.setTimeout(function () { load(1); }, 2500);
     return { show: show, get index() { return index; } };
   }
 

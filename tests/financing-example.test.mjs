@@ -57,28 +57,75 @@ test('the note always states the APR, that it is an example, and credit approval
   assert.match(note, /120 monthly payments of \$162\.81 for each \$10,000 borrowed/);
   assert.match(note, /depend on the offer you qualify for/);
   assert.match(note, /subject to credit approval/);
+  const page = read('public/financing/index.html');
+  assert.match(page, /data-editable="f\.pay\.note">Example only, at 15\.24% fixed APR\.[^<]*subject to credit approval/);
 });
 
-test('the ballpark page loads it after the tool, and the tool itself is untouched', () => {
+test('the ballpark page loads the example only when the unlocked price is shown', () => {
   const page = read('public/quote/ballpark/index.html');
-  assert.match(page, /ballpark\.js\?v=[^"]+" defer><\/script><script src="\.\.\/\.\.\/assets\/js\/financing-example\.js/);
+  const loader = page.match(/<script>([^<]*financing-example\.js[^<]*)<\/script>/)?.[1];
+  assert.ok(loader);
+  assert.doesNotMatch(page, /<script src="[^"]*financing-example\.js/);
   assert.ok(page.includes('id="bp-finance"') && page.includes('id="bp-price-range"'));
-  assert.ok(!/FENCE_PRICING|pricesLive|linearFeet/.test(read('public/assets/js/financing-example.js')), 'the example script never touches the price list or the footage');
+  assert.doesNotMatch(read('public/assets/js/financing-example.js'), /FENCE_PRICING|pricesLive|linearFeet/);
+  const finance = { style: { display: 'none' } };
+  const scripts = [];
+  let notify;
+  let disconnected = false;
+  vm.runInNewContext(loader, {
+    document: {
+      getElementById(id) { assert.equal(id, 'bp-finance'); return finance; },
+      createElement(tag) { assert.equal(tag, 'script'); return { remove() { scripts.splice(scripts.indexOf(this), 1); } }; },
+      head: { appendChild(script) { scripts.push(script); } }
+    },
+    MutationObserver: class {
+      constructor(callback) { notify = callback; }
+      observe(node, options) {
+        assert.equal(node, finance);
+        assert.equal(options.attributes, true);
+        assert.equal(options.attributeFilter.join(), 'style');
+      }
+      disconnect() { disconnected = true; }
+    }
+  });
+  notify();
+  assert.equal(scripts.length, 0);
+  finance.style.display = 'block';
+  notify();
+  notify();
+  assert.equal(scripts.length, 1);
+  assert.match(scripts[0].src, /^\/assets\/js\/financing-example\.js\?/);
+  assert.equal(scripts[0].async, true);
+  scripts[0].onerror();
+  assert.equal(scripts.length, 0);
+  notify();
+  assert.equal(scripts.length, 1);
+  scripts[0].onload();
+  assert.equal(disconnected, true);
 });
 
 // The owner chose to offer the 18-month promotion (Nov 18, 2026). It is deferred interest, so it is
 // never called 0% APR or 0% interest, and wherever it is named the catch is stated beside it.
 // Lender-internal figures (dealer fees, rates by credit score, other plans) never appear anywhere public.
 test('the 18-month promotion is always stated with its conditions, and nothing internal is public', () => {
-  const files = ['public/contact/index.html', 'public/financing/index.html', 'public/faq/index.html', 'public/quote/ballpark/index.html', 'public/assets/js/financing-example.js'];
+  const offerPages = ['public/index.html', 'public/contact/index.html', 'public/financing/index.html', 'public/faq/index.html', 'public/llms.txt'];
+  const files = [...offerPages, 'public/quote/ballpark/index.html', 'public/assets/js/financing-example.js'];
   for (const file of files) {
     const text = read(file);
     for (const banned of [/0% (APR|interest)/i, /zero interest/i, /interest[- ]free/i, /same as cash/i, /12 months/i, /dealer fee/i, /merchant fee/i, /FICO/i, /9\.99%/, /12\.99%/, /auto-?pay discount/i]) {
       assert.ok(!banned.test(text), file + ' contains ' + banned);
     }
-    if (/no interest/i.test(text)) {
-      assert.match(text, /paid in full within/i, file + ': "no interest" must say "if paid in full within"');
-      assert.match(text, /balance is left after/i, file + ': must say what happens if a balance is left');
+    if (offerPages.includes(file)) {
+      const offer = 'No interest if paid in full within 18 months.';
+      const mentions = text.split(offer);
+      assert.ok(mentions.length > 1, file + ': missing the exact offer');
+      assert.doesNotMatch(mentions.join(''), /no interest/i, file);
+      for (const following of mentions.slice(1)) {
+        const conditions = following.slice(0, 440);
+        assert.match(conditions, /Interest builds from the start/, file);
+        assert.match(conditions, /balance is left after 18 months/, file);
+        assert.match(conditions, /monthly payments are required/i, file);
+      }
     }
   }
   const f = load();
