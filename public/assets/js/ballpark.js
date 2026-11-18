@@ -2070,6 +2070,28 @@
     if (!status) return;
     status.style.display = 'block'; status.style.color = 'var(--stop)'; status.textContent = message;
   }
+  const actionScripts = new Map();
+  function loadActionScript(src, globalName) {
+    if (window[globalName]) return Promise.resolve(window[globalName]);
+    if (actionScripts.has(src)) return actionScripts.get(src);
+    const script = document.createElement('script');
+    script.src = src;
+    const loading = new Promise((resolve, reject) => {
+      const failed = () => reject(new Error('Could not load ' + src));
+      script.addEventListener('load', () => {
+        if (window[globalName]) resolve(window[globalName]);
+        else failed();
+      }, { once: true });
+      script.addEventListener('error', failed, { once: true });
+      document.head.appendChild(script);
+    }).catch(error => {
+      script.remove();
+      actionScripts.delete(src);
+      throw error;
+    });
+    actionScripts.set(src, loading);
+    return loading;
+  }
   function renderPostUnlockActions(unlocked) {
     const area = el('bp-actions');
     if (!area) return;
@@ -2085,17 +2107,19 @@
       area.dataset.bound = 'yes';
       const view3d = el('bp-action-3d');
       const dlPdf  = el('bp-action-pdf');
-      if (view3d) view3d.addEventListener('click', () => {
-        if (window.GFSFence3D) {
-          // Expose pricing data so the 3D module can show the right title
+      if (view3d) view3d.addEventListener('click', async () => {
+        const args = [state.fenceId, parseFloat(state.height), state.linearFeet];
+        try {
+          const viewer = await loadActionScript('/assets/js/fence-3d.js?v=kit-880cde3e6716', 'GFSFence3D');
+          // Expose pricing data so the 3D module can show the right title.
           window.GFS_BALLPARK_FENCES = FENCE_PRICING;
           track('3d');
-          window.GFSFence3D.open(state.fenceId, parseFloat(state.height), state.linearFeet);
-        } else {
+          viewer.open(...args);
+        } catch {
           actionNote('The 3D preview is still loading. Give it a moment and try again.');
         }
       });
-      if (dlPdf) dlPdf.addEventListener('click', () => {
+      if (dlPdf) dlPdf.addEventListener('click', async () => {
         if (!state.priceUnlocked) return;
         const price = calculatePrice();
         if (!price) return;
@@ -2108,40 +2132,42 @@
 
         const comparisons = pickComparisonSet(allPriced, state.fenceId, 8);
 
-        if (window.GFSEstimatePDF) {
-          // Try to pull customer name + address from the submitted form
-          const form = el('bp-form');
-          const customerName = (form && form.querySelector('[name="name"]') && form.querySelector('[name="name"]').value) || '';
-          const address = (el('bp-form-address') && el('bp-form-address').value) || state.address || '';
-          const contact = form ? new FormData(form) : null;
-          window.GFSEstimatePDF.download({
-            customerName, address,
-            fenceId: state.fenceId,
-            fenceName: fence.name,
-            linearFeet: state.linearFeet,
-            height: state.height,
-            singleGates: state.singleGates,
-            doubleGates: state.doubleGates,
-            removeOldFence: state.removeOldFence,
-        existingFenceMaterial: state.existingFenceMaterial,
-            priceLow: price.low,
-            priceHigh: price.high,
-            comparisons,
-            // Every fence style in the project, what the customer told us
-            // and the drawing, so the printed sheet matches the request.
-            parts: describeParts(),
-            siteNotes: state.siteNotes.slice(),
-            contactMethod: (contact && contact.get('contactMethod')) || '',
-            bestTime: (contact && contact.get('bestTime')) || '',
-            timeline: (contact && contact.get('timeline')) || '',
-            reference: acceptedBallparkReceipt,
-            geometry: collectGeometry(),
-            photoUrl: thumbOf(fence.photoThumb || fence.photo, 900),
-            // Say what the picture is: many styles only have a material example.
-            photoCaption: !fence.imageKind || fence.imageKind === 'material example' ? 'Example photo. Not the exact style.'
-              : fence.imageKind === 'product rendering' ? 'Product rendering of ' + fence.name + '.' : fence.name + '.',
-          });
-        } else {
+        // Try to pull customer name + address from the submitted form
+        const form = el('bp-form');
+        const customerName = (form && form.querySelector('[name="name"]') && form.querySelector('[name="name"]').value) || '';
+        const address = (el('bp-form-address') && el('bp-form-address').value) || state.address || '';
+        const contact = form ? new FormData(form) : null;
+        const estimate = {
+          customerName, address,
+          fenceId: state.fenceId,
+          fenceName: fence.name,
+          linearFeet: state.linearFeet,
+          height: state.height,
+          singleGates: state.singleGates,
+          doubleGates: state.doubleGates,
+          removeOldFence: state.removeOldFence,
+          existingFenceMaterial: state.existingFenceMaterial,
+          priceLow: price.low,
+          priceHigh: price.high,
+          comparisons,
+          // Every fence style in the project, what the customer told us
+          // and the drawing, so the printed sheet matches the request.
+          parts: describeParts(),
+          siteNotes: state.siteNotes.slice(),
+          contactMethod: (contact && contact.get('contactMethod')) || '',
+          bestTime: (contact && contact.get('bestTime')) || '',
+          timeline: (contact && contact.get('timeline')) || '',
+          reference: acceptedBallparkReceipt,
+          geometry: collectGeometry(),
+          photoUrl: thumbOf(fence.photoThumb || fence.photo, 900),
+          // Say what the picture is: many styles only have a material example.
+          photoCaption: !fence.imageKind || fence.imageKind === 'material example' ? 'Example photo. Not the exact style.'
+            : fence.imageKind === 'product rendering' ? 'Product rendering of ' + fence.name + '.' : fence.name + '.',
+        };
+        try {
+          const pdf = await loadActionScript('/assets/js/estimate-pdf.js?v=20261113c', 'GFSEstimatePDF');
+          pdf.download(estimate);
+        } catch {
           actionNote('The estimate is still loading. Give it a moment and try again.');
         }
       });

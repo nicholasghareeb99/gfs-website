@@ -2,8 +2,8 @@
 (function () {
   'use strict';
   const styles = {
-    vinyl: {name:'Vinyl fencing', image:'08-1-thumb.webp', alt:'White privacy fence beside a landscaped planting bed.', care:'Compare the selected product’s cleaning and care instructions; vinyl does not use the same stain routine as wood.'},
-    cedar: {name:'Cedar fencing', image:'01-1-thumb.webp', alt:'Lattice-top wood fence beside a landscaped garden.', care:'Decide whether you want a maintained wood finish or a weathered appearance, and confirm the specified cedar species.'},
+    vinyl: {name:'Vinyl fencing', image:'08-1-thumb.webp', srcset:'/assets/img/performance-t09/08-1-thumb-360.webp 360w, /assets/img/performance-t09/08-1-thumb-680.webp 680w, /assets/img/projects-sept26/08-1-thumb.webp 800w', alt:'White privacy fence beside a landscaped planting bed.', care:'Compare the selected product’s cleaning and care instructions; vinyl does not use the same stain routine as wood.'},
+    cedar: {name:'Cedar fencing', image:'01-1-thumb.webp', srcset:'/assets/img/performance-t09/01-1-thumb-360.webp 360w, /assets/img/performance-t09/01-1-thumb-680.webp 680w, /assets/img/projects-sept26/01-1-thumb.webp 800w', alt:'Lattice-top wood fence beside a landscaped garden.', care:'Decide whether you want a maintained wood finish or a weathered appearance, and confirm the specified cedar species.'},
     wood: {name:'Wood privacy', image:'/assets/img/performance-v12/920a32f61686f645-480.webp', srcset:'/assets/img/performance-v12/920a32f61686f645-480.webp 480w, /assets/img/performance-v12/920a32f61686f645-960.webp 960w', alt:'Long run of pressure-treated wood privacy fencing.', care:'Discuss finishing, drying and ongoing board and hardware care for the treated wood specified in your proposal.'},
     aluminum: {name:'Ornamental aluminum', image:'10-3-thumb.webp', alt:'Black ornamental metal fence beside a green lawn.', care:'An open look without a wood-staining routine. Review coating care, picket spacing and the selected gate hardware.'},
     chainlink: {name:'Chain link', image:'06-1-thumb.webp', alt:'Black chain-link double gate opening into a grassy yard.', care:'Compare galvanized and coated finishes, then review mesh, bottom-edge details and gate hardware.'},
@@ -48,9 +48,10 @@
     choice.styles.forEach(style=>{
       const card = element('article','fence-finder__card');
       const image = element('img');
-      image.src = style.image.startsWith('/') ? style.image : '/assets/img/projects-sept26/'+style.image;
-      if(style.srcset){image.srcset=style.srcset;image.sizes='(max-width:600px) calc(100vw - 40px), 400px';}
       image.alt = style.alt; image.width = 800; image.height = 600; image.loading = 'lazy'; image.decoding = 'async';
+      image.fetchPriority = 'low';
+      image.src = style.image.startsWith('/') ? style.image : '/assets/img/projects-sept26/'+style.image;
+      if(style.srcset){image.srcset=style.srcset;image.sizes='(max-width:600px) calc(100vw - 60px), 400px';}
       const body = element('div','fence-finder__card-body');
       const link = element('a','', 'Explore '+style.name.toLowerCase()+' →'); link.href = style.href;
       body.append(element('h4','',style.name),element('p','',style.why),element('p','',style.care),link);
