@@ -444,19 +444,18 @@
 
   // -------- PUBLIC API --------
   let downloadPending = false;
-  function downloadEstimate(data) {
+  function downloadEstimate(data, preparedTab) {
     if (downloadPending) return;
     downloadPending = true;
     const button = document.getElementById('bp-action-pdf');
     const label = button?.textContent;
     const wasDisabled = button?.disabled;
     if (button) { button.disabled = true; button.textContent = 'Preparing PDF…'; button.setAttribute('aria-busy', 'true'); }
-    // iOS Safari will not save a generated file from script, and it blocks
-    // a new tab that is opened after waiting on anything. Open the tab now,
-    // while this is still the customer's tap, and send the PDF to it after.
+    // A lazy-loaded caller can reserve a tab during the tap. Open one here
+    // for callers that already have the PDF script and didn't reserve a tab.
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    let tab = null;
-    if (isIOS) { try { tab = window.open('', '_blank'); if (tab) tab.document.write('<p style="font:16px system-ui;padding:24px">Preparing your estimate…</p>'); } catch (e) { tab = null; } }
+    let tab = preparedTab;
+    if (isIOS && tab === undefined) { try { tab = window.open('', '_blank'); if (tab) tab.document.write('<p style="font:16px system-ui;padding:24px">Preparing your estimate…</p>'); } catch (e) { tab = null; } }
     function finishDownload() {
       downloadPending = false;
       if (button) { button.disabled = wasDisabled; button.textContent = label; button.removeAttribute('aria-busy'); }
