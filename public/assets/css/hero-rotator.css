@@ -1,0 +1,60 @@
+/* hero-rotator.css - GFS, Nov 2026
+   Home hero slideshow: photos fade into each other, copy changes with them.
+   Load after hero-fullbleed.css. Works with no JavaScript: slide 1 simply stays up. */
+
+.hero-rotator .hero2__bg .hero-bg{
+  position:absolute; inset:0; opacity:0; transition:opacity 1.2s ease; background:#0e1720;
+}
+.hero-rotator .hero2__bg .hero-bg.is-active{ opacity:1; z-index:1; }
+.hero-rotator .hero2__bg .hero-bg img{
+  width:100%; height:100%; object-fit:cover; display:block;
+  transform:scale(1.06); animation:none;
+}
+.hero-rotator .hero2__bg .hero-bg.is-active img{ animation:heroRotatorZoom 9s ease-out forwards; }
+@keyframes heroRotatorZoom{ from{ transform:scale(1.06); } to{ transform:scale(1); } }
+
+/* All slides share one grid cell, so the hero never jumps in height. */
+.hero-rotator .hero-slides{ display:grid; }
+.hero-rotator .hero-slide{
+  grid-area:1/1; opacity:0; visibility:hidden; transform:translateY(10px);
+  transition:opacity .6s ease, transform .6s ease, visibility 0s linear .6s;
+}
+.hero-rotator .hero-slide.is-active{
+  opacity:1; visibility:visible; transform:none;
+  transition:opacity .6s ease .25s, transform .6s ease .25s, visibility 0s;
+}
+html .home-experience .hero2--photo .hero-slide__title{
+  color:#fff; font-size:clamp(34px,5vw,62px); line-height:1.04; letter-spacing:-.03em;
+  margin:16px 0 18px; max-width:18ch; text-shadow:0 2px 24px rgba(0,0,0,.45);
+}
+.hero-rotator .hero-slide .hero2__cta{ margin-top:6px; }
+
+.hero-rotator .hero-controls{ display:flex; align-items:center; gap:4px; margin:6px 0 14px -10px; }
+.hero-rotator .hero-dot{
+  position:relative; width:44px; height:44px; padding:0; border:0; background:none; cursor:pointer;
+}
+.hero-rotator .hero-dot::before{
+  content:""; position:absolute; left:50%; top:50%; width:34px; height:5px; margin:-2.5px 0 0 -17px;
+  border-radius:3px; background:rgba(255,255,255,.45); transition:background .2s;
+}
+.hero-rotator .hero-dot.is-active::before{ background:#fff; }
+.hero-rotator .hero-dot:hover::before{ background:rgba(255,255,255,.85); }
+.hero-rotator .hero-pause{
+  min-height:44px; padding:0 14px; margin-left:6px; border:0; background:none; cursor:pointer;
+  color:#fff; font-weight:600; font-size:13px; line-height:1; font-family:inherit; letter-spacing:.06em; text-transform:uppercase; text-decoration:underline;
+  text-underline-offset:3px; text-shadow:0 1px 8px rgba(0,0,0,.6);
+}
+.hero-rotator .hero-dot:focus-visible,
+.hero-rotator .hero-pause:focus-visible{ outline:2px solid #fff; outline-offset:-4px; }
+
+@media (max-width:800px){
+  html .home-experience .hero2--photo .hero-slide__title{ font-size:clamp(30px,8.6vw,42px); max-width:none; }
+  .hero-rotator .hero-controls{ margin-bottom:8px; }
+}
+@media (prefers-reduced-motion:reduce){
+  .hero-rotator .hero2__bg .hero-bg{ transition:none; }
+  .hero-rotator .hero2__bg .hero-bg img,
+  .hero-rotator .hero2__bg .hero-bg.is-active img{ animation:none; transform:none; }
+  .hero-rotator .hero-slide,
+  .hero-rotator .hero-slide.is-active{ transition:none; transform:none; }
+}

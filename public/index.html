@@ -103,6 +103,7 @@
 <!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
      Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
 <script src="./assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="/assets/js/hero-rotator.js?v=20261118" defer></script>
 <script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
 <!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
@@ -162,6 +163,7 @@
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
+<link rel="stylesheet" href="/assets/css/hero-rotator.css?v=20261118">
 </head>
 <body class="home-experience">
 
@@ -249,26 +251,64 @@
      Images use data-editable-img. Captions use data-editable-caption.
      ============================================================ -->
 
-<!-- HERO -->
-<section class="hero2 hero2--photo" data-gfs-sec="s0">
-  <div class="hero2__bg" data-editable-img="home.hero.v5.image" aria-hidden="true"><img src="/assets/img/performance-v12/d398bddf2d6fecb7-1600.webp" data-lcp alt="Wood privacy fencing with a top cap and horizontal trim." loading="eager" fetchpriority="high" decoding="async" width="1600" height="1200" style="object-position:48% 58%" srcset="/assets/img/performance-v12/d398bddf2d6fecb7-480.webp 480w, /assets/img/performance-v12/d398bddf2d6fecb7-960.webp 960w, /assets/img/performance-v12/d398bddf2d6fecb7-1600.webp 1600w" sizes="100vw"></div>
+<!-- HERO: four slides that fade into each other. Slide 2 is the financing offer. -->
+<section class="hero2 hero2--photo hero-rotator" data-gfs-sec="s0" data-hero-rotator aria-roledescription="carousel" aria-label="Featured from Ghareeb Fencing Solutions">
+  <div class="hero2__bg" aria-hidden="true">
+    <div class="hero-bg is-active" data-editable-img="home.hero.v5.image"><img src="/assets/img/performance-v12/d398bddf2d6fecb7-1600.webp" data-lcp loading="eager" fetchpriority="high" decoding="async" alt="Wood privacy fencing with a top cap and horizontal trim." width="1600" height="1200" style="object-position:48% 58%" srcset="/assets/img/performance-v12/d398bddf2d6fecb7-480.webp 480w, /assets/img/performance-v12/d398bddf2d6fecb7-960.webp 960w, /assets/img/performance-v12/d398bddf2d6fecb7-1600.webp 1600w" sizes="100vw"></div>
+    <div class="hero-bg"><img src="/assets/img/performance-v12/cfa43ab1e7866c3a-1600.webp" loading="lazy" fetchpriority="low" decoding="async" alt="Tan vinyl privacy fence." width="1600" height="1200" style="object-position:50% 62%" srcset="/assets/img/performance-v12/cfa43ab1e7866c3a-480.webp 480w, /assets/img/performance-v12/cfa43ab1e7866c3a-960.webp 960w, /assets/img/performance-v12/cfa43ab1e7866c3a-1600.webp 1600w" sizes="100vw"></div>
+    <div class="hero-bg"><img src="/assets/img/performance-v12/2cd741b8c589b169-1600.webp" loading="lazy" fetchpriority="low" decoding="async" alt="Privacy fence with double gate and finished hardware." width="1600" height="1200" style="object-position:50% 62%" srcset="/assets/img/performance-v12/2cd741b8c589b169-480.webp 480w, /assets/img/performance-v12/2cd741b8c589b169-960.webp 960w, /assets/img/performance-v12/2cd741b8c589b169-1600.webp 1600w" sizes="100vw"></div>
+    <div class="hero-bg"><img src="/assets/img/performance-v12/600812dfc9d1dcfd-1600.webp" loading="lazy" fetchpriority="low" decoding="async" alt="Cedar spaced picket fence with post caps at a corner." width="1600" height="1200" style="object-position:60% 55%" srcset="/assets/img/performance-v12/600812dfc9d1dcfd-480.webp 480w, /assets/img/performance-v12/600812dfc9d1dcfd-960.webp 960w, /assets/img/performance-v12/600812dfc9d1dcfd-1600.webp 1600w" sizes="100vw"></div>
+  </div>
   <div class="hero2__scrim" aria-hidden="true"></div><a class="hero-project-tag" href="#fence-types"><span>Built for real life outside.</span><strong>Find your fence style <span aria-hidden="true">↗</span></strong></a>
   <div class="wrap hero2__grid">
     <div class="hero2__content">
-      <div class="hero2__eyebrow">
-        <span class="dot"></span>
-        <span class="spec" data-editable="hero.local.v4.eyebrow">Small business. Local roots. Family owned.</span>
+      <div class="hero-slides" aria-live="off">
+        <div class="hero-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 4">
+          <div class="hero2__eyebrow">
+            <span class="dot"></span>
+            <span class="spec" data-editable="hero.local.v4.eyebrow">Small business. Local roots. Family owned.</span>
+          </div>
+          <h1 data-editable="hero.local.v4.title">Your local fence company.<br>Built around you.</h1>
+          <p class="hero2__lede" data-editable="hero.local.v5.lede">Family-owned fence installation in Northwest Ohio and Southeast Michigan—with thoughtful construction and a project portal that keeps you informed.</p>
+          <div class="hero2__cta">
+            <a href="./quote/ballpark/" class="btn2 btn2--cedar">Measure my fence</a>
+            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call our team at (419) 214-2107">Call our team</a>
+          </div>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 of 4" aria-hidden="true">
+          <div class="hero2__eyebrow"><span class="dot"></span><span class="spec">Financing</span></div>
+          <h2 class="hero-slide__title">No interest if paid in full within 18 months.</h2>
+          <p class="hero2__lede">Pay your fence off inside 18 months and you pay no interest. If a balance is left after 18 months, the interest is owed and the rate is 18.99% fixed from then on. For qualified customers, subject to credit approval.</p>
+          <div class="hero2__cta">
+            <a href="/financing/" class="btn2 btn2--cedar" data-hero-financing-cta>See financing</a>
+            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+          </div>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="3 of 4" aria-hidden="true">
+          <div class="hero2__eyebrow"><span class="dot"></span><span class="spec">Winter installs</span></div>
+          <h2 class="hero-slide__title">We install all winter.</h2>
+          <p class="hero2__lede">Sign and put down your deposit now, and your quoted price holds through a spring install.</p>
+          <div class="hero2__cta">
+            <a href="/quote/book/" class="btn2 btn2--cedar">Request a free estimate</a>
+            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call our team at (419) 214-2107">Call our team</a>
+          </div>
+        </div>
+        <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="4 of 4" aria-hidden="true">
+          <div class="hero2__eyebrow"><span class="dot"></span><span class="spec">Price range</span></div>
+          <h2 class="hero-slide__title">See a price range before anyone visits.</h2>
+          <p class="hero2__lede">Pick a style, enter your footage, and the range shows on screen. Then book a visit when you are ready.</p>
+          <div class="hero2__cta">
+            <a href="./quote/ballpark/" class="btn2 btn2--cedar">Measure my fence</a>
+            <a href="/financing/" class="btn2 btn2--ghost">Financing options</a>
+          </div>
+        </div>
       </div>
-
-      <h1 data-editable="hero.local.v4.title">Your local fence company.<br>Built around you.</h1>
-
-      <p class="hero2__lede" data-editable="hero.local.v5.lede">Family-owned fence installation in Northwest Ohio and Southeast Michigan—with thoughtful construction and a project portal that keeps you informed.</p>
-
-      <p class="hero-winter"><strong>We install all winter.</strong> Sign and put down your deposit now, and your quoted price holds through a spring install.</p>
-
-      <div class="hero2__cta">
-        <a href="./quote/ballpark/" class="btn2 btn2--cedar">Measure my fence</a>
-        <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call our team at (419) 214-2107">Call our team</a>
+      <div class="hero-controls" role="group" aria-label="Hero slides">
+        <button type="button" class="hero-dot is-active" data-hero-go="0" aria-label="Show slide 1: your local fence company" aria-current="true"></button>
+        <button type="button" class="hero-dot" data-hero-go="1" aria-label="Show slide 2: financing"></button>
+        <button type="button" class="hero-dot" data-hero-go="2" aria-label="Show slide 3: winter installs"></button>
+        <button type="button" class="hero-dot" data-hero-go="3" aria-label="Show slide 4: price range"></button>
+        <button type="button" class="hero-pause" data-hero-pause aria-pressed="false" aria-label="Pause the slideshow"><span aria-hidden="true">Pause</span></button>
       </div>
       <a href="/quote/book/" id="hero-quote-alt" class="hero2__cta-alt" data-editable-href="hero.cta2.href"><span data-editable="hero.cta2.label">Prefer a visit? Request a free on-site estimate →</span></a>
 
