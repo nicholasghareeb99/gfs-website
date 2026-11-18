@@ -2120,7 +2120,7 @@
         }
       });
       if (dlPdf) dlPdf.addEventListener('click', async () => {
-        if (!state.priceUnlocked) return;
+        if (!state.priceUnlocked || dlPdf.disabled) return;
         const price = calculatePrice();
         if (!price) return;
         const fence = FENCE_PRICING[state.fenceId];
@@ -2164,10 +2164,23 @@
           photoCaption: !fence.imageKind || fence.imageKind === 'material example' ? 'Example photo. Not the exact style.'
             : fence.imageKind === 'product rendering' ? 'Product rendering of ' + fence.name + '.' : fence.name + '.',
         };
+        let previewTab;
+        // iOS needs the preview tab opened during the tap, before the script loads.
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+          previewTab = null;
+          try {
+            previewTab = window.open('', '_blank');
+            previewTab?.document.write('<p style="font:16px system-ui;padding:24px">Preparing your estimate…</p>');
+          } catch {}
+        }
+        dlPdf.disabled = true;
         try {
-          const pdf = await loadActionScript('/assets/js/estimate-pdf.js?v=20261113c', 'GFSEstimatePDF');
-          pdf.download(estimate);
+          const pdf = await loadActionScript('/assets/js/estimate-pdf.js?v=kit-142f5ee09bca', 'GFSEstimatePDF');
+          dlPdf.disabled = false;
+          pdf.download(estimate, previewTab);
         } catch {
+          dlPdf.disabled = false;
+          previewTab?.close();
           actionNote('The estimate is still loading. Give it a moment and try again.');
         }
       });
