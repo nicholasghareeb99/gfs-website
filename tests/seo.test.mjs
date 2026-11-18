@@ -56,3 +56,19 @@ test('sitemap lists the three comparison guides; llms.txt states the financing t
   assert.match(llms, /paid in full within 18 months/);
   assert.match(llms, /balance is left after 18 months/);
 });
+
+test('style page intros state real build specs, and never products we do not sell', () => {
+  const must = {
+    wood: [/8-ft galvanized steel posts 4 ft into the ground/, /welded steel frames/],
+    cedar: [/Western Red Cedar/, /Northern White Cedar/],
+    vinyl: [/Sections are 8 ft wide/, /reinforced with aluminum/],
+    chainlink: [/up to 6 ft tall/, /top rail is standard/],
+    'split-rail': [/Northern White Cedar/, /welded wire/],
+    aluminum: [/flat-top and spear-top/],
+  };
+  for (const [k, res] of Object.entries(must)) {
+    const intro = read(`fences/${k}/index.html`).match(new RegExp(`data-editable="fence\\.v2\\.${k}\\.intro\\.nov18"[^>]*>(.*?)</p>`, 's'))[1];
+    for (const re of res) assert.match(intro, re, k);
+    assert.doesNotMatch(intro, /locust|wrought iron|composite|lifetime/i, k);
+  }
+});
