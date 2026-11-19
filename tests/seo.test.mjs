@@ -93,3 +93,14 @@ test('business schema carries map location and profile links', () => {
   assert.ok(biz.geo && biz.geo.latitude > 41 && biz.geo.longitude < -83);
   assert.ok(biz.sameAs.length >= 4);
 });
+
+test('every city page links to five nearby city pages that exist', () => {
+  const towns = fs.readdirSync(new URL('../public/service-areas/', import.meta.url)).filter((d) => d !== 'index.html');
+  for (const t of towns) {
+    const h = read(`service-areas/${t}/index.html`);
+    const block = h.slice(h.indexOf('<!-- NEARBY AREAS -->'), h.indexOf('<footer class="footer">'));
+    const links = [...block.matchAll(/href="\/service-areas\/([a-z-]+)\/"/g)].map((m) => m[1]);
+    assert.equal(links.length, 5, t);
+    for (const l of links) { assert.ok(towns.includes(l), l); assert.notEqual(l, t); }
+  }
+});
