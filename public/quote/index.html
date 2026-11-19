@@ -63,10 +63,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -230,7 +230,7 @@
         <li class="nav-opt"><a href="../faq/">FAQ</a></li>
     </ul>
     <div class="nav-cta-group">
-      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
       <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
       <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
@@ -281,7 +281,7 @@
     <div class="breadcrumbs"><a href="../">Home</a> <span>/</span> Get a Quote</div>
     <div class="eyebrow" style="margin-bottom: 20px;" data-editable="q.eyebrow">Three Ways to Get Started</div>
     <h1 class="display-1" data-editable="q.title">Get your free fence <span class="italic-accent">quote.</span></h1>
-    <p class="lede" data-editable="q.lede">Choose how you would like to begin: sketch a layout for a planning range, send your project details or request a free on-site estimate. A site review confirms measurements and the final scope.</p>
+    <p class="lede" data-editable="q.lede.nov17">Pick how you want to start: get a ballpark price online, send us your project details, or have us come out and measure for free.</p>
   </div>
 </section>
 
@@ -298,7 +298,7 @@
       <a href="../quote/form/" class="quote-router-card">
         <div class="quote-router-card-icon">📋</div>
         <h2 class="display-4" data-editable="q.card2.title">Detailed Quote Request</h2>
-        <p data-editable="q.card2.body">Share your project details, preferred fence type and timeline. Our team will review your request and contact you about the next step.</p>
+        <p data-editable="q.card2.body.nov17">Tell us the fence you want and when you want it built. We’ll get back to you.</p>
         <span class="link-arrow" data-editable="q.card2.cta">Submit Request →</span>
       </a>
 

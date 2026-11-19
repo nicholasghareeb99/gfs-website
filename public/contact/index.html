@@ -61,10 +61,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -263,7 +263,7 @@
       <li><a class="is-active" href="../contact/">Contact</a></li>
     </ul>
     <div class="nav-cta-group">
-      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
       <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
       <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
@@ -497,7 +497,7 @@
       </details>
       <details class="faq-item">
         <summary data-editable="contact.faq.5.q">Do you offer financing?</summary>
-        <p data-editable="contact.faq.5.a">Yes — qualified homeowners can access 0% APR financing through First National Bank of Omaha (Slice). Apply in 60 seconds with no impact on your credit score. Ask us for the link.</p>
+        <p data-editable="contact.faq.5.a.nov18b">Yes, through Slice by FNBO (First National Bank of Omaha). No interest if paid in full within 18 months. Interest builds from the start and is charged if any balance is left after 18 months, and monthly payments are required. For qualified customers, subject to credit approval. Checking what you qualify for uses a soft credit pull, which does not affect your credit score. <a href="/financing/">See the financing terms</a>.</p>
       </details>
     </div>
   </div>

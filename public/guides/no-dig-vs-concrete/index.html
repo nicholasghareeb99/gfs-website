@@ -26,10 +26,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -110,6 +110,7 @@
 <link rel="preload" as="image" href="/assets/img/performance-v12/f84fae316e3c60bb-1600.webp" imagesrcset="/assets/img/performance-v12/f84fae316e3c60bb-480.webp 480w, /assets/img/performance-v12/f84fae316e3c60bb-960.webp 960w, /assets/img/performance-v12/f84fae316e3c60bb-1600.webp 1600w" imagesizes="100vw" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"}, {"@type": "ListItem", "position": 2, "name": "Guides", "item": "https://ghareebfence.com/guides/"}, {"@type": "ListItem", "position": 3, "name": "No-Dig and Concrete Footings", "item": "https://ghareebfence.com/guides/no-dig-vs-concrete/"}]}</script>
 </head>
 <body class="no-js">
 <a class="skip" href="#main">Skip to content</a>

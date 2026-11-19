@@ -7,10 +7,9 @@
 <meta name="theme-color" content="#0E1720">
 <title>GFS Control — Ghareeb Fencing</title>
 <link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
+<script src="/assets/js/owner-hash.js?v=20261118"></script>
 <script>
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-  ];
+  window.GFS_AUTHORIZED_EMAIL_HASHES = ["89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8"];
   window.GFS_FIREBASE_CONFIG = {
     apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
     authDomain: "ghareeb-fencing.firebaseapp.com",
@@ -417,7 +416,6 @@
 
   firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
   var db = firebase.firestore();
-  var AUTH_EMAILS = (window.GFS_AUTHORIZED_EMAILS || []).map(function (e) { return String(e).toLowerCase().trim(); });
 
   var $ = function (s) { return document.querySelector(s); };
   var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
@@ -442,8 +440,7 @@
 
   function authorized(user) {
     if (!user || !user.email) return false;
-    if (!AUTH_EMAILS.length) return true;
-    return AUTH_EMAILS.indexOf(user.email.toLowerCase()) >= 0;
+    return window.GFSOwner.is(user.email);
   }
 
   $('#gate-signin').addEventListener('click', function () {
@@ -857,7 +854,7 @@
   }
 
   var peCurrentSlug = null, peBase = null, peEpoch = 0, peBusy = false, peUid = null, peUploads = 0;
-  function pageUser(){var u=firebase.auth().currentUser;if(!u||u.uid!==peUid||u.email!=='nicholasghareeb99@gmail.com')throw Error('Sign in again with the page owner account.');return u;}
+  function pageUser(){var u=firebase.auth().currentUser;if(!u||u.uid!==peUid||!window.GFSOwner.is(u.email))throw Error('Sign in again with the page owner account.');return u;}
   function lockPage(locked){peBusy=locked;$$('#page-editor input, #page-editor textarea, #page-editor button, #page-editor select').forEach(function(e){e.disabled=locked;});$('#pe-slug').disabled=locked||!!peCurrentSlug;}
   function draftKey(slug){return 'gfs-page-editor:'+peUid+':'+(slug||'new');}
   function pageValues(){return {title:$('#pe-title').value.trim(),description:$('#pe-desc').value.trim(),navLabel:$('#pe-navlabel').value.trim(),published:$('#pe-published').checked,nav:$('#pe-nav').checked,blocks:collectBlocks()};}

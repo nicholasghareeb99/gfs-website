@@ -61,10 +61,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -285,7 +285,7 @@
         <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
     </ul>
     <div class="nav-cta-group">
-      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
       <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
       <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
@@ -356,7 +356,7 @@
 </section>
 <section class="municipal-permit" id="fence-permits" tabindex="-1" aria-labelledby="permit-heading" data-gfs-sec="municipal-permit-oct01">
 <div class="municipal-permit__inner"><p class="municipal-permit__eyebrow">LOCAL FENCE PLANNING</p><h2 id="permit-heading">Fence permits in Ecorse</h2><p class="municipal-permit__status">Confirm the fence permit and zoning review requirements with Ecorse Building.</p>
-<div class="municipal-permit__grid"><div class="municipal-permit__card"><h3>What to know before installation</h3><ul><li>Ecorse's published municipal code includes a separate Fences chapter and zoning provisions.</li><li>Ask Building for the current fence application and submission checklist before finalizing the layout.</li></ul><details><summary>What to prepare</summary><p>Use this checklist for your conversation with the local office.</p><ul><li>Recommended: project address, fence sketch, proposed material and height.</li><li>Recommended: photos of existing fencing, planned removal and gates, plus available property documents.</li></ul></details></div>
+<div class="municipal-permit__grid"><div class="municipal-permit__card"><h3>What to know before installation</h3><ul><li>Ecorse's published municipal code includes a separate Fences chapter and zoning provisions.</li><li>Ask Building for the current fence application and submission checklist before finalizing the layout.</li></ul><details><summary>What to prepare</summary><p>Here’s what the local office usually asks for. We look up the rules for your address and can help with the application.</p><ul><li>Recommended: project address, fence sketch, proposed material and height.</li><li>Recommended: photos of existing fencing, planned removal and gates, plus available property documents.</li></ul></details></div>
 <div class="municipal-permit__card"><h3>Your local reviewing office</h3><p><strong>Building Department</strong></p><p class="municipal-permit__jurisdiction">City of Ecorse, Michigan; neighboring cities have separate processes.</p><ul class="municipal-permit__sources"><li><a href="https://www.ecorsemi.gov/services/building.php">Ecorse Building Department</a></li><li><a href="https://library.municode.com/mi/ecorse">Ecorse official municipal code</a></li></ul></div></div>
 <p>Have a layout or permit question? <a href="/quote/form/?project=ecorse-mi">Include it with your free quote request</a>.</p>
 <p class="municipal-permit__note">Official sources checked <time datetime="2026-10-01">October 1, 2026</time>. This is a planning summary; the local office confirms current requirements, fees and inspections for your parcel. An online fence sketch does not establish a legal property boundary.</p></div></section>
@@ -383,6 +383,14 @@
 <!-- GFS-GOOGLE-REVIEWS:END -->
 </main>
 
+<!-- NEARBY AREAS -->
+<section class="nearby-areas" data-gfs-sec="nearby" style="background:#fff;padding:40px 0;border-top:1px solid #E7E3DA;">
+  <div class="container" style="max-width:860px;">
+    <style>.nearby-areas a{text-decoration:underline;text-underline-offset:3px;padding:6px 0;display:inline-block}</style><h2 style="margin:0 0 10px;font-size:1.35rem;">Nearby areas we serve</h2>
+    <p style="margin:0 0 14px;line-height:1.9;"><a href="/service-areas/lincoln-park-mi/">Lincoln Park, MI</a> · <a href="/service-areas/wyandotte-mi/">Wyandotte, MI</a> · <a href="/service-areas/southgate-mi/">Southgate, MI</a> · <a href="/service-areas/allen-park-mi/">Allen Park, MI</a> · <a href="/service-areas/riverview-mi/">Riverview, MI</a> · <a href="/service-areas/">All service areas</a></p>
+    <p style="margin:0;line-height:1.9;color:#3d4852;">Planning help: <a href="/blog/fence-cost-ohio-2026/">What a fence costs in 2026</a> · <a href="/blog/do-i-need-permit-fence-toledo/">Do I need a fence permit?</a> · <a href="/blog/cedar-vs-vinyl-fence-ohio/">Cedar vs. vinyl</a> · <a href="/fences/replacement/">Replacing an old fence</a></p>
+  </div>
+</section>
 <footer class="footer">
   <div class="container">
     <div class="footer-grid">

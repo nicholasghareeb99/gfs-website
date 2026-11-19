@@ -61,10 +61,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -156,6 +156,7 @@
 <link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
+<script type="application/ld+json" data-gfs-faq>{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Does prequalification affect my credit score?", "acceptedAnswer": {"@type": "Answer", "text": "FNBO states that Slice prequalification uses a soft credit pull that does not affect your credit score. Review the lender’s disclosures for any later credit checks."}}, {"@type": "Question", "name": "Do I have to use financing?", "acceptedAnswer": {"@type": "Answer", "text": "Financing is optional. Ask us to confirm available payment methods and the payment schedule in your written proposal."}}, {"@type": "Question", "name": "What if I'm not approved?", "acceptedAnswer": {"@type": "Answer", "text": "Approval and available offers are determined by the lender. You can still review your fence scope and payment options with our team."}}, {"@type": "Question", "name": "Can financing cover removal of my old fence?", "acceptedAnswer": {"@type": "Answer", "text": "Include any requested removal in the written project quote, then confirm the eligible financed amount with the lender."}}, {"@type": "Question", "name": "When do I have to pay you?", "acceptedAnswer": {"@type": "Answer", "text": "Review the payment schedule in your project proposal and loan documents. FNBO describes a process in which you approve disbursements as work is completed and funds go to the contractor."}}]}</script>
 </head>
 <body>
 
@@ -193,7 +194,7 @@
       <li><a href="../contact/">Contact</a></li>
     </ul>
     <div class="nav-cta-group">
-      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
       <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
       <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
@@ -242,8 +243,8 @@
   <div class="container ph__content">
     <div class="breadcrumbs"><a href="../">Home</a> <span>/</span> Financing</div>
     <div class="eyebrow" style="margin-bottom: 20px;" data-editable="f.eyebrow">Financing Options</div>
-    <h1 class="display-1" data-editable="f.title">Review financing for your fence project.</h1>
-    <p class="lede" data-editable="f.lede">Explore home improvement financing through Slice by FNBO using our existing application link. Approval, loan amount, APR and repayment terms depend on the offer for which you qualify. Review the lender’s terms before accepting.</p>
+    <h1 class="display-1" data-editable="f.title.nov18">No interest if paid in full within 18 months.</h1>
+    <p class="lede" data-editable="f.lede.nov18">Financing is through Slice by FNBO. Interest builds from the start, so if any balance is left after 18 months, that interest is owed and the rate is 18.99% fixed from then on. Monthly payments are required, and the minimum payment alone may not pay it off in time. Subject to credit approval. Read the lender’s offer before you accept it.</p>
     <div style="display: flex; gap: 16px; flex-wrap: wrap; margin-top: 32px;">
       <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-primary btn-lg">Explore Financing Options →</a>
       <a href="../quote/" class="btn btn-outline btn-lg">Get a Quote First</a>
@@ -282,6 +283,24 @@
           <p style="font-size: 12px; color: var(--gray-500); margin-top: 20px; line-height: 1.5;" data-editable="f.example.disclaimer">Loans are subject to credit approval and offer eligibility. Your loan documents determine the amount, APR, repayment term, payments and conditions.</p>
         </div>
       </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding: 80px 0 0;">
+  <div class="container">
+    <div style="max-width: 760px; margin: 0 auto;">
+      <div class="eyebrow" data-editable="f.pay.eyebrow.nov18">Need longer than 18 months?</div>
+      <h2 class="display-3" style="margin: 12px 0 16px;" data-editable="f.pay.title">FNBO’s own example: $10,000 borrowed.</h2>
+      <table style="width:100%; border-collapse:collapse; font-size:16px;">
+        <thead><tr style="text-align:left; border-bottom:2px solid var(--gray-300);"><th style="padding:10px 8px;">Loan length</th><th style="padding:10px 8px;">Monthly payment</th><th style="padding:10px 8px;">APR in the example</th></tr></thead>
+        <tbody>
+          <tr style="border-bottom:1px solid var(--gray-300);"><td style="padding:10px 8px;">48 months</td><td style="padding:10px 8px;"><strong>$279.53</strong></td><td style="padding:10px 8px;">15.24% fixed</td></tr>
+          <tr style="border-bottom:1px solid var(--gray-300);"><td style="padding:10px 8px;">120 months</td><td style="padding:10px 8px;"><strong>$162.81</strong></td><td style="padding:10px 8px;">15.24% fixed</td></tr>
+          <tr style="border-bottom:1px solid var(--gray-300);"><td style="padding:10px 8px;">240 months</td><td style="padding:10px 8px;"><strong>$133.46</strong></td><td style="padding:10px 8px;">15.24% fixed</td></tr>
+        </tbody>
+      </table>
+      <p style="font-size: 13px; color: var(--gray-500); margin-top: 14px; line-height: 1.6;" data-editable="f.pay.note">Example only, at 15.24% fixed APR. Your rate, loan length and payment depend on the offer you qualify for. Loans are made by First National Bank of Omaha and are subject to credit approval. The loan is unsecured, so no home equity is needed, and FNBO states there is no penalty for paying it off early.</p>
     </div>
   </div>
 </section>
@@ -327,7 +346,7 @@
   </div>
 </section>
 
-<p style="font-size:13px;margin-top:16px;">Source: <a href="https://www.fnbo.com/pos-lending/slice/how-financing-works" target="_blank" rel="noopener">How Slice by FNBO financing works</a>. Reviewed September 7, 2026.</p>
+<p style="font-size:13px;margin-top:16px;">Source: <a href="https://www.fnbo.com/pos-lending/slice/how-financing-works" target="_blank" rel="noopener">How Slice by FNBO financing works</a>. Reviewed November 17, 2026.</p>
 <!-- GFS-GOOGLE-REVIEWS:START -->
 <section class="gfs-customer-reviews gfs-customer-reviews--compact"  data-gfs-sec="google-reviews-20260924" aria-label="Google customer reviews">
 <div class="gfs-reviews-inner"><div class="gfs-reviews-intro"><p class="gfs-review-eyebrow">Customer experiences</p><h2>A word from our customers</h2>
