@@ -23,7 +23,7 @@
 <meta name="theme-color" content="#1A2E40">
 
 <!-- Open Graph -->
-<meta property="og:title" content="About Nick Ghareeb | Toledo's Owner-Supervised Fence Company">
+<meta property="og:title" content="Ghareeb Fencing Solutions">
 <meta property="og:description" content="Meet Nick Ghareeb, the owner who personally supervises every fence install. The story, the philosophy, and why we do things differently.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://ghareebfence.com/p/">
@@ -33,7 +33,7 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="About Nick Ghareeb | Toledo's Owner-Supervised Fence Company">
+<meta name="twitter:title" content="Ghareeb Fencing Solutions">
 <meta name="twitter:description" content="Meet Nick Ghareeb, the owner who personally supervises every fence install. The story, the philosophy, and why we do things differently.">
 <meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
 
@@ -61,10 +61,10 @@
 
   // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
   //    Anyone else who signs in is automatically signed out.
-  //    Leave empty [] to allow ANY signed-in Google user (NOT recommended).
-  window.GFS_AUTHORIZED_EMAILS = [
-    "nicholasghareeb99@gmail.com",
-    // add more authorized editors here
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
   ];
 
   // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
@@ -224,7 +224,7 @@
         <li class="nav-opt"><a href="/faq/">FAQ</a></li>
     </ul>
     <div class="nav-cta-group">
-      <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
       <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
       <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
@@ -391,7 +391,7 @@
       const doc=await window.GFS_DB.collection('sitePages').doc(slug).get();
       if(generation!==loadGeneration||uid!==(firebase.auth?.().currentUser?.uid||null))return;
       if(!doc.exists){notFound();return;}const data=doc.data()||{},u=firebase.auth?.().currentUser;
-      const owner=u?.email==='nicholasghareeb99@gmail.com'&&u.emailVerified===true;
+      const owner=!!(u&&window.GFSOwner&&window.GFSOwner.is(u.email))&&u.emailVerified===true;
       if(!data.published&&!owner){notFound();return;}render(data);
       if(!data.published){const badge=document.createElement('div');badge.id='gfs-draft-badge';badge.textContent='Private draft — visible to your owner account';badge.style.cssText='position:fixed;bottom:16px;left:16px;background:#B4530F;color:#fff;padding:8px 14px;border-radius:4px;font-size:13px;font-weight:600;z-index:9999;';document.body.appendChild(badge);}
     }catch(e){if(generation===loadGeneration)notFound();}

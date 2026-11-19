@@ -72,3 +72,24 @@ test('style page intros state real build specs, and never products we do not sel
     assert.doesNotMatch(intro, /locust|wrought iron|composite|lifetime/i, k);
   }
 });
+
+test('no personal email address anywhere in the public site', () => {
+  const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(new URL(e.name + '/', d)) : /\.(html|js|txt|json|xml)$/.test(e.name) ? [new URL(e.name, d)] : []);
+  for (const f of walk(new URL('../public/', import.meta.url))) {
+    assert.ok(!/@gmail\.com/i.test(fs.readFileSync(f, 'utf8').replace(/you@gmail\.com|name@gmail\.com/gi, '')), f.pathname);
+  }
+});
+
+test('share titles match page titles; header financing button goes to the financing page', () => {
+  for (const p of ['index.html', 'fences/wood/index.html', 'process/index.html', 'guides/fence-care/index.html']) {
+    const h = read(p);
+    assert.equal(h.match(/property="og:title" content="([^"]*)"/)[1], h.match(/<title>(.*?)<\/title>/)[1].trim(), p);
+    assert.match(h, /<a href="\/financing\/" class="btn btn-financing btn-sm" id="nav-fin">/, p);
+  }
+});
+
+test('business schema carries map location and profile links', () => {
+  const biz = ld(home).find((n) => n['@id'] === 'https://ghareebfence.com/#business');
+  assert.ok(biz.geo && biz.geo.latitude > 41 && biz.geo.longitude < -83);
+  assert.ok(biz.sameAs.length >= 4);
+});
