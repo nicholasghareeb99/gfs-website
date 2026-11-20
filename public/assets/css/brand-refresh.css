@@ -73,3 +73,12 @@ a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #35
 .page-header--photo .eyebrow,.page-header--photo .display-1 .italic-accent,.page-header--photo h1 em,.page-header--photo .breadcrumbs a:hover{color:#8cc7ff}
 .page-header--photo .ph__scrim{background:linear-gradient(90deg,rgba(8,28,51,.94),rgba(8,28,51,.82))}
 .page-header--photo :is(a,button):focus-visible{outline-color:#a5d3ff}
+
+/* Contrast fixes from the Nov 20 audit. */
+.spec-table thead .spec,.spec-table thead .spec--paper{color:inherit}
+.section-navy .readout__key{color:#9fb3ca}
+.section-navy .readout__val{color:#fff}
+.section-navy .readout__val sup{color:#8cc7ff}
+.guide-grid .fence-card-tagline{color:#506680;opacity:1}
+.sell-breadcrumb,.sell-breadcrumb a{color:#56646f}
+.nodig-wood-detail figcaption small{color:#5b6e82;opacity:1}
