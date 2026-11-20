@@ -8,20 +8,19 @@ import { ROOT, read } from './helpers.mjs';
 const ld = (html) => [...html.matchAll(/<script type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
 const types = (nodes) => nodes.flatMap((n) => (n['@graph'] || [n]).map((x) => x['@type']));
 
-const SERVICE_PAGES = ['aluminum', 'cedar', 'chainlink', 'split-rail', 'vinyl', 'wood', 'no-dig', 'pet-fencing', 'replacement'];
+const SERVICE_PAGES = ['aluminum', 'cedar', 'chainlink', 'split-rail', 'vinyl', 'wood', 'no-dig', 'pool-fencing', 'pet-fencing', 'replacement'];
 
-test('fence pages carry a Service node tied to the business; the pool page does not', () => {
+test('fence pages carry a Service node tied to the business', () => {
   for (const slug of SERVICE_PAGES) {
     const svc = ld(read(`public/fences/${slug}/index.html`)).find((n) => n['@type'] === 'Service');
     assert.ok(svc, slug);
     assert.equal(svc.provider['@id'], 'https://ghareebfence.com/#business');
     assert.equal(svc.url, `https://ghareebfence.com/fences/${slug}/`);
   }
-  assert.ok(!types(ld(read('public/fences/pool-fencing/index.html'))).includes('Service'), 'GFS does not sell pool fence');
 });
 
 test('fence pages link to related guides that exist', () => {
-  for (const slug of [...SERVICE_PAGES, 'pool-fencing']) {
+  for (const slug of SERVICE_PAGES) {
     const html = read(`public/fences/${slug}/index.html`);
     const block = html.match(/data-gfs-sec="related-guides"[\s\S]*?<\/section>/);
     assert.ok(block, slug);
