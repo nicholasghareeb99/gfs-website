@@ -86,3 +86,11 @@ test('a database refusal still fails loudly, so Netlify records the failed deliv
   status = 403;
   await assert.rejects(() => handler(post({ payload: { data } })), /could not sync to Firestore \(HTTP 403\)/);
 });
+
+test('the intake refuses invalid contact data without writing a Firestore document', async () => {
+  const longEmail = 'test@' + ('label'.repeat(10) + '.').repeat(5) + 'example.test';
+  for (const fields of [{ phone: 'invalid 419-555-0142' }, { phone: '419-555-0142-999999' }, { email: longEmail }]) {
+    await assert.rejects(handler(post({ payload: { data: { ...data, ...fields } } })), /invalid (contact fields|email)/i);
+  }
+  assert.equal(calls.length, 0);
+});

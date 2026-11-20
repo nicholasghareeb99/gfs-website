@@ -340,13 +340,14 @@
           </div>
           <div style="background: var(--white); padding: 24px; border-radius: 6px; box-shadow: var(--shadow-sm);">
             <div style="font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold-deep); font-weight: 700; margin-bottom: 6px;">Hours</div>
-            <div style="font-family: var(--serif); font-size: 18px; color: var(--navy);" data-editable="contact.aside.hours">Mon–Sat · 8am – 6pm</div>
+            <div style="font-family: var(--serif); font-size: 18px; color: var(--navy);" data-editable="contact.aside.hours">Mon–Sat · 8am – 6pm · Closed Sunday</div>
           </div>
         </div>
 
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <a href="../quote/ballpark/" class="btn btn-primary btn-sm">Instant Quote Tool →</a>
           <a href="../service-areas/" class="btn btn-outline btn-sm">View Service Areas</a>
+          <a href="sms:+14192142107" class="btn btn-outline btn-sm">Text (419) 214-2107</a>
         </div>
       </aside>
 
@@ -354,16 +355,16 @@
         <h2 class="display-3" style="margin-bottom: 8px;" data-editable="contact.form.title">Send us a message</h2>
         <p style="color: var(--gray-700); margin-bottom: 32px;" data-editable="contact.form.lede">Fill out the form below and we'll get back to you within 24 hours.</p>
 
-        <form data-lead-form data-redirect="" style="background: var(--white); padding: 32px; border-radius: 8px; box-shadow: var(--shadow-sm);">
+        <form method="post" data-lead-form data-redirect="" style="background: var(--white); padding: 32px; border-radius: 8px; box-shadow: var(--shadow-sm);">
           <div class="form-success"></div>
           <div class="form-row">
             <div class="form-group">
               <label class="form-label" for="fld-first-name-1">First Name <span class="req">*</span></label>
-              <input id="fld-first-name-1" name="firstName" type="text" class="form-input" required autocomplete="given-name">
+              <input id="fld-first-name-1" name="firstName" type="text" class="form-input" required pattern=".*\S.*" title="Enter your first name" autocomplete="given-name">
             </div>
             <div class="form-group">
               <label class="form-label" for="fld-last-name-2">Last Name <span class="req">*</span></label>
-              <input id="fld-last-name-2" name="lastName" type="text" class="form-input" required autocomplete="family-name">
+              <input id="fld-last-name-2" name="lastName" type="text" class="form-input" required pattern=".*\S.*" title="Enter your last name" autocomplete="family-name">
             </div>
           </div>
           <input name="name" type="hidden">
@@ -455,7 +456,8 @@
             <label class="form-label" for="fld-project-details-10">Project Details</label>
             <textarea id="fld-project-details-10" name="notes" class="form-textarea" placeholder="Tell us about your property, any specific requirements, or questions you have…"></textarea>
           </div>
-          <button type="submit" class="btn btn-primary btn-lg btn-block">Send Message</button>
+          <p data-form-fallback data-gfs-protected>If the form is unavailable, call <a href="tel:+14192142107">(419) 214-2107</a>.</p>
+          <button type="submit" disabled class="btn btn-primary btn-lg btn-block">Send Message</button>
           <div class="form-error" role="alert" aria-atomic="true"></div>
           <p class="form-note">By submitting, you agree to receive communications from Ghareeb Fencing Solutions. We use your details to respond to your request. See our <a href="/privacy/">privacy policy</a>.</p>
         </form>
@@ -585,7 +587,7 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../assets/js/leads.js?v=20261113a" defer></script>
+<script src="../assets/js/leads.js?v=20261120" defer></script>
 
 <script src="../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../assets/js/cms-core.js?v=photos-20260919" defer></script>

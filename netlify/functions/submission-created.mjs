@@ -19,9 +19,10 @@ export function intakeRecord(data,now=new Date()){
  // Failed event delivery retains the complete original in Netlify Forms.
  const rawMeta=String(data.meta??'');
  if(rawMeta.length>30000)throw Error('Intake metadata too large; original submission remains in Netlify Forms for recovery.');
- const record={name:text(data.name,200),phone:text(data.phone,50),email:text(data.email,200).toLowerCase(),address:text(data.address,500),notes:text(data.notes,2000),source:text(data.source,100),createdAt:now.toISOString(),createdAtMs:now.getTime()};
- if(record.name.length<2||record.phone.replace(/\D/g,'').length<10)throw Error('Invalid contact fields');
- if(record.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(record.email))throw Error('Invalid email');
+ const record={name:text(data.name,200),phone:text(data.phone,51),email:String(data.email??'').trim().toLowerCase(),address:text(data.address,500),notes:text(data.notes,2000),source:text(data.source,100),createdAt:now.toISOString(),createdAtMs:now.getTime()};
+ const phone=record.phone.replace(/[^\d+]/g,'');
+ if(record.name.length<2||record.phone.length>50||!/^\+?[\d().\s-]+$/.test(record.phone)||!/^(?:\d{10}|\+?1\d{10}|\+[2-9]\d{9,14})$/.test(phone))throw Error('Invalid contact fields');
+ if(record.email&&(record.email.length>200||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(record.email)))throw Error('Invalid email');
  const booking=data.intake_kind==='booking';
  if(booking){
   record.meta=text(data.meta,30000);

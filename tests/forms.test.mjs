@@ -3,7 +3,7 @@
 // and the intake function has to accept what arrives.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { declaredForms, loadLeads } from './helpers.mjs';
+import { declaredForms, loadLeads, read } from './helpers.mjs';
 import { intakeRecord } from '../netlify/functions/submission-created.mjs';
 
 // Sent with every request but not form fields: Netlify's own routing and
@@ -106,4 +106,80 @@ test('ballpark tool: added styles, yard notes, price range and drawing reach the
   assert.deepEqual(JSON.parse(fields.geometry).runStyles, [{ run: 1, style: 'Galv Chain Link 4ft', height: '4' }]);
   const intake = intakeRecord(received(fields, 'gfs-ballpark'), new Date('2026-11-13T12:00:00Z'));
   assert.equal(JSON.parse(intake.record.geometry).lines.length, 2, 'the drawing is stored for the Executive app');
+});
+
+test('an emailed-estimate follow-up asks the office to email the supplied address', async () => {
+  const { leads, sent, window } = loadLeads({ pathname: '/quote/ballpark/' });
+  window.sessionStorage.setItem('gfs_reach', 'Text');
+  const parentReceipt = 'web_abcdefgh-1234-5678-9abc';
+  const result = await leads.submit({
+    ...ballpark,
+    source: 'ballpark-email-estimate',
+    parentReceipt,
+    contactMethod: 'Text',
+    email: 'followup@example.test',
+  });
+  assert.equal(result.ok, true);
+  const fields = sent[0].fields;
+  assert.equal(fields['form-name'], 'gfs-ballpark');
+  assert.deepEqual(Object.keys(fields).filter(key => !declaredForms()['gfs-ballpark'].includes(key)), []);
+  assert.equal(fields.best_way_to_reach, 'Email');
+  assert.match(fields.subject, /wants an email/);
+  const { record, collection } = intakeRecord(received(fields, 'gfs-ballpark'));
+  assert.equal(collection, 'websiteLeads');
+  assert.equal(record.email, 'followup@example.test');
+  assert.match(record.notes, /Best way to reach: Email/);
+  assert.ok(record.meta.includes('parent_receipt=' + parentReceipt));
+  assert.equal(window.sessionStorage.getItem('gfs_reach'), 'Text');
+});
+
+test('quote and visit requests reject invalid phones before sending', async () => {
+  const { leads, sent } = loadLeads();
+  const contact = { ...customer, contactMethod: 'Call' };
+  for (const phone of ['invalid 419-555-0142', '419-555-014', '419-555-0142-999999']) {
+    const estimate = await leads.submit({ ...contact, phone });
+    const visit = await leads.submitBooking({ ...contact, phone, date: '2026-12-01', time: 'Morning (8 am - 12 pm)' });
+    assert.match(estimate.errors?.[0] || '', /valid phone/i, phone);
+    assert.match(visit.errors?.[0] || '', /valid phone/i, phone);
+  }
+  assert.equal(sent.length, 0);
+  for (const phone of ['(419) 555-0142', '+1 (419) 555-0142', '+44 20 7946 0958']) {
+    assert.equal((await leads.submit({ ...contact, phone })).ok, true, phone);
+  }
+});
+
+test('quote and visit requests reject long emails instead of sending a shortened address', async () => {
+  const { leads, sent } = loadLeads();
+  const longEmail = 'test@' + ('label'.repeat(10) + '.').repeat(5) + 'example.test';
+  const details = { ...customer, contactMethod: 'Email', email: longEmail };
+  const estimate = await leads.submit(details);
+  const visit = await leads.submitBooking({ ...details, date: '2026-12-01', time: 'Morning (8 am - 12 pm)' });
+  assert.match(estimate.errors?.[0] || '', /email is invalid/i);
+  assert.match(visit.errors?.[0] || '', /email is invalid/i);
+  assert.equal(sent.length, 0);
+});
+
+test('required name and address fields reject whitespace-only values', () => {
+  for (const file of ['contact/index.html', 'quote/form/index.html', 'quote/book/index.html', 'quote/ballpark/index.html']) {
+    const inputs = [...read('public/' + file).matchAll(/<input\b[^>]*\btype="text"[^>]*\brequired\b[^>]*>/g)];
+    assert.ok(inputs.length > 0, file);
+    for (const [input] of inputs) {
+      const pattern = input.match(/\bpattern="([^"]+)"/)?.[1];
+      assert.ok(pattern, input);
+      const valid = new RegExp('^(?:' + pattern + ')$', 'v');
+      assert.equal(valid.test('   '), false, input);
+      assert.equal(valid.test(' Test Customer '), true, input);
+    }
+  }
+});
+
+test('customer forms fail closed with a phone link until the submit handler binds', () => {
+  for (const file of ['contact/index.html', 'quote/form/index.html', 'quote/book/index.html', 'quote/ballpark/index.html']) {
+    const html = read('public/' + file);
+    const form = html.match(/<form\b[^>]*(?:data-lead-form|id="bp-form")[^>]*>[\s\S]*?<\/form>/)?.[0];
+    assert.ok(form, file);
+    assert.match(form, /^<form\b[^>]*\bmethod="post"/i, file);
+    assert.match(form, /<button\b(?=[^>]*\btype="submit")(?=[^>]*\bdisabled\b)[^>]*>/, file);
+    assert.match(form, /<p data-form-fallback[^>]*>[^<]*<a href="tel:\+14192142107">/, file);
+  }
 });

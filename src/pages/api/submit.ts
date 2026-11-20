@@ -52,7 +52,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^[\d\s()+-]{7,20}$/;
 
 // Notification email recipient
-const NOTIFY_EMAIL = 'nicholasghareeb99@gmail.com';
+const NOTIFY_EMAIL = 'nick@ghareebfence.com';
 
 // ============================================================
 // VALIDATION HELPERS

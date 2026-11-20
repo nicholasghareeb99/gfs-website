@@ -40,3 +40,13 @@ test('the build leaves /x3d/ byte for byte', () => {
   if (!fs.existsSync(dist)) return; // build not run in this checkout
   for (const [rel, want] of Object.entries(manifest.files)) assert.equal(sha(fs.readFileSync(path.join(dist, rel))), want, rel);
 });
+
+test('/x3d/ opens the viewer with the original query and design on a static host', () => {
+  const page = fs.readFileSync(path.join(root, 'public/x3d/index.html'), 'utf8');
+  assert.match(page, /<meta name="viewport" content="width=device-width, initial-scale=1">/);
+  assert.match(page, /<meta name="robots" content="noindex">/);
+  const script = page.match(/<script>(.*?)<\/script>/s)[1];
+  let to;
+  vm.runInNewContext(script, { location: { search: '?embed=1&website=1', hash: '#design', replace: url => { to = url; } } });
+  assert.equal(to, './fence3d.html?embed=1&website=1#design');
+});

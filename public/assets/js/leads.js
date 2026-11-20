@@ -198,7 +198,7 @@
       status: 'new',                     // MUST be 'new' (rule literal)
       source: (input.source || 'website').slice(0, 100),
       // Optional but rule-validated
-      email: email.slice(0, 200),
+      email,
       address: address.slice(0, 500),
       notes: compiledNotes,
       fenceType: (input.fenceType || '').slice(0, 200),
@@ -294,7 +294,10 @@
   }
 
   function normalizePhone(p) {
-    return p.replace(/[^\d+]/g, '');
+    const input = p.trim();
+    if (!/^\+?[\d().\s-]+$/.test(input)) return '';
+    const phone = input.replace(/[^\d+]/g, '');
+    return /^(?:\d{10}|\+?1\d{10}|\+[2-9]\d{9,14})$/.test(phone) ? phone : '';
   }
 
   // ---- VALIDATION ----------------------------------------------
@@ -305,8 +308,8 @@
   function validate(lead) {
     const errors = [];
     if (!lead.name || lead.name.length < 2) errors.push('Name is required');
-    if (!lead.phone || lead.phone.replace(/\D/g,'').length < 10) errors.push('Valid phone number is required');
-    if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) errors.push('Email is invalid');
+    if (!normalizePhone(lead.phone || '')) errors.push('Valid phone number is required');
+    if (lead.email && (lead.email.length > 200 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email))) errors.push('Email is invalid');
     if (lead.photo && (lead.photo.length > 380000 || !/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(lead.photo))) errors.push('Choose a smaller JPG, PNG, or WebP photo');
     if (lead.geometry) {
       try {
@@ -387,10 +390,11 @@
   }
   async function submit(input,options={}){
     // An emailed-estimate follow-up is itself a request to be emailed.
-    if(input&&input.source==='ballpark-email-estimate'&&!reachOf(input))input={...input,contactMethod:'Email'};
+    const emailFollowup = input?.source === 'ballpark-email-estimate';
+    if (emailFollowup) input = { ...input, contactMethod: 'Email' };
     const reachIssue=reachErrors(input||{});if(reachIssue.length)return{ok:false,errors:reachIssue,field:'contactMethod'};
     const lead=buildLead(input),errors=validate(lead);if(errors.length)return{ok:false,errors};
-    rememberReach(input);
+    if (!emailFollowup) rememberReach(input);
     return submitRecordWithFlow(lead,/ballpark/i.test(lead.source)?'ballpark':'estimate',options);
   }
 
@@ -698,6 +702,9 @@
         submitBtn.textContent = submitBtn.dataset.label || 'Submit';
       }
     });
+    const button = form.querySelector('[type="submit"]');
+    if (button) button.disabled = false;
+    form.querySelector('[data-form-fallback]')?.setAttribute('hidden', '');
   }
 
   function init() {
@@ -719,7 +726,7 @@
       phone: normalizePhone(input.phone || '').slice(0, 50),
       date: (input.date || '').trim().slice(0, 30),
       time: (input.time || '').trim().slice(0, 30),
-      email: (input.email || '').trim().toLowerCase().slice(0, 200),
+      email: (input.email || '').trim().toLowerCase(),
       address: (input.address || '').trim().slice(0, 500),
       notes: details.notes,
       meta: attributionMeta(),

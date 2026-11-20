@@ -6,7 +6,7 @@ When someone submits a form on the website (contact, booking, or ballpark calcul
 the server API writes a document to the Firestore `mail` collection. Firebase's
 **Trigger Email from Firestore** extension watches that collection and sends the email.
 
-**Notification recipient:** `nicholasghareeb99@gmail.com`
+**Notification recipient:** `nick@ghareebfence.com`
 
 ---
 
@@ -21,8 +21,8 @@ the server API writes a document to the Firestore `mail` collection. Firebase's
 | Setting | Value |
 |---------|-------|
 | **Email documents collection** | `mail` |
-| **Default FROM address** | `Ghareeb Fencing <noreply@ghareebfencing.com>` (or your Gmail) |
-| **Default REPLY TO** | `nicholasghareeb99@gmail.com` |
+| **Default FROM address** | The verified sender address for your email provider |
+| **Default REPLY TO** | `nick@ghareebfence.com` |
 | **SMTP connection URI** | See Step 2 below |
 
 ---
@@ -41,12 +41,12 @@ the server API writes a document to the Firestore `mail` collection. Firebase's
 6. Use this SMTP URI in the extension:
 
 ```
-smtps://nicholasghareeb99@gmail.com:YOUR_APP_PASSWORD@smtp.gmail.com:465
+smtps://YOUR_GMAIL_USERNAME:YOUR_APP_PASSWORD@smtp.gmail.com:465
 ```
 
 Replace `YOUR_APP_PASSWORD` with the 16 characters (no spaces).
 
-**Example:** `smtps://nicholasghareeb99@gmail.com:abcdefghijklmnop@smtp.gmail.com:465`
+**Example:** `smtps://YOUR_GMAIL_USERNAME:abcdefghijklmnop@smtp.gmail.com:465`
 
 ### Option B: SendGrid (For High Volume)
 
@@ -107,7 +107,7 @@ Each form generates a styled HTML email:
 
 Edit `src/pages/api/submit.ts` line ~16:
 ```typescript
-const NOTIFY_EMAIL = 'nicholasghareeb99@gmail.com';
+const NOTIFY_EMAIL = 'nick@ghareebfence.com';
 ```
 
 Change to any email address, then redeploy.

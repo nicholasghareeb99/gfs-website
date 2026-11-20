@@ -257,13 +257,13 @@
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 48px; align-items: start;" class="quote-form-layout">
 
       <div>
-        <form data-lead-form data-booking-form class="quote-form-card">
+        <form method="post" data-lead-form data-booking-form class="quote-form-card">
           <h2 class="display-3" style="margin-bottom: 28px;" data-editable="qb.about">Request a visit</h2>
 
           <div class="form-grid">
             <div style="grid-column:1/-1;">
               <label class="form-label" for="fld-full-name-1">Full name *</label>
-              <input id="fld-full-name-1" name="name" type="text" class="form-input" required autocomplete="name" maxlength="200">
+              <input id="fld-full-name-1" name="name" type="text" class="form-input" required pattern=".*\S.*" title="Enter your name" autocomplete="name" maxlength="200">
             </div>
             <div>
               <label class="form-label" for="fld-phone-3">Phone *</label>
@@ -285,7 +285,7 @@
           </fieldset>
           <div style="margin-top: 20px;">
             <label class="form-label" for="fld-property-address-5">Property Address *</label>
-            <input id="fld-property-address-5" name="address" type="text" class="form-input" required autocomplete="street-address">
+            <input id="fld-property-address-5" name="address" type="text" class="form-input" required pattern=".*\S.*" title="Enter the property address" autocomplete="street-address">
           </div>
 
           <div class="studio-style-field"><label class="form-label" for="studio-preferred-style">Preferred catalog style (optional)</label><input id="studio-preferred-style" name="fenceStyle" class="form-input" type="text" maxlength="180" autocomplete="off" aria-describedby="studio-style-help"><p id="studio-style-help">Your 3D Studio selection appears here. You can change or remove it; we will confirm specifications and availability.</p></div>
@@ -303,7 +303,7 @@
                 <option value="">Select a time</option>
                 <option>Morning (8 am &ndash; 12 pm)</option>
                 <option>Afternoon (12 &ndash; 5 pm)</option>
-                <option>Evening (5 &ndash; 7 pm)</option>
+                <option>Evening (5 &ndash; 6 pm)</option>
               </select>
               <p class="spec" style="margin-top:6px;text-transform:none;letter-spacing:0.04em;color:var(--galv);" id="bk-slot-note"></p>
             </div>
@@ -341,7 +341,8 @@
           </div>
 
           <div style="margin-top: 32px;">
-            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Request My Visit</button>
+            <p data-form-fallback data-gfs-protected>If the form is unavailable, call <a href="tel:+14192142107">(419) 214-2107</a>.</p>
+            <button type="submit" disabled class="btn btn-primary btn-lg" style="width: 100%;">Request My Visit</button>
             <p style="font-size: 12px; color: var(--gray-500); margin-top: 12px; text-align: center;">This is a visit request. Our team will contact you to confirm the date and time.</p>
           </div>
 
@@ -464,8 +465,8 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=20261113a" defer></script>
-<script src="../../assets/js/availability.js?v=kit-b53877263f21" defer></script>
+<script src="../../assets/js/leads.js?v=20261120" defer></script>
+<script src="../../assets/js/availability.js?v=20261120" defer></script>
 <script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
 <script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
 <script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
