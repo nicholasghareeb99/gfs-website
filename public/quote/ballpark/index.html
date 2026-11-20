@@ -548,13 +548,13 @@
           <button id="bp-action-pdf" type="button" class="btn btn-primary btn-lg" style="flex:1;min-width:200px;">
             &#11015;  Download or print estimate (PDF)
           </button>
-          <button id="bp-action-email" type="button" class="btn btn-outline btn-lg" style="flex:1;min-width:200px;">
-            &#9993;  Request emailed estimate
-          </button>
           <div style="flex:1 0 100%;">
-            <label class="form-label" for="bp-email-address">Email for your estimate request</label>
+            <label class="form-label" for="bp-email-address">Email address</label>
             <input id="bp-email-address" type="email" class="form-input" autocomplete="email" placeholder="you@example.com" aria-describedby="bp-email-status">
           </div>
+          <button id="bp-action-email" type="button" class="btn btn-outline btn-lg" style="flex:1;min-width:200px;">
+            Email me this estimate
+          </button>
         </div>
         <div id="bp-email-status" class="spec" role="status" aria-live="polite" style="display:none;margin:-10px 0 24px;text-transform:none;letter-spacing:0.03em;"></div>
 
@@ -718,9 +718,9 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=money-audit-1" defer></script>
+<script src="../../assets/js/leads.js?v=estimate-email-1" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script type="module" src="../../assets/js/ballpark.js?v=money-audit-1"></script>
+<script type="module" src="../../assets/js/ballpark.js?v=estimate-email-1"></script>
 <script>
 (function () {
   const finance = document.getElementById('bp-finance');

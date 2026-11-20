@@ -232,6 +232,7 @@
       summary: officeSummary(input, sections, priceRange),
       price_range_shown: priceRange,
       ...(input.pricingProject ? { pricing_project: input.pricingProject } : {}),
+      ...(input.source === 'ballpark-email-estimate' && input.estimateEmailOptIn === true ? { estimate_email_opt_in: 'yes' } : {}),
       fence_sections: sections.join('\n'),
       site_notes: siteNotes,
       heard_from: oneLine(input.heardFrom, 80),
@@ -339,6 +340,7 @@
   function intakeFingerprint(kind, record, legacy = false) {
     const fields = [kind,record.name,record.phone,record.email,record.address,record.notes,record.geometry,record.photo,record.date,record.time];
     if (!legacy && (record.pricing_project || record.price_range_shown)) fields.push(record.pricing_project || '', record.price_range_shown || '');
+    if (record.estimate_email_opt_in) fields.push(record.estimate_email_opt_in);
     return JSON.stringify(fields);
   }
   async function routeIntake(record,kind,requestScope={}){

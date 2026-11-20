@@ -262,10 +262,19 @@ test('a lead that is not there yet gives 409 and is priced on a later try (the p
 
 test('catalogue excludes unoffered products and caps height for unlabelled chain link', async () => {
   const names = ['Locust Split Rail', 'Barbed Wire', 'Razor Wire', 'Chain Link 8 ft', 'Chain Link 4–8 ft',
-    'Composite Privacy', 'Wrought-Iron Fence', 'Snow Fence', 'Electric Fence', 'Invisible Fence', 'Pool Fence', 'Farm Fence'];
+    'Composite Privacy', 'Wrought-Iron Fence', 'Snow Fence', 'Electric Fence', 'Invisible Fence', 'Farm Fence'];
   const rows = names.map(name => name + ' : 30 : 150 : 300').concat('Chain Link : 20 : 150 : 300').join('\n');
   assert.deepEqual(Object.keys(parsePricing(rows)), ['chain-link']);
   assert.deepEqual(await (await ask({ receipt: RECEIPT, parts: [part('Chain Link', 50, { height: 8 })] }, google({ pricing: rows }))).json(), { needsQuote: true });
+});
+
+test('a priced pool style appears in Ballpark comparisons', async () => {
+  const pricing = PRICING + '\nAluminum Pool Fence 4ft : 30 : 300 : 600';
+  const answer = await (await ask({
+    receipt: RECEIPT, parts: [part('Aluminum Pool Fence 4ft', 60, { height: 4 })], compare: true,
+  }, google({ pricing }))).json();
+  assert.deepEqual([answer.low, answer.high], [1700, 1900]);
+  assert.ok(answer.comparisons.some(row => row.style === 'Aluminum Pool Fence 4ft'));
 });
 
 test('bad selected gate rates and tiny totals leave pricing to the office', async () => {

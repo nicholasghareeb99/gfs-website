@@ -303,13 +303,13 @@ test('by-request notes say so; the failed-load note stays for a real failure', (
 });
 
 // ---- the emailed request ----------------------------------------------------
-function emailPage({ price }) {
-  const handlers = {}, sent = [], statuses = [];
-  const node = id => ({ id, value: '', disabled: false, textContent: id === 'bp-action-email' ? 'Request emailed estimate' : '', style: {}, parentElement: null, setAttribute() {}, removeAttribute() {}, focus() {},
+function emailPage({ price, emailStatuses = [202] }) {
+  const handlers = {}, sent = [], autoEmail = [];
+  const node = id => ({ id, value: '', disabled: false, textContent: id === 'bp-action-email' ? 'Email me this estimate' : '', style: {}, parentElement: null, setAttribute() {}, removeAttribute() {}, focus() {},
     addEventListener(type, fn) { handlers[id + ':' + type] = fn; } });
   const nodes = {};
   const el = id => id === 'bp-form' ? null : (nodes[id] || (nodes[id] = node(id)));
-  const window = { GFSLeads: { submit: async payload => { sent.push(payload); return price.fail ? Promise.reject(new Error('boom')) : { ok: true }; } } };
+  const window = { GFSLeads: { submit: async payload => { sent.push(payload); return price.fail ? Promise.reject(new Error('boom')) : { ok: true, id: RECEIPT }; } } };
   const code = `
     const state = { linearFeet: 120, fenceId: 'f', height: '6', singleGates: 1, doubleGates: 0, removeOldFence: false, existingFenceMaterial: '', sections: [], siteNotes: [], priceUnlocked: true };
     const FENCE_PRICING = { f: { name: 'Style F', category: 'wood' } };
@@ -322,14 +322,24 @@ function emailPage({ price }) {
     function collectGeometry() { return ''; }
     function removalScopeNote() { return ''; }
     function sectionLines() { return []; }
+    function pricingProject() { return 'saved estimate options'; }
     ${slice('  function formatPrice', '  // -------- DOM HELPERS')}
     ${slice('  function bindEmailEstimate() {', '  function init() {')}
     bindEmailEstimate();
   `;
-  run({ el, window, document: { createElement: () => node('x') }, console: { log() {}, warn() {}, error: (...a) => process.env.DBG && console.error(...a) } }, code);
+  run({
+    el, window, AbortSignal, document: { createElement: () => node('x') },
+    setTimeout: callback => callback(),
+    fetch: async (url, options) => {
+      assert.equal(sent.length, 1, 'the office request is submitted before customer email');
+      autoEmail.push({ url, body: JSON.parse(options.body) });
+      return { status: emailStatuses.shift() };
+    },
+    console: { log() {}, warn() {}, error: (...a) => process.env.DBG && console.error(...a) },
+  }, code);
   nodes['bp-email-address'].value = 'a@b.co';
-  const show = nodes['bp-email-status'] = Object.assign(node('bp-email-status'), {});
-  return { click: () => handlers['bp-action-email:click'](), nodes, sent };
+  nodes['bp-email-status'] = node('bp-email-status');
+  return { click: () => handlers['bp-action-email:click'](), nodes, sent, autoEmail };
 }
 
 test('emailed request with no price: sends a project request with no price lines and cleans up', async () => {
@@ -337,6 +347,8 @@ test('emailed request with no price: sends a project request with no price lines
   await e.click();
   assert.equal(e.sent.length, 1);
   assert.equal(e.sent[0].priceRange, '');
+  assert.equal(e.sent[0].estimateEmailOptIn, false);
+  assert.deepEqual(e.autoEmail, []);
   assert.match(e.sent[0].notes, /EMAILED PROJECT REQUEST \(no price shown\)/);
   assert.doesNotMatch(e.sent[0].notes, /Range|\$|NaN|undefined/);
   assert.equal(e.nodes['bp-action-email'].textContent, '✓ Request sent');
@@ -348,7 +360,21 @@ test('emailed estimate with a price keeps its range lines', async () => {
   await e.click();
   assert.equal(e.sent[0].priceRange, '$5,700 – $6,300');
   assert.match(e.sent[0].notes, /EMAILED ESTIMATE REQUEST — Style: Style F · Length: 120 ft · Height: 6 ft · Gates: 1 walk/);
-  assert.equal(e.nodes['bp-action-email'].textContent, '✓ Estimate requested');
+  assert.equal(e.sent[0].estimateEmailOptIn, true);
+  assert.equal(e.sent[0].pricingProject, 'saved estimate options');
+  assert.deepEqual(e.autoEmail, [{ url: '/.netlify/functions/ballpark-email', body: { receipt: RECEIPT, optIn: true } }]);
+  assert.equal(e.nodes['bp-action-email'].textContent, '✓ Estimate emailed');
+  await e.click();
+  assert.equal(e.autoEmail.length, 1);
+});
+
+test('the confirmed office request survives a disabled email sender and brief intake delay', async () => {
+  const e = emailPage({ price: { value: { low: 5700, high: 6300 } }, emailStatuses: [409, 503] });
+  await e.click();
+  assert.equal(e.autoEmail.length, 2);
+  assert.equal(e.sent.length, 1);
+  assert.equal(e.nodes['bp-action-email'].textContent, '✓ Request sent');
+  assert.match(e.nodes['bp-email-status'].textContent, /^Your request reached our office/);
 });
 
 test('an error while sending leaves the button and the email field usable again', async () => {
@@ -356,7 +382,7 @@ test('an error while sending leaves the button and the email field usable again'
   await e.click();
   assert.equal(e.nodes['bp-action-email'].disabled, false);
   assert.equal(e.nodes['bp-email-address'].disabled, false);
-  assert.equal(e.nodes['bp-action-email'].textContent, 'Request emailed estimate');
+  assert.equal(e.nodes['bp-action-email'].textContent, 'Email me this estimate');
   assert.match(e.nodes['bp-email-status'].textContent, /Could not send that right now/);
 });
 
