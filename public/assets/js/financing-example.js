@@ -38,12 +38,12 @@
 
   // "$4,200 – $5,600" -> {low: 4200, high: 5600}. Anything else -> null.
   function parseRange(text) {
-    var found = String(text || '').match(/\$\s?[\d,]+/g);
-    if (!found || !found.length || found.length > 2) return null;
-    var nums = found.map(function (part) { return Number(part.replace(/[^\d]/g, '')); });
-    if (nums.some(function (n) { return !isFinite(n) || n <= 0; })) return null;
-    var low = Math.min.apply(null, nums), high = Math.max.apply(null, nums);
-    return { low: low, high: high };
+    var match = /^\$(\d{1,3}(?:,\d{3})+|\d+)(?:\s*[–-]\s*\$(\d{1,3}(?:,\d{3})+|\d+))?$/.exec(String(text || '').trim());
+    if (!match) return null;
+    var low = Number(match[1].replace(/,/g, ''));
+    var high = match[2] ? Number(match[2].replace(/,/g, '')) : low;
+    return Number.isSafeInteger(low) && Number.isSafeInteger(high) && low > 0 && high >= low && high < 1e9
+      ? { low: low, high: high } : null;
   }
 
   // The loan lengths that give a real payment for this range, shortest first.
@@ -83,8 +83,12 @@
   // evenly over its months. Plain division, no interest.
   function payoffText(range) {
     if (!range) return '';
-    var low = money(range.low / PROMO.months), high = money(range.high / PROMO.months);
-    return 'To pay this off in ' + PROMO.months + ' months: about ' + (low === high ? low : low + ' – ' + high) + ' a month.';
+    function monthly(amount) {
+      var payment = Math.ceil(amount * 100 / PROMO.months) / 100;
+      return payment.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    }
+    var low = monthly(range.low), high = monthly(range.high);
+    return 'To pay this off in ' + PROMO.months + ' months: budget ' + (low === high ? low : low + ' – ' + high) + ' a month.';
   }
 
   function promoTerms() {

@@ -464,6 +464,7 @@
             </div>
           </div>
           <form method="post" id="bp-form">
+          <div hidden aria-hidden="true"><label>Leave blank <input name="bot-field" type="text" tabindex="-1" autocomplete="off"></label></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
               <div>
                 <label class="form-label" style="color:var(--cream);" for="bpf-name">Name *</label>
@@ -717,9 +718,9 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=20261120" defer></script>
+<script src="../../assets/js/leads.js?v=money-audit-1" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=20261120" defer></script>
+<script type="module" src="../../assets/js/ballpark.js?v=money-audit-1"></script>
 <script>
 (function () {
   const finance = document.getElementById('bp-finance');
@@ -729,7 +730,7 @@
     if (pending || finance.style.display === 'none') return;
     pending = true;
     const script = document.createElement('script');
-    script.src = '/assets/js/financing-example.js?v=20261117';
+    script.src = '/assets/js/financing-example.js?v=money-audit-1';
     script.async = true;
     script.onload = () => observer.disconnect();
     script.onerror = () => {

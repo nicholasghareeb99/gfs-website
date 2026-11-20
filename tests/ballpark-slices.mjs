@@ -5,6 +5,7 @@
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { read } from './helpers.mjs';
+import * as pricingRules from '../public/assets/js/ballpark-pricing-rules.mjs';
 
 export const SRC = read('public/assets/js/ballpark.js').replace(/\r\n/g, '\n');
 
@@ -54,7 +55,7 @@ export function fakeTimers() {
 
 /** Runs `code` plus `exposeCode` in a context with the given globals; returns the context. */
 export function run(globals, code) {
-  const context = vm.createContext({ console: { log() {}, warn() {}, error() {} }, Object, JSON, Array, Set, Map, Math, Number, String, RegExp, Error, Promise, URL, Date, ...globals });
+  const context = vm.createContext({ console: { log() {}, warn() {}, error() {} }, Object, JSON, Array, Set, Map, Math, Number, String, RegExp, Error, Promise, URL, Date, ...pricingRules, ...globals });
   vm.runInContext(code, context);
   return context;
 }

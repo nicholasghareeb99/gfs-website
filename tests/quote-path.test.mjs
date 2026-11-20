@@ -24,7 +24,7 @@ const ballpark = {
   ...customer, contactMethod: 'Text', bestTime: 'Evening', source: 'ballpark-quote-tool',
   fenceType: 'Wood', fenceStyle: 'Cedar Privacy', height: '6', linearFeet: 120, singleGates: 1, doubleGates: 2,
   timeline: 'Next spring', geometry: JSON.stringify(drawing), siteNotes: ['Yard slopes'], heardFrom: 'Friend',
-  sections: '80 ft cedar\n40 ft chain link', priceRange: 'Test price range',
+  sections: '80 ft cedar\n40 ft chain link', priceRange: '$4,000 – $4,400',
 };
 const booking = {
   ...customer, contactMethod: 'Email', email: 'Customer@Example.test',
@@ -64,7 +64,7 @@ function quotePage(kind, input, netlify) {
     '[type="submit"]': submit, '.form-success': success, '.form-error': error,
   };
   const form = {
-    ...element(), elements: fields, parentElement: parent,
+    ...element(), elements: fields, parentElement: parent, checkValidity: () => true,
     hasAttribute: name => kind === 'booking' && name === 'data-booking-form',
     querySelector: selector => selectors[selector] || null,
     querySelectorAll: selector => selectors[selector] ? [selectors[selector]] : [],
@@ -151,7 +151,7 @@ function fakeNetlify({ loseFirstResponse = false, rejectWrite = false } = {}) {
   return { receive, sync, submissions, documents, databaseStatuses };
 }
 
-const netlifyOnly = new Set(['form-name', 'bot-field', 'subject', 'summary', 'price_range_shown', 'came_from', 'submitted']);
+const netlifyOnly = new Set(['form-name', 'subject', 'summary', 'came_from', 'submitted']);
 const includedInNotes = {
   best_way_to_reach: (value, notes) => notes.includes('Best way to reach: ' + value),
   best_time_to_reach: (value, notes) => notes.includes(' (' + value + ')'),
@@ -163,16 +163,21 @@ const numeric = new Set(['linearFeet', 'singleGates', 'doubleGates']);
 
 function fieldDestination(field, value, { collection, id, record }) {
   if (netlifyOnly.has(field)) return ['Netlify only', false, true];
+  if (field === 'bot-field') return ['spam check', true, value === ''];
+  if (field === 'price_range_shown') return ['notes and meta', Boolean(value), !value || record.notes.replace(/\s/g, '').includes(value.replace(/\s/g, ''))];
   if (field === 'gfs_contract') return ['contract check', true, value === 'gfs-intake-v1'];
   if (field === 'intake_kind') return ['collection choice', true, collection === (value === 'booking' ? 'bookings' : 'websiteLeads')];
   if (field === 'submission_id') return ['document ID', true, id === 'web_' + value];
   if (field === 'createdAt') return ['server timestamp', false, record.createdAt === receivedAt.toISOString()];
   if (field === 'createdAtMs') return ['server timestamp', false, record.createdAtMs === receivedAt.getTime()];
-  if (Object.hasOwn(includedInNotes, field)) return ['notes', false, !value || includedInNotes[field](value, record.notes)];
+  if (Object.hasOwn(includedInNotes, field)) return ['notes', field === 'best_way_to_reach', !value || includedInNotes[field](value, record.notes)];
   if (field === 'page') return ['meta', false, record.meta.split(' | ').includes('page=' + encodeURIComponent(value))];
   if (field === 'map_drawing') return ['geometry', false, !value || Boolean(record.geometry)];
   if (field === 'photo') return ['photo URL', true, record.photo === photoUrl];
 
+  if ((field === 'notes' || field === 'meta') && record.source === 'ballpark-quote-tool' && record.meta.includes('price_range_shown=')) {
+    return ['record field with saved range', true, record[field].endsWith(value)];
+  }
   const expected = numeric.has(field) ? (field === 'linearFeet' && !Number(value) ? null : Number(value)) : value;
   return ['record field', true, Object.hasOwn(record, field) && record[field] === expected];
 }

@@ -259,3 +259,19 @@ test('a lead that is not there yet gives 409 and is priced on a later try (the p
   assert.equal((await sendWith(g)).status, 200);
   assert.equal(g.counts.get(RECEIPT), 1, 'only the priced request was counted');
 });
+
+test('catalogue excludes unoffered products and caps height for unlabelled chain link', async () => {
+  const names = ['Locust Split Rail', 'Barbed Wire', 'Razor Wire', 'Chain Link 8 ft', 'Chain Link 4–8 ft',
+    'Composite Privacy', 'Wrought-Iron Fence', 'Snow Fence', 'Electric Fence', 'Invisible Fence', 'Pool Fence', 'Farm Fence'];
+  const rows = names.map(name => name + ' : 30 : 150 : 300').concat('Chain Link : 20 : 150 : 300').join('\n');
+  assert.deepEqual(Object.keys(parsePricing(rows)), ['chain-link']);
+  assert.deepEqual(await (await ask({ receipt: RECEIPT, parts: [part('Chain Link', 50, { height: 8 })] }, google({ pricing: rows }))).json(), { needsQuote: true });
+});
+
+test('bad selected gate rates and tiny totals leave pricing to the office', async () => {
+  const rows = ['Ranch Rail : 12.5 : -100 : Infinity', 'Cedar Privacy : 40 : 0 : 500'].join('\n');
+  for (const selection of [part('Ranch Rail', 1), part('Ranch Rail', 150, { singleGates: 1 }),
+    part('Ranch Rail', 150, { doubleGates: 1 }), part('Cedar Privacy', 150, { singleGates: 1 })]) {
+    assert.deepEqual(await (await ask({ receipt: RECEIPT, parts: [selection] }, google({ pricing: rows }))).json(), { needsQuote: true });
+  }
+});

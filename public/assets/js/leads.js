@@ -114,6 +114,9 @@
     try { return new Date(value + 'T12:00:00Z').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }); } catch { return value; }
   }
   // One readable line for the top of the office email and its subject.
+  function gateCount(value) {
+    return /^\d+\+$/.test(String(value)) ? Number(String(value).slice(0, -1)) : Number(value || 0);
+  }
   function officeSummary(input, sections, priceRange) {
     const bits = [];
     if (input.date) bits.push(niceDate(input.date) + (input.time ? ', ' + oneLine(input.time, 40) : ''));
@@ -123,8 +126,8 @@
     if (Number(input.linearFeet) > 0) bits.push(Number(input.linearFeet) + ' ft');
     if (input.height && sections.length <= 1) bits.push(oneLine(input.height, 10) + ' ft tall');
     const gates = [];
-    if (Number(input.singleGates) > 0) gates.push(Number(input.singleGates) + ' walk');
-    if (Number(input.doubleGates) > 0) gates.push(Number(input.doubleGates) + ' drive');
+    if (gateCount(input.singleGates) > 0) gates.push(input.singleGates + ' walk');
+    if (gateCount(input.doubleGates) > 0) gates.push(input.doubleGates + ' drive');
     if (gates.length) bits.push(gates.join(' + ') + (gates.length === 1 && /^1 /.test(gates[0]) ? ' gate' : ' gates'));
     if (input.removeOldFence) bits.push('remove old fence');
     if (input.timeline) bits.push(oneLine(input.timeline, 60));
@@ -166,8 +169,8 @@
     if (input.height && !multi)     detail.push(`Height: ${input.height} ft`);
     if (multi)                 detail.push('Fence sections: ' + sections.map((line, i) => '(' + (i + 1) + ') ' + line).join('; '));
     const gateBits = [];
-    if (Number(input.singleGates) > 0) gateBits.push(`${input.singleGates} walk`);
-    if (Number(input.doubleGates) > 0) gateBits.push(`${input.doubleGates} drive`);
+    if (gateCount(input.singleGates) > 0) gateBits.push(`${input.singleGates} walk`);
+    if (gateCount(input.doubleGates) > 0) gateBits.push(`${input.doubleGates} drive`);
     if (gateBits.length) detail.push(`Gates: ${gateBits.join(' + ')}`);
     if (input.removeOldFence) detail.push('Remove existing fence');
     if (input.timeline)        detail.push(`Timeline: ${input.timeline}`);
@@ -206,8 +209,8 @@
       fenceStyle: input.fenceStyle || '',
       linearFeet: input.linearFeet ? Number(input.linearFeet) : null,
       height: input.height || '',
-      singleGates: input.singleGates ? Number(input.singleGates) : 0,
-      doubleGates: input.doubleGates ? Number(input.doubleGates) : 0,
+      singleGates: gateCount(input.singleGates),
+      doubleGates: gateCount(input.doubleGates),
       timeline: input.timeline || '',
       // Drawn fence geometry from the ballpark map (JSON string of
       // {lat,lng} lines + gates) — the Exec app rebuilds the sketch
@@ -228,6 +231,7 @@
       best_time_to_reach: bestTime,
       summary: officeSummary(input, sections, priceRange),
       price_range_shown: priceRange,
+      ...(input.pricingProject ? { pricing_project: input.pricingProject } : {}),
       fence_sections: sections.join('\n'),
       site_notes: siteNotes,
       heard_from: oneLine(input.heardFrom, 80),
@@ -332,14 +336,23 @@
   // was lost would reach the office twice. Cleared when confirmed; never outlives the tab.
   const memoryPending=new Map();
   function readPending(key){try{const rows=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(rows)?rows:[];}catch{return[];}}
+  function intakeFingerprint(kind, record, legacy = false) {
+    const fields = [kind,record.name,record.phone,record.email,record.address,record.notes,record.geometry,record.photo,record.date,record.time];
+    if (!legacy && (record.pricing_project || record.price_range_shown)) fields.push(record.pricing_project || '', record.price_range_shown || '');
+    return JSON.stringify(fields);
+  }
   async function routeIntake(record,kind,requestScope={}){
-    const baseFingerprint=JSON.stringify([kind,record.name,record.phone,record.email,record.address,record.notes,record.geometry,record.photo,record.date,record.time]);
-    const fingerprint=requestScope.scope?baseFingerprint+'|flow='+requestScope.scope:baseFingerprint;
+    const baseFingerprint=intakeFingerprint(kind,record);
+    const scopeSuffix=requestScope.scope?'|flow='+requestScope.scope:'';
+    const fingerprint=baseFingerprint+scopeSuffix;
+    const legacyFingerprint=intakeFingerprint(kind,record,true)+scopeSuffix;
+    const matchesPricing=row=>(row.record.pricing_project||'')===(record.pricing_project||'')&&(row.record.price_range_shown||'')===(record.price_range_shown||'');
     if(inflight.has(fingerprint))return inflight.get(fingerprint);
     const run=(async()=>{
       const storageKey='gfs-intake-pending-v1';const pending=readPending(storageKey),remembered=[...memoryPending.values()];
       const find=test=>pending.find(test)||remembered.find(test);
-      let row=requestScope.retryId?find(x=>x.id===requestScope.retryId&&x.fingerprint===fingerprint):find(x=>x.fingerprint===fingerprint);
+      const matches=x=>x.fingerprint===fingerprint||(x.record&&x.fingerprint===legacyFingerprint&&matchesPricing(x));
+      let row=requestScope.retryId?find(x=>x.id===requestScope.retryId&&matches(x)):find(matches);
       if(requestScope.retryId&&!row)return{ok:false,errors:['This saved request changed or is no longer pending. Review the form before sending.']};
       if(!row&&requestScope.scope&&requestScope.legacyRecoveryAllowed)row=find(x=>x.fingerprint===baseFingerprint);
       if(!row){row={id:crypto.randomUUID(),kind,record,fingerprint,at:Date.now(),origin:location.origin};if(requestScope.flowId&&/^[a-f0-9]{64}$/.test(requestScope.key||''))row.flowKey=requestScope.key;}
@@ -388,7 +401,10 @@
     if(result.ok&&prepared.track&&acceptedRecord.source!=='ballpark-email-estimate'){try{fireAnalytics(acceptedRecord,result.id,kind==='booking'?'booking':'lead');}catch{}}
     return result;
   }
+  const filledHoneypot = input => String(input?.['bot-field'] ?? '').trim().length > 0;
+  const honeypotFailure = () => ({ ok: false, errors: ['We could not send this request. Please try again or call (419) 214-2107.'] });
   async function submit(input,options={}){
+    if (filledHoneypot(input)) return honeypotFailure();
     // An emailed-estimate follow-up is itself a request to be emailed.
     const emailFollowup = input?.source === 'ballpark-email-estimate';
     if (emailFollowup) input = { ...input, contactMethod: 'Email' };
@@ -523,10 +539,15 @@
     try{
     if(!row||!['estimate','ballpark','booking'].includes(row.kind)||!receiptPattern.test('web_'+row.id)||!row.record||typeof row.record!=='object'||validate(row.record).length||(row.origin&&row.origin!==location.origin)||['form-name','gfs_contract','intake_kind','submission_id','bot-field'].some(key=>Object.hasOwn(row.record,key)))return null;
     if(row.kind==='booking'){const date=row.record.date;if(typeof date!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!Number.isFinite(Date.parse(date+'T12:00:00Z'))||new Date(date+'T12:00:00Z').toISOString().slice(0,10)!==date||!row.record.time)return null;}
-    const r=row.record,base=JSON.stringify([row.kind,r.name,r.phone,r.email,r.address,r.notes,r.geometry,r.photo,r.date,r.time]);
-    if(row.fingerprint===base)return '';
-    const suffix=String(row.fingerprint||'').slice(base.length);
-    return String(row.fingerprint||'').startsWith(base)&&/^\|flow=[a-zA-Z0-9_-]{16,80}$/.test(suffix)?suffix.slice(6):null;
+    const r=row.record,base=intakeFingerprint(row.kind,r);
+    const legacy=intakeFingerprint(row.kind,r,true);
+    const fingerprint=String(row.fingerprint||'');
+    if(fingerprint===base || fingerprint===legacy)return '';
+    for (const prefix of [base,legacy]) {
+      const suffix=fingerprint.slice(prefix.length);
+      if(fingerprint.startsWith(prefix)&&/^\|flow=[a-zA-Z0-9_-]{16,80}$/.test(suffix))return suffix.slice(6);
+    }
+    return null;
     }catch{return null;}
   }
   async function retryPendingRequest(id){
@@ -647,9 +668,20 @@
     form.dataset.bound = 'yes';
     window.GFSRequestFlow?.bindForm(form,form.hasAttribute('data-booking-form')?'booking':'estimate');
     wireReach(form);
+    const fenceType = form.querySelector('[name="fenceType"]'), height = form.querySelector('[name="height"]');
+    if (fenceType && height) {
+      const syncHeight = () => {
+        const chain = fenceType.value === 'Chain Link';
+        for (const option of height.options) option.disabled = chain && Number(option.value) > 6;
+        if (chain && Number(height.value) > 6) height.value = '';
+      };
+      fenceType.addEventListener('change', syncHeight);
+      syncHeight();
+    }
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
       const data = collectForm(form);
 
       const submitBtn = form.querySelector('[type="submit"]');
@@ -718,6 +750,7 @@
   // Rules require: name, phone, date, time (all strings).
   // Optional: email, address, notes (rule-validated max lengths).
   async function submitBooking(input,options={}) {
+    if (filledHoneypot(input)) return honeypotFailure();
     const reachIssue = reachErrors(input || {});
     if (reachIssue.length) return { ok: false, errors: reachIssue, field: 'contactMethod' };
     const details = buildLead(input);
@@ -725,7 +758,7 @@
       name: resolveName(input).slice(0, 200),
       phone: normalizePhone(input.phone || '').slice(0, 50),
       date: (input.date || '').trim().slice(0, 30),
-      time: (input.time || '').trim().slice(0, 30),
+      time: (input.time || '').trim(),
       email: (input.email || '').trim().toLowerCase(),
       address: (input.address || '').trim().slice(0, 500),
       notes: details.notes,
@@ -744,7 +777,8 @@
     const errors = validate(booking);
     const requestedDate = /^\d{4}-\d{2}-\d{2}$/.test(booking.date) ? new Date(booking.date + 'T12:00:00Z') : null;
     if (!requestedDate || !Number.isFinite(requestedDate.getTime()) || requestedDate.toISOString().slice(0,10) !== booking.date) errors.push('Pick a valid date');
-    if (!booking.time) errors.push('Pick a time');
+    if (!booking.address) errors.push('Property address is required');
+    if (!booking.time || booking.time.length > 100) errors.push('Pick a valid time');
     if (errors.length) return { ok: false, errors };
     rememberReach(input);
 
