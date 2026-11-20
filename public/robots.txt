@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://ghareebfence.com/sitemap.xml
+Sitemap: https://ghareebfence.com/sitemap-images.xml
