@@ -1,3 +1,5 @@
+import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, isChainLink, isOfferedStyle, positiveRate, priceBand, pricingRows } from './ballpark-pricing-rules.mjs';
+
 // Nov 1 pixel audit. Display selection only; stored originals are retained.
 // Match exact legacy files so later staff uploads remain authoritative.
 (function(root){
@@ -1198,16 +1200,32 @@
     for (const part of projectParts()) {
       const fence = FENCE_PRICING[part.fenceId];
       if (!fence || !Number.isFinite(part.feet) || part.feet <= 0) return null;
-      // The height as the customer set it: the function applies a style's named height itself.
-      const height = Number(part.height);
-      if (!Number.isFinite(height) || (supportedStyleHeight(fence.name) === null && ![4, 5, 6, 8].includes(height))) return null;
+      // Named variants carry their own height. Unnamed styles use the selected height.
+      const height = partHeight(fence, part.height);
+      if (!Number.isFinite(height) || !canPriceHeight(fence.name, height) || (supportedStyleHeight(fence.name) === null && ![4, 5, 6, 8].includes(height))) return null;
       parts.push({ style: fence.name, feet: part.feet, height: height, singleGates: Math.max(0, part.singleGates), doubleGates: Math.max(0, part.doubleGates) });
     }
     const removal = state.removeOldFence ? { on: true, material: state.existingFenceMaterial, feet: state.linearFeet } : { on: false };
-    return { parts: parts, removal: removal, compare: true };
+    return { parts, removal, compare: true };
+  }
+  function pricingProject() {
+    const request = serverPriceRequest();
+    return request ? JSON.stringify({ parts: request.parts, removal: request.removal }) : '';
+  }
+  function projectSnapshot() {
+    return JSON.stringify([state.fenceId, state.linearFeet, state.height, state.singleGates, state.doubleGates,
+      state.removeOldFence && state.existingFenceMaterial, state.sections, state.siteNotes, state.address, collectGeometry()]);
+  }
+  function projectChanged() {
+    return Boolean(state.acceptedProject && state.acceptedProject.key !== projectSnapshot());
+  }
+  function displayPrice() {
+    if (projectChanged()) return null;
+    if (!state.acceptedProject) return calculatePrice();
+    return state.acceptedProject.server ? serverPriceNow() : state.acceptedProject.price;
   }
   function serverPriceKey() {
-    if (!serverPriceExpected() || !state.priceUnlocked || !pricingReceipt) return '';
+    if (!serverPriceExpected() || !state.priceUnlocked || !pricingReceipt || projectChanged() || state.acceptedProject?.server === false) return '';
     const req = serverPriceRequest();
     return req ? pricingReceipt + '|' + JSON.stringify(req) : '';
   }
@@ -1276,7 +1294,7 @@
   }
   // A range and rows the page can trust the shape of, or null.
   function serverPriceAnswer(json) {
-    const money = n => typeof n === 'number' && Number.isFinite(n) && n >= 0 && n < 1e9;
+    const money = n => typeof n === 'number' && Number.isSafeInteger(n) && n > 0 && n < 1e9;
     if (!json || typeof json !== 'object' || !money(json.low) || !money(json.high) || json.high < json.low) return null;
     const rows = [];
     for (const row of Array.isArray(json.comparisons) ? json.comparisons.slice(0, 1000) : []) {
@@ -1334,16 +1352,16 @@
       // A 429 with no Retry-After is the project's allowance, and 400, 403 and the like will not change.
       serverPriceFail(key, res.status === 409 || res.status >= 500 || (res.status === 429 && wait > 0), wait);
     };
-    const original = () => acceptedBallparkReceipt;
-    // Ask for a session for the original request. Resolves to it, or null after recording the failure.
-    const renew = () => post({ renew: true, receipt: original() }).then(res => {
+    const receipt = serverPrice.receipt;
+    // Ask for a session for the accepted pricing request. Resolves to it, or null after recording the failure.
+    const renew = () => post({ renew: true, receipt }).then(res => {
       if (!current()) return null;
       if (!res.ok) { failed(res); return null; }
       return res.json().then(json => {
         if (!current()) return null;
         const seconds = json && typeof json.expiresIn === 'number' ? json.expiresIn : NaN;
         if (!json || typeof json.session !== 'string' || !(seconds > 0) || seconds > 86400) { serverPriceFail(key, false, 0); return null; }
-        const session = { receipt: original(), token: json.session, until: Date.now() + seconds * 1000 };
+        const session = { receipt, token: json.session, until: Date.now() + seconds * 1000 };
         keepPricingSession(session);
         return session;
       });
@@ -1352,8 +1370,8 @@
       if (!current()) return;
       // The office record can take a few seconds to appear: ask again.
       if (res.status === 409 && attempt < SERVER_PRICE_RETRY.length) { clearTimeout(serverPrice.deadline); serverPrice.timer = setTimeout(() => serverPriceRun(key, attempt + 1), SERVER_PRICE_RETRY[attempt]); return; }
-      if (res.status === 403 && original()) {
-        // Over a day old: a returning customer gets a session for the original request, once.
+      if (res.status === 403 && receipt) {
+        // Over a day old: a returning customer gets a session for the accepted pricing request, once.
         return res.json().then(json => json, () => null).then(json => {
           if (!current()) return;
           const why = json && json.error;
@@ -1371,9 +1389,9 @@
     });
     function begin() {
       const old = pricingReceiptAt > 0 && Date.now() - pricingReceiptAt > SERVER_RECEIPT_FRESH_MS;
-      if (!(serverPrice.useSession || old) || !original()) return price(null);
+      if (!(serverPrice.useSession || old) || !receipt) return price(null);
       serverPrice.useSession = true;
-      const held = heldPricingSession(original());
+      const held = heldPricingSession(receipt);
       return held ? price(held) : renew().then(session => { if (session && current()) return price(session); });
     }
     try { Promise.resolve(begin()).catch(() => { if (current()) serverPriceFail(key, true, 0); }); } catch (e) { serverPriceFail(key, true, 0); }
@@ -1386,7 +1404,7 @@
     serverPriceCancel();
     serverPrice.key = key; serverPrice.result = null; serverPrice.recovery = 0; serverPrice.eventRetries = 0; serverPrice.retryable = false; serverPrice.useSession = false; serverPrice.sessionRetried = false;
     if (!key) { serverPrice.phase = 'idle'; serverPrice.req = null; serverPrice.receipt = ''; return; }
-    serverPrice.phase = 'working'; serverPrice.req = serverPriceRequest(); serverPrice.receipt = pricingReceipt;
+    serverPrice.phase = 'working'; serverPrice.req = { ...serverPriceRequest(), ...(state.acceptedProject?.server ? { saved: true } : {}) }; serverPrice.receipt = pricingReceipt;
     serverPrice.timer = setTimeout(() => serverPriceRun(key, 0), 400);
   }
   // The range for the project as it is right now; null while it is being worked out.
@@ -1424,35 +1442,8 @@
   // Each height is its own style with its own price, so there is no height
   // multiplier. Removal rates come from the Executive app's settings so the
   // website and the app stay in lockstep; the defaults match its fallbacks.
-  const PRICING_FACTORS = {
-    remWood: 5,
-    remChain: 3,
-    remOther: 6,
-  };
+  const PRICING_FACTORS = { ...DEFAULT_REMOVAL_RATES };
 
-  // Section sizes — ported from the Executive app's getSectionSize().
-  // Order matters: most specific match first.
-  const SECTION_SIZE_OVERRIDES = {
-    'rockport-midrail': 6,
-    'rockport midrail': 6,
-    'midrail': 6,
-  };
-  function getSectionSize(styleName) {
-    if (!styleName) return 0;
-    const s = String(styleName).toLowerCase();
-    for (const pattern in SECTION_SIZE_OVERRIDES) {
-      if (s.indexOf(pattern.toLowerCase()) >= 0) return SECTION_SIZE_OVERRIDES[pattern];
-    }
-    if (s.includes('split rail') || s.includes('splitrail') || s.includes('split-rail')) return 10;
-    if (s.includes('chain link') || s.includes('chainlink') || s.includes('chain-link')) return 10;
-    if (s.includes('vinyl')) return 8;
-    if (s.includes('aluminum') || s.includes('ornamental')) return 6;
-    if (s.includes('wood') || s.includes('cedar') || s.includes('treated') ||
-        s.includes('dog ear') || s.includes('dog-ear') || s.includes('board on board') ||
-        s.includes('board-on-board') || s.includes('shadow box') || s.includes('shadowbox') ||
-        s.includes('hybrid')) return 8;
-    return 0;  // picket / ranch rail / unknown → no rounding
-  }
   function roundToSections(footage, styleName) {
     const ft = parseFloat(footage) || 0;
     const sectionSize = getSectionSize(styleName);
@@ -1504,15 +1495,7 @@
     const gateCost = parts.reduce((sum, part) => sum + part.gateCost, 0);
     const total = fenceCost + gateCost + removalCost;
 
-    // Existing planning band; this is not a measured prediction of accuracy.
-    const low  = total * 0.95;
-    const high = total * 1.05;
-
-    return {
-      total: Math.round(total),
-      low:   Math.round(low / 100) * 100,    // round to nearest $100
-      high:  Math.round(high / 100) * 100,
-    };
+    return priceBand(total);
   }
 
   function existingFenceMaterialLabel(value = state.existingFenceMaterial) {
@@ -1591,6 +1574,13 @@
     // one keep the customer's pick from the 4/5/6/8 ft ladder.
     const namedHeight = supportedStyleHeight(fence.name);
     const heightSelect = el('bp-height');
+    if (heightSelect) {
+      for (const option of heightSelect.options) option.disabled = isChainLink(fence.name) && Number(option.value) > 6;
+      if (isChainLink(fence.name) && Number(state.height) > 6) {
+        setHeightControl(heightSelect, 6);
+        state.height = '6';
+      }
+    }
     if (namedHeight !== null) {
       setHeightControl(heightSelect, namedHeight);
       state.height = String(namedHeight);
@@ -1654,6 +1644,7 @@
   function heightNeedsReview() {
     // A style that names its height carries its own price; nothing to review.
     const fence = FENCE_PRICING[state.fenceId];
+    if (fence && !canPriceHeight(fence.name, Number(state.height))) return true;
     if (fence && supportedStyleHeight(fence.name) !== null) return false;
     const height = Number(state.height);
     return Number.isFinite(height) && height >= 2 && height <= 12 && ![4, 5, 6, 8].includes(height);
@@ -1661,8 +1652,9 @@
 
   // What the office reads when a request arrives without a price range.
   function reviewNote(price) {
-    if (price && price.reason === 'server') return 'Planning range worked out on the website after this request was sent. No range was stored with it.';
-    if (price && price.reason === 'request') return 'Price by request: this website does not show price ranges, so no range was shown. Please send the price.';
+    if (price && price.reason === 'server') return 'Planning range requested. Use the range saved with this project if available.';
+    if (price && price.reason === 'request') return 'Price by request. No range was shown. Please send the price.';
+    if (price && price.reason === 'selection') return 'This selection needs office pricing. No range was shown.';
     return price && price.reason === 'prices'
       ? 'Quote review requested: the price list did not load on the customer\'s device, so no price range was shown.'
       : 'Quote review requested: ' + state.height + ' ft height. No automatic price range was provided.';
@@ -2078,8 +2070,7 @@
       }
       price = calculatePrice();
       if (!price || ![price.low, price.high, price.total].every(Number.isFinite) || price.low < 0 || price.high < price.low || price.total <= 0) {
-        message = 'Pricing is unavailable for this selection. Choose another style or request an on-site estimate.';
-        target = el('bp-fence-select');
+        return { requiresReview: true, reason: 'selection' };
       }
     }
     if (message) {
@@ -2104,12 +2095,13 @@
     if (!form) return;
     window.GFSRequestFlow?.bindForm(form,'ballpark',{
       onUpdate(){const button=form.querySelector('button[type="submit"]');if(button)button.disabled=false;resetEmailRequest();},
-      onNew(){acceptedBallparkReceipt='';pricingReceipt='';pricingReceiptAt=0;keepPricingSession(null);state.priceUnlocked=false;resetEmailRequest();el('bp-success')?.classList.remove('show');updateAll();}
+      onNew(){acceptedBallparkReceipt='';pricingReceipt='';pricingReceiptAt=0;keepPricingSession(null);state.priceUnlocked=false;state.acceptedProject=null;resetEmailRequest();el('bp-success')?.classList.remove('show');updateAll();}
     });
     function resetEmailRequest(){const emailButton=el('bp-action-email'),emailInput=el('bp-email-address');if(emailButton){emailButton.disabled=false;emailButton.textContent='Request emailed estimate';}if(emailInput)emailInput.disabled=false;const status=el('bp-email-status');if(status){status.textContent='';status.style.display='none';}}
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (!form.checkValidity()) { form.reportValidity(); return; }
       const submitBtn = form.querySelector('button[type="submit"]');
       const successEl = el('bp-success');
       const errorEl = el('bp-error');
@@ -2121,8 +2113,12 @@
       errorEl.textContent = ''; errorEl.classList.remove('show'); errorEl.style.display = '';
       const fd = new FormData(form);
       const fence = FENCE_PRICING[state.fenceId] || {};
+      const requestedProject = projectSnapshot();
+      const requestedServerProject = !pricesLive && pricesOnRequest() ? pricingProject() : '';
+      const shownPrice = pricesLive && !price.requiresReview ? price : null;
       const payload = {
         name: fd.get('name'),
+        'bot-field': fd.get('bot-field'),
         email: fd.get('email'),
         phone: fd.get('phone'),
         address: fd.get('address') || state.address,
@@ -2138,7 +2134,7 @@
         removeOldFence: state.removeOldFence,
         existingFenceMaterial: state.existingFenceMaterial,
         source: 'ballpark-quote-tool',
-        notes: [fd.get('notes'), removalScopeNote(), price.requiresReview ? reviewNote(price) : 'Ballpark range: '+formatPrice(price.low)+'–'+formatPrice(price.high)].filter(Boolean).join(' · '),
+        notes: [removalScopeNote(), fd.get('notes'), price.requiresReview ? reviewNote(requestedServerProject ? { reason: 'server' } : price) : ''].filter(Boolean).join(' · '),
         geometry: collectGeometry(),
         photo: leadPhoto || '',
         // How to reach them, when they want it built, what they told us
@@ -2148,7 +2144,8 @@
         timeline: fd.get('timeline') || '',
         siteNotes: state.siteNotes.slice(),
         sections: state.sections.length ? sectionLines().join('\n') : '',
-        priceRange: price.requiresReview ? '' : formatPrice(price.low)+'–'+formatPrice(price.high),
+        priceRange: shownPrice ? formatRange(shownPrice.low, shownPrice.high) : '',
+        pricingProject: requestedServerProject,
       };
 
       submitBtn.disabled = true;
@@ -2196,11 +2193,13 @@
         // A newly written document is fresh now; the id of an unchanged resend may be old, so its age is unknown (the function says).
         pricingReceiptAt = result.reused ? (nextPricing === pricingReceipt ? pricingReceiptAt : 0) : Date.now();
         pricingReceipt = nextPricing;
-        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
+        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'||price.reason==='selection'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
         // UNLOCK the price reveal
         state.priceUnlocked = true;
+        state.acceptedProject = { key: requestedProject, server: Boolean(requestedServerProject), price: shownPrice };
+        resetEmailRequest();
         if(!result.reused&&!result.requestAction&&(!price.requiresReview||price.reason==='server'))track('unlocked');
         clearDraft();
         updateAll();
@@ -2245,12 +2244,28 @@
     const formTitle = el('bp-contact-title'), formHint = el('bp-contact-hint');
     if (formTitle) formTitle.textContent = state.priceUnlocked ? 'Your request is in.' : reviewHeight || noPrices ? 'Request your free quote.' : 'Unlock your estimate.';
     if (formHint) formHint.textContent = state.priceUnlocked ? 'We have your details and will reach out the way you asked.' : reviewHeight ? 'Send your selections to our team for a height and price review. No automatic price range is available for this height.' : noPrices ? (pricesOnRequest() ? 'Send your plan and our team will get your price to you.' : 'Our price list is not loading right now. Send your details and we will get your price to you.') : 'Share your details to view the range and request a project review from our team.';
-    const price = calculatePrice();
+    const price = displayPrice();
     const priceCard = el('bp-price-card');
     const priceRange = el('bp-price-range');
     const priceHint  = el('bp-price-hint');
 
     if (!priceCard) return;
+
+    if (projectChanged()) {
+      if (priceRange) priceRange.textContent = 'Send your project update to see its range';
+      if (priceHint) priceHint.textContent = window.GFSRequestFlow
+        ? 'Choose Update this project in step 4 to send the changed details.'
+        : 'Send the changed details in step 4.';
+      const form = el('bp-form');
+      if (form && !window.GFSRequestFlow) {
+        form.style.display = '';
+        if (submitButton) submitButton.disabled = false;
+      }
+      renderFinance(null);
+      renderComparePanel(false);
+      renderPostUnlockActions(false);
+      return;
+    }
 
     if (!price) {
       // Not enough info yet
@@ -2290,7 +2305,7 @@
       renderComparePanel(false);
       // With no price (a quote-only page, or a range still being worked out)
       // everything that does not need a dollar figure stays available.
-      renderPostUnlockActions(!pricesLive && state.priceUnlocked === true && !!FENCE_PRICING[state.fenceId] && state.linearFeet > 0 && state.linearFeet <= 2000 && !sectionsIssue() && !(state.removeOldFence && !existingFenceMaterialLabel()), false);
+      renderPostUnlockActions(srv !== 'working' && !pricesLive && state.priceUnlocked === true && !!FENCE_PRICING[state.fenceId] && state.linearFeet > 0 && state.linearFeet <= 2000 && !sectionsIssue() && !(state.removeOldFence && !existingFenceMaterialLabel()), false);
       return;
     }
 
@@ -2300,7 +2315,7 @@
       // Show the range, and only the range: an itemised list of feet and
       // dollars would let anyone work out the per-foot rate.
       if (priceRange) {
-        priceRange.innerHTML = `${formatPrice(price.low)} – ${formatPrice(price.high)}`;
+        priceRange.textContent = formatRange(price.low, price.high);
       }
       if (priceHint) priceHint.textContent = 'Planning range. A site review confirms the final scope and price.';
       renderFinance(price);
@@ -2373,7 +2388,7 @@
     return Object.entries(FENCE_PRICING).map(([id, fence]) => {
       const named = supportedStyleHeight(fence.name);
       if (id !== state.fenceId && named !== null && named !== height) return null;
-      const price = calculatePrice(id);
+      const price = id === state.fenceId && state.acceptedProject ? displayPrice() : calculatePrice(id);
       return price ? { id, fence, price, name: fence.name, low: price.low, high: price.high, family: categoryForName(fence.name || id) } : null;
     }).filter(Boolean).sort((a, b) => a.price.total - b.price.total);
   }
@@ -2441,8 +2456,8 @@
         }
       });
       if (dlPdf) dlPdf.addEventListener('click', async () => {
-        if (!state.priceUnlocked || dlPdf.disabled) return;
-        const price = calculatePrice() || (pricesLive ? null : {});   // no price: the PDF says we will price it
+        if (!state.priceUnlocked || projectChanged() || dlPdf.disabled) return;
+        const price = displayPrice() || (pricesLive ? null : {});   // no price: the PDF says we will price it
         if (!price) return;
         const fence = FENCE_PRICING[state.fenceId];
         // Build comparisons for the PDF — same spec priced across materials.
@@ -3831,7 +3846,7 @@
       row('Height', heights.map(h => chipButton(h + ' ft', h === me.height, () => onPick(pickVariant(id, { height: h })))),
         heights.length === 1 ? 'This style comes in ' + me.height + ' ft. Need a different height? Tell us in the notes and we will price it.' : '');
     } else if (ladder) {
-      row('Height', [4, 5, 6, 8].map(h => chipButton(h + ' ft', Number(ladder.value) === h, () => ladder.set(h))));
+      row('Height', [4, 5, 6, 8].filter(h => canPriceHeight(fence.name, h)).map(h => chipButton(h + ' ft', Number(ladder.value) === h, () => ladder.set(h))));
     }
   }
 
@@ -3871,7 +3886,7 @@
       if (!fence) { if (section.fenceId && styleCatalogSettled) section.fenceId = ''; return; }
       const named = supportedStyleHeight(fence.name);
       if (named !== null) section.height = String(named);
-      else if (![4, 5, 6, 8].includes(Number(section.height))) section.height = '6';
+      else if (![4, 5, 6, 8].includes(Number(section.height)) || !canPriceHeight(fence.name, Number(section.height))) section.height = '6';
     });
   }
   function sectionsIssue() {
@@ -3891,7 +3906,7 @@
   }
   function projectParts(primaryId) {
     const totals = sectionTotals();
-    const parts = [{ primary: true, fenceId: primaryId || state.fenceId, feet: Math.round((Number(state.linearFeet) - totals.feet) * 100) / 100, height: state.height, singleGates: state.singleGates - totals.single, doubleGates: state.doubleGates - totals.double }];
+    const parts = [{ primary: true, fenceId: primaryId || state.fenceId, feet: Math.round((Number(state.linearFeet) - totals.feet) * 100) / 100, height: primaryId ? partHeight(FENCE_PRICING[state.fenceId], state.height) : state.height, singleGates: state.singleGates - totals.single, doubleGates: state.doubleGates - totals.double }];
     state.sections.forEach(section => parts.push({ primary: false, fenceId: section.fenceId, feet: section.feet, height: section.height, singleGates: section.singleGates, doubleGates: section.doubleGates }));
     return parts;
   }
@@ -3907,13 +3922,11 @@
     if (!fence || !Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
     if (!Number.isFinite(part.feet) || part.feet <= 0) return null;
     const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
-    if (named === null && ![4, 5, 6, 8].includes(height)) return null;
+    if (!canPriceHeight(fence.name, height) || (named === null && ![4, 5, 6, 8].includes(height))) return null;
     const rounding = roundToSections(part.feet, fence.name);
     // Styles installed in sections are billed at the next full panel.
-    return {
-      fenceCost: rounding.billable * fence.perFoot,
-      gateCost: Math.max(0, part.singleGates) * fence.singleGate + Math.max(0, part.doubleGates) * fence.doubleGate,
-    };
+    const gates = gateCost(part.singleGates, part.doubleGates, fence.singleGate, fence.doubleGate);
+    return gates === null ? null : { fenceCost: rounding.billable * fence.perFoot, gateCost: gates };
   }
   function gateWords(single, double) {
     const bits = [];
@@ -4258,8 +4271,8 @@
     const name = fence ? fence.name + (state.sections.length ? ' + ' + state.sections.length + ' more' : '') : '';
     let view;
     if (state.priceUnlocked) {
-      const price = heightNeedsReview() ? null : calculatePrice();
-      view = [price ? 'Your planning range' : 'Your request', price ? formatPrice(price.low) + ' – ' + formatPrice(price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
+      const price = heightNeedsReview() ? null : displayPrice();
+      view = [price ? 'Your planning range' : 'Your request', price ? formatRange(price.low, price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
     } else if (!feet) view = ['Step 1 of 4', 'How long is the fence?', 'Enter length', jump('bp-step-1', 'bp-linear-feet')];
     else if (!fence) view = ['Step 2 of 4', feet, 'Pick a style', () => openStylePicker()];
     else if (sectionsIssue()) view = ['Step 2 of 4', 'Finish your added style', 'Go to it', jump('bp-sections')];
@@ -4448,8 +4461,7 @@
           // made in its admin settings takes effect here too.
           ['remWood','remChain','remOther']
             .forEach(k => {
-              const v = parseFloat(data[k]);
-              if (!isNaN(v) && v > 0) PRICING_FACTORS[k] = v;
+              PRICING_FACTORS[k] = positiveRate(data[k], PRICING_FACTORS[k]);
             });
           // Live only if the list actually produced styles; a list with no
           // usable lines leaves the built-in styles in place, unpriced.
@@ -4564,20 +4576,9 @@
   // from .stylePhotos. Falls back to keyword-inferred photo only when the
   // Executive app has no photo uploaded for that style.
   function buildStylesFromExecPricing(pricingStr, stylePhotos) {
-    const lines = pricingStr.split('\n').map(l => l.trim()).filter(Boolean);
-    if (!lines.length) return false;
-
-    const built = {};
-    lines.forEach(line => {
-      const parts = line.split(':').map(s => s.trim());
-      if (parts.length < 4) return;
-      const name = parts[0];
-      const perFoot = parseFloat(parts[1]);
-      const singleGate = parseFloat(parts[2]);
-      const doubleGate = parseFloat(parts[3]);
-      if (!name || isNaN(perFoot)) return;
-      built[slugify(name)] = buildStyleEntry(name, perFoot, isNaN(singleGate) ? 150 : singleGate, isNaN(doubleGate) ? 300 : doubleGate, stylePhotos);
-    });
+    const built = Object.fromEntries(pricingRows(pricingStr).filter(row => slugify(row.name)).map(
+      ({ name, perFoot, singleGate, doubleGate }) => [slugify(name), buildStyleEntry(name, perFoot, singleGate, doubleGate, stylePhotos)]
+    ));
     return installCatalogue(built);
   }
 
@@ -4585,10 +4586,10 @@
   // rates are null, so pricePart() and calculatePrice() can never produce a
   // figure from them. `names` must already be through cleanStyleNames().
   function buildStylesFromNames(names, stylePhotos) {
-    const built = {};
+    const built = Object.create(null);
     names.forEach(name => {
       const id = slugify(name);
-      if (!id || Object.prototype.hasOwnProperty.call(built, id)) return;
+      if (!id || !isOfferedStyle(name) || Object.prototype.hasOwnProperty.call(built, id)) return;
       built[id] = buildStyleEntry(name, null, null, null, stylePhotos);
     });
     return installCatalogue(built);
@@ -4856,10 +4857,10 @@
     btn.textContent = 'Request emailed estimate';
 
     btn.addEventListener('click', async () => {
-      if (!state.priceUnlocked || btn.disabled) return;
+      if (!state.priceUnlocked || projectChanged() || serverPricePhase() === 'working' || btn.disabled) return;
       if (!photoReadyForSubmission()) return;
       const status = el('bp-email-status');
-      const price = submissionPrice(status);
+      const price = displayPrice() || (state.acceptedProject ? { requiresReview: true } : submissionPrice(status));
       const fence = FENCE_PRICING[state.fenceId];
       if (!price || !fence) return;
 
@@ -4912,6 +4913,7 @@
         address: (fd && fd.get('address')) || state.address || '',
         source: 'ballpark-email-estimate',
         parentReceipt: acceptedBallparkReceipt,
+        'bot-field': fd && fd.get('bot-field'),
         fenceStyle: fence.name || '',
         fenceType: fence.category || '',
         linearFeet: state.linearFeet,
@@ -4927,11 +4929,10 @@
         timeline: (fd && fd.get('timeline')) || '',
         siteNotes: state.siteNotes.slice(),
         sections: state.sections.length ? sectionLines().join('\n') : '',
-        priceRange: hasRange ? formatPrice(price.low) + '–' + formatPrice(price.high) : '',
-        notes: [(fd && fd.get('notes')) || '', removalScopeNote(), (hasRange ? 'EMAILED ESTIMATE REQUEST — ' : 'EMAILED PROJECT REQUEST (no price shown) — ') +
+        priceRange: hasRange ? formatRange(price.low, price.high) : '',
+        notes: [removalScopeNote(), (fd && fd.get('notes')) || '', (hasRange ? 'EMAILED ESTIMATE REQUEST — ' : 'EMAILED PROJECT REQUEST (no price shown) — ') +
                'Style: ' + fence.name + ' · Length: ' + state.linearFeet + ' ft · ' +
-               'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none') +
-               (hasRange ? ' · Range: ' + formatPrice(price.low) + '-' + formatPrice(price.high) : '')].filter(Boolean).join(' · '),
+               'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none')].filter(Boolean).join(' · '),
       };
 
       window.GFSRequestFlow?.setBusy(form,true);
