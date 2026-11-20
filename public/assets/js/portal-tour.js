@@ -6,7 +6,7 @@
   const dialog = document.createElement('dialog');
   dialog.className = 'portal-screen-viewer';
   dialog.setAttribute('aria-label', 'Customer portal screenshot, sample project');
-  dialog.innerHTML = '<div class="portal-viewer-top"><span data-portal-counter aria-live="polite"></span><button type="button" data-portal-close autofocus>Close ×</button></div><div class="portal-zoom-stage" tabindex="0" aria-label="Screenshot; scroll to read when enlarged"><img alt=""></div><p class="portal-viewer-caption"></p><div class="portal-viewer-controls"><button type="button" data-portal-prev aria-label="Previous portal screenshot">← Previous</button><button type="button" data-portal-next aria-label="Next portal screenshot">Next →</button><button type="button" data-portal-zoom aria-pressed="false">Read at full size</button><a target="_blank" rel="noopener">Open image ↗</a></div>';
+  dialog.innerHTML = '<div class="portal-viewer-top"><span data-portal-counter aria-live="polite"></span><button type="button" data-portal-close autofocus>Close ×</button></div><div class="portal-zoom-stage" tabindex="0" aria-label="Screenshot; scroll to read when enlarged"><img alt=""></div><p class="portal-viewer-caption"></p><div class="portal-viewer-controls"><button type="button" data-portal-prev aria-label="Previous portal screenshot">← Previous</button><button type="button" data-portal-next aria-label="Next portal screenshot">Next →</button><button type="button" data-portal-zoom aria-pressed="false">Read at full size</button><a href="#" target="_blank" rel="noopener">Open image ↗</a></div>';
   document.body.append(dialog);
   const stage = dialog.querySelector('.portal-zoom-stage');
   const zoom = dialog.querySelector('[data-portal-zoom]');

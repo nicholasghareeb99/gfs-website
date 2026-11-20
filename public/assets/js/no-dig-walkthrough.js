@@ -47,7 +47,7 @@
     const dialog = document.createElement('dialog');
     dialog.className = 'fence-viewer';
     dialog.setAttribute('aria-label', 'No-dig installation illustrations');
-    dialog.innerHTML = '<div class="fence-viewer-bar"><span data-illustration-count aria-live="polite"></span><button type="button" data-illustration-close autofocus>Close ×</button></div><figure><img alt=""><figcaption></figcaption></figure><div class="fence-viewer-nav"><button type="button" data-illustration-previous aria-label="Previous illustration">← Previous</button><button type="button" data-illustration-next aria-label="Next illustration">Next →</button><a target="_blank" rel="noopener">Open full image</a></div>';
+    dialog.innerHTML = '<div class="fence-viewer-bar"><span data-illustration-count aria-live="polite"></span><button type="button" data-illustration-close autofocus>Close ×</button></div><figure><img alt=""><figcaption></figcaption></figure><div class="fence-viewer-nav"><button type="button" data-illustration-previous aria-label="Previous illustration">← Previous</button><button type="button" data-illustration-next aria-label="Next illustration">Next →</button><a href="#" target="_blank" rel="noopener">Open full image</a></div>';
     document.body.appendChild(dialog);
     let index = 0, opener = null, oldOverflow = '';
     function render() {

@@ -260,6 +260,7 @@ h1, h2, h3, h4 {
 @media (max-width: 480px) { .process-grid { grid-template-columns: 1fr; } }
 .process-step { position: relative; padding-top: 24px; }
 .process-num { position: absolute; top: -40px; left: -8px; font-family: var(--serif); font-size: 120px; font-weight: 300; color: rgba(184,148,90,0.18); line-height: 1; font-style: italic; pointer-events: none; }
+.process-num::before { content: attr(data-n); }
 .process-step h3 { font-size: 22px; margin-bottom: 10px; position: relative; }
 .process-step p { color: var(--gray-700); font-size: 15px; line-height: 1.6; position: relative; }
 

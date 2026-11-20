@@ -42,6 +42,12 @@ for = "/assets/img/*"
   Cache-Control = "public, max-age=86400, stale-while-revalidate=604800"
 
 [[headers]]
+for = "/x3d/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex"
+
+[[headers]]
 for = "/admin/*"
 
   [headers.values]

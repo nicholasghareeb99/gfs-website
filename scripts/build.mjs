@@ -14,6 +14,7 @@ const RUN = new RegExp(`(?:${LINK.source}\\s*){2,}`, 'g');
 const cssDir = path.join('dist', 'assets', 'b');
 fs.mkdirSync(cssDir, { recursive: true });
 const made = new Map();
+const bundleParts = new Map();
 
 function tidy(css) {
   // Safe size trim only: drop comments and blank lines, keep everything else as written.
@@ -32,6 +33,7 @@ function bundle(files) {
   const name = `/assets/b/${hash}.css`;
   fs.writeFileSync(path.join(cssDir, `${hash}.css`), body);
   made.set(key, name);
+  bundleParts.set(name, files);
   return name;
 }
 
@@ -53,4 +55,41 @@ for (const file of walk('dist')) {
   });
   if (next !== html) { fs.writeFileSync(file, next); pages++; }
 }
-console.log(`Copied public to dist; merged stylesheets on ${pages} pages into ${made.size} bundles`);
+// 3. In <head>, local stylesheets are often split by preloads or JSON-LD. Those
+//    tags carry no CSS, so the head's stylesheets can be fetched as one file in
+//    the same order. Only done when every stylesheet in the head is a plain local
+//    link and the head has no <style> block, so the cascade cannot change.
+let headPages = 0;
+const ANY_SHEET = /<link\b[^>]*rel=["']?stylesheet/gi;
+const HEAD_LINK = /<link rel="stylesheet" href="((?:\.{1,2}\/|\/)(?:\.\.\/)*assets\/(?:css|b)\/[^"?#]+\.css)(?:\?[^"]*)?">/;
+for (const file of walk('dist')) {
+  const html = fs.readFileSync(file, 'utf8');
+  const end = html.search(/<\/head>/i);
+  if (end < 0) continue;
+  const head = html.slice(0, end);
+  const links = [...head.matchAll(new RegExp(HEAD_LINK.source, 'g'))];
+  if (links.length < 2) continue;
+  if ((head.match(ANY_SHEET) || []).length !== links.length) continue;
+  if (/<style[\s>]/i.test(head.replace(/<!--[\s\S]*?-->/g, '').replace(/<script\b[\s\S]*?<\/script>/gi, ''))) continue;
+  const dir = '/' + path.relative('dist', path.dirname(file)).split(path.sep).filter(Boolean).join('/');
+  const files = [];
+  for (const m of links) {
+    const href = m[1].startsWith('/assets/b/') ? null : path.posix.resolve(dir, m[1]);
+    if (href) files.push(href);
+    else files.push(...bundleParts.get(m[1]));
+  }
+  let first = true;
+  const nextHead = head.replace(new RegExp(HEAD_LINK.source, 'g'), () => {
+    if (!first) return '';
+    first = false;
+    return `<link rel="stylesheet" href="${bundle(files)}">`;
+  });
+  fs.writeFileSync(file, nextHead + html.slice(end));
+  headPages++;
+}
+// 4. Drop bundles that step 3 replaced everywhere.
+const used = new Set();
+for (const file of walk('dist')) for (const m of fs.readFileSync(file, 'utf8').matchAll(/\/assets\/b\/([0-9a-f]{12})\.css/g)) used.add(m[1]);
+let dropped = 0;
+for (const f of fs.readdirSync(cssDir)) if (!used.has(f.replace(/\.css$/, ''))) { fs.rmSync(path.join(cssDir, f)); dropped++; }
+console.log(`Copied public to dist; merged stylesheets on ${pages} pages; one head stylesheet on ${headPages} pages; ${made.size - dropped} bundles kept`);
