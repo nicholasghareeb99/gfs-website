@@ -40,6 +40,9 @@ function auditedPhotosCode(src) {
 function harness(src, doc, { readError = null } = {}) {
   const catalogueCode = slice(src, /\/\/ -------- FIRESTORE /, '  // Choose a readable comparison set')
     + slice(src, /  \/\/ Classify a style into a material family\./, '  // ---- DRAFT PERSISTENCE');
+  const pool = src.includes('const POOL_FENCE')
+    ? slice(src, /  const POOL_FENCE = /, '  const FENCE_PRICING = ')
+    : '';
   const calls = { updateAll: 0, renderFenceOptions: 0, selected: [] };
   const window = {
     GFS_STYLE_IMAGE_UPGRADES: {},
@@ -53,7 +56,9 @@ function harness(src, doc, { readError = null } = {}) {
   vm.createContext(sandbox);
   vm.runInContext(auditedPhotosCode(src), sandbox);
   vm.runInContext(`
+    ${pool}
     const FENCE_PRICING = { 'built-in-wood': { name: 'Built-in Wood', perFoot: undefined } };
+    if (typeof POOL_FENCE !== 'undefined') FENCE_PRICING['pool-fence'] = POOL_FENCE;
     const PRICING_FACTORS = { remWood: 4, remChain: 3, remOther: 5 };
     const state = { fenceId: '' };
     let pendingDraftStyle = '', styleCatalogSettled = false, pricesLive = false, pricesByRequest = false;
@@ -89,18 +94,20 @@ const namesOnly = { styleNames: NAMES, stylePhotos: PHOTOS, styleSpecs: SPECS };
 
 const plain = value => JSON.parse(JSON.stringify(value));
 
-test('(a) with pricing present the catalogue is identical to the base page pinned in tests/fixtures', async t => {
+test('(a) existing priced styles are identical to the base page, with a pool option for office pricing', async () => {
   const before = oldSource();
   const oldRun = harness(before, withPricing), newRun = harness(SRC, withPricing);
   await oldRun.api.sync(); await newRun.api.sync();
-  assert.deepEqual(plain(newRun.api.FENCE_PRICING), plain(oldRun.api.FENCE_PRICING));
+  const { 'pool-fence': pool, ...existingStyles } = plain(newRun.api.FENCE_PRICING);
+  assert.deepEqual(existingStyles, plain(oldRun.api.FENCE_PRICING));
+  assert.equal(pool.name, 'Pool Fence');
+  assert.equal(pool.perFoot, null);
   assert.deepEqual(plain(newRun.api.PRICING_FACTORS), plain(oldRun.api.PRICING_FACTORS));
   assert.deepEqual(plain(newRun.window.GFS_BALLPARK_MODEL_OVERRIDES), plain(oldRun.window.GFS_BALLPARK_MODEL_OVERRIDES));
   assert.equal(newRun.api.flags().pricesLive, true);
   assert.equal(newRun.api.flags().pricesByRequest, false);
   const k = newRun.api.FENCE_PRICING['kingston-white-6ft'];
   assert.equal(k.perFoot, 52); assert.equal(k.doubleGate, 800);
-  assert.equal(Object.keys(newRun.api.FENCE_PRICING).length, 4);
   assert.equal(newRun.api.PRICING_FACTORS.remWood, 6);
   assert.deepEqual([...newRun.calls.docId], ['public']);
   assert.equal(newRun.calls.pings || 0, 0, 'with public prices the price function is never checked');
@@ -124,6 +131,30 @@ test('(b) styleNames only: same styles and photos, no prices, by-request flag', 
   assert.equal(bare.calls.pings, 1, 'by-request: the page asks once whether the price function is on');
 });
 
+test('pool fencing is offered in the Ballpark and detailed quote form', async () => {
+  const variant = 'Aluminum Pool Fence 4ft';
+  for (const document of [
+    { pricing: PRICING + '\n' + variant + ' : 30 : 300 : 600' },
+    { styleNames: [...NAMES, variant] },
+  ]) {
+    const { api } = harness(SRC, document);
+    await api.sync();
+    const pool = api.FENCE_PRICING['aluminum-pool-fence-4ft'];
+    assert.equal(pool.name, variant);
+    assert.equal(pool.category, 'pool');
+    assert.equal(pool.perFoot, document.pricing ? 30 : null);
+    assert.equal(api.FENCE_PRICING['pool-fence'], undefined, 'use the published pool style when available');
+  }
+  const form = read('public/quote/form/index.html');
+  const choices = form.match(/<select[^>]+name="fenceType"[^>]*>([\s\S]+?)<\/select>/)[1];
+  assert.match(choices, /<option>Pool Fence<\/option>/);
+  const page = read('public/fences/pool-fencing/index.html');
+  const schema = Array.from(page.matchAll(/<script type="application\/ld\+json">([\s\S]+?)<\/script>/g),
+    ([, json]) => JSON.parse(json));
+  assert.ok(schema.some(entry => entry['@type'] === 'Service' && entry.serviceType === 'Pool fence installation'));
+  assert.match(read('public/llms.txt'), /\[Pool fences\]\(https:\/\/ghareebfence\.com\/fences\/pool-fencing\/\)/);
+});
+
 test('(c) hostile styleNames never throw and never pollute prototypes', async () => {
   const hostile = [
     1, null, undefined, true, {}, [], { name: 'x' }, ['y'], '   ', '', 'Real Style', ' Real Style ', 'Real Style',
@@ -136,7 +167,7 @@ test('(c) hostile styleNames never throw and never pollute prototypes', async ()
   assert.ok(names.includes('Real Style') && names.includes('z'.repeat(200)));
   assert.equal(names.filter(n => n === 'Real Style').length, 1);
   assert.ok(!names.some(n => n.length > 200 || n.trim() !== n || !n));
-  assert.ok(names.length <= 1000);
+  assert.ok(names.filter(name => name !== 'Pool Fence').length <= 1000);
   assert.ok(Object.values(run.api.FENCE_PRICING).every(s => s.perFoot === null && s.doubleGate === null));
   assert.equal({}.polluted, undefined); assert.equal(Object.prototype.perFoot, undefined);
   assert.equal(run.window.GFS_BALLPARK_MODEL_OVERRIDES, undefined);
@@ -145,7 +176,7 @@ test('(c) hostile styleNames never throw and never pollute prototypes', async ()
     const r = harness(SRC, { styleNames: bad, stylePhotos: 'x' });
     await r.api.sync();
     assert.equal(r.api.flags().pricesByRequest, false);
-    assert.deepEqual([...Object.keys(r.api.FENCE_PRICING)], ['built-in-wood']);
+    assert.deepEqual([...Object.keys(r.api.FENCE_PRICING)], ['built-in-wood', 'pool-fence']);
   }
 });
 
@@ -153,7 +184,7 @@ test('(d) neither field, missing document or unreadable document: built-ins stay
   for (const [doc, opts] of [[{ stylePhotos: PHOTOS }, {}], [{ pricing: '   ' }, {}], [{ pricing: 'no usable : lines' }, {}], [null, {}], [{}, { readError: 'permission-denied' }]]) {
     const run = harness(SRC, doc, opts);
     await run.api.sync();
-    assert.deepEqual([...Object.keys(run.api.FENCE_PRICING)], ['built-in-wood']);
+    assert.deepEqual([...Object.keys(run.api.FENCE_PRICING)], ['built-in-wood', 'pool-fence']);
     assert.deepEqual(plain(run.api.flags()), { pricesLive: false, pricesByRequest: false, styleCatalogSettled: true });
   }
 });

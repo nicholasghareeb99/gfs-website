@@ -17,7 +17,7 @@ export function isChainLink(name) {
 
 export function isOfferedStyle(name) {
   const text = String(name).replace(/[‘’ʼ´′]/g, "'");
-  if (/\b(?:locust|barbed|razor|composite|wrought[- ]iron|snow|electric|invisible|swimming[- ]pool|pool|farm)\b/i.test(text)) return false;
+  if (/\b(?:locust|barbed|razor|composite|wrought[- ]iron|snow|electric|invisible|farm)\b/i.test(text)) return false;
   if (!isChainLink(text)) return true;
 
   // A height in a range (e.g. 4–8 ft) also has to be within the catalogue.

@@ -20,7 +20,7 @@ export function intakeRecord(data,now=new Date()){
  if(!/^[a-zA-Z0-9_-]{16,80}$/.test(data.submission_id||''))throw Error('Invalid intake reference');
  // Do not turn a truncated click, ad or parent-receipt ID into a different ID.
  // Failed event delivery retains the complete original in Netlify Forms.
- const rawMeta=String(data.meta??'').split(' | ').filter(part=>!/^(?:pricing_project|price_range_shown)=/.test(part)).join(' | ');
+ const rawMeta=String(data.meta??'').split(' | ').filter(part=>!/^(?:pricing_project|price_range_shown|estimate_email_opt_in|estimate_email_site_notes)=/.test(part)).join(' | ');
  if(rawMeta.length>30000)throw Error('Intake metadata too large; original submission remains in Netlify Forms for recovery.');
  const record={name:text(data.name,200),phone:text(data.phone,51),email:String(data.email??'').trim().toLowerCase(),address:text(data.address,500),notes:text(data.notes,2000),source:text(data.source,100),createdAt:now.toISOString(),createdAtMs:now.getTime()};
  const phone=record.phone.replace(/[^\d+]/g,'');
@@ -42,7 +42,16 @@ export function intakeRecord(data,now=new Date()){
  const id='web_'+data.submission_id;
  if (data.intake_kind==='ballpark') {
   const range=parseRange(data.price_range_shown);
-  if (range) saveEstimate(record,formatRange(range.low,range.high));
+  if (range) {
+   const rawProject=String(data.pricing_project??'');
+   const optedIn=data.source==='ballpark-email-estimate'&&data.estimate_email_opt_in==='yes'
+    &&rawProject.length<=8192&&readPricingProject(rawProject,id);
+   if (optedIn) {
+    const siteNotes=encodeURIComponent(text(data.site_notes,800));
+    record.meta=['estimate_email_opt_in=yes','estimate_email_site_notes='+siteNotes,record.meta].filter(Boolean).join(' | ');
+   }
+   saveEstimate(record,formatRange(range.low,range.high),optedIn?rawProject:'');
+  }
  }
  return{id,collection:booking?'bookings':'websiteLeads',record};
 }

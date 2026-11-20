@@ -96,6 +96,22 @@ async function serverAnswer(request) {
   return { status: response.status, body: await response.json() };
 }
 
+test('gate openings leave the full 151 ft in the billable run', async () => {
+  const api = browser();
+  // One 4 ft walk opening and one 10 ft drive opening. The full 151 ft
+  // rounds to nineteen 8 ft sections, plus both gate charges.
+  Object.assign(api.state, {
+    fenceId: 'full-cedar-privacy-6ft', linearFeet: 151, singleGates: 1, doubleGates: 1,
+  });
+  const total = 152 * 41 + 301 + 601;
+  const calculated = api.calculatePrice();
+  assert.deepEqual({ ...calculated }, { total, low: 6800, high: 7500 });
+  const { status, body } = await serverAnswer(api.serverPriceRequest());
+  assert.equal(status, 200);
+  assert.deepEqual([body.low, body.high], [6800, 7500]);
+  assert.equal(body.parts[0].feet, 151);
+});
+
 test('browser and server give the same range and the same comparison list on 400 varied projects', async () => {
   const api = browser(), rnd = random(20261115);
   let priced = 0, unpriced = 0, withSections = 0, withRemoval = 0, withComparisons = 0;
