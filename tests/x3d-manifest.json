@@ -1,9 +1,11 @@
 {
  "source": "nicholasghareeb99/gfence-app main 3c8a2ba, executive build (the bytes gfence.netlify.app/app/ serves)",
  "websiteOwned": [
-  "gfs/website-scene.mjs"
+  "gfs/website-scene.mjs",
+  "index.html"
  ],
  "files": {
+  "index.html": "74628988faffc2e2292dc780bd04ff7f0833e9f10173cdfeb2080d45a98f77cc",
   "fence3d.html": "75a5a7b64e5385e499292c97908d87ef0ac4c9c99042534ecdddf8940d21a3c4",
   "gfs/ar-model.mjs": "6e4dcb43cb128cc0b34fa4433ec5e499e7da76b2c98fe780e3cc043b7c97c9ee",
   "gfs/ar-workspace.css": "daee53ea4b1c98b66dce1cb2ffae6e0dd9600f7a38757b08f5d27a80c67ad376",

@@ -2219,6 +2219,9 @@
         if (result.field === 'contactMethod' && window.GFSLeads.flagReach) window.GFSLeads.flagReach(form);
       }
     });
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = false;
+    form.querySelector('[data-form-fallback]')?.setAttribute('hidden', '');
   }
 
   // -------- LIVE PRICE REVEAL --------
@@ -4919,7 +4922,7 @@
         existingFenceMaterial: state.existingFenceMaterial,
         geometry: collectGeometry(),
         photo: leadPhoto || '',
-        contactMethod: (fd && fd.get('contactMethod')) || '',
+        contactMethod: 'Email',
         bestTime: (fd && fd.get('bestTime')) || '',
         timeline: (fd && fd.get('timeline')) || '',
         siteNotes: state.siteNotes.slice(),

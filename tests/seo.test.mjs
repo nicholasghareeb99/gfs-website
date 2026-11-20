@@ -104,3 +104,33 @@ test('every city page links to five nearby city pages that exist', () => {
     for (const l of links) { assert.ok(towns.includes(l), l); assert.notEqual(l, t); }
   }
 });
+
+test('the public contact card has explicit opening days and a tappable text link', () => {
+  const contact = read('contact/index.html');
+  for (const page of [contact, read('brochure/read/index.html')]) {
+    assert.match(page, /href="sms:\+14192142107"[^>]*>[^<]*Text/i);
+  }
+  assert.match(contact, /data-editable="contact\.aside\.hours">Mon–Sat · 8am – 6pm · Closed Sunday</);
+});
+
+test('the published site edits use the current business email', () => {
+  const edits = JSON.parse(read('site-edits.json'));
+  const vinylPicket = JSON.parse(edits['gfs_edit_content_fences-vinyl-picket']);
+  assert.equal(vinylPicket['120'], 'nick@ghareebfence.com');
+});
+
+test('the fallback visit windows end at 6 pm in the markup and script', () => {
+  assert.match(read('quote/book/index.html'), /Evening \(5 &ndash; 6 pm\)/);
+  assert.match(read('assets/js/availability.js'), /Evening \(5 - 6 pm\)/);
+});
+
+for (const [city, permit] of [
+  ['rossford-oh', 'https://www.rossfordohio.com/departments/zoning/permits.php'],
+  ['grosse-ile-township-mi', 'https://www.grosseile.com/government/community_development/building_and_permits.php'],
+  ['woodhaven-mi', 'https://cms5.revize.com/revize/woodhavenmi/FENCE%20PERMIT%20APP.pdf'],
+]) {
+  test(city + ' links to the current municipality permit resource', () => {
+    const cityPage = read('service-areas/' + city + '/index.html');
+    assert.ok(cityPage.includes('href="' + permit + '"'), city);
+  });
+}

@@ -68,8 +68,8 @@ src/content/
 {
   "company": {
     "name": "Ghareeb Fencing Solutions",
-    "phone": "(419) 902-8257",
-    "email": "info@ghareebfencing.com",
+    "phone": "(419) 214-2107",
+    "email": "nick@ghareebfence.com",
     "city": "Toledo",
     "state": "OH"
   },

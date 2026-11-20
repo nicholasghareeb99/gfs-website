@@ -463,11 +463,11 @@
               <p id="bp-contact-hint" style="font-size:14px;color:rgba(250,246,239,0.7);margin:0;" data-gfs-protected>Share your details to view the range and request a project review from our team.</p>
             </div>
           </div>
-          <form id="bp-form">
+          <form method="post" id="bp-form">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
               <div>
                 <label class="form-label" style="color:var(--cream);" for="bpf-name">Name *</label>
-                <input name="name" id="bpf-name" type="text" class="form-input" required style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="name">
+                <input name="name" id="bpf-name" type="text" class="form-input" required pattern=".*\S.*" title="Enter your name" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);" autocomplete="name">
               </div>
               <div>
                 <label class="form-label" style="color:var(--cream);" for="bpf-phone">Phone *</label>
@@ -524,7 +524,8 @@
                 <textarea name="notes" id="bpf-notes" class="form-textarea" rows="3" placeholder="Anything else we should know?" style="background:rgba(255,255,255,0.08);color:var(--cream);border-color:rgba(250,246,239,0.2);"></textarea>
               </div>
             </details>
-            <button type="submit" class="btn btn-gold btn-lg" style="width:100%;">Unlock My Price</button>
+            <p data-form-fallback data-gfs-protected>If the form is unavailable, call <a href="tel:+14192142107">(419) 214-2107</a>.</p>
+            <button type="submit" disabled class="btn btn-gold btn-lg" style="width:100%;">Unlock My Price</button>
             <p style="font-size:12px;color:rgba(250,246,239,0.6);text-align:center;margin-top:14px;" data-editable="bp.s4.privacy">
               By submitting, you agree to receive a follow-up from Ghareeb Fencing Solutions. We never sell your info.
             </p>
@@ -716,9 +717,9 @@
 
 <script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
 <script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
-<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+<script src="../../assets/js/leads.js?v=20261120" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
-<script src="../../assets/js/ballpark.js?v=kit-63e694f8b168" defer></script>
+<script src="../../assets/js/ballpark.js?v=20261120" defer></script>
 <script>
 (function () {
   const finance = document.getElementById('bp-finance');

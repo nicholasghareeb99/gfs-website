@@ -37,7 +37,7 @@
   const DEFAULT_TIMES = [
     'Morning (8 am - 12 pm)',
     'Afternoon (12 - 5 pm)',
-    'Evening (5 - 7 pm)',
+    'Evening (5 - 6 pm)',
   ];
 
   // ---- Date bounds: earliest tomorrow, latest 90 days out, no Sundays ----

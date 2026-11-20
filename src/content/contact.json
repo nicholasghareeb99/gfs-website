@@ -5,14 +5,14 @@
   
   "contactInfo": {
     "phone": {
-      "display": "(419) 356-9643",
-      "href": "tel:+14193569643",
-      "description": "Call us Monday-Friday 8am-6pm, Saturday 9am-2pm",
+      "display": "(419) 214-2107",
+      "href": "tel:+14192142107",
+      "description": "Call us Monday–Saturday 8 AM to 6 PM. Closed Sunday.",
       "icon": "fa-phone"
     },
     "email": {
-      "display": "info@ghareebfencing.com",
-      "href": "mailto:info@ghareebfencing.com",
+      "display": "nick@ghareebfence.com",
+      "href": "mailto:nick@ghareebfence.com",
       "description": "We typically respond within 24 hours",
       "icon": "fa-envelope"
     },
@@ -31,8 +31,7 @@
   "businessHours": {
     "headline": "Business Hours",
     "hours": [
-      { "days": "Monday - Friday", "time": "8:00 AM - 6:00 PM" },
-      { "days": "Saturday", "time": "9:00 AM - 2:00 PM" },
+      { "days": "Monday - Saturday", "time": "8:00 AM - 6:00 PM" },
       { "days": "Sunday", "time": "Closed" }
     ],
     "note": "Emergency services available for existing customers"
@@ -172,14 +171,14 @@
       "loadingText": "Sending..."
     },
     "successMessage": "Thank you for contacting us! We'll review your message and get back to you within 24 hours.",
-    "errorMessage": "There was an error sending your message. Please try again or call us directly at (419) 356-9643."
+    "errorMessage": "There was an error sending your message. Please try again or call us directly at (419) 214-2107."
   },
   
   "callToAction": {
     "headline": "Prefer to Talk?",
     "description": "If you'd rather speak with someone directly, give us a call. We're happy to answer questions and can often provide rough estimates over the phone.",
-    "buttonText": "Call (419) 356-9643",
-    "buttonHref": "tel:+14193569643"
+    "buttonText": "Call (419) 214-2107",
+    "buttonHref": "tel:+14192142107"
   },
   
   "quickQuote": {
@@ -231,7 +230,7 @@
   
   "seo": {
     "title": "Contact Us | Ghareeb Fencing Solutions - Free Fence Estimates Toledo",
-    "description": "Contact Ghareeb Fencing Solutions for a free fence estimate in Toledo and Northwest Ohio. Call (419) 356-9643 or fill out our contact form. We respond within 24 hours.",
+    "description": "Contact Ghareeb Fencing Solutions for a free fence estimate in Toledo and Northwest Ohio. Call (419) 214-2107 or fill out our contact form. We respond within 24 hours.",
     "keywords": ["contact fence company Toledo", "free fence estimate Toledo", "fence quote Northwest Ohio", "Toledo fence installer contact"]
   }
 }
