@@ -94,3 +94,10 @@ test('the intake refuses invalid contact data without writing a Firestore docume
   }
   assert.equal(calls.length, 0);
 });
+
+test('a filled honeypot is ignored by both Netlify event entry points', async () => {
+  const spam = { ...data, 'bot-field': 'autofilled by a bot' };
+  assert.equal((await handler(post({ payload: { data: spam } }))).status, 204);
+  await handler.formSubmitted({ data: spam });
+  assert.equal(calls.length, 0);
+});

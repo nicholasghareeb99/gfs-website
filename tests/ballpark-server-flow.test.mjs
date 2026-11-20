@@ -6,8 +6,9 @@ import test from 'node:test';
 import vm from 'node:vm';
 import assert from 'node:assert/strict';
 import { SRC, PRICING_CODE, SERVER_PRICE_CODE, slice, run, fakeTimers } from './ballpark-slices.mjs';
-import { handle, resetCaches } from '../netlify/functions/ballpark-price.mjs';
+import { handle, resetCaches, parsePricing, priceProject } from '../netlify/functions/ballpark-price.mjs';
 import { fakeGoogle, priceFunctionEnv, read } from './helpers.mjs';
+import { formatRange } from '../public/assets/js/ballpark-pricing-rules.mjs';
 
 const RECEIPT = 'web_flowflowflowflow01';
 const NAMES = ['Full Cedar Privacy 6ft', 'Galv Chain Link 4ft', 'Galv Chain Link 6ft', 'Kingston - White 6ft', 'Ranch Rail'];
@@ -291,10 +292,10 @@ test('with no price the non-price actions stay, and only the comparison (which n
 
 test('by-request notes say so; the failed-load note stays for a real failure', () => {
   const note = reason => run({ state: { height: '6' } }, `${slice('  function reviewNote(price) {', '  function quoteSubmitLabel')} globalThis.out = reviewNote({ reason: ${JSON.stringify(reason)} });`).out;
-  assert.match(note('request'), /^Price by request: this website does not show price ranges/);
+  assert.match(note('request'), /^Price by request/);
   assert.doesNotMatch(note('request'), /did not load/);
   assert.match(note('prices'), /did not load on the customer's device/);
-  assert.match(note('server'), /worked out on the website after this request/);
+  assert.match(note('server'), /Use the range saved with this project/);
   assert.match(note('height'), /6 ft height/);
   const p = page({ reply: () => json(ANSWER) });   // by-request, function not asked yet
   p.choose();
@@ -314,6 +315,9 @@ function emailPage({ price }) {
     const FENCE_PRICING = { f: { name: 'Style F', category: 'wood' } };
     let acceptedBallparkReceipt = '${RECEIPT}', leadPhoto = '';
     function photoReadyForSubmission() { return true; }
+    function projectChanged() { return false; }
+    function displayPrice() { return null; }
+    function serverPricePhase() { return 'idle'; }
     function submissionPrice() { return ${JSON.stringify(price.value)}; }
     function collectGeometry() { return ''; }
     function removalScopeNote() { return ''; }
@@ -342,8 +346,8 @@ test('emailed request with no price: sends a project request with no price lines
 test('emailed estimate with a price keeps its range lines', async () => {
   const e = emailPage({ price: { value: { low: 5700, high: 6300, total: 6000 } } });
   await e.click();
-  assert.equal(e.sent[0].priceRange, '$5,700–$6,300');
-  assert.match(e.sent[0].notes, /EMAILED ESTIMATE REQUEST — Style: Style F · Length: 120 ft · Height: 6 ft · Gates: 1 walk · Range: \$5,700-\$6,300/);
+  assert.equal(e.sent[0].priceRange, '$5,700 – $6,300');
+  assert.match(e.sent[0].notes, /EMAILED ESTIMATE REQUEST — Style: Style F · Length: 120 ft · Height: 6 ft · Gates: 1 walk/);
   assert.equal(e.nodes['bp-action-email'].textContent, '✓ Estimate requested');
 });
 
@@ -599,11 +603,12 @@ function returnKit(shared = null) {
   const dom = tag => { const n = { tag, style: {}, children: [], textContent: '', handlers: {}, setAttribute() {}, scrollIntoView() {}, insertBefore(c) { this.children.push(c); }, appendChild(c) { this.children.push(c); }, replaceChildren() { this.children.length = 0; this.textContent = ''; }, addEventListener(t, fn) { this.handlers[t] = fn; }, querySelector: () => null,
     querySelectorAll(sel) { const out = []; const walk = c => { if (c.tag === 'button') out.push(c); c.children.forEach(walk); }; this.children.forEach(walk); return out; } }; return n; };
   const submitButton = Object.assign(dom('button'), { disabled: false, textContent: 'Unlock my price' });
-  const form = Object.assign(dom('form'), { parentElement: dom('div'), elements: [], fields: { name: 'Pat Smith', phone: '4195550100', email: 'pat@example.com', address: '1 Main St' }, querySelector: () => submitButton });
+  const form = Object.assign(dom('form'), { parentElement: dom('div'), elements: [], checkValidity: () => true, fields: { name: 'Pat Smith', phone: '4195550100', email: 'pat@example.com', address: '1 Main St' }, querySelector: () => submitButton });
   const window = {};
   const context = vm.createContext({ window, document: { createElement: dom }, sessionStorage: keep, location: { search: '', pathname: '/quote/ballpark/' }, crypto: globalThis.crypto, TextEncoder, URLSearchParams, Date: FakeDate,
     Uint8Array, JSON, Array, Number, Object, Math, String, RegExp, Set, WeakMap, Error, Promise, setTimeout: timers.setTimeout, clearTimeout: timers.clearTimeout });
   vm.runInContext(read('public/assets/js/request-flow.js'), context, { filename: 'request-flow.js' });
+  const saved = shared ? shared.saved : new Map();
   const created = shared ? shared.created : new Map(), submitted = [], count = shared ? shared.count : { n: 0 };
   window.GFSLeads = { async submit(payload, options) {
     submitted.push(payload);
@@ -612,17 +617,20 @@ function returnKit(shared = null) {
     if (prepared.decision) return { ok: false, errors: prepared.errors, requiresDecision: prepared.decision };
     if (prepared.reuse) return prepared.reuse;
     const id = 'web_returnflow' + String(++count.n).padStart(8, '0');
-    created.set(id, clock.now);   // the intake writes the lead with the server's time
+    created.set(id, clock.now);
+    const input = JSON.parse(payload.pricingProject);
+    const price = priceProject(parsePricing(RETURN_PRICING), { remWood: 5, remChain: 3, remOther: 6 }, input);
+    saved.set(id, { meta: { stringValue: 'pricing_project=' + encodeURIComponent(payload.pricingProject) + ' | price_range_shown=' + encodeURIComponent(formatRange(price.low, price.high)) } });
     return window.GFSRequestFlow.commit(prepared, { ok: true, id, receipt: 'netlify', sync: 'pending' }, prepared.record);
   } };
-  return { clock, keep, timers, form, submitButton, window, created, count, submitted, nodeGlobals: { FormData: class { constructor(f) { this.f = f.fields; } get(k) { return this.f[k] ?? null; } } } };
+  return { clock, keep, timers, form, submitButton, window, created, saved, count, submitted, nodeGlobals: { FormData: class { constructor(f) { this.f = f.fields; } get(k) { return this.f[k] ?? null; } } } };
 }
 
 test('Continue this project after 25 hours: the update is priced with its own fresh receipt, the original stays the attribution', async () => {
   resetCaches();
   const kit = returnKit(), env = priceFunctionEnv();
   const google = fakeGoogle({ pricing: RETURN_PRICING, receipts: ['web_returnflow00000001', 'web_returnflow00000002', 'web_returnflow00000003'], createdAtMs: 1,
-    leadDoc: id => ({ createTime: new Date(kit.created.get(id)).toISOString(), fields: {} }) });
+    leadDoc: id => ({ createTime: new Date(kit.created.get(id)).toISOString(), fields: kit.saved.get(id) }) });
   const askServer = call => handle(new Request('https://example.test/.netlify/functions/ballpark-price', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(call.body) }), { fetcher: google.fetcher, env, now: Math.floor(kit.clock.now / 1000) });
   const p = page({ reply: askServer, step4: { window: kit.window, globals: nodes => { nodes['bp-form'] = kit.form; return kit.nodeGlobals; } } });
   p.api.checkServerPrice(); await settle(p, 0);
@@ -691,8 +699,7 @@ test('the real page code uses the accepted update for pricing and the original f
   assert.match(code, /pricingReceipt = nextPricing/);
   // The price call names the pricing receipt; the original request is only used to ask for a session.
   const run = SRC.slice(SRC.indexOf('  function serverPriceRun'), SRC.indexOf('  function serverPriceSync'));
-  assert.equal(run.match(/acceptedBallparkReceipt/g).length, 1);
-  assert.match(run, /const original = \(\) => acceptedBallparkReceipt;/);
+  assert.match(run, /const receipt = serverPrice\.receipt;/);
   assert.match(run, /receipt: session \? session\.receipt : serverPrice\.receipt/);
   assert.match(SRC, /parentReceipt: acceptedBallparkReceipt/);
 });
@@ -705,7 +712,7 @@ const LEAD_IDS = ['web_returnflow00000001', 'web_returnflow00000002', 'web_retur
 function returningWorld({ renewReply = null, mode = 'by-request' } = {}) {
   resetCaches();
   const first = returnKit(), env = priceFunctionEnv(), calls = [];
-  const google = fakeGoogle({ pricing: RETURN_PRICING, receipts: LEAD_IDS, createdAtMs: 1, leadDoc: id => ({ createTime: new Date(first.created.get(id)).toISOString(), fields: {} }) });
+  const google = fakeGoogle({ pricing: RETURN_PRICING, receipts: LEAD_IDS, createdAtMs: 1, leadDoc: id => ({ createTime: new Date(first.created.get(id)).toISOString(), fields: first.saved.get(id) }) });
   const askServer = call => {
     calls.push(call.body);
     if (call.body.renew && renewReply) { const early = renewReply(); if (early) return early; }

@@ -12,6 +12,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { ROOT, read } from './helpers.mjs';
+import * as pricingRules from '../public/assets/js/ballpark-pricing-rules.mjs';
 
 const FILE = 'public/assets/js/ballpark.js';
 const SRC = read(FILE);
@@ -48,7 +49,7 @@ function harness(src, doc, { readError = null } = {}) {
       return { exists: doc !== null, data: () => doc };
     } }) }) },
   };
-  const sandbox = { window, console: { log: (...a) => process.env.DBG && console.error(...a), warn() {} }, calls, Object, JSON, Array, Set, Math, Number, String, RegExp, Error, URL, Promise };
+  const sandbox = { ...pricingRules, window, console: { log: (...a) => process.env.DBG && console.error(...a), warn() {} }, calls, Object, JSON, Array, Set, Math, Number, String, RegExp, Error, URL, Promise };
   vm.createContext(sandbox);
   vm.runInContext(auditedPhotosCode(src), sandbox);
   vm.runInContext(`

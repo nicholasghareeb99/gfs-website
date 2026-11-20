@@ -134,7 +134,7 @@ test('the 18-month promotion is always stated with its conditions, and nothing i
   assert.match(f.promoTerms(), /18\.99% fixed from then on/);
   assert.match(f.promoTerms(), /Monthly payments are required/);
   assert.match(f.promoTerms(), /subject to credit approval/);
-  assert.equal(f.payoffText({ low: 9000, high: 12600 }), 'To pay this off in 18 months: about $500 – $700 a month.');
+  assert.equal(f.payoffText({ low: 9000, high: 12600 }), 'To pay this off in 18 months: budget $500.00 – $700.00 a month.');
   assert.equal(f.payoffText(null), '');
 });
 
@@ -144,4 +144,16 @@ test('no page still promises 0% APR or a 60-second application', () => {
     assert.ok(!/0% APR/i.test(html), page + ' says 0% APR');
     assert.ok(!/60 seconds/i.test(html), page + ' says 60 seconds');
   }
+});
+
+test('eighteen payments cover each endpoint with the smallest whole-cent payment', () => {
+  const f = load();
+  for (const [principal, cents] of [[100, 556], [7700, 42778], [8500, 47223], [10000, 55556], [12600, 70000]]) {
+    assert.ok(cents * 18 >= principal * 100);
+    assert.ok((cents - 1) * 18 < principal * 100);
+    const payment = (cents / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    assert.ok(f.payoffText({ low: principal, high: principal }).includes(payment + ' a month.'));
+  }
+  assert.equal(f.parseRange('$8,500 – $7,700'), null);
+  assert.equal(f.parseRange('$0 – $100'), null);
 });

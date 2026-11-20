@@ -30,6 +30,7 @@
 // The answer never carries a total, a per-foot figure, billable feet or
 // anything else a rate follows from directly.
 import crypto from 'node:crypto';
+import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, parseRange, positiveRate, priceBand, pricingRows } from '../../public/assets/js/ballpark-pricing-rules.mjs';
 
 const SCOPE = 'https://www.googleapis.com/auth/datastore';
 const MAX_FEET = 2000;
@@ -58,34 +59,10 @@ export function slugify(name) { return String(name).toLowerCase().replace(/[^a-z
 // Same reading of the "Name : perFoot : single : double" list as the page.
 // Keyed by slug in a plain object so ordering matches the page's catalogue.
 export function parsePricing(text) {
-  const styles = {};
-  for (const line of String(text || '').split('\n').map(l => l.trim()).filter(Boolean)) {
-    const parts = line.split(':').map(s => s.trim());
-    if (parts.length < 4) continue;
-    const name = parts[0];
-    const perFoot = parseFloat(parts[1]);
-    const singleGate = parseFloat(parts[2]);
-    const doubleGate = parseFloat(parts[3]);
-    if (!name || isNaN(perFoot)) continue;
-    styles[slugify(name)] = { name, perFoot, singleGate: isNaN(singleGate) ? 150 : singleGate, doubleGate: isNaN(doubleGate) ? 300 : doubleGate };
-  }
-  return styles;
+  return Object.fromEntries(pricingRows(text).filter(row => slugify(row.name)).map(row => [slugify(row.name), row]));
 }
 
-export function getSectionSize(styleName) {
-  if (!styleName) return 0;
-  const s = String(styleName).toLowerCase();
-  if (s.includes('midrail')) return 6;
-  if (s.includes('split rail') || s.includes('splitrail') || s.includes('split-rail')) return 10;
-  if (s.includes('chain link') || s.includes('chainlink') || s.includes('chain-link')) return 10;
-  if (s.includes('vinyl')) return 8;
-  if (s.includes('aluminum') || s.includes('ornamental')) return 6;
-  if (s.includes('wood') || s.includes('cedar') || s.includes('treated') ||
-      s.includes('dog ear') || s.includes('dog-ear') || s.includes('board on board') ||
-      s.includes('board-on-board') || s.includes('shadow box') || s.includes('shadowbox') ||
-      s.includes('hybrid')) return 8;
-  return 0;
-}
+export { getSectionSize };
 
 export function supportedStyleHeight(name) {
   const text = String(name || '').replace(/[‘’ʼ´′]/g, "'");
@@ -101,25 +78,22 @@ function removalRate(factors, material) {
   if (material === 'chain') return factors.remChain;
   return factors.remOther;
 }
-const positive = (v, d) => { const n = parseFloat(v); return !isNaN(n) && n > 0 ? n : d; };
 export function readFactors(raw) {
-  return { remWood: positive(raw && raw.remWood, 5), remChain: positive(raw && raw.remChain, 3), remOther: positive(raw && raw.remOther, 6) };
+  return Object.fromEntries(Object.entries(DEFAULT_REMOVAL_RATES).map(([key, fallback]) => [key, positiveRate(raw?.[key], fallback)]));
 }
 
 function pricePart(styles, part, styleName) {
-  const fence = styles[slugify(styleName)];
+  const id = slugify(styleName);
+  const fence = Object.hasOwn(styles, id) ? styles[id] : null;
   if (!fence || !Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
   if (!Number.isFinite(part.feet) || part.feet <= 0) return null;
   const named = supportedStyleHeight(fence.name), height = partHeight(fence.name, part.height);
-  if (named === null && ![4, 5, 6, 8].includes(height)) return null;
+  if (!canPriceHeight(fence.name, height) || (named === null && ![4, 5, 6, 8].includes(height))) return null;
   const size = getSectionSize(fence.name);
   const billable = size ? Math.ceil(part.feet / size) * size : part.feet;
-  return { fenceCost: billable * fence.perFoot, gateCost: Math.max(0, part.singleGates) * fence.singleGate + Math.max(0, part.doubleGates) * fence.doubleGate };
+  const gates = gateCost(part.singleGates, part.doubleGates, fence.singleGate, fence.doubleGate);
+  return gates === null ? null : { fenceCost: billable * fence.perFoot, gateCost: gates };
 }
-
-// The ±5% band, rounded to the nearest $100. `total` is for sorting inside
-// this function only and is never sent.
-const band = total => ({ total: Math.round(total), low: Math.round(total * 0.95 / 100) * 100, high: Math.round(total * 1.05 / 100) * 100 });
 
 // null whenever the project cannot be priced: a missing rate is not a free fence.
 export function priceProject(styles, factors, request, mainStyle) {
@@ -135,7 +109,7 @@ export function priceProject(styles, factors, request, mainStyle) {
   // Removal is allowed for the same run length as the new fence.
   const removal = request.removal.on ? totalFeet * removalRate(factors, request.removal.material) : 0;
   const total = priced.reduce((s, p) => s + p.fenceCost, 0) + priced.reduce((s, p) => s + p.gateCost, 0) + removal;
-  return band(total);
+  return priceBand(total);
 }
 
 // Other styles priced for the same project: same height as the customer's
@@ -163,7 +137,7 @@ export function readRequest(body) {
   if (!isObject(data)) return null;
   if (data.ping === true) return Object.keys(data).length === 1 ? { ping: true } : null;
   if (data.renew === true) return onlyKeys(data, ['renew', 'receipt']) && typeof data.receipt === 'string' && RECEIPT_RE.test(data.receipt) ? { renew: true, receipt: data.receipt } : null;
-  if (!onlyKeys(data, ['receipt', 'parts', 'removal', 'compare', 'session'])) return null;
+  if (!onlyKeys(data, ['receipt', 'parts', 'removal', 'compare', 'session', 'saved'])) return null;
   if (typeof data.receipt !== 'string' || !RECEIPT_RE.test(data.receipt)) return null;
   if (data.session !== undefined && (typeof data.session !== 'string' || !SESSION_RE.test(data.session))) return null;
   if (!Array.isArray(data.parts) || !data.parts.length || data.parts.length > 4) return null;
@@ -183,7 +157,8 @@ export function readRequest(body) {
   if (removal.feet !== undefined && (typeof removal.feet !== 'number' || !(removal.feet > 0) || removal.feet > MAX_FEET || Math.abs(removal.feet - sum) > 0.011)) return null;
   if (removal.on && !['wood', 'chain', 'vinyl', 'aluminum', 'other'].includes(removal.material)) return null;
   if (data.compare !== undefined && typeof data.compare !== 'boolean') return null;
-  return { receipt: data.receipt, session: data.session, parts, removal: { on: removal.on, material: removal.on ? removal.material : '', feet: removal.feet }, compare: data.compare === true };
+  if (data.saved !== undefined && typeof data.saved !== 'boolean') return null;
+  return { receipt: data.receipt, session: data.session, parts, removal: { on: removal.on, material: removal.on ? removal.material : '', feet: removal.feet }, compare: data.compare === true, saved: data.saved === true };
 }
 
 // ---- Google access with the service account -------------------------------
@@ -233,6 +208,41 @@ async function loadSettings(fetcher, project, token, now) {
   settingsCache = { at: now, project, value };
   return value;
 }
+// Netlify intake prices once before it creates a server-priced lead. The
+// price endpoint later returns that saved range even if settings have changed.
+export function readPricingProject(raw, receipt) {
+  try {
+    const payload = JSON.parse(raw);
+    if (!isObject(payload) || !onlyKeys(payload, ['parts', 'removal'])) return null;
+    return readRequest(JSON.stringify({ ...payload, receipt }));
+  } catch { return null; }
+}
+
+function projectKey(input) {
+  return JSON.stringify([input.parts, input.removal]);
+}
+
+export async function estimateForIntake(input, { fetcher, env, now }) {
+  const config = configuration(env);
+  if (!config) return '';
+  const token = await accessToken(fetcher, config.key, now);
+  const { styles, factors } = await loadSettings(fetcher, config.project, token, now);
+  const price = priceProject(styles, factors, input);
+  return price ? formatRange(price.low, price.high) : '';
+}
+
+function savedEstimate(lead, input) {
+  const meta = String(plain(lead.doc.fields?.meta) || '');
+  const lookup = key => {
+    const entry = meta.split(' | ').find(value => value.startsWith(key + '='));
+    try { return entry ? decodeURIComponent(entry.slice(key.length + 1)) : ''; }
+    catch { return ''; }
+  };
+  const project = readPricingProject(lookup('pricing_project'), input.receipt);
+  if (!project || projectKey(project) !== projectKey(input)) return null;
+  return parseRange(lookup('price_range_shown'));
+}
+
 // How old the lead is, from the best time we can trust. Firestore's own
 // createTime (set by the database when the document was created, so the
 // sender cannot choose it) wins when the REST answer carries it. Otherwise the
@@ -390,13 +400,33 @@ export async function handle(request, { fetcher = fetch, env = process.env, now 
     if (limited && await countAttempt(fetcher, config.project, token, input.receipt, now) > MINUTE_CAP) {
       return reply(429, { error: 'Too many price requests for this project. Please try again in a minute.' }, { 'Retry-After': String(60 - (now % 60)) });
     }
-    const { styles, factors } = await loadSettings(fetcher, config.project, token, now);
-    const price = priceProject(styles, factors, input);
+    const saved = input.saved ? savedEstimate(lead, input) : null;
+    if (input.saved && !saved) return reply(200, { needsQuote: true });
+    let settings;
+    if (!saved || input.compare) {
+      try { settings = await loadSettings(fetcher, config.project, token, now); }
+      catch (error) {
+        if (!saved) throw error;
+        // The customer's saved range remains available during a catalogue outage.
+      }
+    }
+    const price = saved || priceProject(settings.styles, settings.factors, input);
     if (!price) return reply(200, { needsQuote: true });
-    // parts echoes what was priced (the style as named on the list, and the feet
-    // the customer sent) so the page can check the answer is for its layout.
-    const out = { low: price.low, high: price.high, parts: input.parts.map(p => ({ style: (styles[slugify(p.style)] || {}).name || p.style, feet: p.feet })) };
-    if (input.compare) out.comparisons = compareStyles(styles, factors, input);
+    // Echo the priced layout so the page can disregard a stale answer.
+    const out = { low: price.low, high: price.high, parts: input.parts.map(p => ({
+      style: settings?.styles[slugify(p.style)]?.name || p.style, feet: p.feet,
+    })) };
+    if (input.compare) {
+      out.comparisons = settings ? compareStyles(settings.styles, settings.factors, input) : [];
+      // A fresh comparison may otherwise price the customer's own style a
+      // second time after a settings change. The saved selection is the card.
+      if (saved) {
+        const ownStyle = slugify(input.parts[0].style);
+        out.comparisons = out.comparisons.filter(row => slugify(row.style) !== ownStyle);
+        out.comparisons.push({ style: input.parts[0].style, low: saved.low, high: saved.high });
+        out.comparisons.sort((a, b) => a.low - b.low || a.high - b.high);
+      }
+    }
     // Only now, with the range in hand and nothing left that can fail, take the allowance slots.
     if (limited && !await takeSlots(fetcher, config.project, token, now, pricedSlots(input.receipt, lead.made, now))) {
       return reply(429, { error: 'Too many price requests for this project. We will send your price.' });
