@@ -72,22 +72,23 @@ const byStyle = [...catalogue.map(([name, height]) => [name, height]),
 ];
 for (let start = 0; start < byStyle.length; start += 6) {
   const rows = byStyle.slice(start, start + 6);
-  test('Ballpark renders and saves fixture ranges ' + (start + 1) + ' to ' + (start + rows.length), async ({ page, context }) => {
+  test('Ballpark renders and saves fixture ranges ' + (start + 1) + ' to ' + (start + rows.length), async ({ context }) => {
     test.setTimeout(180_000);
     const world = await mockSite(context);
-    await openPage(page, ballpark);
     for (const [index, [style, height]] of rows.entries()) {
       await test.step(style + ' at ' + height + ' ft', async () => {
-        if (index) {
-          await press(page.getByRole('button', { name: 'Start another project' }));
-          await expect(page.getByText('You are starting another project.', { exact: false })).toBeVisible();
+        const page = await context.newPage();
+        try {
+          await openPage(page, ballpark);
+          await pickBallpark(page, style, height, 151);
+          await addBothGates(page);
+          await submitBallpark(page);
+          await expect.poll(() => world.deliveries.length).toBe(index + 1);
+          const { input } = await verifyRange(page, world);
+          expect(input.parts).toEqual([{ style, feet: 151, height, singleGates: 1, doubleGates: 1 }]);
+        } finally {
+          await page.close();
         }
-        await pickBallpark(page, style, height, 151);
-        await addBothGates(page);
-        await submitBallpark(page);
-        await expect.poll(() => world.deliveries.length).toBe(index + 1);
-        const { input } = await verifyRange(page, world);
-        expect(input.parts).toEqual([{ style, feet: 151, height, singleGates: 1, doubleGates: 1 }]);
       });
     }
     expect(world.documents.size).toBe(rows.length);
@@ -180,7 +181,7 @@ for (const email of ['on', 'off']) {
   });
 }
 
-test('public-price Ballpark writes the same visible range and keeps server rates unrequested', async ({ page, context }) => {
+test('public-price Ballpark saves the visible range and can start a separate project', async ({ page, context }, info) => {
   const world = await mockSite(context, { pricing: 'public' });
   await openPage(page, ballpark);
   await pickBallpark(page, 'Cedar Privacy 6 ft Dug', 6, 151);
@@ -190,6 +191,13 @@ test('public-price Ballpark writes the same visible range and keeps server rates
   await expect(page.locator('#bp-price-range')).toHaveText(range);
   expect(world.deliveries[0].data.price_range_shown).toBe(range);
   expect(world.prices).toHaveLength(0);
+  const start = page.getByRole('button', { name: 'Start another project' });
+  await expect(page.locator('#bp-form')).toBeHidden();
+  if (info.project.name === 'desktop') await start.click();
+  else await start.tap();
+  await expect(page.getByText('You are starting another project.')).toBeVisible();
+  await expect(page.locator('#bp-form button[type=submit]')).toBeEnabled();
+  expect(world.deliveries).toHaveLength(1);
 });
 
 test('draw a corner and a gate on the map and restore it after reload', async ({ page, context }) => {
