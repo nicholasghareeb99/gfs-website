@@ -412,6 +412,7 @@ h1, h2, h3, h4 {
 .form-textarea { resize: vertical; min-height: 120px; font-family: inherit; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .contact-form .form-row { grid-template-columns: 1fr; } }
 .form-note { font-size: 13px; color: var(--gray-500); margin-top: 16px; line-height: 1.5; }
 .form-success {
   background: rgba(16,185,129,0.1); border-left: 4px solid var(--success);

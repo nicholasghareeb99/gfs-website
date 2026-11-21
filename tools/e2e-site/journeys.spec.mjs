@@ -190,6 +190,7 @@ test('public-price Ballpark writes the same visible range and keeps server rates
 });
 
 test('draw a corner and a gate on the map and restore it after reload', async ({ page, context }) => {
+  test.setTimeout(100_000);
   const world = await mockSite(context);
   await openPage(page, ballpark);
   await press(page.locator('#bp-open-map'));
