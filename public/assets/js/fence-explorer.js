@@ -55,7 +55,7 @@
   const dialog = document.createElement('dialog');
   dialog.className = 'fence-viewer';
   dialog.setAttribute('aria-label', 'Our fence installation photographs');
-  dialog.innerHTML = '<div class="fence-viewer-bar"><span data-viewer-count aria-live="polite"></span><button type="button" data-viewer-close autofocus>Close ×</button></div><figure><img alt=""><figcaption></figcaption></figure><div class="fence-viewer-nav"><button type="button" data-viewer-previous aria-label="Previous photo">← Previous</button><button type="button" data-viewer-next aria-label="Next photo">Next →</button><a target="_blank" rel="noopener">Open full image</a></div>';
+  dialog.innerHTML = '<div class="fence-viewer-bar"><span data-viewer-count aria-live="polite"></span><button type="button" data-viewer-close autofocus>Close ×</button></div><figure><img alt=""><figcaption></figcaption></figure><div class="fence-viewer-nav"><button type="button" data-viewer-previous aria-label="Previous photo">← Previous</button><button type="button" data-viewer-next aria-label="Next photo">Next →</button><a href="#" target="_blank" rel="noopener">Open full image</a></div>';
   document.body.append(dialog);
   let index = 0, opener = null, oldOverflow = '';
   function render() {
