@@ -1535,7 +1535,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (!lfInput) return;
     lfInput.addEventListener('input', () => {
       state.linearFeet = Number(lfInput.value) || 0;
-      const invalid = !Number.isFinite(state.linearFeet) || state.linearFeet < 0 || state.linearFeet > 2000;
+      const invalid = !!lfInput.validity?.badInput || (lfInput.value !== '' && (!Number.isFinite(state.linearFeet) || state.linearFeet <= 0 || state.linearFeet > 2000));
       const notice = el('bp-length-status');
       if (notice) { notice.hidden = !invalid; notice.textContent = state.linearFeet > 2000 ? 'For more than 2,000 feet, request a detailed quote. Your length has not been reduced.' : 'Enter a positive fence length, up to 2,000 feet.'; }
       if (invalid) lfInput.setAttribute('aria-invalid', 'true'); else lfInput.removeAttribute('aria-invalid');

@@ -1,0 +1,14 @@
+{
+  "name": "gfs-e2e-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "measure": "node measure.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.61.1",
+    "leaflet": "1.9.4",
+    "leaflet-draw": "1.0.4"
+  }
+}

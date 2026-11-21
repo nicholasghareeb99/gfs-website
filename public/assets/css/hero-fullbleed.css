@@ -260,7 +260,7 @@ a.skip:focus{ left:8px; top:8px; }
 .gfs-read__page{ margin:0 auto 34px; max-width:900px; scroll-margin-top:90px; }
 .gfs-read__page img{ display:block; width:100%; height:auto; border:1px solid #dfe3e6; border-radius:6px; background:#fff; box-shadow:0 6px 24px rgba(14,23,32,.08); }
 .gfs-read__page figcaption{ font-size:14px; color:#3c4854; margin:8px 0 4px; }
-.gfs-read__page summary{ cursor:pointer; font-size:14px; color:#0e1720; text-decoration:underline; padding:6px 0; }
+.gfs-read__page summary{ display:list-item; min-height:44px; box-sizing:border-box; cursor:pointer; font-size:14px; color:#0e1720; text-decoration:underline; padding:6px 0; }
 .gfs-read__text p{ font-size:16px; line-height:1.5; margin:0 0 6px; color:#1c2630; }
 .gfs-read__end{ display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:40px; }
 .gfs-read--teaser .gfs-dl-grid{ margin-bottom:0; }

@@ -53,7 +53,13 @@
   function render(){
     if(!document.body||!document.createElement)return;
     if(!surface()){if(panel)panel.hidden=true;if(launcher)launcher.hidden=true;return;}
-    if(!launcher){launcher=element('button','Privacy choices');launcher.type='button';launcher.setAttribute('data-gfs-protected','');launcher.style.cssText='position:fixed;left:12px;bottom:12px;z-index:1100;border:1px solid #d0d8dd;background:#fff;color:#173344;border-radius:20px;padding:8px 13px;font:600 12px system-ui;box-shadow:0 2px 10px #0001;';launcher.addEventListener('click',()=>{open=true;render();});document.body.appendChild(launcher);}
+    if(!launcher){
+      launcher=element('button','Privacy choices');launcher.type='button';launcher.setAttribute('data-gfs-protected','');
+      launcher.style.cssText='min-width:44px;min-height:44px;border:1px solid #d0d8dd;background:#fff;color:#173344;border-radius:20px;padding:8px 13px;font:600 12px system-ui;';
+      launcher.addEventListener('click',()=>{open=true;render();});
+      const footer=document.querySelector?.('.footer-bottom') || document.body;
+      footer.appendChild(launcher);
+    }
     launcher.hidden=false;
     if(!panel){panel=element('section');panel.setAttribute('role','region');panel.setAttribute('aria-label','Privacy choices');panel.setAttribute('data-gfs-protected','');panel.style.cssText='position:fixed;right:16px;bottom:16px;z-index:1101;width:min(420px,calc(100vw - 32px));max-height:75vh;overflow:auto;box-sizing:border-box;padding:22px;border:1px solid #cdd7de;border-radius:18px;background:#fff;color:#173344;box-shadow:0 16px 60px #132d3d33;font:14px/1.5 system-ui;';document.body.appendChild(panel);}
     const value=snapshot();panel.hidden=Boolean(value.choiceId&&!open&&!error);if(panel.hidden)return;
@@ -63,7 +69,7 @@
     const analytics=option('Website analytics',value.analytics,'Allow Google Analytics and our visit records to help improve pages and tools.');
     const advertising=option('Advertising measurement',value.advertising,'Allow Google advertising measurement, including storing ad click identifiers. Google ad personalization stays off.');
     const actions=element('div');actions.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;';panel.appendChild(actions);
-    function button(label,fn,primary=false){const b=element('button',label);b.type='button';b.style.cssText='border:1px solid #173344;border-radius:9px;padding:10px 12px;font:600 13px system-ui;cursor:pointer;'+(primary?'background:#173344;color:white;':'background:white;color:#173344;');b.addEventListener('click',fn);actions.appendChild(b);}
+    function button(label,fn,primary=false){const b=element('button',label);b.type='button';b.style.cssText='border:1px solid #173344;border-radius:9px;min-height:44px;padding:10px 12px;font:600 13px system-ui;cursor:pointer;'+(primary?'background:#173344;color:white;':'background:white;color:#173344;');b.addEventListener('click',fn);actions.appendChild(b);}
     button('Only necessary',()=>save({analytics:false,advertising:false}));button('Save choices',()=>save({analytics:analytics.checked,advertising:advertising.checked}),true);
     const link=element('a','Read our privacy policy');link.href='/privacy/';link.style.cssText='display:inline-block;margin-top:14px;color:#315b76;';panel.appendChild(link);
     if(error){const status=element('p',error);status.setAttribute('role','status');panel.appendChild(status);}
