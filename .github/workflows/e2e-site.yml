@@ -1,0 +1,36 @@
+name: Built website use test
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  built-site:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            tools/e2e-site/package-lock.json
+      - run: npm ci
+      - run: npm ci --prefix tools/e2e-site
+      - run: npm exec --prefix tools/e2e-site -- playwright install --with-deps chromium webkit
+      - run: npm run build
+      - run: npm test
+      - run: npm test --prefix tools/e2e-site
+      - run: npm run measure --prefix tools/e2e-site
+      - name: Upload browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-site-results
+          path: tools/e2e-site/results/
+          retention-days: 14

@@ -627,6 +627,7 @@
   function wireReach(form) {
     if (!form || form.dataset.reachBound === 'yes') return;
     form.dataset.reachBound = 'yes';
+    bindFieldErrors(form);
     if (!form.querySelector('[name="contactMethod"]')) {
       const box = document.createElement('fieldset');
       box.className = 'gfs-reach'; box.setAttribute('data-gfs-protected', '');
@@ -658,6 +659,51 @@
       if (saved && !radios.some(radio => radio.checked)) { const match = radios.find(radio => radio.value === saved); if (match) match.checked = true; }
     } catch {}
     sync();
+  }
+  function bindFieldErrors(form) {
+    const errors = new Map();
+    const phone = form.querySelector('[name="phone"]');
+    const checkPhone = () => {
+      if (!phone?.setCustomValidity) return;
+      const value = phone.value.trim();
+      phone.setCustomValidity(value && !normalizePhone(value) ? 'Enter a valid phone number, including the area code.' : '');
+    };
+    function show(field) {
+      if (!field.validationMessage) return;
+      const target = field.type === 'radio' ? field.closest('fieldset') : field;
+      if (!target) return;
+      if (!errors.has(target)) {
+        const note = document.createElement('p');
+        note.className = 'gfs-field-error';
+        note.id = (field.id || (form.id || 'gfs-form') + '-' + field.name) + '-field-error';
+        note.setAttribute('aria-live', 'polite');
+        target.after(note);
+        const related = target.getAttribute('aria-describedby');
+        target.setAttribute('aria-describedby', [related, note.id].filter(Boolean).join(' '));
+        errors.set(target, note);
+      }
+      target.setAttribute('aria-invalid', 'true');
+      const note = errors.get(target);
+      note.hidden = false;
+      note.textContent = field.type === 'radio' ? 'Choose how we should reach you.' : field.validationMessage;
+    }
+    function update(event) {
+      const field = event.target;
+      if (field === phone) checkPhone();
+      const target = field.type === 'radio' ? field.closest('fieldset') : field;
+      if (!errors.has(target)) return;
+      if (field.validity.valid) {
+        errors.get(target).hidden = true;
+        target.removeAttribute('aria-invalid');
+      } else show(field);
+    }
+    form.addEventListener('invalid', event => show(event.target), true);
+    form.addEventListener('input', update);
+    form.addEventListener('change', update);
+    phone?.addEventListener?.('blur', () => {
+      checkPhone();
+      if (phone.value && !phone.validity?.valid) show(phone);
+    });
   }
   function flagReach(form) {
     const first = form.querySelector('[name="contactMethod"]'); if (!first) return;
