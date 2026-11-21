@@ -17,7 +17,7 @@
      - what happens next and what the written proposal covers
    ============================================================ */
 
-(function() {
+const estimatePDF = (function() {
   'use strict';
 
   let jsPDFLoading = false;
@@ -134,8 +134,7 @@
   }
 
   // -------- PDF BUILDER --------
-  function buildPDF(data, logo, photo) {
-    const { jsPDF } = window.jspdf;
+  function buildPDF(data, logo, photo, jsPDF = window.jspdf.jsPDF) {
     const doc = new jsPDF({ unit: 'pt', format: 'letter' });
     const W = doc.internal.pageSize.getWidth();
     const H = doc.internal.pageSize.getHeight();
@@ -488,5 +487,7 @@
     });
   }
 
-  window.GFSEstimatePDF = { download: downloadEstimate, build: buildPDF };
+  return { download: downloadEstimate, build: buildPDF };
 })();
+
+export const { download, build } = estimatePDF;

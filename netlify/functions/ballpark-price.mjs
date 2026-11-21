@@ -171,14 +171,14 @@ function serviceAccount(env) {
     return key && typeof key.client_email === 'string' && typeof key.private_key === 'string' ? key : null;
   } catch { return null; }
 }
-function configuration(env) {
+export function configuration(env) {
   const project = env.GFS_FIREBASE_PROJECT_ID;
   const key = serviceAccount(env);
   return project && /^[a-z][a-z0-9-]{4,62}$/.test(project) && key ? { project, key } : null;
 }
 const b64url = v => Buffer.from(v).toString('base64url');
 let tokenCache = null;
-async function accessToken(fetcher, key, now) {
+export async function accessToken(fetcher, key, now) {
   if (tokenCache && tokenCache.exp > now + 60 && tokenCache.who === key.client_email) return tokenCache.token;
   const head = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
   const claims = b64url(JSON.stringify({ iss: key.client_email, scope: SCOPE, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 }));
@@ -190,8 +190,8 @@ async function accessToken(fetcher, key, now) {
   tokenCache = { token: json.access_token, exp: now + (Number(json.expires_in) || 3600), who: key.client_email };
   return tokenCache.token;
 }
-function docUrl(project, path) { return 'https://firestore.googleapis.com/v1/projects/' + project + '/databases/(default)/documents/' + path; }
-function plain(field) {
+export function docUrl(project, path) { return 'https://firestore.googleapis.com/v1/projects/' + project + '/databases/(default)/documents/' + path; }
+export function plain(field) {
   if (!field) return undefined;
   if ('stringValue' in field) return field.stringValue;
   if ('doubleValue' in field) return field.doubleValue;
@@ -267,7 +267,7 @@ export function leadAgeStatus(doc, nowMs) {
 }
 // {status:'missing'|'invalid'|'ok'|'expired', made, doc}. A fresh receipt is good for a day;
 // a session (or a renewal) may use an older one, within the horizon.
-async function fetchLead(fetcher, project, token, receipt, now) {
+export async function fetchLead(fetcher, project, token, receipt, now) {
   const res = await fetcher(docUrl(project, 'websiteLeads/' + encodeURIComponent(receipt)), { headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
   if (res.status === 404) return { status: 'missing' };
   if (!res.ok) throw Error('Could not check the request (HTTP ' + res.status + ')');
@@ -308,7 +308,7 @@ const countAttempt = (fetcher, project, token, receipt, now) => increment(fetche
 // the order given (the narrower window first); if a later one is refused or its
 // commit fails, the earlier ones are handed back (best effort) so a denied or
 // failed request keeps nothing. Returns true when every slot was taken.
-async function takeSlots(fetcher, project, token, now, slots) {
+export async function takeSlots(fetcher, project, token, now, slots) {
   const held = [];
   const giveBack = async () => { for (const s of held) { try { await increment(fetcher, project, token, s.id, now, s.keep, -1); } catch { /* a slot left taken is the safe side */ } } };
   try {

@@ -15,7 +15,19 @@ The instant ballpark range used to be worked out in the visitor's browser from a
 
 The submission event prices a server-mode Ballpark request from `settings/global` before it creates the Executive App lead. It stores the submitted dimensions and range in `meta` and puts the range first in `notes`. The browser sends `saved: true` to the price function and receives that saved range for the matching layout. Other styles in the comparison are calculated from the current settings. If server pricing is unavailable while the lead is saved, the lead goes through for office pricing. A changed project must be submitted as an update before its range is shown. A legacy browser with public prices sends the price it calculated with the original lead. The price is a planning estimate for staff review.
 
-The email button creates a linked request for staff. It copies the range from the price card and stores it with the follow-up. The event handler retries a temporary Firestore error with the same document ID. If delivery still fails, the event errors and the original submission stays in Netlify Forms for recovery.
+Gate openings stay in the footage. The Ballpark uses the gross drawn or entered length, rounds up to whole sections where the style is installed in sections, and adds the gate charges. For a 151 ft run of 8 ft sections with one 4 ft walk gate and one 10 ft drive gate, the price uses 19 sections (152 billable ft) and both gate charges.
+
+## Emailing a copy to the customer
+
+The Ballpark result offers **Email me this estimate**. Clicking it sends a linked request through Netlify Forms for the office and records the range from the result, the project options and the customer's opt-in. The form event retries temporary Firestore errors with the same document ID. The original submission remains in Netlify Forms for office recovery if that sync fails.
+
+Automatic delivery is off until the Netlify settings below are present. After the office request is accepted, the customer email function uses the saved opt-in and estimate. It sends the same range, selected styles and dimensions, gates, removal, timeline and yard notes, plus GFS contact details and a PDF made with the Ballpark estimate template. Without a range, the email button offers office follow-up. If automatic email is unavailable, the office still gets the request.
+
+Reuse the EmailJS/Gmail service documented in `gfence-app` and give the customer estimate its own EmailJS template. Set the recipient to `{{to_email}}`, subject to `{{subject}}`, reply-to to `{{reply_to}}` and message to `{{message}}` with line breaks preserved. Configure a dynamic attachment with filename `Ghareeb-Fencing-Estimate.pdf`, MIME type `application/pdf` and Base64 content `{{estimate_pdf}}`. Keep CC and BCC empty.
+
+Set `GFS_ESTIMATE_EMAILJS_SERVICE_ID`, `GFS_ESTIMATE_EMAILJS_TEMPLATE_ID`, `GFS_ESTIMATE_EMAILJS_PUBLIC_KEY` and `GFS_ESTIMATE_EMAILJS_PRIVATE_KEY` in the Netlify Functions environment. Enable EmailJS requests from non-browser applications with private-key authorization. The function also uses `GFS_FIREBASE_PROJECT_ID` and `GFS_PRICING_SERVICE_ACCOUNT` to read the follow-up and public catalogue and update `ballparkPriceUse` counters. Set `GFS_ESTIMATE_EMAIL_ENABLED=true` when the template, provider keys and Firestore permissions are in place.
+
+Each clock hour the function allows up to three sends per email address and ten per Netlify client IP, with a single provider attempt per follow-up receipt. The receipt limit also covers concurrent clicks and uncertain provider responses. The office can follow up from the saved request if the automatic email fails.
 
 ## When something fails (page behaviour)
 

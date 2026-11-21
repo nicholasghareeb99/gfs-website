@@ -1013,7 +1013,19 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   // below carry no rates on purpose: they only let a customer pick a general
   // style and send a request if the live list cannot be reached.
   // photo: preview image; category: which fence family the style belongs to
+  const POOL_FENCE = {
+    name: 'Pool Fence',
+    detail: 'Pool barriers and self-closing, self-latching gates',
+    photo: '/assets/img/work/aluminum-pool-fence-snow.jpg',
+    perFoot: null,
+    singleGate: null,
+    doubleGate: null,
+    category: 'pool',
+    style: 'pool',
+    removalType: 'other',
+  };
   const FENCE_PRICING = {
+    'pool-fence': POOL_FENCE,
     'cedar-privacy': {
       name: 'Cedar Privacy',
       detail: 'Western Red Cedar, classic dog-ear or flat-top',
@@ -1837,8 +1849,9 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     'aluminum': 'Aluminum',
     'chainlink': 'Chain link',
     'split-rail': 'Split rail',
+    'pool': 'Pool fencing',
   };
-  const FAMILY_ORDER = ['cedar', 'treated', 'wood', 'picket', 'vinyl', 'aluminum', 'chainlink', 'split-rail'];
+  const FAMILY_ORDER = ['cedar', 'treated', 'wood', 'picket', 'vinyl', 'aluminum', 'chainlink', 'split-rail', 'pool'];
 
   function familyOf(id) {
     const f = FENCE_PRICING[id];
@@ -2097,7 +2110,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       onUpdate(){const button=form.querySelector('button[type="submit"]');if(button)button.disabled=false;resetEmailRequest();},
       onNew(){acceptedBallparkReceipt='';pricingReceipt='';pricingReceiptAt=0;keepPricingSession(null);state.priceUnlocked=false;state.acceptedProject=null;resetEmailRequest();el('bp-success')?.classList.remove('show');updateAll();}
     });
-    function resetEmailRequest(){const emailButton=el('bp-action-email'),emailInput=el('bp-email-address');if(emailButton){emailButton.disabled=false;emailButton.textContent='Request emailed estimate';}if(emailInput)emailInput.disabled=false;const status=el('bp-email-status');if(status){status.textContent='';status.style.display='none';}}
+    function resetEmailRequest(){const emailButton=el('bp-action-email'),emailInput=el('bp-email-address');if(emailButton){emailButton.disabled=false;emailButton.textContent='Email me this estimate';}if(emailInput)emailInput.disabled=false;const status=el('bp-email-status');if(status){status.textContent='';status.style.display='none';}}
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -2430,9 +2443,10 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       return;
     }
     area.style.display = 'flex';
-    // Without a price the emailed copy is a project request, not an estimate.
     const emailButton = el('bp-action-email');
-    if (emailButton && !emailButton.disabled && !/^\u2713/.test(emailButton.textContent)) emailButton.textContent = hasPrice ? 'Request emailed estimate' : 'Email me this project request';
+    if (emailButton && !emailButton.disabled && !/^\u2713/.test(emailButton.textContent)) {
+      emailButton.textContent = hasPrice ? 'Email me this estimate' : 'Request an email from our office';
+    }
     const pdfButton = el('bp-action-pdf');
     if (pdfButton && !hasPrice) pdfButton.textContent = 'Download or print your project summary (PDF)';
     else if (pdfButton && /project summary/.test(pdfButton.textContent)) pdfButton.textContent = '\u2B07  Download or print estimate (PDF)';
@@ -2511,9 +2525,9 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
         }
         dlPdf.disabled = true;
         try {
-          const pdf = await loadActionScript('/assets/js/estimate-pdf.js?v=kit-142f5ee09bca', 'GFSEstimatePDF');
+          const { download } = await import('/assets/js/estimate-pdf.js?v=estimate-email-1');
           dlPdf.disabled = false;
-          pdf.download(estimate, previewTab);
+          download(estimate, previewTab);
         } catch {
           dlPdf.disabled = false;
           previewTab?.close();
@@ -3923,8 +3937,8 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (!Number.isFinite(part.feet) || part.feet <= 0) return null;
     const named = supportedStyleHeight(fence.name), height = partHeight(fence, part.height);
     if (!canPriceHeight(fence.name, height) || (named === null && ![4, 5, 6, 8].includes(height))) return null;
+    // Round the gross run to full sections, then add gate charges.
     const rounding = roundToSections(part.feet, fence.name);
-    // Styles installed in sections are billed at the next full panel.
     const gates = gateCost(part.singleGates, part.doubleGates, fence.singleGate, fence.doubleGate);
     return gates === null ? null : { fenceCost: rounding.billable * fence.perFoot, gateCost: gates };
   }
@@ -4476,6 +4490,9 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
           }
         }
         if (built) {
+          if (!Object.values(FENCE_PRICING).some(fence => fence.category === 'pool')) {
+            FENCE_PRICING['pool-fence'] = POOL_FENCE;
+          }
           window.GFS_BALLPARK_MODEL_OVERRIDES = data.styleSpecs && typeof data.styleSpecs === "object" ? data.styleSpecs : undefined;
           // Settled before any redraw so the wording is right on first paint.
           styleCatalogSettled = true;
@@ -4635,6 +4652,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (categoryForName(name) === 'vinyl') return base + 'vinyl-white.jpg';
     if (n.includes('picket')) return base + 'vinyl-tan-privacy.jpg';
     if (n.includes('treated') || n.includes('dog ear') || n.includes('wood') || n.includes('pt') || n.includes('pine')) return base + 'pt-privacy.jpg';
+    if (/\bpool\b/.test(n)) return POOL_FENCE.photo;
     return base + 'cedar-shadowbox.jpg';  // default
   }
 
@@ -4642,6 +4660,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     const n = name.toLowerCase();
     // Describe named design features without guessing privacy from a material
     // or family name. Owner-selected photos/specs may vary within a family.
+    if (/\bpool\b/.test(n)) return POOL_FENCE.detail;
     if (n.includes('chain')) return 'Chain-link mesh fence';
     if (n.includes('split') || n.includes('ranch')) return 'Open rail fence';
     if (n.includes('aluminum') || n.includes('ornamental')) return 'Open views with matching gate options';
@@ -4709,6 +4728,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     const n = (name || '').toLowerCase();
 
     // Compound / ambiguous names first
+    if (/\bpool\b/.test(n)) return 'pool';
     if (n.includes('chain')) return 'chainlink';          // incl. "vinyl coated"
     if (n.includes('split rail') || n.includes('split-rail') ||
         n.includes('splitrail') || n.includes('ranch rail')) return 'split-rail';
@@ -4841,7 +4861,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       const label = document.createElement('label');
       label.className = 'form-label';
       label.htmlFor = 'bp-email-address';
-      label.textContent = 'Email for your estimate request';
+      label.textContent = 'Email address';
       emailInput = document.createElement('input');
       emailInput.id = 'bp-email-address';
       emailInput.type = 'email';
@@ -4854,7 +4874,6 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     emailInput.addEventListener('input', () => {
       emailInput.removeAttribute('aria-invalid');
     });
-    btn.textContent = 'Request emailed estimate';
 
     btn.addEventListener('click', async () => {
       if (!state.priceUnlocked || projectChanged() || serverPricePhase() === 'working' || btn.disabled) return;
@@ -4875,7 +4894,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       const fd = form ? new FormData(form) : null;
       const email = emailInput.value.trim();
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) {
-        show('Enter a valid email address above, then request your emailed estimate.', 'error');
+        show('Enter a valid email address.', 'error');
         emailInput.setAttribute('aria-invalid', 'true');
         emailInput.focus();
         return;
@@ -4894,55 +4913,63 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       btn.disabled = true;
       emailInput.disabled = true;
       const original = btn.textContent;
-      btn.textContent = 'Requesting…';
+      btn.textContent = 'Sending…';
 
       // Everything from here runs under the clean-up below, so no error can
       // leave the button or the email field stuck.
       try {
-      const hasRange = !price.requiresReview && Number.isFinite(price.low) && Number.isFinite(price.high);
-      const gates = [];
-      if (state.singleGates) gates.push(state.singleGates + ' walk');
-      if (state.doubleGates) gates.push(state.doubleGates + ' drive');
+        const hasRange = !price.requiresReview && Number.isFinite(price.low) && Number.isFinite(price.high);
+        const gates = [];
+        if (state.singleGates) gates.push(state.singleGates + ' walk');
+        if (state.doubleGates) gates.push(state.doubleGates + ' drive');
 
-      const payload = {
-        name: (fd && fd.get('name')) || '',
-        firstName: (fd && fd.get('firstName')) || '',
-        lastName: (fd && fd.get('lastName')) || '',
-        phone: (fd && fd.get('phone')) || '',
-        email: email,
-        address: (fd && fd.get('address')) || state.address || '',
-        source: 'ballpark-email-estimate',
-        parentReceipt: acceptedBallparkReceipt,
-        'bot-field': fd && fd.get('bot-field'),
-        fenceStyle: fence.name || '',
-        fenceType: fence.category || '',
-        linearFeet: state.linearFeet,
-        height: state.height,
-        singleGates: state.singleGates,
-        doubleGates: state.doubleGates,
-        removeOldFence: state.removeOldFence,
-        existingFenceMaterial: state.existingFenceMaterial,
-        geometry: collectGeometry(),
-        photo: leadPhoto || '',
-        contactMethod: 'Email',
-        bestTime: (fd && fd.get('bestTime')) || '',
-        timeline: (fd && fd.get('timeline')) || '',
-        siteNotes: state.siteNotes.slice(),
-        sections: state.sections.length ? sectionLines().join('\n') : '',
-        priceRange: hasRange ? formatRange(price.low, price.high) : '',
-        notes: [removalScopeNote(), (fd && fd.get('notes')) || '', (hasRange ? 'EMAILED ESTIMATE REQUEST — ' : 'EMAILED PROJECT REQUEST (no price shown) — ') +
-               'Style: ' + fence.name + ' · Length: ' + state.linearFeet + ' ft · ' +
-               'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none')].filter(Boolean).join(' · '),
-      };
+        const payload = {
+          name: (fd && fd.get('name')) || '',
+          firstName: (fd && fd.get('firstName')) || '',
+          lastName: (fd && fd.get('lastName')) || '',
+          phone: (fd && fd.get('phone')) || '',
+          email: email,
+          address: (fd && fd.get('address')) || state.address || '',
+          source: 'ballpark-email-estimate',
+          parentReceipt: acceptedBallparkReceipt,
+          'bot-field': fd && fd.get('bot-field'),
+          fenceStyle: fence.name || '',
+          fenceType: fence.category || '',
+          linearFeet: state.linearFeet,
+          height: state.height,
+          singleGates: state.singleGates,
+          doubleGates: state.doubleGates,
+          removeOldFence: state.removeOldFence,
+          existingFenceMaterial: state.existingFenceMaterial,
+          geometry: collectGeometry(),
+          photo: leadPhoto || '',
+          contactMethod: 'Email',
+          bestTime: (fd && fd.get('bestTime')) || '',
+          timeline: (fd && fd.get('timeline')) || '',
+          siteNotes: state.siteNotes.slice(),
+          sections: state.sections.length ? sectionLines().join('\n') : '',
+          priceRange: hasRange ? formatRange(price.low, price.high) : '',
+          pricingProject: hasRange ? pricingProject() : '',
+          estimateEmailOptIn: hasRange,
+          notes: [removalScopeNote(), (fd && fd.get('notes')) || '', (hasRange ? 'EMAILED ESTIMATE REQUEST — ' : 'EMAILED PROJECT REQUEST (no price shown) — ') +
+                 'Style: ' + fence.name + ' · Length: ' + state.linearFeet + ' ft · ' +
+                 'Height: ' + state.height + ' ft · Gates: ' + (gates.join(' + ') || 'none')].filter(Boolean).join(' · '),
+        };
 
-      window.GFSRequestFlow?.setBusy(form,true);
+        window.GFSRequestFlow?.setBusy(form,true);
         if (!window.GFSLeads || typeof window.GFSLeads.submit !== 'function') {
           throw new Error('lead module unavailable');
         }
         const result = await window.GFSLeads.submit(payload,window.GFSRequestFlow?.optionsFor(form)||{});
         if (result.ok) {
-          show(hasRange ? 'Your estimate request reached our office. We will review it and email you at ' + email + '.' : 'Your request reached our office. We will email you at ' + email + '.', 'ok');
-          btn.textContent = hasRange ? '\u2713 Estimate requested' : '\u2713 Request sent';
+          const sent = hasRange && await sendEstimateEmail(result.id);
+          if (sent) {
+            show('We sent your estimate to ' + email + '. Our office also received your request.', 'ok');
+            btn.textContent = '\u2713 Estimate emailed';
+          } else {
+            show('Your request reached our office. We will follow up at ' + email + '.', 'ok');
+            btn.textContent = '\u2713 Request sent';
+          }
           return;
         }
         show((result.errors || ['Could not send that']).join('. ') + ' — call (419) 214-2107 and we will send it over.', 'error');
@@ -4956,6 +4983,25 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       emailInput.disabled = false;
       btn.textContent = original;
     });
+  }
+
+  async function sendEstimateEmail(receipt) {
+    if (!/^web_[a-zA-Z0-9_-]{16,80}$/.test(receipt || '')) return false;
+    try {
+      for (const delay of [0, 500, 1500, 3000, 4000]) {
+        if (delay) await new Promise(resolve => setTimeout(resolve, delay));
+        const response = await fetch('/.netlify/functions/ballpark-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receipt, optIn: true }),
+          signal: AbortSignal.timeout(12000),
+        });
+        if (response.status !== 409) return response.status === 202;
+      }
+    } catch {
+      // The office has the request even if we cannot confirm automatic email.
+    }
+    return false;
   }
 
   function init() {
