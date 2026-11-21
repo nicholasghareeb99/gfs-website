@@ -421,7 +421,7 @@
   const conversionKey = 'gfs-conversion-invocations-v2', conversionTTL = 30*60*1000;
   let conversionTimer = null, conversionPolls = 0;
   function ownerTraffic(){try{return localStorage.getItem('gfs_owner')==='1';}catch{return false;}}
-  function publicTrackingHost(){return ['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com'].includes(location.hostname)&&window.GFSTrackingPolicy?.contextAllowed()===true;}
+  function publicTrackingHost(){return ['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com','www.ghareebfence.com'].includes(location.hostname)&&window.GFSTrackingPolicy?.contextAllowed()===true;}
   let conversions = [], legacyReceipts = [];
   try {
     const saved=window.GFSTrackingPolicy?.anyAllowed()?JSON.parse(sessionStorage.getItem(conversionKey)||'[]'):[];

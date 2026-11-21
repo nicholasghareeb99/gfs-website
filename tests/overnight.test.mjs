@@ -37,10 +37,10 @@ test('town pages with checked rules show them and answer the height question in 
   }
 });
 
-test('index control: /p/ noindex by default, /x3d/ noindex header, /portal/ in sitemap', () => {
+test('index control: /p/ noindex by default, /x3d/ noindex header, noindex /portal/ stays out of the sitemap', () => {
   assert.match(read('public/p/index.html'), /<meta name="robots" content="noindex">/);
   assert.match(read('netlify.toml'), /for = "\/x3d\/\*"\s+\[headers\.values\]\s+X-Robots-Tag = "noindex"/);
-  assert.match(read('public/sitemap.xml'), /<loc>https:\/\/ghareebfence\.com\/portal\/<\/loc>/);
+  assert.doesNotMatch(read('public/sitemap.xml'), /<loc>https:\/\/ghareebfence\.com\/portal\/<\/loc>/);
 });
 
 test('image sitemap is listed in robots.txt and every image exists', () => {
@@ -61,4 +61,15 @@ test('build fetches one stylesheet in the head of a fence page, in the original 
   const source = read('public/fences/vinyl/index.html');
   const want = [...source.slice(0, source.indexOf('</head>')).matchAll(/<link rel="stylesheet" href="[^"]*\/([\w.-]+\.css)/g)].map((m) => m[1]);
   assert.deepEqual(order, want);
+});
+
+test('measurement is opt-out: on by default, off under Global Privacy Control, and the policy says so', () => {
+  const js = read('public/assets/js/tracking-policy.js');
+  assert.match(js, /function defaults\(\)\{.*globalPrivacyControl!==true;\}/);
+  assert.match(js, /if\(value\)return value\[purpose\]===true;return \(purpose==='analytics'\|\|purpose==='advertising'\)&&defaults\(\);/);
+  assert.match(js, /adPersonalization:false,authority:'not_recorded'/);
+  const policy = read('public/privacy/index.html');
+  assert.match(policy, /Both are on unless you turn them off in Privacy choices/);
+  assert.match(policy, /Global Privacy Control/);
+  assert.doesNotMatch(policy, /stays off until you record a choice/);
 });

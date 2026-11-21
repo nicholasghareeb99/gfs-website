@@ -7,8 +7,11 @@
   const exact=(value,keys)=>value&&typeof value==='object'&&!Array.isArray(value)&&Object.keys(value).length===keys.length&&keys.every(k=>Object.hasOwn(value,k));
   function valid(value){return exact(value,['version','noticeVersion','choiceId','revision','recordedAtClient','analytics','advertising','adPersonalization','authority'])&&value.version===1&&value.noticeVersion===NOTICE&&/^[a-zA-Z0-9_-]{16,80}$/.test(value.choiceId||'')&&Number.isSafeInteger(value.revision)&&value.revision>=1&&Number.isFinite(value.recordedAtClient)&&value.recordedAtClient<=Date.now()&&Date.now()-value.recordedAtClient<MAX_AGE&&typeof value.analytics==='boolean'&&typeof value.advertising==='boolean'&&value.adPersonalization===false&&value.authority==='browser_choice_unverified';}
   function read(){if(forceDenied){record=null;return null;}try{const value=JSON.parse(localStorage.getItem(KEY)||'null');record=sessionStorage.getItem(DENIED)==='1'?null:valid(value)?value:null;storageFailed=false;}catch{record=null;storageFailed=true;}return record;}
-  function snapshot(){const value=read();return value?{...value}:{version:1,noticeVersion:NOTICE,choiceId:null,revision:0,recordedAtClient:null,analytics:false,advertising:false,adPersonalization:false,authority:'not_recorded'};}
-  function allows(purpose){const value=read();return Boolean(value&&value[purpose]===true);}
+  // No recorded choice: measurement is on by default (opt-out), except when the
+  // browser sends Global Privacy Control or a choice could not be stored.
+  function defaults(){if(forceDenied||storageFailed)return false;try{if(sessionStorage.getItem(DENIED)==='1')return false;}catch{return false;}return globalThis.navigator?.globalPrivacyControl!==true;}
+  function snapshot(){const value=read();if(value)return{...value};const on=defaults();return{version:1,noticeVersion:NOTICE,choiceId:null,revision:0,recordedAtClient:null,analytics:on,advertising:on,adPersonalization:false,authority:'not_recorded'};}
+  function allows(purpose){const value=read();if(value)return value[purpose]===true;return (purpose==='analytics'||purpose==='advertising')&&defaults();}
   function redactMeta(meta){return String(meta||'').split(' | ').filter(part=>!CLICK_KEYS.has(part.slice(0,part.indexOf('=')))).map(part=>{
     if(!part.startsWith('ref='))return part;
     try{const url=new URL(decodeURIComponent(part.slice(4)));return 'ref='+encodeURIComponent(url.origin+url.pathname);}catch{return '';}
@@ -62,9 +65,9 @@
     }
     launcher.hidden=false;
     if(!panel){panel=element('section');panel.setAttribute('role','region');panel.setAttribute('aria-label','Privacy choices');panel.setAttribute('data-gfs-protected','');panel.style.cssText='position:fixed;right:16px;bottom:16px;z-index:1101;width:min(420px,calc(100vw - 32px));max-height:75vh;overflow:auto;box-sizing:border-box;padding:22px;border:1px solid #cdd7de;border-radius:18px;background:#fff;color:#173344;box-shadow:0 16px 60px #132d3d33;font:14px/1.5 system-ui;';document.body.appendChild(panel);}
-    const value=snapshot();panel.hidden=Boolean(value.choiceId&&!open&&!error);if(panel.hidden)return;
+    const value=snapshot();panel.hidden=!open&&!error;if(panel.hidden)return;
     panel.replaceChildren();const title=element('h2','Your privacy choices');title.style.cssText='font:700 21px/1.2 system-ui;margin:0 0 10px;';panel.appendChild(title);
-    panel.appendChild(element('p','Choose optional measurement below. You can request a quote, use the planner and book a visit either way.'));
+    panel.appendChild(element('p','Measurement is on unless you turn it off here. You can request a quote, use the planner and book a visit either way.'));
     function option(label,checked,help){const wrap=element('label'),box=element('input');box.type='checkbox';box.checked=checked;box.style.marginRight='9px';wrap.style.cssText='display:block;margin:14px 0;font-weight:600;';wrap.appendChild(box);wrap.appendChild(element('span',label));const note=element('small',help);note.style.cssText='display:block;margin-left:24px;font-weight:400;color:#526574;';wrap.appendChild(note);panel.appendChild(wrap);return box;}
     const analytics=option('Website analytics',value.analytics,'Allow Google Analytics and our visit records to help improve pages and tools.');
     const advertising=option('Advertising measurement',value.advertising,'Allow Google advertising measurement, including storing ad click identifiers. Google ad personalization stays off.');
@@ -75,7 +78,7 @@
     if(error){const status=element('p',error);status.setAttribute('role','status');panel.appendChild(status);}
   }
   window.GFSConsent=Object.freeze({snapshot,allows,save,redactMeta,refreshUI:render,show:()=>{open=true;render();},noticeVersion:NOTICE});
-  read();if(!record?.advertising)purgeAdvertising();if(!record)purgeMeasurement();
+  read();if(!allows('advertising'))purgeAdvertising();if(!record&&!defaults())purgeMeasurement();
   window.addEventListener?.('storage',event=>{if(event?.key&&event.key!==KEY&&event.key!==DENIED&&event.key!=='gfs_owner')return;const before=record?{...record}:null;if(event?.key===KEY||event?.key===DENIED)forceDenied=false;read();signal(before);});
   for(const type of ['gfs-owner-mode-changed','hashchange','popstate','pageshow'])window.addEventListener?.(type,render);
   document.addEventListener?.('DOMContentLoaded',render);if(document.readyState!=='loading')render();
@@ -119,7 +122,7 @@
   }
   function contextAllowed(){
     try{
-      if(location.protocol!=='https:'||!['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com'].includes(location.hostname))return false;
+      if(location.protocol!=='https:'||!['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com','www.ghareebfence.com'].includes(location.hostname))return false;
       if(window.GFS_TRACKING_CONFIG?.internalTest===true||/^\/(?:tests?|__test)(?:\/|$)/i.test(location.pathname))return false;
       const testParams=new URLSearchParams(location.search);if(testParams.has('gfs_test')||testParams.has('system_test'))return false;
       if(!safeUrl(location.href||location.pathname+location.search+(location.hash||'')))return false;
