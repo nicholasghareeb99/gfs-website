@@ -205,7 +205,13 @@ test('draw a corner and a gate on the map and restore it after reload', async ({
   await press(page.locator('#bp-draw-toolbar [data-mode="finish"]'));
   await press(page.getByText('Add gates', { exact: true }));
   await press(page.locator('#bp-draw-toolbar [data-mode="walk-gate"]'));
-  await press(map, { x: Math.round(width * .42), y: Math.round(height * .36) });
+  const fenceLine = map.locator('.leaflet-overlay-pane path[stroke="#00E5A0"]');
+  const gatePoint = await fenceLine.evaluate((line) => {
+    const screen = line.getPointAtLength(line.getTotalLength() / 3).matrixTransform(line.getScreenCTM());
+    const mapRect = line.closest('.leaflet-container').getBoundingClientRect();
+    return { x: screen.x - mapRect.left, y: screen.y - mapRect.top };
+  });
+  await press(map, gatePoint);
   const feet = Number(await page.locator('#bp-linear-feet').inputValue());
   expect(feet).toBeGreaterThan(0);
   await expect(page.locator('#bp-single-gates')).toHaveValue('1');
