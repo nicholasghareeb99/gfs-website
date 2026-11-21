@@ -129,7 +129,8 @@ test('walk the production sitemap and audit links, assets, business facts, layou
     resourceErrors = [];
     const response = await page.goto(path, { waitUntil: 'load', timeout: 20_000 });
     expect(response?.status(), path).toBe(200);
-    const raw = await response.text();
+    // Read the served HTML directly because a long WebKit crawl can evict inspector response bodies.
+    const raw = await (await fetch(new URL(path, BASE))).text();
     const evidence = await inspect(page);
     for (const [kind, values] of Object.entries({ link: evidence.links, image: evidence.imgs })) {
       for (const value of values) {

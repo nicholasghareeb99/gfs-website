@@ -78,7 +78,10 @@ for (let start = 0; start < byStyle.length; start += 6) {
     await openPage(page, ballpark);
     for (const [index, [style, height]] of rows.entries()) {
       await test.step(style + ' at ' + height + ' ft', async () => {
-        if (index) await press(page.getByRole('button', { name: 'Start another project' }));
+        if (index) {
+          await press(page.getByRole('button', { name: 'Start another project' }));
+          await expect(page.getByText('You are starting another project.', { exact: false })).toBeVisible();
+        }
         await pickBallpark(page, style, height, 151);
         await addBothGates(page);
         await submitBallpark(page);
