@@ -65,7 +65,7 @@ test('build fetches one stylesheet in the head of a fence page, in the original 
 
 test('measurement is opt-out: on by default, off under Global Privacy Control, and the policy says so', () => {
   const js = read('public/assets/js/tracking-policy.js');
-  assert.match(js, /function defaults\(\)\{[^}]*globalPrivacyControl!==true/);
+  assert.match(js, /function defaults\(\)\{.*globalPrivacyControl!==true;\}/);
   assert.match(js, /if\(value\)return value\[purpose\]===true;return \(purpose==='analytics'\|\|purpose==='advertising'\)&&defaults\(\);/);
   assert.match(js, /adPersonalization:false,authority:'not_recorded'/);
   const policy = read('public/privacy/index.html');
