@@ -6,7 +6,9 @@ import { promisify } from 'node:util';
 import { gzip } from 'node:zlib';
 
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
-export const BASE = 'http://127.0.0.1:' + (process.env.GFS_E2E_PORT || 4178);
+const port = Number(process.env.GFS_E2E_PORT || 4178);
+if (!Number.isInteger(port) || port < 1024 || port > 65535) throw Error('GFS_E2E_PORT must be an unprivileged local port');
+export const BASE = 'http://127.0.0.1:' + port;
 export const SITE_HOSTS = new Set([
   'ghareebfence.com', 'www.ghareebfence.com', 'gfencing.netlify.app', 'gfs-website.netlify.app',
   'ghareebfencingsolutions.com', 'www.ghareebfencingsolutions.com',
@@ -94,7 +96,7 @@ export async function startServer() {
   });
   await new Promise((ok, fail) => {
     server.once('error', fail);
-    server.listen(Number(new URL(BASE).port), '127.0.0.1', ok);
+    server.listen(port, '127.0.0.1', ok);
   });
   return server;
 }

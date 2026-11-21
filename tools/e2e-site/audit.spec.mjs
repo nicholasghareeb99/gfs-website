@@ -73,6 +73,7 @@ function* businessNodes(value) {
 function facts(audit, raw, path) {
   const errors = [];
   if (STALE.test(raw)) errors.push('former phone or address appears');
+  if (/8F5C4C98-DDFA-4D07-8135-8366CF7247FA/i.test(raw)) errors.push('former logo asset appears');
   if (audit.links.some(href => {
     const target = href.split('?')[0];
     return (/^(tel:|sms:)/.test(target) && target.replace(/\D/g, '').replace(/^1/, '') !== PHONE)

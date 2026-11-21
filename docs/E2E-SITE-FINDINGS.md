@@ -11,10 +11,10 @@ The audit started at `eb4a314` and incorporated `01411ce` from `main` before fin
 | Friction | Pool fencing could be selected in the Ballpark and detailed quote, but was missing from Contact and Book a Measure. | Added Pool Fence to both form lists. The browser flows now exercise pool requests. | [Contact form](../public/contact/index.html) · [Visit form](../public/quote/book/index.html) |
 | Friction | Brochure text summaries, two Toledo FAQ summaries on the iPad, the Studio refresh button and the Ballpark photo picker had touch targets under 44 px. | Increased the target heights. The audit excludes controls that are hidden from the user, such as the native selects behind the gate steppers. | [Touch target audit](../tools/e2e-site/audit.spec.mjs) |
 | Friction | A zero-foot entry had no inline length warning until the customer continued. The map search field used its example address as the only visible prompt. | The Ballpark shows the length warning alongside the field, and the map field has an accessible label. | [Ballpark form](../public/quote/ballpark/index.html) |
-| Friction | Contact's select placeholders clipped in its narrow two-column form rows on iPad. | The form rows use one column at tablet widths so each select gets the full form width. | [iPad before](e2e-site/contact-ipad-before.webp) |
+| Friction | Contact's select placeholders clipped in its narrow two-column form rows on iPad. | The form rows use one column at tablet widths so each select gets the full form width. | [iPad before](e2e-site/contact-ipad-before.webp) · [After](e2e-site/contact-ipad-after.webp) |
 | Friction | The wood versus vinyl, no-dig versus concrete, and open-style comparison guides offered a call but omitted the footer email shortcut. | Added the same business email link used in the other guide footers. | [Wood vs vinyl guide](../public/guides/wood-vs-vinyl/index.html) |
 | Cosmetic | Article publishers and several town business schemas pointed to the legacy Squarespace-hosted logo. The founding year was in About and missing from the home schema and `llms.txt`. | Updated the schema links to the same logo used by the header and added 2022 to `llms.txt`. The current home schema also states 2022. | [Home business schema](../public/index.html) · [Published facts](../public/llms.txt) |
-| Cosmetic | “Built straight, built honest, built to last” repeats across 97 sitemap pages. The Toledo closing heading, “Tell us what you want your yard to become,” is similarly promotional. | Flagged for editorial review. Pricing, financing, warranties and offers were left as published. | [Footer wording](e2e-site/footer-copy.webp) · [Toledo page](../public/service-areas/toledo-oh/index.html) |
+| Cosmetic | “Built straight, built honest, built to last” repeats across 96 of the 99 current sitemap pages. The Toledo closing heading, “Tell us what you want your yard to become,” is similarly promotional. The printed brochure uses “Toledo’s Trusted Fence Professionals” and “Built Sturdy. Built Straight. Built to Last.” | Flagged for editorial review. Pricing, financing, warranties and offers were left as published. | [Footer wording](e2e-site/footer-copy.webp) · [Toledo page](../public/service-areas/toledo-oh/index.html) |
 
 ## Homeowner paths
 
@@ -34,8 +34,8 @@ The CI measurement uses the median of three cold Chromium visits at 390 × 844, 
 
 | Page | LCP | CLS | First-party JS transferred | First-party JS decoded |
 | --- | ---: | ---: | ---: | ---: |
-| Home | 3.11 s | 0.0129 | 82.6 KiB | 265.6 KiB |
-| Ballpark | 3.23 s | 0.0313 | 157.8 KiB | 535.2 KiB |
+| Home | 2.02 s | 0.0129 | 82.8 KiB | 266.0 KiB |
+| Ballpark | 1.86 s | 0.0314 | 157.9 KiB | 535.6 KiB |
 
 ## Owner decisions
 
