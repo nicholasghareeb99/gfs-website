@@ -113,7 +113,7 @@
   }
   function contextAllowed(){
     try{
-      if(location.protocol!=='https:'||!['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com'].includes(location.hostname))return false;
+      if(location.protocol!=='https:'||!['ghareebfencingsolutions.com','www.ghareebfencingsolutions.com','ghareebfence.com','www.ghareebfence.com'].includes(location.hostname))return false;
       if(window.GFS_TRACKING_CONFIG?.internalTest===true||/^\/(?:tests?|__test)(?:\/|$)/i.test(location.pathname))return false;
       const testParams=new URLSearchParams(location.search);if(testParams.has('gfs_test')||testParams.has('system_test'))return false;
       if(!safeUrl(location.href||location.pathname+location.search+(location.hash||'')))return false;
