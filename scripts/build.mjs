@@ -56,9 +56,11 @@ for (const file of walk('dist')) {
   if (next !== html) { fs.writeFileSync(file, next); pages++; }
 }
 // 3. In <head>, local stylesheets are often split by preloads or JSON-LD. Those
-//    tags carry no CSS, so the head's stylesheets can be fetched as one file in
-//    the same order. Only done when every stylesheet in the head is a plain local
-//    link and the head has no <style> block, so the cascade cannot change.
+//    tags carry no CSS, so neighbouring stylesheets can be fetched as one file in
+//    the same order. A <style> block does carry CSS, so the head is cut at every
+//    <style> block and each stretch between them is merged on its own: nothing
+//    moves across a <style> block and the cascade cannot change. Skipped when
+//    any stylesheet in the head is not a plain local link.
 let headPages = 0;
 const ANY_SHEET = /<link\b[^>]*rel=["']?stylesheet/gi;
 const HEAD_LINK = /<link rel="stylesheet" href="((?:\.{1,2}\/|\/)(?:\.\.\/)*assets\/(?:css|b)\/[^"?#]+\.css)(?:\?[^"]*)?">/;
@@ -67,23 +69,29 @@ for (const file of walk('dist')) {
   const end = html.search(/<\/head>/i);
   if (end < 0) continue;
   const head = html.slice(0, end);
-  const links = [...head.matchAll(new RegExp(HEAD_LINK.source, 'g'))];
-  if (links.length < 2) continue;
-  if ((head.match(ANY_SHEET) || []).length !== links.length) continue;
-  if (/<style[\s>]/i.test(head.replace(/<!--[\s\S]*?-->/g, '').replace(/<script\b[\s\S]*?<\/script>/gi, ''))) continue;
+  const all = head.match(new RegExp(HEAD_LINK.source, 'g')) || [];
+  if (all.length < 2) continue;
+  if ((head.match(ANY_SHEET) || []).length !== all.length) continue;
   const dir = '/' + path.relative('dist', path.dirname(file)).split(path.sep).filter(Boolean).join('/');
-  const files = [];
-  for (const m of links) {
-    const href = m[1].startsWith('/assets/b/') ? null : path.posix.resolve(dir, m[1]);
-    if (href) files.push(href);
-    else files.push(...bundleParts.get(m[1]));
-  }
-  let first = true;
-  const nextHead = head.replace(new RegExp(HEAD_LINK.source, 'g'), () => {
-    if (!first) return '';
-    first = false;
-    return `<link rel="stylesheet" href="${bundle(files)}">`;
-  });
+  let changed = false;
+  const nextHead = head.split(/(<style\b[\s\S]*?<\/style>)/i).map((part) => {
+    if (/^<style\b/i.test(part)) return part;
+    const links = [...part.matchAll(new RegExp(HEAD_LINK.source, 'g'))];
+    if (links.length < 2) return part;
+    const files = [];
+    for (const m of links) {
+      if (m[1].startsWith('/assets/b/')) files.push(...bundleParts.get(m[1]));
+      else files.push(path.posix.resolve(dir, m[1]));
+    }
+    let first = true;
+    changed = true;
+    return part.replace(new RegExp(HEAD_LINK.source, 'g'), () => {
+      if (!first) return '';
+      first = false;
+      return `<link rel="stylesheet" href="${bundle(files)}">`;
+    });
+  }).join('');
+  if (!changed) continue;
   fs.writeFileSync(file, nextHead + html.slice(end));
   headPages++;
 }
