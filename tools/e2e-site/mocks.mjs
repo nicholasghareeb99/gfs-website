@@ -107,7 +107,7 @@ export async function mockSite(context, options = {}) {
         const input = await request.clone().json();
         if (!input.ping && state.responseDelay) await new Promise(resolve => setTimeout(resolve, state.responseDelay));
         const response = !input.ping && state.priceStatus !== 200
-          ? Response.json({ error: 'Fixture pricing interruption' }, { status: state.priceStatus })
+          ? Response.json({ error: 'Fixture pricing interruption' }, { status: state.priceStatus, headers: { 'Retry-After': '60' } })
           : await handlePrice(request, { env: environment, fetcher });
         state.prices.push({ input, status: response.status, output: await response.clone().json() });
         return replyWithWebResponse(route, response);

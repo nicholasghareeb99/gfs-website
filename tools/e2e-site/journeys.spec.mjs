@@ -122,17 +122,19 @@ test('Ballpark retains a draft across back and refresh, handles invalid lengths 
 });
 
 test('Ballpark survives delayed pricing, shows retry after a function error, and saves once', async ({ page, context }, info) => {
+  test.setTimeout(90_000);
   const world = await mockSite(context, { catalogueDelay: 400, responseDelay: 800 });
   await openPage(page, ballpark, { waitUntil: 'domcontentloaded' });
   await pickBallpark(page, 'Aluminum Pool Fence 4 ft', 4, 151);
   world.priceStatus = 503;
   await submitBallpark(page);
   await expect(page.locator('#bp-price-range')).toHaveText('Working out your range…');
+  await expect.poll(() => world.prices.some(row => row.input.parts && row.status === 503), { timeout: 30_000 }).toBe(true);
   const retry = page.getByRole('button', { name: 'Try again', exact: true });
   await expect(retry).toBeVisible();
   await expect(page.locator('#bp-price-range')).toHaveText('We will send your price');
   if (info.project.name === 'iphone') {
-    await retry.scrollIntoViewIfNeeded();
+    await page.locator('#bp-price-card').evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
     await page.screenshot({ path: info.outputPath('ballpark-retry.png') });
   }
   world.priceStatus = 200;
@@ -169,7 +171,7 @@ for (const email of ['on', 'off']) {
       expect(Buffer.from(world.mails[0].estimate_pdf, 'base64').subarray(0, 5).toString()).toBe('%PDF-');
     }
     if (info.project.name === 'iphone') {
-      await status.scrollIntoViewIfNeeded();
+      await status.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
       await page.screenshot({ path: info.outputPath('estimate-email-' + email + '.png') });
     }
   });
@@ -207,7 +209,7 @@ test('draw a corner and a gate on the map and restore it after reload', async ({
   expect(feet).toBeGreaterThan(0);
   await expect(page.locator('#bp-single-gates')).toHaveValue('1');
   await page.reload();
-  await press(page.locator('#bp-open-map'));
+  await expect(map).toHaveClass(/leaflet-container/);
   await expect(page.locator('#bp-linear-feet')).toHaveValue(String(feet));
   await expect(page.locator('#bp-single-gates')).toHaveValue('1');
   expect(world.deliveries).toHaveLength(0);
