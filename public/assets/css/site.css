@@ -412,6 +412,7 @@ h1, h2, h3, h4 {
 .form-textarea { resize: vertical; min-height: 120px; font-family: inherit; }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .contact-form .form-row { grid-template-columns: 1fr; } }
 .form-note { font-size: 13px; color: var(--gray-500); margin-top: 16px; line-height: 1.5; }
 .form-success {
   background: rgba(16,185,129,0.1); border-left: 4px solid var(--success);
@@ -425,6 +426,10 @@ h1, h2, h3, h4 {
   font-weight: 500; display: none; margin-top: 16px;
 }
 .form-error.show { display: block; }
+.gfs-field-error { margin: 6px 0 0; font-size: 14px; line-height: 1.4; color: #9d2926; }
+.bp-page .gfs-field-error { color: #ffc7bd; }
+.form-input[aria-invalid="true"], .form-select[aria-invalid="true"] { outline: 2px solid currentColor; outline-offset: 2px; }
+
 
 /* ============================================================
    BALLPARK QUOTE TOOL (rebuilt)
@@ -1300,6 +1305,7 @@ html { scroll-behavior: smooth; }
     align-items: center;
     min-height: 44px;
   }
+  main summary { min-height: 44px; box-sizing: border-box; align-content: center; }
   /* Footer and nav list links: 17px text needs padding, not a bigger font. */
   .footer li a,
   .mobile-drawer ul li a { min-height: 44px; display: flex; align-items: center; }
