@@ -62,3 +62,14 @@ test('build fetches one stylesheet in the head of a fence page, in the original 
   const want = [...source.slice(0, source.indexOf('</head>')).matchAll(/<link rel="stylesheet" href="[^"]*\/([\w.-]+\.css)/g)].map((m) => m[1]);
   assert.deepEqual(order, want);
 });
+
+test('measurement is opt-out: on by default, off under Global Privacy Control, and the policy says so', () => {
+  const js = read('public/assets/js/tracking-policy.js');
+  assert.match(js, /function defaults\(\)\{[^}]*globalPrivacyControl!==true/);
+  assert.match(js, /if\(value\)return value\[purpose\]===true;return \(purpose==='analytics'\|\|purpose==='advertising'\)&&defaults\(\);/);
+  assert.match(js, /adPersonalization:false,authority:'not_recorded'/);
+  const policy = read('public/privacy/index.html');
+  assert.match(policy, /Both are on unless you turn them off in Privacy choices/);
+  assert.match(policy, /Global Privacy Control/);
+  assert.doesNotMatch(policy, /stays off until you record a choice/);
+});
