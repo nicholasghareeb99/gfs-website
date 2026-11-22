@@ -2,7 +2,8 @@
 // All measurements remain in the existing builders; materials only affect appearance.
 import {requireCompleteGateModel} from './model-review.mjs';
 import {withCompleteFence} from './fence-layers.mjs';
-export const RENDER_VERSION = 'studio-7-wellington-lawn';
+import {upgradeMatLib} from './real-surfaces.mjs';
+export const RENDER_VERSION = 'studio-8-v3191-real';
 export function qualityProfile(mode = 'auto', {dpr = 1, mobile = false, maxTextureSize = 4096} = {}) {
   const field = mode === 'field' || (mode === 'auto' && mobile);
   return {mode, pixelRatio: Math.min(dpr, field ? 1.25 : mode === 'presentation' ? 2 : 1.75),
@@ -78,6 +79,18 @@ export function enhanceMaterials(MatLib, T) {
   for(const [method,kind] of [['wood','wood'],['vinyl','vinyl'],['vinylGrain','grain'],['alu','metal'],['galv','galv']]) {
     p[method]=function(hex){return this._mk(RENDER_VERSION+kind+hex,()=>surface(kind,hex));};
   }
+  // V3-191: physically based surfaces (grain along each board, end grain, per-board look) replace the above.
+  upgradeMatLib(MatLib,T);
+}
+export function flatFenceMaterials(materials,T) {
+  const surfaces=['wood','vinyl','vinylGrain','alu','galv','gateIron','screw'];
+  for(const name of surfaces) {
+    materials[name]=(hex=0x14161a)=>materials._mk(name+hex,()=>new T.MeshLambertMaterial({color:hex}));
+  }
+  return ()=>{
+    materials.dispose();
+    for(const name of surfaces)delete materials[name];
+  };
 }
 export function configureQuality(studio, mode = 'auto') {
   const r=studio.renderer;
@@ -95,9 +108,10 @@ export function setShadowVisibility(studio, on) {
   studio.opts.shadows=!!on;studio.renderer.shadowMap.enabled=!!on;
   studio.shadowsDirty();
 }
-export function captureFrame(studio,T,width,format='png',quality=.92) {
+export function captureFrame(studio,T,width,format='png',quality=.92,{aspect=16/9}={}) {
   requireCompleteGateModel(studio.scene);
-  const r=studio.renderer, W=Math.max(320,Math.min(Math.round(width||2000),r.capabilities.maxTextureSize)),H=Math.round(W*9/16);
+  const r=studio.renderer, max=Math.max(320,Math.min(Math.round(width||2000),r.capabilities.maxTextureSize));
+  const W=Math.max(1,Math.round(max*Math.min(1,aspect))),H=Math.max(1,Math.round(W/aspect));
   const sz=r.getSize(new T.Vector2()),ratio=r.getPixelRatio(),cam=studio.cam;
   const old={aspect:cam.aspect,left:cam.left,right:cam.right};
   try {

@@ -26,9 +26,21 @@
   }
   const validIndex = value => Number.isSafeInteger(value) && value >= 0;
   const hasRunEdits = scope => Object.keys(scope || {}).some(key => /#run\d+$/.test(key));
-  function attachScope(spec, overrides, source) {
+  const optionKey = option => /^opt[123]$/.test(option) ? option : "";
+  const runKey = (style, index, option) => style + (optionKey(option) ? '#' + optionKey(option) : '') + '#run' + index;
+  function scopeForOption(overrides, option) {
+    const scoped = modelMap(overrides);
+    const result = {};
+    for (const [key, value] of Object.entries(scoped)) {
+      const match = /^(.*)#(opt[123])(#run[0-9]+)$/.exec(key);
+      if (match && match[2] === option) result[match[1] + match[3]] = value;
+      if (!match && (!optionKey(option) || !/#run[0-9]+$/.test(key))) result[key] = value;
+    }
+    return result;
+  }
+  function attachScope(spec, overrides, source, option) {
     if (!object(spec)) throw Error('The fence preview needs a valid layout.');
-    const scope = modelMap(overrides);
+    const scope = option === undefined ? modelMap(overrides) : scopeForOption(overrides, option);
     spec.modelScope = { v: 1, overrides: scope };
     if (source === 'sketch' || source === 'site') spec.modelScope.source = source;
     // Old links have no reliable binding from a saved Studio run to a segment.
@@ -40,8 +52,8 @@
     const scope = spec?.modelScope?.v === 1 && object(spec.modelScope.overrides) ? spec.modelScope.overrides : {};
     return Object.assign({}, modelPatch(scope[style]), style === sourceStyle && validIndex(runIndex) ? modelPatch(scope[style + '#run' + runIndex]) : {});
   }
-  function studioPatch(overrides, style, runIndex) {
-    return Object.assign({}, modelPatch(overrides?.[style]), validIndex(runIndex) ? modelPatch(overrides?.[style + '#run' + runIndex]) : {});
+  function studioPatch(overrides, style, runIndex, option) {
+    return Object.assign({}, modelPatch(overrides?.[style]), validIndex(runIndex) ? modelPatch(overrides?.[runKey(style, runIndex, option)]) : {});
   }
   function heightOf(style, fallback = 6) {
     const match = String(style || '').replace(/[‘’ʼ´]/g, "'").match(/(\d+(?:\.\d+)?)\s*(?:ft|')/i);
@@ -139,5 +151,5 @@
     if (keepHeights && (styles.size > 1 || heights.size > 1)) return 'Saved layout uses multiple styles/heights';
     return (styles.size > 1 ? 'Multiple fence styles' : selectedStyle || '') + ' · ' + selectedHeight + ' ft';
   }
-  root.GFSModelContract = Object.freeze({ modelPatch, modelMap, attachScope, runPatch, studioPatch, heightOf, sketchRunIds, styleForKind, viewerRuns, layoutLabel });
+  root.GFSModelContract = Object.freeze({ modelPatch, modelMap, attachScope, runPatch, studioPatch, runKey, scopeForOption, heightOf, sketchRunIds, styleForKind, viewerRuns, layoutLabel });
 })(typeof window !== 'undefined' ? window : globalThis);

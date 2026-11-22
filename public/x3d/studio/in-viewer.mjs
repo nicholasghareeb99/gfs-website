@@ -8,20 +8,26 @@ import { createSiteKit } from './site-kit.mjs';
 import { createHardwareKit } from './hardware-kit.mjs';
 
 export function viewerAdapter(w) {
+  const doc = w.document;
+  const hooks = () => w.document === doc && w.__f3d ? w : null;
   const listeners = new Set(); let sig = '';
   w.setInterval(() => {
-    const fg = w.__f3d && w.__f3d.fenceGroup; if (!fg) return;
+    const fg = hooks()?.__f3d.fenceGroup; if (!fg) return;
     const s = fg.children.length + ':' + (fg.children[0] ? fg.children[0].uuid : '') + ':' + (fg.children.length ? fg.children[fg.children.length - 1].uuid : '');
     if (s !== sig) { sig = s; listeners.forEach(f => { try { f() } catch (_) { } }) }
   }, 250);
   let three = null;
   return {
-    hooks: () => (w.__f3d ? w : null),
-    three: () => three || (three = import(new URL('./gfs/vendor/three.module.js', w.location.href).href)),
+    hooks,
+    three: () => {
+      if (!hooks()) return Promise.reject(new Error('The viewer changed while loading.'));
+      if (w.THREE?.Mesh) return Promise.resolve(w.THREE);
+      return three ||= import(new URL('./gfs/vendor/three.module.js', w.location.href).href);
+    },
     ready: () => Promise.resolve(),
     onRebuild(fn) { listeners.add(fn); return () => listeners.delete(fn) },
-    redraw() { try { const r = w.__rend(); if (r.shadowMap) r.shadowMap.needsUpdate = true } catch (_) { } },
-    currentStyle() { const sel = w.document.querySelector('#styleRow select'); return sel ? sel.value : (w.__f3d.spec || {}).style },
+    redraw() { try { const r = hooks()?.__rend(); if (r?.shadowMap) r.shadowMap.needsUpdate = true } catch (_) { } },
+    currentStyle() { return hooks() ? doc.querySelector('#styleRow select')?.value || w.__f3d.spec?.style : undefined },
   };
 }
 
@@ -44,7 +50,7 @@ export async function boot(w) {
   if (store.get('viewerHardware', true)) { try { await hardware.enable() } catch (e) { console.warn('[gfs] hardware', e) } }
   const rail = w.document.getElementById('rail'); if (!rail) return kit;
   const mk = (label, title, fn) => { const b = w.document.createElement('button'); b.className = 'rbtn'; b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.setAttribute('aria-pressed', 'false'); b.textContent = label; b.addEventListener('click', () => fn(b)); rail.insertBefore(b, rail.firstChild); return b };   // at the top: the rail runs off short screens
-  mk('⏚', 'Below grade: see the posts in the ground and the concrete', b => { const on = !kit.state().config.xray; kit.set({ xray: on, footings: on }); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on) });
+  const posts = mk('⏚', 'Below grade: see the posts in the ground and the concrete', b => { const on = !kit.state().config.xray; kit.set({ xray: on, footings: on }); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on) });
   const hw = mk('⚙', 'Detailed gate hardware', async b => { const on = b.getAttribute('aria-pressed') !== 'true'; try { if (on) await hardware.enable(); else hardware.clear(); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); store.set('viewerHardware', on) } catch (e) { console.warn('[gfs] hardware', e) } });
   if (hardware.state().on !== false && store.get('viewerHardware', true)) { hw.setAttribute('aria-pressed', 'true'); hw.classList.add('on') }
   // Photo-real materials are opt-in per device until they have been looked over on real hardware.
@@ -56,6 +62,7 @@ export async function boot(w) {
       b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on); store.set('viewerRealism', on);
     } catch (e) { console.warn('[gfs] materials', e) }
   });
+  posts.id='btnViewerPosts'; hw.id='btnViewerHardware'; real.id='btnViewerMaterials';
   if (store.get('viewerRealism', false)) real.click();
   // V3-143 "Model check" chip. Same condition as the rail buttons above (not hosted, not the portal, the viewer has its rail).
   // profile-diagnostics.mjs ships in the executive build only, so on the portal and website this import fails quietly and nothing is shown.

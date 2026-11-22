@@ -56,6 +56,10 @@ export function classifyMaterial(m, ctx = {}) {
   if (!m) return null;
   if (ctx.ground) return 'ground';
   if (m.isMeshBasicMaterial || m.type === 'MeshBasicMaterial' || m.isShadowMaterial || m.isPointsMaterial || m.isLineBasicMaterial) return null;
+  // V3-191: the viewer's own physically based surfaces (grain per board, end grain) are left as they are, so the
+  // Studio shows what customers see. Only older plain materials are swapped.
+  if (m.userData && m.userData.gfsSurface) return null;
+  if (m.userData && m.userData.gfsGround) return null;
   if (m.userData && m.userData.gfsLawn) return 'ground';
   const alphaTest = +m.alphaTest || 0;
   if (m.alphaMap || (m.transparent && alphaTest > 0)) return alphaTest >= 0.3 ? 'lattice' : 'chainFabric';

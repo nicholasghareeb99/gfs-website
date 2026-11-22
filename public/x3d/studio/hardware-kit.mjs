@@ -466,7 +466,7 @@ export function createHardwareKit(viewer, opts = {}) {
     if (mats && mats.T === T) return mats;
     mats = {
       T,
-      steel: new T.MeshStandardMaterial({ color: 0x17181a, roughness: 0.5, metalness: 0.6 }),
+      steel: new T.MeshStandardMaterial({ color: 0x17181a, roughness: 0.45, metalness: 0.15, envMapIntensity: 0.9 }),   // V3-191: black hardware is powder coated (a paint), not bare metal
       galvanized: new T.MeshStandardMaterial({ color: 0x9aa4ad, roughness: 0.46, metalness: 0.7 }),   // the chain link post colour (10134701)
       stainless: new T.MeshStandardMaterial({ color: 0xc7ccd1, roughness: 0.3, metalness: 0.9 }),
       polymer: new T.MeshStandardMaterial({ color: 0x131415, roughness: 0.6, metalness: 0 }),
@@ -510,10 +510,17 @@ export function createHardwareKit(viewer, opts = {}) {
 
   async function build() {
     const my = ++gen, w = viewer.hooks(); if (!w || !on) return;
-    const Tn = await viewer.three(); if (my !== gen || !on) return;
-    const w2 = viewer.hooks(); if (!w2) return;
+    const { document: startDoc, __f3d: { scene: startScene } } = w;
+    const Tv = await viewer.three();
+    const w2 = viewer.hooks();
+    if (my !== gen || !on || !w2 || w2.document !== startDoc || w2.__f3d.scene !== startScene) return;
+    const Tn = w2.THREE?.Mesh ? w2.THREE : Tv;
     // A new viewer document means every THREE object cached from the old one is dead.
-    if (Tn !== T || w2.document !== doc) { restoreAll(); dropCaches(); group = null; undo.length = 0; T = Tn; doc = w2.document }
+    if (Tn !== T || startDoc !== doc) {
+      restoreAll(); clearGroup();
+      if (group?.parent) group.parent.remove(group);
+      dropCaches(); group = null; T = Tn; doc = startDoc;
+    }
     restoreAll(); clearGroup();
     if (!group) { group = new T.Group(); group.name = 'gfsHardwareKit' }
     const sc = w2.__f3d.scene, fg = w2.__f3d.fenceGroup;
@@ -632,7 +639,7 @@ export function createHardwareKit(viewer, opts = {}) {
   }
 
   const api = {
-    async enable() { on = true; T = await viewer.three(); if (!unsub) unsub = viewer.onRebuild(() => setTimeout(() => { build().catch(e => console.warn('[hardware-kit]', e)) }, 60)); await build(); return api.state() },
+    async enable() { on = true; if (!unsub) unsub = viewer.onRebuild(() => setTimeout(() => { build().catch(e => console.warn('[hardware-kit]', e)) }, 60)); await build(); return api.state() },
     clear() { on = false; gen++; if (unsub) { unsub(); unsub = null } restoreAll(); clearGroup(); if (group && group.parent) group.parent.remove(group); viewer.redraw && viewer.redraw() },
     set(patch) { Object.assign(cfg, patch || {}); if (on) return build().then(() => api.state()); return api.state() },
     refresh() { return build() },
