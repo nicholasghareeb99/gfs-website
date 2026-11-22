@@ -119,7 +119,7 @@ export function followFence(w, T, group) {
 
 export function createSiteKit(viewer, opts = {}) {
   const cfg = { ...DEFAULTS, ...opts };
-  let T = null, group = null, parts = null, soil = null, mats = null, unsub = null, on = false, win = null, sceneHook = null;
+  let T = null, group = null, parts = null, soil = null, mats = null, unsub = null, on = false, binding = null, sceneHook = null, enableRequest = 0;
   const undo = [];                       // functions that put the viewer's own objects back
   let last = { posts: 0, concrete: 0, driven: 0, tamped: 0, steelGateParts: 0, bags: 0 };
 
@@ -135,6 +135,8 @@ export function createSiteKit(viewer, opts = {}) {
       tube: new T.MeshStandardMaterial({ color: 0x23262a, roughness: 0.5, metalness: 0.6 }),
       soil: new T.MeshStandardMaterial({ color: 0x6f5438, roughness: 1, metalness: 0, fog: false }),
     };
+    // V3-191: gritty concrete and crumbly soil from the viewer's own generated textures (colours unchanged).
+    try { const R = (W() || {}).__gfsReal191; if (R) { R.dressMaterial(mats.concrete, 'concrete'); R.dressMaterial(mats.soil, 'soil'); } } catch (_) { }
     return mats;
   }
 
@@ -142,6 +144,21 @@ export function createSiteKit(viewer, opts = {}) {
     if (!group) return;
     group.traverse(o => { if (o.geometry) o.geometry.dispose() });
     group.clear();
+  }
+
+  function releaseScene() {
+    restoreAll(); clearGroup();
+    if (group?.parent) group.parent.remove(group);
+    if (sceneHook) { sceneHook.scene.onBeforeRender = sceneHook.prev; sceneHook = null }
+    group = parts = soil = mats = T = binding = null;
+  }
+
+  const boundTo = w => binding?.doc === w.document && binding?.scene === w.__f3d.scene;
+  function bind(w, three) {
+    if (boundTo(w) && T === three) return;
+    releaseScene();
+    binding = { doc: w.document, scene: w.__f3d.scene };
+    T = three;
   }
 
   function applyXray(w) {
@@ -156,8 +173,11 @@ export function createSiteKit(viewer, opts = {}) {
   }
 
   function build() {
-    const w = W(); if (!w || !on) return;
-    if (w.document !== win) { win = w.document; group = null; parts = null; mats = null; undo.length = 0; sceneHook = null }   // a reloaded viewer is a new document
+    const w = W();
+    if (!on || !w) return;
+    // A host adapter may follow a reload. It can only rebuild with the new document's THREE.
+    if (w.THREE?.Mesh) bind(w, w.THREE);
+    if (!boundTo(w)) return;
     restoreAll(); clearGroup();
     if (!group) { group = new T.Group(); group.name = 'gfsSiteKit'; group.userData.noShadow = 1 }
     if (group.parent !== w.__f3d.scene) w.__f3d.scene.add(group);
@@ -196,7 +216,8 @@ export function createSiteKit(viewer, opts = {}) {
         if (!POST_KINDS.has(kind0) && !(parts && parts.some(x => POST_KINDS.has(x.kind)))) return;
         if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
         o.geometry.boundingBox.getSize(size);
-        const round = /Cylinder/.test(o.geometry.type);
+        const splitPost = o.geometry.userData?.splitPost;
+        const round = splitPost ? splitPost.outline.length > 4 : /Cylinder/.test(o.geometry.type);
         const n = o.isInstancedMesh ? o.count : 1;
         for (let i = 0; i < n; i++) {
           const part = parts && parts[i]; if (parts && part && !POST_KINDS.has(part.kind)) continue;
@@ -216,7 +237,7 @@ export function createSiteKit(viewer, opts = {}) {
           const stub = how === 'driven'
             ? new T.Mesh(new T.CylinderGeometry(2.375 * IN / 2, 2.375 * IN / 2, depth, 18), M.steel)
             : new T.Mesh(round ? new T.CylinderGeometry(wX / 2, wX / 2, depth, 18) : new T.BoxGeometry(wX, depth, wZ), o.material);
-          stub.position.set(p.x, bottom - depth / 2, p.z); stub.quaternion.copy(q); stub.userData.kit = 'buriedPost';
+          stub.position.set(p.x, bottom - depth / 2, p.z); stub.quaternion.copy(q); stub.userData.kit = 'buriedPost'; stub.userData.fenceStyle = run?.styleName || curName;
           place(stub);
           if (how === 'concrete') {
             const dia = (gate ? cfg.gateHoleDiaIn : cfg.holeDiaIn) * IN, hd = cfg.holeDepthIn * IN;
@@ -254,8 +275,26 @@ export function createSiteKit(viewer, opts = {}) {
   }
 
   const api = {
-    async enable() { T = await viewer.three(); on = true; if (!unsub) unsub = viewer.onRebuild(() => setTimeout(build, 60)); build(); return api.state() },
-    clear() { on = false; if (unsub) { unsub(); unsub = null } restoreAll(); clearGroup(); if (group && group.parent) group.parent.remove(group); if (sceneHook) { try { sceneHook.scene.onBeforeRender = sceneHook.prev } catch (_) { } sceneHook = null } viewer.redraw && viewer.redraw() },
+    async enable() {
+      const w = W();
+      if (!w) return api.state();
+      const { document: doc, __f3d: { scene } } = w;
+      const request = ++enableRequest;
+      const THREE = await viewer.three();
+      const current = W();
+      if (enableRequest !== request || !current || current.document !== doc || current.__f3d.scene !== scene) return api.state();
+      bind(current, current.THREE?.Mesh ? current.THREE : THREE);
+      on = true;
+      if (!unsub) unsub = viewer.onRebuild(() => setTimeout(build, 60));
+      build();
+      return api.state();
+    },
+    clear() {
+      on = false; enableRequest++;
+      if (unsub) { unsub(); unsub = null }
+      releaseScene();
+      viewer.redraw?.();
+    },
     set(patch) { Object.assign(cfg, patch || {}); if (on) build(); return api.state() },
     refresh: build,
     state: () => ({ on, config: { ...cfg }, built: { ...last } }),

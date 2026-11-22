@@ -18055,6 +18055,96 @@ function WebGLMorphtargets( gl, capabilities, textures ) {
 
 }
 
+// GFS V3-194. Finalize CPU buffers in the renderer's realm before Three uploads them.
+const gfsIndexArrays = { Uint8Array, Uint16Array, Uint32Array };
+const gfsVertexArrays = { ...gfsIndexArrays, Float32Array, Int8Array, Int16Array, Int32Array, Uint8ClampedArray };
+function gfsWebGLBufferRepair( attribute, index = false ) {
+
+	if ( ! attribute || attribute.isGLBufferAttribute ) return null;
+	const storage = attribute.isInterleavedBufferAttribute ? attribute.data : attribute;
+	const source = storage.array;
+	if ( ( ! index && source instanceof Float32Array ) ||
+		source instanceof Uint16Array || source instanceof Uint32Array || source instanceof Uint8Array ) return null;
+	const supported = index ? gfsIndexArrays : gfsVertexArrays;
+	const name = Object.prototype.toString.call( source ).slice( 8, - 1 );
+	const sameType = Object.hasOwn( supported, name ) ? supported[ name ] : null;
+	if ( sameType && source instanceof sameType ) return null;
+
+	// A typed array from another iframe still has its original type. Keep that type
+	// and its integer normalization when copying into this renderer's realm.
+	const Fallback = index ? Uint32Array : Float32Array;
+	const array = sameType ? new sameType( source ) : Fallback.from( source, Number );
+	return { storage, array, name };
+
+}
+
+function gfsLogWebGLRepair( object, label, repair ) {
+
+	const details = object.userData || {};
+	const part = details.parts?.[ 0 ];
+	let style = details.fenceStyle;
+	for ( let root = object; ! style && root; root = root.parent ) {
+
+		style = root.userData?.gfsStyleForPart?.( part );
+
+	}
+	const kind = part?.kind || details.kit || ( details.hw ? 'gate hardware' : object.name || object.geometry?.type || object.type );
+	console.warn( '[3D] Repaired ' + ( style || 'scene' ) + ' / ' + kind + ' / ' + label + ': ' +
+		repair.name + ' to local ' + repair.array.constructor.name );
+
+}
+
+function gfsFinalizeWebGLGeometry( object, geometry, attributes ) {
+
+	let repairs;
+	function check( attribute, label, index = false ) {
+
+		const repair = gfsWebGLBufferRepair( attribute, index );
+		if ( repair ) ( repairs ||= [] ).push( { ...repair, label, attribute } );
+
+	}
+
+	check( geometry.index, 'index', true );
+	for ( const name in geometry.attributes ) check( geometry.attributes[ name ], name );
+	for ( const name in geometry.morphAttributes ) {
+
+		const morphs = geometry.morphAttributes[ name ];
+		for ( let i = 0; i < morphs.length; i ++ ) check( morphs[ i ], 'morph ' + name + ' ' + i );
+
+	}
+	if ( ! repairs ) return;
+
+	// A repaired array may have a different element size. Release old uploads
+	// and vertex bindings before re-registering this geometry for the new arrays.
+	if ( repairs.some( repair => attributes.get( repair.attribute ) ) ) geometry.dispose();
+	for ( const repair of repairs ) {
+
+		const { storage, array, attribute, label } = repair;
+		if ( array instanceof Float32Array ) attribute.normalized = false;
+		if ( storage.array instanceof array.constructor ) continue;
+		storage.array = array;
+		storage.count = array.length / ( storage.stride || attribute.itemSize );
+		storage.needsUpdate = true;
+		gfsLogWebGLRepair( object, label, repair );
+
+	}
+
+}
+
+function gfsFinalizeWebGLInstance( object, name, attributes ) {
+
+	const old = object[ name ];
+	const repair = gfsWebGLBufferRepair( old );
+	if ( ! repair ) return;
+	// A new attribute also makes Three refresh an instance's cached vertex binding.
+	attributes.remove( old );
+	object[ name ] = new InstancedBufferAttribute( repair.array, old.itemSize,
+		old.normalized && ! ( repair.array instanceof Float32Array ), old.meshPerAttribute ).setUsage( old.usage );
+	gfsLogWebGLRepair( object, name, repair );
+
+}
+
+
 function WebGLObjects( gl, geometries, attributes, info ) {
 
 	let updateMap = new WeakMap();
@@ -18064,6 +18154,7 @@ function WebGLObjects( gl, geometries, attributes, info ) {
 		const frame = info.render.frame;
 
 		const geometry = object.geometry;
+		if ( updateMap.get( geometry ) !== frame ) gfsFinalizeWebGLGeometry( object, geometry, attributes );
 		const buffergeometry = geometries.get( object, geometry );
 
 		// Update once per frame
@@ -18086,10 +18177,12 @@ function WebGLObjects( gl, geometries, attributes, info ) {
 
 			if ( updateMap.get( object ) !== frame ) {
 
+				gfsFinalizeWebGLInstance( object, 'instanceMatrix', attributes );
 				attributes.update( object.instanceMatrix, gl.ARRAY_BUFFER );
 
 				if ( object.instanceColor !== null ) {
 
+					gfsFinalizeWebGLInstance( object, 'instanceColor', attributes );
 					attributes.update( object.instanceColor, gl.ARRAY_BUFFER );
 
 				}

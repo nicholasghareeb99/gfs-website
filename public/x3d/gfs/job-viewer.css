@@ -1,0 +1,343 @@
+body.gfs-job-viewer {
+  color-scheme: light dark;
+  --card-bg: #fff;
+  --input-bg: #f3f7f2;
+  --text: #203b32;
+  --text-sub: #4d6159;
+  --border: #cddbd1;
+  --accent: #315c41;
+  --page-bg: #edf2ed;
+  --notice-bg: #fff7df;
+  --notice-text: #614616;
+  font: 500 15px/1.4 system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--page-bg);
+}
+@media (prefers-color-scheme: dark) {
+  body.gfs-job-viewer {
+    --card-bg: #1e3029;
+    --input-bg: #263c33;
+    --text: #eef5ee;
+    --text-sub: #c6d8ca;
+    --border: #496355;
+    --accent: #3b7052;
+    --page-bg: #16241e;
+    --notice-bg: #403318;
+    --notice-text: #ffebb6;
+  }
+}
+.gfs-job-viewer [hidden] { display: none !important; }
+.gfs-job-viewer .job-viewer-shell {
+  display: grid;
+  grid-template-rows: auto auto minmax(0,1fr) auto;
+  height: 100vh;
+  height: 100dvh;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.gfs-job-viewer .job-viewer-shell > header {
+  position: static;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 10px clamp(10px,2vw,24px);
+  color: var(--text);
+  background: var(--card-bg);
+  border-bottom: 1px solid var(--border);
+}
+.gfs-job-viewer .job-viewer-shell > header b { font-size: clamp(11px,1.4vw,14px); letter-spacing: .07em; }
+.gfs-job-viewer .job-viewer-shell > header small { display: inline; font-size: .8em; color: var(--text-sub); white-space: nowrap; }
+.gfs-job-viewer #meta { opacity: 1; color: var(--text); font-size: clamp(11px,1.4vw,14px); overflow-wrap: anywhere; }
+.gfs-job-viewer .job-viewer-summary {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 3px clamp(10px,2vw,24px);
+  background: var(--page-bg);
+}
+.gfs-job-viewer #hud {
+  position: static;
+  width: auto;
+  max-width: none;
+  flex-wrap: wrap;
+  gap: 5px 9px;
+  padding: 0;
+  border: none;
+  color: var(--text);
+  background: none;
+  backdrop-filter: none;
+  white-space: normal;
+  font-size: clamp(12px,1.4vw,14px);
+}
+.gfs-job-viewer #hudFt { white-space: nowrap; }
+.gfs-job-viewer #cmp { display: inline-block; line-height: 1; }
+.gfs-job-viewer .job-viewer-main {
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) auto auto;
+  grid-template-rows: minmax(0,1fr);
+  gap: 8px;
+  padding: 0 8px;
+  overflow: hidden;
+}
+.gfs-job-viewer .job-viewer-stage {
+  position: relative;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--input-bg);
+}
+.gfs-job-viewer #c { position: absolute; inset: 0; width: 100%; height: 100%; }
+.gfs-job-viewer #rail {
+  position: static;
+  align-self: start;
+  display: flex;
+  padding: 4px;
+  gap: 3px;
+  width: 54px;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  box-shadow: none;
+}
+.gfs-job-viewer #rail .rbtn {
+  flex: 0 0 44px;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--text);
+  box-shadow: none;
+  background: none;
+  backdrop-filter: none;
+  transition: none;
+}
+.gfs-job-viewer #rail svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+.gfs-job-viewer #rail .rbtn.on { background: var(--accent); color: #fff; }
+@media (hover:hover) {
+  .gfs-job-viewer #rail .rbtn:hover:not(.on) { background: var(--input-bg); }
+}
+.gfs-job-viewer .job-viewer-drawer {
+  width: clamp(272px,25vw,360px);
+  min-height: 0;
+  padding: 14px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.gfs-job-viewer .job-viewer-options {
+  display: grid;
+  gap: 12px;
+}
+.gfs-job-viewer .job-viewer-options h2,
+.gfs-job-viewer .job-viewer-drawer h4 { font-size: 1rem; }
+.gfs-job-viewer .job-viewer-options label { display: grid; gap: 3px; font-weight: 650; }
+.gfs-job-viewer .job-viewer-options select { width: 100%; }
+.gfs-job-viewer button,
+.gfs-job-viewer select,
+.gfs-job-viewer input[type=range],
+.gfs-job-viewer summary { min-height: 44px; font: inherit; }
+.gfs-job-viewer button:not(.rbtn), .gfs-job-viewer summary { min-width: 44px; }
+.gfs-job-viewer .job-viewer-shell :focus-visible {
+  outline: 2px solid #aa7633;
+  outline-offset: -2px;
+}
+.gfs-job-viewer .job-viewer-options select,
+.gfs-job-viewer .job-viewer-actions button,
+.gfs-job-viewer #sheet select,
+.gfs-job-viewer #hRow button,
+.gfs-job-viewer #gfsGradeNotice button,
+.gfs-job-viewer .job-viewer-drawer .gfs-fence-layers button {
+  border: 1px solid var(--border);
+  background-color: var(--input-bg);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font: 650 14px/1.3 system-ui, -apple-system, sans-serif;
+}
+.gfs-job-viewer .job-viewer-drawer .gfs-fence-layers button {
+  background: var(--input-bg) !important;
+  color: var(--text) !important;
+  border-color: var(--border) !important;
+}
+.gfs-job-viewer .job-viewer-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.gfs-job-viewer .job-viewer-actions [data-ar] { background: var(--accent); color: #fff; }
+.gfs-job-viewer .job-viewer-export-status:empty { display: none; }
+.gfs-job-viewer .job-viewer-drawer #gfsShape,
+.gfs-job-viewer .job-viewer-drawer #gfsSite {
+  position: static !important;
+  display: block;
+  width: auto;
+  max-height: none;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+  background: var(--card-bg);
+  color: var(--text);
+}
+.gfs-job-viewer .job-viewer-drawer :is(#gfsShape,#gfsSite) :is(button,select) {
+  min-width: 44px;
+  min-height: 44px;
+  border-color: var(--border);
+}
+.gfs-job-viewer .job-viewer-drawer :is(#gfsShape,#gfsSite) button:not(.on):not(.go),
+.gfs-job-viewer .job-viewer-drawer :is(#gfsShape,#gfsSite) select { color: var(--text); background: var(--input-bg); }
+.gfs-job-viewer .job-viewer-drawer :is(#gfsShape,#gfsSite) small { color: var(--text-sub); }
+.gfs-job-viewer .job-viewer-footer { padding: 5px clamp(8px,2vw,24px) 6px; background: var(--page-bg); }
+.gfs-job-viewer #sheet {
+  position: static;
+  display: flex;
+  flex-flow: row wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.gfs-job-viewer #styleRow { width: min(100%,400px); overflow: hidden; }
+.gfs-job-viewer #sheet select {
+  width: 100%;
+  padding-right: 32px;
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px 8px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='m1 1 5 5 5-5' fill='none' stroke='%23948867' stroke-width='2'/%3E%3C/svg%3E");
+}
+.gfs-job-viewer #sheet select :is(option,optgroup) { color: var(--text); background: var(--card-bg); }
+.gfs-job-viewer #hRow button.on { color: #fff; background: var(--accent); }
+.gfs-job-viewer #adjust {
+  padding: 0 8px;
+  color: var(--text);
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  min-width: min(100%,235px);
+}
+.gfs-job-viewer #adjust label { color: var(--text) !important; }
+.gfs-job-viewer #rot { width: 100%; min-width: 44px; }
+.gfs-job-viewer .job-viewer-status {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 24px;
+  font-size: 11px;
+  color: var(--text-sub);
+}
+.gfs-job-viewer #hint {
+  color: inherit;
+  font: inherit;
+  text-shadow: none;
+  text-align: start;
+}
+.gfs-job-viewer .job-viewer-tool-name { flex: 0 0 auto; }
+.gfs-job-viewer .job-viewer-notices > * {
+  position: static !important;
+  max-height: 22dvh;
+  overflow: auto;
+  margin-bottom: 5px;
+  transform: none;
+  padding: 5px 8px;
+  border: 1px solid #c69c54;
+  border-radius: 8px;
+  box-shadow: none !important;
+  color: var(--notice-text) !important;
+  background: var(--notice-bg) !important;
+  font: 600 13px/1.35 system-ui, sans-serif;
+}
+.gfs-job-viewer #gfsGradeNotice {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.gfs-job-viewer #gfsGradeNotice span { flex: 1; }
+.gfs-job-viewer .job-viewer-stage .gfs-post-h {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+  padding: 0;
+  border: 0;
+  color: #fff;
+  background: none;
+  box-shadow: none;
+}
+.gfs-job-viewer .job-viewer-stage .gfs-post-h span {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  min-height: 22px;
+  padding: 0 3px;
+  border-radius: 12px;
+  border: 1px solid #fff;
+  background: #245938;
+  box-shadow: 0 1px 4px #15251e80;
+  font-size: 10px;
+  pointer-events: none;
+}
+.gfs-job-viewer .job-viewer-stage .gfs-post-h.moved span { background: #7b4c21; }
+@media (max-width: 700px) {
+  .gfs-job-viewer .job-viewer-main {
+    grid-template-columns: minmax(0,1fr) auto;
+    grid-template-rows: minmax(0,1fr) auto;
+    gap: 5px;
+    padding: 0 5px;
+  }
+  .gfs-job-viewer .job-viewer-drawer {
+    grid-column: 1/-1;
+    width: 100%;
+    max-height: min(36dvh,290px);
+    padding: 9px;
+  }
+  .gfs-job-viewer .job-viewer-footer { padding-left: 5px; padding-right: 5px; }
+  .gfs-job-viewer #gfsGradeNotice { flex-wrap: wrap; }
+  .gfs-job-viewer #gfsGradeNotice span { min-width: 100%; }
+}
+@media (max-height: 530px) and (min-width: 550px) {
+  .gfs-job-viewer .job-viewer-main {
+    grid-template-columns: minmax(0,1fr) auto auto;
+    grid-template-rows: minmax(0,1fr);
+  }
+  .gfs-job-viewer .job-viewer-drawer {
+    grid-column: 3;
+    width: min(38vw,320px);
+    max-height: none;
+  }
+}
+
+.gfs-job-viewer .job-viewer-detail summary { padding: 10px 0; cursor: pointer; font-weight: 650; }
+.gfs-job-viewer .job-viewer-extra-tools { display: grid; gap: 6px; }
+.gfs-job-viewer .job-viewer-extra-tools button {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: var(--input-bg);
+}
+.gfs-job-viewer .job-viewer-extra-tools button[aria-pressed=true] { color: #fff; background: var(--accent); }
+
+.gfs-job-viewer .job-viewer-options :is(#gfsModelCheck,#gfsModelCheckList) { position: static !important; }

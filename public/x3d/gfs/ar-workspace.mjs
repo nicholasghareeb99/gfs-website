@@ -56,7 +56,7 @@ export function openAR({getFence,name='Fence model'}) {
       const result=await Promise.race([work,new Promise((_,reject)=>{timer=setTimeout(()=>{reject(Error('Preparation took too long. Tap Prepare AR model to retry.'));operation.abort();},15000);}),new Promise((_,reject)=>{onAbort=()=>reject(new DOMException('AR preparation canceled.','AbortError'));operation.signal.addEventListener('abort',onAbort,{once:true});})]);
       if(!current())return;checkPrepared();preparedCheck=checkPrepared;
       if(url)URL.revokeObjectURL(url);url=URL.createObjectURL(result.blob);
-      a.href=url+'#allowsContentScaling=0';a.rel='ar';a.download=filename;a.hidden=!canAR;
+      a.href=url+'#allowsContentScaling=0';a.rel='ar';a.hidden=!canAR;
       download.href=url;download.download=filename;download.hidden=false;
       modelFile=new File([result.blob],filename,{type:'model/vnd.usdz+zip'});
       share.hidden=!(navigator.share&&navigator.canShare?.({files:[modelFile]}));

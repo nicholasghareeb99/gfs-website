@@ -70,7 +70,7 @@ function installStudio(api,T,renderer,bar){
   }
   const generator=new T.PMREMGenerator(renderer),environment=generator.fromScene(room,.06);generator.dispose();
   room.traverse(part=>{part.geometry?.dispose();part.material?.dispose();});
-  const showroomFloor=new T.MeshStandardMaterial({color:STUDIO_LIGHTING.daylight.floor,roughness:.93,metalness:0});
+  const showroomFloor=window.__gfsReal191?window.__gfsReal191.studioFloor(STUDIO_LIGHTING.daylight.floor):new T.MeshStandardMaterial({color:STUDIO_LIGHTING.daylight.floor,roughness:.93,metalness:0});
   // Broad, unshadowed bounce from both faces keeps boards readable during an
   // orbit, while the existing key light supplies the directional shadows.
   const fenceCenter=new T.Box3().setFromObject(api.fenceGroup).getCenter(new T.Vector3());
@@ -93,7 +93,7 @@ function installStudio(api,T,renderer,bar){
     }
     if(!sceneChoice||sceneChoice.value==='showroom'){
       showroomFloor.color.setHex(preset.floor);api.ground.material=showroomFloor;
-      api.scene.background=new T.Color(preset.background);
+      api.scene.background=new T.Color(preset.background);window.__gfsReal191?.backdrop(true,preset.background);
       if(api.scene.fog)api.scene.fog.color.setHex(preset.background);
     }
     renderer.shadowMap.needsUpdate=true;renderer.render(api.scene,window.__cam());
