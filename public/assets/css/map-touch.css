@@ -13,7 +13,7 @@
 #bp-add-center{position:absolute;left:50%;transform:translateX(-50%);bottom:84px;z-index:7;display:inline-flex;align-items:center;gap:8px;min-height:50px;padding:0 22px;border:0;border-radius:999px;background:#1d5eb6;color:#fff;font:700 16px/1 inherit;box-shadow:0 10px 26px rgba(6,23,44,.45),0 0 0 3px rgba(255,255,255,.85);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 #bp-add-center span{font-size:24px;line-height:0;margin-top:-2px}
 #bp-add-center:active{transform:translateX(-50%) scale(.95)}
-#bp-map-tools:not(.bp-map-full) #bp-add-center{bottom:16px}
+#bp-map-tools:not(.bp-map-full) #bp-add-center{bottom:78px}
 @media(pointer:fine){#bp-map-tools:not(.bp-map-full) #bp-add-center,#bp-map-tools:not(.bp-map-full) #bp-sight{display:none!important}}
 
 /* Edit and delete buttons */

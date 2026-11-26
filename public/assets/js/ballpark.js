@@ -2895,7 +2895,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     'idle':       '<strong>Move map:</strong> drag to position your property and zoom in. Choose <strong>Draw fence</strong> when ready, or <strong>Edit lines</strong> to fix a corner.',
     'fence':      'Tap each corner, or line up the <strong>+</strong> and press <strong>Add corner</strong>. Tap the first corner to close a loop. ' +
                   '<span id="bp-snap-on" style="display:none;color:#FFC83D;">· Snap 90° ON</span>',
-    'edit':       '<strong>Edit:</strong> drag a white corner to move it. Drag a <strong>+</strong> to add a bend. Drag <strong>✥</strong> to move a whole line. Tap a corner, then <strong>Delete corner</strong> to remove it.',
+    'edit':       '<strong>Edit:</strong> drag a corner to move it, drag <strong>+</strong> to add a bend, drag <strong>✥</strong> to move a whole line. Tap a corner to delete it.',
     'walk-gate':  'Tap near a drawn fence to snap a 4 ft walk gate into the run. Drag it to move; tap it to remove.',
     'drive-gate': 'Tap near a drawn fence to snap a 10 ft drive gate into the run. Openings cannot overlap.',
   };
@@ -3510,13 +3510,13 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if(del){del.hidden=!(gDrawingMode==='edit'&&gSelected);del.disabled=!gSelected;}
     if(gDrawingMode!=='edit'||!gMap||activeDrawingEngine!=='google')return;
     gFenceLines.forEach(line=>{
-      const path=line.getPath(),n=path.getLength();
-      for(let i=0;i<n;i++){
+      const path=line.getPath(),n=path.getLength(),closed=isClosedGooglePath(path);
+      for(let i=0;i<(closed?n-1:n);i++){
         const on=gSelected&&gSelected.line===line&&gSelected.index===i;
         const m=new google.maps.Marker({map:gMap,position:path.getAt(i),draggable:true,icon:handleIcon('corner',on),zIndex:300,title:'Corner '+(i+1)+': drag to move, tap to select',crossOnDrag:false});
         let edit=null;
         m.addListener('dragstart',()=>{edit=startGoogleEdit(line);gSelected={line,index:i};});
-        m.addListener('drag',e=>{path.setAt(i,e.latLng);showDragChip(lineLengthsAround(line,i));});
+        m.addListener('drag',e=>{path.setAt(i,e.latLng);if(closed&&i===0)path.setAt(n-1,e.latLng);showDragChip(lineLengthsAround(line,i));});
         m.addListener('dragend',()=>{if(edit)endGoogleEdit(edit);edit=null;});
         m.addListener('click',()=>{gSelected=on?null:{line,index:i};renderGoogleHandles();});
         gHandles.push(m);
@@ -3548,10 +3548,15 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       }
     });
   }
+  // A loop ends on its own first corner; edit that shared corner as one handle.
+  function isClosedGooglePath(path){const n=path.getLength();if(n<4)return false;const a=path.getAt(0),b=path.getAt(n-1);return Math.abs(a.lat()-b.lat())<1e-9&&Math.abs(a.lng()-b.lng())<1e-9;}
   function deleteSelectedGoogleCorner(){
     if(!gSelected)return;const{line,index}=gSelected,path=line.getPath();
     const edit=startGoogleEdit(line);
-    if(path.getLength()<=2){path.clear();line.setMap(null);const i=gFenceLines.indexOf(line);if(i>=0)gFenceLines.splice(i,1);}
+    const closed=isClosedGooglePath(path);
+    if(closed&&path.getLength()<=4){path.removeAt(path.getLength()-1);path.removeAt(index);}
+    else if(closed&&index===0){path.removeAt(0);path.setAt(path.getLength()-1,path.getAt(0));}
+    else if(path.getLength()<=2){path.clear();line.setMap(null);const i=gFenceLines.indexOf(line);if(i>=0)gFenceLines.splice(i,1);}
     else path.removeAt(index);
     gSelected=null;endGoogleEdit(edit);
   }
