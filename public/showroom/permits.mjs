@@ -310,7 +310,7 @@ async function askAI(force) {
     const res = await fetch('/.netlify/functions/showroom-ai', { method: 'POST', signal: ctl.signal, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ address: c.address, town: c.town, county: c.place?.county || c.geo.county || '', state: stateOf(c) }) });
     clearTimeout(t);
     const j = await res.json().catch(() => ({}));
-    if (!res.ok) throw Error(j.error === 'not-configured' ? 'The AI lookup isn’t switched on yet. It needs an Anthropic API key added in Netlify.' : j.message || 'The AI lookup failed.');
+    if (!res.ok) throw Error(j.error === 'not-configured' || res.status === 404 ? 'The AI lookup isn’t switched on yet. It needs an Anthropic API key added in Netlify.' : j.message || 'The AI lookup failed.');
     if (cur !== c) return;
     c.ai = j; aiCache.set(key, j);
     if (c.rule?.front == null && (j.frontMaxFt ?? j.sideMaxFt) != null) c.useAI = true;
