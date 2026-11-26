@@ -734,3 +734,20 @@ body.present .top .brand{cursor:default}
 .vs-item small{display:block;color:var(--dim);font-size:13px;line-height:1.4;margin-top:2px}
 .vs-item.on{background:rgba(217,130,63,.12);border-color:rgba(217,130,63,.45)}
 .vs-item.bad.on{background:rgba(239,91,91,.1);border-color:rgba(239,91,91,.4)}
+.vs-grid{grid-template-columns:1fr 1fr}
+.vs-card figcaption small{flex-basis:100%;color:var(--dim);font-size:12px}
+@media (max-width:639px){
+  .vs-grid{gap:8px}
+  .vs-card{border-radius:16px}
+  .vs-card figcaption{padding:8px 10px;gap:6px}
+  .vs-card figcaption b{font-size:13px}
+  .vs-card figcaption small{font-size:11px}
+  .vs-tag{font-size:9px;padding:4px 6px}
+  .vs-status{font-size:12px;padding:8px 10px 10px;min-height:5.4em}
+  .vs-years{grid-template-columns:1fr}
+}
+.lab-list{display:grid;gap:8px}
+.lab-li{display:grid;grid-template-columns:22px 1fr 18px;gap:12px;align-items:center;text-align:left;padding:12px 14px;border-radius:16px;background:linear-gradient(135deg,rgba(217,130,63,.14),rgba(61,127,224,.1));border:1px solid var(--line-2);transition:transform .18s var(--ease),border-color .25s}
+.lab-li:active{transform:scale(.98)}
+.lab-li svg{width:20px;height:20px;color:var(--copper-lt)}.lab-li>svg:last-child{width:16px;color:var(--dim)}
+.lab-li b{display:block;font-size:15px}.lab-li small{display:block;color:var(--dim);font-size:13px}

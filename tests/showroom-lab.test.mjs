@@ -34,3 +34,9 @@ test('lifespan never leaves the published range', () => {
     const { years } = lifeEstimate(m, on); assert.ok(years >= 15 && years <= 30, String(years));
   }
 });
+test('vinyl: a 5 in post at .150 wall is about 10% stiffer than at .135', async () => {
+  const { tube } = await import('../public/showroom/lab.mjs');
+  const a = tube(5, .150), b = tube(5, .135);
+  near(a.A, 25 - 4.7 * 4.7, 1e-9);
+  near(a.I / b.I, 1.101, 0.001);
+});

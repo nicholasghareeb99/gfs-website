@@ -4,11 +4,13 @@
 // already printed in the GFS brochure. Where a drawing exaggerates motion so it can
 // be seen, it says so.
 import { $, $$, esc, clamp, icons, reduced } from './ui.mjs';
+import { visit } from './visit.mjs';
 
 let app, root, D, current = null, stop = null;
 
 const TOOLS = [
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by' },
+  { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you' },
   { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style' },
   { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first' },
   { id: 'wood', name: 'Wood movement', line: 'Why gaps open between boards' },
@@ -29,10 +31,11 @@ export async function init(a, el) {
     </div>`;
   $('.lab-tabs', root).onclick = e => { const b = e.target.closest('[data-t]'); if (b) select(b.dataset.t); };
 }
-export function show(opts = {}) { select(opts.tool || current || 'build', true); }
+let fromLink = false;
+export function show(opts = {}) { fromLink = !!opts.fromLink; select(opts.tool || current || 'build', true); }
 export function hide() { stop?.(); stop = null; }
 
-const RENDER = { build, wind, life, wood, frost, gate };
+const RENDER = { build, vinyl, wind, life, wood, frost, gate };
 function select(id, force) {
   if (!RENDER[id]) id = 'build';
   if (id === current && !force && stop) return;
@@ -44,6 +47,7 @@ function select(id, force) {
   const body = $('.lab-body', root);
   body.classList.remove('in'); void body.offsetWidth;
   stop = RENDER[id](body) || null;
+  if (!fromLink) visit.addLab(id); // shown to this customer: goes in the recap and the link
   body.classList.add('in');
 }
 
@@ -396,7 +400,7 @@ function frost(body) {
 // ═════════════════════════════════════════════════════════════════
 const BRACES = [['none', 'No brace'], ['wrong', 'Brace the wrong way'], ['right', 'Brace the right way'], ['steel', 'GFS steel frame']];
 function gate(body) {
-  let width = 4, brace = 'right', years = 5;
+  let width = 4, brace = 'right', years = 5, gpost = 'steel';
   body.innerHTML = `
     <div class="lab-grid">
       <div class="lab-vis"><svg class="gate-svg" viewBox="0 0 420 300" aria-label="A wood gate on its hinges"></svg>
@@ -404,6 +408,7 @@ function gate(body) {
       <div class="lab-ctl">
         ${slider('gw', 'Gate width', 3, 6, .5, width, ' ft')}
         <div class="lab-label">Bracing</div>${seg('brace', BRACES, brace)}
+        <div class="lab-label">Hinge post</div>${seg('gpost', [['wood', '4×4 wood post'], ['steel', 'GFS 3 in steel post']], gpost)}
         ${slider('y', 'Years in use', 0, 15, 1, years)}
         <div class="readouts">
           <div><b class="mono" id="gPull"></b><small>pull on the top hinge, compared with a 4 ft gate</small></div>
@@ -413,35 +418,40 @@ function gate(body) {
     </div>
     ${math(`<p><b>Why wide gates sag more</b>: a gate hangs from one side, so its weight acts as a lever on the hinges. The weight grows with the width and so does the lever, so the pull on the top hinge grows with width squared. A 5 ft gate pulls about (5 ÷ 4)² ≈ 1.6 times as hard as a 4 ft gate.</p>
       <p><b>Which way a brace goes</b>: a wood brace works in compression, so it runs from the bottom hinge corner up to the top latch corner and props the latch side up. Run it the other way and it hangs off nails in tension, and the gate racks into a parallelogram. A steel cable is the opposite: it works in tension, from the top hinge corner down to the bottom latch corner.</p>
+      <p><b>The hinge post matters as much as the gate</b>: if the post leans, a perfectly square gate still drops at the latch. GFS gate posts are 3 in steel in a bigger wood box, so the post doesn't lean.</p>
       <p><b>GFS steel frame</b>: wood gates can get a welded 1½ in square steel tube frame inside, so the gate cannot rack at all. Vinyl gates get aluminum inside the frame.</p>`)}`;
   const svg = $('.gate-svg', body);
   const update = () => {
     const k = (width / 4) ** 2, base = { none: 9, wrong: 7, right: .8, steel: .1 }[brace];
-    const sag = clamp(base * k * Math.sqrt(years / 5 || 0) * 1.0, 0, 40);
+    // A hinge post that leans lets the whole gate drop, braced or not.
+    const leanDeg = gpost === 'wood' ? clamp(years / 15, 0, 1) * 2.2 * Math.sqrt(k) : 0;
+    const rack = clamp(base * k * Math.sqrt(years / 5 || 0), 0, 40);
+    const pw = 70 + width * 40, drop = rack + pw * Math.sin(leanDeg * Math.PI / 180), lean = drop - rack;
     $('[data-out=gw]', body).textContent = width + ' ft'; $('[data-out=y]', body).textContent = years;
     $('#gPull', body).textContent = fmt(k, 2) + '×';
-    $('#gState', body).textContent = sag < 2 ? 'Square and swinging free' : sag < 7 ? 'Starting to drag' : 'Dragging on the ground';
-    $('#gStateS', body).textContent = brace === 'wrong' ? 'The brace is pulling on nails instead of pushing.' : brace === 'none' ? 'Nothing stops the frame from racking.' : brace === 'steel' ? 'A welded frame cannot rack.' : 'The brace props the latch corner up.';
-    const pw = 70 + width * 40, x0 = 210 - pw / 2 + 20, y0 = 60, h = 170, post = x0 - 22;
+    $('#gState', body).textContent = drop < 2 ? 'Square and swinging free' : drop < 9 ? 'Starting to drag' : 'Dragging on the ground';
+    $('#gStateS', body).textContent = lean > 3 && brace !== 'none' && brace !== 'wrong' ? 'The gate is square, but the wood hinge post is leaning, so the whole gate drops.' : brace === 'wrong' ? 'The brace is pulling on nails instead of pushing.' : brace === 'none' ? 'Nothing stops the frame from racking.' : brace === 'steel' ? 'A welded frame cannot rack.' : 'The brace props the latch corner up.';
+    const x0 = 210 - pw / 2 + 20, y0 = 60, h = 170, post = x0 - 22, sag = rack;
     const pts = [[x0, y0], [x0 + pw, y0 + sag], [x0 + pw, y0 + h + sag], [x0, y0 + h]];
     const P = p => p.join(',');
     const pickets = Array.from({ length: Math.round(pw / 18) }, (_, i) => { const t = (i + .5) / Math.round(pw / 18), x = x0 + pw * t, dy = sag * t; return `<rect x="${x - 7}" y="${y0 - 14 + dy}" width="14" height="${h + 14}" fill="#c98a5b" stroke="#7a4f2f" stroke-width=".8" rx="1.5"/>`; }).join('');
     const br = brace === 'right' ? [pts[3], pts[1]] : brace === 'wrong' ? [pts[0], pts[2]] : null;
     svg.innerHTML = `
       <rect x="0" y="${y0 + h + 6}" width="420" height="80" fill="#1b2c1e"/>
-      <rect x="${post - 12}" y="${y0 - 30}" width="24" height="${h + 60}" fill="#8f6a46"/>
+      ${gpost === 'steel' ? `<rect x="${post - 15}" y="${y0 - 30}" width="30" height="${h + 60}" fill="#b99a68" stroke="#5e4c30"/><rect x="${post - 6}" y="${y0 - 26}" width="12" height="${h + 56}" fill="#c8d2dc" opacity=".45"/>` : `<rect x="${post - 12}" y="${y0 - 30}" width="24" height="${h + 60}" fill="#8f6a46" transform="rotate(${leanDeg} ${post} ${y0 + h + 30})"/>`}
+      <g transform="rotate(${leanDeg} ${post} ${y0 + h + 30})">
       ${pickets}
       <polyline points="${P(pts[0])} ${P(pts[1])}" stroke="#7a4f2f" stroke-width="10" fill="none"/>
       <polyline points="${P(pts[3])} ${P(pts[2])}" stroke="#7a4f2f" stroke-width="10" fill="none"/>
       ${brace === 'steel' ? `<polygon points="${pts.map(P).join(' ')}" fill="none" stroke="#c8d2dc" stroke-width="5"/>` : ''}
       ${br ? `<line x1="${br[0][0]}" y1="${br[0][1]}" x2="${br[1][0]}" y2="${br[1][1]}" stroke="${brace === 'right' ? '#3ecf8e' : '#ef5b5b'}" stroke-width="8" stroke-linecap="round"/>` : ''}
-      <rect x="${post + 8}" y="${y0 + 8}" width="20" height="10" rx="2" fill="#20262c"/><rect x="${post + 8}" y="${y0 + h - 18}" width="20" height="10" rx="2" fill="#20262c"/>
-      ${sag > 2 ? `<path d="M${x0 + pw + 14},${y0 + h} v${sag}" stroke="#ef5b5b" stroke-width="2"/><text x="${x0 + pw + 20}" y="${y0 + h + sag / 2 + 4}" class="svg-l red">SAG</text>` : ''}
+      <rect x="${post + 8}" y="${y0 + 8}" width="20" height="10" rx="2" fill="#20262c"/><rect x="${post + 8}" y="${y0 + h - 18}" width="20" height="10" rx="2" fill="#20262c"/></g>
+      ${drop > 2 ? `<path d="M${x0 + pw + 14},${y0 + h} v${drop}" stroke="#ef5b5b" stroke-width="2"/><text x="${x0 + pw + 20}" y="${y0 + h + drop / 2 + 4}" class="svg-l red">SAG</text>` : ''}
       <text x="${x0 + pw / 2}" y="${y0 - 26}" text-anchor="middle" class="svg-n">${width} ft gate</text>`;
   };
   $('[name=gw]', body).oninput = e => { width = +e.target.value; update(); };
   $('[name=y]', body).oninput = e => { years = +e.target.value; update(); };
-  bindSeg(body, (n, v) => { brace = v; update(); });
+  bindSeg(body, (n, v) => { if (n === 'brace') brace = v; if (n === 'gpost') gpost = v; update(); });
   update();
 }
 
@@ -474,8 +484,8 @@ function build(body) {
   const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false };
   body.innerHTML = `
     <div class="vs-grid">
-      <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Big-box prefab</span><b>Panel on 4×4 wood posts</b></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 0 380 460"></svg><p class="vs-status" id="vsPreS"></p></figure>
-      <figure class="vs-card gfs"><figcaption><span class="vs-tag good">GFS King Plus</span><b>Driven steel, built board by board</b></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 0 380 460"></svg><p class="vs-status" id="vsGfsS"></p></figure>
+      <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Big-box prefab</span><b>Panel on 4×4 wood posts</b><small id="vsPreC"></small></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsPreS"></p></figure>
+      <figure class="vs-card gfs"><figcaption><span class="vs-tag good">GFS King Plus</span><b>Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
     </div>
     <div class="lab-ctl vs-ctl">
       <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play 15 years</button>${slider('yr', 'Years', 0, 15, .05, 0)}</div>
@@ -483,7 +493,7 @@ function build(body) {
         <div><div class="lab-label">Their posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2.5 ft']], st.set)}</div>
         <div><div class="lab-label">Yard</div>${seg('slope', [['0', 'Flat'], ['1', 'Sloped']], '0')}</div>
       </div>
-      <p class="vis-note-inline">Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
+      <p class="vis-note-inline">Both drawn from the back, so you can see how each is built. Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
     </div>
     <div class="vs-parts">
       <div class="lab-card"><div class="lab-label">What makes ours different (tap one)</div><div class="vs-list" id="vsG">${GFS_PARTS.map((p, i) => `<button class="vs-item" data-k="${p.k}"><i>${i + 1}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('')}</div></div>
@@ -543,7 +553,7 @@ function build(body) {
       s += `<g class="part${hl('gap')}">${px.map(x => `<rect x="${x + 6}" y="${ptop}" width="3" height="${lvl - ptop}" fill="#0f2034"/>`).join('')}</g>`;
       if (st.slope) s += `<g class="part${hl('slope')}"><path d="M${x0},${lvl + sagAt(x0)} L${x1},${lvl} L${x1},${groundY(x1)} L${x0},${groundY(x0)} Z" fill="#ef5b5b" opacity=".25"/><text x="${(x0 + x1) / 2}" y="${(lvl + groundY(x0)) / 2 + 30}" text-anchor="middle" class="svg-l red">GAP UNDER THE PANEL</text></g>`;
       if (sag > 3) s += `<g class="part${hl('sag')}"><path d="M190,${ptop - 12} v${sag + 6}" stroke="#ef5b5b" stroke-width="2"/><text x="198" y="${ptop - 2}" class="svg-l red">SAG</text></g>`;
-      s += `<text x="190" y="22" text-anchor="middle" class="svg-n">${dirt ? '4×4 post ~2 ft in dirt' : '4×4 post ~2.5 ft in concrete'} · back side</text>`;
+      $('#vsPreC', body).textContent = dirt ? 'Posts about 2 ft deep in dirt' : 'Posts about 2.5 ft deep in concrete';
       pre.innerHTML = s;
       $('#vsPreS', body).innerHTML = y < .5 ? 'Looks fine the day it goes in.' : [rot > .6 ? 'Posts rotting at the ' + (dirt ? 'soil line' : 'top of the concrete') : '', heave > 4 ? 'posts pushed up and leaning' : '', sag > 3 ? 'panel sagging' : '', st.slope ? 'gap under the panel' : '', fade > .5 ? 'stapled pickets cupping' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
     }
@@ -569,7 +579,6 @@ function build(body) {
       s += `<g class="part${hl('rails')}">${railOffs.map(o => `<line x1="${x0}" y1="${lineAt(x0, o)}" x2="${x1}" y2="${lineAt(x1, o)}" stroke="#a48a5c" stroke-width="10"/>${px.map(x => `<circle cx="${x - 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/><circle cx="${x + 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/>`).join('')}`).join('')}</g>`;
       // the + : flat cap 2x4 on the boxes, plus the top rail
       s += `<g class="part plus${hl('plus')}"><line x1="${x0 - 14}" y1="${lineAt(x0, 6 * S - 30) - 12}" x2="${x1 + 14}" y2="${lineAt(x1, 6 * S - 30) - 12}" stroke="#d9823f" stroke-width="7"/><text x="190" y="${lineAt(190, 6 * S) - 18}" text-anchor="middle" class="svg-plus">+ extra top rail</text></g>`;
-      s += `<text x="190" y="22" text-anchor="middle" class="svg-n">Steel driven 4 ft, no concrete · back side</text>`;
       gfs.innerHTML = s;
       $('#vsGfsS', body).textContent = y < .5 ? 'Straight on day one.' : fade > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
     }
@@ -597,4 +606,61 @@ function build(body) {
 function mixHex(a, b, t) {
   const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b);
   return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * clamp(t, 0, 1)).toString(16).padStart(2, '0')).join('');
+}
+
+// ═════════════════════════════════════════════════════════════════
+// 6. VINYL WALLS — section properties of a 5×5 post, .150 vs .135 wall
+// ═════════════════════════════════════════════════════════════════
+// Wall thicknesses are the ones printed in the brochure (p. 31, 36). The big-box
+// post is drawn at the same 5 in size so only the wall changes. Square hollow
+// section: A = b² − (b − 2t)², I = (b⁴ − (b − 2t)⁴) / 12. Same wind and same
+// material means bending (deflection) goes as 1/I.
+export function tube(b, t) { const i = b - 2 * t; return { A: b * b - i * i, I: (b ** 4 - i ** 4) / 12 }; }
+function vinyl(body) {
+  const B = 5, HOME = .150, BIG = .135;
+  let V = 58, wob = 0, raf = 0, live = true;
+  const h = tube(B, HOME), g = tube(B, BIG), stiff = h.I / g.I, more = h.A / g.A;
+  body.innerHTML = `
+    <div class="lab-grid">
+      <div class="lab-vis"><svg class="vinyl-svg" viewBox="0 0 420 330" aria-label="Two vinyl posts bending in the wind"></svg>
+        <div class="vis-note">Walls drawn thicker so you can see the difference. Bend drawn bigger than life.</div></div>
+      <div class="lab-ctl">
+        ${slider('V', 'Gust speed', 20, 115, 1, V, ' mph')}
+        <div class="readouts">
+          <div><b class="mono">${fmt((stiff - 1) * 100, 0)}%</b><small>stiffer post, from a wall just .015 in thicker</small></div>
+          <div><b class="mono">${fmt((1 - 1 / stiff) * 100, 0)}%</b><small>less bend in the same wind</small></div>
+          <div><b class="mono">${fmt((more - 1) * 100, 0)}%</b><small>more vinyl in every foot of post</small></div>
+          <div><b class="mono" id="vLoad"></b><small>lb of wind on each 6 ft × 8 ft section right now</small></div>
+        </div>
+        <p class="lab-note">The wall is the part you can't see in the store, and it's where cheaper vinyl saves money. Homeland prints it on the spec sheet: 5″ × 5″ posts at .150″. Every Homeland gate also has aluminum inside the frame.</p>
+      </div>
+    </div>
+    ${math(`<p><b>Section properties of a square tube</b> (outside size b, wall t): area A = b² − (b − 2t)², moment of inertia I = [b⁴ − (b − 2t)⁴] / 12.</p>
+      <p>Homeland 5″ at .150″: A = ${fmt(h.A, 3)} in², I = ${fmt(h.I, 2)} in⁴. Big-box wall .135″ at the same 5″: A = ${fmt(g.A, 3)} in², I = ${fmt(g.I, 2)} in⁴.</p>
+      <p><b>Bending</b>: for the same load, length and material, a post bends in proportion to 1/I, so the thicker wall bends ${fmt((1 - 1 / stiff) * 100, 1)}% less. Bending stress drops by about the same share, which is what keeps a post from cracking at the ground.</p>
+      <p><b>Wind on the section</b> uses the ASCE 7 numbers from the Wind tool (solid 6 ft fence, houses and trees around).</p>
+      <p class="src">Wall thicknesses from the GFS brochure, p. 31 (big-box .135″ vs Homeland .150″) and p. 36 (Homeland 5″ × 5″ at .150″). The big-box post is drawn at the same 5″ size so only the wall changes.</p>`)}`;
+  const svg = $('.vinyl-svg', body);
+  const draw = () => {
+    const load = windLoad({ V, h: 6, exposure: 'B', style: WSTYLES[0] });
+    $('[data-out=V]', body).textContent = V + ' mph'; $('#vLoad', body).textContent = fmt(load.perPost, 0);
+    const base = clamp(load.perPost / 900, 0, 1) * 34 * (1 + .12 * Math.sin(wob));
+    const post = (x, bend, t, label, good) => {
+      const top = 70, gy = 250, tipX = x + bend;
+      const sec = (cx, cy) => { const s = 5 * 8, w = t * 8 * 6; return `<rect x="${cx - s / 2}" y="${cy - s / 2}" width="${s}" height="${s}" fill="${good ? '#f4f6f8' : '#e6e8ea'}"/><rect x="${cx - s / 2 + w}" y="${cy - s / 2 + w}" width="${s - 2 * w}" height="${s - 2 * w}" fill="#0f2034"/>`; };
+      return `<path d="M${x - 11},${gy} Q${x - 11},${(gy + top) / 2} ${tipX - 11},${top} L${tipX + 11},${top} Q${x + 11},${(gy + top) / 2} ${x + 11},${gy} Z" fill="${good ? '#f4f6f8' : '#e6e8ea'}" stroke="#9aa8b6"/>
+        <rect x="${tipX - 13}" y="${top - 8}" width="26" height="8" rx="2" fill="${good ? '#f4f6f8' : '#e6e8ea'}" stroke="#9aa8b6"/>
+        ${bend > 1 ? `<path d="M${x},${top - 18} h${bend}" stroke="${good ? '#3ecf8e' : '#ef5b5b'}" stroke-width="2"/><path d="M${x + bend},${top - 22} v8" stroke="${good ? '#3ecf8e' : '#ef5b5b'}" stroke-width="2"/>` : ''}
+        ${sec(x, gy + 40)}
+        <text x="${x}" y="${gy + 78}" text-anchor="middle" class="svg-n">${label}</text>
+        <text x="${x}" y="${gy + 94}" text-anchor="middle" class="svg-l">${t.toFixed(3).replace(/^0/, '')}″ WALL</text>`;
+    };
+    svg.innerHTML = `<rect width="420" height="250" fill="#0f2034"/><rect y="250" width="420" height="80" fill="#1b2c1e"/>
+      ${post(120, base * stiff, BIG, 'Big-box vinyl', false)}${post(300, base, HOME, 'Homeland', true)}
+      <text x="210" y="34" text-anchor="middle" class="svg-big">${V} mph →</text>`;
+  };
+  const tick = () => { wob += .08; draw(); if (live && !reduced.matches) raf = requestAnimationFrame(tick); };
+  $('[name=V]', body).oninput = e => { V = +e.target.value; if (reduced.matches) draw(); };
+  tick();
+  return () => { live = false; cancelAnimationFrame(raf); };
 }
