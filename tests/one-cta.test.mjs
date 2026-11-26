@@ -53,3 +53,21 @@ test('ballpark reads material, height and feet from the link and offers 70/140/2
   assert.match(js, /oneParam\(params, 'feet'\)/);
   assert.match(js, /id="bp-feet-slider"/);
 });
+
+test('gallery photos link to the ballpark by material; ballpark shows real review lines', () => {
+  const js = read('public/assets/js/project-gallery.js');
+  assert.match(js, /\/quote\/ballpark\/\?material=/);
+  assert.match(js, /splitrail:'split-rail'/);
+  const bp = read('public/quote/ballpark/index.html');
+  assert.equal((bp.match(/class="path-quote"/g) || []).length, 3);
+  assert.match(bp, /Google review<\/a><\/figcaption>/);
+});
+
+test('ballpark motion layer: loaded on the ballpark page only and never rewrites the price text', () => {
+  const bp = read('public/quote/ballpark/index.html');
+  assert.match(bp, /ballpark-motion\.css/);
+  assert.match(bp, /ballpark-motion\.js/);
+  const js = read('public/assets/js/ballpark-motion.js');
+  assert.ok(!/range\.textContent\s*=/.test(js), 'count-up must use an overlay');
+  assert.match(read('public/assets/css/ballpark-motion.css'), /prefers-reduced-motion:reduce/);
+});

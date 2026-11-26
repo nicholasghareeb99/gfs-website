@@ -1,0 +1,82 @@
+/* Ballpark map: big-map layout and touch drawing aids.
+   Full screen gives the map nearly the whole phone; the tools become one
+   compact row along the bottom and the instructions float over the map. */
+
+/* Centre sight + Add corner (Draw mode) */
+#bp-sight{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;z-index:6;pointer-events:none;
+  background:
+    linear-gradient(#fff,#fff) center/2px 46px no-repeat,
+    linear-gradient(#fff,#fff) center/46px 2px no-repeat;
+  filter:drop-shadow(0 0 1.5px #0f1e30) drop-shadow(0 0 1px #0f1e30)}
+#bp-sight::after{content:"";position:absolute;inset:15px;border:2px solid #ffc83d;border-radius:50%;box-shadow:0 0 0 1px #0f1e30}
+#bp-sight[hidden],#bp-add-center[hidden]{display:none!important}
+#bp-add-center{position:absolute;left:50%;transform:translateX(-50%);bottom:84px;z-index:7;display:inline-flex;align-items:center;gap:8px;min-height:50px;padding:0 22px;border:0;border-radius:999px;background:#1d5eb6;color:#fff;font:700 16px/1 inherit;box-shadow:0 10px 26px rgba(6,23,44,.45),0 0 0 3px rgba(255,255,255,.85);touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#bp-add-center span{font-size:24px;line-height:0;margin-top:-2px}
+#bp-add-center:active{transform:translateX(-50%) scale(.95)}
+#bp-map-tools:not(.bp-map-full) #bp-add-center{bottom:78px}
+@media(pointer:fine){#bp-map-tools:not(.bp-map-full) #bp-add-center,#bp-map-tools:not(.bp-map-full) #bp-sight{display:none!important}}
+
+/* Edit and delete buttons */
+#bp-draw-toolbar [data-mode="delete-point"][hidden]{display:none!important}
+#bp-draw-toolbar [data-mode="delete-point"]:not([hidden]){display:flex!important;background:#fff1f1!important;color:#a32020!important;border-color:#e3a3a3!important}
+
+/* ---- FULL SCREEN ---------------------------------------------------------------- */
+#bp-map-tools.bp-map-full{background:#0a1522!important}
+.bp-map-full .bp-map-address{padding:6px 8px!important;padding-top:calc(6px + env(safe-area-inset-top))!important;background:#0a1522!important}
+.bp-map-full #bp-map-search-row{grid-template-columns:minmax(0,1fr) 72px!important;gap:6px!important}
+.bp-map-full #bp-map-search,.bp-map-full #bp-map-search-btn{min-height:44px!important;height:44px;font-size:16px!important}
+.bp-map-full .bp-map-frame{position:relative}
+.bp-map-full #bp-map{flex:1 1 auto!important}
+
+/* Instructions float over the top of the map instead of taking a band of screen */
+.bp-map-full #bp-draw-hint{position:absolute!important;top:10px!important;left:10px!important;right:auto!important;bottom:auto!important;max-width:calc(100% - 150px);height:auto!important;max-height:5.6em;overflow:hidden!important;padding:7px 11px!important;border-radius:10px!important;font-size:12.5px!important;line-height:1.35!important;text-align:left!important;background:rgba(10,21,34,.82)!important;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:8!important;pointer-events:none}
+.bp-map-full #bp-map-fullscreen{top:10px!important;right:10px!important;min-height:44px!important;padding:6px 12px!important;font-size:14px!important;border-radius:10px!important}
+.bp-map-full #bp-live-feet{display:block;position:absolute!important;top:auto!important;bottom:146px!important;left:50%!important;right:auto!important;transform:translateX(-50%);white-space:nowrap;font-size:14px!important;padding:7px 14px!important;z-index:8!important}
+.bp-map-full #bp-live-feet[style*="display: none"],.bp-map-full #bp-live-feet[style*="display:none"]{display:none!important}
+.bp-map-full:not(.bp-mode-draw) #bp-live-feet{bottom:84px!important}
+
+/* One compact row of tools along the bottom */
+.bp-map-full #bp-draw-toolbar{display:flex!important;flex-wrap:nowrap!important;gap:4px!important;padding:6px!important;padding-bottom:calc(6px + env(safe-area-inset-bottom))!important;background:#0f1e30!important;border:0!important;position:relative!important;z-index:9}
+.bp-map-full #bp-draw-toolbar>.bp-draw-btn,.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary{flex:1 1 0!important;min-width:0!important;min-height:56px!important;height:56px;padding:4px 2px!important;display:flex!important;flex-direction:column!important;align-items:center;justify-content:center;gap:3px!important;border-radius:10px!important;font-size:11px!important;line-height:1.1!important;font-weight:700!important;background:rgba(255,255,255,.06)!important;color:#dfe8f3!important;border:1px solid rgba(255,255,255,.12)!important;box-shadow:none!important;text-align:center;white-space:nowrap}
+.bp-map-full #bp-draw-toolbar>.bp-draw-btn>span:first-child{font-size:18px!important;line-height:1}
+.bp-map-full #bp-draw-toolbar .bp-btn-label{display:block!important;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bp-map-full #bp-draw-toolbar>.bp-draw-btn[aria-pressed="true"]{background:#1d5eb6!important;color:#fff!important;border-color:#8cc7ff!important}
+.bp-map-full #bp-draw-toolbar>[data-mode="finish"]:disabled{display:none!important}
+.bp-map-full #bp-draw-toolbar>[data-mode="finish"]:not(:disabled){background:#1f9d63!important;border-color:#7ee2b0!important;color:#fff!important}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group{flex:1 1 0!important;min-width:0;position:relative;border:0!important;background:none!important;padding:0!important;margin:0!important}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary{list-style:none;width:100%}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary::-webkit-details-marker{display:none}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary::before{content:"🚪";font-size:18px;line-height:1}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group+.bp-tool-group>summary::before{content:"⋯";font-size:20px}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group[open]>summary{background:#1d5eb6!important;color:#fff!important}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group[open]>div{position:absolute;bottom:calc(100% + 10px);right:0;left:auto;width:min(220px,calc(100vw - 20px));display:flex!important;flex-direction:column;gap:6px;padding:8px;border-radius:14px;background:#0f1e30;border:1px solid rgba(140,199,255,.3);box-shadow:0 16px 40px rgba(0,0,0,.5);z-index:20}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group[open]>div .bp-draw-btn{min-height:48px!important;justify-content:flex-start!important;width:100%;background:rgba(255,255,255,.08)!important;color:#fff!important;border:1px solid rgba(255,255,255,.14)!important}
+
+/* Total + Use this layout in one row */
+.bp-map-full #bp-measure-slot{max-height:none!important;background:#0f1e30}
+.bp-map-full .bp-map-measurements{display:flex!important;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:8px 10px!important;padding-bottom:calc(8px + env(safe-area-inset-bottom))!important;background:#0f1e30!important;border:0!important;color:#eaf0f7}
+.bp-map-full #bp-measure-total{flex:1 1 auto;margin:0!important;font-size:14px;color:#eaf0f7}
+.bp-map-full #bp-measure-review:empty{display:none}
+.bp-map-full #bp-measure-review{flex-basis:100%;order:3;margin:0;font-size:12.5px;color:#ffc83d}
+.bp-map-full #bp-drawing-next{flex:0 0 auto;min-height:46px;padding:0 16px;border-radius:10px;font-size:15px}
+.bp-map-full #bp-drawing-next:disabled{opacity:.45}
+/* The measure row below the toolbar takes the bottom safe area */
+.bp-map-full .bp-map-frame #bp-draw-toolbar{padding-bottom:6px!important}
+
+@media(min-width:761px){
+  .bp-map-full #bp-draw-toolbar>.bp-draw-btn,.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary{flex-direction:row!important;gap:8px!important;font-size:14px!important;height:50px;min-height:50px!important}
+  .bp-map-full #bp-draw-toolbar{justify-content:center}
+  .bp-map-full #bp-draw-toolbar>*{flex:0 1 160px!important}
+  #bp-add-center{bottom:78px}
+}
+@media(prefers-reduced-motion:reduce){#bp-add-center:active{transform:translateX(-50%)}}
+.bp-map-full #bp-draw-hint,.bp-map-full #bp-draw-hint *{color:#eaf0f7!important}
+.bp-map-full #bp-draw-hint strong{color:#8cc7ff!important}
+.bp-map-full #bp-draw-toolbar>.bp-draw-btn[hidden]{display:none!important}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary{font-size:0!important}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary::after{content:"Gates";font-size:11px;font-weight:700}
+.bp-map-full #bp-draw-toolbar>.bp-tool-group+.bp-tool-group>summary::after{content:"More"}
+.bp-map-full .leaflet-top.leaflet-left{top:auto;bottom:12px}
+@media(min-width:761px){.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary::after{font-size:14px}}
+.bp-edit-handle{background:none!important;border:0!important}
+.bp-edit-handle svg{display:block;width:100%;height:100%}
