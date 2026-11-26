@@ -1,8 +1,8 @@
 // GFS Showroom — app shell: data, modes, dock, offline, live catalog.
-import { $, $$, toast, vt, modal, esc, asset, pageImg, icons } from './ui.mjs';
+import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
 import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.0 (2026-11-25)';
+const VERSION = 'showroom-1.2 (2026-11-26)';
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
@@ -96,15 +96,19 @@ function setBack(b) {
   if (b) { $('.l', el).textContent = b.label; $('.s', el).textContent = b.short || b.label; el.setAttribute('aria-label', 'Back to ' + b.label); }
   el.classList.toggle('on', !!b); document.body.classList.toggle('has-back', !!b);
 }
-const loading = {}; let goSeq = 0;
+const loading = {}; let goSeq = 0, lastError = '';
+addEventListener('error', e => { lastError = String(e.message || ''); });
+addEventListener('unhandledrejection', e => { lastError = String(e.reason?.message || e.reason || ''); });
 app.go = async function go(mode, opts = {}) {
   if (!loaders[mode]) mode = 'brochure';
   const seq = ++goSeq;
   if (!modes[mode]) {
     // one load per mode, even if it's tapped twice while the first load is still running
     loading[mode] ||= (async () => { const mod = await loaders[mode](); await mod.init(app, $('#v-' + mode)); modes[mode] = mod; })();
-    try { await loading[mode]; }
-    catch (e) { delete loading[mode]; console.error(e); toast(navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.', 2600); return; }
+    const slow = setTimeout(() => toast(mode === 'ar' ? 'Loading 3D…' : 'Loading…', 2200), 1500);
+    try { await Promise.race([loading[mode], new Promise((_, no) => setTimeout(() => no(Error('timed out')), 20000))]); }
+    catch (e) { clearTimeout(slow); delete loading[mode]; console.error(e); lastError = String(e?.message || e); toast((navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.') + (lastError ? ` (${lastError.slice(0, 80)})` : ''), 4000); return; }
+    clearTimeout(slow);
   }
   if (seq !== goSeq) return; // a later tap won while this screen was loading
   const prev = app.mode;
@@ -123,15 +127,15 @@ app.go = async function go(mode, opts = {}) {
       const here = modes[was]?.where?.();
       if (opts.via === 'dock' || opts.via === 'back' || opts.via === 'pop') setBack(null);
       else if (here) setBack({ mode: was, opts: here.opts || {}, label: here.label, short: here.short });
-      modes[was]?.hide?.();
+      try { modes[was]?.hide?.(); } catch (e) { console.error(e); }
     }
-    modes[mode].show?.(opts);
+    try { modes[mode].show?.(opts); } catch (e) { console.error(e); lastError = String(e?.message || e); toast('Something on this screen didn\'t load (' + lastError.slice(0, 80) + ')', 4000); }
     { const h = modes[mode].help?.(); if (!h || h.key === mode) helpOnce(mode); } // first visit to this screen on this device (Lab tools have their own how-to)
   };
   if (prev && prev !== mode) {
     const order = Object.keys(loaders), dir = order.indexOf(mode) > order.indexOf(prev) ? 'next' : 'prev';
     document.documentElement.dataset.vt = dir;
-    if (document.startViewTransition) await vt(swap);
+    if (canVT) await vt(swap);
     else { swap(); const v = $('#v-' + mode); v.classList.remove('view-enter'); void v.offsetWidth; v.classList.add('view-enter'); }
   } else swap();
   if (seq !== goSeq) return;
@@ -157,7 +161,7 @@ function settings() {
       <dt>Brochure</dt><dd>${d.pages.length} pages</dd>
       <dt>Style photos (Exec App)</dt><dd>${Object.values(app.live.photos || {}).reduce((n, l) => n + l.length, 0)}</dd>
       <dt>Fence rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
-      <dt>Version</dt><dd>${esc(VERSION)}</dd>
+      <dt>Version</dt><dd>${esc(VERSION)}${canVT ? '' : ' · Safari mode'}</dd>${lastError ? `<dt>Last problem</dt><dd style="word-break:break-word">${esc(lastError.slice(0, 160))}</dd>` : ''}
     </dl>
     <div class="row"><span><b>Presentation mode</b><br><small style="color:var(--dim)">Hides this menu so a customer can flip through on their own. To exit, press and hold the logo for 2 seconds.</small></span><button class="btn sm" id="presentGo">Turn on</button></div>
     <p class="src" style="margin:0">The brochure pages and style photos also save to this device on their own when it's online, so most of the showroom works with no signal.</p>
