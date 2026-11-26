@@ -57,7 +57,7 @@ export function grade(body, kit) {
     ${math(`<p><b>We slope every fence, we never step it.</b> Each section runs straight from one post to the next and follows the ground. The tops line up post to post, and there are no stair-step gaps.</p>
       <p><b>The gap under a section</b> is the distance from the bottom of the fence to the ground, checked every 3 in along the run. Wood pickets on our no-dig fence sit 2.5 in off the ground at the posts (72 in boards, rail top at 68.5 in, pickets 6 in above the rail). Because a section is a straight line, a dip between two posts opens a gap and a hump pushes into the fence.</p>
       <p><b>Smooth the top line</b> moves each post up or down so the top reads as one smooth line over bumps and dips. It never sets a post more than 2 in into the ground or 12 in above it, then lifts any section that a hump would still push into.</p>
-      <p><b>Three ways to close what's left</b>: raked dirt up to the bottom of the pickets (included with our installs); a pressure-treated 2×6 kickboard along the bottom of wood fences, which also keeps the pickets off the dirt; or grading the strip under the fence so the ground matches the fence line.</p>
+      <p><b>Three ways to close what's left</b>: raked dirt up to the bottom of the pickets (we rake dirt along the bottom on every install); a pressure-treated 2×6 kickboard along the bottom of wood fences, which also keeps the pickets off the dirt; or grading the strip under the fence so the ground matches the fence line.</p>
       <p><b>Dirt moved</b> is the cut and fill along a 3 ft wide strip under the fence, in cubic yards.</p>
       <p class="src">Drawn to scale. The close-up under the drawing shows the bottom of the fence 4× bigger at the biggest gap. The yard shapes are examples; at the estimate we measure yours.</p>`)}`;
 
@@ -282,6 +282,8 @@ export function grade(body, kit) {
 
   // ── touch ──
   let drag = null, brush = null, live = true;
+  // one repaint per screen frame, however fast the finger sends moves
+  let pend = 0; const redraw = () => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; if (live) draw(); }); };
   cv.addEventListener('pointerdown', e => {
     cv.setPointerCapture(e.pointerId); const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
     snap();
@@ -291,16 +293,16 @@ export function grade(body, kit) {
   });
   const move = e => {
     const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
-    brush = { x }; if (!drag) { if (st.mode !== 'posts') draw(); return; }
+    brush = { x }; if (!drag) { if (st.mode !== 'posts') redraw(); return; }
     if (drag.kind === 'post') st.offs[drag.i] = Math.round(clamp(drag.o0 + (y - drag.y0) * .4, -4 * IN, 18 * IN) * 48) / 48; // quarter inches
     if (drag.kind === 'ground') { const R = 2.5, dy = (y - drag.y) * .25; drag.y = y; for (let j = 0; j < NS; j++) { const d = j * STEP - x; if (Math.abs(d) > R * 2) continue; const w = Math.exp(-(d * d) / (R * R)); st.ground[j] = clamp(st.ground[j] + dy * w, -1.5, 2); } if (st.orig) st.orig = null; }
     if (drag.kind === 'dirt') { const R = 1.2; for (let j = 0; j < NS; j++) { const xx = j * STEP, d = xx - x; if (Math.abs(d) > R) continue; const gap = bottomAt(xx) - (st.ground[j] + st.dirt[j]); if (gap > 0) st.dirt[j] += gap * (1 - Math.abs(d) / R) * .5; } }
-    draw();
+    redraw();
   };
   cv.addEventListener('pointermove', move);
-  const up = () => { drag = null; };
+  const up = () => { drag = null; if (pend) { cancelAnimationFrame(pend); pend = 0; draw(); } };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('pointerleave', () => { brush = null; draw(); });
   const ro = new ResizeObserver(fit); ro.observe(cv);
-  return () => { live = false; cancelAnimationFrame(st.anim); ro.disconnect(); };
+  return () => { live = false; cancelAnimationFrame(st.anim); cancelAnimationFrame(pend); ro.disconnect(); };
 }

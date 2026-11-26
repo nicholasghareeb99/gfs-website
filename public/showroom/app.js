@@ -19,7 +19,8 @@ const setBar = p => { if (bar) bar.style.width = Math.round(p * 100) + '%'; };
 
 async function loadData() {
   setBar(.15);
-  const res = await fetch('data.json', { cache: 'no-cache' }).catch(() => null) || await caches.match('data.json');
+  let res = await fetch('data.json', { cache: 'no-cache' }).catch(() => null);
+  if (!res?.ok) res = (await globalThis.caches?.match('data.json').catch(() => null)) || res; // bad signal: use the saved copy
   if (!res || !res.ok) throw Error('Showroom data could not load.');
   const data = await res.json();
   data.styleById = Object.fromEntries(data.styles.map(s => [s.id, s]));
@@ -87,22 +88,29 @@ function moveGlow(btn) {
   glow.style.transform = `translate(${r.left - d.left - 6}px,${r.top - d.top - 6}px)`;
 }
 
+const loading = {}; let goSeq = 0;
 app.go = async function go(mode, opts = {}) {
   if (!loaders[mode]) mode = 'brochure';
+  const seq = ++goSeq;
   if (!modes[mode]) {
-    const mod = await loaders[mode]();
-    modes[mode] = mod; await mod.init(app, $('#v-' + mode));
+    // one load per mode, even if it's tapped twice while the first load is still running
+    loading[mode] ||= (async () => { const mod = await loaders[mode](); await mod.init(app, $('#v-' + mode)); modes[mode] = mod; })();
+    try { await loading[mode]; }
+    catch (e) { delete loading[mode]; console.error(e); toast(navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.', 2600); return; }
   }
+  if (seq !== goSeq) return; // a later tap won while this screen was loading
   const prev = app.mode;
   // Sheets and full-screen panels belong to the screen they were opened on.
   if (prev !== mode) for (const o of $$('.picker,.recap,.cmp,.rv,.bp,.modal')) { o.classList.remove('on'); o.classList.add('out'); o.style.pointerEvents = 'none'; setTimeout(() => o.remove(), 400); }
   const swap = () => {
+    if (seq !== goSeq) return; // a newer tap already decided where we're going
+    const was = app.mode;
     for (const v of $$('.view')) v.classList.toggle('on', v.id === 'v-' + mode);
     document.body.classList.remove('chrome-hidden');
     app.mode = mode;
     for (const b of $$('.dock button')) b.setAttribute('aria-current', b.dataset.mode === mode ? 'page' : 'false');
     moveGlow($(`.dock button[data-mode="${mode}"]`));
-    if (prev && prev !== mode) modes[prev]?.hide?.();
+    if (was && was !== mode) modes[was]?.hide?.();
     modes[mode].show?.(opts);
   };
   if (prev && prev !== mode) {
@@ -111,6 +119,7 @@ app.go = async function go(mode, opts = {}) {
     if (document.startViewTransition) await vt(swap);
     else { swap(); const v = $('#v-' + mode); v.classList.remove('view-enter'); void v.offsetWidth; v.classList.add('view-enter'); }
   } else swap();
+  if (seq !== goSeq) return;
   const hash = '#' + mode + (opts.page ? '-' + opts.page : '');
   if (location.hash !== hash) history.replaceState(null, '', hash);
   try { localStorage.setItem('gfs-showroom-mode', mode); } catch {}
@@ -205,7 +214,7 @@ async function boot() {
   $('#btnSearch').onclick = () => app.go('brochure', { overview: true, focus: true });
   addEventListener('resize', () => { const b = $('.dock button[aria-current=page]'); if (b) moveGlow(b); });
   visualViewport?.addEventListener('resize', dockClear);
-  const m = (location.hash.match(/^#(brochure|styles|ar|permits)(?:-(\d+))?/) || []);
+  const m = (location.hash.match(/^#(brochure|styles|ar|permits|lab)(?:-(\d+))?/) || []);
   let start = m[1]; try { start ||= localStorage.getItem('gfs-showroom-mode'); } catch {}
   setBar(.7);
   await app.go(start || 'brochure', m[2] ? { page: +m[2] } : {});

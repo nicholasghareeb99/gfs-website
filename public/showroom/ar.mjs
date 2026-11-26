@@ -1,7 +1,7 @@
 // 3D · AR mode. The model on screen is the Executive App's own viewer (/x3d/),
 // built from the same published style specs. "Place it in the yard" exports that
 // exact model at 1:1 scale to USDZ and hands it to Apple's AR Quick Look.
-import { $, $$, esc, clamp, icons, toast } from './ui.mjs';
+import { $, $$, esc, clamp, icons, toast, niceModel } from './ui.mjs';
 import { visit } from './visit.mjs';
 
 let app, root, D, frame, state = { model: null, layout: 'run24', gate: 'walk', styleId: null, geometry: null }, ar = { url: null, ticket: 0, key: '' }, mods = null;
@@ -87,7 +87,7 @@ export function hide() {}
 
 const key = () => `${state.model}|${state.layout}|${state.gate}|${state.layout === 'yard' ? JSON.stringify(yardGeometry()).length : ''}`;
 function render() {
-  $('#arName', root).textContent = state.model;
+  $('#arName', root).textContent = niceModel(state.model);
   for (const b of $$('#arLayouts .chip', root)) b.setAttribute('aria-pressed', String(b.dataset.l === state.layout));
   const L = LAYOUTS.find(l => l.id === state.layout);
   $('#arGates', root).hidden = !!(L?.detail || L?.corner || L?.yard);
@@ -194,10 +194,10 @@ function picker() {
   let f = 'all'; const input = $('input', el), list = $('.list', el);
   const draw = () => {
     const q = input.value.toLowerCase().split(/\s+/).filter(Boolean);
-    const rows = names.filter(n => (f === 'all' || familyOfModel(n) === f) && q.every(w => n.toLowerCase().includes(w)));
+    const rows = names.filter(n => (f === 'all' || familyOfModel(n) === f) && q.every(w => (n + " " + niceModel(n)).toLowerCase().includes(w)));
     list.innerHTML = fams.filter(x => f === 'all' || x.id === f).map(x => {
       const r = rows.filter(n => familyOfModel(n) === x.id); if (!r.length) return '';
-      return `<div class="grp">${esc(x.name.toUpperCase())} · ${r.length}</div>` + r.map(n => `<button class="item${n === state.model ? ' on' : ''}" data-n="${esc(n)}"><i class="dot" style="background:${dotOf(n)}"></i>${esc(n)}<small>${heightOf(n)} FT</small></button>`).join('');
+      return `<div class="grp">${esc(x.name.toUpperCase())} · ${r.length}</div>` + r.map(n => `<button class="item${n === state.model ? ' on' : ''}" data-n="${esc(n)}"><i class="dot" style="background:${dotOf(n)}"></i>${esc(niceModel(n))}<small>${heightOf(n)} FT</small></button>`).join('');
     }).join('') || '<div class="empty">No models match.</div>';
   };
   draw();

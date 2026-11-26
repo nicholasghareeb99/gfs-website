@@ -6,7 +6,7 @@ export function openReviews(app) {
   const el = document.createElement('div'); el.className = 'rv';
   el.innerHTML = `
     <div class="recap-top"><button class="iconbtn" data-x aria-label="Close">${icons.close}</button>
-      <div class="grow"><div class="eyebrow">WHAT CUSTOMERS SAY</div><h2>${R.length} reviews, word for word</h2></div></div>
+      <div class="grow"><div class="eyebrow">WHAT CUSTOMERS SAY</div><h2>In their own words</h2></div></div>
     <div class="rv-track">${R.map((r, i) => `
       <article class="rv-card">
         <div class="rv-top"><span class="rv-stars" aria-label="${r.stars} out of 5 stars">${'★'.repeat(r.stars)}</span><span class="rv-plat">${esc(r.platform)}</span></div>

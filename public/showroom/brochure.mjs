@@ -402,7 +402,7 @@ function centerCard() { return { dataset: { n: String(focusPage()) } }; }
 function sizeBooklet() {
   const fw = els.flow.clientWidth, fh = els.flow.clientHeight;
   // two pages side by side, opened about 150°, have to fit the width; the height leaves room for the tilt
-  const h = Math.max(160, Math.min(fh * .74, (fw * .84) / (2 * ASPECT * .97)));
+  const h = Math.max(160, Math.min(fh * .74, (fw * (fw < 600 ? .98 : .84)) / (2 * ASPECT * .97)));
   bk.h = Math.round(h); bk.w = Math.round(h * ASPECT);
   els.flow.style.setProperty('--pw', bk.w + 'px'); els.flow.style.setProperty('--ph', bk.h + 'px');
 }
@@ -423,6 +423,8 @@ function coverflow() {
     el.style.setProperty('--sh', (bend * .45 + depth * .05).toFixed(3));
     el.style.setProperty('--lift', (bend * 18).toFixed(1) + 'px');
   }
+  // a closed book sits centred on its cover: slide it half a page at either end
+  els.rail.style.setProperty('--bk', ((clamp(P - (leafCount() - 1), 0, 1) - (1 - clamp(P, 0, 1))) * .5).toFixed(4));
   // covers sit just under the deepest pages
   const turned = clamp(P, 0, leafCount());
   $('.b3-cover.l', els.rail).style.transform = `rotateY(${-(180 - Math.max(0, 30 - 11 * 1.6) + 1.5)}deg)`;
@@ -463,11 +465,12 @@ function bindBook() {
   els.flow.addEventListener('pointermove', e => {
     if (!d) return;
     const dx = e.clientX - d.x; if (Math.abs(dx) > 6) d.moved = true;
-    setPos(d.p - dx / (bk.w * 1.15));                           // drag a page's width to turn one leaf
-    d.hist.push([performance.now(), bk.pos]); if (d.hist.length > 6) d.hist.shift();
+    const to = clamp(d.p - dx / (bk.w * 1.15), 0, leafCount()); // drag a page's width to turn one leaf
+    d.to = to; if (!d.raf) d.raf = requestAnimationFrame(() => { if (d) { d.raf = 0; setPos(d.to); } });  // one layout per frame
+    d.hist.push([performance.now(), to]); if (d.hist.length > 6) d.hist.shift();
   });
   const end = e => {
-    if (!d) return; const dd = d; d = null;
+    if (!d) return; const dd = d; d = null; if (dd.raf) { cancelAnimationFrame(dd.raf); if (dd.to != null) setPos(dd.to); }
     if (!dd.moved && performance.now() - dd.t < 400) {             // a tap opens the page you tapped
       const face = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('face'));
       if (face) return pickPage(+face.dataset.n, face);
