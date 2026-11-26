@@ -57,10 +57,11 @@
     }
   }
 
-  // Reveal step cards and review lines as they scroll in
+  // Reveal review lines as they scroll in. Step cards never move: they
+  // hold buttons and inputs, and a moving or scaled control is a missed tap.
   if (!calm && 'IntersectionObserver' in window) {
     const io = new IntersectionObserver(entries => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('bpm-in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-    $$('.bpm-stage .bp-step, .bpm-stage .path-quote').forEach(node => {
+    $$('.bpm-stage .path-quote').forEach(node => {
       const r = node.getBoundingClientRect();
       if (r.top < innerHeight) return; // already on screen: leave it alone
       node.classList.add('bpm-reveal'); io.observe(node);

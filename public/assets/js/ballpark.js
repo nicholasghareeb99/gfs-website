@@ -2820,8 +2820,8 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     const finish=document.querySelector('#bp-draw-toolbar [data-mode="finish"]');
     const active=mapKind==='google'?gActivePolyline?.getPath().getLength():lActivePolyline?.getLatLngs().length;
     if(finish)finish.disabled=gDrawingMode!=='fence'||!(active>=2);
-    const next=el('bp-drawing-next');if(next)next.disabled=!(facts.totalFeet>0)||!!facts.issues.length||gDrawingMode==='fence';
-    const hint=el('bp-draw-hint');if(hint&&gDrawingMode==='idle'&&facts.totalFeet>0)hint.textContent='Line saved. Draw another section, open Add gates, or continue to choose a style. Drag a corner to adjust the layout.';
+    const next=el('bp-drawing-next');if(next)next.disabled=!(facts.totalFeet>0)||!!facts.issues.length;
+    const hint=el('bp-draw-hint');if(hint&&gDrawingMode==='idle'&&facts.totalFeet>0)hint.textContent='Line saved. Draw another section, add gates, or tap Edit lines to fix a corner. Then continue to choose a style.';
     const total=el('bp-measure-total');if(total)total.textContent='Total run '+format(facts.totalFeet)+' · '+gates.length+' gate'+(gates.length===1?'':'s');
     const openings=el('bp-measure-opening');if(openings)openings.textContent='Gate openings '+format(facts.openingsFeet)+' · Fence outside openings '+format(facts.netFenceFeet)+(facts.issues.length?' (review gate placement)':'');
     const review=el('bp-measure-review');if(review)review.textContent=layoutAddress!==null&&layoutAddress!==draftAddress(state.address)&&paths.some(line=>line.length)?'The address changed. Review the layout, then confirm it for this property or redraw.':facts.issues.length?'Gate '+facts.issues.map(i=>i+1).join(', ')+': drag onto a clear fence segment long enough for its opening.':'';
@@ -2892,9 +2892,10 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
 
   // Hint text per mode — drives the bottom status bar
   const MODE_HINTS = {
-    'idle':       '<strong>Move map:</strong> drag to position your property and zoom in. Choose <strong>Draw fence</strong> when ready. Drag a saved corner to adjust it.',
-    'fence':      'Tap each corner of your fence, then press <strong>Finish line</strong>. ' +
+    'idle':       '<strong>Move map:</strong> drag to position your property and zoom in. Choose <strong>Draw fence</strong> when ready, or <strong>Edit lines</strong> to fix a corner.',
+    'fence':      'Tap each corner, or line up the <strong>+</strong> and press <strong>Add corner</strong>. Tap the first corner to close a loop. ' +
                   '<span id="bp-snap-on" style="display:none;color:#FFC83D;">· Snap 90° ON</span>',
+    'edit':       '<strong>Edit:</strong> drag a white corner to move it. Drag a <strong>+</strong> to add a bend. Drag <strong>✥</strong> to move a whole line. Tap a corner, then <strong>Delete corner</strong> to remove it.',
     'walk-gate':  'Tap near a drawn fence to snap a 4 ft walk gate into the run. Drag it to move; tap it to remove.',
     'drive-gate': 'Tap near a drawn fence to snap a 10 ft drive gate into the run. Openings cannot overlap.',
   };
@@ -3217,6 +3218,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
           return;
         }
         if (mode === 'parcel') return;   // handled by initParcelTools
+        if (mode === 'delete-point') { if (mapKind === 'google') deleteSelectedGoogleCorner(); return; }
         if (mode === 'finish') {
           // Explicit finish — the only reliable way to end a fence on touch
           // devices, where double-tap is the browser's zoom gesture.
@@ -3269,6 +3271,8 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (action.type === 'point' && gActivePolyline) {
       const path = gActivePolyline.getPath();
       if (path.getLength() > 0) path.removeAt(path.getLength() - 1);
+    } else if (action.type === 'edit' && action.item) {
+      restoreGooglePath(action.item, action.before, action.gates);
     } else if (action.type === 'fence' && action.item) {
       action.item.setMap(null);
       const idx = gFenceLines.indexOf(action.item);
@@ -3319,6 +3323,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       if (btn.dataset.mode === 'undo') return;    // undo is an action, not a mode
       if (btn.dataset.mode === 'snap') return;    // snap manages its own toggle state
       if (btn.dataset.mode === 'parcel') return;  // an action, not a mode
+      if (btn.dataset.mode === 'delete-point') return;
       if (btn.dataset.mode === 'finish') {
         btn.style.display='flex';btn.disabled=mode!=='fence';return;
       }
@@ -3347,12 +3352,13 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (gClickListener) { google.maps.event.removeListener(gClickListener); gClickListener = null; }
     // Gate taps must reach the map instead of being consumed by the fence stroke.
     const placingGate=mode==='walk-gate'||mode==='drive-gate';
-    gFenceLines.forEach(line=>{line.setEditable(mode==='idle');line.setOptions({clickable:!placingGate});});
+    gFenceLines.forEach(line=>{line.setEditable(mode==='idle'&&!coarsePointer());line.setOptions({clickable:!placingGate});});
     // Disable any in-progress polyline editing while not in fence mode
     if (mode !== 'fence' && gActivePolyline) {
       finalizeGooglePolyline();
     }
-    gFenceLines.forEach(line=>{line.setEditable(mode==='idle');line.setOptions({clickable:!placingGate});});
+    gFenceLines.forEach(line=>{line.setEditable(mode==='idle'&&!coarsePointer());line.setOptions({clickable:!placingGate});});
+    gSelected=null;renderGoogleHandles();syncTouchExtras();
 
     if (mode === 'fence') {
       startGoogleFenceDrawing();
@@ -3372,7 +3378,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     gMap.setOptions({draggableCursor:'crosshair',disableDoubleClickZoom:true});
     const path=new google.maps.MVCArray();
     gActivePolyline=new google.maps.Polyline({strokeColor:'#00E5A0',strokeWeight:6,strokeOpacity:1,editable:false,map:gMap,path});
-    gClickListener=gMap.addListener('click',e=>{const pt=snappedDrawingPoint('google',e.latLng);path.push(pt);mapPreview=null;if(gPreviewLine)gPreviewLine.setPath([]);gUndoStack.push({type:'point'});updateGoogleStats();});
+    gClickListener=gMap.addListener('click',e=>addGooglePoint(e.latLng));
     gMoveListener=gMap.addListener('mousemove',e=>previewDrawingPoint('google',e.latLng));
     gDoubleClickListener=gMap.addListener('dblclick',e=>{e.stop?.();finalizeGooglePolyline();setDrawMode('idle','google');});
   }
@@ -3442,7 +3448,161 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if(activeDrawingEngine!=='google')return;
     const facts=window.GFSMapGeometry.summary(mapPaths('google'),mapGates('google'));
     setLiveStats(Math.round(facts.totalFeet),gWalkGates.length,gDriveGates.length);renderMapMeasurements('google');
+    if(!gHandleDrag)renderGoogleHandles();
+    syncTouchExtras();
   }
+
+  // ---- TOUCH DRAWING AND EDITING ---------------------------------------------------
+  // Phones: Google's own corner dots are about 10 px and sit under the finger,
+  // so Edit mode draws finger-sized handles instead. White dot = corner (drag
+  // to move, tap to select for delete). "+" = halfway point (drag or tap to
+  // add a bend). Arrows = whole line (drag to move it, gates come along).
+  // Draw mode also gets a centre "+" sight and an Add corner button, so a
+  // corner can be placed exactly without the finger covering it.
+  let gHandles=[],gSelected=null,gHandleDrag=false,gCenterListener=null,lCenterHandler=null;
+  const coarsePointer=()=>{try{return matchMedia('(pointer: coarse)').matches;}catch(e){return false;}};
+  const HANDLE_SVG={
+    corner:(on)=>'<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="rgba(0,0,0,0.001)"/><circle cx="24" cy="24" r="'+(on?13:11)+'" fill="'+(on?'#ffc83d':'#ffffff')+'" stroke="#0f1e30" stroke-width="3"/><circle cx="24" cy="24" r="3.5" fill="#0f1e30"/></svg>',
+    mid:()=>'<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="rgba(0,0,0,0.001)"/><circle cx="22" cy="22" r="10" fill="rgba(15,30,48,0.78)" stroke="#ffffff" stroke-width="2"/><path d="M22 16v12M16 22h12" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round"/></svg>',
+    move:()=>'<svg xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="rgba(0,0,0,0.001)"/><circle cx="26" cy="26" r="15" fill="#1d5eb6" stroke="#ffffff" stroke-width="3"/><path d="M26 15v22M15 26h22M26 15l-4 4M26 15l4 4M26 37l-4-4M26 37l4-4M15 26l4-4M15 26l4 4M37 26l-4-4M37 26l-4 4" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>',
+  };
+  function handleIcon(kind,on){const size=kind==='move'?52:kind==='mid'?44:48;return{url:'data:image/svg+xml;utf8,'+encodeURIComponent(HANDLE_SVG[kind](on)),scaledSize:new google.maps.Size(size,size),anchor:new google.maps.Point(size/2,size/2)};}
+  function clearGoogleHandles(){gHandles.forEach(m=>m.setMap(null));gHandles=[];}
+  function googlePathCopy(line){return line.getPath().getArray().map(p=>new google.maps.LatLng(p.lat(),p.lng()));}
+  // Gates sitting on a line, so a moved line takes its gates along.
+  function gatesOnGoogleLine(line){
+    const pts=line.getPath().getArray().map(p=>({lat:p.lat(),lng:p.lng()}));
+    return [...gWalkGates.map(m=>[m,'walk']),...gDriveGates.map(m=>[m,'drive'])].filter(([m])=>{
+      const g=m.getPosition(),q={lat:g.lat(),lng:g.lng()},k=Math.cos(q.lat*Math.PI/180);
+      for(let i=0;i<pts.length-1;i++){
+        const ax=(pts[i].lng-q.lng)*k,ay=pts[i].lat-q.lat,bx=(pts[i+1].lng-q.lng)*k,by=pts[i+1].lat-q.lat;
+        const dx=bx-ax,dy=by-ay,len=dx*dx+dy*dy,t=len?Math.max(0,Math.min(1,-(ax*dx+ay*dy)/len)):0;
+        const ex=ax+t*dx,ey=ay+t*dy;if(Math.sqrt(ex*ex+ey*ey)*364000<4)return true; // within ~4 ft
+      }return false;});
+  }
+  function restoreGooglePath(line,before,gates){
+    const path=line.getPath();path.clear();before.forEach(p=>path.push(p));
+    if(!line.getMap()){line.setMap(gMap);if(!gFenceLines.includes(line)){gFenceLines.push(line);['set_at','insert_at','remove_at'].forEach(ev=>path.addListener(ev,updateGoogleStats));}}
+    (gates||[]).forEach(([m,pos])=>m.setPosition(pos));
+    gSelected=null;updateGoogleStats();
+  }
+  function resnapGoogleGates(){
+    [...gWalkGates.map(m=>[m,'walk']),...gDriveGates.map(m=>[m,'drive'])].forEach(([m,type])=>{
+      const point=window.GFSMapGeometry.snapGate({paths:mapPaths('google',false),point:window.GFSMapGeometry.point(m.getPosition()),type,gates:mapGates('google',m),maxDistanceFeet:8});
+      if(point.ok)m.setPosition(point.point);
+    });
+  }
+  function startGoogleEdit(line){gHandleDrag=true;return{line,before:googlePathCopy(line),gates:[...gWalkGates,...gDriveGates].map(m=>[m,m.getPosition()])};}
+  function endGoogleEdit(edit){
+    gHandleDrag=false;gUndoStack.push({type:'edit',item:edit.line,before:edit.before,gates:edit.gates});
+    resnapGoogleGates();updateGoogleStats();if(typeof saveDraft==='function')saveDraft();
+  }
+  function lineLengthsAround(line,i){
+    const pts=line.getPath().getArray().map(p=>({lat:p.lat(),lng:p.lng()})),f=n=>window.GFSMapGeometry.format(n,mapMeasurementUnit),out=[];
+    if(i>0)out.push(f(window.GFSMapGeometry.distanceFeet(pts[i-1],pts[i])));
+    if(i<pts.length-1)out.push(f(window.GFSMapGeometry.distanceFeet(pts[i],pts[i+1])));
+    return out.join(' · ');
+  }
+  function showDragChip(text){const chip=el('bp-live-feet');if(chip&&text){chip.textContent=text;chip.style.display='block';}}
+  function renderGoogleHandles(){
+    clearGoogleHandles();
+    const del=document.querySelector('#bp-draw-toolbar [data-mode="delete-point"]');
+    if(del){del.hidden=!(gDrawingMode==='edit'&&gSelected);del.disabled=!gSelected;}
+    if(gDrawingMode!=='edit'||!gMap||activeDrawingEngine!=='google')return;
+    gFenceLines.forEach(line=>{
+      const path=line.getPath(),n=path.getLength();
+      for(let i=0;i<n;i++){
+        const on=gSelected&&gSelected.line===line&&gSelected.index===i;
+        const m=new google.maps.Marker({map:gMap,position:path.getAt(i),draggable:true,icon:handleIcon('corner',on),zIndex:300,title:'Corner '+(i+1)+': drag to move, tap to select',crossOnDrag:false});
+        let edit=null;
+        m.addListener('dragstart',()=>{edit=startGoogleEdit(line);gSelected={line,index:i};});
+        m.addListener('drag',e=>{path.setAt(i,e.latLng);showDragChip(lineLengthsAround(line,i));});
+        m.addListener('dragend',()=>{if(edit)endGoogleEdit(edit);edit=null;});
+        m.addListener('click',()=>{gSelected=on?null:{line,index:i};renderGoogleHandles();});
+        gHandles.push(m);
+      }
+      for(let i=0;i<n-1;i++){
+        const a=path.getAt(i),b=path.getAt(i+1),mid=new google.maps.LatLng((a.lat()+b.lat())/2,(a.lng()+b.lng())/2);
+        const m=new google.maps.Marker({map:gMap,position:mid,draggable:true,icon:handleIcon('mid'),zIndex:250,title:'Drag or tap to add a bend here',crossOnDrag:false});
+        let edit=null;
+        m.addListener('dragstart',()=>{edit=startGoogleEdit(line);path.insertAt(i+1,m.getPosition());});
+        m.addListener('drag',e=>{path.setAt(i+1,e.latLng);showDragChip(lineLengthsAround(line,i+1));});
+        m.addListener('dragend',()=>{if(edit)endGoogleEdit(edit);edit=null;gSelected={line,index:i+1};renderGoogleHandles();});
+        m.addListener('click',()=>{const edit=startGoogleEdit(line);path.insertAt(i+1,mid);gSelected={line,index:i+1};endGoogleEdit(edit);});
+        gHandles.push(m);
+      }
+      if(n>=2){
+        // Move handle: middle of the longest segment, nudged off the line so it never hides the + handle.
+        let best=0,bestLen=-1;for(let i=0;i<n-1;i++){const d=window.GFSMapGeometry.distanceFeet(window.GFSMapGeometry.point(path.getAt(i)),window.GFSMapGeometry.point(path.getAt(i+1)));if(d>bestLen){bestLen=d;best=i;}}
+        const a=path.getAt(best),b=path.getAt(best+1),k=Math.cos(a.lat()*Math.PI/180);
+        const dx=(b.lng()-a.lng())*k,dy=b.lat()-a.lat(),len=Math.hypot(dx,dy)||1,scale=156543.03392*k/Math.pow(2,gMap.getZoom()||20)/111320*46;
+        const pos=new google.maps.LatLng((a.lat()+b.lat())/2+dx/len*scale,(a.lng()+b.lng())/2-dy/len*scale/k);
+        const m=new google.maps.Marker({map:gMap,position:pos,draggable:true,icon:handleIcon('move'),zIndex:260,title:'Drag to move this whole line',crossOnDrag:false});
+        let edit=null,start=null,carried=[];
+        m.addListener('dragstart',()=>{edit=startGoogleEdit(line);start=m.getPosition();carried=gatesOnGoogleLine(line).map(([g])=>[g,g.getPosition()]);});
+        m.addListener('drag',e=>{if(!edit)return;const dLat=e.latLng.lat()-start.lat(),dLng=e.latLng.lng()-start.lng();
+          edit.before.forEach((p,j)=>path.setAt(j,new google.maps.LatLng(p.lat()+dLat,p.lng()+dLng)));
+          carried.forEach(([g,p])=>g.setPosition(new google.maps.LatLng(p.lat()+dLat,p.lng()+dLng)));});
+        m.addListener('dragend',()=>{if(edit)endGoogleEdit(edit);edit=null;});
+        gHandles.push(m);
+      }
+    });
+  }
+  function deleteSelectedGoogleCorner(){
+    if(!gSelected)return;const{line,index}=gSelected,path=line.getPath();
+    const edit=startGoogleEdit(line);
+    if(path.getLength()<=2){path.clear();line.setMap(null);const i=gFenceLines.indexOf(line);if(i>=0)gFenceLines.splice(i,1);}
+    else path.removeAt(index);
+    gSelected=null;endGoogleEdit(edit);
+  }
+  // Shared by a tap and by Add corner. Tapping near the first corner of a run
+  // with three or more corners closes the loop and finishes the line.
+  function addGooglePoint(latLng){
+    if(!gActivePolyline)return;
+    const path=gActivePolyline.getPath(),n=path.getLength();
+    if(n>=3){
+      const first=path.getAt(0),zoom=gMap.getZoom()||20,mpp=156543.03392*Math.cos(first.lat()*Math.PI/180)/Math.pow(2,zoom);
+      const feet=window.GFSMapGeometry.distanceFeet(window.GFSMapGeometry.point(first),window.GFSMapGeometry.point(latLng));
+      if(feet*.3048<mpp*26){path.push(first);gUndoStack.push({type:'point'});finalizeGooglePolyline();setDrawMode('idle','google');return;}
+    }
+    const pt=snappedDrawingPoint('google',latLng);path.push(pt);mapPreview=null;if(gPreviewLine)gPreviewLine.setPath([]);gUndoStack.push({type:'point'});updateGoogleStats();
+  }
+  function addCornerAtCenter(){
+    const kind=activeDrawingEngine;
+    if(kind==='google'&&gMap){if(gDrawingMode!=='fence')setDrawMode('fence','google');addGooglePoint(gMap.getCenter());}
+    else if(kind==='leaflet'&&map){if(gDrawingMode!=='fence')setDrawMode('fence','leaflet');if(lClickHandler)lClickHandler({latlng:map.getCenter()});}
+  }
+  // Centre sight, Add corner button and Done button over the map; centre preview line on touch screens.
+  function ensureTouchExtras(){
+    const frame=el('bp-map')?.parentElement;if(!frame||el('bp-sight'))return;
+    const sight=document.createElement('div');sight.id='bp-sight';sight.setAttribute('aria-hidden','true');sight.hidden=true;
+    const add=document.createElement('button');add.type='button';add.id='bp-add-center';add.hidden=true;add.setAttribute('data-gfs-protected','');
+    add.innerHTML='<span aria-hidden="true">+</span> Add corner';add.addEventListener('click',addCornerAtCenter);
+    frame.append(sight,add);
+  }
+  function syncTouchExtras(){
+    ensureTouchExtras();
+    const drawing=gDrawingMode==='fence',sight=el('bp-sight'),add=el('bp-add-center');
+    if(sight)sight.hidden=!drawing;if(add)add.hidden=!drawing;
+    if(activeDrawingEngine==='google'&&gMap&&window.google){
+      const want=drawing&&coarsePointer();
+      if(want&&!gCenterListener)gCenterListener=gMap.addListener('center_changed',()=>{if(gActivePolyline&&gActivePolyline.getPath().getLength())previewDrawingPoint('google',gMap.getCenter());});
+      if(!want&&gCenterListener){google.maps.event.removeListener(gCenterListener);gCenterListener=null;}
+    }
+    if(activeDrawingEngine==='leaflet'&&map&&window.L){
+      const want=drawing&&coarsePointer();
+      if(want&&!lCenterHandler){lCenterHandler=()=>{if(lActivePolyline&&lActivePolyline.getLatLngs().length)previewDrawingPoint('leaflet',map.getCenter());};map.on('move',lCenterHandler);}
+      if(!want&&lCenterHandler){map.off('move',lCenterHandler);lCenterHandler=null;}
+    }
+    const tools=el('bp-map-tools');if(tools){tools.classList.toggle('bp-mode-draw',drawing);tools.classList.toggle('bp-mode-edit',gDrawingMode==='edit');}
+  }
+  // "Use this layout" while a line is still open finishes it first, instead of sitting greyed out.
+  document.addEventListener('click',event=>{
+    if(!event.target.closest?.('#bp-drawing-next')||gDrawingMode!=='fence')return;
+    const kind=activeDrawingEngine;
+    if(kind==='google'&&gActivePolyline)finalizeGooglePolyline();else if(kind==='leaflet'&&lActivePolyline)finalizeLeafletPolyline();
+    setDrawMode('idle',kind);
+  },true);
 
   // Shared stats keep the existing gross-footage pricing convention.
 
@@ -3644,11 +3804,13 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     // Stop any prior click handler + close any active polyline
     if (lClickHandler) { map.off('click', lClickHandler); lClickHandler = null; }
     clearDrawingPreview('leaflet');
-    lFenceLines.forEach(line=>{if(mode==='idle')enableLeafletEditing(line);else line.editing?.disable();});
+    const leafletEditing=mode==='idle'||mode==='edit';
+    lFenceLines.forEach(line=>{if(leafletEditing)enableLeafletEditing(line);else line.editing?.disable();});
     if (mode !== 'fence' && lActivePolyline) {
       finalizeLeafletPolyline();
     }
-    lFenceLines.forEach(line=>{if(mode==='idle')enableLeafletEditing(line);else line.editing?.disable();});
+    lFenceLines.forEach(line=>{if(leafletEditing)enableLeafletEditing(line);else line.editing?.disable();});
+    syncTouchExtras();
 
     if (mode === 'fence') {
       startLeafletFenceDrawing();
@@ -4232,7 +4394,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     const refresh = () => {
       try {
         if (map && typeof map.invalidateSize === 'function') map.invalidateSize();
-        if (gMap && window.google && google.maps && google.maps.event) google.maps.event.trigger(gMap, 'resize');
+        if (gMap && window.google && google.maps && google.maps.event) { google.maps.event.trigger(gMap, 'resize'); gMap.setOptions({ gestureHandling: on ? 'greedy' : 'cooperative' }); }
       } catch (e) {}
     };
     refresh(); setTimeout(refresh, 80); setTimeout(refresh, 400);

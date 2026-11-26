@@ -52,6 +52,7 @@
 <link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
 <link rel="stylesheet" href="/assets/css/request-tools.css?v=20261113c">
 <link rel="stylesheet" href="/assets/css/ballpark-motion.css?v=20261126">
+<link rel="stylesheet" href="/assets/css/map-touch.css?v=20261126">
 
 <!-- ================================================================
      CONFIG INJECTION — Edit this single block to wire up Firebase
@@ -307,11 +308,11 @@
             <div id="bp-map" style="width:100%;height:460px;background:#e5e7eb;"></div>
 
             <!-- Custom drawing toolbar (floats over the map) -->
-            <div id="bp-draw-toolbar" aria-label="Fence sketch controls"><button type="button" data-mode="idle" class="bp-draw-btn" aria-label="Move map and adjust corners" aria-pressed="true"><span aria-hidden="true">✥</span><span class="bp-btn-label">Move map</span></button><button type="button" data-mode="fence" aria-label="Draw fence line" class="bp-draw-btn" title="Draw fence line — click each corner, tap Finish line when done" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--navy);color:var(--cream);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+            <div id="bp-draw-toolbar" aria-label="Fence sketch controls"><button type="button" data-mode="idle" class="bp-draw-btn" aria-label="Move the map" aria-pressed="true"><span aria-hidden="true">✥</span><span class="bp-btn-label">Move map</span></button><button type="button" data-mode="fence" aria-label="Draw fence line" class="bp-draw-btn" title="Draw fence line — click each corner, tap Finish line when done" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--navy);color:var(--cream);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
                 <span style="font-size:16px;">✏️</span><span class="bp-btn-label">Draw fence</span>
               </button><button type="button" data-mode="finish" aria-label="Finish drawing this fence" class="bp-draw-btn bp-finish-btn" title="Finish the fence line you're drawing" disabled style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:2px solid var(--navy);background:var(--success,#1A7A3C);color:#fff;border-radius:5px;font-weight:700;font-size:13px;cursor:pointer;transition:all 0.15s;">
                 <span style="font-size:15px;">✓</span><span class="bp-btn-label">Finish line</span>
-              </button><button type="button" data-mode="undo" aria-label="Undo last action" class="bp-draw-btn" title="Undo last action — removes the most recent point, fence, or gate" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
+              </button><button type="button" data-mode="edit" class="bp-draw-btn" aria-label="Edit lines: drag corners, add bends, move a whole line" aria-pressed="false"><span aria-hidden="true">✎</span><span class="bp-btn-label">Edit lines</span></button><button type="button" data-mode="delete-point" class="bp-draw-btn bp-delete-btn" aria-label="Delete the selected corner" hidden disabled><span aria-hidden="true">✕</span><span class="bp-btn-label">Delete corner</span></button><button type="button" data-mode="undo" aria-label="Undo last action" class="bp-draw-btn" title="Undo last action — removes the most recent point, fence, or gate" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
                 <span style="font-size:16px;">↶</span><span class="bp-btn-label">Undo</span>
               </button><details class="bp-tool-group"><summary>Add gates</summary><div><button type="button" data-mode="walk-gate" aria-label="Place walk-through gate" class="bp-draw-btn" title="Place a walk-through gate — click the fence line where the gate goes" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid transparent;background:var(--white);color:var(--navy);border-radius:5px;font-weight:600;font-size:13px;cursor:pointer;transition:all 0.15s;">
                 <span style="font-size:16px;">🚶</span><span class="bp-btn-label">Walk Gate</span>
@@ -721,7 +722,7 @@
 <script src="../../assets/js/leads.js?v=site-use-1" defer></script>
 <script src="../../assets/js/ballpark-map-loader.js?v=20260923-on-demand" defer></script><!-- On request: libraries=places,geometry; drawing SDK is a fallback only. --><script src="../../assets/js/parcels.js?v=202608180500" defer></script><script src="/assets/js/style-images.js?v=kit-76875d8af98f"></script>
 <script src="/assets/js/ballpark-motion.js?v=20261126" defer></script>
-<script type="module" src="../../assets/js/ballpark.js?v=site-use-1"></script>
+<script type="module" src="../../assets/js/ballpark.js?v=20261126-touch"></script>
 <script>
 (function () {
   const finance = document.getElementById('bp-finance');
