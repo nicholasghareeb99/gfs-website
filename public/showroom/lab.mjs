@@ -205,10 +205,11 @@ function wind(body) {
     g.fillStyle = 'rgba(234,240,247,.85)'; g.font = '600 12px "IBM Plex Mono", monospace'; g.textAlign = 'center';
     g.textAlign = 'right'; g.fillText(`${st.h} FT`, fx - 14, ground - hpx + 4); g.textAlign = 'center';
     if (eddy > .2) { g.fillStyle = 'rgba(140,199,255,.9)'; g.fillText('EDDY', fx + hpx * 1.1, ground - hpx * 1.15); }
-    if (live && !reduced.matches) raf = requestAnimationFrame(frame);
+    if (live && vis.on && !reduced.matches) raf = requestAnimationFrame(frame);
   };
+  const vis = onScreen(cv, () => { if (live && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); } });
   update(); resize(); frame();
-  return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); };
+  return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); vis.stop(); };
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -717,6 +718,11 @@ function mixHex(a, b, t) {
 // section: A = b² − (b − 2t)², I = (b⁴ − (b − 2t)⁴) / 12. Same wind and same
 // material means bending (deflection) goes as 1/I.
 export function tube(b, t) { const i = b - 2 * t; return { A: b * b - i * i, I: (b ** 4 - i ** 4) / 12 }; }
+// Runs an animation only while its picture is on screen (saves the iPad's battery when you scroll down to read).
+function onScreen(el, resume) {
+  const s = { on: true }; const io = new IntersectionObserver(([e]) => { const was = s.on; s.on = e.isIntersecting; if (s.on && !was) resume(); }); io.observe(el);
+  s.stop = () => io.disconnect(); return s;
+}
 function vinyl(body) {
   const B = 5, HOME = .150, BIG = .135;
   let V = 58, wob = 0, raf = 0, live = true;
@@ -760,10 +766,11 @@ function vinyl(body) {
       ${post(120, base * stiff, BIG, 'Big-box vinyl', false)}${post(300, base, HOME, 'Homeland', true)}
       <text x="210" y="34" text-anchor="middle" class="svg-big">${V} mph →</text>`;
   };
-  const tick = () => { wob += .08; draw(); if (live && !reduced.matches) raf = requestAnimationFrame(tick); };
+  const tick = () => { wob += .08; draw(); if (live && vis.on && !reduced.matches) raf = requestAnimationFrame(tick); };
+  const vis = onScreen($('.vinyl-svg', body), () => { if (live && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); } });
   $('[name=V]', body).oninput = e => { V = +e.target.value; if (reduced.matches) draw(); };
   tick();
-  return () => { live = false; cancelAnimationFrame(raf); };
+  return () => { live = false; cancelAnimationFrame(raf); vis.stop(); };
 }
 
 // Grade Lab lives in its own file; it loads the first time it's opened.

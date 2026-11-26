@@ -465,11 +465,12 @@ function bindBook() {
   els.flow.addEventListener('pointermove', e => {
     if (!d) return;
     const dx = e.clientX - d.x; if (Math.abs(dx) > 6) d.moved = true;
-    setPos(d.p - dx / (bk.w * 1.15));                           // drag a page's width to turn one leaf
-    d.hist.push([performance.now(), bk.pos]); if (d.hist.length > 6) d.hist.shift();
+    const to = clamp(d.p - dx / (bk.w * 1.15), 0, leafCount()); // drag a page's width to turn one leaf
+    d.to = to; if (!d.raf) d.raf = requestAnimationFrame(() => { if (d) { d.raf = 0; setPos(d.to); } });  // one layout per frame
+    d.hist.push([performance.now(), to]); if (d.hist.length > 6) d.hist.shift();
   });
   const end = e => {
-    if (!d) return; const dd = d; d = null;
+    if (!d) return; const dd = d; d = null; if (dd.raf) { cancelAnimationFrame(dd.raf); if (dd.to != null) setPos(dd.to); }
     if (!dd.moved && performance.now() - dd.t < 400) {             // a tap opens the page you tapped
       const face = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('face'));
       if (face) return pickPage(+face.dataset.n, face);

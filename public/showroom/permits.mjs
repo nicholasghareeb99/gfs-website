@@ -61,7 +61,7 @@ function bindSearch() {
       try {
         const u = new URL('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/suggest');
         Object.entries({ f: 'json', text: q, location: '-83.58,41.66', countryCode: 'USA', category: 'Address,Postal', maxSuggestions: 6 }).forEach(([k, v]) => u.searchParams.set(k, v));
-        const r = await (await fetch(u)).json(); if (my !== seq) return;
+        const r = await getJSON(u, 6000); if (my !== seq) return;
         sugg.innerHTML = (r.suggestions || []).map(s => `<button data-key="${esc(s.magicKey)}" data-t="${esc(s.text)}">${esc(s.text.split(',')[0])}<small>${esc(s.text.split(',').slice(1).join(',').trim())}</small></button>`).join('');
         sugg.hidden = !sugg.children.length;
       } catch { sugg.hidden = true; }
@@ -76,12 +76,20 @@ function bindSearch() {
   };
 }
 
+// Fetch JSON with a time limit, so a weak signal in a yard never leaves the screen waiting forever.
+async function getJSON(url, ms, opts = {}) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), ms);
+  try { const res = await fetch(url, { ...opts, signal: ctl.signal }); if (!res.ok) throw Error('HTTP ' + res.status); return await res.json(); }
+  finally { clearTimeout(t); }
+}
+
 async function lookupText(text, magicKey) {
   try {
     const u = new URL('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates');
     Object.entries({ f: 'json', SingleLine: text, maxLocations: 1, outFields: 'Match_addr,City,Subregion,Region,RegionAbbr,Postal', location: '-83.58,41.66', ...(magicKey ? { magicKey } : {}) }).forEach(([k, v]) => u.searchParams.set(k, v));
     const us = new URL(u); us.searchParams.set('locationType', 'street');
-    const [r, rs] = await Promise.all([fetch(u).then(x => x.json()), fetch(us).then(x => x.json()).catch(() => null)]);
+    toast('Finding the address…', 1200);
+    const [r, rs] = await Promise.all([getJSON(u, 10000), getJSON(us, 10000).catch(() => null)]);
     const c = r.candidates?.[0], s = rs?.candidates?.[0];
     if (!c) return toast('That address was not found.');
     const street = s && Math.hypot(s.location.x - c.location.x, s.location.y - c.location.y) > 0.00004 ? [s.location.y, s.location.x] : null;
@@ -113,17 +121,14 @@ async function lookupPoint(lat, lng, address, geo = {}) {
 
 async function reverse(lat, lng) {
   try {
-    const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=${lat}&lon=${lng}`, { headers: { Accept: 'application/json' } });
-    return (await r.json()).address || {};
+    return (await getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=18&addressdetails=1&lat=${lat}&lon=${lng}`, 8000, { headers: { Accept: 'application/json' } })).address || {};
   } catch { return {}; }
 }
 async function overpass(lat, lng) {
   const q = `[out:json][timeout:12];(way(around:70,${lat},${lng})[building];way(around:120,${lat},${lng})[highway~"^(residential|tertiary|secondary|primary|unclassified|living_street|trunk|service)$"];);out geom;`;
   for (const host of ['https://overpass-api.de/api/interpreter', 'https://overpass.kumi.systems/api/interpreter']) {
     try {
-      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 12000);
-      const r = await fetch(host, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ctl.signal, headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }); clearTimeout(t);
-      const j = await r.json();
+      const j = await getJSON(host, 9000, { method: 'POST', body: 'data=' + encodeURIComponent(q), headers: { 'Content-Type': 'application/x-www-form-urlencoded' } });
       return {
         buildings: j.elements.filter(e => e.tags?.building && e.geometry?.length > 3).map(e => e.geometry.map(p => [p.lon, p.lat])),
         roads: j.elements.filter(e => e.tags?.highway && e.tags.highway !== 'service' && e.geometry?.length > 1).map(e => ({ name: e.tags.name || '', pts: e.geometry.map(p => [p.lon, p.lat]) }))

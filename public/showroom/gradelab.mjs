@@ -282,6 +282,8 @@ export function grade(body, kit) {
 
   // ── touch ──
   let drag = null, brush = null, live = true;
+  // one repaint per screen frame, however fast the finger sends moves
+  let pend = 0; const redraw = () => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; if (live) draw(); }); };
   cv.addEventListener('pointerdown', e => {
     cv.setPointerCapture(e.pointerId); const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
     snap();
@@ -291,16 +293,16 @@ export function grade(body, kit) {
   });
   const move = e => {
     const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
-    brush = { x }; if (!drag) { if (st.mode !== 'posts') draw(); return; }
+    brush = { x }; if (!drag) { if (st.mode !== 'posts') redraw(); return; }
     if (drag.kind === 'post') st.offs[drag.i] = Math.round(clamp(drag.o0 + (y - drag.y0) * .4, -4 * IN, 18 * IN) * 48) / 48; // quarter inches
     if (drag.kind === 'ground') { const R = 2.5, dy = (y - drag.y) * .25; drag.y = y; for (let j = 0; j < NS; j++) { const d = j * STEP - x; if (Math.abs(d) > R * 2) continue; const w = Math.exp(-(d * d) / (R * R)); st.ground[j] = clamp(st.ground[j] + dy * w, -1.5, 2); } if (st.orig) st.orig = null; }
     if (drag.kind === 'dirt') { const R = 1.2; for (let j = 0; j < NS; j++) { const xx = j * STEP, d = xx - x; if (Math.abs(d) > R) continue; const gap = bottomAt(xx) - (st.ground[j] + st.dirt[j]); if (gap > 0) st.dirt[j] += gap * (1 - Math.abs(d) / R) * .5; } }
-    draw();
+    redraw();
   };
   cv.addEventListener('pointermove', move);
-  const up = () => { drag = null; };
+  const up = () => { drag = null; if (pend) { cancelAnimationFrame(pend); pend = 0; draw(); } };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('pointerleave', () => { brush = null; draw(); });
   const ro = new ResizeObserver(fit); ro.observe(cv);
-  return () => { live = false; cancelAnimationFrame(st.anim); ro.disconnect(); };
+  return () => { live = false; cancelAnimationFrame(st.anim); cancelAnimationFrame(pend); ro.disconnect(); };
 }

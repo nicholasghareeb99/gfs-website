@@ -7,7 +7,7 @@ import { $, $$, esc, icons, toast, cssUrl, pageImg, modal } from './ui.mjs';
 const KEY = 'gfs-showroom-visit', OFFICE = '(419) 214-2107', OFFICE_TEL = '+14192142107';
 let app, D, v = blank(), listeners = new Set(), shared = null;
 function blank() { return { styles: [], pages: [], lab: [], address: '', fence: null, customer: {}, sent: null, started: Date.now() }; }
-function load() { try { const x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x && Array.isArray(x.styles)) v = { ...blank(), ...x }; } catch {} }
+function load() { try { const x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x && Array.isArray(x.styles)) { v = { ...blank(), ...x }; for (const k of ['pages', 'lab']) if (!Array.isArray(v[k])) v[k] = []; if (!v.customer || typeof v.customer !== 'object') v.customer = {}; } } catch {} }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} listeners.forEach(f => f(v)); badge(); }
 
 export const visit = {
@@ -54,8 +54,9 @@ function encode(x) {
 function decode(s) {
   const j = JSON.parse(unb64(s)); if (j.v !== 1) throw Error('version');
   const ok = id => typeof id === 'string' && D.styleById[id];
-  const fence = j.f && Array.isArray(j.f.l) ? { geometry: { lines: j.f.l.slice(0, 100).map(l => l.slice(0, 300).map(([lat, lng]) => ({ lat: +lat, lng: +lng }))), gates: (j.f.g || []).slice(0, 40).map(([lat, lng, d]) => ({ lat: +lat, lng: +lng, type: d ? 'drive' : 'walk' })) }, model: D.models.includes(j.f.m) ? j.f.m : '', ft: +j.f.ft || 0 } : null;
-  return { styles: (j.s || []).filter(ok).slice(0, 20), pages: (j.p || []).map(Number).filter(n => n >= 1 && n <= D.pages.length).slice(0, 40), lab: (j.l || []).filter(id => LAB_IDS.includes(id)), address: String(j.a || '').slice(0, 200), fence, customer: { name: String(j.n || '').slice(0, 40) }, readOnly: true };
+  const A = x => Array.isArray(x) ? x : [], pt = p => Array.isArray(p) && Math.abs(+p[0]) <= 90 && Math.abs(+p[1]) <= 180 && Number.isFinite(+p[0]) && Number.isFinite(+p[1]);
+  const fence = j.f && Array.isArray(j.f.l) ? { geometry: { lines: j.f.l.slice(0, 100).map(l => A(l).filter(pt).slice(0, 300).map(([lat, lng]) => ({ lat: +lat, lng: +lng }))).filter(l => l.length > 1), gates: A(j.f.g).filter(pt).slice(0, 40).map(([lat, lng, d]) => ({ lat: +lat, lng: +lng, type: d ? 'drive' : 'walk' })) }, model: D.models.includes(j.f.m) ? j.f.m : '', ft: +j.f.ft || 0 } : null;
+  return { styles: A(j.s).filter(ok).slice(0, 20), pages: A(j.p).map(Number).filter(n => n >= 1 && n <= D.pages.length).slice(0, 40), lab: A(j.l).filter(id => LAB_IDS.includes(id)), address: String(j.a || '').slice(0, 200), fence, customer: { name: String(j.n || '').slice(0, 40) }, readOnly: true };
 }
 export function shareUrl(x = v) { return `${location.origin}/showroom/#visit=${encode(x)}`; }
 
@@ -138,7 +139,10 @@ async function send() {
 
 function loadLeads() {
   if (window.GFSLeads) return Promise.resolve(window.GFSLeads);
-  return new Promise((res, rej) => { const s = document.createElement('script'); s.src = '/assets/js/leads.js?v=showroom'; s.onload = () => window.GFSLeads ? res(window.GFSLeads) : rej(Error('lead helper')); s.onerror = () => rej(Error('offline')); document.head.append(s); });
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'), fail = m => { clearTimeout(t); s.remove(); rej(Error(m)); }, t = setTimeout(() => fail('slow'), 15000);
+    s.src = '/assets/js/leads.js?v=showroom'; s.onload = () => { clearTimeout(t); window.GFSLeads ? res(window.GFSLeads) : fail('lead helper'); }; s.onerror = () => fail('offline'); document.head.append(s);
+  });
 }
 async function saveLead(form) {
   const msg = form.querySelector('.lead-msg'), btn = form.querySelector('[type=submit]'), c = v.customer;
@@ -149,7 +153,7 @@ async function saveLead(form) {
   if (c.reach === 'Email' && !/^\S+@\S+\.\S+$/.test(c.email || '')) bad.push('Add their email, since that is how they want to hear from us.');
   msg.className = 'lead-msg';
   if (bad.length) { msg.classList.add('bad'); msg.textContent = bad.join(' '); form.querySelector(!String(c.name || '').trim() ? '[name=name]' : '[name=phone]')?.focus({ preventScroll: true }); return; }
-  const sig = [c.name, c.phone, c.email, c.reach, c.notes, v.styles.join(), v.pages.join(), v.lab.join(), v.fence?.ft].join('|');
+  const sig = [c.name, c.phone, c.email, c.reach, c.notes, c.address || v.address, v.styles.join(), v.pages.join(), v.lab.join(), v.fence?.ft].join('|');
   if (v.customer.savedSig === sig) { msg.classList.add('ok'); msg.textContent = 'Already saved. Nothing has changed since.'; return; }
   msg.textContent = 'Saving…'; btn.disabled = true;
   try {
@@ -159,7 +163,7 @@ async function saveLead(form) {
     const notes = [c.notes, styles.length ? `Liked: ${styles.map(s => s.name).join(', ')}` : '', v.pages.length ? `Brochure pages: ${v.pages.join(', ')}` : '', v.lab.length ? `Fence Lab: ${v.lab.map(id => LAB_NAME[id]).join(', ')}` : '', `Showroom visit: ${shareUrl()}`].filter(Boolean).join('\n').slice(0, 1900);
     const input = { name: c.name, phone: c.phone, email: c.email, address: c.address || v.address, contactMethod: c.reach, notes, source: 'showroom', heardFrom: 'Showroom visit', fenceType: fam, fenceStyle: v.fence?.model || styles.map(s => s.name).join(', ').slice(0, 190) };
     if (v.fence?.geometry?.lines?.length) { input.geometry = JSON.stringify(v.fence.geometry); input.linearFeet = Math.round(v.fence.ft || 0) || ''; input.singleGates = v.fence.geometry.gates.filter(g => g.type !== 'drive').length; input.doubleGates = v.fence.geometry.gates.filter(g => g.type === 'drive').length; }
-    const r = await L.submit(input);
+    const r = await Promise.race([L.submit(input), new Promise((_, no) => setTimeout(() => no(Error('slow')), 25000))]); // never leave the button stuck on "Saving…"
     if (r.ok) { msg.classList.add('ok'); msg.textContent = 'Saved. The lead is on its way to the Executive App.'; v.customer.savedAt = Date.now(); v.customer.savedSig = sig; save(); }
     else { msg.classList.add('bad'); msg.textContent = (r.errors || ['Not saved.']).join(' '); }
   } catch (e) { msg.classList.add('bad'); msg.textContent = navigator.onLine ? 'Could not reach the website. Try again in a moment.' : 'No signal here. The details are kept on this device. Tap Save again when you have signal.'; }

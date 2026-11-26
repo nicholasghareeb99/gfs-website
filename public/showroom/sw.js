@@ -7,6 +7,7 @@ const CORE = ['./', 'index.html', 'app.css?v=4', 'app.js?v=4', 'ui.mjs', 'photos
   '/assets/fonts/archivo-latin-wght-normal.woff2', '/assets/fonts/source-sans-3-latin-wght-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-500-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-400-normal.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil((async () => { for (const k of await caches.keys()) if (k.startsWith('gfs-showroom-') && ![SHELL, MEDIA, 'gfs-showroom-blueprints-v1'].includes(k)) await caches.delete(k); await self.clients.claim(); })()); });
+let slowUntil = 0;
 const cacheFirst = /\/assets\/(brochure|img|fonts|data)\/|\/images\/|unpkg\.com\/leaflet|firebasestorage\.googleapis\.com\/v0\/b\/[^/]+\/o\/stylePhotos/;
 self.addEventListener('fetch', e => {
   const req = e.request; if (req.method !== 'GET') return;
@@ -17,6 +18,18 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;
-  e.respondWith(fetch(req).then(res => { if (res.ok && (url.pathname.startsWith('/showroom/') || url.pathname.startsWith('/gfs/') || url.pathname.startsWith('/x3d/'))) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)); } return res; })
-    .catch(() => caches.match(req, { ignoreSearch: url.pathname.startsWith('/showroom/') }).then(hit => hit || (req.mode === 'navigate' ? caches.match('index.html') : Response.error()))));
+  // Network first so updates arrive, but a weak signal can't hold the app hostage:
+  // after 3.5 s with no answer, use the saved copy and let the download finish in the background.
+  const fresh = fetch(req).then(res => { if (res.ok && (url.pathname.startsWith('/showroom/') || url.pathname.startsWith('/gfs/') || url.pathname.startsWith('/x3d/'))) { const copy = res.clone(); caches.open(SHELL).then(c => c.put(req, copy)).catch(() => {}); } return res; });
+  const saved = () => caches.match(req, { ignoreSearch: url.pathname.startsWith('/showroom/') });
+  e.respondWith((async () => {
+    try {
+      if (Date.now() < slowUntil) { const hit = await saved(); if (hit) { e.waitUntil(fresh.catch(() => {})); return hit; } }
+      const first = await Promise.race([fresh, new Promise(r => setTimeout(r, 3500, 'slow'))]);
+      if (first !== 'slow') { slowUntil = 0; return first; }
+      slowUntil = Date.now() + 30000; // the signal is weak: use saved files for the next 30 s
+      const hit = await saved(); if (hit) { e.waitUntil(fresh.catch(() => {})); return hit; }
+      return await fresh;
+    } catch { return (await saved()) || (req.mode === 'navigate' ? (await caches.match('index.html')) || Response.error() : Response.error()); }
+  })());
 });
