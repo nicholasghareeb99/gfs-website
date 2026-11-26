@@ -2,6 +2,8 @@
 export const $ = (s, r = document) => r.querySelector(s);
 export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+// Executive App model names are shorthand ("8'P/t dog ear privacy"); tidy them for customers.
+export const niceModel = m => m.replace(/\bp\/t\b/gi, 'PT').replace(/(\d)\s*(?:['’′]|ft\b)\s*/gi, '$1 ft ').replace(/\bno[- ]dig\b/gi, 'No-dig').replace(/\bdog[- ]ear\b/gi, 'dog-ear').replace(/\s+/g, ' ').trim().replace(/^./, c => c.toUpperCase());
 export const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // Same-origin asset URL from a data path such as "assets/img/x.webp".
 export const asset = p => (!p ? '' : /^https:\/\//.test(p) ? String(p) : '/' + String(p).replace(/^\/+/, ''));

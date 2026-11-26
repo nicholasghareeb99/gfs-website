@@ -423,6 +423,8 @@ function coverflow() {
     el.style.setProperty('--sh', (bend * .45 + depth * .05).toFixed(3));
     el.style.setProperty('--lift', (bend * 18).toFixed(1) + 'px');
   }
+  // a closed book sits centred on its cover: slide it half a page at either end
+  els.rail.style.setProperty('--bk', ((clamp(P - (leafCount() - 1), 0, 1) - (1 - clamp(P, 0, 1))) * .5).toFixed(4));
   // covers sit just under the deepest pages
   const turned = clamp(P, 0, leafCount());
   $('.b3-cover.l', els.rail).style.transform = `rotateY(${-(180 - Math.max(0, 30 - 11 * 1.6) + 1.5)}deg)`;

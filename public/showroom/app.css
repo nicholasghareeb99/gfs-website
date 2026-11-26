@@ -251,10 +251,10 @@ h1,h2,h3{font-family:var(--disp);margin:0;letter-spacing:-.01em;text-wrap:balanc
 .fam-line{font-size:15px;color:var(--dim);max-width:70ch}
 .deck{position:relative;flex:1;display:flex;align-items:center;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;perspective:1600px;touch-action:pan-x pan-y;-webkit-overflow-scrolling:touch}
 .deck::-webkit-scrollbar{display:none}
-.deck .rail{display:flex;align-items:center;gap:22px;padding:0 calc(50% - var(--tw)/2);transform-style:preserve-3d}
+.deck .rail{display:flex;align-items:center;gap:22px;height:100%;box-sizing:border-box;padding:0 calc(50% - var(--tw)/2);transform-style:preserve-3d}
 .deck{--tw:min(84vw,430px);--th:min(calc(100dvh - 300px - var(--sat) - var(--sab)),620px)}
 @media (min-width:900px){.deck{--tw:min(40vw,460px)}}
-.tile{flex:none;width:var(--tw);height:var(--th);min-height:380px;scroll-snap-align:center;border-radius:26px;position:relative;overflow:hidden;background:var(--ink);border:1px solid var(--line-2);box-shadow:0 40px 90px rgba(0,0,0,.6);will-change:transform;transform-style:preserve-3d;text-align:left}
+.tile{flex:none;width:var(--tw);height:min(var(--th),calc(100% - 24px));min-height:320px;scroll-snap-align:center;border-radius:26px;position:relative;overflow:hidden;background:var(--ink);border:1px solid var(--line-2);box-shadow:0 40px 90px rgba(0,0,0,.6);will-change:transform;transform-style:preserve-3d;text-align:left}
 .tile .ph{position:absolute;inset:0}
 .tile .ph div{position:absolute;inset:-4%;background:#13263c center/cover no-repeat;opacity:0;transition:opacity 1.4s var(--ease);animation:kb 16s ease-in-out infinite alternate}
 .tile .ph div.on{opacity:1}
@@ -773,7 +773,7 @@ body.present .top .brand{cursor:default}
 /* ── Zoomed-out brochure: the booklet open in 3D ─────────────────── */
 .flow.book3d{overflow:hidden;scroll-snap-type:none;touch-action:none;perspective:1300px;perspective-origin:50% -40%;display:grid;place-items:center;cursor:grab}
 .flow.book3d:active{cursor:grabbing}
-.b3{position:relative;width:calc(var(--pw) * 2);height:var(--ph);transform-style:preserve-3d;transform:translate3d(0,-4%,0) rotateX(30deg);margin:auto}
+.b3{position:relative;width:calc(var(--pw) * 2);height:var(--ph);transform-style:preserve-3d;transform:translate3d(calc(var(--pw) * var(--bk,0)),-4%,0) rotateX(30deg);margin:auto}
 .leaf3{position:absolute;left:50%;top:0;width:var(--pw);height:var(--ph);transform-origin:0 50%;transform-style:preserve-3d;will-change:transform}
 .leaf3 .face{position:absolute;inset:0;background:#fbfaf6 center/100% 100% no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:0 3px 3px 0;box-shadow:0 0 0 .5px rgba(0,0,0,.25);cursor:pointer;overflow:hidden}
 .leaf3 .face.back{transform:rotateY(180deg);border-radius:3px 0 0 3px}
@@ -787,3 +787,8 @@ body.present .top .brand{cursor:default}
 .b3-shadow{position:absolute;left:4%;right:4%;top:88%;height:30%;background:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,.6),transparent 68%);transform:translateZ(-60px);pointer-events:none;filter:blur(6px)}
 @media (max-width:520px){.lab-eb-more{display:none}}
 .lab .svg-l.halo,.svg-l.halo{paint-order:stroke;stroke:#14202c;stroke-width:4px;stroke-linejoin:round}
+
+@media (max-width:520px){.fam-line{font-size:14px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}}
+.tile .ph .nophoto{place-content:start center;padding:72px 24px 0}
+@media (max-height:740px){.tile .ph .nophoto b,.tile .ph .nophoto svg{display:none}.tile .ph .nophoto{padding-top:60px}}
+#v-brochure:has(.overview.on) .pager{opacity:0;transform:translate(-50%,30px);pointer-events:none}

@@ -1,7 +1,7 @@
 // Styles mode: swipe through style tiles, grouped by material.
 // Swipe sideways for the next style, up/down (or the chips) for the next material,
 // tap a tile to open it: photos, specs, colors, brochure pages, 3D.
-import { $, $$, esc, clamp, asset, cssUrl, pageImg, icons, fly, reduced, toast } from './ui.mjs';
+import { niceModel, $, $$, esc, clamp, asset, cssUrl, pageImg, icons, fly, reduced, toast } from './ui.mjs';
 import { openPhotos, initPhotos, execItems } from './photos.mjs';
 import { visit } from './visit.mjs';
 let comparing = false, picks = [];
@@ -66,7 +66,7 @@ export function hide() { clearInterval(cycle); closeDetail(true); }
 // Photos come only from the Executive App. None there = "No photo available".
 const photoUrls = s => app.photosFor(s.models);
 function heroList(s) { return photoUrls(s).slice(0, 4).map(cssUrl); }
-const NOPHOTO = `<div class="nophoto">${icons.noPhoto}<b>No photo available</b><small>Add photos to this style in the Executive App</small></div>`;
+const NOPHOTO = `<div class="nophoto">${icons.noPhoto}<b>No photo available</b></div>`;
 const swatch = c => COLOR[c] ? `<i title="${esc(c)}" style="background:${COLOR[c]}"></i>` : '';
 const heights = s => s.heights?.length ? s.heights.map(h => (h % 1 ? h.toFixed(1) : h)).join(' · ') + ' ft' : 'Built to fit';
 
@@ -183,11 +183,11 @@ async function openDetail(s, tile) {
           ${s.colors ? `<div class="panel"><h3>Colors</h3><div class="opts">${s.colors.map(c => `<span class="chip">${COLOR[c] ? `<i style="width:16px;height:16px;border-radius:50%;background:${COLOR[c]};box-shadow:0 0 0 2px rgba(255,255,255,.2)"></i>` : ''}${esc(c)}</span>`).join('')}</div></div>` : ''}
           ${s.options ? `<div class="panel"><h3>${s.family === 'wood' ? 'Lumber' : 'Options'}</h3><div class="opts">${s.options.map(o => `<span class="chip">${esc(o)}</span>`).join('')}</div></div>` : ''}
           ${s.models.length ? `<div class="panel"><h3>Blueprints <span class="mono" style="font-size:12px;color:var(--mute)">${s.models.length}</span></h3><div class="opts">${s.models.map(m => `<button class="chip" data-bp="${esc(m)}">${icons.blueprint.replace('<svg', '<svg width="14" height="14"')} ${esc(m)}</button>`).join('')}</div></div>` : ''}
-          ${s.models.length ? `<div class="panel"><h3>3D models <span class="mono" style="font-size:12px;color:var(--mute)">${s.models.length}</span></h3><div class="opts">${s.models.map(m => `<button class="chip" data-model="${esc(m)}">${icons.cube.replace('<svg', '<svg width="14" height="14"')} ${esc(m)}</button>`).join('')}</div></div>` : ''}
+          ${s.models.length ? `<div class="panel"><h3>3D models <span class="mono" style="font-size:12px;color:var(--mute)">${s.models.length}</span></h3><div class="opts">${s.models.map(m => `<button class="chip" data-model="${esc(m)}">${icons.cube.replace('<svg', '<svg width="14" height="14"')} ${esc(niceModel(m))}</button>`).join('')}</div></div>` : ''}
           <div class="panel"><h3>In the brochure</h3><div class="pages">${s.pages.map(n => `<button data-page="${n}"><span class="th" style="background-image:url('${pageImg(n)}')"></span><small>P.${n} · ${esc(D.page(n).title)}</small></button>`).join('')}</div></div>
         </div>
       </div>
-      ${items.length ? '' : `<div class="panel"><h3>Photos</h3><p style="margin:0;color:var(--dim)">No photo available. Add photos to ${s.models.length ? 'this style' : 'a matching style'} in the Executive App and they show up here.</p></div>`}
+      ${items.length ? '' : `<div class="panel"><h3>Photos</h3><p style="margin:0;color:var(--dim)">No photos of this style yet. ${s.pages.length ? 'See it on brochure page ' + s.pages[0] + '.' : ''}</p></div>`}
       ${items.length ? `<div class="panel"><h3>Photos <span class="mono" style="font-size:12px;color:var(--mute)">${items.length}</span></h3><div class="gal">${items.slice(0, 48).map((it, i) => `<button data-photo="${i}" style="background-image:${cssUrl(it.photo.th)}" aria-label="${esc(it.photo.alt)}"></button>`).join('')}</div></div>` : ''}
       <p class="src">Specs from the GFS brochure and supplier drawings. Final layout, heights and materials are confirmed in your written quote.</p>
     </div>`;
