@@ -402,7 +402,7 @@ function centerCard() { return { dataset: { n: String(focusPage()) } }; }
 function sizeBooklet() {
   const fw = els.flow.clientWidth, fh = els.flow.clientHeight;
   // two pages side by side, opened about 150°, have to fit the width; the height leaves room for the tilt
-  const h = Math.max(160, Math.min(fh * .74, (fw * .84) / (2 * ASPECT * .97)));
+  const h = Math.max(160, Math.min(fh * .74, (fw * (fw < 600 ? .98 : .84)) / (2 * ASPECT * .97)));
   bk.h = Math.round(h); bk.w = Math.round(h * ASPECT);
   els.flow.style.setProperty('--pw', bk.w + 'px'); els.flow.style.setProperty('--ph', bk.h + 'px');
 }

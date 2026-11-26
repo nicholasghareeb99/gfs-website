@@ -24,7 +24,7 @@ export async function init(a, el) {
   root.innerHTML = `
     <div class="lab">
       <header class="lab-head">
-        <div class="eyebrow">FENCE LAB · THE ENGINEERING BEHIND EVERY GFS FENCE</div>
+        <div class="eyebrow">FENCE LAB<span class="lab-eb-more"> · THE ENGINEERING BEHIND EVERY GFS FENCE</span></div>
         <h2 id="labTitle"></h2><p id="labLine"></p>
         <div class="chips lab-tabs">${TOOLS.map(t => `<button class="chip" data-t="${t.id}">${esc(t.name)}</button>`).join('')}</div>
       </header>
@@ -203,7 +203,7 @@ function wind(body) {
     for (let i = 0; i < n; i++) { const y = ground - hpx * (i + .5) / n, x = fx - 6; g.beginPath(); g.moveTo(x - len, y); g.lineTo(x, y); g.stroke(); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 6, y - 4); g.lineTo(x - 6, y + 4); g.fill(); }
     // labels
     g.fillStyle = 'rgba(234,240,247,.85)'; g.font = '600 12px "IBM Plex Mono", monospace'; g.textAlign = 'center';
-    g.fillText(`${st.h} FT`, fx, ground - hpx - 10);
+    g.textAlign = 'right'; g.fillText(`${st.h} FT`, fx - 14, ground - hpx + 4); g.textAlign = 'center';
     if (eddy > .2) { g.fillStyle = 'rgba(140,199,255,.9)'; g.fillText('EDDY', fx + hpx * 1.1, ground - hpx * 1.15); }
     if (live && !reduced.matches) raf = requestAnimationFrame(frame);
   };
@@ -284,7 +284,7 @@ function life(body) {
 const SPECIES = [
   { id: 'pt', name: 'Treated pine', T: 7.4, R: 4.8, wet: 30, note: 'Treated lumber often leaves the yard soaked, above 30% moisture, so it shrinks the most after it goes up.' },
   { id: 'wrc', name: 'Western Red Cedar', T: 5.0, R: 2.4, wet: 18, note: 'Cedar shrinks about a third less than pine and is usually drier when it arrives.' },
-  { id: 'nwc', name: 'Northern White Cedar', T: 4.9, R: 2.2, wet: 18, note: 'Among the most stable woods grown in North America.' }
+  { id: 'nwc', name: 'Northern White Cedar', T: 4.9, R: 2.2, wet: 18, note: 'Shrinks even less than Western Red Cedar as it dries.' }
 ];
 const FSP = 30; // fiber saturation point, % (Wood Handbook uses 30 for this estimate)
 export function shrink(sp, width, mcFrom, mcTo, grain = 'T') {
@@ -357,7 +357,8 @@ function frost(body) {
     </div>
     ${math(`<p><b>Frost depth</b> is how deep the ground freezes in a hard winter: 36 in in Toledo and Lucas County, 42 in across Michigan. A GFS driven post goes 48 in down, past both.</p>
       <p><b>Frost heave</b>: in wet clay, water is drawn up to the freezing front and freezes into ice lenses that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A post that stops inside the frozen layer gets lifted with it, and each thaw it settles back a little less. A post anchored well below the frost line is held by unfrozen soil.</p>
-      <p><b>Why GFS changes method by soil</b>: a driven steel post needs firm clay to grip. In sand, which drains and heaves far less but holds a driven post poorly, GFS sets the post in concrete instead.</p>
+      <p><b>Concrete footings lift too</b>: frozen clay grips the rough sides and flared top of a footing, so a footing that stops above the frost line rides up with the ground. That's why the post set about 2.5 ft in concrete moves here.</p>
+      <p><b>Why GFS changes method by soil</b>: a driven steel post needs firm clay to grip. In sand, which drains and heaves far less but holds a driven post poorly, GFS sets pressure-treated posts in concrete instead.</p>
       <p class="src">Frost depths: ${PLACES.map(p => esc(p.src)).join('; ')}.</p>`)}`;
   const svg = $('.frost-svg', body);
   const update = () => {
@@ -365,12 +366,12 @@ function frost(body) {
     $('[data-out=m]', body).textContent = mName; $('[data-out=w]', body).textContent = winters;
     const heaving = soil === 'clay' ? 1 : .25;
     const posts = [
-      { x: 64, d: 24, name: 'Shallow post', sub: '24 in deep', col: '#a68b60' },
-      { x: 178, d: Math.max(36, place.frost), name: soil === 'sand' ? 'GFS in sand' : 'Wood in concrete', sub: `${Math.max(36, place.frost)} in · concrete`, col: '#a68b60', conc: true },
-      { x: 292, d: 48, name: soil === 'clay' ? 'GFS driven steel' : 'Driven steel', sub: '48 in · driven', col: '#c8d2dc', steel: true }
+      { x: 64, d: 24, name: 'Shallow post', sub: '24″ deep', col: '#a68b60' },
+      { x: 178, d: 30, name: 'Wood in concrete', sub: '30″ concrete', col: '#a68b60', conc: true },
+      { x: 292, d: 48, name: soil === 'clay' ? 'GFS driven steel' : 'Driven steel', sub: '48″ driven', col: '#c8d2dc', steel: true }
     ];
     // Lift: only posts whose bottom sits within the frozen zone get carried; residual grows each winter.
-    const lift = p => { if (p.d >= place.frost) return 0; const grip = clamp((fd - p.d * .45) / (p.d * .55), 0, 1); return grip * 14 * heaving + 3 * heaving * (winters - 1); };
+    const lift = p => { if (p.d >= place.frost) return 0; const grip = clamp((fd - p.d * .45) / (p.d * .55), 0, 1), k = p.conc ? .7 : 1; return (grip * 14 * heaving + 3 * heaving * (winters - 1)) * k; };
     svg.innerHTML = `
       <defs><linearGradient id="soilG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${soil === 'clay' ? '#5b4532' : '#8a7550'}"/><stop offset="1" stop-color="${soil === 'clay' ? '#3d2d20' : '#6b5a3c'}"/></linearGradient>
         <pattern id="ice" width="14" height="10" patternUnits="userSpaceOnUse"><path d="M0 5h9" stroke="#bfe3ff" stroke-width="2" opacity=".55"/></pattern></defs>
@@ -378,8 +379,8 @@ function frost(body) {
       <rect x="0" y="${top}" width="420" height="${330 - top}" fill="url(#soilG)"/>
       ${fd > 0 ? `<rect x="0" y="${top}" width="420" height="${fd * ppi}" fill="#9fd0ff" opacity=".16"/>${soil === 'clay' ? `<rect x="0" y="${top}" width="420" height="${fd * ppi}" fill="url(#ice)"/>` : ''}` : ''}
       <line x1="0" x2="420" y1="${gx(place.frost)}" y2="${gx(place.frost)}" stroke="#8cc7ff" stroke-dasharray="6 6" stroke-width="1.5"/>
-      <text x="414" y="${gx(place.frost) - 6}" text-anchor="end" class="svg-l blue">FROST LINE ${place.frost}″</text>
-      ${fd > 0 ? `<text x="6" y="${gx(fd) + 14}" class="svg-l">FROZEN TO ${Math.round(fd)}″ · ${esc(mName.toUpperCase())}</text>` : `<text x="6" y="${top + 16}" class="svg-l">${esc(mName.toUpperCase())} · GROUND THAWED</text>`}
+      <text x="414" y="${gx(place.frost) - 6}" text-anchor="end" class="svg-l blue halo">FROST LINE ${place.frost}″</text>
+      ${fd > 0 ? `<text x="6" y="${gx(fd) - 6}" class="svg-l halo">FROZEN TO ${Math.round(fd)}″ · ${esc(mName.toUpperCase())}</text>` : `<text x="6" y="${top + 16}" class="svg-l">${esc(mName.toUpperCase())} · GROUND THAWED</text>`}
       ${posts.map(p => { const L = lift(p), bot = gx(p.d) - L, w = p.steel ? 9 : 16; return `
         ${p.conc ? `<path d="M${p.x - 22},${gx(0) - L} L${p.x + 22},${gx(0) - L} L${p.x + 17},${bot + 8} L${p.x - 17},${bot + 8} Z" fill="#9aa3ab" opacity=".9"/>` : ''}
         <rect x="${p.x - w / 2}" y="${top - 52 - L}" width="${w}" height="${bot - (top - 52 - L)}" fill="${p.col}" rx="${p.steel ? 4 : 1}" ${p.steel ? 'stroke="#eef3f7" stroke-width=".8"' : ''}/>
@@ -387,7 +388,8 @@ function frost(body) {
         <text x="${p.x}" y="${top - 74 - Math.min(L, 16)}" text-anchor="middle" class="svg-n">${esc(p.name)}</text>
         <text x="${p.x}" y="${328}" text-anchor="middle" class="svg-l">${esc(p.sub)}</text>`; }).join('')}`;
     const shallow = lift(posts[0]);
-    $('#fWhy', body).textContent = shallow > 2 ? 'The shallow post is being jacked up' : mf ? 'Every post is holding' : 'Ground is thawed';
+    const conc = lift(posts[1]);
+    $('#fWhy', body).textContent = shallow > 2 || conc > 2 ? (conc > 2 ? 'The shallow post and the concrete footing are being lifted' : 'The shallow post is being jacked up') : mf ? 'Every post is holding' : 'Ground is thawed';
     $('#fWhyS', body).textContent = soil === 'sand' ? 'Sand drains, so it heaves much less than clay. Posts are set in concrete here because sand holds a driven post poorly.' : `Only a post that reaches past ${place.frost} in is anchored in soil that never freezes. GFS drives to 48 in.`;
   };
   bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'soil') soil = v; update(); });
@@ -420,7 +422,7 @@ function gate(body) {
     ${math(`<p><b>Why wide gates sag more</b>: a gate hangs from one side, so its weight acts as a lever on the hinges. The weight grows with the width and so does the lever, so the pull on the top hinge grows with width squared. A 5 ft gate pulls about (5 ÷ 4)² ≈ 1.6 times as hard as a 4 ft gate.</p>
       <p><b>Which way a brace goes</b>: a wood brace works in compression, so it runs from the bottom hinge corner up to the top latch corner and props the latch side up. Run it the other way and it hangs off nails in tension, and the gate racks into a parallelogram. A steel cable is the opposite: it works in tension, from the top hinge corner down to the bottom latch corner.</p>
       <p><b>The hinge post matters as much as the gate</b>: if the post leans, a perfectly square gate still drops at the latch. GFS gate posts are 3 in steel in a bigger wood box, so the post doesn't lean.</p>
-      <p><b>GFS steel frame</b>: wood gates can get a welded 1½ in square steel tube frame inside, so the gate cannot rack at all. Vinyl gates get aluminum inside the frame.</p>`)}`;
+      <p><b>GFS steel frame</b>: wood gates can get a welded steel frame inside, which can't rack the way a wood frame does. Vinyl gates get aluminum inside the frame.</p>`)}`;
   const svg = $('.gate-svg', body);
   const update = () => {
     const k = (width / 4) ** 2, base = { none: 9, wrong: 7, right: .8, steel: .1 }[brace];
@@ -435,7 +437,7 @@ function gate(body) {
     const x0 = 210 - pw / 2 + 20, y0 = 60, h = 170, post = x0 - 22, sag = rack;
     const pts = [[x0, y0], [x0 + pw, y0 + sag], [x0 + pw, y0 + h + sag], [x0, y0 + h]];
     const P = p => p.join(',');
-    const pickets = Array.from({ length: Math.round(pw / 18) }, (_, i) => { const t = (i + .5) / Math.round(pw / 18), x = x0 + pw * t, dy = sag * t; return `<rect x="${x - 7}" y="${y0 - 14 + dy}" width="14" height="${h + 14}" fill="#c98a5b" stroke="#7a4f2f" stroke-width=".8" rx="1.5"/>`; }).join('');
+    const pickets = Array.from({ length: Math.round(pw / 18) }, (_, i) => { const t = (i + .5) / Math.round(pw / 18), x = x0 + pw * t, dy = sag * t; const T = y0 - 14 + dy, B = T + h + 14, e = 3; return `<path d="M${x - 7},${B} L${x - 7},${T + e} L${x - 7 + e},${T} L${x + 7 - e},${T} L${x + 7},${T + e} L${x + 7},${B} Z" fill="#c98a5b" stroke="#7a4f2f" stroke-width=".8"/>`; }).join('');
     const br = brace === 'right' ? [pts[3], pts[1]] : brace === 'wrong' ? [pts[0], pts[2]] : null;
     svg.innerHTML = `
       <rect x="0" y="${y0 + h + 6}" width="420" height="80" fill="#1b2c1e"/>
