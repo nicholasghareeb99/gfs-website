@@ -96,15 +96,25 @@ export async function fly({ from, to, bg, size = 'cover', pos = 'center', ms = 5
   return el;
 }
 
+// Safari (every iPhone/iPad browser is Safari underneath) can leave a view transition hanging,
+// which froze screen changes with no message. There we use a plain CSS slide instead.
+const UA = globalThis.navigator?.userAgent || '';
+export const webkit = /AppleWebKit/.test(UA) && !/Chrome\/|Edg\//.test(UA) || /CriOS|FxiOS|EdgiOS/.test(UA);
+export const canVT = !!globalThis.document?.startViewTransition && !webkit;
 export function vt(update) {
-  // One transition at a time: a tap during a running one just swaps, so fast taps never queue up or throw.
-  if (vt.running) { const r = vt.running; r.skipTransition(); return r.updateCallbackDone.catch(() => {}).then(() => update()); }
-  if (document.startViewTransition && !reduced.matches) {
-    const t = document.startViewTransition(update); vt.running = t;
-    t.ready.catch(() => {}); t.updateCallbackDone.catch(() => {});
-    return t.finished.catch(() => {}).finally(() => { if (vt.running === t) vt.running = null; });
-  }
-  update(); return Promise.resolve();
+  // Whatever happens, the update runs once, and within 1.2 s.
+  let done = false; const run = () => { if (done) return; done = true; update(); };
+  const guard = new Promise(res => setTimeout(() => { if (!done) { vt.running = null; run(); } res(); }, 1200));
+  try {
+    // One transition at a time: a tap during a running one just swaps, so fast taps never queue up or throw.
+    if (vt.running) { const r = vt.running; try { r.skipTransition(); } catch {} return Promise.race([r.updateCallbackDone.catch(() => {}).then(run), guard]); }
+    if (canVT && !reduced.matches) {
+      const t = document.startViewTransition(run); vt.running = t;
+      t.ready.catch(() => {}); t.updateCallbackDone.catch(() => {});
+      return Promise.race([t.finished.catch(() => {}), guard.then(() => new Promise(r => setTimeout(r, 400)))]).finally(() => { if (vt.running === t) vt.running = null; });
+    }
+  } catch (e) { console.error(e); vt.running = null; }
+  run(); return Promise.resolve();
 }
 
 // Simple word search with prefix matching and highlights.
