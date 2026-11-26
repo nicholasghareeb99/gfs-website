@@ -3360,6 +3360,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     }
     gFenceLines.forEach(line=>{line.setEditable(mode==='idle'&&!coarsePointer());line.setOptions({clickable:!placingGate});});
     gSelected=null;renderGoogleHandles();syncTouchExtras();
+    if(mode==='edit'&&!gFenceLines.length){const hint=el('bp-draw-hint');if(hint)hint.innerHTML='Nothing to edit yet. Choose <strong>Draw fence</strong> first.';}
 
     if (mode === 'fence') {
       startGoogleFenceDrawing();
@@ -3817,6 +3818,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     }
     lFenceLines.forEach(line=>{if(leafletEditing)enableLeafletEditing(line);else line.editing?.disable();});
     lSelected=null;renderLeafletHandles();syncTouchExtras();
+    if(mode==='edit'&&!lFenceLines.length){const hint=el('bp-draw-hint');if(hint)hint.innerHTML='Nothing to edit yet. Choose <strong>Draw fence</strong> first.';}
 
     if (mode === 'fence') {
       startLeafletFenceDrawing();
