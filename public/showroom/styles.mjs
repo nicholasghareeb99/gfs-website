@@ -56,12 +56,14 @@ export async function init(a, el) {
 }
 
 export function show(opts = {}) {
+  if (opts.via === 'dock' && detailEl) { closeDetail(); return; } // dock tap while a style is open = back to the cards
   const s = opts.style && D.styleById[opts.style];
   setFamily(s ? s.family : opts.family || fam || D.families[0].id, 0, s?.id);
   if (s && opts.detail) setTimeout(() => openDetail(s, rail.querySelector(`[data-id="${s.id}"]`)), 80);
   clearInterval(cycle); cycle = setInterval(rotatePhotos, 3600);
 }
 export function hide() { clearInterval(cycle); closeDetail(true); }
+export const where = () => { const id = detailEl?.dataset.id || rail?.children[current()]?.dataset.id, st = D.styleById[id]; return { opts: st ? { style: st.id, detail: !!detailEl } : {}, label: st ? `Styles · ${st.name}` : 'Styles', short: st ? st.name : 'Styles' }; };
 
 // Photos come only from the Executive App. None there = "No photo available".
 const photoUrls = s => app.photosFor(s.models);
@@ -160,7 +162,7 @@ function action(a, s, tile) {
 async function openDetail(s, tile) {
   if (detailEl) closeDetail(true);
   const imgs = heroList(s), items = photoItems(s), fam = D.familyById[s.family];
-  const el = document.createElement('div'); el.className = 'detail'; detailEl = el;
+  const el = document.createElement('div'); el.className = 'detail'; el.dataset.id = s.id; detailEl = el;
   el.innerHTML = `
     <button class="iconbtn back" aria-label="Back to styles">${icons.back}</button>
     <div class="hero">${imgs.length ? `<div class="img" style="background-image:${imgs[0]}"></div>` : `<div class="img">${NOPHOTO}</div>`}</div>

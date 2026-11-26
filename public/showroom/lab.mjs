@@ -3,55 +3,126 @@
 // ASCE 7 wind loads, the USDA Wood Handbook, local frost depths, and the lifespans
 // already printed in the GFS brochure. Where a drawing exaggerates motion so it can
 // be seen, it says so.
-import { $, $$, esc, clamp, icons, reduced } from './ui.mjs';
+import { $, $$, esc, clamp, icons, reduced, gesture } from './ui.mjs';
 import { visit } from './visit.mjs';
+import { helpOnce } from './help.mjs';
 
 let app, root, D, current = null, stop = null;
 
 const TOOLS = [
-  { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by' },
-  { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps' },
-  { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you' },
-  { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style' },
-  { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first' },
-  { id: 'wood', name: 'Wood movement', line: 'Why gaps open between boards' },
-  { id: 'frost', name: 'Frost & posts', line: 'Why post depth matters in Toledo clay' },
-  { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and how a brace stops it' }
+  { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by',
+    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how their posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to light it up on the drawing.']],
+    take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The extra top rail keeps the top line straight.' },
+  { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
+    how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
+    take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
+  { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you',
+    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['tap', 'Watch the thinner big-box post bend further than ours.']],
+    take: 'A thicker wall makes a stiffer post, and ours sleeves over a driven steel post instead of sitting in a concrete plug.' },
+  { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style',
+    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['tap', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
+    take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
+  { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
+    how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match their yard.']],
+    take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
+  { id: 'wood', name: 'Wood movement', line: 'Why gaps open between boards',
+    how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.']],
+    take: 'All wood shrinks as it dries. Styles that overlap the boards, like board-on-board, hide the gaps.' },
+  { id: 'frost', name: 'Frost & posts', line: 'Why post depth matters in Toledo clay',
+    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and <b>clay</b> or <b>sand</b>.'], ['slide', 'Slide through the <b>months</b> and add <b>winters</b> to watch shallow posts lift.']],
+    take: 'A post has to reach below the frost line, about 3 ft here. Ours are driven 4 ft.' },
+  { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and how a brace stops it',
+    how: [['slide', 'Slide the <b>gate width</b> and the <b>years in use</b>.'], ['tap', 'Try each <b>brace</b> and <b>hinge post</b> to see how much the gate drops.']],
+    take: 'A brace from the bottom hinge up to the latch side holds a gate square. A steel frame and a steel hinge post hold it best.' }
 ];
+
+// Small line drawings for the Lab home cards.
+const PICT = {
+  build: '<path d="M6 40h52"/><path d="M10 40V16M26 40V16" class="mute"/><path d="M10 20l16 3M10 34l16 1" class="mute"/><path d="M36 40V14M54 40V14"/><path d="M36 18h18M36 26h18M36 34h18"/><path d="M36 14h18" class="cu"/>',
+  grade: '<path d="M6 36c8-4 14 3 22 0s14-6 30-2" class="cu"/><path d="M8 14h48"/><path d="M10 14v20M24 14v21M38 14v18M52 14v19"/>',
+  vinyl: '<rect x="10" y="10" width="16" height="30" rx="1"/><rect x="38" y="10" width="16" height="30" rx="1" class="cu"/><rect x="41" y="13" width="10" height="24" class="cu"/><rect x="12" y="12" width="12" height="26" class="mute"/>',
+  wind: '<path d="M44 8v34"/><path d="M8 14h22M8 22h28M8 30h22" class="cu"/><path d="M30 10l4 4-4 4M36 18l4 4-4 4M30 26l4 4-4 4" class="cu"/>',
+  life: '<path d="M8 38h48"/><rect x="10" y="26" width="10" height="12"/><rect x="24" y="18" width="10" height="20"/><rect x="38" y="10" width="10" height="28" class="cu"/>',
+  wood: '<path d="M8 12h10v28H8zM21 12h10v28H21zM34 12h10v28H34z"/><path d="M47 12h10v28H47z" class="mute"/><path d="M18.5 16v20M31.5 16v20M44.5 16v20" class="cu"/>',
+  frost: '<path d="M4 18h56"/><path d="M4 30h56" class="cu dash"/><path d="M14 10v14M30 10v18M48 10v30"/>',
+  gate: '<path d="M8 8v34"/><rect x="12" y="12" width="42" height="26"/><path d="M12 38L54 12" class="cu"/>'
+};
 
 export async function init(a, el) {
   app = a; root = el; D = app.data;
   root.innerHTML = `
     <div class="lab">
       <header class="lab-head">
+        <div class="lab-nav" hidden>
+          <button class="btn sm" data-nav="home">${icons.grid}<span>All tools</span></button>
+          <div class="grow"></div>
+          <button class="iconbtn sm" data-nav="-1" aria-label="Previous tool">${icons.back}</button>
+          <span class="mono lab-count"></span>
+          <button class="iconbtn sm" data-nav="1" aria-label="Next tool">${icons.next}</button>
+        </div>
         <div class="eyebrow">FENCE LAB<span class="lab-eb-more"> · THE ENGINEERING BEHIND EVERY GFS FENCE</span></div>
         <h2 id="labTitle"></h2><p id="labLine"></p>
-        <div class="chips lab-tabs">${TOOLS.map(t => `<button class="chip" data-t="${t.id}">${esc(t.name)}</button>`).join('')}</div>
       </header>
+      <details class="lab-how" hidden><summary>${icons.help}<span>How to use</span><small></small></summary><ul class="hs-list"></ul></details>
       <div class="lab-body"></div>
+      <footer class="lab-foot" hidden>
+        <div class="lab-take"><div class="lab-label">Why it matters</div><p></p></div>
+        <div class="lab-next"><button class="btn sm" data-nav="home">${icons.grid}<span>All tools</span></button><button class="btn primary" data-nav="1"></button></div>
+      </footer>
     </div>`;
-  $('.lab-tabs', root).onclick = e => { const b = e.target.closest('[data-t]'); if (b) select(b.dataset.t); };
+  root.addEventListener('click', e => {
+    const tile = e.target.closest('.lab-tile'); if (tile) return select(tile.dataset.tool);
+    const n = e.target.closest('[data-nav]')?.dataset.nav; if (!n) return;
+    if (n === 'home') return select('home');
+    const i = TOOLS.findIndex(x => x.id === current);
+    select(TOOLS[(i + +n + TOOLS.length) % TOOLS.length].id);
+  });
 }
-let fromLink = false;
-export function show(opts = {}) { fromLink = !!opts.fromLink; select(opts.tool || current || 'build', true); }
-export function hide() { stop?.(); stop = null; }
+let fromLink = false, visible = false;
+export function show(opts = {}) {
+  fromLink = !!opts.fromLink;
+  // Tapping Lab in the dock while already in the Lab goes back to the Lab home.
+  const tool = opts.tool || (opts.via === 'dock' && visible ? 'home' : current || 'home');
+  visible = true; select(tool, true);
+}
+export function hide() { visible = false; stop?.(); stop = null; }
+export const where = () => ({ opts: { tool: current || 'home' }, label: current && current !== 'home' ? `Fence Lab · ${TOOLS.find(x => x.id === current).name}` : 'Fence Lab', short: current && current !== 'home' ? TOOLS.find(x => x.id === current).name : 'Lab' });
+export const help = () => { const t = TOOLS.find(x => x.id === current); return t ? { key: 'lab-' + t.id, extra: { title: t.name, steps: t.how, note: 'Tap <b>All tools</b> to see the other tools, or ‹ › to go to the next one.' } } : { key: 'lab' }; };
 
 const RENDER = { build, grade: gradeTool, vinyl, wind, life, wood, frost, gate };
 function select(id, force) {
-  if (!RENDER[id]) id = 'build';
-  if (id === current && !force && stop) return;
+  if (id !== 'home' && !RENDER[id]) id = 'home';
+  if (id === current && !force && (stop || id === 'home')) return;
   stop?.(); stop = null; current = id;
-  const t = TOOLS.find(x => x.id === id);
-  $('#labTitle', root).textContent = t.name; $('#labLine', root).textContent = t.line;
-  for (const b of $$('.lab-tabs .chip', root)) b.setAttribute('aria-pressed', String(b.dataset.t === id));
-  $(`.lab-tabs [data-t="${id}"]`, root)?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-  const body = $('.lab-body', root);
+  const body = $('.lab-body', root), home = id === 'home', t = TOOLS.find(x => x.id === id), i = TOOLS.indexOf(t);
+  $('.lab-nav', root).hidden = home; $('.lab-foot', root).hidden = home; $('.lab-how', root).hidden = home;
+  $('#labTitle', root).textContent = home ? 'Fence Lab' : t.name;
+  $('#labLine', root).textContent = home ? 'Hands-on tools that show how a fence is built, and why ours lasts. Pick one.' : t.line;
+  if (!home) {
+    $('.lab-count', root).textContent = `${i + 1} / ${TOOLS.length}`;
+    const how = $('.lab-how', root);
+    $('ul', how).innerHTML = t.how.map(([g, s]) => `<li>${gesture(g)}<p>${s}</p></li>`).join('');
+    $('summary small', how).textContent = `${t.how.length} steps`;
+    // open the first time each tool is used on this device, folded after that
+    let open = true; try { const k = 'gfs-showroom-labhow-' + id; open = !localStorage.getItem(k); localStorage.setItem(k, '1'); } catch {}
+    how.open = open;
+    $('.lab-take p', root).textContent = t.take;
+    const nx = TOOLS[(i + 1) % TOOLS.length];
+    $('.lab-next [data-nav="1"]', root).innerHTML = `<span>Next: ${esc(nx.name)}</span>${icons.next}`;
+  }
   body.classList.remove('in'); void body.offsetWidth;
-  stop = RENDER[id](body) || null;
-  if (!fromLink) visit.addLab(id); // shown to this customer: goes in the recap and the link
+  if (home) { body.innerHTML = homeHTML(); if (visible) helpOnce('lab'); }
+  else { stop = RENDER[id](body) || null; if (!fromLink) visit.addLab(id); } // shown to this customer: goes in the recap and the link
   body.classList.add('in');
+  root.scrollTo?.({ top: 0 }); $('.lab', root).scrollTop = 0;
+  if (app.mode === 'lab') { const h = '#lab' + (home ? '' : '-' + id); if (location.hash !== h) history.replaceState(null, '', h); }
 }
-
+function homeHTML() {
+  return `<div class="lab-home">${TOOLS.map((t, i) => `<button class="lab-card lab-tile" data-tool="${t.id}">
+    <svg viewBox="0 0 64 48" aria-hidden="true">${PICT[t.id]}</svg>
+    <span class="lt-b"><span class="mono">${String(i + 1).padStart(2, '0')}${i === 0 ? ' · START HERE' : ''}</span><b>${esc(t.name)}</b><small>${esc(t.line)}</small>
+    <span class="lt-how">${[...new Set(t.how.map(h => h[0]))].map(g => `<em>${{ tap: 'Tap', slide: 'Slide', drag: 'Drag', swipe: 'Swipe' }[g] || g}</em>`).join('')}</span></span>${icons.next}</button>`).join('')}</div>`;
+}
 // ── shared bits ───────────────────────────────────────────────────
 const fmt = (v, d = 0) => Number(v).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
 const seg = (name, opts, val) => `<div class="seg" data-name="${name}">${opts.map(([v, l]) => `<button data-v="${v}" aria-pressed="${String(v) === String(val)}">${esc(l)}</button>`).join('')}</div>`;

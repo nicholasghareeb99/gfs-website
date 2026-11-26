@@ -1,7 +1,8 @@
 // GFS Showroom — app shell: data, modes, dock, offline, live catalog.
-import { $, $$, toast, vt, modal, esc, asset, pageImg } from './ui.mjs';
+import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
+import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.0 (2026-11-25)';
+const VERSION = 'showroom-1.2 (2026-11-26)';
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
@@ -88,15 +89,26 @@ function moveGlow(btn) {
   glow.style.transform = `translate(${r.left - d.left - 6}px,${r.top - d.top - 6}px)`;
 }
 
-const loading = {}; let goSeq = 0;
+// ── Back to where a link came from ──────────────────────────────
+let back = null;
+function setBack(b) {
+  back = b; const el = $('#backPill'); if (!el) return;
+  if (b) { $('.l', el).textContent = b.label; $('.s', el).textContent = b.short || b.label; el.setAttribute('aria-label', 'Back to ' + b.label); }
+  el.classList.toggle('on', !!b); document.body.classList.toggle('has-back', !!b);
+}
+const loading = {}; let goSeq = 0, lastError = '';
+addEventListener('error', e => { lastError = String(e.message || ''); });
+addEventListener('unhandledrejection', e => { lastError = String(e.reason?.message || e.reason || ''); });
 app.go = async function go(mode, opts = {}) {
   if (!loaders[mode]) mode = 'brochure';
   const seq = ++goSeq;
   if (!modes[mode]) {
     // one load per mode, even if it's tapped twice while the first load is still running
     loading[mode] ||= (async () => { const mod = await loaders[mode](); await mod.init(app, $('#v-' + mode)); modes[mode] = mod; })();
-    try { await loading[mode]; }
-    catch (e) { delete loading[mode]; console.error(e); toast(navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.', 2600); return; }
+    const slow = setTimeout(() => toast(mode === 'ar' ? 'Loading 3D…' : 'Loading…', 2200), 1500);
+    try { await Promise.race([loading[mode], new Promise((_, no) => setTimeout(() => no(Error('timed out')), 20000))]); }
+    catch (e) { clearTimeout(slow); delete loading[mode]; console.error(e); lastError = String(e?.message || e); toast((navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.') + (lastError ? ` (${lastError.slice(0, 80)})` : ''), 4000); return; }
+    clearTimeout(slow);
   }
   if (seq !== goSeq) return; // a later tap won while this screen was loading
   const prev = app.mode;
@@ -110,20 +122,31 @@ app.go = async function go(mode, opts = {}) {
     app.mode = mode;
     for (const b of $$('.dock button')) b.setAttribute('aria-current', b.dataset.mode === mode ? 'page' : 'false');
     moveGlow($(`.dock button[data-mode="${mode}"]`));
-    if (was && was !== mode) modes[was]?.hide?.();
-    modes[mode].show?.(opts);
+    // A link from inside one screen to another leaves a way back; the dock and Back clear it.
+    if (was && was !== mode) {
+      const here = modes[was]?.where?.();
+      if (opts.via === 'dock' || opts.via === 'back' || opts.via === 'pop') setBack(null);
+      else if (here) setBack({ mode: was, opts: here.opts || {}, label: here.label, short: here.short });
+      try { modes[was]?.hide?.(); } catch (e) { console.error(e); }
+    }
+    try { modes[mode].show?.(opts); } catch (e) { console.error(e); lastError = String(e?.message || e); toast('Something on this screen didn\'t load (' + lastError.slice(0, 80) + ')', 4000); }
+    { const h = modes[mode].help?.(); if (!h || h.key === mode) helpOnce(mode); } // first visit to this screen on this device (Lab tools have their own how-to)
   };
   if (prev && prev !== mode) {
     const order = Object.keys(loaders), dir = order.indexOf(mode) > order.indexOf(prev) ? 'next' : 'prev';
     document.documentElement.dataset.vt = dir;
-    if (document.startViewTransition) await vt(swap);
+    if (canVT) await vt(swap);
     else { swap(); const v = $('#v-' + mode); v.classList.remove('view-enter'); void v.offsetWidth; v.classList.add('view-enter'); }
   } else swap();
   if (seq !== goSeq) return;
-  const hash = '#' + mode + (opts.page ? '-' + opts.page : '');
-  if (location.hash !== hash) history.replaceState(null, '', hash);
+  const hash = '#' + mode + (opts.page ? '-' + opts.page : opts.tool ? '-' + opts.tool : '');
+  // New screen = new history entry, so Safari's back swipe returns to the last screen.
+  if (prev && prev !== mode && opts.via !== 'pop') history.pushState(null, '', hash);
+  else if (location.hash !== hash && opts.via !== 'pop') history.replaceState(null, '', hash);
   try { localStorage.setItem('gfs-showroom-mode', mode); } catch {}
 };
+
+const hashOpts = m => !m[2] ? {} : /^\d+$/.test(m[2]) ? { page: +m[2] } : m[1] === 'lab' ? { tool: m[2] } : {};
 
 function settings() {
   const d = app.data, online = navigator.onLine;
@@ -138,7 +161,7 @@ function settings() {
       <dt>Brochure</dt><dd>${d.pages.length} pages</dd>
       <dt>Style photos (Exec App)</dt><dd>${Object.values(app.live.photos || {}).reduce((n, l) => n + l.length, 0)}</dd>
       <dt>Fence rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
-      <dt>Version</dt><dd>${esc(VERSION)}</dd>
+      <dt>Version</dt><dd>${esc(VERSION)}${canVT ? '' : ' · Safari mode'}</dd>${lastError ? `<dt>Last problem</dt><dd style="word-break:break-word">${esc(lastError.slice(0, 160))}</dd>` : ''}
     </dl>
     <div class="row"><span><b>Presentation mode</b><br><small style="color:var(--dim)">Hides this menu so a customer can flip through on their own. To exit, press and hold the logo for 2 seconds.</small></span><button class="btn sm" id="presentGo">Turn on</button></div>
     <p class="src" style="margin:0">The brochure pages and style photos also save to this device on their own when it's online, so most of the showroom works with no signal.</p>
@@ -209,15 +232,23 @@ async function boot() {
   loadLiveCatalog();
   const { initVisit } = await import('./visit.mjs'); initVisit(app);
   bindPresentExit(); try { if (localStorage.getItem('gfs-showroom-present')) document.body.classList.add('present'); } catch {}
-  for (const b of $$('.dock button')) b.onclick = () => app.go(b.dataset.mode);
+  for (const b of $$('.dock button')) b.onclick = () => app.go(b.dataset.mode, { via: 'dock' });
+  const pill = document.createElement('button'); pill.className = 'backpill'; pill.id = 'backPill';
+  pill.innerHTML = `${icons.back}<span class="l"></span><span class="s"></span><i class="x" role="button" aria-label="Dismiss">${icons.close}</i>`;
+  pill.onclick = e => { if (e.target.closest('.x')) return setBack(null); const b = back; setBack(null); if (b) app.go(b.mode, { ...b.opts, via: 'back' }); };
+  $('.top').prepend(pill);
+  const help = document.createElement('button'); help.className = 'pill'; help.id = 'btnHelp'; help.setAttribute('aria-label', 'How to use this screen'); help.innerHTML = icons.help;
+  help.onclick = () => { const h = modes[app.mode]?.help?.(); openHelp(h?.key || app.mode, h?.extra); };
+  $('#btnSearch').before(help);
+  addEventListener('popstate', () => { const m = location.hash.match(/^#(brochure|styles|ar|permits|lab)(?:-(\d+|[a-z]+))?/); if (m) app.go(m[1], { ...hashOpts(m), via: 'pop' }); });
   $('#btnMenu').onclick = settings;
   $('#btnSearch').onclick = () => app.go('brochure', { overview: true, focus: true });
   addEventListener('resize', () => { const b = $('.dock button[aria-current=page]'); if (b) moveGlow(b); });
   visualViewport?.addEventListener('resize', dockClear);
-  const m = (location.hash.match(/^#(brochure|styles|ar|permits|lab)(?:-(\d+))?/) || []);
+  const m = (location.hash.match(/^#(brochure|styles|ar|permits|lab)(?:-(\d+|[a-z]+))?/) || []);
   let start = m[1]; try { start ||= localStorage.getItem('gfs-showroom-mode'); } catch {}
   setBar(.7);
-  await app.go(start || 'brochure', m[2] ? { page: +m[2] } : {});
+  await app.go(start || 'brochure', hashOpts(m));
   setBar(1);
   const wait = Math.max(0, 1900 - (performance.now() - t0));
   setTimeout(() => $('#splash').classList.add('done'), wait);
