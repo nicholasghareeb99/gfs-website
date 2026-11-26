@@ -93,6 +93,8 @@ app.go = async function go(mode, opts = {}) {
     modes[mode] = mod; await mod.init(app, $('#v-' + mode));
   }
   const prev = app.mode;
+  // Sheets and full-screen panels belong to the screen they were opened on.
+  if (prev !== mode) for (const o of $$('.picker,.recap,.cmp,.rv,.bp,.modal')) { o.classList.remove('on'); o.classList.add('out'); o.style.pointerEvents = 'none'; setTimeout(() => o.remove(), 400); }
   const swap = () => {
     for (const v of $$('.view')) v.classList.toggle('on', v.id === 'v-' + mode);
     document.body.classList.remove('chrome-hidden');
@@ -102,7 +104,12 @@ app.go = async function go(mode, opts = {}) {
     if (prev && prev !== mode) modes[prev]?.hide?.();
     modes[mode].show?.(opts);
   };
-  if (prev && prev !== mode) await vt(swap); else swap();
+  if (prev && prev !== mode) {
+    const order = Object.keys(loaders), dir = order.indexOf(mode) > order.indexOf(prev) ? 'next' : 'prev';
+    document.documentElement.dataset.vt = dir;
+    if (document.startViewTransition) await vt(swap);
+    else { swap(); const v = $('#v-' + mode); v.classList.remove('view-enter'); void v.offsetWidth; v.classList.add('view-enter'); }
+  } else swap();
   const hash = '#' + mode + (opts.page ? '-' + opts.page : '');
   if (location.hash !== hash) history.replaceState(null, '', hash);
   try { localStorage.setItem('gfs-showroom-mode', mode); } catch {}

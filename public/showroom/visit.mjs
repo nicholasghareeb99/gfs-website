@@ -36,7 +36,7 @@ export function initVisit(a) {
   const m = location.hash.match(/^#visit=([A-Za-z0-9_-]+)/);
   if (m) { try { shared = decode(m[1]); } catch { toast('That link is not complete. Ask us to send it again.'); } if (shared) setTimeout(() => openRecap(shared), 2000); }
 }
-function badge() { const n = visit.count(), el = $('#visitCount'); if (el) { el.textContent = n ? String(n) : ''; $('#btnVisit').classList.toggle('hot', !!n); } }
+function badge() { const n = visit.count(), el = $('#visitCount'); if (el) { el.textContent = n ? String(n) : ''; $('#btnVisit').classList.toggle('has-picks', !!n); } }
 
 // ── Link to the customer ─────────────────────────────────────────
 const b64 = s => btoa(unescape(encodeURIComponent(s))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -112,7 +112,7 @@ export function openRecap(x = null) {
   };
   const form = el.querySelector('form.lead');
   if (form) {
-    form.oninput = () => { const f = new FormData(form); v.customer = { name: f.get('name'), phone: f.get('phone'), email: f.get('email'), address: f.get('address'), reach: f.get('reach') || '', notes: f.get('notes') }; try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
+    form.oninput = () => { const f = new FormData(form); v.customer = { savedAt: v.customer.savedAt, savedSig: v.customer.savedSig, name: f.get('name'), phone: f.get('phone'), email: f.get('email'), address: f.get('address'), reach: f.get('reach') || '', notes: f.get('notes') }; try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} };
     form.onsubmit = e => { e.preventDefault(); form.oninput(); saveLead(form); };
   }
 }
@@ -133,7 +133,16 @@ function loadLeads() {
 }
 async function saveLead(form) {
   const msg = form.querySelector('.lead-msg'), btn = form.querySelector('[type=submit]'), c = v.customer;
-  msg.className = 'lead-msg'; msg.textContent = 'Saving…'; btn.disabled = true;
+  const bad = [];
+  if (!String(c.name || '').trim()) bad.push('Add their name.');
+  if (String(c.phone || '').replace(/\D/g, '').length < 10) bad.push('Add a 10-digit phone number.');
+  if (!c.reach) bad.push('Pick call, text or email.');
+  if (c.reach === 'Email' && !/^\S+@\S+\.\S+$/.test(c.email || '')) bad.push('Add their email, since that is how they want to hear from us.');
+  msg.className = 'lead-msg';
+  if (bad.length) { msg.classList.add('bad'); msg.textContent = bad.join(' '); form.querySelector(!String(c.name || '').trim() ? '[name=name]' : '[name=phone]')?.focus({ preventScroll: true }); return; }
+  const sig = [c.name, c.phone, c.email, c.reach, c.notes, v.styles.join(), v.pages.join(), v.fence?.ft].join('|');
+  if (v.customer.savedSig === sig) { msg.classList.add('ok'); msg.textContent = 'Already saved. Nothing has changed since.'; return; }
+  msg.textContent = 'Saving…'; btn.disabled = true;
   try {
     const L = await loadLeads();
     const styles = v.styles.map(id => D.styleById[id]).filter(Boolean);
@@ -142,7 +151,7 @@ async function saveLead(form) {
     const input = { name: c.name, phone: c.phone, email: c.email, address: c.address || v.address, contactMethod: c.reach, notes, source: 'showroom', heardFrom: 'Showroom visit', fenceType: fam, fenceStyle: v.fence?.model || styles.map(s => s.name).join(', ').slice(0, 190) };
     if (v.fence?.geometry?.lines?.length) { input.geometry = JSON.stringify(v.fence.geometry); input.linearFeet = Math.round(v.fence.ft || 0) || ''; input.singleGates = v.fence.geometry.gates.filter(g => g.type !== 'drive').length; input.doubleGates = v.fence.geometry.gates.filter(g => g.type === 'drive').length; }
     const r = await L.submit(input);
-    if (r.ok) { msg.classList.add('ok'); msg.textContent = 'Saved. The lead is on its way to the Executive App.'; v.customer.savedAt = Date.now(); save(); }
+    if (r.ok) { msg.classList.add('ok'); msg.textContent = 'Saved. The lead is on its way to the Executive App.'; v.customer.savedAt = Date.now(); v.customer.savedSig = sig; save(); }
     else { msg.classList.add('bad'); msg.textContent = (r.errors || ['Not saved.']).join(' '); }
   } catch (e) { msg.classList.add('bad'); msg.textContent = navigator.onLine ? 'Could not reach the website. Try again in a moment.' : 'No signal here. The details are kept on this device. Tap Save again when you have signal.'; }
   btn.disabled = false;

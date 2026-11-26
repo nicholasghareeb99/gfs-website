@@ -71,7 +71,7 @@ export function ring(x, y) {
 export function modal(html, { onOpen } = {}) {
   const m = document.createElement('div'); m.className = 'modal';
   m.innerHTML = `<div class="box" role="dialog" aria-modal="true">${html}</div>`;
-  const close = () => { m.style.transition = 'opacity .25s'; m.style.opacity = '0'; setTimeout(() => m.remove(), 250); };
+  const close = () => { m.classList.add('out'); setTimeout(() => m.remove(), 230); };
   m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) close(); });
   document.body.append(m); onOpen?.(m, close);
   return { el: m, close };
@@ -95,7 +95,13 @@ export async function fly({ from, to, bg, size = 'cover', pos = 'center', ms = 5
 }
 
 export function vt(update) {
-  if (document.startViewTransition && !reduced.matches) return document.startViewTransition(update).finished.catch(() => {});
+  // One transition at a time: a tap during a running one just swaps, so fast taps never queue up or throw.
+  if (vt.running) { const r = vt.running; r.skipTransition(); return r.updateCallbackDone.catch(() => {}).then(() => update()); }
+  if (document.startViewTransition && !reduced.matches) {
+    const t = document.startViewTransition(update); vt.running = t;
+    t.ready.catch(() => {}); t.updateCallbackDone.catch(() => {});
+    return t.finished.catch(() => {}).finally(() => { if (vt.running === t) vt.running = null; });
+  }
   update(); return Promise.resolve();
 }
 
