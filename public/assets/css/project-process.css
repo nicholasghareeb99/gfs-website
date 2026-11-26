@@ -11,3 +11,9 @@
 .project-path .path-links a{display:inline-flex;align-items:center;min-height:44px;margin-right:20px;color:#086b61;font-weight:600}
 .project-path details{background:white;border:1px solid #dce5e4;border-radius:12px;padding:20px;margin:12px 0}.project-path summary{font-weight:700;cursor:pointer;min-height:44px;display:list-item}
 @media(max-width:700px){.project-access{justify-content:center;gap:16px;padding:0 10px}.project-access a{font-size:12px}.project-path .path-grid{grid-template-columns:1fr}.project-path .path-card{padding:24px}.project-path .path-actions .btn{width:100%}.project-footer{gap:14px}}
+
+/* Customer words next to the step they talk about */
+.path-quote{margin:16px 0 0;padding:12px 14px;border-radius:10px;background:#f6f9fd;box-shadow:0 1px 2px #102b460f,0 6px 18px #102b460d}
+.path-quote blockquote{margin:0;font-size:14.5px;line-height:1.5;color:#22384f}
+.path-quote figcaption{margin-top:6px;font-size:12px;color:#5b6f84}
+.path-quote figcaption a{color:inherit}
