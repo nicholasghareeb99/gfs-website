@@ -99,6 +99,9 @@ function layout() {
   paint();
 }
 
+// Pages that have a matching hands-on tool in the Fence Lab.
+const LAB_PAGES = { 5: 'frost', 6: 'frost', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'gate', 77: 'life', 31: 'wind' };
+const LAB_NAMES = { frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
 function setSlot(slot, n) {
   slot.innerHTML = '';
   if (!n) { slot.classList.add('blank'); slot.style.backgroundImage = 'none'; slot.dataset.n = ''; return; }
@@ -109,6 +112,8 @@ function setSlot(slot, n) {
     Object.assign(h.style, { left: sp.r[0] * 100 + '%', top: sp.r[1] * 100 + '%', width: sp.r[2] * 100 + '%', height: sp.r[3] * 100 + '%' });
     slot.append(h);
   }
+  const tool = LAB_PAGES[n];
+  if (tool) { const b = document.createElement('span'); b.className = 'lab-try'; b.dataset.tool = tool; b.innerHTML = `${icons.spark}<b>Try it</b><small>${LAB_NAMES[tool]} · Fence Lab</small>`; slot.append(b); }
 }
 
 function paint() {
@@ -120,6 +125,10 @@ function paint() {
   $('.n', els.pager).textContent = `${label} / ${D.pages.length}`;
   $('[data-p=heart]', els.pager).setAttribute('aria-pressed', String(visit.hasPage(spread ? (r || l) : cur)));
   els.bar.style.width = ((spread ? (r || l) : cur) / D.pages.length * 100) + '%';
+  // Page edges: the read pages stack up on the left, the rest on the right, like a real booklet.
+  const at = (spread ? (r || l) : cur) / D.pages.length;
+  els.book.style.setProperty('--edge-l', (1.5 + at * 9).toFixed(1) + 'px');
+  els.book.style.setProperty('--edge-r', (1.5 + (1 - at) * 9).toFixed(1) + 'px');
   try { localStorage.setItem('gfs-showroom-page', cur); } catch {}
   if (app.mode === 'brochure' && location.hash !== '#brochure-' + cur) history.replaceState(null, '', '#brochure-' + cur);
   // warm the next pages
@@ -323,6 +332,9 @@ function bindGestures() {
 
 function tap(x, y) {
   if (busy || overviewOn) return;
+  // "Try it" link to the Fence Lab?
+  const lab = document.elementFromPoint(x, y)?.closest('.lab-try');
+  if (lab) { ring(x, y); return app.go('lab', { tool: lab.dataset.tool }); }
   // photo hotspot?
   for (const slot of [els.l, els.r]) {
     if (!slot.dataset.n) continue;

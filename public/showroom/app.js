@@ -8,7 +8,8 @@ const loaders = {
   brochure: () => import('./brochure.mjs'),
   styles: () => import('./styles.mjs'),
   ar: () => import('./ar.mjs'),
-  permits: () => import('./permits.mjs')
+  permits: () => import('./permits.mjs'),
+  lab: () => import('./lab.mjs')
 };
 const app = { data: null, mode: null, live: { names: null, specs: null, from: 'built-in' }, version: VERSION };
 window.GFSShowroom = app;
