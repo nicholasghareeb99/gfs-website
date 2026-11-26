@@ -74,7 +74,13 @@ app.photosFor = names => {
   return out;
 };
 
+// Keep cards and page controls clear of the bottom bar, whatever size Safari makes it.
+function dockClear() {
+  const r = $('.dock').getBoundingClientRect(), side = r.height > r.width;
+  document.documentElement.style.setProperty('--dock-clear', side ? 'calc(var(--sab) + 18px)' : Math.ceil(innerHeight - r.top + 10) + 'px');
+}
 function moveGlow(btn) {
+  dockClear();
   const glow = $('.dock .glow'), dock = $('.dock');
   const r = btn.getBoundingClientRect(), d = dock.getBoundingClientRect();
   glow.style.transform = `translate(${r.left - d.left - 6}px,${r.top - d.top - 6}px)`;
@@ -163,6 +169,7 @@ async function boot() {
   $('#btnMenu').onclick = settings;
   $('#btnSearch').onclick = () => app.go('brochure', { overview: true, focus: true });
   addEventListener('resize', () => { const b = $('.dock button[aria-current=page]'); if (b) moveGlow(b); });
+  visualViewport?.addEventListener('resize', dockClear);
   const m = (location.hash.match(/^#(brochure|styles|ar|permits)(?:-(\d+))?/) || []);
   let start = m[1]; try { start ||= localStorage.getItem('gfs-showroom-mode'); } catch {}
   setBar(.7);
