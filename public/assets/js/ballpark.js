@@ -2740,7 +2740,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     try{
       for(const points of pending.geometry.lines){
         if(kind==='google'){
-          const line=new google.maps.Polyline({path:points,strokeColor:'#00E5A0',strokeWeight:6,strokeOpacity:1,editable:true,map:gMap});
+          const line=new google.maps.Polyline({path:points,strokeColor:'#00E5A0',strokeWeight:6,strokeOpacity:1,editable:!coarsePointer(),map:gMap});
           lines.push(line);gFenceLines.push(line);gUndoStack.push({type:'fence',item:line});
           ['set_at','insert_at','remove_at'].forEach(event=>line.getPath().addListener(event,updateGoogleStats));
         }else{
@@ -2873,7 +2873,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   }
   function enableLeafletEditing(line){
     if(!line.editing&&L.Edit?.Poly)line.editing=new L.Edit.Poly(line,{poly:{allowIntersection:false}});
-    if(line.editing)line.editing.enable();
+    if(line.editing&&!coarsePointer())line.editing.enable();
     if(!line._gfsMeasureBound){line.on('edit',updateLeafletStats);line._gfsMeasureBound=true;}
   }
 
@@ -3125,7 +3125,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       const poly = new google.maps.Polyline({
         path: path.map(([lng, lat]) => ({ lat, lng })),
         strokeColor: '#00E5A0', strokeWeight: 6, strokeOpacity: 1,
-        editable: true, map: gMap,
+        editable: !coarsePointer(), map: gMap,
       });
       gFenceLines.push(poly);
       track('drew');
@@ -3395,7 +3395,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       while (gUndoStack.length && gUndoStack[gUndoStack.length - 1].type === 'point') gUndoStack.pop();
     } else {
       // Make editable so user can drag corners
-      gActivePolyline.setEditable(true);
+      gActivePolyline.setEditable(!coarsePointer());
       gFenceLines.push(gActivePolyline);
       track('drew');
       path.addListener('set_at', updateGoogleStats);
