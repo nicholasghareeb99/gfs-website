@@ -62,3 +62,12 @@ test('gallery photos link to the ballpark by material; ballpark shows real revie
   assert.equal((bp.match(/class="path-quote"/g) || []).length, 3);
   assert.match(bp, /Google review<\/a><\/figcaption>/);
 });
+
+test('ballpark motion layer: loaded on the ballpark page only and never rewrites the price text', () => {
+  const bp = read('public/quote/ballpark/index.html');
+  assert.match(bp, /ballpark-motion\.css/);
+  assert.match(bp, /ballpark-motion\.js/);
+  const js = read('public/assets/js/ballpark-motion.js');
+  assert.ok(!/range\.textContent\s*=/.test(js), 'count-up must use an overlay');
+  assert.match(read('public/assets/css/ballpark-motion.css'), /prefers-reduced-motion:reduce/);
+});
