@@ -503,8 +503,8 @@ function scene(id, gy, fr, G, S) {
     <linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6b4f36"/><stop offset=".4" stop-color="#4f3a28"/><stop offset="1" stop-color="#2a1e15"/></linearGradient>
     <pattern id="${id}p" width="44" height="34" patternUnits="userSpaceOnUse"><ellipse cx="7" cy="9" rx="2.4" ry="1.6" fill="#a08c73" opacity=".55"/><ellipse cx="29" cy="5" rx="1.6" ry="1.2" fill="#2a1b10" opacity=".6"/><ellipse cx="20" cy="24" rx="3" ry="2" fill="#7d654b" opacity=".5"/><ellipse cx="38" cy="28" rx="1.4" ry="1" fill="#b39d80" opacity=".5"/><circle cx="12" cy="30" r="1" fill="#2a1b10" opacity=".5"/></pattern>
     <pattern id="${id}i" width="12" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h8" stroke="#bfe3ff" stroke-width="2" opacity=".55"/></pattern>
-    <pattern id="${id}g" width="16" height="64" patternUnits="userSpaceOnUse"><path d="M4 0C6 16 2 32 5 64M11 0C9 22 13 40 10 64" stroke="rgba(90,55,25,.28)" stroke-width=".8" fill="none"/><ellipse cx="8" cy="40" rx="1.4" ry="2.6" fill="none" stroke="rgba(90,55,25,.3)" stroke-width=".7"/></pattern>
-    <linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <pattern id="${id}g" width="16" height="64" patternUnits="userSpaceOnUse"><path d="M4 0C6 16 2 32 5 64M11 0C9 22 13 40 10 64" stroke="rgba(90,55,25,.16)" stroke-width=".7" fill="none"/></pattern>
+    <linearGradient id="${id}s" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".06"/><stop offset="1" stop-color="#000" stop-opacity=".1"/></linearGradient>
     <linearGradient id="${id}v" x1="0" x2="1"><stop offset="0" stop-color="#d9ddda"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#cfd4d1"/></linearGradient>
     <linearGradient id="${id}st" x1="0" x2="1"><stop offset="0" stop-color="#9aa7b3"/><stop offset=".5" stop-color="#e8eef3"/><stop offset="1" stop-color="#8b98a4"/></linearGradient>
     <linearGradient id="${id}c" x1="0" x2="1"><stop offset="0" stop-color="#8d959b"/><stop offset=".5" stop-color="#b9c0c4"/><stop offset="1" stop-color="#848c92"/></linearGradient>
@@ -583,7 +583,8 @@ function build(body) {
       for (const ry of rails) s += `<path d="M${x0},${ry} Q${(x0 + x1) / 2},${ry + sag * 2} ${x1},${ry}" stroke="#a48a5c" stroke-width="7" fill="none"/>`;
       const n = 15;
       for (let i = 0; i < n; i++) { const x = x0 + 3 + (x1 - x0 - 6) * i / (n - 1), dy = sagAt(x), cup = clamp((y - 2) / 10, 0, 1) * (i % 3 === 1 ? 4 : i % 4 === 0 ? -3 : 1);
-        s += `<rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="${mixHex('#d4bf8f', '#9a958c', fade)}" stroke="#6f5d3b" stroke-width=".7"/><rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="url(#psg)"/><rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="url(#pss)"/>`;
+        const xl = x - 8.5 + cup, xr = x + 8.5 + cup, yt = ptop + dy, yb = lvl, e = S / 12, d = `M${xl},${yb} L${xr},${yb} L${xr},${yt + e} L${xr - e},${yt} L${xl + e},${yt} L${xl},${yt + e} Z`;
+        s += `<path d="${d}" fill="${mixHex('#d4bf8f', '#9a958c', fade)}" stroke="#6f5d3b" stroke-width=".6"/><path d="${d}" fill="url(#psg)"/><path d="${d}" fill="url(#pss)"/>`;
         for (const ry of [rails[0], rails[2]]) s += `<rect x="${x - 2}" y="${ry + dy - 1}" width="4" height="2" fill="#5a5a5a"/>`; }
       s += `</g>`;
       s += `<g class="part${hl('gap')}">${px.map(x => `<rect x="${x + 6}" y="${ptop}" width="3" height="${lvl - ptop}" fill="#0f2034"/>`).join('')}</g>`;
@@ -601,9 +602,10 @@ function build(body) {
       const railOffs = [6 * S - 30, 3.1 * S, .7 * S];
       // pickets, seen from the back, nailed one at a time and following the ground
       s += `<g class="part${hl('pickets')}${hl('grade')}">`;
-      const n = 17;
-      for (let i = 0; i < n; i++) { const x = x0 + 9 + (x1 - x0 - 18) * i / (n - 1), b = lineAt(x, 3), tp = lineAt(x, 6 * S - 4);
-        s += `<path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="${mixHex('#d4bf8f', '#a8a39a', fade)}" stroke="#6f5d3b" stroke-width=".7"/><path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="url(#gsg)"/><path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="url(#gss)"/>`; }
+      const pw = 5.5 / 12 * S, n = Math.round((x1 - x0) / pw), w = (x1 - x0) / n, ear = S / 12; // 5½ in dog-ear pickets, 1 in clips
+      for (let i = 0; i < n; i++) { const xl = x0 + i * w, xr = xl + w, bl = lineAt(xl, 3), br = lineAt(xr, 3), tl = lineAt(xl, 6 * S - 4), tr = lineAt(xr, 6 * S - 4);
+        const d = `M${xl},${bl} L${xr},${br} L${xr},${tr + ear} L${xr - ear},${tr} L${xl + ear},${tl} L${xl},${tl + ear} Z`;
+        s += `<path d="${d}" fill="${mixHex('#d4bf8f', '#a8a39a', fade)}" stroke="#6f5d3b" stroke-width=".6"/><path d="${d}" fill="url(#gsg)"/><path d="${d}" fill="url(#gss)"/>`; }
       s += `</g>`;
       // steel post in the ground, wood box around it above ground
       for (const x of px) {
