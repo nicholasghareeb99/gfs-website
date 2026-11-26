@@ -53,3 +53,12 @@ test('ballpark reads material, height and feet from the link and offers 70/140/2
   assert.match(js, /oneParam\(params, 'feet'\)/);
   assert.match(js, /id="bp-feet-slider"/);
 });
+
+test('gallery photos link to the ballpark by material; ballpark shows real review lines', () => {
+  const js = read('public/assets/js/project-gallery.js');
+  assert.match(js, /\/quote\/ballpark\/\?material=/);
+  assert.match(js, /splitrail:'split-rail'/);
+  const bp = read('public/quote/ballpark/index.html');
+  assert.equal((bp.match(/class="path-quote"/g) || []).length, 3);
+  assert.match(bp, /Google review<\/a><\/figcaption>/);
+});

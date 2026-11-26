@@ -26,3 +26,6 @@
 }
 @supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){@media(max-width:768px){.mobile-cta{background:#102d50}}}
 @media(prefers-reduced-motion:reduce){.nav .header-measure-button,.mobile-cta a{transition:none!important}}
+/* Gallery: "Price this style" under each photo */
+.photo-card .photo-price{display:flex;align-items:center;justify-content:center;min-height:44px;margin:0;border-radius:0 0 12px 12px;background:#f3f7fc;color:var(--cedar,#225fbe);font-weight:700;font-size:14.5px;text-decoration:none;box-shadow:0 1px 2px #102b4612}
+.photo-card .photo-price:hover{background:var(--cedar,#225fbe);color:#fff}

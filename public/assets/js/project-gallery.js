@@ -6,6 +6,9 @@
  const controls=document.querySelector('[data-gallery-controls]'),more=document.querySelector('[data-gallery-more]');if(!controls||!more)return;
  controls.hidden=false;const search=controls.querySelector('input'),status=controls.querySelector('p');
  let material='all',limit=18,active=cards;
+ // Each photo gets a "Price this style" link that opens the ballpark tool on that material.
+ const priceMaterial={vinyl:'vinyl',cedar:'cedar',wood:'wood',aluminum:'aluminum',chainlink:'chainlink',splitrail:'split-rail'};
+ cards.forEach(card=>{const m=priceMaterial[card.dataset.type];if(!m||card.querySelector('.photo-price'))return;const a=document.createElement('a');a.className='photo-price';a.href='/quote/ballpark/?material='+m;a.textContent='Price this style →';a.setAttribute('aria-label','Price a fence like this: '+(card.querySelector('img')?.alt||m));card.appendChild(a);});
  const editing=()=>document.body.classList.contains('editing')||document.body.classList.contains('edit-mode')||document.documentElement.classList.contains('edit-mode');
  function render(){
   const terms=search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
