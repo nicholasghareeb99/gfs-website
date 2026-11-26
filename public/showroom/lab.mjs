@@ -8,6 +8,7 @@ import { $, $$, esc, clamp, icons, reduced } from './ui.mjs';
 let app, root, D, current = null, stop = null;
 
 const TOOLS = [
+  { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by' },
   { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style' },
   { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first' },
   { id: 'wood', name: 'Wood movement', line: 'Why gaps open between boards' },
@@ -28,12 +29,12 @@ export async function init(a, el) {
     </div>`;
   $('.lab-tabs', root).onclick = e => { const b = e.target.closest('[data-t]'); if (b) select(b.dataset.t); };
 }
-export function show(opts = {}) { select(opts.tool || current || 'wind', true); }
+export function show(opts = {}) { select(opts.tool || current || 'build', true); }
 export function hide() { stop?.(); stop = null; }
 
-const RENDER = { wind, life, wood, frost, gate };
+const RENDER = { build, wind, life, wood, frost, gate };
 function select(id, force) {
-  if (!RENDER[id]) id = 'wind';
+  if (!RENDER[id]) id = 'build';
   if (id === current && !force && stop) return;
   stop?.(); stop = null; current = id;
   const t = TOOLS.find(x => x.id === id);
@@ -442,4 +443,158 @@ function gate(body) {
   $('[name=y]', body).oninput = e => { years = +e.target.value; update(); };
   bindSeg(body, (n, v) => { brace = v; update(); });
   update();
+}
+
+// ═════════════════════════════════════════════════════════════════
+// 0. OUR BUILD VS PREFAB — one section of each, aged year by year
+// ═════════════════════════════════════════════════════════════════
+// Every claim here is one the GFS brochure already makes (p. 5, 6, 14, 25):
+// King Plus = 8 ft galvanized Sch. 40 steel post, 2⅜ in OD, driven 4 ft, a wood
+// box around it, rails nailed across the box, and an extra top rail (the "+").
+// Prefab = thin pickets stapled to a light frame on 4×4 wood posts, gaps between
+// panels, can't follow a slope, tends to sag after a few years. The competitor's
+// post is set the two ways p. 6 describes: in tamped dirt about 2 ft deep, or in
+// concrete about 2.5 ft deep.
+const GFS_PARTS = [
+  { k: 'steel', n: 'Driven steel post', d: 'Galvanized Schedule 40 steel, 2⅜ in across, driven 4 ft into undisturbed clay. Below Toledo\'s frost line, with no concrete to heave and no wood underground to rot.' },
+  { k: 'box', n: 'Wood box around every post', d: 'Steel in the ground, wood where you see it. The box gives the rails a full nailing surface and makes the post look like a wood post.' },
+  { k: 'plus', n: 'The extra top rail (the + in King Plus)', d: 'A second 2×4 across the top. It locks the pickets straight and crowns the fence, so the top line stays straight for years.' },
+  { k: 'rails', n: 'Rails nailed across the box', d: '2×4 rails run across the face of each box instead of being toe-nailed between posts, with 3 in galvanized nails.' },
+  { k: 'pickets', n: 'Pickets nailed one at a time', d: 'Cut and fit in your yard with 1¾ in galvanized coil nails. No staples.' },
+  { k: 'grade', n: 'Follows the ground', d: 'Every section follows the grade from post to post, so there is no triangle of gap under the fence on a slope.' }
+];
+const PRE_PARTS = [
+  { k: 'post', n: '4×4 wood post', d: 'Set about 2 ft deep in tamped dirt, or about 2.5 ft in concrete. Either way, wood sits underground where it rots.' },
+  { k: 'staples', n: 'Thin pickets on a stapled frame', d: 'A light frame built in a factory, with thin pickets stapled on.' },
+  { k: 'gap', n: 'Gaps between panels', d: 'Panels come in fixed widths, so there are seams at every post.' },
+  { k: 'slope', n: 'Can\'t follow a slope', d: 'A rectangle panel stays level, so on a slope it leaves gaps underneath or gets stepped.' },
+  { k: 'sag', n: 'Sags after a few years', d: 'The light frame racks and sags between posts.' }
+];
+function build(body) {
+  const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false };
+  body.innerHTML = `
+    <div class="vs-grid">
+      <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Big-box prefab</span><b>Panel on 4×4 wood posts</b></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 0 380 460"></svg><p class="vs-status" id="vsPreS"></p></figure>
+      <figure class="vs-card gfs"><figcaption><span class="vs-tag good">GFS King Plus</span><b>Driven steel, built board by board</b></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 0 380 460"></svg><p class="vs-status" id="vsGfsS"></p></figure>
+    </div>
+    <div class="lab-ctl vs-ctl">
+      <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play 15 years</button>${slider('yr', 'Years', 0, 15, .05, 0)}</div>
+      <div class="vs-opts">
+        <div><div class="lab-label">Their posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2.5 ft']], st.set)}</div>
+        <div><div class="lab-label">Yard</div>${seg('slope', [['0', 'Flat'], ['1', 'Sloped']], '0')}</div>
+      </div>
+      <p class="vis-note-inline">Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
+    </div>
+    <div class="vs-parts">
+      <div class="lab-card"><div class="lab-label">What makes ours different (tap one)</div><div class="vs-list" id="vsG">${GFS_PARTS.map((p, i) => `<button class="vs-item" data-k="${p.k}"><i>${i + 1}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('')}</div></div>
+      <div class="lab-card"><div class="lab-label">What you get with prefab (tap one)</div><div class="vs-list" id="vsP">${PRE_PARTS.map((p, i) => `<button class="vs-item bad" data-k="${p.k}"><i>${String.fromCharCode(65 + i)}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('')}</div></div>
+    </div>
+    ${math(`<p><b>Why the wood post fails first</b>: decay needs air and water together. On a buried wood post that band is right at the soil line, or where the wood meets the top of the concrete, and that is where it breaks. A steel post has no wood underground.</p>
+      <p><b>Why posts lift</b>: wet clay freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
+      <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with an extra top rail holding the line.</p>
+      <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14 and 25). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
+  const pre = $('#vsPre', body), gfs = $('#vsGfs', body);
+  const S = 34, G = 300; // px per ft, ground line
+  const groundY = (x) => st.slope ? G - (x - 40) * 0.16 : G; // slope rises to the right
+  function frostBand(season, y) {
+    const w = clamp(Math.sin(Math.PI * clamp((season - .62) / .36, 0, 1)), 0, 1);
+    return { w, depth: w * 3 * S };
+  }
+  function draw() {
+    const y = st.years, yi = Math.floor(y), season = y - yi, fr = y < .01 ? { w: 0, depth: 0 } : frostBand(season, y);
+    // competitor post movement
+    const dirt = st.set === 'dirt';
+    const heave = Math.min(18, (dirt ? 1.3 : .9) * yi + (dirt ? 4 : 3) * fr.w);
+    const lean = Math.min(dirt ? .07 : .04, (dirt ? .006 : .003) * y);
+    const rot = clamp((y - (dirt ? 3 : 5)) / 8, 0, 1);
+    const sag = clamp((y - 3) / 10, 0, 1) * 16;
+    const fade = clamp(y / 6, 0, 1);
+    const hl = k => st.focus === k ? ' hl' : '';
+    const soil = (id) => `<defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5b4532"/><stop offset="1" stop-color="#2f2219"/></linearGradient><pattern id="${id}i" width="12" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h8" stroke="#bfe3ff" stroke-width="2" opacity=".5"/></pattern></defs>
+      <rect width="380" height="460" fill="#0f2034"/>
+      <path d="M0,${groundY(0)} L380,${groundY(380)} L380,460 L0,460 Z" fill="url(#${id})"/>
+      ${fr.w > .05 ? `<path d="M0,${groundY(0)} L380,${groundY(380)} L380,${groundY(380) + fr.depth} L0,${groundY(0) + fr.depth} Z" fill="url(#${id}i)" opacity="${fr.w}"/><text x="370" y="${groundY(380) + fr.depth - 6}" text-anchor="end" class="svg-l blue">FROST</text>` : ''}
+      <line x1="0" x2="380" y1="${G + 3 * S}" y2="${G + 3 * S}" stroke="#8cc7ff" stroke-dasharray="5 6" opacity=".55"/><text x="80" y="${G + 3 * S - 5}" class="svg-l blue">FROST LINE ~3 FT</text>`;
+    // ── prefab ──
+    {
+      const px = [56, 324], top = G - 6 * S, tilt = (x, yy, sgn) => [x + Math.sin(lean * sgn) * (G - yy), yy - heave];
+      const postW = 13, depth = (dirt ? 2 : 2.5) * S;
+      let s = soil('ps');
+      for (const [i, x] of px.entries()) {
+        const sgn = i ? -1 : 1, gy = groundY(x);
+        if (!dirt) s += `<path d="M${x - 22},${gy - heave * .6} L${x + 22},${gy - heave * .6} L${x + 16},${gy + depth - heave * .6} L${x - 16},${gy + depth - heave * .6} Z" fill="#9aa3ab" opacity=".9"/>`;
+        const [tx, ty] = tilt(x, top, sgn);
+        s += `<g class="part${hl('post')}"><path d="M${x - postW / 2},${gy + depth - heave} L${x + postW / 2},${gy + depth - heave} L${tx + postW / 2},${ty} L${tx - postW / 2},${ty} Z" fill="#8f7a52"/>
+          <rect x="${x - postW / 2 - 1}" y="${gy - 10 - heave}" width="${postW + 2}" height="22" fill="#2b1a0e" opacity="${rot * .9}"/></g>`;
+        if (rot > .6) s += `<path d="M${x + 9},${gy - 4 - heave} l10 -8" stroke="#ef5b5b" stroke-width="2"/>`;
+      }
+      // panel: level rectangle between posts; sags in the middle, stays level on a slope
+      const x0 = 62, x1 = 318, ptop = top + 4 - heave, pbot = Math.max(groundY(x0), groundY(x1)) - 4 - heave + (st.slope ? -2 : 0);
+      const lvl = st.slope ? Math.min(groundY(x0), groundY(x1)) - 6 - heave : pbot;
+      const sagAt = x => sag * Math.sin(Math.PI * (x - x0) / (x1 - x0));
+      const rails = [ptop + 16, (ptop + lvl) / 2, lvl - 16];
+      s += `<g class="part${hl('staples')}">`;
+      for (const ry of rails) s += `<path d="M${x0},${ry} Q${(x0 + x1) / 2},${ry + sag * 2} ${x1},${ry}" stroke="#a48a5c" stroke-width="7" fill="none"/>`;
+      const n = 15;
+      for (let i = 0; i < n; i++) { const x = x0 + 3 + (x1 - x0 - 6) * i / (n - 1), dy = sagAt(x), cup = clamp((y - 2) / 10, 0, 1) * (i % 3 === 1 ? 4 : i % 4 === 0 ? -3 : 1);
+        s += `<rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="${mixHex('#d4bf8f', '#9a958c', fade)}" stroke="#6f5d3b" stroke-width=".7"/>`;
+        for (const ry of [rails[0], rails[2]]) s += `<rect x="${x - 2}" y="${ry + dy - 1}" width="4" height="2" fill="#5a5a5a"/>`; }
+      s += `</g>`;
+      s += `<g class="part${hl('gap')}">${px.map(x => `<rect x="${x + 6}" y="${ptop}" width="3" height="${lvl - ptop}" fill="#0f2034"/>`).join('')}</g>`;
+      if (st.slope) s += `<g class="part${hl('slope')}"><path d="M${x0},${lvl + sagAt(x0)} L${x1},${lvl} L${x1},${groundY(x1)} L${x0},${groundY(x0)} Z" fill="#ef5b5b" opacity=".25"/><text x="${(x0 + x1) / 2}" y="${(lvl + groundY(x0)) / 2 + 30}" text-anchor="middle" class="svg-l red">GAP UNDER THE PANEL</text></g>`;
+      if (sag > 3) s += `<g class="part${hl('sag')}"><path d="M190,${ptop - 12} v${sag + 6}" stroke="#ef5b5b" stroke-width="2"/><text x="198" y="${ptop - 2}" class="svg-l red">SAG</text></g>`;
+      s += `<text x="190" y="22" text-anchor="middle" class="svg-n">${dirt ? '4×4 post ~2 ft in dirt' : '4×4 post ~2.5 ft in concrete'} · back side</text>`;
+      pre.innerHTML = s;
+      $('#vsPreS', body).innerHTML = y < .5 ? 'Looks fine the day it goes in.' : [rot > .6 ? 'Posts rotting at the ' + (dirt ? 'soil line' : 'top of the concrete') : '', heave > 4 ? 'posts pushed up and leaning' : '', sag > 3 ? 'panel sagging' : '', st.slope ? 'gap under the panel' : '', fade > .5 ? 'stapled pickets cupping' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
+    }
+    // ── GFS ──
+    {
+      const px = [56, 324], top = G - 6 * S, boxTop = top + 6 + 12;
+      let s = soil('gs');
+      const x0 = 43, x1 = 337, g0 = groundY(x0), g1 = groundY(x1), lineAt = (x, off) => (g0 + (g1 - g0) * (x - x0) / (x1 - x0)) - off;
+      const railOffs = [6 * S - 30, 3.1 * S, .7 * S];
+      // pickets, seen from the back, nailed one at a time and following the ground
+      s += `<g class="part${hl('pickets')}${hl('grade')}">`;
+      const n = 17;
+      for (let i = 0; i < n; i++) { const x = x0 + 9 + (x1 - x0 - 18) * i / (n - 1), b = lineAt(x, 3), tp = lineAt(x, 6 * S - 4);
+        s += `<rect x="${x - 8}" y="${tp}" width="16" height="${b - tp}" fill="${mixHex('#d4bf8f', '#a8a39a', fade)}" stroke="#6f5d3b" stroke-width=".7"/>`; }
+      s += `</g>`;
+      // steel post in the ground, wood box around it above ground
+      for (const x of px) {
+        const gy = groundY(x), bt = lineAt(x, 6 * S - 30) + 4;
+        s += `<g class="part${hl('steel')}"><rect x="${x - 5}" y="${gy - 4}" width="10" height="${4 * S + 4}" rx="2" fill="#c8d2dc" stroke="#eef3f7" stroke-width=".8"/><text x="${x}" y="${gy + 4 * S + 16}" text-anchor="middle" class="svg-l">4 FT</text></g>
+          <g class="part${hl('box')}"><rect x="${x - 14}" y="${bt}" width="28" height="${gy - bt}" fill="${mixHex('#b99a68', '#a29d93', fade * .7)}" stroke="#5e4c30" stroke-width="1.2"/><line x1="${x}" x2="${x}" y1="${bt + 3}" y2="${gy - 2}" stroke="#5e4c30" stroke-width=".8" opacity=".6"/></g>`;
+      }
+      // rails run across the face of the boxes, nailed with 3 in galvanized nails
+      s += `<g class="part${hl('rails')}">${railOffs.map(o => `<line x1="${x0}" y1="${lineAt(x0, o)}" x2="${x1}" y2="${lineAt(x1, o)}" stroke="#a48a5c" stroke-width="10"/>${px.map(x => `<circle cx="${x - 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/><circle cx="${x + 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/>`).join('')}`).join('')}</g>`;
+      // the + : flat cap 2x4 on the boxes, plus the top rail
+      s += `<g class="part plus${hl('plus')}"><line x1="${x0 - 14}" y1="${lineAt(x0, 6 * S - 30) - 12}" x2="${x1 + 14}" y2="${lineAt(x1, 6 * S - 30) - 12}" stroke="#d9823f" stroke-width="7"/><text x="190" y="${lineAt(190, 6 * S) - 18}" text-anchor="middle" class="svg-plus">+ extra top rail</text></g>`;
+      s += `<text x="190" y="22" text-anchor="middle" class="svg-n">Steel driven 4 ft, no concrete · back side</text>`;
+      gfs.innerHTML = s;
+      $('#vsGfsS', body).textContent = y < .5 ? 'Straight on day one.' : fade > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
+    }
+    $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${season > .62 && season < .98 && y > .5 ? ' · winter' : ''}`;
+    for (const b of $$('.vs-item', body)) b.classList.toggle('on', b.dataset.k === st.focus);
+  }
+  let raf = 0, live = true;
+  const play = () => {
+    if (st.playing) { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; return; }
+    if (st.years >= 14.9) st.years = 0;
+    st.playing = true; $('#vsPlay', body).textContent = 'Pause';
+    let last = performance.now();
+    const step = now => { if (!st.playing || !live) return; const dt = Math.min(.05, (now - last) / 1000); last = now;
+      st.years = Math.min(15, st.years + dt * (reduced.matches ? 3 : 1.2)); $('[name=yr]', body).value = st.years; draw();
+      if (st.years >= 15) { st.playing = false; $('#vsPlay', body).textContent = 'Play again'; return; } raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  };
+  $('#vsPlay', body).onclick = play;
+  $('[name=yr]', body).oninput = e => { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; st.years = +e.target.value; draw(); };
+  bindSeg(body, (n, v) => { if (n === 'set') st.set = v; if (n === 'slope') st.slope = v === '1'; draw(); });
+  body.addEventListener('click', e => { const b = e.target.closest('.vs-item'); if (!b) return; st.focus = st.focus === b.dataset.k ? null : b.dataset.k; draw(); });
+  draw();
+  return () => { live = false; st.playing = false; cancelAnimationFrame(raf); };
+}
+function mixHex(a, b, t) {
+  const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b);
+  return '#' + A.map((v, i) => Math.round(v + (B[i] - v) * clamp(t, 0, 1)).toString(16).padStart(2, '0')).join('');
 }

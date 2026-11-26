@@ -100,8 +100,8 @@ function layout() {
 }
 
 // Pages that have a matching hands-on tool in the Fence Lab.
-const LAB_PAGES = { 5: 'frost', 6: 'frost', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'gate', 77: 'life', 31: 'wind' };
-const LAB_NAMES = { frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
+const LAB_PAGES = { 5: 'build', 6: 'build', 22: 'build', 14: 'build', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'gate', 77: 'life', 31: 'wind', 7: 'frost' };
+const LAB_NAMES = { build: 'Our build vs prefab', frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
 function setSlot(slot, n) {
   slot.innerHTML = '';
   if (!n) { slot.classList.add('blank'); slot.style.backgroundImage = 'none'; slot.dataset.n = ''; return; }
