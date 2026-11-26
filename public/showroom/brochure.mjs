@@ -5,6 +5,7 @@
 //  • pinch out to fly every page into a flowing deck with search
 import { $, $$, esc, clamp, pageImg, icons, spring, tween, ring, fly, tokens, snippet, reduced, toast, cssUrl, asset } from './ui.mjs';
 import { initPhotos, openPhotos, execItems } from './photos.mjs';
+import { visit } from './visit.mjs';
 
 const N_STRIPS = 12, ASPECT = 900 / 1165;
 let app, root, D;
@@ -26,7 +27,7 @@ export async function init(a, el) {
     <div class="pinch-hint">${icons.pinch}<span>Let go to see every page</span></div>
     <div class="pager"><span class="t"></span><span class="n"></span>
       <button data-p="-1" aria-label="Previous page">${icons.back}</button><button data-p="1" aria-label="Next page">${icons.next}</button>
-      <button data-p="all" aria-label="All pages">${icons.layers}</button></div>
+      <button data-p="all" aria-label="All pages">${icons.layers}</button><button data-p="heart" class="heartbtn" aria-label="Save this page to the visit" aria-pressed="false">${icons.heart}</button></div>
     <div class="progress"><i></i></div>
     <div class="overview" aria-hidden="true">
       <div class="ov-head">
@@ -48,7 +49,7 @@ export async function init(a, el) {
   try { cur = clamp(+localStorage.getItem('gfs-showroom-page') || 1, 1, D.pages.length); } catch {}
   buildOverview();
   bindGestures();
-  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'all') openOverview(); else if (p) turn(+p); };
+  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to this visit` : 'Removed from this visit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
   addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
     if (app.mode !== 'brochure' || e.target.matches('input')) return;
@@ -117,6 +118,7 @@ function paint() {
   const label = spread && l && r ? `${l}–${r}` : String(spread ? (l || r) : cur);
   $('.t', els.pager).textContent = spread && l && r ? `${D.page(l).title} · ${D.page(r).title}` : p.title;
   $('.n', els.pager).textContent = `${label} / ${D.pages.length}`;
+  $('[data-p=heart]', els.pager).setAttribute('aria-pressed', String(visit.hasPage(spread ? (r || l) : cur)));
   els.bar.style.width = ((spread ? (r || l) : cur) / D.pages.length * 100) + '%';
   try { localStorage.setItem('gfs-showroom-page', cur); } catch {}
   if (app.mode === 'brochure' && location.hash !== '#brochure-' + cur) history.replaceState(null, '', '#brochure-' + cur);

@@ -2,15 +2,21 @@
 // built from the same published style specs. "Place it in the yard" exports that
 // exact model at 1:1 scale to USDZ and hands it to Apple's AR Quick Look.
 import { $, $$, esc, clamp, icons, toast } from './ui.mjs';
+import { visit } from './visit.mjs';
 
-let app, root, D, frame, state = { model: null, layout: 'run24g', styleId: null }, ar = { url: null, ticket: 0, key: '' }, mods = null;
+let app, root, D, frame, state = { model: null, layout: 'run24', gate: 'walk', styleId: null, geometry: null }, ar = { url: null, ticket: 0, key: '' }, mods = null;
 const LAYOUTS = [
   { id: 'panel', name: 'One section', detail: true },
   { id: 'run16', name: '16 ft run', length: 16 },
-  { id: 'run24g', name: '24 ft + walk gate', length: 24, single: 1 },
+  { id: 'run24', name: '24 ft run', length: 24 },
   { id: 'run40', name: '40 ft run', length: 40 },
-  { id: 'corner', name: 'Corner 24 × 16', corner: [24, 16] }
+  { id: 'corner', name: 'Corner 24 × 16', corner: [24, 16] },
+  { id: 'yard', name: 'Their yard', yard: true }
 ];
+const GATES = [['none', 'No gate'], ['walk', 'Walk gate'], ['drive', 'Drive gate'], ['both', 'Walk + drive']];
+// Color and height of a model, read from its Executive App name.
+const COLORS = ['Mocha Walnut', 'Chai Gray', 'Dark Gray', 'Aspen Latte', 'White/tan', 'White', 'Tan', 'Adobe', 'Bronze', 'Black', 'BLK', 'Galv', 'Cedar-tone', 'Cedartone', 'Cedar', 'P/T', 'PT'];
+const colorOf = n => { const c = COLORS.find(c => new RegExp('(^|[^a-z])' + c.replace(/[/-]/g, '\\$&') + '([^a-z]|$)', 'i').test(n)) || ''; return ({ BLK: 'Black', Galv: 'Galvanized', 'P/T': 'Pressure-treated', PT: 'Pressure-treated', Cedartone: 'Cedar-tone', 'White/tan': 'White/Tan' })[c] || c; };
 const canAR = (() => { const a = document.createElement('a'); return !!a.relList?.supports?.('ar'); })();
 
 export function familyOfModel(n) {
@@ -37,6 +43,8 @@ export async function init(a, el) {
       <iframe title="3D fence model" allow="fullscreen; xr-spatial-tracking" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
     </div>
     <div class="ar-bar">
+      <div class="ar-row" id="arVariants"></div>
+      <div class="ar-row" id="arGates">${GATES.map(([id, n]) => `<button class="chip" data-g="${id}">${n}</button>`).join('')}</div>
       <div class="ar-row" id="arLayouts">${LAYOUTS.map(l => `<button class="chip" data-l="${l.id}">${esc(l.name)}</button>`).join('')}</div>
       <div class="ar-go">
         <button class="btn primary" id="arGo">${icons.ar} <span>Place it in the yard</span></button>
@@ -47,12 +55,15 @@ export async function init(a, el) {
     </div>`;
   frame = $('iframe', root);
   $('#arPick', root).onclick = picker;
-  $('#arLayouts', root).onclick = e => { const b = e.target.closest('[data-l]'); if (b) { state.layout = b.dataset.l; load(); } };
+  $('#arLayouts', root).onclick = e => { const b = e.target.closest('[data-l]'); if (!b) return; if (b.dataset.l === 'yard' && !yardGeometry()) { toast('Draw the fence on the Permits map first, then come back here.'); return; } state.layout = b.dataset.l; load(); };
+  $('#arGates', root).onclick = e => { const b = e.target.closest('[data-g]'); if (b) { state.gate = b.dataset.g; load(); } };
+  $('#arVariants', root).onclick = e => { const b = e.target.closest('[data-m]'); if (b) { state.model = b.dataset.m; load(); } };
   $('#arBp', root).onclick = () => import('./blueprint.mjs').then(m => m.openBlueprint(app, state.model, state.styleId ? D.styleById[state.styleId] : null));
   $('#arStyle', root).onclick = () => state.styleId && app.go('styles', { style: state.styleId, detail: true });
   $('#arGo', root).addEventListener('click', goAR);
   addEventListener('message', e => {
     if (e.source !== frame.contentWindow || e.data?.type !== 'GFS_F3D_READY') return;
+    if (performance.now() - (load.at || 0) < 400) return; // the page being replaced, not the new one
     try { // keep the viewer clean: the showroom has its own controls around it
       const doc = frame.contentDocument;
       if (doc && !doc.getElementById('showroomClean')) { const st = doc.createElement('style'); st.id = 'showroomClean'; st.textContent = 'body>*:not(canvas):not(#c):not(#load):not(script):not(style){display:none!important}'; doc.head.append(st); }
@@ -63,7 +74,9 @@ export async function init(a, el) {
   try { const saved = JSON.parse(localStorage.getItem('gfs-showroom-ar') || 'null'); if (saved?.model) state = { ...state, ...saved }; } catch {}
 }
 
+const yardGeometry = () => state.geometry || visit.get().fence?.geometry || null;
 export function show(opts = {}) {
+  if (opts.geometry) { state.geometry = opts.geometry; state.layout = 'yard'; if (!opts.model && visit.get().fence?.model) opts.model = visit.get().fence.model; }
   if (opts.model) { state.model = opts.model; state.styleId = opts.styleId || D.styles.find(s => s.models.includes(opts.model))?.id || null; }
   if (!state.model) { state.model = D.styles[0].models[0]; state.styleId = D.styles[0].id; }
   const fresh = frame.dataset.key !== key();
@@ -72,10 +85,21 @@ export function show(opts = {}) {
 }
 export function hide() {}
 
-const key = () => `${state.model}|${state.layout}`;
+const key = () => `${state.model}|${state.layout}|${state.gate}|${state.layout === 'yard' ? JSON.stringify(yardGeometry()).length : ''}`;
 function render() {
   $('#arName', root).textContent = state.model;
   for (const b of $$('#arLayouts .chip', root)) b.setAttribute('aria-pressed', String(b.dataset.l === state.layout));
+  const L = LAYOUTS.find(l => l.id === state.layout);
+  $('#arGates', root).hidden = !!(L?.detail || L?.corner || L?.yard);
+  for (const b of $$('#arGates .chip', root)) b.setAttribute('aria-pressed', String(b.dataset.g === state.gate));
+  // Color and height chips: the other models of this style, switched in place.
+  const s = state.styleId && D.styleById[state.styleId], list = s ? s.models : [];
+  const cur = { c: colorOf(state.model), h: heightOf(state.model) };
+  const colors = [...new Set(list.map(colorOf).filter(Boolean))], hs = [...new Set(list.map(heightOf))].sort((a, b) => a - b);
+  const pick = (c, h) => list.find(m => colorOf(m) === c && heightOf(m) === h) || list.find(m => colorOf(m) === c) || list.find(m => heightOf(m) === h);
+  $('#arVariants', root).innerHTML = (colors.length > 1 ? colors.map(c => `<button class="chip" data-m="${esc(pick(c, cur.h))}" aria-pressed="${c === cur.c}">${esc(c)}</button>`).join('') : '') +
+    (hs.length > 1 ? `<span class="sep"></span>` + hs.map(h => `<button class="chip mono" data-m="${esc(pick(cur.c, h))}" aria-pressed="${h === cur.h}">${h % 1 ? h.toFixed(1) : h} ft</button>`).join('') : '');
+  $('#arVariants', root).hidden = !(colors.length > 1 || hs.length > 1);
   $('#arStyle', root).hidden = !state.styleId;
 }
 
@@ -90,17 +114,25 @@ async function spec() {
     s.lines = [{ x1: -a / 2, z1: 0, x2: a / 2, z2: 0, ft: a }, { x1: a / 2, z1: 0, x2: a / 2, z2: -b, ft: b }]; s.gates = [];
     return s;
   }
-  return mods.buildPreviewSpec({ ...base, length: L.length, singleGates: L.single || 0 });
+  if (L.yard) { const g = yardGeometry(); if (!g) throw Error('Draw the fence on the Permits map first.'); return mods.buildPreviewSpec({ ...base, geometry: g }); }
+  const single = state.gate === 'walk' || state.gate === 'both' ? 1 : 0, double = state.gate === 'drive' || state.gate === 'both' ? 1 : 0;
+  const length = Math.max(L.length, 4 * single + 10 * double + 8);
+  return mods.buildPreviewSpec({ ...base, length, singleGates: single, doubleGates: double });
 }
 
 async function load() {
   render(); resetAR();
-  try { localStorage.setItem('gfs-showroom-ar', JSON.stringify({ model: state.model, layout: state.layout, styleId: state.styleId })); } catch {}
+  try { localStorage.setItem('gfs-showroom-ar', JSON.stringify({ model: state.model, layout: state.layout === 'yard' ? 'run24' : state.layout, gate: state.gate, styleId: state.styleId })); } catch {}
   frame.classList.remove('ready'); $('.ar-load', root).hidden = false; $('#arLoadText', root).textContent = 'BUILDING MODEL';
   let s;
   try { s = await spec(); } catch (e) { $('#arLoadText', root).textContent = e.message.toUpperCase(); return; }
   frame.dataset.key = key();
-  frame.src = '/x3d/fence3d.html?embed=1&website=1#' + mods.encodePreview(s);
+  const url = '/x3d/fence3d.html?embed=1&website=1#' + mods.encodePreview(s);
+  // The viewer reads its design once, so a hash-only change must reload the page.
+  load.at = performance.now();
+  const same = (frame.getAttribute('src') || '').split('#')[0] === url.split('#')[0];
+  frame.src = url;
+  if (same) try { frame.contentWindow.location.reload(); } catch { frame.src = 'about:blank'; requestAnimationFrame(() => { frame.src = url; }); }
   clearTimeout(load.t); load.t = setTimeout(() => { if (!frame.classList.contains('ready')) $('#arLoadText', root).textContent = navigator.onLine ? 'STILL LOADING…' : 'THE 3D VIEWER NEEDS A CONNECTION THE FIRST TIME'; }, 15000);
 }
 
