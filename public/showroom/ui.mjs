@@ -4,7 +4,7 @@ export const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 // Same-origin asset URL from a data path such as "assets/img/x.webp".
-export const asset = p => (p ? '/' + String(p).replace(/^\/+/, '') : '');
+export const asset = p => (!p ? '' : /^https:\/\//.test(p) ? String(p) : '/' + String(p).replace(/^\/+/, ''));
 export const cssUrl = p => `url('${asset(p).replace(/'/g, '%27')}')`;
 export const pageImg = (n, hi = false) => `/assets/brochure/${hi ? 'hires' : 'pages'}/p${String(n).padStart(2, '0')}.webp`;
 export const reduced = matchMedia('(prefers-reduced-motion: reduce)');
@@ -24,6 +24,8 @@ export const icons = {
   locate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>',
   shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 10 4-1.7 7-5.5 7-10V6z"/></svg>',
   map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
+  blueprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 16V9l2.5-2.5L12 9v7M7 12h5M15 8v8M14 8h2M14 16h2"/></svg>',
+  noPhoto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><path d="M3 3l18 18"/></svg>',
   layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>'
 };
 

@@ -2,7 +2,7 @@
 // Swipe sideways for the next style, up/down (or the chips) for the next material,
 // tap a tile to open it: photos, specs, colors, brochure pages, 3D.
 import { $, $$, esc, clamp, asset, cssUrl, pageImg, icons, fly, reduced } from './ui.mjs';
-import { openPhotos, initPhotos } from './photos.mjs';
+import { openPhotos, initPhotos, execItems } from './photos.mjs';
 
 let app, root, D, fam = null, deck, rail, dots, cycle = 0, detailEl = null;
 const COLOR = { White: '#f4f5f2', Tan: '#d9c7a3', Adobe: '#c9a984', 'White/Tan': 'linear-gradient(90deg,#f4f5f2 50%,#d9c7a3 50%)', 'Aspen Latte': '#b89c7c', 'Chai Gray': '#9c978e', 'Dark Gray': '#5b5d5f', 'Mocha Walnut': '#6b4b35', Black: '#151515', Bronze: '#5a4632' };
@@ -44,6 +44,8 @@ export async function init(a, el) {
     if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { const i = D.families.findIndex(f => f.id === fam); setFamily(D.families[clamp(i + (e.key === 'ArrowDown' ? 1 : -1), 0, D.families.length - 1)].id); }
   });
   addEventListener('resize', () => app.mode === 'styles' && tilt());
+  // Executive App photos can arrive after the tiles are drawn.
+  addEventListener('showroom:catalog', () => { if (fam) { const keep = rail.children[current()]?.dataset.id; fam = null; setFamily(D.styleById[keep]?.family || D.families[0].id, 0, keep); } });
 }
 
 export function show(opts = {}) {
@@ -54,22 +56,20 @@ export function show(opts = {}) {
 }
 export function hide() { clearInterval(cycle); closeDetail(true); }
 
-function heroList(s) {
-  const ph = s.photos.slice(0, 4).map(id => D.photoById[id]).filter(Boolean).map(p => cssUrl(p.full || p.th));
-  if (ph.length) return ph;
-  // No project photos yet: show the style's own brochure spread (its drawings) instead of nothing.
-  return s.pages.slice(0, 2).map(n => `url('${pageImg(n, true)}')`);
-}
+// Photos come only from the Executive App. None there = "No photo available".
+const photoUrls = s => app.photosFor(s.models);
+function heroList(s) { return photoUrls(s).slice(0, 4).map(cssUrl); }
+const NOPHOTO = `<div class="nophoto">${icons.noPhoto}<b>No photo available</b><small>Add photos to this style in the Executive App</small></div>`;
 const swatch = c => COLOR[c] ? `<i title="${esc(c)}" style="background:${COLOR[c]}"></i>` : '';
 const heights = s => s.heights?.length ? s.heights.map(h => (h % 1 ? h.toFixed(1) : h)).join(' · ') + ' ft' : 'Built to fit';
 
 function tileHTML(s, i, total) {
-  const imgs = heroList(s), fromPages = !s.photos.length;
+  const imgs = heroList(s), n = photoUrls(s).length;
   return `<div class="tile" data-id="${esc(s.id)}" role="button" tabindex="0" aria-label="${esc(s.name)}">
-    <div class="ph">${imgs.map((u, j) => `<div class="${j ? '' : 'on'}" style="background-image:${u};${fromPages ? 'background-size:contain;background-color:#f6f6f4;background-position:center 30%' : ''};animation-delay:${-j * 3}s"></div>`).join('')}</div>
+    <div class="ph">${imgs.length ? imgs.map((u, j) => `<div class="${j ? '' : 'on'}" style="background-image:${u};animation-delay:${-j * 3}s"></div>`).join('') : NOPHOTO}</div>
     <div class="shade"></div><div class="gloss"></div>
     <span class="count">${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}</span>
-    <div class="badges">${s.models.length ? `<span>${icons.cube} 3D</span>` : ''}${s.photos.length ? `<span>${icons.photos} ${s.photos.length}</span>` : ''}</div>
+    <div class="badges">${s.models.length ? `<span>${icons.cube} 3D</span>` : ''}${n ? `<span>${icons.photos} ${n}</span>` : ''}</div>
     <div class="body">
       <div class="eyebrow">${esc(D.familyById[s.family].name.toUpperCase())}${s.colors ? ` <span class="swatches" style="display:inline-flex;vertical-align:middle;margin-left:8px">${s.colors.map(swatch).join('')}</span>` : ''}</div>
       <h2>${esc(s.name)}</h2>
@@ -80,9 +80,8 @@ function tileHTML(s, i, total) {
         <div><small>${s.colors ? 'COLORS' : 'OPTIONS'}</small><b>${esc(String((s.colors || s.options || []).filter(c => !/more/.test(c)).length || '—'))}${s.colors?.some(c => /more/.test(c)) ? '+' : ''}</b></div>
       </div>
       <div class="acts">
-        <button class="btn sm" data-act="photos">${icons.photos} Photos</button>
-        ${s.models.length ? `<button class="btn sm blue" data-act="3d">${icons.cube} 3D</button>` : ''}
-        <button class="btn sm" data-act="page">${icons.book} P.${s.pages[0]}</button>
+        ${n ? `<button class="btn sm" data-act="photos">${icons.photos} Photos</button>` : `<button class="btn sm" data-act="page">${icons.book} P.${s.pages[0]}</button>`}
+        ${s.models.length ? `<button class="btn sm blue" data-act="3d">${icons.cube} 3D</button><button class="btn sm" data-act="bp">${icons.blueprint} Blueprint</button>` : ''}
       </div>
     </div>
   </div>`;
@@ -136,15 +135,15 @@ function rotatePhotos() {
   const i = layers.findIndex(l => l.classList.contains('on')); layers[i].classList.remove('on'); layers[(i + 1) % layers.length].classList.add('on');
 }
 
-function photoItems(s) { return s.photos.map(id => D.photoById[id]).filter(Boolean).map(p => ({ photo: p, styleId: s.id })); }
+const photoItems = s => execItems(s);
 function action(a, s, tile) {
   if (a === 'photos') {
-    const items = photoItems(s);
-    if (!items.length) { const p = D.page(s.pages[0]); return openPhotos({ items: (p.spots.length ? p.spots : [{ r: [0, 0, 1, 1] }]).map(x => ({ page: p.n, r: x.r, styleId: s.id })), title: s.name, sub: `From page ${p.n}`, fromRect: tile.getBoundingClientRect() }); }
-    openPhotos({ items, title: s.name, sub: `${items.length} project photos`, fromRect: tile.querySelector('.ph').getBoundingClientRect() });
+    const items = photoItems(s); if (!items.length) return;
+    openPhotos({ items, title: s.name, sub: `${items.length} photos`, fromRect: tile.querySelector('.ph').getBoundingClientRect() });
   }
   if (a === '3d') app.go('ar', { model: s.models[0], styleId: s.id });
   if (a === 'page') app.go('brochure', { page: s.pages[0] });
+  if (a === 'bp') import('./blueprint.mjs').then(m => m.openBlueprint(app, s.models[0], s));
 }
 
 // ── Detail ───────────────────────────────────────────────────────
@@ -154,11 +153,12 @@ async function openDetail(s, tile) {
   const el = document.createElement('div'); el.className = 'detail'; detailEl = el;
   el.innerHTML = `
     <button class="iconbtn back" aria-label="Back to styles">${icons.back}</button>
-    <div class="hero"><div class="img" style="background-image:${imgs[0]};${s.photos.length ? '' : 'background-size:contain;background-color:#f6f6f4'}"></div></div>
+    <div class="hero">${imgs.length ? `<div class="img" style="background-image:${imgs[0]}"></div>` : `<div class="img">${NOPHOTO}</div>`}</div>
     <div class="inner">
       <div><div class="eyebrow">${esc(fam.name.toUpperCase())}</div><h1>${esc(s.name)}</h1><p class="lead">${esc(s.line)}</p></div>
       <div class="acts">
         ${s.models.length ? `<button class="btn primary" data-act="ar">${icons.ar} Place it in the yard</button><button class="btn blue" data-act="3d">${icons.cube} Spin it in 3D</button>` : ''}
+        ${s.models.length ? `<button class="btn" data-act="bp">${icons.blueprint} Blueprint</button>` : ''}
         ${items.length ? `<button class="btn" data-act="photos">${icons.photos} ${items.length} photos</button>` : ''}
         <button class="btn ghost" data-act="page">${icons.book} Brochure p.${s.pages[0]}</button>
       </div>
@@ -171,20 +171,22 @@ async function openDetail(s, tile) {
         <div style="display:grid;gap:18px;align-content:start">
           ${s.colors ? `<div class="panel"><h3>Colors</h3><div class="opts">${s.colors.map(c => `<span class="chip">${COLOR[c] ? `<i style="width:16px;height:16px;border-radius:50%;background:${COLOR[c]};box-shadow:0 0 0 2px rgba(255,255,255,.2)"></i>` : ''}${esc(c)}</span>`).join('')}</div></div>` : ''}
           ${s.options ? `<div class="panel"><h3>${s.family === 'wood' ? 'Lumber' : 'Options'}</h3><div class="opts">${s.options.map(o => `<span class="chip">${esc(o)}</span>`).join('')}</div></div>` : ''}
+          ${s.models.length ? `<div class="panel"><h3>Blueprints <span class="mono" style="font-size:12px;color:var(--mute)">${s.models.length}</span></h3><div class="opts">${s.models.map(m => `<button class="chip" data-bp="${esc(m)}">${icons.blueprint.replace('<svg', '<svg width="14" height="14"')} ${esc(m)}</button>`).join('')}</div></div>` : ''}
           ${s.models.length ? `<div class="panel"><h3>3D models <span class="mono" style="font-size:12px;color:var(--mute)">${s.models.length}</span></h3><div class="opts">${s.models.map(m => `<button class="chip" data-model="${esc(m)}">${icons.cube.replace('<svg', '<svg width="14" height="14"')} ${esc(m)}</button>`).join('')}</div></div>` : ''}
           <div class="panel"><h3>In the brochure</h3><div class="pages">${s.pages.map(n => `<button data-page="${n}"><span class="th" style="background-image:url('${pageImg(n)}')"></span><small>P.${n} · ${esc(D.page(n).title)}</small></button>`).join('')}</div></div>
         </div>
       </div>
+      ${items.length ? '' : `<div class="panel"><h3>Photos</h3><p style="margin:0;color:var(--dim)">No photo available. Add photos to ${s.models.length ? 'this style' : 'a matching style'} in the Executive App and they show up here.</p></div>`}
       ${items.length ? `<div class="panel"><h3>Photos <span class="mono" style="font-size:12px;color:var(--mute)">${items.length}</span></h3><div class="gal">${items.slice(0, 48).map((it, i) => `<button data-photo="${i}" style="background-image:${cssUrl(it.photo.th)}" aria-label="${esc(it.photo.alt)}"></button>`).join('')}</div></div>` : ''}
       <p class="src">Specs from the GFS brochure and supplier drawings. Final layout, heights and materials are confirmed in your written quote.</p>
     </div>`;
   document.body.append(el);
   const hero = $('.hero', el).getBoundingClientRect();
-  if (tile && !reduced.matches) {
+  if (tile && imgs.length && !reduced.matches) {
     $('.hero .img', el).style.opacity = '0';
     const from = tile.getBoundingClientRect();
     requestAnimationFrame(() => el.classList.add('on'));
-    const f = await fly({ from, to: { left: 0, top: 0, width: innerWidth, height: hero.height }, bg: imgs[0], size: s.photos.length ? 'cover' : 'contain', ms: 560, radius: [26, 0] });
+    const f = await fly({ from, to: { left: 0, top: 0, width: innerWidth, height: hero.height }, bg: imgs[0], size: 'cover', ms: 560, radius: [26, 0] });
     $('.hero .img', el).style.opacity = ''; f.remove();
   } else requestAnimationFrame(() => el.classList.add('on'));
   el.onclick = e => {
@@ -192,11 +194,13 @@ async function openDetail(s, tile) {
     if (b.classList.contains('back')) return closeDetail();
     if (b.dataset.act === 'ar') { closeDetail(true); app.go('ar', { model: s.models[0], styleId: s.id, ar: true }); }
     if (b.dataset.act === '3d') { closeDetail(true); app.go('ar', { model: s.models[0], styleId: s.id }); }
-    if (b.dataset.act === 'photos') openPhotos({ items, title: s.name, sub: `${items.length} project photos` });
+    if (b.dataset.act === 'photos') openPhotos({ items, title: s.name, sub: `${items.length} photos` });
+    if (b.dataset.act === 'bp') import('./blueprint.mjs').then(m => m.openBlueprint(app, s.models[0], s));
+    if (b.dataset.bp) import('./blueprint.mjs').then(m => m.openBlueprint(app, b.dataset.bp, s));
     if (b.dataset.act === 'page') { closeDetail(true); app.go('brochure', { page: s.pages[0] }); }
     if (b.dataset.page) { closeDetail(true); app.go('brochure', { page: +b.dataset.page }); }
     if (b.dataset.model) { closeDetail(true); app.go('ar', { model: b.dataset.model, styleId: s.id }); }
-    if (b.dataset.photo) openPhotos({ items, index: +b.dataset.photo, title: s.name, sub: `${items.length} project photos`, fromRect: b.getBoundingClientRect() });
+    if (b.dataset.photo) openPhotos({ items, index: +b.dataset.photo, title: s.name, sub: `${items.length} photos`, fromRect: b.getBoundingClientRect() });
   };
   // parallax hero
   el.addEventListener('scroll', () => { const y = el.scrollTop; $('.hero .img', el).style.transform = `translateY(${y * .4}px) scale(${1 + Math.min(.15, y / 2000)})`; }, { passive: true });

@@ -6,7 +6,9 @@ let app, el, state = null;
 
 export function initPhotos(a) { app = a; }
 
-// item: { photo } (a data.photos record) or { page, r } (a crop of a brochure page)
+// item: { photo } (an Executive App style photo, see execItems) or { page, r } (a crop of a brochure page)
+// Executive App photos for a style tile, as explorer items.
+export function execItems(s) { return s ? app.photosFor(s.models).map((url, i) => ({ photo: { id: url, th: url, full: url, alt: `${s.name} photo ${i + 1}` }, styleId: s.id })) : []; }
 function aspectOf(it) { return it.page ? (it.r[2] * 900) / (it.r[3] * 1165) : (it.photo?.w && it.photo?.h ? it.photo.w / it.photo.h : 4 / 3); }
 export function cropStyle(page, r) {
   const [x, y, w, h] = r;
@@ -15,16 +17,13 @@ export function cropStyle(page, r) {
 function styleOf(it) {
   const d = app.data;
   if (it.styleId) return d.styleById[it.styleId];
-  if (it.photo) return d.styles.find(s => s.photos.includes(it.photo.id));
+  if (it.photo) return d.styles.find(s => app.photosFor(s.models).includes(it.photo.id));
   if (it.page) return d.styles.find(s => s.pages.includes(it.page));
 }
-export function similar(photo, styleId) {
-  const d = app.data;
-  const fam = m => (m === 'cedar' ? 'wood' : m);
-  let list = photo ? d.photos.filter(p => p.id !== photo.id && p.tag && p.tag === photo.tag && fam(p.m) === fam(photo.m)) : [];
-  const s = styleId ? d.styleById[styleId] : photo ? d.styles.find(x => x.photos.includes(photo.id)) : null;
-  if (s) for (const id of s.photos) if (id !== photo?.id && !list.some(p => p.id === id)) list.push(d.photoById[id]);
-  return list.filter(Boolean).slice(0, 60);
+// Similar = Executive App photos of the other styles in the same material.
+export function similar(styleId) {
+  const d = app.data, s = d.styleById[styleId]; if (!s) return [];
+  return d.styles.filter(x => x.family === s.family && x.id !== s.id).flatMap(x => execItems(x).slice(0, 6)).slice(0, 60);
 }
 
 function fitRect(aspect, box) {
@@ -86,7 +85,7 @@ function select(i, scrollStrip = true) {
   // swap in the full-size photo for the current slide and its neighbours
   for (const j of [i, i + 1, i - 1]) { const img = $(`.px-slide[data-i="${j}"] img`, el); if (img && img.src !== location.origin + img.dataset.full) img.src = img.dataset.full; }
   const s = styleOf(it), d = app.data;
-  const cap = it.photo ? `<b>${esc(it.photo.tag || d.familyById[s?.family]?.name || 'Project photo')}</b> · ${esc(it.photo.alt)}` : `<b>From page ${it.page}</b> · ${esc(d.page(it.page).title)}`;
+  const cap = it.photo ? `<b>${esc(s?.name || 'Style photo')}</b> · ${esc(d.familyById[s?.family]?.name || '')}` : `<b>From page ${it.page}</b> · ${esc(d.page(it.page).title)}`;
   $('.px-cap', el).innerHTML = cap + (state.items.length > 1 ? ` <span class="mono" style="color:var(--mute)">${i + 1}/${state.items.length}</span>` : '');
   for (const b of el.querySelectorAll('.px-strip button')) b.classList.toggle('on', +b.dataset.i === i);
   if (scrollStrip) el.querySelector(`.px-strip button[data-i="${i}"]`)?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' });
@@ -94,7 +93,8 @@ function select(i, scrollStrip = true) {
   const acts = [];
   if (s) acts.push(`<button class="btn blue sm" data-a="style">${icons.photos} ${esc(s.name)}</button>`);
   if (s?.models?.length) acts.push(`<button class="btn sm" data-a="3d">${icons.cube} See in 3D</button>`);
-  if (it.photo && similar(it.photo).length && !state.similarOf) acts.push(`<button class="btn sm" data-a="similar">${icons.layers} Similar</button>`);
+  if (s && !state.similarOf && similar(s.id).length) acts.push(`<button class="btn sm" data-a="similar">${icons.layers} Similar</button>`);
+  if (s?.models?.length) acts.push(`<button class="btn sm" data-a="bp">${icons.blueprint} Blueprint</button>`);
   if (!it.page && s?.pages?.length) acts.push(`<button class="btn ghost sm" data-a="page">${icons.book} Page ${s.pages[0]}</button>`);
   const box = $('.px-acts', el); box.innerHTML = acts.join('');
   box.onclick = e => {
@@ -102,7 +102,8 @@ function select(i, scrollStrip = true) {
     if (a === 'style') { close(); app.go('styles', { style: s.id, detail: true }); }
     if (a === '3d') { close(); app.go('ar', { model: s.models[0], styleId: s.id }); }
     if (a === 'page') { close(); app.go('brochure', { page: s.pages[0] }); }
-    if (a === 'similar') { const list = similar(it.photo); openPhotos({ items: [it, ...list.map(p => ({ photo: p }))], index: 0, title: 'Similar to this', sub: `${list.length} more photos`, similarOf: it.photo.id }); }
+    if (a === 'similar') { const list = similar(s.id); openPhotos({ items: list, index: 0, title: `More ${d.familyById[s.family].name.toLowerCase()}`, sub: `${list.length} photos from other styles`, similarOf: s.id }); }
+    if (a === 'bp') import('./blueprint.mjs').then(m => m.openBlueprint(app, s.models[0], s));
   };
 }
 

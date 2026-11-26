@@ -4,7 +4,7 @@
 //  • pinch in to zoom (high-res pages swap in), double-tap to zoom to a spot
 //  • pinch out to fly every page into a flowing deck with search
 import { $, $$, esc, clamp, pageImg, icons, spring, tween, ring, fly, tokens, snippet, reduced, toast, cssUrl, asset } from './ui.mjs';
-import { initPhotos, openPhotos, similar } from './photos.mjs';
+import { initPhotos, openPhotos, execItems } from './photos.mjs';
 
 const N_STRIPS = 12, ASPECT = 900 / 1165;
 let app, root, D;
@@ -338,12 +338,11 @@ function openSpot(n, i, slot) {
   const page = D.page(n), sp = page.spots[i], r = slot.getBoundingClientRect();
   const from = { left: r.left + sp.r[0] * r.width, top: r.top + sp.r[1] * r.height, width: sp.r[2] * r.width, height: sp.r[3] * r.height };
   const first = { page: n, r: sp.r };
-  const photo = sp.photo ? D.photoById[sp.photo] : null;
-  const style = (photo && D.styles.find(s => s.photos.includes(photo.id) && s.pages.includes(n))) || D.styles.find(s => s.pages.includes(n)) || (photo && D.styles.find(s => s.photos.includes(photo.id)));
-  const more = (photo ? similar(photo, style?.id) : style ? style.photos.map(id => D.photoById[id]) : []).filter(Boolean);
+  const style = D.styles.find(s => s.pages.includes(n) && s.models.length) || D.styles.find(s => s.pages.includes(n));
+  const more = execItems(style);
   const others = page.spots.filter((_, j) => j !== i).map(s => ({ page: n, r: s.r }));
   const sid = style?.id;
-  openPhotos({ items: [first, ...(photo ? [{ photo }] : []), ...others, ...more.slice(0, 40).map(p => ({ photo: p }))].map(it => ({ ...it, styleId: sid })), index: 0, title: style ? style.name : page.title, sub: `Page ${n} · ${more.length ? more.length + ' more like this' : page.section}`, fromRect: from });
+  openPhotos({ items: [first, ...others, ...more.slice(0, 40)].map(it => ({ ...it, styleId: sid })), index: 0, title: style ? style.name : page.title, sub: `Page ${n} · ${more.length ? more.length + ' style photos' : page.section}`, fromRect: from });
 }
 
 // ── Overview: every page, flowing deck, search ───────────────────
@@ -456,7 +455,7 @@ function search(q) {
   const flat = groups.map(g => g[0]);
   const box = document.createElement('div'); box.className = 'results';
   let html = '';
-  if (styles.length) html += `<h4>STYLES</h4>` + styles.map(({ s }) => { const ph = D.photoById[s.photos[0]]; return `<button class="res" data-style="${esc(s.id)}"><span class="th ph" style="background-image:${ph ? cssUrl(ph.th) : `url('${pageImg(s.pages[0])}')`}"></span><span><b>${esc(s.name)}</b><small>${esc(D.familyById[s.family].name)} · ${esc(s.line)}</small></span><span class="pg">${icons.next}</span></button>`; }).join('');
+  if (styles.length) html += `<h4>STYLES</h4>` + styles.map(({ s }) => { const ph = app.photosFor(s.models)[0]; return `<button class="res" data-style="${esc(s.id)}"><span class="th ph" style="background-image:${ph ? cssUrl(ph) : `url('${pageImg(s.pages[0])}')`}"></span><span><b>${esc(s.name)}</b><small>${esc(D.familyById[s.family].name)} · ${esc(s.line)}</small></span><span class="pg">${icons.next}</span></button>`; }).join('');
   if (towns.length) html += `<h4>FENCE RULES</h4>` + towns.map(t => `<button class="res" data-town="${esc(t.id)}"><span class="th ph" style="display:grid;place-items:center;background:rgba(61,127,224,.18);color:var(--blue-lt)">${icons.map}</span><span><b>${esc(t.name)}, ${esc(t.state)}</b><small>${t.front != null ? `Front ${t.front} ft · ` : ''}${t.side != null ? `Side/rear ${t.side} ft · ` : ''}${esc(t.permit)}</small></span><span class="pg">MAP</span></button>`).join('');
   if (pages.length) html += `<h4>${pages.length} BROCHURE PAGE${pages.length > 1 ? 'S' : ''}</h4>` + pages.slice(0, 40).map(({ p }) => `<button class="res" data-n="${p.n}"><span class="th" style="background-image:url('${pageImg(p.n)}')"></span><span><b>${esc(p.title)}</b><small>${snippet(p.text || p.title, flat)}</small></span><span class="pg">P.${p.n}</span></button>`).join('');
   if (!html) html = `<div class="empty">Nothing in the brochure matches “${esc(q)}”.</div>`;

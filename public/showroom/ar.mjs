@@ -40,6 +40,7 @@ export async function init(a, el) {
       <div class="ar-row" id="arLayouts">${LAYOUTS.map(l => `<button class="chip" data-l="${l.id}">${esc(l.name)}</button>`).join('')}</div>
       <div class="ar-go">
         <button class="btn primary" id="arGo">${icons.ar} <span>Place it in the yard</span></button>
+        <button class="btn" id="arBp">${icons.blueprint} Blueprint</button>
         <button class="btn blue" id="arStyle" hidden>${icons.photos} Style</button>
       </div>
       <div class="ar-status" id="arStatus"></div>
@@ -47,6 +48,7 @@ export async function init(a, el) {
   frame = $('iframe', root);
   $('#arPick', root).onclick = picker;
   $('#arLayouts', root).onclick = e => { const b = e.target.closest('[data-l]'); if (b) { state.layout = b.dataset.l; load(); } };
+  $('#arBp', root).onclick = () => import('./blueprint.mjs').then(m => m.openBlueprint(app, state.model, state.styleId ? D.styleById[state.styleId] : null));
   $('#arStyle', root).onclick = () => state.styleId && app.go('styles', { style: state.styleId, detail: true });
   $('#arGo', root).addEventListener('click', goAR);
   addEventListener('message', e => {

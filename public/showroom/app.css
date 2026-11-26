@@ -398,3 +398,36 @@ h1,h2,h3{font-family:var(--disp);margin:0;letter-spacing:-.01em;text-wrap:balanc
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .atmos::after{display:none}
 }
+
+/* No photo available (photos come from the Executive App) */
+.nophoto{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:8px;text-align:center;padding:24px 24px 45%;color:var(--dim);background:repeating-linear-gradient(135deg,rgba(150,190,240,.05) 0 2px,transparent 2px 14px),linear-gradient(180deg,#132a44,#0a1522)}
+.nophoto svg{width:54px;height:54px;color:var(--blue-lt);opacity:.7}
+.nophoto b{font:700 18px/1.2 var(--disp);color:var(--text)}
+.nophoto small{font-size:14px}
+.detail .hero .nophoto{padding-bottom:120px}
+
+/* Blueprint viewer */
+.bp{position:fixed;inset:0;z-index:75;display:flex;flex-direction:column;background:rgba(4,8,14,0);transition:background .35s var(--ease)}
+.bp.on{background:rgba(4,8,14,.95);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.bp-top{display:flex;align-items:center;gap:12px;padding:calc(var(--sat) + 10px) 14px 10px}
+.bp-top .grow{flex:1;min-width:0}.bp-top h3{font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bp-stage{position:relative;flex:1;margin:0 12px;border-radius:16px;overflow:hidden;background:#0b1622;border:1px solid var(--line-2)}
+.bp-sheet{position:absolute;inset:0;display:grid;place-items:center;padding:10px;touch-action:none;opacity:0;transform:scale(.96);transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.bp-sheet.in{opacity:1;transform:none}
+.bp-sheet img{max-width:100%;max-height:100%;border-radius:4px;box-shadow:0 30px 80px rgba(0,0,0,.6);transform-origin:50% 50%}
+.bp-load{position:absolute;inset:0;z-index:2;display:grid;place-content:center;gap:18px;background:radial-gradient(ellipse at 50% 40%,#16314f,#0a1522);overflow:hidden}
+.bp-load::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(140,199,255,.09) 1px,transparent 1px) 0 0/24px 24px,linear-gradient(90deg,rgba(140,199,255,.09) 1px,transparent 1px) 0 0/24px 24px}
+.bp-scan{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--blue-lt),transparent);box-shadow:0 0 20px var(--blue-lt);animation:bpscan 2.2s ease-in-out infinite}
+@keyframes bpscan{0%{top:8%}50%{top:92%}100%{top:8%}}
+.bp-load ol{position:relative;list-style:none;margin:0;padding:0;display:grid;gap:12px;font:500 14px/1.3 var(--mono);color:var(--mute)}
+.bp-load li{display:flex;gap:10px;align-items:center;transition:color .3s}
+.bp-load li::before{content:"";width:10px;height:10px;border-radius:50%;border:2px solid currentColor}
+.bp-load li.on{color:var(--blue-lt)}.bp-load li.on::before{animation:blink 1s infinite;background:currentColor}
+.bp-load li.done{color:var(--text)}.bp-load li.done::before{background:var(--ok);border-color:var(--ok)}
+.bp-load li.err{color:var(--warn);max-width:420px}
+.bp-models{padding:10px 14px calc(var(--sab) + 12px)}
+.bp:not(:has(.bp-models)) .bp-stage{margin-bottom:calc(var(--sab) + 12px)}
+.tile .ph .nophoto{inset:0;opacity:1;animation:none;background-size:auto}
+.bp-sheet{display:flex;align-items:center;justify-content:center}
+.bp-sheet img{width:auto;height:auto;max-width:100%;max-height:100%;object-fit:contain}
+.bp-models .chip{flex:none}

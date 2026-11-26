@@ -2,7 +2,7 @@
 import { $, $$, toast, vt, modal, esc, asset, pageImg } from './ui.mjs';
 
 const VERSION = 'showroom-1.0 (2026-11-25)';
-const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=publishedAt';
+const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
   brochure: () => import('./brochure.mjs'),
@@ -21,7 +21,6 @@ async function loadData() {
   const res = await fetch('data.json', { cache: 'no-cache' }).catch(() => null) || await caches.match('data.json');
   if (!res || !res.ok) throw Error('Showroom data could not load.');
   const data = await res.json();
-  data.photoById = Object.fromEntries(data.photos.map(p => [p.id, p]));
   data.styleById = Object.fromEntries(data.styles.map(s => [s.id, s]));
   data.familyById = Object.fromEntries(data.families.map(f => [f.id, f]));
   data.page = n => data.pages[n - 1];
@@ -40,15 +39,40 @@ async function loadLiveCatalog() {
     const ctl = new AbortController(); const timer = setTimeout(() => ctl.abort(), 8000);
     const res = await fetch(PUBLIC_CATALOG, { signal: ctl.signal }); clearTimeout(timer);
     if (!res.ok) throw Error('HTTP ' + res.status);
-    const doc = decodePublicCatalog(await res.json());
+    const raw = await res.json();
+    const doc = decodePublicCatalog(raw);
     const names = doc.styleNames || doc.names || [], specs = doc.styleSpecs || doc.specs || null;
     if (names.length) {
-      app.live = { names, specs, from: 'live', at: new Date().toISOString() };
-      try { localStorage.setItem('gfs-showroom-catalog', JSON.stringify({ names, specs, at: app.live.at })); } catch {}
+      const photos = readPhotos(raw), codes = readCodes(raw);
+      app.live = { names, specs, photos, codes, from: 'live', at: new Date().toISOString() };
+      try { localStorage.setItem('gfs-showroom-catalog', JSON.stringify({ names, specs, photos, codes, at: app.live.at })); } catch {}
       dispatchEvent(new CustomEvent('showroom:catalog'));
     }
   } catch (e) { console.info('[Showroom] live catalog not loaded:', e.message); }
 }
+
+// Style photos come only from the Executive App (settings/public.stylePhotos,
+// Firebase Storage stylePhotos/ objects). A style with none shows "No photo available".
+const STORAGE = /^https:\/\/firebasestorage\.googleapis\.com\/v0\/b\/[^/]+\/o\/stylePhotos%2F/;
+function readPhotos(raw) {
+  const out = {}, f = raw?.fields?.stylePhotos?.mapValue?.fields || {};
+  for (const [name, v] of Object.entries(f)) {
+    const urls = (v?.arrayValue?.values || []).map(x => x?.mapValue?.fields?.url?.stringValue || x?.stringValue).filter(u => typeof u === 'string' && STORAGE.test(u));
+    if (urls.length) out[name] = urls.slice(0, 20);
+  }
+  return out;
+}
+function readCodes(raw) {
+  const out = {}, f = raw?.fields?.styleCodes?.mapValue?.fields || {};
+  for (const [name, v] of Object.entries(f)) { const c = v?.stringValue || v?.mapValue?.fields?.code?.stringValue; if (typeof c === 'string' && /^[A-Z0-9-]{3,24}$/.test(c)) out[name] = c; }
+  return out;
+}
+// Executive App photos for a set of style names, first photo of each name first.
+app.photosFor = names => {
+  const P = app.live.photos || {}, lists = names.map(n => P[n] || []), out = [];
+  for (let i = 0; lists.some(l => l[i]); i++) for (const l of lists) if (l[i] && !out.includes(l[i])) out.push(l[i]);
+  return out;
+};
 
 function moveGlow(btn) {
   const glow = $('.dock .glow'), dock = $('.dock');
@@ -89,7 +113,7 @@ function settings() {
       <dt>Connection</dt><dd>${online ? 'Online' : 'Offline'}</dd>
       <dt>Style catalog</dt><dd>${esc(app.live.from)} · ${(app.live.names || d.models).length} models</dd>
       <dt>Brochure</dt><dd>${d.pages.length} pages</dd>
-      <dt>Project photos</dt><dd>${d.photos.length}</dd>
+      <dt>Style photos (Exec App)</dt><dd>${Object.values(app.live.photos || {}).reduce((n, l) => n + l.length, 0)}</dd>
       <dt>Fence rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
       <dt>Version</dt><dd>${esc(VERSION)}</dd>
     </dl>
@@ -112,11 +136,10 @@ async function saveOffline(progress) {
   if (!('caches' in window)) { toast('This browser cannot save files offline.'); return false; }
   const d = app.data, urls = new Set();
   for (const p of d.pages) { urls.add(pageImg(p.n)); urls.add(pageImg(p.n, true)); }
-  for (const p of d.photos) { urls.add(asset(p.th)); }
-  for (const s of d.styles) for (const id of s.photos.slice(0, 12)) { const p = d.photoById[id]; if (p) urls.add(asset(p.full)); }
+  for (const s of d.styles) for (const u of app.photosFor(s.models).slice(0, 12)) urls.add(u);
   for (const u of ['/x3d/fence3d.html', '/gfs/vendor/three.module.js', '/gfs/ar-model.mjs', '/gfs/website-model.mjs', '/gfs/studio-catalog.mjs', '/gfs/model-profiles.mjs', '/gfs/owner-model-corrections.mjs', '/gfs/model-review.mjs', '/gfs/fence-layers.mjs', '/gfs/vendor/usdzexporter.js', '/gfs/vendor/fflate.module.js', '/gfs/vendor/textureutils.js', '/assets/js/studio-public-catalog.mjs', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css']) urls.add(u);
   const cache = await caches.open('gfs-showroom-media-v1'), list = [...urls]; let done = 0, failed = 0;
-  const worker = async () => { while (list.length) { const u = list.shift(); try { if (!(await cache.match(u))) { const r = await fetch(u, { mode: u.startsWith('http') ? 'cors' : 'same-origin' }); if (r.ok) await cache.put(u, r); else failed++; } } catch { failed++; } progress(++done, urls.size); } };
+  const worker = async () => { while (list.length) { const u = list.shift(); try { if (!(await cache.match(u))) { const r = await fetch(u, { mode: u.includes('firebasestorage') ? 'no-cors' : u.startsWith('http') ? 'cors' : 'same-origin' }); if (r.ok || r.type === 'opaque') await cache.put(u, r); else failed++; } } catch { failed++; } progress(++done, urls.size); } };
   await Promise.all(Array.from({ length: 6 }, worker));
   try { localStorage.setItem('gfs-showroom-offline', new Date().toLocaleDateString()); } catch {}
   return failed === 0;
