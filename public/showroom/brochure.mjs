@@ -99,6 +99,9 @@ function layout() {
   paint();
 }
 
+// Pages that have a matching hands-on tool in the Fence Lab.
+const LAB_PAGES = { 5: 'build', 6: 'build', 22: 'build', 14: 'build', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'grade', 77: 'life', 31: 'vinyl', 32: 'vinyl', 36: 'vinyl', 7: 'frost' };
+const LAB_NAMES = { build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
 function setSlot(slot, n) {
   slot.innerHTML = '';
   if (!n) { slot.classList.add('blank'); slot.style.backgroundImage = 'none'; slot.dataset.n = ''; return; }
@@ -109,6 +112,8 @@ function setSlot(slot, n) {
     Object.assign(h.style, { left: sp.r[0] * 100 + '%', top: sp.r[1] * 100 + '%', width: sp.r[2] * 100 + '%', height: sp.r[3] * 100 + '%' });
     slot.append(h);
   }
+  const tool = LAB_PAGES[n];
+  if (tool) { const b = document.createElement('span'); b.className = 'lab-try'; b.dataset.tool = tool; b.innerHTML = `${icons.spark}<b>Try it</b><small>${LAB_NAMES[tool]} · Fence Lab</small>`; slot.append(b); }
 }
 
 function paint() {
@@ -120,6 +125,10 @@ function paint() {
   $('.n', els.pager).textContent = `${label} / ${D.pages.length}`;
   $('[data-p=heart]', els.pager).setAttribute('aria-pressed', String(visit.hasPage(spread ? (r || l) : cur)));
   els.bar.style.width = ((spread ? (r || l) : cur) / D.pages.length * 100) + '%';
+  // Page edges: the read pages stack up on the left, the rest on the right, like a real booklet.
+  const at = (spread ? (r || l) : cur) / D.pages.length;
+  els.book.style.setProperty('--edge-l', (1.5 + at * 9).toFixed(1) + 'px');
+  els.book.style.setProperty('--edge-r', (1.5 + (1 - at) * 9).toFixed(1) + 'px');
   try { localStorage.setItem('gfs-showroom-page', cur); } catch {}
   if (app.mode === 'brochure' && location.hash !== '#brochure-' + cur) history.replaceState(null, '', '#brochure-' + cur);
   // warm the next pages
@@ -323,6 +332,9 @@ function bindGestures() {
 
 function tap(x, y) {
   if (busy || overviewOn) return;
+  // "Try it" link to the Fence Lab?
+  const lab = document.elementFromPoint(x, y)?.closest('.lab-try');
+  if (lab) { ring(x, y); return app.go('lab', { tool: lab.dataset.tool }); }
   // photo hotspot?
   for (const slot of [els.l, els.r]) {
     if (!slot.dataset.n) continue;
@@ -350,21 +362,27 @@ function openSpot(n, i, slot) {
 
 // ── Overview: every page, flowing deck, search ───────────────────
 function buildOverview() {
-  els.rail.innerHTML = D.pages.map(p => `<button class="card" data-n="${p.n}" aria-label="Page ${p.n}: ${esc(p.title)}" style="background-image:url('${pageImg(p.n)}')"><span class="no">${p.n}</span></button>`).join('');
+  // The zoomed-out view is the booklet itself, open in 3D: a stack of pages on each side
+  // of the spine, the two open pages dipping into the gutter, and pages that riffle over
+  // the spine as you swipe. Each leaf carries two pages, front (odd) and back (even).
+  els.flow.classList.add('book3d');
+  const leaves = Math.ceil(D.pages.length / 2);
+  els.rail.className = 'b3';
+  els.rail.innerHTML = `<div class="b3-shadow"></div><div class="b3-cover l"></div><div class="b3-cover r"></div>` +
+    Array.from({ length: leaves }, (_, j) => { const f = 2 * j + 1, b = 2 * j + 2;
+      return `<div class="leaf3" data-j="${j}"><div class="face front" data-n="${f}" role="button" aria-label="Page ${f}: ${esc(D.page(f).title)}"><i class="shade"></i><span class="no">${f}</span></div>${b <= D.pages.length ? `<div class="face back" data-n="${b}" role="button" aria-label="Page ${b}: ${esc(D.page(b).title)}"><i class="shade"></i><span class="no">${b}</span></div>` : ''}</div>`; }).join('');
+  bindBook();
   const secs = []; for (const p of D.pages) if (!secs.some(s => s.name === p.section)) secs.push({ name: p.section, n: p.n });
   els.chips.innerHTML = secs.map(s => `<button class="chip" data-n="${s.n}">${esc(s.name)} <span class="n">${s.n}</span></button>`).join('');
   els.ticks.innerHTML = D.pages.map(p => `<i data-n="${p.n}" class="${secs.some(s => s.n === p.n) ? 'sec' : ''}"></i>`).join('');
-  let raf = 0;
-  els.flow.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(coverflow); }, { passive: true });
-  els.rail.onclick = e => { const c = e.target.closest('.card'); if (c) pickPage(+c.dataset.n, c); };
   els.chips.onclick = e => { const c = e.target.closest('.chip'); if (c) scrollToCard(+c.dataset.n, true); };
   const scrubTo = x => { const r = els.ticks.getBoundingClientRect(); scrollToCard(Math.round(clamp((x - r.left) / r.width, 0, 1) * (D.pages.length - 1)) + 1, false); };
   els.scrub.addEventListener('pointerdown', e => { els.scrub.setPointerCapture(e.pointerId); scrubTo(e.clientX); els.scrub.onpointermove = ev => scrubTo(ev.clientX); });
   els.scrub.addEventListener('pointerup', () => { els.scrub.onpointermove = null; });
   // close the deck by pinching it back in, or tapping empty space
   let down = null;
-  els.ov.addEventListener('pointerdown', e => { down = (e.target === els.ov || e.target === els.flow || e.target === els.rail) ? { t: performance.now(), x: e.clientX, y: e.clientY } : null; });
-  els.ov.addEventListener('pointerup', e => { if (down && performance.now() - down.t < 300 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10 && els.flow.scrollLeft === (els.flow._sl ?? els.flow.scrollLeft)) closeOverview(); down = null; });
+  els.ov.addEventListener('pointerdown', e => { down = e.target === els.ov ? { t: performance.now(), x: e.clientX, y: e.clientY } : null; });
+  els.ov.addEventListener('pointerup', e => { if (down && performance.now() - down.t < 300 && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 10) closeOverview(); down = null; });
   els.ov.addEventListener('gestureend', e => { if (e.scale > 1.25) closeOverview(); });
   // search
   const x = $('.x', els.ov);
@@ -373,44 +391,93 @@ function buildOverview() {
   x.onclick = () => { els.input.value = ''; x.hidden = true; search(''); els.input.focus(); };
 }
 
-function centerCard() {
-  const fr = els.flow.getBoundingClientRect(), mid = fr.left + fr.width / 2;
-  let best = null, bd = 1e9;
-  for (const c of els.rail.children) { const r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
-  return best;
-}
-// The pinched-out view behaves like holding the booklet: one page big in the middle,
-// the edges of the pages before and after it showing, and a thumb flick riffles through.
+// ── 3D book ─────────────────────────────────────────────────────
+// bk.pos is how many leaves have been turned (continuous while a page is in the air).
+// At a whole number k the book is open to pages 2k (left) and 2k+1 (right).
+const bk = { pos: 0, w: 200, h: 260, anim: 0, v: 0 };
+const leafCount = () => Math.ceil(D.pages.length / 2);
+const posOf = n => Math.floor(n / 2);
+const focusPage = () => { const k = Math.round(bk.pos), right = 2 * k + 1; return right <= D.pages.length ? right : 2 * k; };
+function centerCard() { return { dataset: { n: String(focusPage()) } }; }
 function sizeBooklet() {
   const fw = els.flow.clientWidth, fh = els.flow.clientHeight;
-  const cw = Math.max(140, Math.min(fw * (fw < 700 ? .76 : .5), (fh - 24) * 900 / 1165));
-  els.flow.style.setProperty('--cw', cw + 'px');
+  // two pages side by side, opened about 150°, have to fit the width; the height leaves room for the tilt
+  const h = Math.max(160, Math.min(fh * .74, (fw * .84) / (2 * ASPECT * .97)));
+  bk.h = Math.round(h); bk.w = Math.round(h * ASPECT);
+  els.flow.style.setProperty('--pw', bk.w + 'px'); els.flow.style.setProperty('--ph', bk.h + 'px');
 }
+const ease = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
 function coverflow() {
-  const fr = els.flow.getBoundingClientRect(), cw = els.rail.firstElementChild?.offsetWidth || 200, pitch = cw + 14;
-  for (const c of els.rail.children) {
-    const r = c.offsetLeft + c.offsetWidth / 2 - els.flow.scrollLeft - fr.width / 2;
-    const d = clamp(r / pitch, -4, 4), ad = Math.abs(d);
-    if (ad > 3.5) { c.style.visibility = 'hidden'; continue; }
-    c.style.visibility = '';
-    const turn = Math.min(1, ad);                         // a page lifts off the stack as it leaves the middle
-    c.style.transformOrigin = d > 0 ? '0% 50%' : '100% 50%';
-    c.style.transform = `perspective(1100px) translateX(${-Math.sign(d) * Math.max(0, ad - 1) * cw * .78}px) rotateY(${Math.sign(d) * (turn * 34 + Math.max(0, ad - 1) * 8)}deg) scale(${1 - turn * .05})`;
-    c.style.zIndex = String(100 - Math.round(ad * 10));
-    c.style.setProperty('--shade', (turn * .55 + Math.max(0, ad - 1) * .2).toFixed(2));
-    c.classList.toggle('mid', ad < .5);
+  const P = bk.pos, open = 30, step = 1.6, show = 10;
+  for (const el of els.rail.querySelectorAll('.leaf3')) {
+    const j = +el.dataset.j, f = clamp(P - j, 0, 1);            // 0 = lying on the right, 1 = turned to the left
+    const depth = f >= 1 ? (P - 1 - j) : f <= 0 ? (j - P) : 0;  // how far down its stack a page sits
+    if (depth > show) { el.style.display = 'none'; continue; }
+    el.style.display = '';
+    if (!el.dataset.img) { el.dataset.img = '1'; for (const fc of el.querySelectorAll('.face')) fc.style.backgroundImage = `url('${pageImg(+fc.dataset.n)}')`; }
+    const lift = Math.max(0, open - depth * step);              // pages lower in the stack lie a little flatter
+    const a = f <= 0 ? -lift : f >= 1 ? -(180 - lift) : -(open + (180 - 2 * open) * ease(f));
+    const bend = f > 0 && f < 1 ? Math.sin(Math.PI * f) : 0;
+    el.style.transform = `translate3d(0,0,${(-depth * .6).toFixed(2)}px) rotateY(${a.toFixed(2)}deg)`;
+    el.style.zIndex = String(500 - Math.round(depth * 10) + (bend ? 100 : 0));
+    el.style.setProperty('--sh', (bend * .45 + depth * .05).toFixed(3));
+    el.style.setProperty('--lift', (bend * 18).toFixed(1) + 'px');
   }
-  const c = centerCard(); if (!c) return;
-  const n = +c.dataset.n, p = D.page(n);
-  els.ovTitle.textContent = p.title; els.ovNo.textContent = `PAGE ${n} · ${p.section.toUpperCase()}`;
+  // covers sit just under the deepest pages
+  const turned = clamp(P, 0, leafCount());
+  $('.b3-cover.l', els.rail).style.transform = `rotateY(${-(180 - Math.max(0, 30 - 11 * 1.6) + 1.5)}deg)`;
+  $('.b3-cover.r', els.rail).style.transform = `rotateY(${-(Math.max(0, 30 - 11 * 1.6) - 1.5)}deg)`;
+  $('.b3-cover.l', els.rail).style.opacity = turned > .02 ? '1' : '0';
+  $('.b3-cover.r', els.rail).style.opacity = turned < leafCount() - .02 ? '1' : '0';
+  const n = focusPage(), p = D.page(n), k = Math.round(P), left = 2 * k, right = 2 * k + 1;
+  els.ovTitle.textContent = p.title;
+  els.ovNo.textContent = `PAGE${left >= 1 && right <= D.pages.length ? `S ${left}–${right}` : ` ${n}`} · ${p.section.toUpperCase()}`;
   els.knob.style.left = ((n - 1) / (D.pages.length - 1) * 100) + '%';
   for (const ch of els.chips.children) ch.setAttribute('aria-pressed', String(ch.textContent.trim().startsWith(p.section)));
 }
-function scrollToCard(n, smooth) {
-  const c = els.rail.children[n - 1]; if (!c) return;
-  const left = c.offsetLeft + c.offsetWidth / 2 - els.flow.clientWidth / 2;
-  els.flow.scrollTo({ left, behavior: smooth && !reduced.matches ? 'smooth' : 'auto' });
-  if (!smooth) coverflow();
+function setPos(p) { bk.pos = clamp(p, 0, leafCount()); coverflow(); }
+// Spring the book to a whole leaf; a fast flick riffles through several pages on the way.
+function settle(target) {
+  cancelAnimationFrame(bk.anim);
+  target = clamp(Math.round(target), 0, leafCount());
+  if (reduced.matches) return setPos(target);
+  let last = performance.now();
+  const stepF = now => {
+    const dt = Math.min(.032, (now - last) / 1000); last = now;
+    const k = 120, c = 2 * Math.sqrt(k) * .9;                    // nearly critically damped
+    bk.v += (-(bk.pos - target) * k - bk.v * c) * dt; bk.pos += bk.v * dt;
+    if (Math.abs(bk.pos - target) < .002 && Math.abs(bk.v) < .02) { bk.v = 0; return setPos(target); }
+    setPos(bk.pos); bk.anim = requestAnimationFrame(stepF);
+  };
+  bk.anim = requestAnimationFrame(stepF);
+}
+function scrollToCard(n, smooth) { const t = posOf(clamp(n, 1, D.pages.length)); if (smooth) settle(t); else { cancelAnimationFrame(bk.anim); bk.v = 0; setPos(t); } }
+function bindBook() {
+  let d = null;
+  els.flow.addEventListener('pointerdown', e => {
+    if (e.button > 0) return;
+    cancelAnimationFrame(bk.anim); bk.v = 0;
+    d = { x: e.clientX, y: e.clientY, p: bk.pos, t: performance.now(), hist: [[performance.now(), bk.pos]], moved: false };
+    els.flow.setPointerCapture(e.pointerId);
+  });
+  els.flow.addEventListener('pointermove', e => {
+    if (!d) return;
+    const dx = e.clientX - d.x; if (Math.abs(dx) > 6) d.moved = true;
+    setPos(d.p - dx / (bk.w * 1.15));                           // drag a page's width to turn one leaf
+    d.hist.push([performance.now(), bk.pos]); if (d.hist.length > 6) d.hist.shift();
+  });
+  const end = e => {
+    if (!d) return; const dd = d; d = null;
+    if (!dd.moved && performance.now() - dd.t < 400) {             // a tap opens the page you tapped
+      const face = document.elementsFromPoint(e.clientX, e.clientY).find(el => el.classList?.contains('face'));
+      if (face) return pickPage(+face.dataset.n, face);
+      return settle(bk.pos);
+    }
+    const [t0, p0] = dd.hist[0], [t1, p1] = dd.hist[dd.hist.length - 1], v = (p1 - p0) / Math.max(16, t1 - t0) * 1000; // leaves per second
+    bk.v = v; settle(bk.pos + v * .28);
+  };
+  els.flow.addEventListener('pointerup', end); els.flow.addEventListener('pointercancel', end);
+  els.flow.addEventListener('wheel', e => { e.preventDefault(); cancelAnimationFrame(bk.anim); setPos(bk.pos + (e.deltaX || e.deltaY) / (bk.w * 1.15)); clearTimeout(bk.wt); bk.wt = setTimeout(() => settle(bk.pos), 120); }, { passive: false });
 }
 
 async function openOverview({ fromPinch = false, focus = false } = {}) {
@@ -419,7 +486,7 @@ async function openOverview({ fromPinch = false, focus = false } = {}) {
   document.body.classList.remove('chrome-hidden'); chromeHidden = false;
   sizeBooklet(); scrollToCard(cur, false);
   const from = (els.r.dataset.n == cur ? els.r : els.l).getBoundingClientRect();
-  const card = els.rail.children[cur - 1];
+  const card = els.rail.querySelector(`.face[data-n="${cur}"]`);
   els.ov.classList.add('on');
   els.wrap.style.transition = 'opacity .35s'; els.wrap.style.opacity = '0';
   if (!reduced.matches && card) {
@@ -458,7 +525,7 @@ async function pickPage(n, fromEl) {
 function search(q) {
   $('.results', root)?.remove();
   for (const t of els.ticks.children) t.classList.remove('hit');
-  for (const c of els.rail.children) c.classList.remove('dim');
+  for (const c of els.rail.querySelectorAll('.face')) c.classList.remove('dim');
   const words = tokens(q); if (!words.length) return;
   const groups = words.map(w => SYN[w] || [w]);
   const hits = text => { const t = text.toLowerCase(); let s = 0; for (const g of groups) { const m = g.find(w => t.includes(w)); if (!m) return 0; s += 1; } return s; };
@@ -477,7 +544,7 @@ function search(q) {
   for (const { p } of pages) { els.ticks.children[p.n - 1]?.classList.add('hit'); }
   box.onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.flip !== undefined) { box.remove(); for (const c of els.rail.children) c.classList.toggle('dim', !pages.some(x => x.p.n === +c.dataset.n)); scrollToCard(pages[0].p.n, true); els.input.blur(); return; }
+    if (b.dataset.flip !== undefined) { box.remove(); for (const c of els.rail.querySelectorAll('.face')) c.classList.toggle('dim', !pages.some(x => x.p.n === +c.dataset.n)); scrollToCard(pages[0].p.n, true); els.input.blur(); return; }
     if (b.dataset.n) pickPage(+b.dataset.n, b.querySelector('.th'));
     if (b.dataset.style) { closeOverview(true); app.go('styles', { style: b.dataset.style, detail: true }); }
     if (b.dataset.town) { closeOverview(true); app.go('permits', { town: b.dataset.town }); }

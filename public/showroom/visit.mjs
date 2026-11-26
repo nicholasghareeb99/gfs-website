@@ -6,7 +6,7 @@ import { $, $$, esc, icons, toast, cssUrl, pageImg, modal } from './ui.mjs';
 
 const KEY = 'gfs-showroom-visit', OFFICE = '(419) 214-2107', OFFICE_TEL = '+14192142107';
 let app, D, v = blank(), listeners = new Set(), shared = null;
-function blank() { return { styles: [], pages: [], address: '', fence: null, customer: {}, sent: null, started: Date.now() }; }
+function blank() { return { styles: [], pages: [], lab: [], address: '', fence: null, customer: {}, sent: null, started: Date.now() }; }
 function load() { try { const x = JSON.parse(localStorage.getItem(KEY) || 'null'); if (x && Array.isArray(x.styles)) v = { ...blank(), ...x }; } catch {} }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {} listeners.forEach(f => f(v)); badge(); }
 
@@ -20,8 +20,13 @@ export const visit = {
   setAddress(a) { if (a && a !== v.address) { v.address = a; save(); } },
   // geometry: {lines:[[{lat,lng}…]], gates:[{lat,lng,type}]} — the ballpark tool's format
   setFence(fence) { v.fence = fence; save(); },
+  // Fence Lab tools shown during the visit, so the customer can replay them from the link.
+  addLab(id) { if (!LAB_IDS.includes(id) || v.lab.includes(id)) return; v.lab = [...v.lab, id]; save(); },
   count: () => v.styles.length + v.pages.length + (v.fence ? 1 : 0)
 };
+const LAB_IDS = ['build', 'grade', 'vinyl', 'wind', 'life', 'wood', 'frost', 'gate'];
+const LAB_NAME = { build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', wind: 'Wind', life: 'Lifespan', wood: 'Wood movement', frost: 'Frost & posts', gate: 'Gate sag' };
+const LAB_LINE = { build: 'A prefab panel and our King Plus fence, 15 years later', grade: 'How we keep the top line clean and close gaps on your slope', vinyl: 'What a thicker vinyl wall buys you', wind: 'How hard wind pushes on each style', life: 'How long each material lasts', wood: 'Why gaps open between boards', frost: 'Why post depth matters in clay', gate: 'Why gates sag, and how we stop it' };
 
 export function initVisit(a) {
   app = a; D = app.data; load();
@@ -44,13 +49,13 @@ const unb64 = s => decodeURIComponent(escape(atob(s.replace(/-/g, '+').replace(/
 function encode(x) {
   const r = n => Math.round(n * 1e6) / 1e6;
   const g = x.fence?.geometry ? { l: x.fence.geometry.lines.map(l => l.map(p => [r(p.lat), r(p.lng)])), g: (x.fence.geometry.gates || []).map(p => [r(p.lat), r(p.lng), p.type === 'drive' ? 1 : 0]) } : null;
-  return b64(JSON.stringify({ v: 1, s: x.styles, p: x.pages, a: x.address || '', f: g ? { ...g, m: x.fence.model || '', ft: x.fence.ft || 0 } : null, n: (x.customer?.name || '').split(' ')[0] }));
+  return b64(JSON.stringify({ v: 1, s: x.styles, p: x.pages, l: x.lab || [], a: x.address || '', f: g ? { ...g, m: x.fence.model || '', ft: x.fence.ft || 0 } : null, n: (x.customer?.name || '').split(' ')[0] }));
 }
 function decode(s) {
   const j = JSON.parse(unb64(s)); if (j.v !== 1) throw Error('version');
   const ok = id => typeof id === 'string' && D.styleById[id];
   const fence = j.f && Array.isArray(j.f.l) ? { geometry: { lines: j.f.l.slice(0, 100).map(l => l.slice(0, 300).map(([lat, lng]) => ({ lat: +lat, lng: +lng }))), gates: (j.f.g || []).slice(0, 40).map(([lat, lng, d]) => ({ lat: +lat, lng: +lng, type: d ? 'drive' : 'walk' })) }, model: D.models.includes(j.f.m) ? j.f.m : '', ft: +j.f.ft || 0 } : null;
-  return { styles: (j.s || []).filter(ok).slice(0, 20), pages: (j.p || []).map(Number).filter(n => n >= 1 && n <= D.pages.length).slice(0, 40), address: String(j.a || '').slice(0, 200), fence, customer: { name: String(j.n || '').slice(0, 40) }, readOnly: true };
+  return { styles: (j.s || []).filter(ok).slice(0, 20), pages: (j.p || []).map(Number).filter(n => n >= 1 && n <= D.pages.length).slice(0, 40), lab: (j.l || []).filter(id => LAB_IDS.includes(id)), address: String(j.a || '').slice(0, 200), fence, customer: { name: String(j.n || '').slice(0, 40) }, readOnly: true };
 }
 export function shareUrl(x = v) { return `${location.origin}/showroom/#visit=${encode(x)}`; }
 
@@ -74,6 +79,7 @@ export function openRecap(x = null) {
       <section><h3>Brochure pages <span class="mono">${data.pages.length}</span></h3>
         ${data.pages.length ? `<div class="pages">${data.pages.map(n => `<button data-page="${n}"><span class="th" style="background-image:url('${pageImg(n)}')"></span><small>P.${n} · ${esc(D.page(n).title)}</small></button>`).join('')}</div>`
           : `<p class="muted">${ro ? 'No pages picked.' : 'Tap the heart under the brochure to save a page.'}</p>`}</section>
+      ${(data.lab || []).length ? `<section><h3>From the Fence Lab <span class="mono">${data.lab.length}</span></h3><div class="lab-list">${data.lab.map(id => `<button class="lab-li" data-lab="${id}">${icons.spark}<span><b>${esc(LAB_NAME[id])}</b><small>${esc(LAB_LINE[id])}</small></span>${icons.next}</button>`).join('')}</div></section>` : ''}
       ${data.fence ? `<section><h3>Your fence</h3><p>${data.fence.ft ? `<b class="mono">${Math.round(data.fence.ft)} ft</b> of fence` : 'Fence layout'}${(data.fence.geometry.gates || []).length ? ` · ${data.fence.geometry.gates.length} gate${data.fence.geometry.gates.length > 1 ? 's' : ''}` : ''}${data.fence.model ? ` · ${esc(data.fence.model)}` : ''}</p>
         <div class="rs-acts"><button class="btn sm blue" data-fence3d>${icons.cube} See it in 3D</button>${ro ? '' : `<button class="btn sm" data-fencemap>${icons.map} Edit on the map</button>`}</div></section>` : ''}
       ${ro ? `<section class="recap-call"><h3>Questions?</h3><p>Call or text Ghareeb Fencing Solutions at <b class="mono">${OFFICE}</b>.</p>
@@ -93,6 +99,8 @@ export function openRecap(x = null) {
         </form></section>
       <section><div class="rs-acts"><button class="btn ghost" data-new>Start a new visit</button></div></section>`}
     </div>`;
+  // The customer's copy only shows what was actually picked.
+  if (ro) for (const h of $$('.recap-body section h3 .mono', el)) if (h.textContent.trim() === '0') h.closest('section').remove();
   document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
   const close = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 350); if (ro && location.hash.startsWith('#visit=')) history.replaceState(null, '', '#brochure'); };
   el.onclick = async e => {
@@ -104,6 +112,7 @@ export function openRecap(x = null) {
     if (b.dataset['3d']) { close(); app.go('ar', { model: s(b.dataset['3d']).models[0], styleId: b.dataset['3d'] }); }
     if (b.dataset.unheart) { visit.toggleStyle(b.dataset.unheart); el.remove(); openRecap(); }
     if (b.dataset.page) { close(); app.go('brochure', { page: +b.dataset.page }); }
+    if (b.dataset.lab) { close(); app.go('lab', { tool: b.dataset.lab, fromLink: ro }); }
     if (b.dataset.fence3d !== undefined) { close(); app.go('ar', { geometry: data.fence.geometry, model: data.fence.model || undefined }); }
     if (b.dataset.fencemap !== undefined) { close(); app.go('permits', {}); }
     if (b.dataset.send !== undefined) send();
@@ -140,14 +149,14 @@ async function saveLead(form) {
   if (c.reach === 'Email' && !/^\S+@\S+\.\S+$/.test(c.email || '')) bad.push('Add their email, since that is how they want to hear from us.');
   msg.className = 'lead-msg';
   if (bad.length) { msg.classList.add('bad'); msg.textContent = bad.join(' '); form.querySelector(!String(c.name || '').trim() ? '[name=name]' : '[name=phone]')?.focus({ preventScroll: true }); return; }
-  const sig = [c.name, c.phone, c.email, c.reach, c.notes, v.styles.join(), v.pages.join(), v.fence?.ft].join('|');
+  const sig = [c.name, c.phone, c.email, c.reach, c.notes, v.styles.join(), v.pages.join(), v.lab.join(), v.fence?.ft].join('|');
   if (v.customer.savedSig === sig) { msg.classList.add('ok'); msg.textContent = 'Already saved. Nothing has changed since.'; return; }
   msg.textContent = 'Saving…'; btn.disabled = true;
   try {
     const L = await loadLeads();
     const styles = v.styles.map(id => D.styleById[id]).filter(Boolean);
     const fam = styles[0] ? D.familyById[styles[0].family].short : '';
-    const notes = [c.notes, styles.length ? `Liked: ${styles.map(s => s.name).join(', ')}` : '', v.pages.length ? `Brochure pages: ${v.pages.join(', ')}` : '', `Showroom visit: ${shareUrl()}`].filter(Boolean).join('\n').slice(0, 1900);
+    const notes = [c.notes, styles.length ? `Liked: ${styles.map(s => s.name).join(', ')}` : '', v.pages.length ? `Brochure pages: ${v.pages.join(', ')}` : '', v.lab.length ? `Fence Lab: ${v.lab.map(id => LAB_NAME[id]).join(', ')}` : '', `Showroom visit: ${shareUrl()}`].filter(Boolean).join('\n').slice(0, 1900);
     const input = { name: c.name, phone: c.phone, email: c.email, address: c.address || v.address, contactMethod: c.reach, notes, source: 'showroom', heardFrom: 'Showroom visit', fenceType: fam, fenceStyle: v.fence?.model || styles.map(s => s.name).join(', ').slice(0, 190) };
     if (v.fence?.geometry?.lines?.length) { input.geometry = JSON.stringify(v.fence.geometry); input.linearFeet = Math.round(v.fence.ft || 0) || ''; input.singleGates = v.fence.geometry.gates.filter(g => g.type !== 'drive').length; input.doubleGates = v.fence.geometry.gates.filter(g => g.type === 'drive').length; }
     const r = await L.submit(input);

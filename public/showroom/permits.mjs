@@ -372,14 +372,14 @@ function fenceHTML(A, rule) {
   const style = `<label class="chip fence-style">Style <select data-fmodel><option value="">Pick a style…</option>${opts}</select></label>`;
   if (!cur.drawing) return `<div class="fence-box">${sum}${empty ? '' : style}${issues}<div class="where"><button class="btn sm ${empty ? 'primary' : ''}" data-draw>${icons.pen} ${empty ? 'Draw the fence' : 'Edit fence'}</button>${empty ? '' : `<button class="btn sm primary" data-3d>${icons.cube} See it in 3D</button><button class="btn sm" data-packet>${icons.blueprint} Permit packet</button>`}</div></div>`;
   return `<div class="fence-box on">
-    <p class="warnline" style="color:var(--copper-lt)">${cur.gateMode ? `Tap the fence line where the ${cur.gateMode} gate goes.` : 'Tap the map to set each corner post. Drag a post to move it.'}</p>
+    <p class="warnline" style="color:var(--copper-lt)">${cur.gateMode ? `Tap the fence line where the ${cur.gateMode} gate goes.` : empty && !cur.fence.runs.at(-1).length ? 'Tap the map where the first post goes.' : empty ? 'Now tap where the next corner post goes.' : 'Keep tapping to add corner posts, or add a gate. Drag a post to move it.'}</p>
     ${sum}${style}${issues}
     <div class="where tools-row">
-      <button class="btn sm" data-undo ${empty && !cur.fence.runs.at(-1).length ? 'disabled' : ''}>Undo</button>
-      <button class="btn sm" data-run ${cur.fence.runs.at(-1).length < 2 ? 'disabled' : ''}>New run</button>
-      <button class="btn sm ${cur.gateMode === 'walk' ? 'primary' : ''}" data-gate="walk" ${empty ? 'disabled' : ''}>+ Walk gate</button>
-      <button class="btn sm ${cur.gateMode === 'drive' ? 'primary' : ''}" data-gate="drive" ${empty ? 'disabled' : ''}>+ Drive gate</button>
-      <button class="btn sm ghost" data-clear ${empty ? 'disabled' : ''}>Clear</button>
+      <button class="btn sm" data-undo>Undo</button>
+      <button class="btn sm" data-run>New run</button>
+      <button class="btn sm ${cur.gateMode === 'walk' ? 'primary' : ''}" data-gate="walk">+ Walk gate</button>
+      <button class="btn sm ${cur.gateMode === 'drive' ? 'primary' : ''}" data-gate="drive">+ Drive gate</button>
+      <button class="btn sm ghost" data-clear>Clear</button>
       <button class="btn sm primary" data-done>Done</button>
     </div></div>`;
 }
@@ -387,10 +387,10 @@ function bindFence(el) {
   const on = (s, f) => { const b = $(s, el); if (b) b.onclick = f; };
   on('[data-draw]', () => setDrawing(true));
   on('[data-done]', () => setDrawing(false));
-  on('[data-undo]', () => { const r = cur.fence.runs; if (!r.at(-1).length && r.length > 1) r.pop(); else if (r.at(-1).length) r.at(-1).pop(); else cur.fence.gates.pop(); saveFence(); draw(); renderCard(); });
-  on('[data-run]', () => { cur.fence.runs.push([]); renderCard(); toast('Tap to start the next run.'); });
-  on('[data-clear]', () => { cur.fence = blankFence(); saveFence(); draw(); renderCard(); });
-  for (const b of $$('[data-gate]', el)) b.onclick = () => { cur.gateMode = cur.gateMode === b.dataset.gate ? null : b.dataset.gate; renderCard(); };
+  on('[data-undo]', () => { if (fenceEmpty() && !cur.fence.runs.at(-1).length) return toast('Nothing to undo yet.'); const r = cur.fence.runs; if (!r.at(-1).length && r.length > 1) r.pop(); else if (r.at(-1).length) r.at(-1).pop(); else cur.fence.gates.pop(); saveFence(); draw(); renderCard(); });
+  on('[data-run]', () => { if (cur.fence.runs.at(-1).length < 2) return toast('Put down at least two posts first. A new run starts a separate line of fence.'); cur.fence.runs.push([]); renderCard(); toast('Tap to start the next run.'); });
+  on('[data-clear]', () => { if (fenceEmpty() && !cur.fence.runs.at(-1).length) return toast('Nothing to clear yet.'); cur.fence = blankFence(); saveFence(); draw(); renderCard(); });
+  for (const b of $$('[data-gate]', el)) b.onclick = () => { if (fenceEmpty()) return toast('Tap at least two posts to make a line of fence first, then add the gate on it.'); cur.gateMode = cur.gateMode === b.dataset.gate ? null : b.dataset.gate; renderCard(); };
   const sel = $('[data-fmodel]', el); if (sel) sel.onchange = () => { cur.fenceModel = sel.value || null; saveFence(); draw(); renderCard(); };
   on('[data-3d]', () => { if (!cur.fenceModel) { toast('Pick a style first.'); return; } app.go('ar', { geometry: fenceGeometry(), model: cur.fenceModel }); });
   on('[data-packet]', async () => {
