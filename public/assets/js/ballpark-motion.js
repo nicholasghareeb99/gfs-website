@@ -18,8 +18,8 @@
   // Live readout in the hero, fed by the project summary
   const hero = $('.page-header--photo .ph__content');
   const HUD = [['length', 'Length', 'bp-summary-length'], ['style', 'Style', 'bp-summary-style'], ['gates', 'Gates', 'bp-summary-gates'], ['price', 'Range', null]];
-  let hud = null;
-  if (hero && !$('.bpm-hud')) {
+  let hud = $('.bpm-hud');
+  if (hero && !hud) {
     hud = document.createElement('div');
     hud.className = 'bpm-hud'; hud.setAttribute('aria-hidden', 'true');
     hud.innerHTML = HUD.map(([k, label]) => '<div class="bpm-hud__cell" data-k="' + k + '"><span class="bpm-hud__k">' + label + '</span><span class="bpm-hud__v">—</span></div>').join('');
