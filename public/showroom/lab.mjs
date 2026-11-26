@@ -10,6 +10,7 @@ let app, root, D, current = null, stop = null;
 
 const TOOLS = [
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by' },
+  { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps' },
   { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you' },
   { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style' },
   { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first' },
@@ -35,7 +36,7 @@ let fromLink = false;
 export function show(opts = {}) { fromLink = !!opts.fromLink; select(opts.tool || current || 'build', true); }
 export function hide() { stop?.(); stop = null; }
 
-const RENDER = { build, vinyl, wind, life, wood, frost, gate };
+const RENDER = { build, grade: gradeTool, vinyl, wind, life, wood, frost, gate };
 function select(id, force) {
   if (!RENDER[id]) id = 'build';
   if (id === current && !force && stop) return;
@@ -480,29 +481,67 @@ const PRE_PARTS = [
   { k: 'slope', n: 'Can\'t follow a slope', d: 'A rectangle panel stays level, so on a slope it leaves gaps underneath or gets stepped.' },
   { k: 'sag', n: 'Sags after a few years', d: 'The light frame racks and sags between posts.' }
 ];
+const GFS_PARTS_V = [
+  { k: 'steel', n: 'Driven steel inside every post', d: 'A galvanized steel post is driven 4 ft into the clay and the vinyl post goes over it. No concrete to lift in frost, and nothing gripping the vinyl at the ground.' },
+  { k: 'wall', n: 'Homeland .150″ post walls', d: 'Thicker walls than the big-box brand (.135″), so the post flexes less in wind and holds up longer.' },
+  { k: 'uv', n: 'ACCU-Shield UV protection', d: 'Made in the USA with UV protection built in, so it stays white instead of yellowing.' },
+  { k: 'grade', n: 'Slopes with the ground', d: 'Rails pass through the posts, so each section follows the grade with no stair-step gaps.' }
+];
+const PRE_PARTS_V = [
+  { k: 'footing', n: 'Post set in a concrete footing', d: 'The usual way: a vinyl post sunk in a concrete plug about 2.5 ft deep.' },
+  { k: 'heave', n: 'Footings lift in frost', d: 'Water gets in, freezes, and pushes the footing a little further out of line each year. Posts lift by different amounts, so the panels rack.' },
+  { k: 'crack', n: 'Cracks at the ground', d: 'Concrete grips the vinyl at the top of the footing, so that is where the post takes the strain. Thinner .135″ walls crack sooner.' },
+  { k: 'yellow', n: 'Yellows in the sun', d: 'Cheaper vinyl yellows faster in the sun.' },
+  { k: 'slope', n: 'Stepped on a slope', d: 'Level panels on sloped ground leave a gap underneath.' }
+];
+// Shared scenery for the side-by-side drawings: sky, tree line, soil with stones, grass, frost.
+const BLADES = Array.from({ length: 96 }, (_, i) => [((i * 37) % 7) - 3, 5 + ((i * 53) % 7)]);
+function scene(id, gy, fr, G, S) {
+  const gpath = `M0,${gy(0)} L380,${gy(380)} L380,460 L0,460 Z`;
+  return `<defs>
+    <linearGradient id="${id}sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0c2036"/><stop offset="1" stop-color="#21466b"/></linearGradient>
+    <linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6b4f36"/><stop offset=".4" stop-color="#4f3a28"/><stop offset="1" stop-color="#2a1e15"/></linearGradient>
+    <pattern id="${id}p" width="44" height="34" patternUnits="userSpaceOnUse"><ellipse cx="7" cy="9" rx="2.4" ry="1.6" fill="#a08c73" opacity=".55"/><ellipse cx="29" cy="5" rx="1.6" ry="1.2" fill="#2a1b10" opacity=".6"/><ellipse cx="20" cy="24" rx="3" ry="2" fill="#7d654b" opacity=".5"/><ellipse cx="38" cy="28" rx="1.4" ry="1" fill="#b39d80" opacity=".5"/><circle cx="12" cy="30" r="1" fill="#2a1b10" opacity=".5"/></pattern>
+    <pattern id="${id}i" width="12" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h8" stroke="#bfe3ff" stroke-width="2" opacity=".55"/></pattern>
+    <pattern id="${id}g" width="16" height="64" patternUnits="userSpaceOnUse"><path d="M4 0C6 16 2 32 5 64M11 0C9 22 13 40 10 64" stroke="rgba(90,55,25,.28)" stroke-width=".8" fill="none"/><ellipse cx="8" cy="40" rx="1.4" ry="2.6" fill="none" stroke="rgba(90,55,25,.3)" stroke-width=".7"/></pattern>
+    <linearGradient id="${id}s" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".16"/><stop offset=".45" stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>
+    <linearGradient id="${id}v" x1="0" x2="1"><stop offset="0" stop-color="#d9ddda"/><stop offset=".5" stop-color="#ffffff"/><stop offset="1" stop-color="#cfd4d1"/></linearGradient>
+    <linearGradient id="${id}st" x1="0" x2="1"><stop offset="0" stop-color="#9aa7b3"/><stop offset=".5" stop-color="#e8eef3"/><stop offset="1" stop-color="#8b98a4"/></linearGradient>
+    <linearGradient id="${id}c" x1="0" x2="1"><stop offset="0" stop-color="#8d959b"/><stop offset=".5" stop-color="#b9c0c4"/><stop offset="1" stop-color="#848c92"/></linearGradient>
+  </defs>
+  <rect width="380" height="460" fill="url(#${id}sky)"/>
+  <path d="M0,${G - 40} ${Array.from({ length: 20 }, (_, i) => `Q${i * 20 + 10},${G - 70 - ((i * 29) % 23)} ${i * 20 + 20},${G - 44 - ((i * 13) % 11)}`).join(' ')} L380,${G} L0,${G} Z" fill="#0a1a2a" opacity=".75"/>
+  <path d="${gpath}" fill="url(#${id})"/><path d="${gpath}" fill="url(#${id}p)"/>
+  ${fr.w > .05 ? `<path d="M0,${gy(0)} L380,${gy(380)} L380,${gy(380) + fr.depth} L0,${gy(0) + fr.depth} Z" fill="url(#${id}i)" opacity="${fr.w}"/><text x="370" y="${gy(380) + fr.depth - 6}" text-anchor="end" class="svg-l blue">FROST</text>` : ''}
+  <line x1="0" x2="380" y1="${G + 3 * S}" y2="${G + 3 * S}" stroke="#8cc7ff" stroke-dasharray="5 6" opacity=".55"/><text x="80" y="${G + 3 * S - 5}" class="svg-l blue">FROST LINE ~3 FT</text>
+  <path d="M0,${gy(0)} L380,${gy(380)}" stroke="#3f6b33" stroke-width="4"/>
+  <path d="${BLADES.map(([dx, h], i) => { const x = i * 4 + 1; return `M${x},${gy(x) + 1}q${dx * .4},${-h * .6} ${dx},${-h}`; }).join('')}" stroke="#4f8a3c" stroke-width="1.3" fill="none"/>`;
+}
 function build(body) {
-  const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false };
+  const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false, mat: 'wood' };
   body.innerHTML = `
     <div class="vs-grid">
-      <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Big-box prefab</span><b>Panel on 4×4 wood posts</b><small id="vsPreC"></small></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsPreS"></p></figure>
-      <figure class="vs-card gfs"><figcaption><span class="vs-tag good">GFS King Plus</span><b>Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
+      <figure class="vs-card pre"><figcaption><span class="vs-tag bad" id="vsPreT">Big-box prefab</span><b id="vsPreB">Panel on 4×4 wood posts</b><small id="vsPreC"></small></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsPreS"></p></figure>
+      <figure class="vs-card gfs"><figcaption><span class="vs-tag good" id="vsGfsT">GFS King Plus</span><b id="vsGfsB">Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
     </div>
     <div class="lab-ctl vs-ctl">
       <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play 15 years</button>${slider('yr', 'Years', 0, 15, .05, 0)}</div>
       <div class="vs-opts">
-        <div><div class="lab-label">Their posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2.5 ft']], st.set)}</div>
+        <div><div class="lab-label">Fence</div>${seg('mat', [['wood', 'Wood'], ['vinyl', 'Vinyl']], st.mat)}</div>
+        <div id="vsSet"><div class="lab-label">Their posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2.5 ft']], st.set)}</div>
         <div><div class="lab-label">Yard</div>${seg('slope', [['0', 'Flat'], ['1', 'Sloped']], '0')}</div>
       </div>
       <p class="vis-note-inline">Both drawn from the back, so you can see how each is built. Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
     </div>
     <div class="vs-parts">
-      <div class="lab-card"><div class="lab-label">What makes ours different (tap one)</div><div class="vs-list" id="vsG">${GFS_PARTS.map((p, i) => `<button class="vs-item" data-k="${p.k}"><i>${i + 1}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('')}</div></div>
-      <div class="lab-card"><div class="lab-label">What you get with prefab (tap one)</div><div class="vs-list" id="vsP">${PRE_PARTS.map((p, i) => `<button class="vs-item bad" data-k="${p.k}"><i>${String.fromCharCode(65 + i)}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('')}</div></div>
+      <div class="lab-card"><div class="lab-label">What makes ours different (tap one)</div><div class="vs-list" id="vsG"></div></div>
+      <div class="lab-card"><div class="lab-label" id="vsPL">What you get with prefab (tap one)</div><div class="vs-list" id="vsP"></div></div>
     </div>
     ${math(`<p><b>Why the wood post fails first</b>: decay needs air and water together. On a buried wood post that band is right at the soil line, or where the wood meets the top of the concrete, and that is where it breaks. A steel post has no wood underground.</p>
       <p><b>Why posts lift</b>: wet clay freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
       <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with an extra top rail holding the line.</p>
-      <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14 and 25). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
+      <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. A vinyl post over a driven steel post has no footing to lift.</p>
+      <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
   const pre = $('#vsPre', body), gfs = $('#vsGfs', body);
   const S = 34, G = 300; // px per ft, ground line
   const groundY = (x) => st.slope ? G - (x - 40) * 0.16 : G; // slope rises to the right
@@ -520,11 +559,8 @@ function build(body) {
     const sag = clamp((y - 3) / 10, 0, 1) * 16;
     const fade = clamp(y / 6, 0, 1);
     const hl = k => st.focus === k ? ' hl' : '';
-    const soil = (id) => `<defs><linearGradient id="${id}" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#5b4532"/><stop offset="1" stop-color="#2f2219"/></linearGradient><pattern id="${id}i" width="12" height="8" patternUnits="userSpaceOnUse"><path d="M0 4h8" stroke="#bfe3ff" stroke-width="2" opacity=".5"/></pattern></defs>
-      <rect width="380" height="460" fill="#0f2034"/>
-      <path d="M0,${groundY(0)} L380,${groundY(380)} L380,460 L0,460 Z" fill="url(#${id})"/>
-      ${fr.w > .05 ? `<path d="M0,${groundY(0)} L380,${groundY(380)} L380,${groundY(380) + fr.depth} L0,${groundY(0) + fr.depth} Z" fill="url(#${id}i)" opacity="${fr.w}"/><text x="370" y="${groundY(380) + fr.depth - 6}" text-anchor="end" class="svg-l blue">FROST</text>` : ''}
-      <line x1="0" x2="380" y1="${G + 3 * S}" y2="${G + 3 * S}" stroke="#8cc7ff" stroke-dasharray="5 6" opacity=".55"/><text x="80" y="${G + 3 * S - 5}" class="svg-l blue">FROST LINE ~3 FT</text>`;
+    const soil = id => scene(id, groundY, fr, G, S);
+    if (st.mat === 'vinyl') return drawVinyl(y, yi, fr, hl, fade);
     // ── prefab ──
     {
       const px = [56, 324], top = G - 6 * S, tilt = (x, yy, sgn) => [x + Math.sin(lean * sgn) * (G - yy), yy - heave];
@@ -547,7 +583,7 @@ function build(body) {
       for (const ry of rails) s += `<path d="M${x0},${ry} Q${(x0 + x1) / 2},${ry + sag * 2} ${x1},${ry}" stroke="#a48a5c" stroke-width="7" fill="none"/>`;
       const n = 15;
       for (let i = 0; i < n; i++) { const x = x0 + 3 + (x1 - x0 - 6) * i / (n - 1), dy = sagAt(x), cup = clamp((y - 2) / 10, 0, 1) * (i % 3 === 1 ? 4 : i % 4 === 0 ? -3 : 1);
-        s += `<rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="${mixHex('#d4bf8f', '#9a958c', fade)}" stroke="#6f5d3b" stroke-width=".7"/>`;
+        s += `<rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="${mixHex('#d4bf8f', '#9a958c', fade)}" stroke="#6f5d3b" stroke-width=".7"/><rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="url(#psg)"/><rect x="${x - 7.5 + cup}" y="${ptop + dy}" width="15" height="${lvl - ptop}" fill="url(#pss)"/>`;
         for (const ry of [rails[0], rails[2]]) s += `<rect x="${x - 2}" y="${ry + dy - 1}" width="4" height="2" fill="#5a5a5a"/>`; }
       s += `</g>`;
       s += `<g class="part${hl('gap')}">${px.map(x => `<rect x="${x + 6}" y="${ptop}" width="3" height="${lvl - ptop}" fill="#0f2034"/>`).join('')}</g>`;
@@ -567,7 +603,7 @@ function build(body) {
       s += `<g class="part${hl('pickets')}${hl('grade')}">`;
       const n = 17;
       for (let i = 0; i < n; i++) { const x = x0 + 9 + (x1 - x0 - 18) * i / (n - 1), b = lineAt(x, 3), tp = lineAt(x, 6 * S - 4);
-        s += `<rect x="${x - 8}" y="${tp}" width="16" height="${b - tp}" fill="${mixHex('#d4bf8f', '#a8a39a', fade)}" stroke="#6f5d3b" stroke-width=".7"/>`; }
+        s += `<path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="${mixHex('#d4bf8f', '#a8a39a', fade)}" stroke="#6f5d3b" stroke-width=".7"/><path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="url(#gsg)"/><path d="M${x - 8},${b} L${x + 8},${b} L${x + 8},${tp + 5} L${x + 4},${tp} L${x - 4},${tp} L${x - 8},${tp + 5} Z" fill="url(#gss)"/>`; }
       s += `</g>`;
       // steel post in the ground, wood box around it above ground
       for (const x of px) {
@@ -598,8 +634,69 @@ function build(body) {
   };
   $('#vsPlay', body).onclick = play;
   $('[name=yr]', body).oninput = e => { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; st.years = +e.target.value; draw(); };
-  bindSeg(body, (n, v) => { if (n === 'set') st.set = v; if (n === 'slope') st.slope = v === '1'; draw(); });
+  bindSeg(body, (n, v) => { if (n === 'set') st.set = v; if (n === 'slope') st.slope = v === '1'; if (n === 'mat') { st.mat = v; lists(); } draw(); });
+  lists();
   body.addEventListener('click', e => { const b = e.target.closest('.vs-item'); if (!b) return; st.focus = st.focus === b.dataset.k ? null : b.dataset.k; draw(); });
+  function lists() {
+    const v = st.mat === 'vinyl', G1 = v ? GFS_PARTS_V : GFS_PARTS, P1 = v ? PRE_PARTS_V : PRE_PARTS;
+    $('#vsG', body).innerHTML = G1.map((p, i) => `<button class="vs-item" data-k="${p.k}"><i>${i + 1}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('');
+    $('#vsP', body).innerHTML = P1.map((p, i) => `<button class="vs-item bad" data-k="${p.k}"><i>${String.fromCharCode(65 + i)}</i><span><b>${esc(p.n)}</b><small>${esc(p.d)}</small></span></button>`).join('');
+    $('#vsPL', body).textContent = v ? 'What you get with vinyl in concrete (tap one)' : 'What you get with prefab (tap one)';
+    $('#vsPreT', body).textContent = v ? 'Typical vinyl install' : 'Big-box prefab'; $('#vsPreB', body).textContent = v ? 'Vinyl post in concrete' : 'Panel on 4×4 wood posts';
+    $('#vsGfsT', body).textContent = v ? 'GFS vinyl' : 'GFS King Plus'; $('#vsGfsB', body).textContent = v ? 'Homeland over driven steel' : 'Driven steel, built board by board';
+    $('#vsSet', body).hidden = v; st.focus = null;
+  }
+  // Vinyl: big-box vinyl set in concrete vs Homeland over a driven steel post.
+  function drawVinyl(y, yi, fr, hl, fade) {
+    const soil = id => scene(id, groundY, fr, G, S), top = G - 6 * S, px = [56, 324], depth = 2.5 * S;
+    // competitor: each footing lifts a different amount every winter; posts tip; the panel racks
+    const h1 = Math.min(16, 1.1 * yi + 3 * fr.w), h2 = Math.min(10, .55 * yi + 1.6 * fr.w), hv = [h1, h2];
+    const lean = [Math.min(.05, .0045 * y), -Math.min(.03, .0025 * y)];
+    const crack = clamp((y - 4) / 6, 0, 1), yellow = clamp(y / 10, 0, 1);
+    let s = soil('pv');
+    const pw = 17;
+    const topOf = i => { const x = px[i], gy = groundY(x); return [x + Math.sin(lean[i]) * (gy - top), top - hv[i]]; };
+    for (const [i, x] of px.entries()) {
+      const gy = groundY(x), h = hv[i];
+      s += `<g class="part${hl('footing')}${hl('heave')}"><path d="M${x - 20},${gy - h} L${x + 20},${gy - h} L${x + 25},${gy + depth - h} L${x - 25},${gy + depth - h} Z" fill="url(#pvc)" stroke="#6f777d"/></g>`;
+      const [tx, ty] = topOf(i);
+      s += `<g class="part${hl('crack')}"><path d="M${x - pw / 2},${gy + depth * .8 - h} L${x + pw / 2},${gy + depth * .8 - h} L${tx + pw / 2},${ty} L${tx - pw / 2},${ty} Z" fill="${mixHex('#ffffff', '#efe3bd', yellow)}" stroke="#aab3b0"/>
+        <rect x="${tx - pw / 2 - 2}" y="${ty - 6}" width="${pw + 4}" height="7" rx="2" fill="${mixHex('#f7f7f5', '#ece0b8', yellow)}" stroke="#aab3b0"/>
+        ${crack > .05 ? `<path d="M${x - pw / 2 + 2},${gy - h - 2} l4,-6 l-3,-5 l5,-7 l-2,-6" stroke="#ef5b5b" stroke-width="${1 + crack}" fill="none" opacity="${crack}"/>` : ''}</g>`;
+    }
+    // panel hangs between the two posts at their (different) heights
+    const [ta, tb] = [topOf(0), topOf(1)], xa = ta[0] + pw / 2, xb = tb[0] - pw / 2;
+    const ya = ta[1] + 10, yb = tb[1] + 10, panelH = 6 * S - 26;
+    const lvlA = ya + panelH, lvlB = yb + panelH;
+    s += `<g class="part${hl('yellow')}"><path d="M${xa},${ya} L${xb},${yb} L${xb},${lvlB} L${xa},${lvlA} Z" fill="${mixHex('#fbfbf9', '#efe3bd', yellow)}"/>`;
+    for (let k = 1; k < 14; k++) { const t = k / 14, x = xa + (xb - xa) * t; s += `<line x1="${x}" y1="${ya + (yb - ya) * t + 14}" x2="${x}" y2="${lvlA + (lvlB - lvlA) * t - 12}" stroke="rgba(150,140,110,.45)" stroke-width=".8"/>`; }
+    for (const off of [0, panelH - 12]) s += `<path d="M${xa},${ya + off} L${xb},${yb + off} L${xb},${yb + off + 12} L${xa},${ya + off + 12} Z" fill="${mixHex('#f2f3f1', '#e6d9b2', yellow)}" stroke="rgba(150,150,140,.6)"/>`;
+    s += `</g>`;
+    if (st.slope) s += `<g class="part${hl('slope')}"><path d="M${xa},${lvlA} L${xb},${lvlB} L${xb},${groundY(xb)} L${xa},${groundY(xa)} Z" fill="#ef5b5b" opacity=".25"/><text x="190" y="${(lvlA + groundY(xa)) / 2 + 24}" text-anchor="middle" class="svg-l red">GAP UNDER THE PANEL</text></g>`;
+    else if (y > .5) { const ga = groundY(xa) - lvlA, gb = groundY(xb) - lvlB; if (Math.max(ga, gb) > 3) s += `<path d="M${xa},${lvlA} L${xb},${lvlB} L${xb},${groundY(xb)} L${xa},${groundY(xa)} Z" fill="#ef5b5b" opacity=".22"/>`; }
+    pre.innerHTML = s;
+    $('#vsPreC', body).textContent = 'Big-box vinyl, posts about 2.5 ft in concrete';
+    $('#vsPreS', body).textContent = y < .5 ? 'Looks fine the day it goes in.' : [h1 > 4 ? 'Footings lifting by different amounts, panel racking' : '', crack > .4 ? 'post cracking at the concrete' : '', yellow > .5 ? 'vinyl yellowing' : '', st.slope ? 'gap under the panel' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
+    // GFS: Homeland vinyl over a driven steel post, following the ground
+    let g2 = soil('gv');
+    const x0 = 56 + pw / 2, x1 = 324 - pw / 2, b0 = groundY(x0) - 6, b1 = groundY(x1) - 6, tt0 = b0 - (6 * S - 26), tt1 = b1 - (6 * S - 26);
+    g2 += `<g class="part${hl('grade')}${hl('uv')}"><path d="M${x0},${tt0} L${x1},${tt1} L${x1},${b1} L${x0},${b0} Z" fill="#fdfdfb"/>`;
+    for (let k = 1; k < 14; k++) { const t = k / 14, x = x0 + (x1 - x0) * t; g2 += `<line x1="${x}" y1="${tt0 + (tt1 - tt0) * t + 14}" x2="${x}" y2="${b0 + (b1 - b0) * t - 12}" stroke="rgba(140,150,160,.45)" stroke-width=".8"/>`; }
+    for (const off of [0, 6 * S - 38]) g2 += `<path d="M${x0},${tt0 + off} L${x1},${tt1 + off} L${x1},${tt1 + off + 12} L${x0},${tt0 + off + 12} Z" fill="#f2f3f1" stroke="rgba(140,150,160,.6)"/>`;
+    g2 += `</g>`;
+    for (const x of px) {
+      const gy = groundY(x), ptop = gy - 6 * S - 4;
+      g2 += `<g class="part${hl('steel')}"><rect x="${x - 5}" y="${ptop + 20}" width="10" height="${gy - ptop - 20 + 4 * S}" rx="2" fill="url(#gvst)" stroke="#eef3f7" stroke-width=".6"/><text x="${x}" y="${gy + 4 * S + 16}" text-anchor="middle" class="svg-l">4 FT</text></g>
+        <g class="part${hl('wall')}"><rect x="${x - pw / 2}" y="${ptop}" width="${pw}" height="${gy - ptop}" fill="url(#gvv)" stroke="#aab3b0" opacity=".9"/>
+        <rect x="${x - pw / 2 + 2}" y="${gy - 2.2 * S}" width="${pw - 4}" height="${1.6 * S}" rx="2" fill="#0f2034" opacity=".55"/><rect x="${x - 5}" y="${gy - 2.2 * S}" width="10" height="${1.6 * S}" fill="url(#gvst)"/>
+        <rect x="${x - pw / 2 - 2}" y="${ptop - 6}" width="${pw + 4}" height="7" rx="2" fill="#f7f7f5" stroke="#aab3b0"/></g>`;
+    }
+    g2 += `<text x="190" y="${G - 6 * S - 22}" text-anchor="middle" class="svg-l">CUTAWAY SHOWS THE STEEL POST INSIDE</text>`;
+    gfs.innerHTML = g2;
+    $('#vsGfsS', body).textContent = y < .5 ? 'Straight on day one.' : 'Still straight, square and white.';
+    $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${(y - yi) > .62 && (y - yi) < .98 && y > .5 ? ' · winter' : ''}`;
+    for (const b of $$('.vs-item', body)) b.classList.toggle('on', b.dataset.k === st.focus);
+  }
   draw();
   return () => { live = false; st.playing = false; cancelAnimationFrame(raf); };
 }
@@ -663,4 +760,12 @@ function vinyl(body) {
   $('[name=V]', body).oninput = e => { V = +e.target.value; if (reduced.matches) draw(); };
   tick();
   return () => { live = false; cancelAnimationFrame(raf); };
+}
+
+// Grade Lab lives in its own file; it loads the first time it's opened.
+function gradeTool(body) {
+  let stopFn = null, gone = false;
+  body.innerHTML = '<div class="lab-vis" style="min-height:320px;display:grid;place-items:center;color:var(--dim)">Loading Grade Lab…</div>';
+  import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt }); });
+  return () => { gone = true; stopFn?.(); };
 }

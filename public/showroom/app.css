@@ -751,3 +751,16 @@ body.present .top .brand{cursor:default}
 .lab-li:active{transform:scale(.98)}
 .lab-li svg{width:20px;height:20px;color:var(--copper-lt)}.lab-li>svg:last-child{width:16px;color:var(--dim)}
 .lab-li b{display:block;font-size:15px}.lab-li small{display:block;color:var(--dim);font-size:13px}
+
+/* ── Grade Lab ─────────────────────────────────────────────────── */
+.gl-stage{position:relative}
+.gl-cv{display:block;width:100%;height:clamp(250px,min(64vw,54vh),520px);touch-action:none;cursor:crosshair}
+.gl-hud{position:absolute;top:12px;left:12px;display:flex;gap:8px}
+.gl-hud>div{padding:8px 12px;border-radius:12px;background:rgba(6,12,20,.78);border:1px solid var(--line-2);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:grid}
+.gl-hud b{font-size:22px;line-height:1.05;color:var(--copper-lt)}.gl-hud small{font-size:11px;color:var(--dim)}
+.gl-tools{gap:14px}
+.gl-row{display:grid;gap:8px}
+@media (min-width:860px){.gl-tools{grid-template-columns:1fr 1fr}.gl-read{grid-column:1/-1;grid-template-columns:repeat(4,1fr)}}
+.gl-acts{display:flex;flex-wrap:wrap;gap:8px}
+.gl-acts .btn svg{width:15px;height:15px}
+.gl-acts .btn:disabled{opacity:.4}

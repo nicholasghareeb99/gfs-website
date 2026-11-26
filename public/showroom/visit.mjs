@@ -24,9 +24,9 @@ export const visit = {
   addLab(id) { if (!LAB_IDS.includes(id) || v.lab.includes(id)) return; v.lab = [...v.lab, id]; save(); },
   count: () => v.styles.length + v.pages.length + (v.fence ? 1 : 0)
 };
-const LAB_IDS = ['build', 'vinyl', 'wind', 'life', 'wood', 'frost', 'gate'];
-const LAB_NAME = { build: 'Our build vs prefab', vinyl: 'Vinyl walls', wind: 'Wind', life: 'Lifespan', wood: 'Wood movement', frost: 'Frost & posts', gate: 'Gate sag' };
-const LAB_LINE = { build: 'A prefab panel and our King Plus fence, 15 years later', vinyl: 'What a thicker vinyl wall buys you', wind: 'How hard wind pushes on each style', life: 'How long each material lasts', wood: 'Why gaps open between boards', frost: 'Why post depth matters in clay', gate: 'Why gates sag, and how we stop it' };
+const LAB_IDS = ['build', 'grade', 'vinyl', 'wind', 'life', 'wood', 'frost', 'gate'];
+const LAB_NAME = { build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', wind: 'Wind', life: 'Lifespan', wood: 'Wood movement', frost: 'Frost & posts', gate: 'Gate sag' };
+const LAB_LINE = { build: 'A prefab panel and our King Plus fence, 15 years later', grade: 'How we keep the top line clean and close gaps on your slope', vinyl: 'What a thicker vinyl wall buys you', wind: 'How hard wind pushes on each style', life: 'How long each material lasts', wood: 'Why gaps open between boards', frost: 'Why post depth matters in clay', gate: 'Why gates sag, and how we stop it' };
 
 export function initVisit(a) {
   app = a; D = app.data; load();
