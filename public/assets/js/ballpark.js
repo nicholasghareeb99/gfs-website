@@ -1253,7 +1253,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     serverPrice.runId++;                   // anything still in flight for this ask is finished with
     serverPrice.phase = phase; serverPrice.result = result; serverPrice.controller = null;
     const note = el('bp-success');
-    if (note && note.classList.contains('show')) note.textContent = phase === 'ok' ? 'Your planning range is ready.' : 'Your request has been received. We will get your price to you.';
+    if (note && note.classList.contains('show')) note.textContent = phase === 'ok' ? 'Your price range is ready.' : 'Your request has been received. We will get your price to you.';
     try { updateAll(); } catch (e) { console.warn('[Ghareeb Ballpark] redraw skipped:', e); }
   }
   // This ask did not give a range. When it may work later (service busy or down,
@@ -1961,10 +1961,10 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   // Illustrative linear lengths only; acreage does not define the fence run.
   // Customers can adjust the number or draw their actual layout.
   const SIZE_PRESETS = [
-    { label: '100 ft', feet: 100, note: 'small back yard' },
-    { label: '150 ft', feet: 150, note: 'typical back yard' },
-    { label: '220 ft', feet: 220, note: 'large back yard' },
-    { label: '320 ft', feet: 320, note: 'whole lot' },
+    { label: '~70 ft', feet: 70, note: 'side gates & short runs' },
+    { label: '~140 ft', feet: 140, note: 'city back yard' },
+    { label: '~210 ft', feet: 210, note: 'suburban yard' },
+    { label: '~310 ft', feet: 310, note: 'large or corner lot' },
   ];
 
   function renderSizePresets() {
@@ -1977,8 +1977,19 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       'border-radius:5px;cursor:pointer;min-height:48px;font-family:var(--body);color:var(--ink);">' +
       '<span style="font-weight:600;font-size:14px;">' + esc(p.label) + '</span>' +
       '<span style="font-size:12px;color:var(--galv);">' + esc(p.note) + '</span>' +
-      '</button>').join('');
+      '</button>').join('') +
+      '<label style="flex-basis:100%;display:flex;align-items:center;gap:12px;margin-top:6px;font-size:13px;color:var(--galv);">' +
+      '<span style="flex:none;">Slide to adjust</span>' +
+      '<input id="bp-feet-slider" type="range" min="20" max="600" step="5" value="140" aria-label="Fence length in feet" style="flex:1;min-height:44px;accent-color:var(--cedar);">' +
+      '</label>';
 
+    const slider = el('bp-feet-slider');
+    if (slider) slider.addEventListener('input', () => {
+      const lf = el('bp-linear-feet');
+      if (!lf) return;
+      lf.value = slider.value;
+      lf.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     wrap.querySelectorAll('button[data-feet]').forEach(btn => {
       btn.addEventListener('click', () => {
         const lf = el('bp-linear-feet');
@@ -2060,7 +2071,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   function submissionPrice(errorEl) {
     let message = '', target = null;
     if (!state.fenceId || !FENCE_PRICING[state.fenceId]) {
-      message = 'Choose a fence style before requesting your planning range.';
+      message = 'Choose a fence style to see your price range.';
       target = el('bp-fence-select');
     } else if (!Number.isFinite(Number(state.linearFeet)) || Number(state.linearFeet) <= 0) {
       message = 'Draw your fence line or enter a length greater than zero before continuing.';
@@ -2206,7 +2217,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
         // A newly written document is fresh now; the id of an unchanged resend may be old, so its age is unknown (the function says).
         pricingReceiptAt = result.reused ? (nextPricing === pricingReceipt ? pricingReceiptAt : 0) : Date.now();
         pricingReceipt = nextPricing;
-        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'||price.reason==='selection'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your planning range is ready.';
+        successEl.textContent=result.reused?'This project request has already been received.':result.requestAction==='project_update'?'Your project update has been received for review.':price.requiresReview?(price.reason==='server'?'Your request has been received.':price.reason==='prices'||price.reason==='request'||price.reason==='selection'?'Your request has been received. We will get your price to you.':'Your quote request has been received. Our team will review your selected height and project details, then follow up with you.'):'Your price range is ready.';
         const emailInput = el('bp-email-address');
         if (emailInput && !emailInput.value) emailInput.value = String(fd.get('email') || '').trim();
         // UNLOCK the price reveal
@@ -4157,6 +4168,8 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   // A typical-size button shows as pressed while the length equals its size.
   function renderSizePresetState() {
     $$('#bp-size-presets button[data-feet]').forEach(button => button.setAttribute('aria-pressed', Number(button.dataset.feet) === Number(state.linearFeet) ? 'true' : 'false'));
+    const feetSlider = el('bp-feet-slider');
+    if (feetSlider && document.activeElement !== feetSlider && Number(state.linearFeet) > 0) feetSlider.value = String(Math.min(600, Math.max(20, Math.round(Number(state.linearFeet) / 5) * 5)));
   }
 
   // ---- SITE NOTES (STEP 3) ------------------------------------------------------
@@ -4286,7 +4299,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     let view;
     if (state.priceUnlocked) {
       const price = heightNeedsReview() ? null : displayPrice();
-      view = [price ? 'Your planning range' : 'Your request', price ? formatRange(price.low, price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
+      view = [price ? 'Your price range' : 'Your request', price ? formatRange(price.low, price.high) : 'Request received', 'Book a free measure', () => { location.href = (window.GFSRequestFlow && window.GFSRequestFlow.bookingUrl(el('bp-form'))) || '/quote/book/'; }];
     } else if (!feet) view = ['Step 1 of 4', 'How long is the fence?', 'Enter length', jump('bp-step-1', 'bp-linear-feet')];
     else if (!fence) view = ['Step 2 of 4', feet, 'Pick a style', () => openStylePicker()];
     else if (sectionsIssue()) view = ['Step 2 of 4', 'Finish your added style', 'Go to it', jump('bp-sections')];
@@ -4302,13 +4315,28 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   // Style pages link straight here with a style name. If the name matches
   // one catalog model it is selected for the visitor, unless they already
   // have a saved plan with its own style.
-  let requestedStyle = '';
+  // Links from style cards, the gallery and the studio can also carry
+  // ?material=vinyl&height=6&feet=140. Height narrows the style match,
+  // material opens that family when no single style matches, and feet fills
+  // the length box. Bad values are ignored without a warning.
+  let requestedStyle = '', requestedHeight = '', requestedFamily = '', requestedFeet = 0;
+  const MATERIAL_PARAM = { vinyl: 'vinyl', cedar: 'cedar', wood: 'treated', treated: 'treated', 'pressure-treated': 'treated', pt: 'treated', aluminum: 'aluminum', chainlink: 'chainlink', 'chain-link': 'chainlink', 'split-rail': 'split-rail', splitrail: 'split-rail', pool: 'pool' };
+  function oneParam(params, key) { const values = params.getAll(key); return values.length === 1 ? values[0].trim() : ''; }
   function readRequestedStyle() {
     try {
-      const values = new URLSearchParams(location.search).getAll('style');
-      const value = values.length === 1 ? values[0].trim() : '';
+      const params = new URLSearchParams(location.search);
+      const value = oneParam(params, 'style');
       requestedStyle = value && value.length <= 120 && /^[\p{L}\p{N} '’"().,\/#&+–—-]+$/u.test(value) ? value : '';
-    } catch (e) { requestedStyle = ''; }
+      const height = oneParam(params, 'height');
+      requestedHeight = /^(?:3|3\.5|4|4\.5|5|6|7|8)$/.test(height) ? height : '';
+      requestedFamily = MATERIAL_PARAM[oneParam(params, 'material').toLowerCase()] || '';
+      const feet = Number(oneParam(params, 'feet'));
+      requestedFeet = Number.isFinite(feet) && feet >= 10 && feet <= 2000 ? Math.round(feet) : 0;
+    } catch (e) { requestedStyle = ''; requestedHeight = ''; requestedFamily = ''; requestedFeet = 0; }
+    if (requestedFeet) {
+      const lf = el('bp-linear-feet');
+      if (lf && !lf.value && !(Number(state.linearFeet) > 0)) { lf.value = String(requestedFeet); lf.dispatchEvent(new Event('input', { bubbles: true })); }
+    }
   }
   function matchRequestedStyle(wanted) {
     const words = wanted.toLowerCase().replace(/[‘’]/g, "'").split(/[^a-z0-9.']+/).filter(Boolean);
@@ -4325,10 +4353,19 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     return modelCards(hits, '')[0].id;
   }
   function applyRequestedStyle() {
-    if (!requestedStyle || state.fenceId || pendingDraftStyle) return;
-    const id = matchRequestedStyle(requestedStyle);
+    if ((!requestedStyle && !requestedFamily) || state.fenceId || pendingDraftStyle) return;
+    const inFamily = id => !id || !requestedFamily || familyOf(id) === requestedFamily;
+    let id = '';
+    if (requestedStyle && requestedHeight) id = matchRequestedStyle(requestedStyle + ' ' + requestedHeight + 'ft');
+    if (!id && requestedStyle) id = matchRequestedStyle(requestedStyle);
+    if (id && !inFamily(id)) id = '';
     requestedStyle = '';
     if (id) { selectFenceStyle(id); track('style-link'); }
+    else if (requestedFamily && Object.keys(FENCE_PRICING).some(key => familyOf(key) === requestedFamily)) {
+      activeFamily = requestedFamily;
+      renderMaterialFilter(); renderStyleGrid();
+    }
+    requestedFamily = '';
   }
 
   // ---- STYLE CARRIED OVER FROM THE 3D STUDIO (?studio-style=Name) -----------------------

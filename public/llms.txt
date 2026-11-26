@@ -31,6 +31,7 @@
 - [Request a quote](https://ghareebfence.com/quote/form/)
 - [Book a free measure](https://ghareebfence.com/quote/book/)
 - [Fence styles](https://ghareebfence.com/fences/): blueprints, 3D models, photos and specs for every style
+- [Compare fence styles](https://ghareebfence.com/fences/compare/): vinyl, cedar, treated wood, aluminum and chain link side by side, a height tool, and driven vs concrete posts
 - [3D Fence Studio](https://ghareebfence.com/fence-studio/)
 - [Brochure](https://ghareebfence.com/brochure/)
 - [Customer reviews](https://ghareebfence.com/reviews/)

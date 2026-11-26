@@ -43,9 +43,9 @@
 <link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
 <link rel="stylesheet" href="/assets/css/landing-pages.css?v=20261114">
 <link rel="stylesheet" href="/assets/css/map-drawing.css?v=20260930-tools">
-<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20261126-quotes">
 <link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
-<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20261126-one-cta">
 <link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/studio-quote-context.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
@@ -122,7 +122,6 @@
 </script>
 
 <script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
-<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
 <script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
 <script src="/assets/js/firebase-after-paint.js" defer></script>
@@ -159,7 +158,7 @@
       <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
     </a>
     <ul class="nav-links">
-      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="/fences/compare/">Compare styles</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
       <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
       <li><a href="../../reviews/">Reviews</a></li>
       <li><a href="../../guides/">Guides</a></li>
@@ -172,8 +171,7 @@
     <div class="nav-cta-group">
       <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
-      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
-      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button" id="nav-quote">Get My 60-Second Price →</a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
         <span></span><span></span><span></span>
       </button>
@@ -207,7 +205,7 @@
 <a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
     <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
     <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
-    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
     <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
   </div>
 </div>
@@ -216,7 +214,7 @@
 <aside class="studio-quote-context" id="studio-quote-context" aria-label="Selected fence style" hidden></aside>
           <div id="bp-success-email" class="form-success" style="background:rgba(26,122,74,0.16);border:1px solid rgba(26,122,74,0.4);color:#c8ecd8;padding:20px;border-radius:5px;margin-top:14px;">
             <div style="font-family:var(--mono);font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:#8fd3b0;margin-bottom:8px;">Request received</div>
-            <strong style="display:block;font-family:var(--display);font-size:19px;color:#fff;margin-bottom:6px;">Your planning range is ready.</strong>
+            <strong style="display:block;font-family:var(--display);font-size:19px;color:#fff;margin-bottom:6px;">Your price range is ready.</strong>
             <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#c8ecd8;">
               The written estimate and material comparison are on the right. Nicholas reviews
               every request himself and will call to confirm measurements.
@@ -424,7 +422,7 @@
           </div>
           <label style="display:flex;align-items:center;gap:10px;padding:14px;background:var(--cream);border-radius:4px;cursor:pointer;" for="bp-remove-old">
             <input id="bp-remove-old" type="checkbox" style="width:18px;height:18px;cursor:pointer;">
-            <span style="font-weight:500;color:var(--navy);" data-editable="bp.s3.removal">Include removal of an existing fence in the planning range</span>
+            <span style="font-weight:500;color:var(--navy);" data-editable="bp.s3.removal.nov26">Include tearing out my old fence</span>
           </label>
           <div id="bp-removal-fields" hidden style="margin-top:16px;">
             <label class="form-label" for="bp-existing-material">What is your existing fence made of?</label>
@@ -536,7 +534,7 @@
             <div id="bp-error" class="form-error" role="alert" style="margin-top:14px;"></div>
           </form>
           <div id="bp-success" class="form-success" style="background:rgba(16,185,129,0.15);color:#a7f3d0;padding:16px;border-radius:4px;margin-top:14px;text-align:center;">
-            <strong>✓ Request received.</strong> Your planning range is ready below. Our team will review your project details and contact you about the next step.
+            <strong>✓ Got it.</strong> Your price range is below. Nick will reach out about next steps.
           </div>
         </div>
 
@@ -563,12 +561,10 @@
           <div style="margin-bottom:20px;">
             <div style="font-family:var(--serif);font-size: 12px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-deep);margin-bottom:6px;" data-editable="bp.compare.eyebrow">Compare Materials</div>
             <h2 style="font-family:var(--serif);font-size:24px;font-weight:600;color:var(--navy);margin:0 0 6px;" data-editable="bp.compare.title">Compare a few fence options.</h2>
-            <p style="font-size:14px;color:var(--gray-700);margin:0;" data-editable="bp.compare.sub">Planning ranges for your selected layout. Review product and installation details with your estimator.</p>
+            <p style="font-size:14px;color:var(--gray-700);margin:0;" data-editable="bp.compare.sub.nov26">Price ranges for your layout, side by side.</p>
           </div>
           <div id="bp-compare-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-          <p style="font-size:12px;color:var(--gray-500);margin-top:18px;line-height:1.5;" data-editable="bp.compare.disclaimer">
-            This is a planning range based on your selections. Removal, site work, permits and any additional requirements need review in the written proposal. A site measure is needed to confirm the final scope and price.
-          </p>
+          <p style="font-size:12px;color:var(--gray-500);margin-top:18px;line-height:1.5;" data-editable="bp.compare.disclaimer.nov26">Ranges cover the fence and gates you picked. Nick confirms the final price after he measures the yard.</p>
         </div>
       </div>
 
@@ -577,7 +573,7 @@
 
         <!-- Price card -->
         <div id="bp-price-card" class="price-card-wrap" style="background:var(--navy);color:var(--cream);padding:28px;border-radius:6px;box-shadow:var(--shadow-xl);margin-bottom:20px;">
-          <div style="font-family:var(--serif);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:8px;" data-editable="bp.price.eyebrow">Your Planning Range</div>
+          <div style="font-family:var(--serif);font-size:13px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold-bright);margin-bottom:8px;" data-editable="bp.price.eyebrow.nov26">Your price range</div>
           <div id="bp-price-range" style="font-family:var(--serif);font-size:36px;font-weight:600;line-height:1.1;margin-bottom:8px;">Your price in 4 quick steps</div>
           <div id="bp-price-hint" style="font-size:13px;color:rgba(250,246,239,0.7);margin-bottom:18px;">Then unlock your price in step 4</div>
 
@@ -597,7 +593,7 @@
             </p>
           </div>
           <div style="margin-top:24px;padding-top:18px;border-top:1px solid rgba(250,246,239,0.15);">
-            <p style="font-size: 12px;color:rgba(250,246,239,0.5);line-height:1.5;" data-editable="bp.price.disclaimer">Your written proposal confirms the measurements, materials, installation and site requirements. This planning range is not a fixed-price offer.</p>
+            <p style="font-size: 12px;color:rgba(250,246,239,0.5);line-height:1.5;" data-editable="bp.price.disclaimer.nov26">This is a range, not a final price. Nick measures the yard and checks the soil, then your written quote sets the number.</p>
           </div>
         </div>
 
@@ -710,9 +706,9 @@
 <div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
 </footer>
 
-<div class="mobile-cta">
-  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
-  <a href="../../quote/" class="btn btn-gold">Get Free Estimate</a>
+<div class="mobile-cta" role="navigation" aria-label="Quick actions">
+  <a href="tel:14192142107" class="mobile-cta__call" aria-label="Call Nick at (419) 214-2107">Call Nick</a>
+  <a href="/quote/ballpark/" class="mobile-cta__price">Get 60-Sec Price →</a>
 </div>
 
 

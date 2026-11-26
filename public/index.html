@@ -43,14 +43,14 @@
 <link rel="stylesheet" href="./assets/css/site.css?v=202608180500">
 <link rel="stylesheet" href="./assets/css/system.css?v=20260907-photos">
 
-<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20261126-quotes">
 <link rel="stylesheet" href="/assets/css/growth-upgrade.css?v=20260919">
 <link rel="stylesheet" href="/assets/css/home-experience.css?v=20260930-design">
 <link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
 <link rel="stylesheet" href="/assets/css/photo-showcase.css?v=20260919-1">
 <link rel="stylesheet" href="/assets/css/portal-tour.css?v=20261001-label">
 <link rel="stylesheet" href="/assets/css/fence-finder.css?v=20260920-1">
-<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20261126-one-cta">
 <link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
@@ -109,7 +109,6 @@
 
 <script src="./assets/js/site.js?v=kit-570037921d4c" defer></script>
 <script src="/assets/js/hero-rotator.js?v=20261118d" defer></script>
-<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
 <script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
 <script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
 <script src="/assets/js/firebase-after-paint.js" defer></script>
@@ -147,7 +146,7 @@
       <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
     </a>
     <ul class="nav-links">
-      <li class="nav-item-menu"><a href="./fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="./fences/cedar/">Cedar Privacy</a></li><li><a href="./fences/wood/">Wood Privacy</a></li><li><a href="./fences/vinyl/">Vinyl Fencing</a></li><li><a href="./fences/aluminum/">Ornamental Aluminum</a></li><li><a href="./fences/chainlink/">Chain Link</a></li><li><a href="./fences/split-rail/">Split Rail</a></li><li><a href="./fences/no-dig/">No-Dig Fencing</a></li><li><a href="./fences/">All styles →</a></li></ul></li>
+      <li class="nav-item-menu"><a href="./fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="./fences/cedar/">Cedar Privacy</a></li><li><a href="./fences/wood/">Wood Privacy</a></li><li><a href="./fences/vinyl/">Vinyl Fencing</a></li><li><a href="./fences/aluminum/">Ornamental Aluminum</a></li><li><a href="./fences/chainlink/">Chain Link</a></li><li><a href="./fences/split-rail/">Split Rail</a></li><li><a href="./fences/no-dig/">No-Dig Fencing</a></li><li><a href="/fences/compare/">Compare styles</a></li><li><a href="./fences/">All styles →</a></li></ul></li>
       <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
       <li><a href="./reviews/">Reviews</a></li>
       <li><a href="./guides/">Guides</a></li>
@@ -160,8 +159,7 @@
     <div class="nav-cta-group">
       <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
-      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
-      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button" id="nav-quote">Get My 60-Second Price →</a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
         <span></span><span></span><span></span>
       </button>
@@ -194,8 +192,8 @@
   <div class="mobile-drawer-cta">
 <a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
     <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
-    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
-    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Get My 60-Second Price →</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
     <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
   </div>
 </div>
@@ -229,13 +227,13 @@
         <div class="hero-slide is-active" role="group" aria-roledescription="slide" aria-label="1 of 11">
           <div class="hero2__eyebrow">
             <span class="dot"></span>
-            <span class="spec" data-editable="hero.local.v4.eyebrow">Small business. Local roots. Family owned.</span>
+            <span class="spec" data-editable="hero.local.v6.eyebrow">Family owned · Toledo · Since 2022</span>
           </div>
-          <h1 data-editable="hero.local.v4.title">Your local fence company.<br>Built around you.</h1>
-          <p class="hero2__lede" data-editable="hero.local.v5.lede">Family-owned fence installation in Northwest Ohio and Southeast Michigan—with thoughtful construction and a project portal that keeps you informed.</p>
+          <h1 data-editable="hero.local.v6.title">Fences built for Toledo clay<br>and Ohio winters.</h1>
+          <p class="hero2__lede" data-editable="hero.local.v6.lede">In clay we drive steel posts 4 feet down, below the frost line, so the fence doesn&rsquo;t heave. Most fences go up in one to two days. Nick prices every job himself, and every fence has our 3-year workmanship warranty.</p>
           <div class="hero2__cta">
-            <a href="./quote/ballpark/" class="btn2 btn2--cedar">Measure my fence</a>
-            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call our team at (419) 214-2107">Call our team</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--cedar">Get My 60-Second Price →</a>
+            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call (419) 214-2107">Call (419) 214-2107</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="2 of 11" aria-hidden="true">
@@ -244,7 +242,7 @@
           <p class="hero2__lede">Interest builds from the start. If a balance is left after 18 months, the interest is owed and the rate is 18.99% fixed from then on. Monthly payments are required. For qualified customers, subject to credit approval.</p>
           <div class="hero2__cta">
             <a href="/financing/" class="btn2 btn2--cedar" data-hero-financing-cta>See financing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="3 of 11" aria-hidden="true">
@@ -253,7 +251,7 @@
           <p class="hero2__lede">Vinyl privacy panels in a gray woodgrain finish, with a matching gate and black hardware. Nothing to stain or paint.</p>
           <div class="hero2__cta">
             <a href="/fences/vinyl/" class="btn2 btn2--cedar">See vinyl fencing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="4 of 11" aria-hidden="true">
@@ -262,16 +260,16 @@
           <p class="hero2__lede">Black ornamental aluminum marks the yard line without blocking what is behind it.</p>
           <div class="hero2__cta">
             <a href="/fences/aluminum/" class="btn2 btn2--cedar">See aluminum fencing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="5 of 11" aria-hidden="true">
           <div class="hero2__eyebrow"><span class="dot"></span><span class="spec">Winter installs</span></div>
-          <h2 class="hero-slide__title">We install all winter.</h2>
-          <p class="hero2__lede">Sign and put down your deposit now, and your quoted price holds through a spring install.</p>
+          <h2 class="hero-slide__title">Book this winter. Lock today&rsquo;s price.</h2>
+          <p class="hero2__lede">Winter is the only time we lock pricing. Sign and put down your deposit now, and your quoted price holds through a spring install. We drive posts in frozen ground, so we build all winter too.</p>
           <div class="hero2__cta">
             <a href="/quote/book/" class="btn2 btn2--cedar">Request a free estimate</a>
-            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call our team at (419) 214-2107">Call our team</a>
+            <a href="tel:+14192142107" class="btn2 btn2--ghost" aria-label="Call (419) 214-2107">Call (419) 214-2107</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="6 of 11" aria-hidden="true">
@@ -280,7 +278,7 @@
           <p class="hero2__lede">Vinyl pickets with a matching gate. It washes off with a hose, and there is no staining or painting to keep up with.</p>
           <div class="hero2__cta">
             <a href="/fences/vinyl/" class="btn2 btn2--cedar">See vinyl fencing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="7 of 11" aria-hidden="true">
@@ -288,7 +286,7 @@
           <h2 class="hero-slide__title">See a price range before anyone visits.</h2>
           <p class="hero2__lede">Pick a style, enter your footage, and the range shows on screen. Then book a visit when you are ready.</p>
           <div class="hero2__cta">
-            <a href="./quote/ballpark/" class="btn2 btn2--cedar">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--cedar">Get My 60-Second Price →</a>
             <a href="/financing/" class="btn2 btn2--ghost">Financing options</a>
           </div>
         </div>
@@ -298,7 +296,7 @@
           <p class="hero2__lede">A three-rail wood fence with a matching gate. Add wire mesh if it needs to keep a dog in.</p>
           <div class="hero2__cta">
             <a href="/fences/split-rail/" class="btn2 btn2--cedar">See split rail</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="9 of 11" aria-hidden="true">
@@ -307,7 +305,7 @@
           <p class="hero2__lede">Solid boards below for privacy, lattice above to let some light through.</p>
           <div class="hero2__cta">
             <a href="/fences/wood/" class="btn2 btn2--cedar">See wood fencing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="10 of 11" aria-hidden="true">
@@ -316,7 +314,7 @@
           <p class="hero2__lede">It keeps kids and dogs in the yard and stays out of the view.</p>
           <div class="hero2__cta">
             <a href="/fences/chainlink/" class="btn2 btn2--cedar">See chain link</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
         <div class="hero-slide" role="group" aria-roledescription="slide" aria-label="11 of 11" aria-hidden="true">
@@ -325,7 +323,7 @@
           <p class="hero2__lede">Tan panels with white posts and rails. It also comes in solid white or solid tan.</p>
           <div class="hero2__cta">
             <a href="/fences/vinyl/" class="btn2 btn2--cedar">See vinyl fencing</a>
-            <a href="./quote/ballpark/" class="btn2 btn2--ghost">Measure my fence</a>
+            <a href="/quote/ballpark/" class="btn2 btn2--ghost">Get my price</a>
           </div>
         </div>
       </div>
@@ -499,7 +497,7 @@
         </div>
       </a>
     </div>
-    <div class='style-next'><a class='btn btn-primary' data-style-plan href='/quote/ballpark/?project=cedar'>Plan with cedar →</a><span>A planning range first. A reviewed proposal before installation.</span></div>
+    <div class='style-next'><a class='btn btn-primary' data-style-plan href='/quote/ballpark/?project=cedar'>Plan with cedar →</a><span>See a price range now. Get a written quote after Nick measures.</span></div>
   </div>
 </section>
 
@@ -608,14 +606,14 @@
    <li><span class="sync-step">02 / OFFICE REVIEW</span><h3 data-editable="home.sync.review.title">We check the site plan.</h3><p data-editable="home.sync.review.body">Our team uses the office app to review the fence layout, available parcel mapping, gates and access before finalizing the project scope.</p><a href="/process/">See our process <span aria-hidden="true">↗</span></a></li>
    <li><span class="sync-step">03 / YOUR PORTAL</span><h3 data-editable="home.sync.portal.title">Keep the details together.</h3><p data-editable="home.sync.portal.body">Review shared proposals and drawings, ask questions and see the project information your team has made available.</p><a href="/portal/">Explore your portal <span aria-hidden="true">↗</span></a></li>
   </ol>
-  <div class="boundary-note"><span aria-hidden="true">↳</span><p data-editable="home.sync.boundary.note">A thoughtful plan starts with the right checks. Parcel lines on a map are a planning reference, not a survey or a confirmed legal boundary. Property lines, easements, utilities and any required approvals still need verification before installation.</p></div>
+  <div class="boundary-note"><span aria-hidden="true">↳</span><p data-editable="home.sync.boundary.note.nov26">Map lines are a starting point, not a survey. Before we build, we confirm property lines, utilities and permits with you.</p></div>
   <div class="portal-tour-head"><div><p class="eyebrow">A look inside</p><h3>Your project portal, on your terms.</h3></div><span class="sample-badge">Sample project • Demo views</span></div>
   <div class="portal-tour" data-portal-tour>
 <div class="tour-controls" role="group" aria-label="Explore the customer portal" hidden><button type="button" data-tour-choice="0" aria-pressed="true">01 &nbsp; Your project</button><button type="button" data-tour-choice="1" aria-pressed="false">02 &nbsp; Compare options</button><button type="button" data-tour-choice="2" aria-pressed="false">03 &nbsp; Shared plan</button><button type="button" data-tour-choice="3" aria-pressed="false">04 &nbsp; Explore in 3D</button><button type="button" data-tour-choice="4" aria-pressed="false">05 &nbsp; Project files</button><button type="button" data-tour-choice="5" aria-pressed="false">06 &nbsp; Messages</button></div>
 <figure class="tour-panel" data-tour-panel="0"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-overview.webp" target="_blank" rel="noopener" aria-label="Enlarge Your project screenshot — sample project"><img src="/assets/img/portal-demo/tour-overview.webp" alt="Ghareeb customer portal interface showing a sample project overview, quote status and project navigation." width="1425" height="990" loading="lazy" decoding="async" data-editable-img="home.portal.v3.overview.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-overview.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.overview.title">Pick up where you left off.</strong><span data-editable="home.portal.v3.overview.body">Your shared quote, project status and next steps have a home. Return to the details when you are ready to review them or talk with the team.</span></figcaption></figure>
 <figure class="tour-panel" data-tour-panel="1"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-options.webp" target="_blank" rel="noopener" aria-label="Enlarge Compare options screenshot — sample project"><img src="/assets/img/portal-demo/tour-options.webp" alt="Sample portal quote showing two vinyl fence options with product illustrations, dimensions, gate details and quoted totals." width="1425" height="1175" loading="lazy" decoding="async" data-editable-img="home.portal.v3.options.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-options.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.options.title">Compare more than a price.</strong><span data-editable="home.portal.v3.options.body">See the shared style, height, fence length and gate details alongside each option. Compare the finishing touches, then tell the team which direction you prefer.</span></figcaption></figure>
 <figure class="tour-panel" data-tour-panel="2"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-plan.webp" target="_blank" rel="noopener" aria-label="Enlarge Shared plan screenshot — sample project"><img src="/assets/img/portal-demo/tour-plan.webp" alt="Current portal showing the latest saved sample site drawing with three fence runs and a walk gate, marked as not an actual property." width="1425" height="1175" loading="lazy" decoding="async" data-editable-img="home.portal.v3.plan.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-plan.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.plan.title">Put the fence line in context.</strong><span data-editable="home.portal.v3.plan.body">Review the drawing your team shares and discuss the fence runs, gate location and access together. A visible plan makes it easier to point to the detail you want clarified.</span></figcaption></figure>
-<figure class="tour-panel" data-tour-panel="3"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-design-full.webp" target="_blank" rel="noopener" aria-label="Enlarge Explore in 3D screenshot — sample project"><img src="/assets/img/portal-demo/tour-design-full.webp" alt="Ghareeb portal interactive design studio showing a synthetic fence layout in 3D with view controls." width="1440" height="1000" loading="lazy" decoding="async" data-editable-img="home.portal.v3.design-full.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=1440&amp;fit=contain&amp;fm=webp&amp;q=85 1440w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.design-full.title">Picture the layout from another angle.</strong><span data-editable="home.portal.v3.design-full.body">Explore the shared fence layout from different angles. This sample 3D scene illustrates a design; it is not a survey or a photograph of the property.</span></figcaption></figure>
+<figure class="tour-panel" data-tour-panel="3"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-design-full.webp" target="_blank" rel="noopener" aria-label="Enlarge Explore in 3D screenshot — sample project"><img src="/assets/img/portal-demo/tour-design-full.webp" alt="Ghareeb portal interactive design studio showing a synthetic fence layout in 3D with view controls." width="1440" height="1000" loading="lazy" decoding="async" data-editable-img="home.portal.v3.design-full.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-design-full.webp&amp;w=1440&amp;fit=contain&amp;fm=webp&amp;q=85 1440w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.design-full.title">Picture the layout from another angle.</strong><span data-editable="home.portal.v3.design-full.body.nov26">Turn the layout around and look at it from any side. This one is a sample project, not a real yard.</span></figcaption></figure>
 <figure class="tour-panel" data-tour-panel="4"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-files.webp" target="_blank" rel="noopener" aria-label="Enlarge Project files screenshot — sample project"><img src="/assets/img/portal-demo/tour-files.webp" alt="Sample customer portal Files and documents section listing a fence proposal, project paperwork and shared site plan." width="1425" height="1175" loading="lazy" decoding="async" data-editable-img="home.portal.v3.files.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-files.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.files.title">Keep the paperwork with the plan.</strong><span data-editable="home.portal.v3.files.body">Open the proposal and project files your team has shared, then return to the written scope when you need to check a detail. Less searching through separate messages for the right document.</span></figcaption></figure>
 <figure class="tour-panel" data-tour-panel="5"><div class="portal-screen"><a data-portal-shot href="/assets/img/portal-demo/tour-conversation.webp" target="_blank" rel="noopener" aria-label="Enlarge Messages screenshot — sample project"><img src="/assets/img/portal-demo/tour-conversation.webp" alt="Sample portal conversation between the Ghareeb team and a customer discussing backyard privacy and a walk gate." width="1425" height="1175" loading="lazy" decoding="async" data-editable-img="home.portal.v3.conversation.image" srcset="https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=480&amp;fit=contain&amp;fm=webp&amp;q=85 480w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=960&amp;fit=contain&amp;fm=webp&amp;q=85 960w, https://gfencing.netlify.app/.netlify/images?url=/assets/img/portal-demo/tour-conversation.webp&amp;w=1425&amp;fit=contain&amp;fm=webp&amp;q=85 1425w" sizes="(max-width:700px) calc(100vw - 48px), (max-width:1100px) 50vw, 600px"></a></div><figcaption><strong data-editable="home.portal.v3.conversation.title">Ask the question while the plan is in front of you.</strong><span data-editable="home.portal.v3.conversation.body">Discuss a gate, clarify a detail or ask what happens next. The shared conversation stays with your project so you can return to the answer alongside the plan and proposal.</span></figcaption></figure>
 </div>
@@ -756,7 +754,7 @@
     <h2 class="display-1" style="margin-top: 20px; margin-bottom: 24px; color: var(--cream);" data-editable="cta.title">Your yard. Your fence plan.</h2>
     <p class="cta-banner-lede" data-editable="cta.lede">Tell us what you want your fence to do. Start a layout or request an on-site estimate to review your options with our team.</p>
     <div class="cta-banner-actions">
-      <a href="./quote/" class="btn btn-gold btn-lg">Get Free Estimate →</a>
+      <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Get My 60-Second Price →</a>
       <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
     </div>
   </div>
@@ -826,9 +824,9 @@
 <div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
 </footer>
 
-<div class="mobile-cta">
-  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
-  <a href="./quote/" class="btn btn-gold">Get Free Estimate</a>
+<div class="mobile-cta" role="navigation" aria-label="Quick actions">
+  <a href="tel:14192142107" class="mobile-cta__call" aria-label="Call Nick at (419) 214-2107">Call Nick</a>
+  <a href="/quote/ballpark/" class="mobile-cta__price">Get 60-Sec Price →</a>
 </div>
 
 

@@ -103,7 +103,6 @@
 <!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
      Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
 <script src="../assets/js/site.js?v=kit-570037921d4c" defer></script>
-<script src="/assets/js/header-quote-chooser.js?v=20260920-1" defer></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
 <!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
      (owner sign-in). Loading it for every visitor was the single largest
@@ -181,10 +180,10 @@
 }
 </script>
 
-<link rel="stylesheet" href="/assets/css/project-process.css?v=20260918-1">
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20261126-quotes">
 <link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
 <link rel="stylesheet" href="/assets/css/portal-tour.css?v=20261001-label">
-<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20260930-design">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20261126-one-cta">
 <link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
 <link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
 <link rel="stylesheet" href="/assets/css/construction-lab.css?v=20260930">
@@ -216,7 +215,7 @@
       <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
     </a>
     <ul class="nav-links">
-      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
+      <li class="nav-item-menu"><a href="../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../fences/cedar/">Cedar Privacy</a></li><li><a href="../fences/wood/">Wood Privacy</a></li><li><a href="../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../fences/chainlink/">Chain Link</a></li><li><a href="../fences/split-rail/">Split Rail</a></li><li><a href="../fences/no-dig/">No-Dig Fencing</a></li><li><a href="/fences/compare/">Compare styles</a></li><li><a href="../fences/">All styles →</a></li></ul></li>
       <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
       <li><a href="../reviews/">Reviews</a></li>
       <li><a href="../guides/">Guides</a></li>
@@ -229,8 +228,7 @@
     <div class="nav-cta-group">
       <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
       <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
-      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button">Measure my fence</a>
-      <a href="/quote/" class="btn btn-sm header-quote-button" id="nav-quote" data-quote-chooser>Quote</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button" id="nav-quote">Get My 60-Second Price →</a>
       <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
         <span></span><span></span><span></span>
       </button>
@@ -264,7 +262,7 @@
 <a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
     <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
     <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
-    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" data-quote-chooser style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
     <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
   </div>
 </div>
@@ -272,10 +270,10 @@
 <main id="main"><section class="section project-path"><div class="container">
 <div class="breadcrumbs"><a href="/">Home</a> / Our process</div>
 <p class="eyebrow">Toledo · Northwest Ohio · Southeast Michigan</p>
-<h1 class="display-1" data-editable="process.v1.title">Your fence project.<br>A clear plan at every step.</h1>
-<p class="lede" data-editable="process.v1.lede">A good fence starts with clear decisions. Here is how we move from your first idea to installation, with a customer portal to keep your project information close at hand.</p>
+<h1 class="display-1" data-editable="process.v2.title">Your fence, start to finish.<br>Six steps, no guesswork.</h1>
+<p class="lede" data-editable="process.v2.lede">Nick prices every job himself, our own crew builds it, and your project portal shows where things stand the whole way.</p>
 <div class="path-actions"><a class="btn btn-primary btn-lg" href="/quote/">Request a free estimate</a><a class="btn btn-outline btn-lg" href="/portal/">Explore the customer portal</a></div>
-<h2 class="display-3" style="margin-top:40px" data-editable="process.v1.features">From estimate to installation</h2><div class="path-grid"><article class="path-card"><span class="path-num">01</span><h3 data-editable="process.v1.card1.title">Plan your fence</h3><p data-editable="process.v1.card1.body.nov17">Start with what you want the fence to do: privacy, keeping a dog in, or a new look. Get a ballpark price online in a few minutes, or ask us to come measure. The online price is an honest ballpark. Your exact price comes after we measure the yard.</p></article><article class="path-card"><span class="path-num">02</span><h3 data-editable="process.v1.card2.title">Compare a written proposal</h3><p data-editable="process.v1.card2.body.nov17">You get the style, height, gates, removal and install written out, with a price. Deciding between two styles? Ask and we’ll write up both. It all stays in your project portal.</p></article><article class="path-card"><span class="path-num">03</span><h3 data-editable="process.v1.card3.title">Confirm the details</h3><p data-editable="process.v1.card3.body.nov17">We agree on the final scope, price and payment terms before any work starts. We also go over property lines, HOA rules and permits. We look up the permit rules for your town and can help with the application.</p></article><article class="path-card"><span class="path-num">04</span><h3 data-editable="process.v1.card4.title">Prepare for installation</h3><p data-editable="process.v1.card4.body.nov17">We go over access, pets, landscaping and any old fence coming out. We call 811 to have underground utilities marked before we start. Then we confirm your install date, and if weather moves it, we tell you.</p></article><article class="path-card"><span class="path-num">05</span><h3 data-editable="process.v1.card5.title">Stay in touch during the work</h3><p data-editable="process.v1.card5.body.nov17">Message us in your portal any time during the build. Want to change something? Tell us and we’ll price it before we do it. Photos and files from your job go in the portal too.</p></article><article class="path-card"><span class="path-num">06</span><h3 data-editable="process.v1.card6.title">Review the finished fence</h3><p data-editable="process.v1.card6.body.nov17">We walk the fence and gates with you, go over how to care for it, and fix anything that isn’t right. Then the final balance is due. Your paperwork stays in your portal.</p></article></div>
+<h2 class="display-3" style="margin-top:40px" data-editable="process.v1.features">From estimate to installation</h2><div class="path-grid"><article class="path-card"><span class="path-num">01</span><h3 data-editable="process.v2.card1.title">Tell us what the fence needs to do</h3><p data-editable="process.v2.card1.body">Privacy, keeping the dog in, or a better look from the street. Get a price range online in about a minute, or have Nick come out. He measures the yard himself and checks your soil while he&rsquo;s there.</p></article><article class="path-card"><span class="path-num">02</span><h3 data-editable="process.v2.card2.title">Get it in writing</h3><p data-editable="process.v2.card2.body">Your quote lists the style, height, gates, any old fence coming out, and the price. Torn between two styles? We&rsquo;ll write up both, and you can look at them in 3D in your project portal.</p><figure class="path-quote"><blockquote>&ldquo;They were meticulous about the placement of the panels to ensure they were perfectly straight and graded.&rdquo;</blockquote><figcaption>First Fruits Ministries · <a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xkeldVcDVaa2RET1VoQmQwWjNNV2hyV1ZwSWVYYxAB!2m1!1s0x0:0xcfd5c85e63391463" rel="noopener" target="_blank">Google review</a></figcaption></figure></article><article class="path-card"><span class="path-num">03</span><h3 data-editable="process.v2.card3.title">We sort out the rules</h3><p data-editable="process.v2.card3.body">We look up your town&rsquo;s fence rules and permit, go over any HOA guidelines with you, and help with the application. Show us your property pins or survey and we lay the line out from there.</p></article><article class="path-card"><span class="path-num">04</span><h3 data-editable="process.v2.card4.title">Utilities marked, date set</h3><p data-editable="process.v2.card4.body">We call Ohio 811 (MISS DIG 811 in Michigan) to get public utility lines marked. That&rsquo;s free. You flag any private lines, like sprinklers or a lamp post. Then we set your install date, and if weather moves it, you hear from us first.</p></article><article class="path-card"><span class="path-num">05</span><h3 data-editable="process.v2.card5.title">Build day</h3><p data-editable="process.v2.card5.body">Most fences go up in one to two days. In clay we drive steel posts, so there&rsquo;s no concrete to cure and no dirt piles in the lawn. We clean up the scraps and rake the fence line when we&rsquo;re done. Want a change mid-build? We price it before we do it.</p><figure class="path-quote"><blockquote>&ldquo;Completed my project in the middle of winter and in a timely manner. Great communication along the way. Highly recommend!&rdquo;</blockquote><figcaption>Nathan Gullette · <a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChdDSUhNMG9nS0VJQ0FnSURmOWFIOW9BRRAB!2m1!1s0x0:0xcfd5c85e63391463" rel="noopener" target="_blank">Google review</a></figcaption></figure></article><article class="path-card"><span class="path-num">06</span><h3 data-editable="process.v2.card6.title">Walk it together</h3><p data-editable="process.v2.card6.body">Before you sign off, we walk the whole fence with you and open and close every gate. Anything that isn&rsquo;t right, we fix. Then the final balance is due, and your 3-year workmanship warranty starts.</p><figure class="path-quote"><blockquote>&ldquo;Did a great job on the transition from the 6&#x27; privacy fence to the 3.5&#x27; picket fence. Highly recommend them for fence work!&rdquo;</blockquote><figcaption>Brian Hammond · <a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sChZDSUhNMG9nS0VJQ0FnSURMbnB1Zk93EAE!2m1!1s0x0:0xcfd5c85e63391463" rel="noopener" target="_blank">Google review</a></figcaption></figure></article></div>
 <section style="margin-top:56px"><p class="eyebrow">Your project, connected</p><h2 class="display-2" data-editable="process.v1.portal">Less searching. More clarity.</h2><p>Review your shared quote and layout, find the files our team has shared and keep questions with your project conversation. The portal supports the conversation with our team, so you can find the details when you need them.</p><div class="path-links"><a href="/portal/">See how the portal works →</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div></section>
 <section style="margin-top:48px"><h2 class="display-3">Before your fence installation</h2>
 <details><summary>What should I have ready for an estimate?</summary><p>Tell us the purpose of your fence, materials you like, approximate layout, desired height and number of gates. Photos and a property survey, if you have one, help us discuss the site. Let us know about old fencing, slopes and tight access.</p></details>
@@ -361,9 +359,9 @@
 <div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
 </footer>
 
-<div class="mobile-cta">
-  <a href="tel:14192142107" class="btn btn-outline" style="color: var(--cream); border-color: var(--gold);">📞 Call</a>
-  <a href="../quote/" class="btn btn-gold">Get Free Estimate</a>
+<div class="mobile-cta" role="navigation" aria-label="Quick actions">
+  <a href="tel:14192142107" class="mobile-cta__call" aria-label="Call Nick at (419) 214-2107">Call Nick</a>
+  <a href="/quote/ballpark/" class="mobile-cta__price">Get 60-Sec Price →</a>
 </div>
 
 

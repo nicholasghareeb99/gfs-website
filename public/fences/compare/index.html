@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1A2E40">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Preconnect to the CDNs we use on every page (warms the TLS handshake
+     before the actual asset requests fire, saving 100-300ms on first paint) -->
+<link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+<link rel="preconnect" href="https://identitytoolkit.googleapis.com" crossorigin>
+<link rel="dns-prefetch" href="https://images.squarespace-cdn.com">
+<link rel="dns-prefetch" href="https://maps.googleapis.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<link rel="dns-prefetch" href="https://nominatim.openstreetmap.org">
+<title>Compare Fence Styles: Vinyl, Cedar, Wood, Aluminum, Chain Link | Ghareeb Fencing</title>
+<meta name="description" content="Vinyl, cedar, pressure-treated wood, aluminum and chain link side by side: privacy, upkeep in Ohio winters, heights, gates and price tier. Plus a fence height tool.">
+<meta name="theme-color" content="#1A2E40">
+
+<!-- Open Graph -->
+<meta property="og:title" content="Compare Fence Styles: Vinyl, Cedar, Wood, Aluminum, Chain Link | Ghareeb Fencing">
+<meta property="og:description" content="Vinyl, cedar, pressure-treated wood, aluminum and chain link side by side: privacy, upkeep in Ohio winters, heights, gates and price tier. Plus a fence height tool.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://ghareebfence.com/fences/compare/">
+<meta property="og:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+<meta property="og:site_name" content="Ghareeb Fencing Solutions">
+<meta property="og:locale" content="en_US">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Compare Fence Styles: Vinyl, Cedar, Wood, Aluminum, Chain Link | Ghareeb Fencing">
+<meta name="twitter:description" content="Vinyl, cedar, pressure-treated wood, aluminum and chain link side by side: privacy, upkeep in Ohio winters, heights, gates and price tier. Plus a fence height tool.">
+<meta name="twitter:image" content="https://ghareebfence.com/assets/img/og-default.jpg">
+
+<link rel="canonical" href="https://ghareebfence.com/fences/compare/">
+<link rel="icon" type="image/png" href="/assets/img/performance-v12/ghareeb-icon-48.png">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://images.squarespace-cdn.com">
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/css/fonts.css?v=20261114">
+
+<!-- Site styles -->
+<!-- site.css first (legacy component styles), then system.css so the
+     design system is the last word on tokens and components. -->
+<link rel="stylesheet" href="../../assets/css/site.css?v=202608180500">
+<link rel="stylesheet" href="../../assets/css/system.css?v=20260907-photos">
+
+<!-- ================================================================
+     CONFIG INJECTION — Edit this single block to wire up Firebase
+     for lead capture + content sync + Google sign-in for Edit Mode.
+     Then re-run python3 build.py.
+     ================================================================ -->
+<script>
+  // 1) EDIT-MODE PASSWORD (fallback only — Google sign-in below is preferred)
+  window.GFS_EDIT_PASSWORD = ""; // password preview removed; use Google sign-in
+
+  // 2) AUTHORIZED EDITORS — Google accounts allowed to edit site content.
+  //    Anyone else who signs in is automatically signed out.
+  //    An empty list allows no one.
+  window.GFS_AUTHORIZED_EMAIL_HASHES = [
+    "89da84b4b77585c61104599b1568a6e8fb94a396124054b78d3fc223b86e4fc8",
+    // SHA-256 of each editor's lowercase Google address; no addresses in page source
+  ];
+
+  // 2b) GOOGLE MAPS — premium satellite map for the ballpark quote tool.
+  //     Leave empty string to use the free Leaflet+ESRI fallback (which works
+  //     fine, just with slightly less polish in geocoding/autocomplete).
+  //     To enable: create a key at https://console.cloud.google.com/
+  //     → APIs & Services → Credentials → Create Credentials → API Key.
+  //     Enable: Maps JavaScript API, Places API, Geocoding API.
+  //     RESTRICT the key by HTTP referrer to: ghareebfencingsolutions.com/*,
+  //     www.ghareebfencingsolutions.com/*, gfs-website.netlify.app/*
+  window.GFS_GOOGLE_MAPS_KEY = "AIzaSyCi57gPQcckjNuzDDIt6SLt48r-H-HD_-Y";  // ← Ghareeb-fencing project key
+
+  // 3) FIREBASE — paste your Firebase config below to enable:
+  //    - Lead capture posting to your `websiteLeads` collection
+  //    - Edit Mode publishing edits live to your `siteContent` collection
+  //    - Google sign-in to gate Edit Mode access
+  //    Collection names below MATCH YOUR DEPLOYED FIRESTORE RULES.
+
+  // ↓↓↓ FIREBASE CONFIG — wired and live ↓↓↓
+  window.GFS_FIREBASE_CONFIG = {
+    apiKey: "AIzaSyB6TYNujOLqIt1dzzhBkjsCvVgRt53luRE",
+    authDomain: "ghareeb-fencing.firebaseapp.com",
+    projectId: "ghareeb-fencing",
+    storageBucket: "ghareeb-fencing.firebasestorage.app",
+    messagingSenderId: "187837905206",
+    appId: "1:187837905206:web:1e9a9bc33f745cbeeddb97",
+    measurementId: "G-48D6NRGPP4"
+  };
+  window.GFS_LEADS_CONFIG = {
+    firestoreEnabled: true,
+    firestoreCollection: "websiteLeads",     // ← matches your deployed rules
+    contentSyncCollection: "siteContent"      // ← matches your deployed rules
+  };
+</script>
+
+<!-- Firebase SDK — loaded since GFS_FIREBASE_CONFIG is provided.
+     Includes Auth (Google sign-in), Firestore (leads + content), Analytics. -->
+<script src="../../assets/js/site.js?v=kit-570037921d4c" defer></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer></script>
+<!-- firebase-auth is ~90 KB gzipped and is only ever used by Edit Mode
+     (owner sign-in). Loading it for every visitor was the single largest
+     item on the page. It is now fetched on demand via GFS_LOAD_AUTH(). -->
+<script>
+  window.GFS_LOAD_AUTH = function () {
+    if (window.__gfsAuthPromise) return window.__gfsAuthPromise;
+    window.__gfsAuthPromise = new Promise(function (resolve, reject) {
+      if (window.firebase && window.firebase.auth) return resolve();
+      var s = document.createElement('script');
+      s.src = 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js';
+      s.onload = function () { resolve(); };
+      s.onerror = function () { reject(new Error('Could not load the sign-in library')); };
+      document.head.appendChild(s);
+    });
+    return window.__gfsAuthPromise;
+  };
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js" defer></script>
+<script src="/assets/js/ads-config.js?v=20260919-inquiry" defer></script>
+<script src="/assets/js/tracking-policy.js?v=20261114-lazyga" defer></script>
+
+<script defer>
+  // Auto-initialize Firebase
+  window.addEventListener('DOMContentLoaded', function() {
+    if (window.GFS_FIREBASE_CONFIG && typeof firebase !== 'undefined') {
+      firebase.initializeApp(window.GFS_FIREBASE_CONFIG);
+      window.GFS_DB = firebase.firestore();
+      // Persist Google sign-in across reloads
+      try { firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL); } catch (e) {}
+      // Initialize Analytics if measurementId is configured
+      try {
+        if (window.GFS_FIREBASE_CONFIG.measurementId) {
+          window.GFS_ANALYTICS = window.GFSTrackingPolicy?.initialize(firebase) || null;
+        }
+      } catch (e) {}
+      window.dispatchEvent(new Event('gfs-firebase-ready'));
+    }
+  });
+</script>
+
+<!-- Schema: LocalBusiness (suppressed on pages that define their own) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": "https://ghareebfence.com/#business",
+  "name": "Ghareeb Fencing Solutions",
+  "telephone": "+1-419-214-2107",
+  "email": "nick@ghareebfence.com",
+  "url": "https://ghareebfence.com/",
+  "priceRange": "$$",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "5242 Tractor Rd Suite C",
+    "addressLocality": "Toledo",
+    "addressRegion": "OH",
+    "postalCode": "43612",
+    "addressCountry": "US"
+  },
+  "areaServed": ["Toledo, OH","Perrysburg, OH","Sylvania, OH","Maumee, OH","Bowling Green, OH","Rossford, OH","Northwood, OH","Monroe, MI","Temperance, MI","Lambertville, MI","Whiteford, MI","Dundee, MI"],
+  "openingHoursSpecification": [{ "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"], "opens": "08:00", "closes": "18:00" }],
+  "sameAs": ["https://www.facebook.com/GhareebLandscaping/", "https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews"]
+}
+</script>
+<!-- Schema: BreadcrumbList -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://ghareebfence.com/"},
+    {"@type": "ListItem", "position": 2, "name": "Fence styles", "item": "https://ghareebfence.com/fences/"},
+    {"@type": "ListItem", "position": 3, "name": "Compare styles", "item": "https://ghareebfence.com/fences/compare/"}
+  ]
+}
+</script>
+<link rel="stylesheet" href="/assets/css/project-process.css?v=20261126-quotes">
+<link rel="stylesheet" href="/assets/css/brand-refresh.css?v=20261001-contrast">
+<link rel="stylesheet" href="/assets/css/header-quote-chooser.css?v=20261126-one-cta">
+<link rel="stylesheet" href="/assets/css/studio-navigation.css?v=20260920-1">
+<link rel="stylesheet" href="/assets/css/customer-reviews.css?v=20260924">
+<link rel="stylesheet" href="/assets/css/hero-fullbleed.css?v=20261114">
+<link rel="stylesheet" href="/assets/css/compare.css?v=20261126">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<div class="announce">
+  <div class="container announce-inner">
+    <div class="announce-rating">
+      <span class="announce-stars">&#9733; &#9733; &#9733; &#9733; &#9733;</span>
+      <span class="spec spec--paper">4.9 Google rating &middot; 27 reviews</span>
+    </div>
+    <div class="announce-trust">
+      <span class="spec spec--paper">Licensed &amp; insured</span>
+      <span class="spec spec--paper">3-year workmanship warranty</span>
+      <span class="spec spec--paper">Financing options</span>
+    </div>
+  </div>
+</div>
+
+<div class="project-access" role="navigation" aria-label="Project links"><a href="/process/">Our process</a><a href="/portal/">Project portal</a><a href="https://portal.ghareebfence.com/">Customer login →</a></div>
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="../../" class="logo logo-with-mark"><img class="brand-mark" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="Ghareeb Fencing Solutions" width="396" height="264">
+      <span class="logo__name" data-chrome="brand">Ghareeb <em>Fencing Solutions</em></span>
+      <small class="spec" data-chrome="brand-tag">Toledo &middot; Family owned</small>
+    </a>
+    <ul class="nav-links">
+      <li class="nav-item-menu"><a href="../../fences/" class="has-menu" aria-haspopup="true">Fence Styles</a><ul class="nav-sub"><li><a href="../../fences/cedar/">Cedar Privacy</a></li><li><a href="../../fences/wood/">Wood Privacy</a></li><li><a href="../../fences/vinyl/">Vinyl Fencing</a></li><li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li><li><a href="../../fences/chainlink/">Chain Link</a></li><li><a href="../../fences/split-rail/">Split Rail</a></li><li><a href="../../fences/no-dig/">No-Dig Fencing</a></li><li><a href="/fences/compare/">Compare styles</a></li><li><a href="../../fences/">All styles →</a></li></ul></li>
+      <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+      <li><a href="../../reviews/">Reviews</a></li>
+      <li><a href="../../guides/">Guides</a></li>
+      <li><a class="is-active" href="../../about/">About</a></li>
+      <li><a href="../../gallery/">Gallery</a></li>
+      <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+      <li><a href="../../contact/">Contact</a></li>
+        <li class="nav-opt"><a href="../../faq/">FAQ</a></li>
+    </ul>
+    <div class="nav-cta-group">
+      <a href="/financing/" class="btn btn-financing btn-sm" id="nav-fin">Financing Options</a>
+      <a href="tel:14192142107" class="btn btn-ghost btn-sm nav-phone">(419) 214-2107</a>
+      <a href="/quote/ballpark/" class="btn btn-primary btn-sm header-measure-button" id="nav-quote">Get My 60-Second Price →</a>
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileDrawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<div class="mobile-drawer" id="mobileDrawer">
+  <button class="mobile-drawer-close" id="drawerClose" aria-label="Close menu">×</button>
+  <ul>
+    <li><a href="../../">Home</a></li>
+    <li><a href="/fence-studio/" class="nav-studio-link">3D Fence Studio</a></li>
+    <li><a href="../../fences/">Fence Styles</a></li>
+    <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+    <li><a href="../../fences/wood/">Wood Privacy</a></li>
+    <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+    <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+    <li><a href="../../fences/no-dig/">No-Dig Fencing</a></li>
+    <li><a href="../../fences/chainlink/">Chain Link</a></li>
+    <li><a href="../../fences/split-rail/">Split Rail</a></li>
+    <li><a href="../../reviews/">Reviews</a></li>
+    <li><a href="../../about/">About</a></li>
+    <li><a href="../../gallery/">Gallery</a></li>
+    <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+    <li><a href="../../contact/">Contact</a></li>
+    <li><a href="../../guides/">Guides</a></li>
+    <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener">Explore Financing Options</a></li>
+  </ul>
+  <div class="mobile-drawer-cta">
+<a data-dyn="project-login" href="https://portal.ghareebfence.com/" class="btn btn-gold btn-lg">Customer login →</a>
+    <a href="https://hil.slice.fnbo.com/application/qr/Ghareeb%20Fencing%20Solutions/Ghareeb%20Fencing%20Solutions?hash=Xg3bR%2FJFyMCD3yBp2GxP2A6gOVYoEK15tyjNmbsmk7XK3ppy1756qXI0pjttar3XolXzU4oLcjnB%2F9nroXKyMdNPkHg3EfgDHzf41PwUqv4kFKzVCar3mqg%2Bvicb9T%2B5r4XGhF3HOzSpyRnAvBKSEe67VMilu9mTLAw7zIBAtfI%3D&agent_id=279d54ef-f73c-4a64-a41c-b999dce9ac70&entry_point=qr" target="_blank" rel="noopener" class="btn btn-financing btn-lg" id="drawer-fin">Explore Financing Options →</a>
+    <a href="/quote/ballpark/" class="btn btn-gold btn-lg">Measure my fence</a>
+    <a href="/quote/" class="btn btn-outline btn-lg header-drawer-quote" style="color:var(--cream);border-color:var(--cream)">Request a free quote</a>
+    <a href="tel:14192142107" class="btn btn-outline btn-lg" style="color: var(--cream); border-color: var(--cream);">Call (419) 214-2107</a>
+  </div>
+</div>
+
+<main id="main">
+<section class="cmp-hero"><div class="container">
+<p class="eyebrow">Fence styles · side by side</p>
+<h1>Which fence fits your yard?</h1>
+<p>Five materials we install, compared on what matters after the crew leaves: privacy, upkeep through Ohio and Michigan winters, how the posts and gates hold up, and roughly what it costs.</p>
+</div></section>
+
+<section class="cmp-section" aria-labelledby="cmp-t"><div class="container">
+<h2 id="cmp-t">Compare styles</h2>
+<p class="cmp-intro">Tick the ones you’re deciding between.</p>
+<div class="cmp-picker" role="group" aria-label="Styles to compare"><label><input type="checkbox" value="vinyl" checked> Vinyl privacy</label><label><input type="checkbox" value="cedar" checked> Cedar privacy</label><label><input type="checkbox" value="wood"> Pressure-treated wood</label><label><input type="checkbox" value="aluminum" checked> Ornamental aluminum</label><label><input type="checkbox" value="chainlink"> Chain link</label></div>
+<div class="cmp-grid"><article class="cmp-card" id="cmp-vinyl">
+<img src="/assets/img/performance-v12/62e4b0b12485dd80-960.webp" srcset="/assets/img/performance-v12/62e4b0b12485dd80-480.webp 480w, /assets/img/performance-v12/62e4b0b12485dd80-960.webp 960w" sizes="(max-width: 600px) 100vw, 400px" alt="White vinyl privacy fence" width="960" height="720" loading="lazy" decoding="async">
+<div class="cmp-card__body"><h3>Vinyl privacy</h3><p class="cmp-card__line">High-quality Homeland vinyl, made in the USA. Nothing to paint or stain.</p>
+<dl><dt>Price</dt><dd><span class="cmp-tier" aria-label="Price tier 3 of 4">$$$<span>$</span></span></dd><dt>Privacy</dt><dd>100% on privacy panels; toppers and semi-privacy styles let light through</dd><dt>Upkeep</dt><dd>Rinse it with a hose. It doesn’t rot, and it won’t need paint</dd><dt>Posts &amp; gates</dt><dd>5×5 posts with a .150″ wall. Aluminum inside every gate frame so it doesn’t sag</dd><dt>Heights</dt><dd>3 to 8 ft</dd><dt>Warranty</dt><dd>Homeland limited lifetime + our 3-year workmanship</dd><dt>Colors</dt><dd><ul class="cmp-swatches"><li><i style="background:#f7f7f4"></i>White</li><li><i style="background:#d9c7a3"></i>Tan</li><li><i style="background:#c9b28e"></i>Adobe</li><li><i style="background:#c8ab86"></i>Aspen Latte</li><li><i style="background:#a79f95"></i>Chai Gray</li><li><i style="background:#5f5d5b"></i>Dark Gray</li><li><i style="background:#6b4a35"></i>Mocha Walnut</li></ul></dd></dl>
+<a class="cmp-card__go" href="/quote/ballpark/?material=vinyl">Price vinyl privacy →</a>
+<a class="cmp-card__more" href="/fences/vinyl/">Photos, styles and specs</a></div></article><article class="cmp-card" id="cmp-cedar">
+<img src="/assets/img/performance-v12/f5bfdb53643c6e47-960.webp" srcset="/assets/img/performance-v12/f5bfdb53643c6e47-480.webp 480w, /assets/img/performance-v12/f5bfdb53643c6e47-960.webp 960w" sizes="(max-width: 600px) 100vw, 400px" alt="Cedar wood privacy fence" width="960" height="720" loading="lazy" decoding="async">
+<div class="cmp-card__body"><h3>Cedar privacy</h3><p class="cmp-card__line">Western Red Cedar is our standard. Northern White Cedar from Michigan mills is the premium.</p>
+<dl><dt>Price</dt><dd><span class="cmp-tier" aria-label="Price tier 3 of 4">$$$<span>$</span></span></dd><dt>Privacy</dt><dd>90–100%, depending on the style (dog-ear, board-on-board, shadowbox)</dd><dt>Upkeep</dt><dd>Weathers to silver-gray on its own. Seal it every few years if you want to keep the color</dd><dt>Posts &amp; gates</dt><dd>Driven steel in clay, boxed in wood. 3″ steel gate posts; welded steel gate frames available</dd><dt>Heights</dt><dd>4, 6 and 8 ft</dd><dt>Warranty</dt><dd>3-year workmanship</dd><dt>Colors</dt><dd><ul class="cmp-swatches"><li><i style="background:#a8643c"></i>Western Red Cedar</li><li><i style="background:#cdb48e"></i>Northern White Cedar</li></ul></dd></dl>
+<a class="cmp-card__go" href="/quote/ballpark/?material=cedar">Price cedar privacy →</a>
+<a class="cmp-card__more" href="/fences/cedar/">Photos, styles and specs</a></div></article><article class="cmp-card" id="cmp-wood">
+<img src="/assets/img/performance-v12/b3ba2762310d3bab-960.webp" srcset="/assets/img/performance-v12/b3ba2762310d3bab-480.webp 480w, /assets/img/performance-v12/b3ba2762310d3bab-960.webp 960w" sizes="(max-width: 600px) 100vw, 400px" alt="Pressure-treated wood privacy fence" width="960" height="720" loading="lazy" decoding="async">
+<div class="cmp-card__body"><h3>Pressure-treated wood</h3><p class="cmp-card__line">Pressure-treated pine built board by board on site. The most privacy for the money.</p>
+<dl><dt>Price</dt><dd><span class="cmp-tier" aria-label="Price tier 2 of 4">$$<span>$$</span></span></dd><dt>Privacy</dt><dd>90–100%, depending on the style</dd><dt>Upkeep</dt><dd>Let it dry out for a season, then stain or seal if you want a color</dd><dt>Posts &amp; gates</dt><dd>Driven steel in clay, boxed in wood. 3″ steel gate posts; welded steel gate frames available</dd><dt>Heights</dt><dd>4, 6, 7 and 8 ft</dd><dt>Warranty</dt><dd>3-year workmanship</dd><dt>Colors</dt><dd><ul class="cmp-swatches"><li><i style="background:#c9b27f"></i>Pressure-treated pine</li><li><i style="background:#a66a3f"></i>Cedar-tone</li></ul></dd></dl>
+<a class="cmp-card__go" href="/quote/ballpark/?material=wood">Price pressure-treated wood →</a>
+<a class="cmp-card__more" href="/fences/wood/">Photos, styles and specs</a></div></article><article class="cmp-card" id="cmp-aluminum">
+<img src="/assets/img/performance-v12/c4f6cec8825fe22c-960.webp" srcset="/assets/img/performance-v12/c4f6cec8825fe22c-480.webp 480w, /assets/img/performance-v12/c4f6cec8825fe22c-960.webp 960w" sizes="(max-width: 600px) 100vw, 400px" alt="Black spear-top ornamental aluminum fence" width="960" height="720" loading="lazy" decoding="async">
+<div class="cmp-card__body"><h3>Ornamental aluminum</h3><p class="cmp-card__line">Elite aluminum, made in Michigan, with a factory powder coat. Marks the line and keeps the view.</p>
+<dl><dt>Price</dt><dd><span class="cmp-tier" aria-label="Price tier 4 of 4">$$$$<span></span></span></dd><dt>Privacy</dt><dd>None. You see straight through it</dd><dt>Upkeep</dt><dd>Nothing to paint. Elite’s lifetime warranty covers peeling and cracking</dd><dt>Posts &amp; gates</dt><dd>2″ aluminum posts. Panels rack to follow a slope. Pet panel closes gaps to 1⅝″</dd><dt>Heights</dt><dd>4, 5 and 6 ft</dd><dt>Warranty</dt><dd>Elite lifetime + our 3-year workmanship</dd><dt>Colors</dt><dd><ul class="cmp-swatches"><li><i style="background:#1d1f22"></i>Black</li><li><i style="background:#4a3a2c"></i>Bronze</li><li><i style="background:#9aa3ad"></i>+5 more colors</li></ul></dd></dl>
+<a class="cmp-card__go" href="/quote/ballpark/?material=aluminum">Price ornamental aluminum →</a>
+<a class="cmp-card__more" href="/fences/aluminum/">Photos, styles and specs</a></div></article><article class="cmp-card" id="cmp-chainlink">
+<img src="/assets/img/performance-v12/f429101468f7a206-960.webp" srcset="/assets/img/performance-v12/f429101468f7a206-480.webp 480w, /assets/img/performance-v12/f429101468f7a206-960.webp 960w" sizes="(max-width: 600px) 100vw, 400px" alt="Black vinyl-coated chain link fence" width="960" height="720" loading="lazy" decoding="async">
+<div class="cmp-card__body"><h3>Chain link</h3><p class="cmp-card__line">Galvanized or black vinyl-coated. The budget fence, built right.</p>
+<dl><dt>Price</dt><dd><span class="cmp-tier" aria-label="Price tier 1 of 4">$<span>$$$</span></span></dd><dt>Privacy</dt><dd>None</dd><dt>Upkeep</dt><dd>Close to nothing. The black coating blends into the yard</dd><dt>Posts &amp; gates</dt><dd>Top rail standard. Line posts set to the ASTM F567 footing schedule. Bottom wire is an add-on</dd><dt>Heights</dt><dd>4, 5 and 6 ft</dd><dt>Warranty</dt><dd>3-year workmanship</dd><dt>Colors</dt><dd><ul class="cmp-swatches"><li><i style="background:#b9bec4"></i>Galvanized</li><li><i style="background:#202326"></i>Black coated</li></ul></dd></dl>
+<a class="cmp-card__go" href="/quote/ballpark/?material=chainlink">Price chain link →</a>
+<a class="cmp-card__more" href="/fences/chainlink/">Photos, styles and specs</a></div></article></div>
+<p class="cmp-foot">$ to $$$$ is the rough price order for the same yard, not a quote. Tap “Price” on a card for a range on your own footage. Screen colors are close, not exact; ask to see real samples. Financing through Slice by FNBO: no interest if paid in full within 18 months, for qualified buyers. Interest builds from the start and is owed if a balance is left after 18 months. <a href="/financing/">Full financing terms</a>.</p>
+</div></section>
+
+<section class="cmp-section" aria-labelledby="hv-t"><div class="container">
+<h2 id="hv-t">How tall should it be?</h2>
+<p class="cmp-intro">Pick a material and a height. Heights a material doesn’t come in are crossed out.</p>
+<div class="hv" id="hv">
+<div class="hv__controls">
+<span class="hv__label">Material</span><div class="hv__row" role="group" aria-label="Material"><button type="button" data-hv-style="vinyl" data-hv-material="vinyl" data-hv-heights="4,5,6,8" data-hv-color="#f1f1ec">Vinyl</button><button type="button" data-hv-style="cedar" data-hv-material="cedar" data-hv-heights="4,6,8" data-hv-color="#b5754a">Cedar</button><button type="button" data-hv-style="wood" data-hv-material="wood" data-hv-heights="4,6,8" data-hv-color="#c3a874">Treated wood</button><button type="button" data-hv-style="aluminum" data-hv-material="aluminum" data-hv-heights="4,5,6" data-hv-color="#26292d|open">Aluminum</button><button type="button" data-hv-style="chainlink" data-hv-material="chainlink" data-hv-heights="4,5,6" data-hv-color="#5d646c|open">Chain link</button></div>
+<span class="hv__label">Height</span><div class="hv__row" role="group" aria-label="Height"><button type="button" data-hv-height="4">4 ft</button><button type="button" data-hv-height="5">5 ft</button><button type="button" data-hv-height="6">6 ft</button><button type="button" data-hv-height="8">8 ft</button></div>
+<p class="hv__read" aria-live="polite"></p>
+<a id="hv-go" class="cmp-card__go" href="/quote/ballpark/">Price this height →</a>
+<p class="hv__note">Town height limits vary, especially in front yards. <a href="/permits/">Check your town’s fence rules</a>.</p>
+<figure class="cmp-quote"><blockquote>&ldquo;Our fence looks amazing and the escape artist puppy is now contained!&rdquo;</blockquote><figcaption>Hannah Lafferty · <a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT21FMGEwbExhVkpSVlhkeGRIVmlMVGRvTVVwVWRsRRAB!2m1!1s0x0:0xcfd5c85e63391463" rel="noopener" target="_blank">Google review</a></figcaption></figure>
+</div>
+<svg viewBox="0 0 360 300" role="img" aria-labelledby="hv-svg-t"><title id="hv-svg-t">Fence height next to an adult and a dog, with the post below ground</title>
+<rect x="0" y="200" width="360" height="100" fill="#d9cbb3"/>
+<line x1="0" y1="272" x2="360" y2="272" stroke="#7a6a52" stroke-dasharray="6 5" stroke-width="1.5"/><text x="6" y="268" font-size="10.5" fill="#5a4c38">Frost line ~36″ (42″ in Michigan)</text>
+<rect class="hv-fence" x="150" y="80" width="190" height="120" fill="#f1f1ec" stroke="#00000033"/>
+<rect x="166" y="200" width="7" height="80" fill="#8a9097"/><rect x="316" y="200" width="7" height="80" fill="#8a9097"/>
+<text x="245" y="295" text-anchor="middle" font-size="10.5" fill="#5a4c38">Steel post driven 4 ft into clay</text>
+<g fill="#33475b"><circle cx="60" cy="74" r="10"/><rect x="51" y="86" width="18" height="52" rx="7"/><rect x="52" y="134" width="7" height="66" rx="3"/><rect x="61" y="134" width="7" height="66" rx="3"/></g>
+<line x1="38" y1="93" x2="148" y2="93" stroke="#225fbe" stroke-dasharray="3 3"/><text x="40" y="54" font-size="10.5" fill="#33475b">5′9″ adult</text><text x="96" y="89" font-size="10" fill="#225fbe">eye level</text>
+<g fill="#6b5844"><rect x="100" y="172" width="30" height="13" rx="6"/><circle cx="132" cy="168" r="7"/><rect x="103" y="184" width="4" height="16"/><rect x="123" y="184" width="4" height="16"/></g>
+<text x="146" y="164" text-anchor="end" font-size="9.5" fill="#6a7c8e">2 ft</text><line x1="148" y1="160" x2="152" y2="160" stroke="#6a7c8e"/><text x="146" y="124" text-anchor="end" font-size="9.5" fill="#6a7c8e">4 ft</text><line x1="148" y1="120" x2="152" y2="120" stroke="#6a7c8e"/><text x="146" y="84" text-anchor="end" font-size="9.5" fill="#6a7c8e">6 ft</text><line x1="148" y1="80" x2="152" y2="80" stroke="#6a7c8e"/><text x="146" y="44" text-anchor="end" font-size="9.5" fill="#6a7c8e">8 ft</text><line x1="148" y1="40" x2="152" y2="40" stroke="#6a7c8e"/>
+</svg>
+</div>
+</div></section>
+
+<section class="cmp-section" aria-labelledby="fd-t"><div class="container">
+<h2 id="fd-t">What holds the fence up</h2>
+<p class="cmp-intro">The part you never see fails first. We pick the post by your soil, and we check it at the estimate.</p>
+<div class="fd">
+<article class="fd__card"><span class="fd__tag">Clay · most Toledo yards</span><h3>Driven steel post (no-dig)</h3><svg viewBox="0 0 300 190" role="img" aria-label="Driven steel post: no hole, no concrete, 4 ft into clay"><rect y="60" width="300" height="130" fill="#c9b591"/><rect y="0" width="300" height="60" fill="#eef5fc"/><line x1="0" y1="150" x2="300" y2="150" stroke="#7a6a52" stroke-dasharray="6 5"/><text x="6" y="145" font-size="10" fill="#5a4c38">frost line</text><rect x="140" y="8" width="20" height="172" fill="#8a9097"/><rect x="132" y="8" width="36" height="52" fill="#b5754a" opacity=".9"/><text x="176" y="40" font-size="10" fill="#33475b">wood box</text><text x="168" y="120" font-size="10" fill="#33475b">2⅜″ galvanized steel</text><text x="168" y="134" font-size="10" fill="#33475b">driven 4 ft, undisturbed clay</text></svg>
+<ul><li>8 ft galvanized steel post, 2⅜″ across, driven 4 ft down, below the frost line</li><li>No hole and no concrete, so no dirt piles and nothing to heave in a freeze</li><li>No cure time: the fence goes on as soon as the posts are in</li><li>We can drive posts in frozen ground, so we build all winter</li></ul></article>
+<article class="fd__card"><span class="fd__tag">Sand or loose soil</span><h3>Post set in concrete</h3><svg viewBox="0 0 300 190" role="img" aria-label="Post set in a dug hole with concrete, 36 inches deep"><rect y="60" width="300" height="130" fill="#e3d4ad"/><rect y="0" width="300" height="60" fill="#eef5fc"/><line x1="0" y1="150" x2="300" y2="150" stroke="#7a6a52" stroke-dasharray="6 5"/><text x="6" y="145" font-size="10" fill="#5a4c38">frost line</text><rect x="124" y="60" width="52" height="92" fill="#b8b8b2"/><rect x="138" y="8" width="24" height="140" fill="#b5754a"/><path d="M96 60 q10 -14 22 0 z M182 60 q10 -14 22 0 z" fill="#a88f62"/><text x="182" y="100" font-size="10" fill="#33475b">10″ hole, 36″ deep</text><text x="182" y="114" font-size="10" fill="#33475b">concrete around the post</text></svg>
+<ul><li>Driven posts need clay to grip, so sandy yards get dug posts</li><li>Pressure-treated wood post in a 10″ hole, 36″ deep, set in concrete</li><li>Galvanized steel in concrete is available as an upgrade</li><li>Gate posts get a wider 12″ hole</li></ul></article>
+</div>
+<figure class="cmp-quote"><blockquote>&ldquo;They were on time, professional, and clean.&rdquo;</blockquote><figcaption>doug holben · <a href="https://www.google.com/maps/reviews/@41.7122855,-83.5525512,17z/data=!3m1!4b1!4m6!14m5!1m4!2m3!1sCi9DQUlRQUNvZENodHljRjlvT2xVNVptbEdObDluYzBSM1ZFMUROMGxVYkdwb2FYYxAB!2m1!1s0x0:0xcfd5c85e63391463" rel="noopener" target="_blank">Google review</a></figcaption></figure>
+<p class="cmp-foot">Split rail is the exception: it uses mortised cedar or pressure-treated posts. <a href="/fences/no-dig/">More on no-dig fencing</a>.</p>
+</div></section>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><img class="brand-mark brand-mark--footer" src="/assets/img/performance-v12/ghareeb-logo-396.webp" alt="" width="396" height="264" loading="lazy" decoding="async">
+        <h2 class="footer-brand-h">Ghareeb Fencing Solutions</h2>
+        <p>Toledo's owner-supervised fence contractor. Cedar, vinyl, aluminum, chain link and split rail — built straight, built honest, built to last.</p>
+        <div style="margin-top: 24px;">
+          <a href="tel:14192142107" style="display: block; font-family: var(--serif); font-size: 22px; color: var(--cream); font-weight: 500;">(419) 214-2107</a>
+          <a href="mailto:nick@ghareebfence.com" style="display: block; margin-top: 8px;">nick@ghareebfence.com</a>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Fence Styles</h3>
+        <ul>
+          <li><a href="../../fences/cedar/">Cedar Privacy</a></li>
+          <li><a href="../../fences/wood/">Wood Privacy</a></li>
+          <li><a href="../../fences/vinyl/">Vinyl Fencing</a></li>
+          <li><a href="../../fences/aluminum/">Ornamental Aluminum</a></li>
+          <li><a href="../../fences/chainlink/">Chain Link</a></li>
+          <li><a href="../../fences/split-rail/">Split Rail</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Company</h3>
+        <ul>
+          <li><a href="../../about/">About Nick</a></li>
+          <li><a href="../../reviews/">Reviews</a></li>
+          <li><a href="../../gallery/">Gallery</a></li>
+          <li class="nav-opt"><a href="../../brochure/">Brochure</a></li>
+          <li><a href="../../service-areas/">Service Areas</a></li>
+          <li><a href="../../faq/">FAQ</a></li>
+    <li><a href="../../guides/">Fence Guides</a></li>
+    <li><a href="../../why-us/">Why Choose Us</a></li>
+          <li><a href="../../quote/">Free Estimate</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h3 class="footer-col-h">Office</h3>
+        <ul>
+          <li>5242 Tractor Rd Suite C<br>Toledo, OH 43612</li>
+          <li>Mon–Sat · 8am – 6pm</li>
+          <li><a href="https://www.bbb.org/us/oh/toledo/profile/outdoor-living/ghareeb-fencing-solutions-0422-211006075/customer-reviews" target="_blank" rel="noopener">BBB Accredited Profile →</a></li>
+          <li><a href="https://www.facebook.com/GhareebLandscaping/" target="_blank" rel="noopener">Facebook →</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div>© 2026 Ghareeb Fencing Solutions · All rights reserved · <a href="../../privacy/" style="color:inherit;">Privacy</a> · <a href="../../terms/" style="color:inherit;">Terms</a></div>
+      <div class="footer-bottom-badges">
+        <span>★ 4.9 Google · 27 reviews</span>
+        <span>BBB Accredited</span>
+        <span>Licensed &amp; Insured</span>
+      </div>
+    </div>
+  </div>
+<div class="project-footer"><a href="/process/">Our process</a><a href="/portal/">Explore the portal</a><a href="https://portal.ghareebfence.com/">Customer login</a></div>
+</footer>
+
+<div class="mobile-cta" role="navigation" aria-label="Quick actions">
+  <a href="tel:14192142107" class="mobile-cta__call" aria-label="Call Nick at (419) 214-2107">Call Nick</a>
+  <a href="/quote/ballpark/" class="mobile-cta__price">Get 60-Sec Price →</a>
+</div>
+
+
+<script src="/assets/js/project-context.js?v=downriver-20260920" defer></script>
+<script src="/assets/js/request-flow.js?v=kit-eea9b3ca797f" defer></script>
+<script src="../../assets/js/leads.js?v=20261113a" defer></script>
+
+<script src="../../assets/js/sanitize-overrides.js?v=20260920-empty-image" defer></script>
+<script src="../../assets/js/cms-core.js?v=photos-20260919" defer></script>
+<script src="../../assets/js/edit-mode.js?v=20261114-nopw" defer></script>
+<script src="../../assets/js/analytics.js?v=kit-337517d9e3b3" defer></script>
+<script src="../../assets/js/motion.js?v=kit-498f7a820e24" defer></script>
+
+
+<script src="/assets/js/compare.js?v=20261126" defer></script>
+</body>
+</html>
