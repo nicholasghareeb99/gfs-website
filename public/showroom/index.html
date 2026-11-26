@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#060c14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="GFS Showroom">
+<title>GFS Showroom</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preload" href="data.json" as="fetch" crossorigin>
+<link rel="preload" href="/assets/fonts/archivo-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/assets/fonts/source-sans-3-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="app.css?v=1">
+</head>
+<body>
+<div class="atmos" aria-hidden="true"></div>
+
+<div class="splash" id="splash" aria-hidden="true">
+  <div class="mark">
+    <svg viewBox="0 0 320 150" fill="none">
+      <path class="roof" d="M20 72 L160 12 L300 72" stroke="#eaf0f7" stroke-width="12" stroke-linejoin="miter"/>
+      <g fill="#eaf0f7">
+        <path class="pk" style="animation-delay:0.55s" d="M65 140V86l11-13 11 13v54z"/>
+        <path class="pk" style="animation-delay:0.62s" d="M93 140V74l11-13 11 13v66z"/>
+        <path class="pk" style="animation-delay:0.69s" d="M121 140V62l11-13 11 13v78z"/>
+        <path class="pk" style="animation-delay:0.76s" d="M149 140V50l11-13 11 13v90z"/>
+        <path class="pk" style="animation-delay:0.83s" d="M177 140V62l11-13 11 13v78z"/>
+        <path class="pk" style="animation-delay:0.90s" d="M205 140V74l11-13 11 13v66z"/>
+        <path class="pk" style="animation-delay:0.97s" d="M233 140V86l11-13 11 13v54z"/>
+      </g>
+    </svg>
+    <img class="word" src="logo-white.png" alt="">
+    <div class="sub">SHOWROOM</div>
+    <div class="bar"><i id="splashBar"></i></div>
+  </div>
+</div>
+
+<header class="top">
+  <div class="brand"><img src="logo-white.png" alt="Ghareeb Fencing Solutions"><span>SHOWROOM</span></div>
+  <div class="grow"></div>
+  <button class="pill" id="btnSearch" aria-label="Search the brochure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+  <button class="pill" id="btnMenu" aria-label="Showroom settings"><i class="net" id="netDot"></i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+</header>
+
+<main>
+  <section class="view" id="v-brochure" aria-label="Brochure"></section>
+  <section class="view" id="v-styles" aria-label="Fence styles"></section>
+  <section class="view" id="v-ar" aria-label="3D and AR"></section>
+  <section class="view" id="v-permits" aria-label="Permit map"></section>
+</main>
+
+<nav class="dock" aria-label="Modes">
+  <i class="glow" aria-hidden="true"></i>
+  <button data-mode="brochure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 6c-2-1.5-5-2-8-1.5v14c3-.5 6 0 8 1.5 2-1.5 5-2 8-1.5v-14c-3-.5-6 0-8 1.5z"/><path d="M12 6v14"/></svg>Brochure</button>
+  <button data-mode="styles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><rect x="3" y="5" width="12" height="15" rx="2.5"/><path d="M18 7.5l2.3.6a1.5 1.5 0 0 1 1 1.8l-2.6 9.6"/><path d="M7 14l2-2.5 2 2 1.5-1.5"/></svg>Styles</button>
+  <button data-mode="ar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M12 3 4 7.5v9L12 21l8-4.5v-9z"/><path d="M4 7.5 12 12l8-4.5M12 12v9"/></svg>3D · AR</button>
+  <button data-mode="permits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>Permits</button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="app.js?v=1"></script>
+</body>
+</html>
