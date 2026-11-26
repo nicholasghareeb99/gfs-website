@@ -637,3 +637,17 @@ from = "/service-areas/monroe-township-mi/*"
 to = "/service-areas/monroe-mi/"
 status = 301
 force = true
+
+# GFS Showroom (sales app for iPhone/iPad). Not for search engines.
+[[headers]]
+for = "/showroom/*"
+
+  [headers.values]
+  X-Robots-Tag = "noindex, nofollow"
+  Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+for = "/assets/brochure/hires/*"
+
+  [headers.values]
+  Cache-Control = "public, max-age=604800, stale-while-revalidate=2592000"
