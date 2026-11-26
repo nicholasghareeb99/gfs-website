@@ -768,3 +768,20 @@ body.present .top .brand{cursor:default}
 .gl-zoom{position:relative;border-top:1px solid var(--line)}
 .gl-zcv{display:block;width:100%;height:120px}
 .gl-zoom span{position:absolute;left:10px;top:8px;font-size:11px;color:#fff;background:rgba(6,12,20,.75);padding:4px 8px;border-radius:8px}
+.chips .chip{flex:0 0 auto;width:max-content;min-width:max-content;max-width:none}
+
+/* ── Zoomed-out brochure: the booklet open in 3D ─────────────────── */
+.flow.book3d{overflow:hidden;scroll-snap-type:none;touch-action:none;perspective:1300px;perspective-origin:50% -40%;display:grid;place-items:center;cursor:grab}
+.flow.book3d:active{cursor:grabbing}
+.b3{position:relative;width:calc(var(--pw) * 2);height:var(--ph);transform-style:preserve-3d;transform:translate3d(0,-4%,0) rotateX(30deg);margin:auto}
+.leaf3{position:absolute;left:50%;top:0;width:var(--pw);height:var(--ph);transform-origin:0 50%;transform-style:preserve-3d;will-change:transform}
+.leaf3 .face{position:absolute;inset:0;background:#fbfaf6 center/100% 100% no-repeat;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:0 3px 3px 0;box-shadow:0 0 0 .5px rgba(0,0,0,.25);cursor:pointer;overflow:hidden}
+.leaf3 .face.back{transform:rotateY(180deg);border-radius:3px 0 0 3px}
+.leaf3 .shade{position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.34),rgba(0,0,0,.06) 14%,rgba(255,255,255,.05) 30%,transparent 45%),rgba(0,0,0,var(--sh,0))}
+.leaf3 .back .shade{background:linear-gradient(270deg,rgba(0,0,0,.34),rgba(0,0,0,.06) 14%,rgba(255,255,255,.05) 30%,transparent 45%),rgba(0,0,0,var(--sh,0))}
+.leaf3 .no{position:absolute;bottom:6px;right:8px;font:700 11px/1 var(--mono);color:#fff;background:rgba(6,12,20,.7);padding:3px 6px;border-radius:6px}
+.leaf3 .back .no{right:auto;left:8px}
+.leaf3 .face.dim{filter:grayscale(.8) brightness(.45)}
+.b3-cover{position:absolute;left:50%;top:-1.6%;width:calc(var(--pw) * 1.03);height:103.2%;transform-origin:0 50%;background:linear-gradient(135deg,#1c3c63,#0b1a2c);border-radius:0 7px 7px 0;box-shadow:0 0 0 1px rgba(140,199,255,.12),0 30px 60px rgba(0,0,0,.5);transition:opacity .3s}
+.b3-cover.l{border-radius:7px 0 0 7px}
+.b3-shadow{position:absolute;left:4%;right:4%;top:88%;height:30%;background:radial-gradient(ellipse at 50% 40%,rgba(0,0,0,.6),transparent 68%);transform:translateZ(-60px);pointer-events:none;filter:blur(6px)}

@@ -482,7 +482,7 @@ const PRE_PARTS = [
   { k: 'sag', n: 'Sags after a few years', d: 'The light frame racks and sags between posts.' }
 ];
 const GFS_PARTS_V = [
-  { k: 'steel', n: 'Driven steel inside every post', d: 'A galvanized steel post is driven 4 ft into the clay and the vinyl post goes over it. No concrete to lift in frost, and nothing gripping the vinyl at the ground.' },
+  { k: 'steel', n: 'Driven steel inside every post', d: 'A galvanized steel post is driven 4 ft into the clay. Steel adapters clamp onto it, and the vinyl post sleeves down over them. No concrete to lift in frost, and nothing gripping the vinyl at the ground.' },
   { k: 'wall', n: 'Homeland .150″ post walls', d: 'Thicker walls than the big-box brand (.135″), so the post flexes less in wind and holds up longer.' },
   { k: 'uv', n: 'ACCU-Shield UV protection', d: 'Made in the USA with UV protection built in, so it stays white instead of yellowing.' },
   { k: 'grade', n: 'Slopes with the ground', d: 'Rails pass through the posts, so each section follows the grade with no stair-step gaps.' }
@@ -540,7 +540,7 @@ function build(body) {
     ${math(`<p><b>Why the wood post fails first</b>: decay needs air and water together. On a buried wood post that band is right at the soil line, or where the wood meets the top of the concrete, and that is where it breaks. A steel post has no wood underground.</p>
       <p><b>Why posts lift</b>: wet clay freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
       <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with an extra top rail holding the line.</p>
-      <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. A vinyl post over a driven steel post has no footing to lift.</p>
+      <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. GFS drives a galvanized steel post, clamps steel adapters to it, and sleeves the vinyl post over the adapters, so there is no footing to lift.</p>
       <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
   const pre = $('#vsPre', body), gfs = $('#vsGfs', body);
   const S = 34, G = 300; // px per ft, ground line
@@ -690,10 +690,10 @@ function build(body) {
       const gy = groundY(x), ptop = gy - 6 * S - 4;
       g2 += `<g class="part${hl('steel')}"><rect x="${x - 5}" y="${ptop + 20}" width="10" height="${gy - ptop - 20 + 4 * S}" rx="2" fill="url(#gvst)" stroke="#eef3f7" stroke-width=".6"/><text x="${x}" y="${gy + 4 * S + 16}" text-anchor="middle" class="svg-l">4 FT</text></g>
         <g class="part${hl('wall')}"><rect x="${x - pw / 2}" y="${ptop}" width="${pw}" height="${gy - ptop}" fill="url(#gvv)" stroke="#aab3b0" opacity=".9"/>
-        <rect x="${x - pw / 2 + 2}" y="${gy - 2.2 * S}" width="${pw - 4}" height="${1.6 * S}" rx="2" fill="#0f2034" opacity=".55"/><rect x="${x - 5}" y="${gy - 2.2 * S}" width="10" height="${1.6 * S}" fill="url(#gvst)"/>
+        <rect x="${x - pw / 2 + 2}" y="${gy - 2.2 * S}" width="${pw - 4}" height="${1.6 * S}" rx="2" fill="#0f2034" opacity=".55"/><rect x="${x - 5}" y="${gy - 2.2 * S}" width="10" height="${1.6 * S}" fill="url(#gvst)"/><rect x="${x - 7.5}" y="${gy - 2.2 * S + 6}" width="15" height="7" rx="1.5" fill="#5d6a76"/><rect x="${x - 7.5}" y="${gy - .6 * S - 13}" width="15" height="7" rx="1.5" fill="#5d6a76"/>
         <rect x="${x - pw / 2 - 2}" y="${ptop - 6}" width="${pw + 4}" height="7" rx="2" fill="#f7f7f5" stroke="#aab3b0"/></g>`;
     }
-    g2 += `<text x="190" y="${G - 6 * S - 22}" text-anchor="middle" class="svg-l">CUTAWAY SHOWS THE STEEL POST INSIDE</text>`;
+    g2 += `<text x="190" y="${G - 6 * S - 22}" text-anchor="middle" class="svg-l">CUTAWAY: STEEL POST AND ADAPTERS INSIDE</text>`;
     gfs.innerHTML = g2;
     $('#vsGfsS', body).textContent = y < .5 ? 'Straight on day one.' : 'Still straight, square and white.';
     $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${(y - yi) > .62 && (y - yi) < .98 && y > .5 ? ' · winter' : ''}`;
