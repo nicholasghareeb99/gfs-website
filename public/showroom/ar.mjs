@@ -84,6 +84,7 @@ export function show(opts = {}) {
   if (opts.ar) setTimeout(() => toast(canAR ? 'Getting the AR model ready…' : 'AR opens on iPhone and iPad in Safari'), 300);
 }
 export function hide() {}
+export const where = () => ({ opts: state.model ? { model: state.model, styleId: state.styleId } : {}, label: state.model ? `3D · ${niceModel(state.model)}` : '3D · AR', short: '3D' });
 
 const key = () => `${state.model}|${state.layout}|${state.gate}|${state.layout === 'yard' ? JSON.stringify(yardGeometry()).length : ''}`;
 function render() {

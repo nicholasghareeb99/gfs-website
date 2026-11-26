@@ -8,7 +8,7 @@
 // 6 in above the top rail (72 in boards, rail top at 68.5 in); "Smooth the top line"
 // never sets a post more than 2 in into the ground or 12 in above it; raked dirt is
 // laid up to the bottom of the pickets.
-import { $, $$, esc, clamp, icons, toast, reduced } from './ui.mjs';
+import { $, $$, esc, clamp, icons, toast, reduced, gesture } from './ui.mjs';
 
 const SEC = 8, N = 4, L = SEC * N, STEP = .25, NS = L / STEP + 1, IN = 1 / 12;
 const CLEAR = { wood: 2.5 * IN, vinyl: 2 * IN };
@@ -33,6 +33,7 @@ export function grade(body, kit) {
 
   body.innerHTML = `
     <div class="gl-stage lab-vis"><canvas class="gl-cv" aria-label="A 32 foot fence on a shaped yard, seen from the side"></canvas>
+      <div class="gl-try" aria-hidden="true">${gesture('drag')}<span id="glTry">Drag up or down on the yard</span></div>
       <div class="gl-zoom"><canvas class="gl-zcv" aria-label="Close-up of the bottom of the fence"></canvas><span class="mono" id="glZl">CLOSE-UP 4×</span></div>
       <div class="gl-hud"><div><b class="mono" id="glGap"></b><small>biggest gap under the fence</small></div><div><b class="mono" id="glTop"></b><small>top line</small></div></div>
       <div class="vis-note" id="glNote"></div></div>
@@ -278,13 +279,14 @@ export function grade(body, kit) {
     if (a === 'reset') { st.offs.fill(0); st.dirt.fill(0); st.kick = false; if (st.orig) { st.ground.set(st.orig); st.orig = null; } }
     draw();
   });
-  bindSeg(body, (n, v) => { if (n === 'mode') st.mode = v; if (n === 'style') { st.style = v; if (v !== 'wood') st.kick = false; } draw(); });
+  bindSeg(body, (n, v) => { if (n === 'mode') { st.mode = v; const tr = $('.gl-try', body); tr.classList.remove('gone'); $('#glTry', body).textContent = { ground: 'Drag up or down on the yard', posts: 'Drag a post up or down', dirt: 'Run your finger along the bottom to rake in dirt' }[v]; tr.querySelector('.gest').className = 'gest g-' + (v === 'dirt' ? 'slide' : 'drag'); } if (n === 'style') { st.style = v; if (v !== 'wood') st.kick = false; } draw(); });
 
   // ── touch ──
   let drag = null, brush = null, live = true;
   // one repaint per screen frame, however fast the finger sends moves
   let pend = 0; const redraw = () => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; if (live) draw(); }); };
   cv.addEventListener('pointerdown', e => {
+    $('.gl-try', body)?.classList.add('gone');
     cv.setPointerCapture(e.pointerId); const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
     snap();
     if (st.mode === 'posts') { let best = -1, bd = 1e9; for (let i = 0; i <= N; i++) { const d = Math.abs(x - i * SEC); if (d < bd) { bd = d; best = i; } } if (bd > 3) return; drag = { kind: 'post', i: best, y0: y, o0: st.offs[best] }; }

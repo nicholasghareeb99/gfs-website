@@ -792,3 +792,123 @@ body.present .top .brand{cursor:default}
 .tile .ph .nophoto{place-content:start center;padding:72px 24px 0}
 @media (max-height:740px){.tile .ph .nophoto b,.tile .ph .nophoto svg{display:none}.tile .ph .nophoto{padding-top:60px}}
 #v-brochure:has(.overview.on) .pager{opacity:0;transform:translate(-50%,30px);pointer-events:none}
+
+/* ── Gesture demos (help sheets, tool hints) ───────────────────── */
+.gest{position:relative;flex:none;width:52px;height:52px;border-radius:14px;background:rgba(140,199,255,.08);border:1px solid rgba(140,199,255,.18);overflow:hidden}
+.gest i{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.22),0 2px 8px rgba(0,0,0,.4)}
+.gest s{position:absolute;left:10px;right:10px;top:50%;height:4px;margin-top:-2px;border-radius:2px;background:rgba(140,199,255,.35);text-decoration:none}
+.g-tap i{animation:g-tap 1.6s ease-in-out infinite}
+.g-dtap i{animation:g-dtap 1.8s ease-in-out infinite}
+.g-swipe i{animation:g-swipe 1.8s cubic-bezier(.5,0,.3,1) infinite}
+.g-swipev i{animation:g-swipev 1.8s cubic-bezier(.5,0,.3,1) infinite}
+.g-drag i{animation:g-drag 2.2s ease-in-out infinite}
+.g-slide i{animation:g-slide 2.2s ease-in-out infinite}
+.g-pinchin i{animation:g-pin-a 2s ease-in-out infinite}.g-pinchin i.b{animation-name:g-pin-b}
+.g-pinchout i{animation:g-pout-a 2s ease-in-out infinite}.g-pinchout i.b{animation-name:g-pout-b}
+.g-type s{top:auto;bottom:12px;height:12px;border-radius:3px;background:repeating-linear-gradient(90deg,rgba(140,199,255,.45) 0 5px,transparent 5px 8px)}
+.g-type i{width:12px;height:12px;margin:-14px 0 0 -6px;animation:g-type 1.2s steps(4) infinite}
+@keyframes g-tap{0%,100%{transform:scale(1);opacity:.9}45%{transform:scale(.7);opacity:1}60%{transform:scale(1.1)}}
+@keyframes g-dtap{0%,100%,24%,48%{transform:scale(1)}12%,36%{transform:scale(.68)}}
+@keyframes g-swipe{0%{transform:translateX(14px);opacity:0}15%{opacity:1}70%{transform:translateX(-14px);opacity:1}100%{transform:translateX(-16px);opacity:0}}
+@keyframes g-swipev{0%{transform:translateY(14px);opacity:0}15%{opacity:1}70%{transform:translateY(-14px);opacity:1}100%{transform:translateY(-16px);opacity:0}}
+@keyframes g-drag{0%,100%{transform:translateY(10px)}50%{transform:translateY(-10px)}}
+@keyframes g-slide{0%,100%{transform:translateX(-14px)}50%{transform:translateX(14px)}}
+@keyframes g-pin-a{0%,100%{transform:translate(-13px,-13px)}50%{transform:translate(-3px,-3px)}}
+@keyframes g-pin-b{0%,100%{transform:translate(13px,13px)}50%{transform:translate(3px,3px)}}
+@keyframes g-pout-a{0%,100%{transform:translate(-3px,-3px)}50%{transform:translate(-14px,-14px)}}
+@keyframes g-pout-b{0%,100%{transform:translate(3px,3px)}50%{transform:translate(14px,14px)}}
+@keyframes g-type{from{transform:translateX(-12px)}to{transform:translateX(16px)}}
+@media (prefers-reduced-motion:reduce){.gest i{animation:none!important}}
+
+/* ── Help sheet ─────────────────────────────────────────────────── */
+.help-sheet{position:fixed;inset:0;z-index:90;display:grid;align-items:end;justify-items:center;background:rgba(4,9,16,0);transition:background .3s}
+.help-sheet.on{background:rgba(4,9,16,.6)}
+.help-sheet .hs{width:min(560px,100%);max-height:86dvh;overflow:auto;margin:0 0 calc(var(--sab) + 10px);padding:20px 20px 16px;border-radius:26px;background:linear-gradient(180deg,#14263d,#0c1828);border:1px solid var(--line-2);box-shadow:0 30px 80px rgba(0,0,0,.6);transform:translateY(40px);opacity:0;transition:transform .45s var(--spring),opacity .3s}
+@media (min-width:700px){.help-sheet{align-items:center}.help-sheet .hs{margin:0}}
+.help-sheet.on .hs{transform:none;opacity:1}
+.hs-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.hs-top h2{font-size:22px;line-height:1.15;margin:2px 0 0}
+.hs-top .grow{flex:1}
+.hs-list{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.hs-list li{display:flex;align-items:center;gap:14px;padding:10px 12px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid var(--line)}
+.hs-list li p{margin:0;font-size:16px;line-height:1.35;color:#dbe5f0}
+.hs-list li b{color:#fff}
+.hs-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.hs-note{margin:12px 2px 0;font-size:14px;color:var(--dim)}
+
+/* ── Back-to pill (returns to where a link came from) ──────────── */
+.backpill{position:relative;flex:0 1 auto;min-width:0;display:none;align-items:center;gap:8px;height:40px;padding:0 16px 0 10px;border-radius:20px;background:rgba(214,130,63,.95);color:#120a04;font:700 14px/1 var(--font);box-shadow:0 10px 30px rgba(0,0,0,.45);transform:translateY(-14px);opacity:0;pointer-events:none;transition:transform .45s var(--spring),opacity .25s;max-width:min(60vw,360px)}
+.backpill.on{display:inline-flex;transform:none;opacity:1;pointer-events:auto;animation:bp-in .45s var(--spring)}
+@keyframes bp-in{from{transform:translateX(-16px);opacity:0}}
+body.has-back .top .brand{display:none}
+.backpill svg{width:18px;height:18px;flex:none}
+.backpill span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.backpill .x{margin-left:4px;width:26px;height:26px;border-radius:13px;display:grid;place-items:center;background:rgba(0,0,0,.14)}
+.backpill .x svg{width:14px;height:14px}
+@media (max-width:430px){.top{gap:8px}}
+
+/* Brochure: way back from a hidden-chrome page, a zoom that says how to undo it, a close on the book */
+.show-chrome{position:absolute;z-index:26;right:max(14px,var(--sar));bottom:calc(var(--sab) + 14px);display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:20px;background:rgba(10,20,34,.72);border:1px solid var(--line-2);color:var(--text);font:600 14px/1 var(--font);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);opacity:.85;animation:sc-in .5s .3s both}
+.show-chrome[hidden]{display:none}
+.show-chrome svg{width:16px;height:16px}
+@keyframes sc-in{from{opacity:0;transform:translateY(10px)}}
+.zoom-badge{display:inline-flex;align-items:center;gap:6px;pointer-events:none;cursor:pointer}
+.zoom-badge.on{pointer-events:auto}
+.zoom-badge svg{width:14px;height:14px}
+.zoom-badge span{font-family:var(--font);font-weight:700;color:var(--text)}
+.ov-row{display:flex;gap:10px;align-items:center}
+.ov-row .search{flex:1;min-width:0}
+.ov-close{height:52px;flex:none;gap:6px;border-radius:26px}
+.ov-close svg{width:16px;height:16px}
+@media (max-width:430px){.ov-close span{display:none}.ov-close{width:52px;padding:0;justify-content:center}}
+.pager .t{cursor:pointer}
+
+/* ── Fence Lab: home, nav, how-to, takeaway ─────────────────────── */
+.lab-nav{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.lab-nav[hidden]{display:none}
+.lab-nav .grow{flex:1}
+.lab-nav .btn svg{width:16px;height:16px}
+.lab-count{font-size:13px;color:var(--dim);min-width:44px;text-align:center}
+.iconbtn.sm{width:40px;height:40px}
+.lab-home{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.lab-tile{display:flex;align-items:center;gap:16px;text-align:left;padding:16px;border-radius:20px;cursor:pointer;transition:transform .25s var(--spring),border-color .25s,background-color .25s}
+.lab-tile:active{transform:scale(.98)}
+.lab-tile:hover{border-color:rgba(140,199,255,.4)}
+.lab-tile>svg{flex:none;width:78px;height:58px;padding:6px;border-radius:14px;background:rgba(140,199,255,.07);fill:none;stroke:#c7d6e6;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.lab-tile>svg .cu{stroke:var(--copper-lt)}.lab-tile>svg .mute{stroke:#6f8399}.lab-tile>svg .dash{stroke-dasharray:4 4}
+.lab-tile>svg:last-child{width:20px;height:20px;padding:0;background:none;stroke:var(--dim)}
+.lt-b{flex:1;min-width:0;display:grid;gap:4px}
+.lt-b .mono{font-size:11px;color:var(--copper-lt);letter-spacing:.06em}
+.lt-b b{font-size:18px;line-height:1.2}
+.lt-b small{font-size:14px;line-height:1.35;color:var(--dim)}
+.lt-how{display:flex;gap:6px;margin-top:4px}
+.lt-how em{font:600 11px/1 var(--mono);font-style:normal;padding:5px 8px;border-radius:8px;background:rgba(61,127,224,.16);color:var(--blue-lt)}
+.lab-how{border-radius:18px;background:rgba(61,127,224,.08);border:1px solid rgba(140,199,255,.22);padding:0 12px}
+.lab-how[hidden]{display:none}
+.lab-how summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;font-weight:700;color:var(--blue-lt)}
+.lab-how summary::-webkit-details-marker{display:none}
+.lab-how summary svg{width:20px;height:20px}
+.lab-how summary small{margin-left:auto;font:500 12px/1 var(--mono);color:var(--dim)}
+.lab-how summary::after{content:'';width:9px;height:9px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg) translate(-2px,-2px);transition:transform .25s}
+.lab-how[open] summary::after{transform:rotate(-135deg)}
+.lab-how .hs-list{padding-bottom:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.lab-how .hs-list li{padding:8px 10px}
+.lab-how .hs-list li p{font-size:15px}
+.lab-foot{display:grid;gap:12px}
+.lab-foot[hidden]{display:none}
+.lab-take{padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(214,130,63,.16),rgba(214,130,63,.05));border:1px solid rgba(214,130,63,.35)}
+.lab-take p{margin:6px 0 0;font-size:17px;line-height:1.4;color:#fff}
+.lab-next{display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.lab-next .btn svg{width:16px;height:16px}
+.lab-next .primary{gap:8px}
+/* Grade Lab: "drag here" hint over the yard until the first touch */
+.gl-stage{position:relative}
+.gl-try{position:absolute;left:50%;top:34%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:10px;padding:8px 14px 8px 8px;border-radius:18px;background:rgba(10,20,34,.82);border:1px solid var(--line-2);font-weight:700;font-size:14px;pointer-events:none;transition:opacity .4s,transform .4s;white-space:nowrap}
+.gl-try.gone{opacity:0;transform:translate(-50%,-40%)}
+.gl-try .gest{width:44px;height:44px}
+
+.backpill .s{display:none}
+@media (max-width:430px){
+  .backpill .l{display:none}.backpill .s{display:block}.backpill .x{display:none}.backpill{padding-right:14px;max-width:none}
+  body.has-back #btnReviews,body.has-back #btnHelp{display:none}
+}

@@ -23,7 +23,8 @@ export async function init(a, el) {
         <div class="slot l"></div><div class="slot r"></div><div class="spine"></div><div class="under-shade"></div>
       </div></div>
     </div>
-    <div class="zoom-badge mono"></div>
+    <button class="zoom-badge mono" aria-label="Zoom back out to the whole page"></button>
+    <button class="show-chrome" hidden>${icons.layers}<span>Show buttons</span></button>
     <div class="pinch-hint">${icons.pinch}<span>Let go to see every page</span></div>
     <div class="pager"><span class="t"></span><span class="n"></span>
       <button data-p="-1" aria-label="Previous page">${icons.back}</button><button data-p="1" aria-label="Next page">${icons.next}</button>
@@ -31,7 +32,7 @@ export async function init(a, el) {
     <div class="progress"><i></i></div>
     <div class="overview" aria-hidden="true">
       <div class="ov-head">
-        <label class="search">${icons.search}<input type="search" placeholder="Search styles, specs, towns, warranty…" enterkeyhint="search" autocomplete="off" aria-label="Search the brochure"><button class="x" hidden aria-label="Clear">${icons.close}</button></label>
+        <div class="ov-row"><button class="btn sm ov-close" aria-label="Close the book and go back to the page">${icons.close}<span>Close</span></button><label class="search">${icons.search}<input type="search" placeholder="Search styles, specs, towns, warranty…" enterkeyhint="search" autocomplete="off" aria-label="Search the brochure"><button class="x" hidden aria-label="Clear">${icons.close}</button></label></div>
         <div class="chips"></div>
       </div>
       <div class="flow"><div class="rail"></div></div>
@@ -42,13 +43,17 @@ export async function init(a, el) {
     </div>`;
   els = {
     stage: $('.stage', root), wrap: $('.book-wrap', root), book: $('.book', root), l: $('.slot.l', root), r: $('.slot.r', root), shade: $('.under-shade', root),
-    badge: $('.zoom-badge', root), hint: $('.pinch-hint', root), pager: $('.pager', root), bar: $('.progress i', root),
+    badge: $('.zoom-badge', root), showChrome: $('.show-chrome', root), hint: $('.pinch-hint', root), pager: $('.pager', root), bar: $('.progress i', root),
     ov: $('.overview', root), flow: $('.flow', root), rail: $('.flow .rail', root), input: $('.overview input', root), chips: $('.overview .chips', root),
     ovTitle: $('.ov-title h2', root), ovNo: $('.ov-title .mono', root), ticks: $('.scrub .ticks', root), knob: $('.scrub .knob', root), scrub: $('.scrub', root)
   };
   try { cur = clamp(+localStorage.getItem('gfs-showroom-page') || 1, 1, D.pages.length); } catch {}
   buildOverview();
   bindGestures();
+  els.badge.onclick = () => resetZoom();
+  els.showChrome.onclick = () => setChrome(false);
+  $('.ov-close', root).onclick = () => closeOverview();
+  $('.t', els.pager).onclick = () => openOverview();
   els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to this visit` : 'Removed from this visit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
   addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
@@ -63,15 +68,15 @@ export function show(opts = {}) {
   if (opts.page) goTo(opts.page, false);
   if (opts.overview) openOverview({ focus: opts.focus });
   else if (overviewOn) closeOverview(true);
-  try { if (!localStorage.getItem('gfs-showroom-coach')) { coach(); localStorage.setItem('gfs-showroom-coach', '1'); } } catch {}
 }
-export function hide() { document.body.classList.remove('chrome-hidden'); chromeHidden = false; }
-
-function coach() {
-  const c = document.createElement('div'); c.className = 'coach';
-  c.innerHTML = '<span><b>Drag</b> a page to turn it</span><span><b>Tap</b> a photo to explore</span><span><b>Pinch out</b> for every page</span>';
-  root.append(c); setTimeout(() => { c.style.transition = 'opacity .6s'; c.style.opacity = '0'; setTimeout(() => c.remove(), 700); }, 5200);
-  setTimeout(() => { els.book.classList.add('hint-spots'); setTimeout(() => els.book.classList.remove('hint-spots'), 3400); }, 900);
+export function hide() { setChrome(false, true); }
+export const where = () => ({ opts: { page: cur }, label: `Brochure · page ${cur}`, short: `Page ${cur}` });
+export const help = () => ({ key: 'brochure' });
+// Tapping the middle of a page hides the buttons for a clean look; a small button brings them back.
+function setChrome(hidden, quiet) {
+  chromeHidden = hidden; document.body.classList.toggle('chrome-hidden', hidden);
+  els.showChrome.hidden = !hidden;
+  if (!quiet) setTimeout(layout, 460);
 }
 
 // ── Layout & content ─────────────────────────────────────────────
@@ -228,7 +233,7 @@ function setView(v) {
   els.wrap.style.transformOrigin = '0 0';
   els.wrap.style.transform = `translate(${v.x}px,${v.y}px) scale(${v.s})`;
   els.badge.classList.toggle('on', v.s > 1.05);
-  els.badge.textContent = `${v.s.toFixed(1)}×`;
+  els.badge.innerHTML = `${v.s.toFixed(1)}× ${icons.fit}<span>Fit page</span>`;
   els.hint.classList.remove('on');
   clearTimeout(hiTimer);
   if (v.s > 1.3) hiTimer = setTimeout(() => { for (const s of [els.l, els.r]) if (s.dataset.n && !s.style.backgroundImage.includes('hires')) s.style.backgroundImage = `url('${pageImg(+s.dataset.n, true)}'), url('${pageImg(+s.dataset.n)}')`; }, 120);
@@ -345,8 +350,7 @@ function tap(x, y) {
     const edge = spread ? (slot === els.l ? u < .2 : u > .8) : (u < .2 || u > .8);
     if (edge && view.s <= 1.02) return turn(spread ? (slot === els.l ? -1 : 1) : (u < .5 ? -1 : 1));
   }
-  chromeHidden = !chromeHidden; document.body.classList.toggle('chrome-hidden', chromeHidden);
-  setTimeout(layout, 460);
+  setChrome(!chromeHidden);
 }
 
 function openSpot(n, i, slot) {
@@ -486,7 +490,7 @@ function bindBook() {
 async function openOverview({ fromPinch = false, focus = false } = {}) {
   if (overviewOn) { if (focus) els.input.focus(); return; }
   overviewOn = true; els.ov.setAttribute('aria-hidden', 'false');
-  document.body.classList.remove('chrome-hidden'); chromeHidden = false;
+  setChrome(false, true);
   sizeBooklet(); scrollToCard(cur, false);
   const from = (els.r.dataset.n == cur ? els.r : els.l).getBoundingClientRect();
   const card = els.rail.querySelector(`.face[data-n="${cur}"]`);

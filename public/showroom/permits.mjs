@@ -34,6 +34,7 @@ export async function init(a, el) {
   bindSearch();
 }
 
+export const where = () => ({ opts: {}, label: 'Permits' + (cur?.address && cur.address !== 'Current location' ? ` · ${cur.address.split(',')[0]}` : '') });
 export function show(opts = {}) {
   setTimeout(() => map?.invalidateSize(), 60);
   if (opts.town) { const r = D.rules.find(x => x.id === opts.town); if (r) townOnly(r); }
