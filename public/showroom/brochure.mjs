@@ -5,6 +5,7 @@
 //  • pinch out to fly every page into a flowing deck with search
 import { $, $$, esc, clamp, pageImg, icons, spring, tween, ring, fly, tokens, snippet, reduced, toast, cssUrl, asset } from './ui.mjs';
 import { initPhotos, openPhotos, execItems } from './photos.mjs';
+import { visit } from './visit.mjs';
 
 const N_STRIPS = 12, ASPECT = 900 / 1165;
 let app, root, D;
@@ -26,7 +27,7 @@ export async function init(a, el) {
     <div class="pinch-hint">${icons.pinch}<span>Let go to see every page</span></div>
     <div class="pager"><span class="t"></span><span class="n"></span>
       <button data-p="-1" aria-label="Previous page">${icons.back}</button><button data-p="1" aria-label="Next page">${icons.next}</button>
-      <button data-p="all" aria-label="All pages">${icons.layers}</button></div>
+      <button data-p="all" aria-label="All pages">${icons.layers}</button><button data-p="heart" class="heartbtn" aria-label="Save this page to the visit" aria-pressed="false">${icons.heart}</button></div>
     <div class="progress"><i></i></div>
     <div class="overview" aria-hidden="true">
       <div class="ov-head">
@@ -48,8 +49,8 @@ export async function init(a, el) {
   try { cur = clamp(+localStorage.getItem('gfs-showroom-page') || 1, 1, D.pages.length); } catch {}
   buildOverview();
   bindGestures();
-  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'all') openOverview(); else if (p) turn(+p); };
-  addEventListener('resize', () => { if (root.classList.contains('on')) layout(); });
+  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to this visit` : 'Removed from this visit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
+  addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
     if (app.mode !== 'brochure' || e.target.matches('input')) return;
     if (e.key === 'ArrowRight') turn(1); if (e.key === 'ArrowLeft') turn(-1);
@@ -117,6 +118,7 @@ function paint() {
   const label = spread && l && r ? `${l}–${r}` : String(spread ? (l || r) : cur);
   $('.t', els.pager).textContent = spread && l && r ? `${D.page(l).title} · ${D.page(r).title}` : p.title;
   $('.n', els.pager).textContent = `${label} / ${D.pages.length}`;
+  $('[data-p=heart]', els.pager).setAttribute('aria-pressed', String(visit.hasPage(spread ? (r || l) : cur)));
   els.bar.style.width = ((spread ? (r || l) : cur) / D.pages.length * 100) + '%';
   try { localStorage.setItem('gfs-showroom-page', cur); } catch {}
   if (app.mode === 'brochure' && location.hash !== '#brochure-' + cur) history.replaceState(null, '', '#brochure-' + cur);
@@ -218,7 +220,7 @@ function setView(v) {
   els.wrap.style.transform = `translate(${v.x}px,${v.y}px) scale(${v.s})`;
   els.badge.classList.toggle('on', v.s > 1.05);
   els.badge.textContent = `${v.s.toFixed(1)}×`;
-  els.hint.classList.toggle('on', v.s < .8);
+  els.hint.classList.remove('on');
   clearTimeout(hiTimer);
   if (v.s > 1.3) hiTimer = setTimeout(() => { for (const s of [els.l, els.r]) if (s.dataset.n && !s.style.backgroundImage.includes('hires')) s.style.backgroundImage = `url('${pageImg(+s.dataset.n, true)}'), url('${pageImg(+s.dataset.n)}')`; }, 120);
 }
@@ -263,6 +265,7 @@ function bindGestures() {
     if (g.type === 'pinch' && pts.size >= 2) {
       const [a, b] = [...pts.values()], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       const s = clamp(g.s0 * d / g.d0, 0.4, 5);
+      if (s < 0.86 && g.s0 <= 1.05) { pts.clear(); g = null; openOverview({ fromPinch: true }); return; }
       setView({ s, x: mx - g.bx - g.lx * s, y: my - g.by - g.ly * s });
       return;
     }
@@ -376,16 +379,26 @@ function centerCard() {
   for (const c of els.rail.children) { const r = c.getBoundingClientRect(), d = Math.abs(r.left + r.width / 2 - mid); if (d < bd) { bd = d; best = c; } }
   return best;
 }
+// The pinched-out view behaves like holding the booklet: one page big in the middle,
+// the edges of the pages before and after it showing, and a thumb flick riffles through.
+function sizeBooklet() {
+  const fw = els.flow.clientWidth, fh = els.flow.clientHeight;
+  const cw = Math.max(140, Math.min(fw * (fw < 700 ? .76 : .5), (fh - 24) * 900 / 1165));
+  els.flow.style.setProperty('--cw', cw + 'px');
+}
 function coverflow() {
-  const fr = els.flow.getBoundingClientRect(), mid = fr.left + fr.width / 2, cw = els.rail.firstElementChild?.offsetWidth || 200;
+  const fr = els.flow.getBoundingClientRect(), cw = els.rail.firstElementChild?.offsetWidth || 200, pitch = cw + 14;
   for (const c of els.rail.children) {
-    const r = c.offsetLeft + c.offsetWidth / 2 - els.flow.scrollLeft - fr.width / 2 + (fr.left - fr.left);
-    const d = clamp(r / (cw * 0.62), -6, 6), ad = Math.abs(d);
-    if (ad > 5.9) { c.style.visibility = 'hidden'; continue; }
+    const r = c.offsetLeft + c.offsetWidth / 2 - els.flow.scrollLeft - fr.width / 2;
+    const d = clamp(r / pitch, -4, 4), ad = Math.abs(d);
+    if (ad > 3.5) { c.style.visibility = 'hidden'; continue; }
     c.style.visibility = '';
-    c.style.transform = `translateZ(${-ad * 110}px) rotateY(${clamp(-d * 42, -62, 62)}deg) scale(${1 - Math.min(.22, ad * .07)})`;
+    const turn = Math.min(1, ad);                         // a page lifts off the stack as it leaves the middle
+    c.style.transformOrigin = d > 0 ? '0% 50%' : '100% 50%';
+    c.style.transform = `perspective(1100px) translateX(${-Math.sign(d) * Math.max(0, ad - 1) * cw * .78}px) rotateY(${Math.sign(d) * (turn * 34 + Math.max(0, ad - 1) * 8)}deg) scale(${1 - turn * .05})`;
     c.style.zIndex = String(100 - Math.round(ad * 10));
-    c.style.setProperty('--shade', Math.min(.8, ad * .28).toFixed(2));
+    c.style.setProperty('--shade', (turn * .55 + Math.max(0, ad - 1) * .2).toFixed(2));
+    c.classList.toggle('mid', ad < .5);
   }
   const c = centerCard(); if (!c) return;
   const n = +c.dataset.n, p = D.page(n);
@@ -404,7 +417,7 @@ async function openOverview({ fromPinch = false, focus = false } = {}) {
   if (overviewOn) { if (focus) els.input.focus(); return; }
   overviewOn = true; els.ov.setAttribute('aria-hidden', 'false');
   document.body.classList.remove('chrome-hidden'); chromeHidden = false;
-  scrollToCard(cur, false);
+  sizeBooklet(); scrollToCard(cur, false);
   const from = (els.r.dataset.n == cur ? els.r : els.l).getBoundingClientRect();
   const card = els.rail.children[cur - 1];
   els.ov.classList.add('on');

@@ -46,10 +46,26 @@ const styles = STYLES.map(s => {
 });
 for (const s of styles) if (!FAMILIES.some(f => f.id === s.family)) throw Error('Unknown family ' + s.family);
 
+// ── Reviews: the real ones on /reviews/, word for word, with links to the originals ──
+const reviewsHtml = readFileSync(path.join(PUB, 'reviews/index.html'), 'utf8');
+const reviews = [...reviewsHtml.matchAll(/<article class="gfs-review-card"[^>]*>([\s\S]*?)<\/article>/g)].map(m => {
+  const b = m[1], pick = re => { const x = b.match(re); return x ? strip(x[1]).trim() : ''; };
+  return {
+    stars: (pick(/aria-label="(\d) out of 5 stars"/) || '5') * 1,
+    platform: pick(/class="gfs-review-platform">([\s\S]*?)<\/span>/),
+    topic: pick(/class="gfs-review-topic">([\s\S]*?)<\/p>/),
+    quote: pick(/<blockquote>([\s\S]*?)<\/blockquote>/),
+    name: pick(/<strong>([\s\S]*?)<\/strong>/),
+    note: pick(/<\/strong><span>([\s\S]*?)<\/span>/),
+    url: (b.match(/href="(https:\/\/[^"]+)"/) || [])[1] ? unescape(b.match(/href="(https:\/\/[^"]+)"/)[1]) : ''
+  };
+}).filter(r => r.quote && r.name);
+if (reviews.length < 10) throw Error('Expected the real reviews on /reviews/, found ' + reviews.length);
+
 const data = {
   built: new Date().toISOString().slice(0, 10),
-  families: FAMILIES, styles, pages, models: catalogNames, rules: RULES, dig: DIG_RULES,
+  families: FAMILIES, styles, pages, reviews, models: catalogNames, rules: RULES, dig: DIG_RULES,
   rulesChecked: 'Nov 19, 2026'
 };
 writeFileSync(path.join(PUB, 'showroom/data.json'), JSON.stringify(data));
-console.log(`showroom data: ${pages.length} pages, ${styles.length} styles, ${catalogNames.length} 3D models, ${RULES.length} towns`);
+console.log(`showroom data: ${reviews.length} reviews, ${pages.length} pages, ${styles.length} styles, ${catalogNames.length} 3D models, ${RULES.length} towns`);

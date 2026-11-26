@@ -3,6 +3,7 @@
 // ballpark tool), the house and streets from OpenStreetMap, the rules from GFS's
 // verified research, and an AI lookup for towns we haven't verified yet.
 import { $, $$, esc, clamp, icons, toast } from './ui.mjs';
+import { visit } from './visit.mjs';
 
 let app, root, D, map, L, layers, cur = null, aiCache = new Map();
 const LEAFLET = 'https://unpkg.com/leaflet@1.9.4/dist/';
@@ -29,6 +30,7 @@ export async function init(a, el) {
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 21, maxNativeZoom: 19, attribution: 'Imagery © Esri, Maxar, Earthstar' }).addTo(map);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', { maxZoom: 21, maxNativeZoom: 19, opacity: .55 }).addTo(map);
   layers = L.layerGroup().addTo(map);
+  map.on('click', onMapClick);
   bindSearch();
 }
 
@@ -78,16 +80,20 @@ async function lookupText(text, magicKey) {
   try {
     const u = new URL('https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates');
     Object.entries({ f: 'json', SingleLine: text, maxLocations: 1, outFields: 'Match_addr,City,Subregion,Region,RegionAbbr,Postal', location: '-83.58,41.66', ...(magicKey ? { magicKey } : {}) }).forEach(([k, v]) => u.searchParams.set(k, v));
-    const r = await (await fetch(u)).json(), c = r.candidates?.[0];
+    const us = new URL(u); us.searchParams.set('locationType', 'street');
+    const [r, rs] = await Promise.all([fetch(u).then(x => x.json()), fetch(us).then(x => x.json()).catch(() => null)]);
+    const c = r.candidates?.[0], s = rs?.candidates?.[0];
     if (!c) return toast('That address was not found.');
-    lookupPoint(c.location.y, c.location.x, c.attributes.Match_addr || text, { city: c.attributes.City, county: c.attributes.Subregion, state: c.attributes.RegionAbbr });
+    const street = s && Math.hypot(s.location.x - c.location.x, s.location.y - c.location.y) > 0.00004 ? [s.location.y, s.location.x] : null;
+    lookupPoint(c.location.y, c.location.x, c.attributes.Match_addr || text, { city: c.attributes.City, county: c.attributes.Subregion, state: c.attributes.RegionAbbr, street });
   } catch { toast(navigator.onLine ? 'Address search failed. Try again.' : 'Address search needs a connection.'); }
 }
 
 // ── Lookup ───────────────────────────────────────────────────────
 async function lookupPoint(lat, lng, address, geo = {}) {
   $('.p-empty', root).hidden = true;
-  layers.clearLayers(); cur = { lat, lng, address, geo, aiRule: null };
+  layers.clearLayers(); cur = { lat, lng, address, geo, aiRule: null, ...loadEdits(address), ...restoreFence(address) };
+  if (address !== 'Current location') visit.setAddress(address);
   L.marker([lat, lng], { icon: L.divIcon({ className: '', html: '<div class="pulse-pin"></div>', iconSize: [18, 18] }) }).addTo(layers);
   map.flyTo([lat, lng], 19, { duration: 1.6 });
   card(`<div class="eyebrow">LOOKING UP</div><h2>${esc(address)}</h2><div class="ai"><div class="think"><i></i><i></i><i></i> Pulling the parcel lines, the house and the street…</div></div>`);
@@ -176,26 +182,39 @@ function analyse() {
   // front lot lines: parcel edges that run along a street
   const edges = lot.map((a, i) => { const b = lot[(i + 1) % lot.length], mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; let best = null; for (const r of roads) { const n = nearestOnPolyline(mid, r.pts); if (!best || n.d < best.d) best = { ...n, road: r }; } return { a, b, i, mid, len: len(sub(b, a)), road: best }; });
   const ang = (u, v) => { const c2 = Math.abs(dot(u, v)) / (len(u) * len(v) || 1); return Math.acos(clamp(c2, 0, 1)) * 180 / Math.PI; };
-  const fronts = edges.filter(e => e.len > 4 && e.road && e.road.d < 35 && ang(sub(e.b, e.a), e.road.dir) < 35).sort((x, y) => x.road.d - y.road.d);
-  const picked = [];
-  for (const e of fronts) {
+  const fronts = edges.filter(e => e.len > 3 && e.road && e.road.d < 45 && ang(sub(e.b, e.a), e.road.dir) < 40).sort((x, y) => x.road.d - y.road.d);
+  // The geocoder's street-side point sits on the street in front of the address: the lot line facing it is the front.
+  const streetPt = c.geo.street ? P.to([c.geo.street[1], c.geo.street[0]]) : null;
+  if (streetPt) {
+    const facing = edges.filter(e => e.len > 3).map(e => { const d = sub(e.b, e.a), n = [-d[1] / e.len, d[0] / e.len]; return { e, out: -dot(sub(streetPt, e.a), n), dist: segDist(streetPt, e.a, e.b) }; })
+      .filter(x => x.out > 0).sort((a, b) => a.dist - b.dist)[0];
+    if (facing) { const i = fronts.indexOf(facing.e); if (i > 0) fronts.splice(i, 1); if (i !== 0) fronts.unshift(facing.e); }
+  }
+  let picked = [];
+  if (Array.isArray(c.frontPick)) picked = c.frontPick.map(i => edges[i]).filter(Boolean);
+  else for (const e of fronts) {
     if (!picked.length) { picked.push(e); continue; }
     const p0 = picked[0];
-    if (picked.length < 2 && ang(sub(e.b, e.a), sub(p0.b, p0.a)) > 45 && e.road.road !== p0.road.road) picked.push(e);
-    // merge collinear pieces of the same frontage
-    else if (ang(sub(e.b, e.a), sub(p0.b, p0.a)) < 12 && e.road.road === p0.road.road) p0.extra = (p0.extra || []).concat(e);
+    if (picked.length < 2 && e.road && ang(sub(e.b, e.a), sub(p0.b, p0.a)) > 45 && e.road.road !== p0.road?.road) picked.push(e);
   }
   // inward normal of each front edge (lot is CCW, so inward is to the left)
   const fronts2 = picked.map(e => {
     const d = sub(e.b, e.a), L2 = len(d), u = [d[0] / L2, d[1] / L2], nrm = [-u[1], u[0]];
     const sd = p => dot(sub(p, e.a), nrm); // distance into the lot
-    let depth = house ? Math.min(...house.map(sd)) : 9.1; // front wall of the house, else assume 30 ft
+    // Front wall of the house. With no outline, the address point is about the middle of the
+    // house, so the front wall is taken as ~15 ft closer to the street than that point.
+    let depth = house ? Math.min(...house.map(sd)) : sd(home) > 6 ? sd(home) - 4.6 : 9.1;
     depth = clamp(depth, 1.5, 60);
-    return { e, u, nrm, sd, depth, assumed: !house, road: e.road };
+    return { e, u, nrm, sd, depth, assumed: !house, road: e.road?.d < 45 ? e.road : null };
   });
   for (const [i, d] of Object.entries(c.override || {})) if (fronts2[i]) { fronts2[i].depth = d; fronts2[i].assumed = false; }
-  return { P, lot, house, roads, fronts: fronts2 };
+  return { P, lot, house, roads, edges, fronts: fronts2 };
 }
+
+// The salesman's corrections (street side, front of house) are kept per address on this device.
+const editKey = a => 'gfs-showroom-front:' + String(a).toLowerCase();
+function loadEdits(address) { try { const v = JSON.parse(localStorage.getItem(editKey(address)) || 'null'); return v ? { frontPick: v.pick ?? undefined, override: v.override || undefined } : {}; } catch { return {}; } }
+function saveEdits() { try { if (Array.isArray(cur.frontPick) || cur.override) localStorage.setItem(editKey(cur.address), JSON.stringify({ pick: cur.frontPick ?? null, override: cur.override || null })); else localStorage.removeItem(editKey(cur.address)); } catch {} }
 
 // ── Drawing ──────────────────────────────────────────────────────
 function draw() {
@@ -203,42 +222,194 @@ function draw() {
   const c = cur, A = analyse(); c.A = A;
   const rule = effectiveRule();
   L.circleMarker([c.lat, c.lng], { radius: 5, color: '#fff', weight: 2, fillColor: '#d9823f', fillOpacity: 1 }).addTo(layers);
-  if (!A) { if (c.parcel === null) map.flyTo([c.lat, c.lng], 19); return; }
+  if (!A) { drawFence(null); if (c.parcel === null) map.flyTo([c.lat, c.lng], 19); return; }
   const back = pts => pts.map(A.P.back);
   const poly = (pts, color, opts = {}) => L.polygon(back(pts), { color, weight: 2, fillColor: color, fillOpacity: .28, ...opts }).addTo(layers);
   const label = (pts, html) => L.tooltip({ permanent: true, direction: 'center', className: 'zone-label', interactive: false }).setLatLng(A.P.back(centroid(pts))).setContent(html).addTo(layers);
   const h = v => v == null ? 'Verify' : `${v % 1 ? v.toFixed(1) : v} ft`;
-  // side & rear: lot behind every front building line
-  let rear = A.lot; for (const f of A.fronts) rear = rear.length ? clipHalf(rear, p => f.sd(p) - f.depth) : rear;
-  if (rear.length) { poly(rear, rule?.side == null ? COLORS.unknown : COLORS.side); label(rear, `Side &amp; rear<span class="mono">max ${h(rule?.side)}</span>`); }
+  for (const z of zones(A, rule)) { poly(z.pts, COLORS[z.kind], z.kind === 'no' ? { fillOpacity: .22, dashArray: '6 6' } : {}); label(z.pts, z.label); }
   for (const [i, f] of A.fronts.entries()) {
-    const front = clipHalf(A.lot, p => f.depth - f.sd(p));
-    if (front.length) { poly(front, rule?.front == null ? COLORS.unknown : COLORS.front); label(front, `${i ? 'Second front' : 'Front yard'}<span class="mono">max ${h(rule?.front)}</span>`); }
-    // street right-of-way: between the front lot line and the street
-    if (f.road && f.road.d > 1.5) {
-      const qa = nearestOnPolyline(f.e.a, f.road.road.pts).q, qb = nearestOnPolyline(f.e.b, f.road.road.pts).q;
-      const row = [f.e.a, f.e.b, qb, qa];
-      poly(row, COLORS.no, { fillOpacity: .22, dashArray: '6 6' }); label(row, 'No fence<span class="mono">street right-of-way</span>');
-    }
     // front building line + drag handle
     const a = [f.e.a[0] + f.nrm[0] * f.depth, f.e.a[1] + f.nrm[1] * f.depth], b = [f.e.b[0] + f.nrm[0] * f.depth, f.e.b[1] + f.nrm[1] * f.depth];
     L.polyline(back([a, b]), { color: '#d9823f', weight: 3, dashArray: '8 7' }).addTo(layers);
     const mid = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
     const m = L.marker(A.P.back(mid), { draggable: true, icon: L.divIcon({ className: '', html: '<div class="handle"></div>', iconSize: [26, 26] }), title: 'Drag to the front of the house' }).addTo(layers);
     m.on('drag', ev => { const ll = ev.target.getLatLng(), p = A.P.to([ll.lng, ll.lat]); f.depth = clamp(f.sd(p), 1, 80); cur.override = cur.override || {}; cur.override[i] = f.depth; });
-    m.on('dragend', () => { draw(); renderCard(); });
+    m.on('dragend', () => { saveEdits(); draw(); renderCard(); });
+    m.bindTooltip('Front of the house', { direction: 'top', offset: [0, -14], className: 'zone-label' });
+  }
+  if (cur.picking) {
+    const on = new Set(A.fronts.map(f => f.e.i));
+    for (const e of A.edges) {
+      const sel = on.has(e.i);
+      L.polyline(back([e.a, e.b]), { color: sel ? '#d9823f' : '#ffffff', weight: sel ? 9 : 6, opacity: sel ? 1 : .8, dashArray: sel ? null : '2 10', lineCap: 'round' }).addTo(layers);
+      L.polyline(back([e.a, e.b]), { color: '#000', weight: 34, opacity: 0, interactive: true })
+        .on('click', () => { const s = new Set(on); s.has(e.i) ? s.delete(e.i) : s.add(e.i); cur.frontPick = [...s]; cur.override = undefined; saveEdits(); draw(); renderCard(); })
+        .addTo(layers);
+    }
+  }
+  drawFence(A);
+  if (A.house) L.polygon(back(A.house), { color: '#0b1622', weight: 1, fillColor: '#0b1622', fillOpacity: .55 }).addTo(layers);
+  L.polygon(back(A.lot), { color: '#fff', weight: 3, fill: false, dashArray: '2 7', lineCap: 'round' }).addTo(layers);
+  L.polygon(back(A.lot), { color: '#8cc7ff', weight: 9, opacity: .25, fill: false }).addTo(layers);
+  if (draw.fitted !== cur) { map.flyToBounds(L.polygon(back(A.lot)).getBounds().pad(.35), { duration: 1.2, maxZoom: 20.5 }); draw.fitted = cur; }
+}
+// Yard zones in local metres: [{kind:'front'|'side'|'no'|'unknown', pts, label, text}]
+function zones(A, rule) {
+  const out = [], h = v => v == null ? 'Verify' : `${v % 1 ? v.toFixed(1) : v} ft`;
+  let rear = A.lot; for (const f of A.fronts) rear = rear.length ? clipHalf(rear, p => f.sd(p) - f.depth) : rear;
+  if (rear.length) out.push({ kind: rule?.side == null ? 'unknown' : 'side', pts: rear, label: `Side &amp; rear<span class="mono">max ${h(rule?.side)}</span>`, text: ['SIDE & REAR', `max ${h(rule?.side)}`] });
+  for (const [i, f] of A.fronts.entries()) {
+    const front = clipHalf(A.lot, p => f.depth - f.sd(p));
+    if (front.length) out.push({ kind: rule?.front == null ? 'unknown' : 'front', pts: front, label: `${i ? 'Second front' : 'Front yard'}<span class="mono">max ${h(rule?.front)}</span>`, text: [i ? 'SECOND FRONT' : 'FRONT YARD', `max ${h(rule?.front)}`] });
+    // street right-of-way: between the front lot line and the street
+    if (f.road && f.road.d > 1.5) {
+      const qa = nearestOnPolyline(f.e.a, f.road.road.pts).q, qb = nearestOnPolyline(f.e.b, f.road.road.pts).q;
+      out.push({ kind: 'no', pts: [f.e.a, f.e.b, qb, qa], label: 'No fence<span class="mono">street right-of-way</span>', text: ['NO FENCE', 'right-of-way'] });
+    }
   }
   // corner clear-vision triangle
   if (rule?.sight && A.fronts.length >= 2) {
     const [f1, f2] = A.fronts, corner = [f1.e.a, f1.e.b].flatMap(p => [f2.e.a, f2.e.b].map(q => ({ p, d: len(sub(p, q)) }))).sort((x, y) => x.d - y.d)[0].p;
     const leg = rule.sight.ft * FT, dir = (f, p) => { const o = len(sub(f.e.a, p)) < len(sub(f.e.b, p)) ? f.e.b : f.e.a, v = sub(o, p), l = len(v); return [p[0] + v[0] / l * leg, p[1] + v[1] / l * leg]; };
-    const tri = [corner, dir(f1, corner), dir(f2, corner)];
-    poly(tri, COLORS.no, { fillOpacity: .45 }); label(tri, `Clear vision<span class="mono">max ${rule.sight.max} ft</span>`);
+    out.push({ kind: 'no', sight: true, pts: [corner, dir(f1, corner), dir(f2, corner)], label: `Clear vision<span class="mono">max ${rule.sight.max} ft</span>`, text: ['CLEAR VISION', `max ${rule.sight.max} ft`] });
   }
-  if (A.house) L.polygon(back(A.house), { color: '#0b1622', weight: 1, fillColor: '#0b1622', fillOpacity: .55 }).addTo(layers);
-  L.polygon(back(A.lot), { color: '#fff', weight: 3, fill: false, dashArray: '2 7', lineCap: 'round' }).addTo(layers);
-  L.polygon(back(A.lot), { color: '#8cc7ff', weight: 9, opacity: .25, fill: false }).addTo(layers);
-  if (draw.fitted !== cur) { map.flyToBounds(L.polygon(back(A.lot)).getBounds().pad(.35), { duration: 1.2, maxZoom: 20.5 }); draw.fitted = cur; }
+  return out;
+}
+
+// ── Drawing the fence ───────────────────────────────────────────
+// Kept in lat/lng in the ballpark tool's format so the 3D viewer and the Executive App can read it.
+const blankFence = () => ({ runs: [[]], gates: [] });
+const fenceHeight = n => { const m = String(n || '').match(/(\d+(?:\.\d)?)\s*(?:ft|'|’)/i); return m ? +m[1] : null; };
+function restoreFence(address) {
+  const v = visit.get();
+  let model = v.fence?.model || null;
+  if (!model) try { model = JSON.parse(localStorage.getItem('gfs-showroom-ar') || 'null')?.model || null; } catch {}
+  if (v.address === address && v.fence?.geometry?.lines?.length) {
+    const g = v.fence.geometry;
+    return { fence: { runs: g.lines.map(r => r.map(p => ({ lat: p.lat, lng: p.lng }))), gates: (g.gates || []).map(x => ({ ...x })) }, fenceModel: model };
+  }
+  return { fence: blankFence(), fenceModel: model };
+}
+const fenceEmpty = (f = cur?.fence) => !f || !f.runs.some(r => r.length > 1);
+export function fenceGeometry(f = cur.fence) { return { lines: f.runs.filter(r => r.length > 1).map(r => r.map(p => ({ lat: p.lat, lng: p.lng }))), gates: f.gates.map(g => ({ lat: g.lat, lng: g.lng, type: g.type })) }; }
+function fenceStats() {
+  const P = projector(cur.lat, cur.lng), segs = [];
+  for (const [ri, r] of cur.fence.runs.entries()) for (let i = 1; i < r.length; i++) {
+    const a = P.to([r[i - 1].lng, r[i - 1].lat]), b = P.to([r[i].lng, r[i].lat]);
+    segs.push({ ri, i, a, b, ft: len(sub(b, a)) / FT });
+  }
+  const ft = segs.reduce((s, x) => s + x.ft, 0);
+  return { P, segs, ft, walk: cur.fence.gates.filter(g => g.type === 'walk').length, drive: cur.fence.gates.filter(g => g.type === 'drive').length };
+}
+// Where each piece of fence sits: 'front' (front yard), 'row' (past the front lot line), 'ok'.
+function placeOf(p, A) {
+  if (!A) return 'ok';
+  for (const f of A.fronts) { const d = f.sd(p), along = dot(sub(p, f.e.a), f.u); if (along > -1 && along < f.e.len + 1) { if (d < -0.3) return 'row'; if (d < f.depth - 0.3) return 'front'; } }
+  return 'ok';
+}
+function fenceIssues(A, rule) {
+  if (fenceEmpty() || !A) return [];
+  const st = fenceStats(), hgt = fenceHeight(cur.fenceModel), out = new Set();
+  for (const s of st.segs) for (const t of [.1, .5, .9]) {
+    const p = [s.a[0] + (s.b[0] - s.a[0]) * t, s.a[1] + (s.b[1] - s.a[1]) * t], k = placeOf(p, A);
+    if (k === 'row') out.add('Part of the fence is past the front property line, in the street right-of-way. Fences are not allowed there.');
+    if (k === 'front' && hgt && rule?.front != null && hgt > rule.front) out.add(`Part of the fence is in the front yard, where the limit is ${rule.front} ft. This style is ${hgt} ft. Move that part behind the front of the house or pick a shorter style.`);
+  }
+  return [...out];
+}
+function segBad(s, A, rule) {
+  const hgt = fenceHeight(cur.fenceModel), p = [(s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2], k = placeOf(p, A);
+  return k === 'row' || (k === 'front' && hgt && rule?.front != null && hgt > rule.front);
+}
+function drawFence(A) {
+  const f = cur.fence; if (!f) return;
+  const st = fenceStats(), rule = effectiveRule();
+  for (const s of st.segs) {
+    const ll = [st.P.back(s.a), st.P.back(s.b)], bad = segBad(s, A, rule);
+    L.polyline(ll, { color: '#06101a', weight: 11, opacity: .55, interactive: false }).addTo(layers);
+    L.polyline(ll, { color: bad ? COLORS.no : '#d9823f', weight: 6, interactive: false, lineCap: 'round' }).addTo(layers);
+    if (s.ft >= 3) L.tooltip({ permanent: true, direction: 'center', className: 'seg-label', interactive: false }).setLatLng(st.P.back([(s.a[0] + s.b[0]) / 2, (s.a[1] + s.b[1]) / 2])).setContent(`${Math.round(s.ft)}′`).addTo(layers);
+  }
+  for (const [ri, r] of f.runs.entries()) for (const [i, p] of r.entries()) {
+    const last = ri === f.runs.length - 1 && i === r.length - 1;
+    const m = L.marker([p.lat, p.lng], { draggable: !!cur.drawing, icon: L.divIcon({ className: '', html: `<div class="vtx${last && cur.drawing ? ' last' : ''}"></div>`, iconSize: [18, 18] }), keyboard: false }).addTo(layers);
+    m.on('drag', e => { const ll = e.target.getLatLng(); p.lat = ll.lat; p.lng = ll.lng; });
+    m.on('dragend', () => { saveFence(); draw(); renderCard(); });
+  }
+  for (const g of f.gates) {
+    const m = L.marker([g.lat, g.lng], { icon: L.divIcon({ className: '', html: `<div class="gate-pin ${g.type}">${g.type === 'drive' ? 'DRIVE' : 'WALK'}</div>`, iconSize: [54, 22], iconAnchor: [27, 34] }), keyboard: false }).addTo(layers);
+    m.on('click', () => { if (!cur.drawing) return; f.gates = f.gates.filter(x => x !== g); saveFence(); draw(); renderCard(); });
+  }
+}
+function onMapClick(e) {
+  if (!cur?.drawing) return;
+  const ll = { lat: e.latlng.lat, lng: e.latlng.lng };
+  if (cur.gateMode) {
+    const st = fenceStats(), p = st.P.to([ll.lng, ll.lat]);
+    let best = null; for (const s of st.segs) { const n = nearestOnPolyline(p, [s.a, s.b]); if (!best || n.d < best.d) best = { ...n, s }; }
+    if (!best || best.d > 4) { toast('Tap on the fence line to put the gate there.'); return; }
+    const at = st.P.back(best.q); cur.fence.gates.push({ lat: at[0], lng: at[1], type: cur.gateMode });
+    cur.gateMode = null;
+  } else cur.fence.runs.at(-1).push(ll);
+  saveFence(); draw(); renderCard();
+}
+function saveFence() {
+  visit.setFence(fenceEmpty() ? null : { geometry: fenceGeometry(), model: cur.fenceModel, ft: Math.round(fenceStats().ft), address: cur.address });
+}
+function setDrawing(on) {
+  cur.drawing = on; cur.gateMode = null;
+  if (on) { cur.picking = false; map.doubleClickZoom.disable(); $('.p-card', root).classList.add('drawing'); }
+  else { map.doubleClickZoom.enable(); $('.p-card', root).classList.remove('drawing'); const r = cur.fence.runs; if (r.length > 1 && r.at(-1).length < 2) r.pop(); for (const x of r) if (x.length === 1) x.length = 0; cur.fence.runs = r.filter(x => x.length) ; if (!cur.fence.runs.length) cur.fence.runs = [[]]; saveFence(); }
+  draw(); renderCard();
+}
+function fenceHTML(A, rule) {
+  if (!cur.parcel && !cur.lat) return '';
+  const empty = fenceEmpty(), st = fenceStats();
+  const opts = D.styles.map(s => `<optgroup label="${esc(s.name)}">${s.models.map(m => `<option ${m === cur.fenceModel ? 'selected' : ''}>${esc(m)}</option>`).join('')}</optgroup>`).join('');
+  const sum = empty ? '' : `<div class="fence-sum"><b class="mono">${Math.round(st.ft)} ft</b><span>${st.walk ? `${st.walk} walk gate${st.walk > 1 ? 's' : ''}` : ''}${st.walk && st.drive ? ' · ' : ''}${st.drive ? `${st.drive} drive gate${st.drive > 1 ? 's' : ''}` : ''}${!st.walk && !st.drive ? 'No gates' : ''}</span></div>`;
+  const issues = fenceIssues(A, rule).map(x => `<p class="warnline">${esc(x)}</p>`).join('');
+  const style = `<label class="chip fence-style">Style <select data-fmodel><option value="">Pick a style…</option>${opts}</select></label>`;
+  if (!cur.drawing) return `<div class="fence-box">${sum}${empty ? '' : style}${issues}<div class="where"><button class="btn sm ${empty ? 'primary' : ''}" data-draw>${icons.pen} ${empty ? 'Draw the fence' : 'Edit fence'}</button>${empty ? '' : `<button class="btn sm primary" data-3d>${icons.cube} See it in 3D</button><button class="btn sm" data-packet>${icons.blueprint} Permit packet</button>`}</div></div>`;
+  return `<div class="fence-box on">
+    <p class="warnline" style="color:var(--copper-lt)">${cur.gateMode ? `Tap the fence line where the ${cur.gateMode} gate goes.` : 'Tap the map to set each corner post. Drag a post to move it.'}</p>
+    ${sum}${style}${issues}
+    <div class="where tools-row">
+      <button class="btn sm" data-undo ${empty && !cur.fence.runs.at(-1).length ? 'disabled' : ''}>Undo</button>
+      <button class="btn sm" data-run ${cur.fence.runs.at(-1).length < 2 ? 'disabled' : ''}>New run</button>
+      <button class="btn sm ${cur.gateMode === 'walk' ? 'primary' : ''}" data-gate="walk" ${empty ? 'disabled' : ''}>+ Walk gate</button>
+      <button class="btn sm ${cur.gateMode === 'drive' ? 'primary' : ''}" data-gate="drive" ${empty ? 'disabled' : ''}>+ Drive gate</button>
+      <button class="btn sm ghost" data-clear ${empty ? 'disabled' : ''}>Clear</button>
+      <button class="btn sm primary" data-done>Done</button>
+    </div></div>`;
+}
+function bindFence(el) {
+  const on = (s, f) => { const b = $(s, el); if (b) b.onclick = f; };
+  on('[data-draw]', () => setDrawing(true));
+  on('[data-done]', () => setDrawing(false));
+  on('[data-undo]', () => { const r = cur.fence.runs; if (!r.at(-1).length && r.length > 1) r.pop(); else if (r.at(-1).length) r.at(-1).pop(); else cur.fence.gates.pop(); saveFence(); draw(); renderCard(); });
+  on('[data-run]', () => { cur.fence.runs.push([]); renderCard(); toast('Tap to start the next run.'); });
+  on('[data-clear]', () => { cur.fence = blankFence(); saveFence(); draw(); renderCard(); });
+  for (const b of $$('[data-gate]', el)) b.onclick = () => { cur.gateMode = cur.gateMode === b.dataset.gate ? null : b.dataset.gate; renderCard(); };
+  const sel = $('[data-fmodel]', el); if (sel) sel.onchange = () => { cur.fenceModel = sel.value || null; saveFence(); draw(); renderCard(); };
+  on('[data-3d]', () => { if (!cur.fenceModel) { toast('Pick a style first.'); return; } app.go('ar', { geometry: fenceGeometry(), model: cur.fenceModel }); });
+  on('[data-packet]', async () => {
+    const { openSitePlan } = await import('./siteplan.mjs');
+    openSitePlan(app, packetData());
+  });
+}
+// Everything the permit packet needs, in local metres (y up) plus the text.
+function packetData() {
+  const A = cur.A, rule = effectiveRule(), st = fenceStats();
+  return {
+    address: cur.address, town: cur.town, state: stateOf(cur), rule, ruleInfo: cur.rule,
+    lot: A?.lot || null, house: A?.house || null, zones: A ? zones(A, rule) : [],
+    roads: (A?.roads || []).filter(r => r.name), frontLines: (A?.fronts || []).map(f => [[f.e.a[0] + f.nrm[0] * f.depth, f.e.a[1] + f.nrm[1] * f.depth], [f.e.b[0] + f.nrm[0] * f.depth, f.e.b[1] + f.nrm[1] * f.depth]]),
+    segs: st.segs.map(s => ({ a: s.a, b: s.b, ft: s.ft, bad: segBad(s, A, rule) })), ft: st.ft,
+    gates: cur.fence.gates.map(g => ({ type: g.type, p: st.P.to([g.lng, g.lat]) })),
+    model: cur.fenceModel, height: fenceHeight(cur.fenceModel), issues: fenceIssues(A, rule),
+    dig: D.dig[stateOf(cur)] || '', source: cur.rule ? `${cur.rule.source} · checked ${D.rulesChecked}` : ''
+  };
 }
 // ── Rules & card ─────────────────────────────────────────────────
 function effectiveRule() {
@@ -252,12 +423,18 @@ function renderCard() {
   const c = cur, r = effectiveRule(), st = stateOf(c), A = c.A;
   const h = v => v == null ? '—' : `${v % 1 ? v.toFixed(1) : v} ft`;
   const opts = D.rules.map(x => `<option value="${x.id}" ${c.rule?.id === x.id ? 'selected' : ''}>${esc(x.name)}, ${x.state}</option>`).join('');
-  const parcelNote = !c.parcel ? `<p class="warnline">No parcel lines for this address from county GIS, so the yard zones aren't drawn. The rules below still apply.</p>` : A?.fronts.length === 0 ? `<p class="warnline">Couldn't tell which side faces the street. Zones show the whole lot as side/rear.</p>` : A?.fronts.some(f => f.assumed) ? `<p class="warnline">No house outline found. The front building line is set 30 ft back. Drag the copper handle to the front of the house.</p>` : '';
+  const parcelNote = !c.parcel ? `<p class="warnline">No parcel lines for this address from county GIS, so the yard zones aren't drawn. The rules below still apply.</p>`
+    : c.picking ? `<p class="warnline" style="color:var(--copper-lt)">Tap each property line that runs along a street (two on a corner lot). Then drag the copper handle to the front wall of the house.</p>`
+    : A?.fronts.length === 0 ? `<p class="warnline">Couldn't tell which side faces the street. Tap “Set street side” and tap that property line.</p>`
+    : A?.fronts.some(f => f.assumed) ? `<p class="warnline">No house outline on the map. The front-of-house line is estimated from the address point. Drag the copper handle to the front wall of the house.</p>` : '';
+  const edited = Array.isArray(c.frontPick) || c.override;
+  const tools = c.parcel ? `<div class="where"><button class="btn sm ${c.picking ? 'primary' : ''}" data-pick>${c.picking ? 'Done' : 'Set street side'}</button>${edited ? '<button class="btn sm ghost" data-auto>Back to automatic</button>' : ''}<span class="src" style="align-self:center">${edited ? 'Your changes are saved for this address' : 'Automatic'}</span></div>` : '';
   card(`
     <div class="row" style="align-items:start"><div><div class="eyebrow">${icons.pin.replace('<svg', '<svg width="12" height="12" style="vertical-align:-1px"')} ${esc((c.town || 'Unknown town').toUpperCase())}</div><h2>${esc(c.address)}</h2></div>
       <button class="iconbtn" data-min aria-label="Collapse">${icons.layers}</button></div>
     <div class="where"><label class="chip" style="padding-right:4px">Rules for <select data-town style="background:none;border:0;color:#fff;font:inherit;font-weight:700;max-width:180px"><option value="">Other town</option>${opts}</select></label>${r?.fromAI ? '<span class="chip on">AI numbers on map</span>' : r ? '<span class="chip on">GFS verified</span>' : ''}</div>
-    ${parcelNote}
+    ${parcelNote}${c.drawing ? '' : tools}
+    ${fenceHTML(A, r)}
     <div class="legend">
       <div><i style="background:${COLORS.front}"></i><span><b>${h(r?.front)}</b><small>Front yard</small></span></div>
       <div><i style="background:${COLORS.side}"></i><span><b>${h(r?.side)}</b><small>Side yard</small></span></div>
@@ -273,7 +450,10 @@ function renderCard() {
     <div class="ai" id="aiBox">${aiHTML()}</div>`);
   const el = $('.p-card', root);
   $('[data-min]', el).onclick = () => el.classList.toggle('min');
+  const pick = $('[data-pick]', el); if (pick) pick.onclick = () => { cur.picking = !cur.picking; cur.drawing = false; if (cur.picking && !Array.isArray(cur.frontPick)) cur.frontPick = (cur.A?.fronts || []).map(f => f.e.i); if (!cur.picking) saveEdits(); draw(); renderCard(); };
+  const auto = $('[data-auto]', el); if (auto) auto.onclick = () => { cur.frontPick = undefined; cur.override = undefined; cur.picking = false; saveEdits(); draw(); renderCard(); };
   $('[data-town]', el).onchange = e => { cur.rule = D.rules.find(x => x.id === e.target.value) || null; cur.useAI = false; draw(); renderCard(); };
+  bindFence(el);
   bindAI();
 }
 

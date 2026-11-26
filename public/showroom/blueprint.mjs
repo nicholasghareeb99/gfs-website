@@ -464,7 +464,7 @@ export async function openBlueprint(app, name, style) {
   show(name);
 }
 
-function zoomable(box) {
+export function zoomable(box) {
   const img = box.firstChild; let s = 1, x = 0, y = 0; const pts = new Map(); let g = null;
   const apply = () => { img.style.transform = `translate(${x}px,${y}px) scale(${s})`; };
   box.onpointerdown = e => { box.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); const v = [...pts.values()]; g = v.length > 1 ? { d: Math.hypot(v[0][0] - v[1][0], v[0][1] - v[1][1]), s } : { x: e.clientX - x, y: e.clientY - y }; };

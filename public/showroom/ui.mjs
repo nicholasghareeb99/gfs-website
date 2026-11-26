@@ -26,6 +26,10 @@ export const icons = {
   map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M9 4 3 6.5v13.5l6-2.5 6 2.5 6-2.5V4l-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
   blueprint: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 16V9l2.5-2.5L12 9v7M7 12h5M15 8v8M14 8h2M14 16h2"/></svg>',
   noPhoto: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/><path d="M3 3l18 18"/></svg>',
+  heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7.5-4.6-9.2-9.3C1.6 7.3 3.9 4 7.3 4c2 0 3.6 1.1 4.7 2.7C13.1 5.1 14.7 4 16.7 4c3.4 0 5.7 3.3 4.5 6.7C19.5 15.4 12 20 12 20z"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z"/></svg>',
+  compare: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="7" height="14" rx="1.5"/><rect x="14" y="5" width="7" height="14" rx="1.5"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/></svg>',
   layers: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>'
 };
 
@@ -67,7 +71,7 @@ export function ring(x, y) {
 export function modal(html, { onOpen } = {}) {
   const m = document.createElement('div'); m.className = 'modal';
   m.innerHTML = `<div class="box" role="dialog" aria-modal="true">${html}</div>`;
-  const close = () => { m.style.transition = 'opacity .25s'; m.style.opacity = '0'; setTimeout(() => m.remove(), 250); };
+  const close = () => { m.classList.add('out'); setTimeout(() => m.remove(), 230); };
   m.addEventListener('click', e => { if (e.target === m || e.target.closest('[data-close]')) close(); });
   document.body.append(m); onOpen?.(m, close);
   return { el: m, close };
@@ -91,7 +95,13 @@ export async function fly({ from, to, bg, size = 'cover', pos = 'center', ms = 5
 }
 
 export function vt(update) {
-  if (document.startViewTransition && !reduced.matches) return document.startViewTransition(update).finished.catch(() => {});
+  // One transition at a time: a tap during a running one just swaps, so fast taps never queue up or throw.
+  if (vt.running) { const r = vt.running; r.skipTransition(); return r.updateCallbackDone.catch(() => {}).then(() => update()); }
+  if (document.startViewTransition && !reduced.matches) {
+    const t = document.startViewTransition(update); vt.running = t;
+    t.ready.catch(() => {}); t.updateCallbackDone.catch(() => {});
+    return t.finished.catch(() => {}).finally(() => { if (vt.running === t) vt.running = null; });
+  }
   update(); return Promise.resolve();
 }
 

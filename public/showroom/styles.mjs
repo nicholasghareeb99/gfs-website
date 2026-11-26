@@ -1,8 +1,10 @@
 // Styles mode: swipe through style tiles, grouped by material.
 // Swipe sideways for the next style, up/down (or the chips) for the next material,
 // tap a tile to open it: photos, specs, colors, brochure pages, 3D.
-import { $, $$, esc, clamp, asset, cssUrl, pageImg, icons, fly, reduced } from './ui.mjs';
+import { $, $$, esc, clamp, asset, cssUrl, pageImg, icons, fly, reduced, toast } from './ui.mjs';
 import { openPhotos, initPhotos, execItems } from './photos.mjs';
+import { visit } from './visit.mjs';
+let comparing = false, picks = [];
 
 let app, root, D, fam = null, deck, rail, dots, cycle = 0, detailEl = null;
 const COLOR = { White: '#f4f5f2', Tan: '#d9c7a3', Adobe: '#c9a984', 'White/Tan': 'linear-gradient(90deg,#f4f5f2 50%,#d9c7a3 50%)', 'Aspen Latte': '#b89c7c', 'Chai Gray': '#9c978e', 'Dark Gray': '#5b5d5f', 'Mocha Walnut': '#6b4b35', Black: '#151515', Bronze: '#5a4632' };
@@ -11,6 +13,7 @@ export async function init(a, el) {
   app = a; root = el; D = app.data; initPhotos(app);
   root.innerHTML = `
     <div class="st-head">
+      <div class="st-tools"><button class="chip" id="cmpToggle" aria-pressed="false">${icons.compare.replace('<svg', '<svg width="16" height="16"')} Compare</button><span class="src" id="cmpHint" hidden>Tap 2 or 3 styles, then Compare</span><button class="btn sm primary" id="cmpGo" hidden>Compare</button></div>
       <div class="mats" role="tablist"><i class="ink"></i>${D.families.map(f => `<button class="mat" role="tab" data-f="${f.id}"><i class="sw" style="background:${f.tone}"></i>${esc(f.name)} <span class="n">${D.styles.filter(s => s.family === f.id).length}</span></button>`).join('')}</div>
       <div class="fam-line"></div>
     </div>
@@ -33,11 +36,15 @@ export async function init(a, el) {
     const act = e.target.closest('[data-act]'), tile = e.target.closest('.tile'); if (!tile) return;
     const s = D.styleById[tile.dataset.id];
     if (act) { e.stopPropagation(); return action(act.dataset.act, s, tile); }
+    if (comparing) { picks = picks.includes(s.id) ? picks.filter(x => x !== s.id) : [...picks, s.id].slice(-3); markPicks(); return; }
     // tapping a side tile brings it to centre first
     const r = tile.getBoundingClientRect(), mid = innerWidth / 2;
     if (Math.abs(r.left + r.width / 2 - mid) > r.width * .4) { tile.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' }); return; }
     openDetail(s, tile);
   };
+  $('#cmpToggle', root).onclick = () => { comparing = !comparing; if (!comparing) picks = []; markPicks(); };
+  $('#cmpGo', root).onclick = () => openCompare(picks.map(id => D.styleById[id]));
+  visit.onChange(() => { for (const t of rail.children) t.querySelector('[data-act=heart]')?.setAttribute('aria-pressed', String(visit.hasStyle(t.dataset.id))); });
   addEventListener('keydown', e => {
     if (app.mode !== 'styles' || detailEl) { if (e.key === 'Escape') closeDetail(); return; }
     if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') { const i = current(); rail.children[clamp(i + (e.key === 'ArrowRight' ? 1 : -1), 0, rail.children.length - 1)]?.scrollIntoView({ inline: 'center', behavior: 'smooth', block: 'nearest' }); }
@@ -69,6 +76,8 @@ function tileHTML(s, i, total) {
     <div class="ph">${imgs.length ? imgs.map((u, j) => `<div class="${j ? '' : 'on'}" style="background-image:${u};animation-delay:${-j * 3}s"></div>`).join('') : NOPHOTO}</div>
     <div class="shade"></div><div class="gloss"></div>
     <span class="count">${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}</span>
+    <button class="heart" data-act="heart" aria-label="Save ${esc(s.name)} to this visit" aria-pressed="${visit.hasStyle(s.id)}">${icons.heart}</button>
+    <span class="pickmark" aria-hidden="true"></span>
     <div class="badges">${s.models.length ? `<span>${icons.cube} 3D</span>` : ''}${n ? `<span>${icons.photos} ${n}</span>` : ''}</div>
     <div class="body">
       <div class="eyebrow">${esc(D.familyById[s.family].name.toUpperCase())}${s.colors ? ` <span class="swatches" style="display:inline-flex;vertical-align:middle;margin-left:8px">${s.colors.map(swatch).join('')}</span>` : ''}</div>
@@ -137,6 +146,7 @@ function rotatePhotos() {
 
 const photoItems = s => execItems(s);
 function action(a, s, tile) {
+  if (a === 'heart') { const on = visit.toggleStyle(s.id); tile.querySelector('[data-act=heart]').setAttribute('aria-pressed', String(on)); toast(on ? `${s.name} saved to this visit` : 'Removed from this visit', 1400); return; }
   if (a === 'photos') {
     const items = photoItems(s); if (!items.length) return;
     openPhotos({ items, title: s.name, sub: `${items.length} photos`, fromRect: tile.querySelector('.ph').getBoundingClientRect() });
@@ -159,6 +169,7 @@ async function openDetail(s, tile) {
       <div class="acts">
         ${s.models.length ? `<button class="btn primary" data-act="ar">${icons.ar} Place it in the yard</button><button class="btn blue" data-act="3d">${icons.cube} Spin it in 3D</button>` : ''}
         ${s.models.length ? `<button class="btn" data-act="bp">${icons.blueprint} Blueprint</button>` : ''}
+        <button class="btn heartbtn" data-act="heart" aria-pressed="${visit.hasStyle(s.id)}">${icons.heart} <span>${visit.hasStyle(s.id) ? 'Saved' : 'Save'}</span></button>
         ${items.length ? `<button class="btn" data-act="photos">${icons.photos} ${items.length} photos</button>` : ''}
         <button class="btn ghost" data-act="page">${icons.book} Brochure p.${s.pages[0]}</button>
       </div>
@@ -194,6 +205,7 @@ async function openDetail(s, tile) {
     if (b.classList.contains('back')) return closeDetail();
     if (b.dataset.act === 'ar') { closeDetail(true); app.go('ar', { model: s.models[0], styleId: s.id, ar: true }); }
     if (b.dataset.act === '3d') { closeDetail(true); app.go('ar', { model: s.models[0], styleId: s.id }); }
+    if (b.dataset.act === 'heart') { const on = visit.toggleStyle(s.id); b.setAttribute('aria-pressed', String(on)); b.querySelector('span').textContent = on ? 'Saved' : 'Save'; }
     if (b.dataset.act === 'photos') openPhotos({ items, title: s.name, sub: `${items.length} photos` });
     if (b.dataset.act === 'bp') import('./blueprint.mjs').then(m => m.openBlueprint(app, s.models[0], s));
     if (b.dataset.bp) import('./blueprint.mjs').then(m => m.openBlueprint(app, b.dataset.bp, s));
@@ -209,4 +221,34 @@ function closeDetail(instant = false) {
   if (!detailEl) return; const el = detailEl; detailEl = null;
   if (instant) return el.remove();
   el.classList.remove('on'); setTimeout(() => el.remove(), 360);
+}
+
+// ── Compare 2 or 3 styles side by side ───────────────────────────
+function markPicks() {
+  $('#cmpToggle', root).setAttribute('aria-pressed', String(comparing));
+  $('#cmpHint', root).hidden = !comparing || picks.length >= 2; $('#cmpGo', root).hidden = !comparing || picks.length < 2;
+  $('#cmpGo', root).textContent = `Compare ${picks.length}`;
+  root.classList.toggle('comparing', comparing);
+  for (const t of rail.children) { const n = picks.indexOf(t.dataset.id); t.classList.toggle('picked', n >= 0); t.querySelector('.pickmark').textContent = n >= 0 ? String(n + 1) : ''; }
+}
+function openCompare(list) {
+  const rows = [['Material', s => D.familyById[s.family].name], ['Privacy', s => s.privacy], ['Heights', s => heights(s)], ['Colors', s => (s.colors || []).join(', ') || '—'], ['Lumber / options', s => (s.options || []).join(', ') || '—']];
+  const keys = [...new Set(list.flatMap(s => s.specs.map(([k]) => k)))].filter(k => !/warranty/i.test(k)).slice(0, 10);
+  for (const k of keys) rows.push([k, s => (s.specs.find(([x]) => x === k) || [, '—'])[1]]);
+  rows.push(['Warranty', s => (s.specs.find(([k]) => /warranty/i.test(k)) || [, '—'])[1]]);
+  const el = document.createElement('div'); el.className = 'cmp';
+  el.innerHTML = `<div class="recap-top"><button class="iconbtn" data-x aria-label="Close">${icons.close}</button><div class="grow"><div class="eyebrow">SIDE BY SIDE</div><h2>${list.map(s => esc(s.name)).join(' · ')}</h2></div></div>
+    <div class="cmp-scroll"><table class="cmp-t" style="--n:${list.length}">
+      <thead><tr><th></th>${list.map(s => { const ph = app.photosFor(s.models)[0]; return `<th><div class="cmp-img" style="${ph ? `background-image:${cssUrl(ph)}` : ''}">${ph ? '' : `<span>${icons.noPhoto}No photo available</span>`}</div><b>${esc(s.name)}</b><div class="rs-acts">${s.models.length ? `<button class="btn sm" data-bp="${s.id}">${icons.blueprint}</button><button class="btn sm blue" data-3d="${s.id}">${icons.cube}</button>` : ''}<button class="btn sm heartbtn" data-heart="${s.id}" aria-pressed="${visit.hasStyle(s.id)}">${icons.heart}</button></div></th>`; }).join('')}</tr></thead>
+      <tbody>${rows.map(([k, f]) => `<tr><th scope="row">${esc(k)}</th>${list.map(s => `<td>${esc(f(s))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
+  const close = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 350); };
+  el.onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.x !== undefined) return close();
+    const s = D.styleById[b.dataset.bp || b.dataset['3d'] || b.dataset.heart];
+    if (b.dataset.bp) import('./blueprint.mjs').then(m => m.openBlueprint(app, s.models[0], s));
+    if (b.dataset['3d']) { close(); app.go('ar', { model: s.models[0], styleId: s.id }); }
+    if (b.dataset.heart) b.setAttribute('aria-pressed', String(visit.toggleStyle(s.id)));
+  };
 }

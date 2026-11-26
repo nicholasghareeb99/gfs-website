@@ -74,7 +74,13 @@ app.photosFor = names => {
   return out;
 };
 
+// Keep cards and page controls clear of the bottom bar, whatever size Safari makes it.
+function dockClear() {
+  const r = $('.dock').getBoundingClientRect(), side = r.height > r.width;
+  document.documentElement.style.setProperty('--dock-clear', side ? 'calc(var(--sab) + 18px)' : Math.ceil(innerHeight - r.top + 10) + 'px');
+}
 function moveGlow(btn) {
+  dockClear();
   const glow = $('.dock .glow'), dock = $('.dock');
   const r = btn.getBoundingClientRect(), d = dock.getBoundingClientRect();
   glow.style.transform = `translate(${r.left - d.left - 6}px,${r.top - d.top - 6}px)`;
@@ -87,6 +93,8 @@ app.go = async function go(mode, opts = {}) {
     modes[mode] = mod; await mod.init(app, $('#v-' + mode));
   }
   const prev = app.mode;
+  // Sheets and full-screen panels belong to the screen they were opened on.
+  if (prev !== mode) for (const o of $$('.picker,.recap,.cmp,.rv,.bp,.modal')) { o.classList.remove('on'); o.classList.add('out'); o.style.pointerEvents = 'none'; setTimeout(() => o.remove(), 400); }
   const swap = () => {
     for (const v of $$('.view')) v.classList.toggle('on', v.id === 'v-' + mode);
     document.body.classList.remove('chrome-hidden');
@@ -96,7 +104,12 @@ app.go = async function go(mode, opts = {}) {
     if (prev && prev !== mode) modes[prev]?.hide?.();
     modes[mode].show?.(opts);
   };
-  if (prev && prev !== mode) await vt(swap); else swap();
+  if (prev && prev !== mode) {
+    const order = Object.keys(loaders), dir = order.indexOf(mode) > order.indexOf(prev) ? 'next' : 'prev';
+    document.documentElement.dataset.vt = dir;
+    if (document.startViewTransition) await vt(swap);
+    else { swap(); const v = $('#v-' + mode); v.classList.remove('view-enter'); void v.offsetWidth; v.classList.add('view-enter'); }
+  } else swap();
   const hash = '#' + mode + (opts.page ? '-' + opts.page : '');
   if (location.hash !== hash) history.replaceState(null, '', hash);
   try { localStorage.setItem('gfs-showroom-mode', mode); } catch {}
@@ -117,6 +130,8 @@ function settings() {
       <dt>Fence rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
       <dt>Version</dt><dd>${esc(VERSION)}</dd>
     </dl>
+    <div class="row"><span><b>Presentation mode</b><br><small style="color:var(--dim)">Hides this menu so a customer can flip through on their own. To exit, press and hold the logo for 2 seconds.</small></span><button class="btn sm" id="presentGo">Turn on</button></div>
+    <p class="src" style="margin:0">The brochure pages and style photos also save to this device on their own when it's online, so most of the showroom works with no signal.</p>
     <button class="btn ghost sm" id="replay">Replay intro</button>`, {
     onOpen: (m) => {
       const meter = m.querySelector('#offMeter'), text = m.querySelector('#offText');
@@ -128,20 +143,21 @@ function settings() {
         e.target.disabled = false;
       };
       m.querySelector('#replay').onclick = () => { close(); splash(true); };
+      m.querySelector('#presentGo').onclick = () => { close(); present(true); };
     }
   });
 }
 
-async function saveOffline(progress) {
+async function saveOffline(progress, { lite = false } = {}) {
   if (!('caches' in window)) { toast('This browser cannot save files offline.'); return false; }
   const d = app.data, urls = new Set();
-  for (const p of d.pages) { urls.add(pageImg(p.n)); urls.add(pageImg(p.n, true)); }
-  for (const s of d.styles) for (const u of app.photosFor(s.models).slice(0, 12)) urls.add(u);
+  for (const p of d.pages) { urls.add(pageImg(p.n)); if (!lite) urls.add(pageImg(p.n, true)); }
+  for (const s of d.styles) for (const u of app.photosFor(s.models).slice(0, lite ? 4 : 12)) urls.add(u);
   for (const u of ['/x3d/fence3d.html', '/gfs/vendor/three.module.js', '/gfs/ar-model.mjs', '/gfs/website-model.mjs', '/gfs/studio-catalog.mjs', '/gfs/model-profiles.mjs', '/gfs/owner-model-corrections.mjs', '/gfs/model-review.mjs', '/gfs/fence-layers.mjs', '/gfs/vendor/usdzexporter.js', '/gfs/vendor/fflate.module.js', '/gfs/vendor/textureutils.js', '/assets/js/studio-public-catalog.mjs', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js', 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css']) urls.add(u);
   const cache = await caches.open('gfs-showroom-media-v1'), list = [...urls]; let done = 0, failed = 0;
   const worker = async () => { while (list.length) { const u = list.shift(); try { if (!(await cache.match(u))) { const r = await fetch(u, { mode: u.includes('firebasestorage') ? 'no-cors' : u.startsWith('http') ? 'cors' : 'same-origin' }); if (r.ok || r.type === 'opaque') await cache.put(u, r); else failed++; } } catch { failed++; } progress(++done, urls.size); } };
-  await Promise.all(Array.from({ length: 6 }, worker));
-  try { localStorage.setItem('gfs-showroom-offline', new Date().toLocaleDateString()); } catch {}
+  await Promise.all(Array.from({ length: lite ? 3 : 6 }, worker));
+  try { localStorage.setItem(lite ? 'gfs-showroom-offline-auto' : 'gfs-showroom-offline', lite ? String(Date.now()) : new Date().toLocaleDateString()); } catch {}
   return failed === 0;
 }
 
@@ -149,6 +165,28 @@ function splash(replay = false) {
   const s = $('#splash');
   if (replay) { const clone = s.cloneNode(true); s.replaceWith(clone); clone.classList.remove('done'); setTimeout(() => clone.classList.add('done'), 2300); clone.onclick = () => clone.classList.add('done'); return; }
   s.onclick = () => s.classList.add('done');
+}
+
+// Presentation mode: no menu, so a customer can flip through on their own.
+function present(on) {
+  document.body.classList.toggle('present', on);
+  try { on ? localStorage.setItem('gfs-showroom-present', '1') : localStorage.removeItem('gfs-showroom-present'); } catch {}
+  toast(on ? 'Presentation mode on. Hold the logo for 2 seconds to exit.' : 'Presentation mode off');
+}
+function bindPresentExit() {
+  const logo = $('.top .brand'); let t = 0;
+  const down = () => { if (!document.body.classList.contains('present')) return; t = setTimeout(() => present(false), 2000); };
+  const up = () => clearTimeout(t);
+  logo.addEventListener('pointerdown', down); logo.addEventListener('pointerup', up); logo.addEventListener('pointerleave', up); logo.addEventListener('pointercancel', up);
+}
+// Save the brochure and photos on their own about once a week while online.
+function autoOffline() {
+  if (autoOffline.ran) return; autoOffline.ran = true;
+  if (!navigator.onLine || !('caches' in window)) return;
+  try { if (Date.now() - (+localStorage.getItem('gfs-showroom-offline-auto') || 0) < 7 * 864e5) return; } catch { return; }
+  navigator.storage?.persist?.().catch(() => {});
+  const go = () => saveOffline(() => {}, { lite: true }).catch(() => {});
+  ('requestIdleCallback' in window) ? setTimeout(() => requestIdleCallback(go, { timeout: 20000 }), 12000) : setTimeout(go, 15000);
 }
 
 function net() { $('#netDot').classList.toggle('off', !navigator.onLine); }
@@ -159,10 +197,13 @@ async function boot() {
   const t0 = performance.now();
   try { await loadData(); } catch (e) { $('#splash .sub').textContent = e.message; return; }
   loadLiveCatalog();
+  const { initVisit } = await import('./visit.mjs'); initVisit(app);
+  bindPresentExit(); try { if (localStorage.getItem('gfs-showroom-present')) document.body.classList.add('present'); } catch {}
   for (const b of $$('.dock button')) b.onclick = () => app.go(b.dataset.mode);
   $('#btnMenu').onclick = settings;
   $('#btnSearch').onclick = () => app.go('brochure', { overview: true, focus: true });
   addEventListener('resize', () => { const b = $('.dock button[aria-current=page]'); if (b) moveGlow(b); });
+  visualViewport?.addEventListener('resize', dockClear);
   const m = (location.hash.match(/^#(brochure|styles|ar|permits)(?:-(\d+))?/) || []);
   let start = m[1]; try { start ||= localStorage.getItem('gfs-showroom-mode'); } catch {}
   setBar(.7);
@@ -170,6 +211,7 @@ async function boot() {
   setBar(1);
   const wait = Math.max(0, 1900 - (performance.now() - t0));
   setTimeout(() => $('#splash').classList.add('done'), wait);
+  addEventListener('showroom:catalog', autoOffline, { once: true }); setTimeout(autoOffline, 30000);
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js', { scope: './' }).catch(e => console.info('[Showroom] service worker:', e.message));
 }
 boot();
