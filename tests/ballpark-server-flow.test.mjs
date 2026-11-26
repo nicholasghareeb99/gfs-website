@@ -103,7 +103,7 @@ test('success: the range and the comparison list come from the function and feed
   assert.equal(sent.url, '/.netlify/functions/ballpark-price');
   assert.deepEqual(JSON.parse(JSON.stringify(sent.body)), { receipt: RECEIPT, parts: [{ style: 'Galv Chain Link 4ft', feet: 120, height: 4, singleGates: 0, doubleGates: 0 }], removal: { on: false }, compare: true });
   assert.equal(p.text('bp-price-range'), '$5,700 – $6,300');
-  assert.equal(p.text('bp-price-hint'), 'Planning range. A site review confirms the final scope and price.');
+  assert.equal(p.text('bp-price-hint'), 'This is a range. Nick confirms the final price after he measures.');
   assert.deepEqual(p.draws.compare.slice(-1), [true]);
   assert.deepEqual(JSON.parse(JSON.stringify(p.api.comparisonRows().map(r => [r.id, r.name, r.low, r.high]))), [['galv-chain-link-4ft', 'Galv Chain Link 4ft', 5700, 6300], ['full-cedar-privacy-6ft', 'Full Cedar Privacy 6ft', 9000, 9900]], 'rows match catalogue styles by name, in the order sent; unknown styles are dropped');
   assert.deepEqual(JSON.parse(JSON.stringify(p.api.calculatePrice())).low, 5700);

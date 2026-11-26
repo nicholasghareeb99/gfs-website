@@ -78,3 +78,5 @@
 .bp-map-full #bp-draw-toolbar>.bp-tool-group+.bp-tool-group>summary::after{content:"More"}
 .bp-map-full .leaflet-top.leaflet-left{top:auto;bottom:12px}
 @media(min-width:761px){.bp-map-full #bp-draw-toolbar>.bp-tool-group>summary::after{font-size:14px}}
+.bp-edit-handle{background:none!important;border:0!important}
+.bp-edit-handle svg{display:block;width:100%;height:100%}

@@ -1727,7 +1727,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
       img.src=thumbOf(photo.url,800);img.dataset.full=photo.url;img.alt=photo.kind==='material example'?'Fence example; not the exact selected style':fence.name+(photo.kind==='product rendering'?' — product rendering':' — style reference '+(i+1));img.loading='lazy';img.decoding='async';
       if(i===0){img.setAttribute('data-editable-img','bp.fence.'+id+'.photo');img.addEventListener('click',event=>{if(!document.body.classList.contains('editing')||img.hasAttribute('data-editable-img'))return;const card=$$('#bp-fence-options .ballpark-photo-opt').find(card=>card.dataset.id===state.fenceId),target=card?.querySelector('img');if(target){event.preventDefault();event.stopImmediatePropagation();target.click();}});}
-      caption.textContent=photo.kind==='material example'?'Example photo — not the exact style':photo.kind==='product rendering'?'Product rendering':'Style reference';
+      caption.textContent=photo.kind==='material example'?'Similar style shown':photo.kind==='product rendering'?'Product rendering':'Style reference';
       figure.append(img,caption);gallery.append(figure);
     });
     syncStylePickerPhoto();
@@ -1933,7 +1933,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
             <img src="${esc(thumbOf(fence.photoThumb || fence.photo, 480))}" data-full="${esc(fence.photoThumb || fence.photo)}" alt="${!fence.imageKind||fence.imageKind==='material example'?'Fence example; not the exact selected style':esc(fence.name)+(fence.imageKind==='product rendering'?' — product rendering':'')}" data-editable-img="bp.fence.${esc(id)}.photo" loading="lazy" decoding="async" style="width:100%;height:100%;object-fit:contain;display:block;">
           </div>
           <div style="padding:14px 16px;">
-            ${fence.photoCaption?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+esc(fence.photoCaption)+'</p>':!fence.imageKind||fence.imageKind==='material example'?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+(fence.photo.endsWith('photo-needed.svg')?'Reference photo needed for this style':'Example photo — not the exact style')+'</p>':''}
+            ${fence.photoCaption?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+esc(fence.photoCaption)+'</p>':!fence.imageKind||fence.imageKind==='material example'?'<p style="margin:0 0 8px;font-size:12px;line-height:1.4;color:var(--navy);">'+(fence.photo.endsWith('photo-needed.svg')?'Reference photo needed for this style':'Similar style shown')+'</p>':''}
             <div style="font-family:var(--serif);font-size:16px;font-weight:600;color:var(--navy);margin-bottom:4px;line-height:1.2;"${grouped?'':' data-editable="bp.fence.'+esc(id)+'.name"'}>${esc(card.title)}</div>
             <div style="font-size:12px;color:var(--gray-700);line-height:1.4;"${grouped?'':' data-editable="bp.fence.'+esc(id)+'.detail"'}>${esc(fence.detail)}</div>
             ${card.options?'<div style="margin-top:6px;font-family:var(--mono);font-size:12px;color:var(--cedar-dk,#174a90);line-height:1.4;">'+esc(card.options)+'</div>':''}
@@ -2341,7 +2341,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
       if (priceRange) {
         priceRange.textContent = formatRange(price.low, price.high);
       }
-      if (priceHint) priceHint.textContent = 'Planning range. A site review confirms the final scope and price.';
+      if (priceHint) priceHint.textContent = 'This is a range. Nick confirms the final price after he measures.';
       renderFinance(price);
       renderComparePanel(true);
       renderPostUnlockActions(true);
@@ -3218,7 +3218,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
           return;
         }
         if (mode === 'parcel') return;   // handled by initParcelTools
-        if (mode === 'delete-point') { if (mapKind === 'google') deleteSelectedGoogleCorner(); return; }
+        if (mode === 'delete-point') { if (mapKind === 'google') deleteSelectedGoogleCorner(); else deleteSelectedLeafletCorner(); return; }
         if (mode === 'finish') {
           // Explicit finish — the only reliable way to end a fence on touch
           // devices, where double-tap is the browser's zoom gesture.
@@ -3292,6 +3292,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
   function undoLastLeaflet() {
     const action = lUndoStack.pop();
     if (!action) return;
+    if (action.type === 'edit' && action.item) { restoreLeafletPath(action.item, action.before, action.gates); return; }
     if (action.type === 'point' && lActivePolyline) {
       const latlngs = lActivePolyline.getLatLngs();
       if (latlngs.length > 0) {
@@ -3809,13 +3810,13 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     // Stop any prior click handler + close any active polyline
     if (lClickHandler) { map.off('click', lClickHandler); lClickHandler = null; }
     clearDrawingPreview('leaflet');
-    const leafletEditing=mode==='idle'||mode==='edit';
+    const leafletEditing=mode==='idle'&&!coarsePointer();
     lFenceLines.forEach(line=>{if(leafletEditing)enableLeafletEditing(line);else line.editing?.disable();});
     if (mode !== 'fence' && lActivePolyline) {
       finalizeLeafletPolyline();
     }
     lFenceLines.forEach(line=>{if(leafletEditing)enableLeafletEditing(line);else line.editing?.disable();});
-    syncTouchExtras();
+    lSelected=null;renderLeafletHandles();syncTouchExtras();
 
     if (mode === 'fence') {
       startLeafletFenceDrawing();
@@ -3834,7 +3835,11 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if(lActivePolyline)finalizeLeafletPolyline();clearDrawingPreview('leaflet');
     map.getContainer().style.cursor='crosshair';
     const polyline=L.polyline([],{color:'#00E5A0',weight:6,opacity:1}).addTo(map);lActivePolyline=polyline;
-    lClickHandler=e=>{const pt=snappedDrawingPoint('leaflet',e.latlng);polyline.addLatLng(pt);mapPreview=null;if(lPreviewLine)lPreviewLine.setLatLngs([]);lUndoStack.push({type:'point'});updateLeafletStats();};
+    lClickHandler=e=>{
+      const n=polyline.getLatLngs().length;
+      if(n>=3){const first=polyline.getLatLngs()[0],a=map.latLngToContainerPoint(first),b=map.latLngToContainerPoint(e.latlng);
+        if(Math.hypot(a.x-b.x,a.y-b.y)<26){polyline.addLatLng(first);lUndoStack.push({type:'point'});finalizeLeafletPolyline();setDrawMode('idle','leaflet');return;}}
+      const pt=snappedDrawingPoint('leaflet',e.latlng);polyline.addLatLng(pt);mapPreview=null;if(lPreviewLine)lPreviewLine.setLatLngs([]);lUndoStack.push({type:'point'});updateLeafletStats();};
     map.on('click',lClickHandler);lMoveHandler=e=>previewDrawingPoint('leaflet',e.latlng);map.on('mousemove',lMoveHandler);
     lDoubleClickHandler=()=>{finalizeLeafletPolyline();setDrawMode('idle','leaflet');};map.on('dblclick',lDoubleClickHandler);
   }
@@ -3886,6 +3891,72 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if(activeDrawingEngine!=='leaflet')return;
     const facts=window.GFSMapGeometry.summary(mapPaths('leaflet'),mapGates('leaflet'));
     setLiveStats(Math.round(facts.totalFeet),lWalkGates.length,lDriveGates.length);renderMapMeasurements('leaflet');
+    if(!lHandleDrag)renderLeafletHandles();
+    syncTouchExtras();
+  }
+
+  // Leaflet stand-in map: the same finger-sized Edit handles as the Google map.
+  let lHandles=[],lSelected=null,lHandleDrag=false;
+  const lCopy=line=>line.getLatLngs().map(p=>L.latLng(p.lat,p.lng));
+  const lClosed=pts=>pts.length>=4&&Math.abs(pts[0].lat-pts.at(-1).lat)<1e-9&&Math.abs(pts[0].lng-pts.at(-1).lng)<1e-9;
+  function lIcon(kind,on){const size=kind==='move'?52:kind==='mid'?44:48;return L.divIcon({className:'bp-edit-handle',html:HANDLE_SVG[kind](on),iconSize:[size,size],iconAnchor:[size/2,size/2]});}
+  function clearLeafletHandles(){lHandles.forEach(m=>map.removeLayer(m));lHandles=[];}
+  function startLeafletEdit(line){lHandleDrag=true;return{line,before:lCopy(line),gates:[...lWalkGates,...lDriveGates].map(m=>[m,m.getLatLng()])};}
+  function endLeafletEdit(edit){
+    lHandleDrag=false;lUndoStack.push({type:'edit',item:edit.line,before:edit.before,gates:edit.gates});
+    [...lWalkGates.map(m=>[m,'walk']),...lDriveGates.map(m=>[m,'drive'])].forEach(([m,type])=>{const r=window.GFSMapGeometry.snapGate({paths:mapPaths('leaflet',false),point:window.GFSMapGeometry.point(m.getLatLng()),type,gates:mapGates('leaflet',m),maxDistanceFeet:8});if(r.ok)m.setLatLng([r.point.lat,r.point.lng]);});
+    updateLeafletStats();if(typeof saveDraft==='function')saveDraft();
+  }
+  function restoreLeafletPath(line,before,gates){
+    line.setLatLngs(before);if(!map.hasLayer(line)){line.addTo(map);if(!lFenceLines.includes(line))lFenceLines.push(line);}
+    (gates||[]).forEach(([m,pos])=>m.setLatLng(pos));lSelected=null;updateLeafletStats();
+  }
+  function leafletLengthsAround(pts,i){const f=n=>window.GFSMapGeometry.format(n,mapMeasurementUnit),out=[];if(i>0)out.push(f(window.GFSMapGeometry.distanceFeet(pts[i-1],pts[i])));if(i<pts.length-1)out.push(f(window.GFSMapGeometry.distanceFeet(pts[i],pts[i+1])));return out.join(' · ');}
+  function renderLeafletHandles(){
+    if(!map||!window.L)return;clearLeafletHandles();
+    const del=document.querySelector('#bp-draw-toolbar [data-mode="delete-point"]');
+    if(activeDrawingEngine==='leaflet'&&del){del.hidden=!(gDrawingMode==='edit'&&lSelected);del.disabled=!lSelected;}
+    if(gDrawingMode!=='edit'||activeDrawingEngine!=='leaflet')return;
+    lFenceLines.forEach(line=>{
+      const pts=lCopy(line),n=pts.length,closed=lClosed(pts);
+      const add=(pos,kind,on,title,z)=>{const m=L.marker(pos,{draggable:true,icon:lIcon(kind,on),zIndexOffset:z,title,keyboard:false,autoPan:true}).addTo(map);lHandles.push(m);return m;};
+      for(let i=0;i<(closed?n-1:n);i++){
+        const on=lSelected&&lSelected.line===line&&lSelected.index===i,m=add(pts[i],'corner',on,'Corner '+(i+1)+': drag to move, tap to select',3000);
+        let edit=null;
+        m.on('dragstart',()=>{edit=startLeafletEdit(line);lSelected={line,index:i};});
+        m.on('drag',e=>{const cur=lCopy(line);cur[i]=e.target.getLatLng();if(closed&&i===0)cur[n-1]=cur[0];line.setLatLngs(cur);updateLeafletStats();showDragChip(leafletLengthsAround(cur,i));});
+        m.on('dragend',()=>{if(edit)endLeafletEdit(edit);edit=null;});
+        m.on('click',()=>{lSelected=on?null:{line,index:i};renderLeafletHandles();});
+      }
+      for(let i=0;i<n-1;i++){
+        const mid=L.latLng((pts[i].lat+pts[i+1].lat)/2,(pts[i].lng+pts[i+1].lng)/2),m=add(mid,'mid',false,'Drag or tap to add a bend here',2000);
+        let edit=null;
+        m.on('dragstart',()=>{edit=startLeafletEdit(line);const cur=lCopy(line);cur.splice(i+1,0,m.getLatLng());line.setLatLngs(cur);});
+        m.on('drag',e=>{const cur=lCopy(line);cur[i+1]=e.target.getLatLng();line.setLatLngs(cur);updateLeafletStats();showDragChip(leafletLengthsAround(cur,i+1));});
+        m.on('dragend',()=>{if(edit)endLeafletEdit(edit);edit=null;lSelected={line,index:i+1};renderLeafletHandles();});
+        m.on('click',()=>{const edit=startLeafletEdit(line),cur=lCopy(line);cur.splice(i+1,0,mid);line.setLatLngs(cur);lSelected={line,index:i+1};endLeafletEdit(edit);});
+      }
+      if(n>=2){
+        let best=0,bestLen=-1;for(let i=0;i<n-1;i++){const d=window.GFSMapGeometry.distanceFeet(pts[i],pts[i+1]);if(d>bestLen){bestLen=d;best=i;}}
+        const a=map.latLngToContainerPoint(pts[best]),b=map.latLngToContainerPoint(pts[best+1]),len=Math.hypot(b.x-a.x,b.y-a.y)||1;
+        const pos=map.containerPointToLatLng(L.point((a.x+b.x)/2+(b.y-a.y)/len*46,(a.y+b.y)/2-(b.x-a.x)/len*46));
+        const m=add(pos,'move',false,'Drag to move this whole line',2500);
+        let edit=null,start=null,carried=[];
+        m.on('dragstart',()=>{edit=startLeafletEdit(line);start=m.getLatLng();
+          const near=window.GFSMapGeometry;carried=[...lWalkGates,...lDriveGates].filter(g=>{return pts.some((p,j)=>j<n-1&&near.distanceFeet(g.getLatLng(),p)+near.distanceFeet(g.getLatLng(),pts[j+1])-near.distanceFeet(p,pts[j+1])<1);}).map(g=>[g,g.getLatLng()]);});
+        m.on('drag',e=>{if(!edit)return;const c=e.target.getLatLng(),dLat=c.lat-start.lat,dLng=c.lng-start.lng;
+          line.setLatLngs(edit.before.map(p=>L.latLng(p.lat+dLat,p.lng+dLng)));carried.forEach(([g,p])=>g.setLatLng([p.lat+dLat,p.lng+dLng]));updateLeafletStats();});
+        m.on('dragend',()=>{if(edit)endLeafletEdit(edit);edit=null;});
+      }
+    });
+  }
+  function deleteSelectedLeafletCorner(){
+    if(!lSelected)return;const{line,index}=lSelected,edit=startLeafletEdit(line);let cur=lCopy(line);const closed=lClosed(cur);
+    if(closed&&cur.length<=4){cur.pop();cur.splice(index,1);}
+    else if(closed&&index===0){cur.shift();cur[cur.length-1]=cur[0];}
+    else cur.splice(index,1);
+    if(cur.length<2){map.removeLayer(line);const i=lFenceLines.indexOf(line);if(i>=0)lFenceLines.splice(i,1);}else line.setLatLngs(cur);
+    lSelected=null;endLeafletEdit(edit);
   }
 
   function clearLeaflet() {
