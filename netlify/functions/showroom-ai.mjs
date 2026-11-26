@@ -46,16 +46,17 @@ export default async function handler(request) {
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: headers(origin) });
   if (request.method !== 'POST') return reply(405, { error: 'POST only' }, origin);
   if (origin && !ALLOWED_ORIGIN.test(origin)) return reply(403, { error: 'origin' }, origin);
+  // The release pipeline's read-only check: {"ping":true} → 200 {ok:true} when set up, 503 {error:'not-configured'} when not.
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return reply(503, { error: 'not-configured', message: 'The AI lookup needs ANTHROPIC_API_KEY in Netlify.' }, origin);
+  if (!key) return reply(503, { error: 'not-configured' }, origin);
 
+  let input;
+  try { input = await request.json(); } catch { return reply(400, { error: 'bad-json' }, origin); }
+  if (input && input.ping === true && Object.keys(input).length === 1) return reply(200, { ok: true }, origin);
   const ip = request.headers.get('x-nf-client-connection-ip') || 'anon', now = Date.now();
   const hits = (recent.get(ip) || []).filter(t => now - t < 3600e3);
   if (hits.length >= 30) return reply(429, { error: 'rate', message: 'Too many lookups this hour.' }, origin);
   recent.set(ip, [...hits, now]);
-
-  let input;
-  try { input = await request.json(); } catch { return reply(400, { error: 'bad-json' }, origin); }
   const address = clean(input.address, 200), town = clean(input.town, 80), county = clean(input.county, 60), state = clean(input.state, 20);
   if (!address && !town) return reply(400, { error: 'address' }, origin);
   const cacheKey = `${town}|${county}|${state}`.toLowerCase();
