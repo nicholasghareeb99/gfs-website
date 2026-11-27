@@ -1,5 +1,5 @@
 {
- "source": "nicholasghareeb99/gfence-app main 78a65c0000a67d3adb310060e50cb3e54b1d9775, Executive build; matches the published portal viewer (6b098afe1d05b87cedc2fdc9)",
+ "source": "nicholasghareeb99/gfence-app main 63366133735bc224b34c98ff873e693430e453d6, Executive build after #431",
  "websiteOwned": [
   "index.html"
  ],
@@ -32,7 +32,7 @@
   "gfs/viewer-model-contract.js": "c6a0900ecec349293a6364806cbf3ccf794cdf66e64698eea0b377519c78a411",
   "gfs/viewer-workspace.css": "58c0e7b531f8c0832957dc88a5b77d0fea6d9395b7a7f882a39c52574cc19172",
   "gfs/viewer-workspace.mjs": "0db4b36f7b5f0414d49795566cc4cfe16e98350050bf4100d4d436e0dbef798b",
-  "gfs/website-scene.mjs": "467fe65fa02341f09360fc2bdaaa3c0b551e100b5f5b8d005e780422f47a4cf2",
+  "gfs/website-scene.mjs": "d7fc3f65a56f1d965dc05156416efa71c6bb2b2298919e1628cb6ac1605ffe90",
   "index.html": "74628988faffc2e2292dc780bd04ff7f0833e9f10173cdfeb2080d45a98f77cc",
   "studio/custom-parts.mjs": "ea0ffc28f7641a417d02f18af95014865a9da98cbd10a81d3613682e97633026",
   "studio/hardware-kit.mjs": "ba52a1defa8b7e2b7dd5ec093f0d91d80cd6be06b0b315c79ac68cc286f955b7",
