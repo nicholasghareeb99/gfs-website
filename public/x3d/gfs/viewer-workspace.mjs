@@ -19,7 +19,7 @@ function installScene(){
   ground.material=showroom?floor:saved.material;scene.background=showroom?(real?real.studioBackground():new T.Color(0xe9ede7)):saved.background;scene.fog=null;real?.backdrop(showroom);
   window.__f3dFraming?.syncFog();renderer.shadowMap.needsUpdate=true;renderer.render(scene,cam);
  }
- selects[0].value=api.spec.site?'outdoor':'showroom';selects[0].onchange=backdrop;backdrop();
+ selects[0].value=api.spec.site||new URLSearchParams(location.search).get('phoneStudio')==='1'?'outdoor':'showroom';selects[0].onchange=backdrop;backdrop();
  scene.addEventListener('childadded',()=>{if(selects[0].value==='showroom')backdrop();});
  let quality=configureQuality(studio);real?.setQuality(selects[1].value);selects[1].onchange=()=>{quality=configureQuality(studio,selects[1].value);real?.setQuality(selects[1].value);renderer.render(scene,cam);};
  bar.querySelector('button').onclick=()=>{const status=bar.querySelector('[role="status"]');try{const png=captureFrame(studio,T,quality.exportWidth),a=document.createElement('a');a.href=png;a.download='Ghareeb-fence-'+quality.exportWidth+'.png';a.click();status.textContent='Image exported';}catch(error){status.textContent=error.message||'Choose Field quality and retry';}};
