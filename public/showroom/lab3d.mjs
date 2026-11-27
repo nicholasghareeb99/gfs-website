@@ -303,12 +303,13 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     ticks.add(function f(now) { const k = ease(clamp((now - t0) / dur, 0, 1)); for (const key of ['yaw', 'pitch', 'zoom']) if (to[key] != null) orbit[key] = from[key] + (to[key] - from[key]) * k; need = true; return k < 1; }); kick();
   }
   // Smoothly move one camera's framing: { cx, cy, w, h } in feet.
-  function frameView(id, { cx, cy, w, h }, ms = 0) {
+  // cz: the depth the box is framed at (default the cut plane, z = 0)
+  function frameView(id, { cx, cy, w, h, cz = 0 }, ms = 0) {
     const v = V.find(x => x.id === id) || V[0];
-    const from = { x: v.target.x, y: v.target.y, w: v.base.w, h: v.base.h }, to = { x: cx, y: cy, w, h };
-    if (!ms || reduce.matches) { v.target.set(cx, cy, 0); v.base = { w, h }; dirty(); return; }
+    const from = { x: v.target.x, y: v.target.y, z: v.target.z, w: v.base.w, h: v.base.h }, to = { x: cx, y: cy, z: cz, w, h };
+    if (!ms || reduce.matches) { v.target.set(cx, cy, cz); v.base = { w, h }; dirty(); return; }
     const t0 = performance.now();
-    ticks.add(function f(now) { const k = ease(clamp((now - t0) / ms, 0, 1)); v.target.set(from.x + (to.x - from.x) * k, from.y + (to.y - from.y) * k, 0); v.base = { w: from.w + (to.w - from.w) * k, h: from.h + (to.h - from.h) * k }; need = true; return k < 1; }); kick();
+    ticks.add(function f(now) { const k = ease(clamp((now - t0) / ms, 0, 1)); v.target.set(from.x + (to.x - from.x) * k, from.y + (to.y - from.y) * k, from.z + (to.z - from.z) * k); v.base = { w: from.w + (to.w - from.w) * k, h: from.h + (to.h - from.h) * k }; need = true; return k < 1; }); kick();
   }
 
   // ── labels pinned to points in the scene (HTML, so the text stays sharp) ──

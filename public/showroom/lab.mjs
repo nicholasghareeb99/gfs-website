@@ -7,6 +7,7 @@ import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs
 import { webglOK } from './lab3d-ok.mjs';
 import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
 import { sag, gateGeom, BRACES as GBRACES } from './gate-plan.mjs';
+import { flowField, streamlines } from './wind-plan.mjs';
 import { bends } from './vinyl-plan.mjs';
 export { digNumbers } from './ui.mjs';
 import { visit } from './visit.mjs';
@@ -37,7 +38,7 @@ const TOOLS = [
     how: [['slide', 'Slide <b>Gust speed</b> to push on both fences.'], ['look', 'Watch the big-box post bend further than ours. The bend is drawn true size.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
     take: 'A thicker wall makes the vinyl stiffer, and ours sleeves over a steel post driven 4 ft, which takes most of the push.' },
   { id: 'wind', more: true, name: 'Wind', line: 'How hard wind pushes on each style',
-    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
+    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
     take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
   { id: 'wood', more: true, name: 'Wood movement', line: 'Why gaps open between boards',
     how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.']],
@@ -157,15 +158,17 @@ function sizedCanvas(cv) {
 // 1. WIND — ASCE 7 force on freestanding walls, with a flow picture
 // ═════════════════════════════════════════════════════════════════
 // Solidity ε = solid area ÷ gross area of one section (ASCE 7 §29.3, Fig. 29.3-1).
-// Open styles are estimates from typical member sizes; they are labelled "about".
+// The solid shares are measured off the Executive App's own models, seen face-on from post centre
+// to post centre and ground to fence top (chain-link fabric is thin wire, so it is worked out
+// instead: about 15% for the fabric, plus the top rail and posts).
 const WSTYLES = [
-  { id: 'privacy', name: 'Solid privacy', note: 'Dog-ear, board-on-board, Kingston vinyl', eps: () => 1, hs: [4, 5, 6, 7, 8], bay: 8 },
+  { id: 'privacy', name: 'Solid privacy', note: 'Dog-ear, board-on-board, Kingston vinyl. Counted as solid', eps: () => 1, hs: [4, 5, 6, 7, 8], bay: 8 },
   { id: 'shadowbox', name: 'Shadowbox', note: 'Engineers treat it as solid. Air does weave through the offset boards, so the real push is a bit lower, but we never count on that', eps: () => 1, hs: [4, 6], bay: 8 },
-  { id: 'lattice', name: 'Lattice top', note: 'Solid boards with a 12 in lattice band that is about half open', eps: h => (h - 1 + .5) / h, hs: [6], bay: 8 },
-  { id: 'picket', name: 'Picket', note: 'About 60% solid', eps: () => .6, hs: [3, 4, 5], bay: 8 },
-  { id: 'split', name: 'Split rail', note: 'About 25% solid', eps: () => .25, hs: [3, 4], bay: 10 },
-  { id: 'alu', name: 'Aluminum', note: 'About 20% solid. Typical 6 ft panels', eps: () => .2, hs: [4, 5, 6], bay: 6 },
-  { id: 'chain', name: 'Chain link', note: 'Bare fabric, about 15% solid. Posts up to 10 ft apart (ASTM F567)', eps: () => .15, hs: [4, 5, 6], bay: 10 }
+  { id: 'lattice', name: 'Lattice top', note: 'Solid boards with a lattice band at the top: about 91% solid', eps: () => .91, hs: [6], bay: 8 },
+  { id: 'picket', name: 'Picket', note: 'About three-quarters solid, once you count the rails behind the pickets', eps: h => ({ 3: .76, 4: .74, 5: .73 })[h] ?? .74, hs: [3, 4, 5], bay: 8 },
+  { id: 'split', name: 'Split rail', note: 'About 20 to 25% solid', eps: h => h <= 3 ? .2 : .24, hs: [3, 4], bay: 10 },
+  { id: 'alu', name: 'Aluminum', note: 'About 20% solid. Typical 6 ft panels', eps: h => ({ 4: .22, 5: .21, 6: .2 })[h] ?? .21, hs: [4, 5, 6], bay: 6 },
+  { id: 'chain', name: 'Chain link', note: 'Fabric about 15% solid, plus the top rail and posts. Posts up to 10 ft apart (ASTM F567)', eps: h => .15 + 1.37 / (12 * h) + 1.62 / 120, hs: [4, 5, 6], bay: 10 }
 ];
 const PRESETS = [[25, 'Breezy'], [58, 'Severe storm'], [80, 'Derecho'], [115, 'Ohio design gust']];
 export function windLoad({ V, h, exposure, style }) {
@@ -181,16 +184,17 @@ export function windLoad({ V, h, exposure, style }) {
 function wind(body) {
   const st = { style: WSTYLES[0], h: 6, V: 58, exposure: 'B' };
   body.innerHTML = `
+    <div class="wind-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the fence in 3D…</div></div>
+    <div class="lab-ctl vs-ctl">${slider('V', 'Gust speed', 10, 120, 1, st.V, ' mph')}</div>
     <div class="lab-grid">
       <div class="lab-vis"><canvas class="wind-cv" aria-label="Wind flowing over the fence"></canvas>
         <div class="wind-gauge"><div class="wg-n mono" id="wgN"></div><div class="wg-l">lb on each post</div></div>
-        <div class="vis-note">Side view. Wind blows left to right.</div></div>
+        <div class="vis-note">Side view. Wind blows left to right, slowed way down.</div></div>
       <div class="lab-ctl">
         <div class="lab-label">Style</div>
         <div class="chips wrap" id="wStyle">${WSTYLES.map(s => `<button class="chip" data-s="${s.id}">${esc(s.name)}</button>`).join('')}</div>
         <p class="lab-note" id="wNote"></p>
         <div class="lab-label">Height</div><div id="wH"></div>
-        ${slider('V', 'Gust speed', 10, 120, 1, st.V, ' mph')}
         <div class="chips wrap presets">${PRESETS.map(([v, l]) => `<button class="chip" data-v="${v}">${l} · ${v}</button>`).join('')}</div>
         <div class="lab-label">Yard</div>
         ${seg('exposure', [['B', 'Houses and trees around'], ['C', 'Open field']], st.exposure)}
@@ -207,14 +211,15 @@ function wind(body) {
       <p><b>Velocity pressure</b> (ASCE 7-16 Eq. 26.10-1): q = 0.00256 · K<sub>z</sub> · K<sub>zt</sub> · K<sub>d</sub> · K<sub>e</sub> · V² <span class="mono" id="mQ"></span></p>
       <p>K<sub>z</sub> = 0.57 for houses and trees (Exposure B) or 0.85 for open ground (Exposure C), 0–15 ft (Table 26.10-1). K<sub>zt</sub> = 1 (flat ground). K<sub>d</sub> = 0.85. K<sub>e</sub> = 1.</p>
       <p><b>Force on a freestanding wall</b> (Eq. 29.3-1): F = q · G · C<sub>f</sub> · A<sub>s</sub>, with gust factor G = 0.85 and C<sub>f</sub> = 1.3 for a long wall standing on the ground (Fig. 29.3-1, s/h = 1).</p>
-      <p><b>Open styles</b>: C<sub>f</sub> is multiplied by 1 − (1 − ε)<sup>1.5</sup>, where ε is the solid share of the section. <span class="mono" id="mE"></span></p>
+      <p><b>Open styles</b>: C<sub>f</sub> is multiplied by 1 − (1 − ε)<sup>1.5</sup>, where ε is the solid share of the section. <span class="mono" id="mE"></span> The solid shares are measured off the Executive App's own models, face-on, from post centre to post centre and from the ground to the top: picket about 75% (the rails behind the gaps count), split rail 20–24%, aluminum 20–22%, lattice top 91%. Chain-link fabric is thin wire, so it's worked out instead: about 15% for the fabric, plus the top rail and posts.</p>
       <p><b>Bending at the ground</b>: the resultant acts at 0.55 h above grade, so M = F · 0.55 h.</p>
-      <p><b>Wind behind the fence</b>: behind a fence that is less than about 30% open, air rolls back toward the fence in an eddy. Above that porosity the eddy disappears (wind tunnel work summarized in <i>Scientific Reports</i> 4:6619, 2014). That is why a solid fence makes a calm but swirly pocket, and a picket or aluminum fence just slows the wind.</p>
+      <p><b>The moving air</b> is the average flow, slowed way down so you can follow it. The open-yard wind grows with height (ASCE 7 power law, 1/7 among houses, 1/9.5 in open country). Air that gets through an open fence is worked out from the pressure loss of a perforated plate (Idelchik, <i>Handbook of Hydraulic Resistance</i>, diagram 8-1) and actuator-disc momentum. Behind a fence less than about 30% open the air rolls back toward the fence (Perera 1981; <i>Scientific Reports</i> 4:6619, 2014). In wind-tunnel work that swirl reaches about 13 fence heights back; turbulence shortens it, so it's drawn 10 heights long among houses and 12 in open country. Further back the slow air recovers as Perera's far-wake formula (as given in <i>Wind Energy Science</i> 1:101, 2016). What can't get through goes over the top, faster.</p>
       <p><b>Ends and corners</b> see higher pressure than the middle of a long run (ASCE 7 Case C), which is why end, corner and gate posts matter most.</p>
-      <p class="src">Gust speeds are 3-second gusts. 115 mph is Ohio's ultimate design wind speed for ordinary buildings, a rare event. These are unfactored loads for comparing styles, not a stamped design.</p>`)}`;
+      <p class="src">Gust speeds are 3-second gusts. 115 mph is Ohio's ultimate design wind speed for ordinary buildings, a rare event. These are unfactored loads for comparing styles, not a stamped design. Fences in 3D are the Executive App's models: no-dig dog-ear privacy, shadowbox, lattice top, spaced picket, cedar split rail, 3-rail aluminum and galvanized chain link.</p>`)}`;
   const cv = $('.wind-cv', body), { g, fit } = sizedCanvas(cv);
-  let W = 0, H = 0, parts = [], t = 0, raf = 0, live = true;
+  let W = 0, H = 0, raf = 0, live = true, scene = null, field = null, fkey = '';
   const res = () => windLoad(st);
+  const flow = () => { const r = res(), k = `${r.eps}|${st.h}|${st.exposure}`; if (k !== fkey) { field = flowField({ eps: r.eps, hFt: st.h, exposure: st.exposure }); fkey = k; } return field; };
   let update = () => {
     const r = res();
     $('#wNote', body).textContent = st.style.note;
@@ -224,12 +229,13 @@ function wind(body) {
     $('#rBags', body).textContent = fmt(r.perPost / 80, 1);
     $('#wgN', body).textContent = fmt(r.perPost, 0);
     $('#mQ', body).textContent = `= ${fmt(r.q, 1)} psf at ${st.V} mph`;
-    $('#mE', body).textContent = `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, factor ${fmt(r.red, 2)}`;
+    $('#mE', body).textContent = `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, factor ${fmt(r.red, 2)}.`;
     for (const b of $$('#wStyle .chip', body)) b.setAttribute('aria-pressed', String(b.dataset.s === st.style.id));
     for (const b of $$('.presets .chip', body)) b.setAttribute('aria-pressed', String(+b.dataset.v === st.V));
     const all = WSTYLES.map(s => { const h = s.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, s.hs[0]); return { s, h, r: windLoad({ ...st, style: s, h }) }; });
     const max = Math.max(...all.map(x => x.r.perFt), 1);
     $('#wBars', body).innerHTML = all.map(x => `<button class="wbar${x.s === st.style ? ' on' : ''}" data-s="${x.s.id}"><span class="wb-n">${esc(x.s.name)} <small>${x.h} ft</small></span><span class="wb-t"><i style="--w:${(x.r.perFt / max * 100).toFixed(1)}%"></i></span><b class="mono">${fmt(x.r.perFt)} <small>lb/ft</small></b></button>`).join('');
+    if (scene) scene.set({ style: st.style.id, h: st.h, bay: st.style.bay, eps: r.eps, V: st.V, exposure: st.exposure, p: r.p, perPost: r.perPost });
   };
   body.addEventListener('click', e => {
     const s = e.target.closest('[data-s]'); if (s) { st.style = WSTYLES.find(x => x.id === s.dataset.s); if (!st.style.hs.includes(st.h)) st.h = st.style.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, st.style.hs[0]); update(); seed(); }
@@ -238,69 +244,63 @@ function wind(body) {
   bindSeg(body, (n, v) => { if (n === 'h') st.h = +v; if (n === 'exposure') st.exposure = v; update(); });
   $('[name=V]', body).oninput = e => { st.V = +e.target.value; update(); };
 
-  // ── flow picture ──
-  const geo = () => { const ground = H * .8, scale = (H * .52) / 8, fx = W * .4; return { ground, hpx: st.h * scale, fx, scale }; };
-  const seed = () => { parts = Array.from({ length: Math.round(clamp(W * H / 1700, 120, 420)) }, () => spawn(true)); };
-  const spawn = (anywhere) => { const { ground } = geo(); return { x: anywhere ? Math.random() * W : -10 - Math.random() * 40, y: 12 + Math.random() * (ground - 16), r: Math.random(), trail: [] }; };
-  // Reduce Motion (an iPhone setting) gets a still picture: the flow is run ahead off-screen and drawn once.
-  const still = () => { if (!W) return; for (let i = 0; i < 70; i++) frame(true); };
+  // ── flow picture without 3D: the same smoke lines as the 3D, side on ──
+  const geo = () => { const ground = H * .8, hpx = st.h * (H * .5) / 8, fx = W * .22; return { ground, hpx, fx }; };
+  let lines = [], lkey = '', T = 0;
+  const seed = () => { lkey = ''; };
+  const smoke = () => {
+    const { hpx, fx } = geo(), F = flow(), k = fkey + '|' + W + '|' + H;
+    if (k === lkey) return; lkey = k;
+    lines = streamlines(F, { x0: -fx / hpx - .2, x1: (W - fx) / hpx + .2, top: (H * .8 - 8) / hpx });
+  };
+  // Reduce Motion (an iPhone setting) gets still smoke lines.
+  const still = () => { if (W) frame(true); };
   const resize = () => { ({ w: W, h: H } = fit()); seed(); if (reduced.matches) still(); };
   const ro = new ResizeObserver(resize); ro.observe(cv);
   const frame = (once) => {
-    t += 1 / 60;
-    const { ground, hpx, fx } = geo(), r = res(), eps = r.eps;
-    const U = clamp(st.V / 58, .25, 2.2) * 2.4; // px per frame
+    if (scene) return;
+    const { ground, hpx, fx } = geo(), r = res(), F = flow(); smoke();
+    if (once !== true) T = (T + (.55 + 1.25 * st.V / 58) * 1.6 / 60) % 1000;
     g.clearRect(0, 0, W, H);
-    // sky + ground
     const sky = g.createLinearGradient(0, 0, 0, ground); sky.addColorStop(0, '#0d1d31'); sky.addColorStop(1, '#13283f'); g.fillStyle = sky; g.fillRect(0, 0, W, ground);
     g.fillStyle = '#1b2c1e'; g.fillRect(0, ground, W, H - ground); g.fillStyle = '#26402a'; g.fillRect(0, ground, W, 3);
-    // a house downwind for scale
-    const hx = fx + hpx * 2.6, hw = 7.5 * 8 * (hpx / st.h) / 8 * 1.2, hh = 9 * hpx / st.h;
-    g.fillStyle = '#0a1726'; g.fillRect(hx, ground - hh, hw * 3, hh); g.beginPath(); g.moveTo(hx - 6, ground - hh); g.lineTo(hx + hw * 1.5, ground - hh - hh * .45); g.lineTo(hx + hw * 3 + 6, ground - hh); g.fill();
-    // wake eddy behind fences under ~30% open (solidity over ~0.7)
-    const eddy = clamp((eps - .65) / .35, 0, 1);
-    // particles
-    g.lineCap = 'round';
-    for (const p of parts) {
-      const z = ground - p.y, dx = p.x - fx;
-      let vx = U * (0.55 + 0.45 * Math.min(1, z / (H * .35))) * (0.8 + 0.4 * p.r), vy = 0;
-      const blocked = p.r < eps;
-      if (blocked && z < hpx * 1.25 && dx > -hpx * 2.2 && dx < 0) { const k = 1 - (-dx) / (hpx * 2.2); vy = -(hpx * 1.25 - z) * 0.06 * k * U * .6; vx *= 0.85 + .4 * k; }
-      if (!blocked && dx > -4 && dx < 6 && z < hpx) vx *= 1 - eps * .75;
-      if (dx > 0 && dx < hpx * 5 && z < hpx * 1.4 && eps > .5) { const k = 1 - dx / (hpx * 5); vy += (z - hpx * .3) * 0.012 * k * U * (blocked ? 1 : 0.2); if (z < hpx * 1.05) vx *= 1 - .7 * eps * k; }
-      p.x += vx; p.y += vy;
-      if (p.y > ground - 2) p.y = ground - 2;
-      p.trail.push(p.x, p.y); if (p.trail.length > 14) p.trail.splice(0, 2);
-      if (p.x > W + 10 || p.y < 0) Object.assign(p, spawn(false), { trail: [] });
-      const fast = Math.hypot(vx, vy) / U;
-      g.strokeStyle = fast > 1.15 ? 'rgba(240,168,101,.75)' : 'rgba(140,199,255,.5)'; g.lineWidth = 1.4;
-      g.beginPath(); for (let i = 0; i < p.trail.length; i += 2) i ? g.lineTo(p.trail[i], p.trail[i + 1]) : g.moveTo(p.trail[i], p.trail[i + 1]); g.stroke();
+    g.lineCap = 'round'; g.lineWidth = 2;
+    const X = x => fx + x * hpx, Y = z => ground - z * hpx;
+    for (const L of lines) {
+      const P = L.pts, swirl = L.kind === 'swirl';
+      g.strokeStyle = swirl ? 'rgba(196,181,255,.25)' : 'rgba(140,199,255,.22)';
+      g.beginPath(); P.forEach((p, k) => k ? g.lineTo(X(p[0]), Y(p[1])) : g.moveTo(X(p[0]), Y(p[1]))); g.stroke();
+      // dashes the same time long, moving at the local speed
+      for (let k = 1; k < P.length; k++) {
+        const p = P[k], ph = ((p[2] * 1.6 - T) % 1 + 1) % 1;
+        if (ph > .42) continue;
+        const sp = Math.hypot(p[3], p[4]), u0 = F.U0(p[1]);
+        g.strokeStyle = swirl || p[3] < -.02 ? 'rgba(196,181,255,.95)' : sp > u0 * 1.12 && p[1] > .8 && p[0] > -1 && p[0] < 4 ? 'rgba(240,168,101,.95)' : 'rgba(159,208,255,.9)';
+        g.beginPath(); g.moveTo(X(P[k - 1][0]), Y(P[k - 1][1])); g.lineTo(X(p[0]), Y(p[1])); g.stroke();
+      }
     }
-    if (eddy > 0) { // rolling air behind a solid fence: drawn as rotating arcs
-      const cx = fx + hpx * 1.1, cy = ground - hpx * .45, rr = hpx * .55;
-      g.save(); g.globalAlpha = .55 * eddy; g.strokeStyle = '#8cc7ff'; g.lineWidth = 2;
-      for (let i = 0; i < 3; i++) { const a0 = -t * 2.2 * clamp(st.V / 40, .4, 2) + i * 2.1; g.beginPath(); g.ellipse(cx, cy, rr * (1 - i * .22), rr * .7 * (1 - i * .22), 0, a0, a0 + 1.7); g.stroke(); }
-      g.restore();
-    }
-    // fence, leaning a little with the load (drawn exaggerated)
-    const lean = clamp(r.moment / 6000, 0, .07) * (1 + .25 * Math.sin(t * 5 + Math.sin(t * 1.7) * 2)), top = [fx + Math.sin(lean) * hpx, ground - Math.cos(lean) * hpx];
+    // the fence (dashed when it's open)
+    const eps = r.eps;
     g.strokeStyle = '#d9823f'; g.lineWidth = 7; g.setLineDash(eps > .9 ? [] : [Math.max(2, eps * 10), Math.max(2, (1 - eps) * 10)]);
-    g.beginPath(); g.moveTo(fx, ground); g.lineTo(top[0], top[1]); g.stroke(); g.setLineDash([]);
-    g.strokeStyle = '#f0a865'; g.lineWidth = 3; g.beginPath(); g.moveTo(fx, ground + 2); g.lineTo(fx, ground + hpx * .55); g.stroke(); // post below grade
+    g.beginPath(); g.moveTo(fx, ground); g.lineTo(fx, ground - hpx); g.stroke(); g.setLineDash([]);
     // pressure arrows on the windward face
     const n = 5, len = clamp(r.p * 1.6, 4, 46);
     g.strokeStyle = 'rgba(239,91,91,.9)'; g.fillStyle = 'rgba(239,91,91,.9)'; g.lineWidth = 2;
     for (let i = 0; i < n; i++) { const y = ground - hpx * (i + .5) / n, x = fx - 6; g.beginPath(); g.moveTo(x - len, y); g.lineTo(x, y); g.stroke(); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 6, y - 4); g.lineTo(x - 6, y + 4); g.fill(); }
-    // labels
-    g.fillStyle = 'rgba(234,240,247,.85)'; g.font = '600 12px "IBM Plex Mono", monospace'; g.textAlign = 'center';
+    g.fillStyle = 'rgba(234,240,247,.85)'; g.font = '600 12px "IBM Plex Mono", monospace';
     g.textAlign = 'right'; g.fillText(`${st.h} FT`, fx - 14, ground - hpx + 4); g.textAlign = 'center';
-    if (eddy > .2) { g.fillStyle = 'rgba(140,199,255,.9)'; g.fillText('EDDY', fx + hpx * 1.1, ground - hpx * 1.15); }
+    if (F.swirl > .5) { const tw = g.measureText('AIR ROLLS BACK').width; g.fillStyle = 'rgba(196,181,255,.95)'; g.fillText('AIR ROLLS BACK', Math.min(fx + hpx * 1.9, W - tw / 2 - 8), ground - hpx * .5); }
     if (once !== true && live && vis.on && !reduced.matches) raf = requestAnimationFrame(frame);
   };
-  const vis = onScreen(cv, () => { if (live && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); } });
+  const vis = onScreen(cv, () => { if (live && !scene && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); } });
   update(); resize(); frame();
-  const upd = update; update = () => { upd(); if (reduced.matches) still(); };
-  return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); vis.stop(); };
+  const upd = update; update = () => { upd(); if (reduced.matches) { if (scene) scene.still(); else still(); } };
+  if (webglOK()) {
+    const host = $('.wind-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true;
+    import('./wind3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); cancelAnimationFrame(raf); scene = m.createWindScene(host, { specs: app.live?.specs }); body.__wind = scene; update(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; scene = null; resize(); frame(); });
+  }
+  return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); vis.stop(); scene?.dispose(); scene = null; };
 }
 
 // ═════════════════════════════════════════════════════════════════

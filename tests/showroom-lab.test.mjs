@@ -146,3 +146,30 @@ test('vinyl bend: the beam numbers behind Vinyl walls', async () => {
   // the GFS post bends less at every height
   for (let y = 6; y <= K.postTop; y += 6) assert.ok(r.gfs.at(y) < r.big.at(y), `at ${y} in`);
 });
+
+test('wind flow: the average flow behind the Wind tool\'s picture', async () => {
+  const W = await import('../public/showroom/wind-plan.mjs');
+  // Idelchik's perforated-plate loss at 50% open is about 4.0 dynamic heads; actuator-disc momentum lets 1/(1 + ζ/4) through
+  const b = W.bleed(.5); near(b.zeta, (1 + .707 * Math.sqrt(.5) - .5) ** 2 / .25, 1e-12); near(b.through, 1 / (1 + b.zeta / 4), 1e-12);
+  assert.equal(W.bleed(1).through, 0);
+  for (const eps of [1, .91, .74, .24, .19]) for (const exposure of ['B', 'C']) {
+    const F = W.flowField({ eps, hFt: 6, exposure });
+    // no air is made or lost: the same flow passes every station
+    const q0 = F.psi(-4, 4.99);
+    for (const x of [-2, 0, .5, 3, 8, 15, 25]) assert.ok(Math.abs(F.psi(x, 4.99) / q0 - 1) < .005, `eps ${eps} ${exposure} at x=${x}: ${F.psi(x, 4.99)} vs ${q0}`);
+    // under 30% open the air near the ground behind the fence runs back toward it; above that it doesn't
+    const back = F.vel(3, .1)[0];
+    if (1 - eps < W.CRITICAL_OPEN - .05) assert.ok(back < 0, `eps ${eps}: u = ${back}`); else if (1 - eps > W.CRITICAL_OPEN) assert.ok(back > 0, `eps ${eps}: u = ${back}`);
+    // far downstream the wind comes back
+    assert.ok(F.vel(25, .5)[0] > .6 * F.U0(.5), `eps ${eps} recovers`);
+    // smoke lines start upwind, and the open ones reach past the fence
+    const L = W.streamlines(F);
+    assert.equal(L.filter(l => l.kind === 'open').length, 14);
+    for (const l of L.filter(l => l.kind === 'open')) assert.ok(l.pts.at(-1)[0] > 13.9, 'open line reaches the end');
+    if (eps === 1) assert.ok(L.some(l => l.kind === 'swirl'), 'a solid fence shows the swirl');
+  }
+  // Perera's far wake: 10 fence heights behind a 50% open fence the slowest air is about 25% down
+  const F = W.flowField({ eps: .5, hFt: 6 });
+  let worst = 1; for (let z = .05; z < 2; z += .01) worst = Math.min(worst, F.vel(10, z)[0] / F.U0(z));
+  assert.ok(worst > .65 && worst < .85, worst);
+});
