@@ -32,18 +32,18 @@ export function resolveRanchModelSpec(spec,name,raw=spec,height){
 }
 export function ranchModelGeometry(spec,height){
  if(!spec||spec.mode!=='ranch'||spec.wood!==true)return null;
- const faceIn=positive(spec.railWIn)?spec.railWIn:5;
- const depthIn=positive(spec.railTIn)?spec.railTIn:1.2;
+ const faceIn=positive(spec.railWIn)?spec.railWIn:5.5;
+ const depthIn=positive(spec.railTIn)?spec.railTIn:1.5;
  const scale=positive(spec.editH)&&spec.editH!==height?height/spec.editH:1;
  let railsIn;
  if(Array.isArray(spec.rails)&&spec.rails.length)railsIn=scale===1?spec.rails.slice():spec.rails.map(v=>Math.round(v*scale*4)/4);
- else{const n=Number.isInteger(spec.railsN)&&spec.railsN>0?spec.railsN:3;railsIn=Array.from({length:n},(_,i)=>(.18+(.78-.18)*i/Math.max(1,n-1))*height*12);}
+ else{const n=Number.isInteger(spec.railsN)&&spec.railsN>0?spec.railsN:3;const top=height*12-faceIn/2,bottom=Math.min(top,Math.max(faceIn/2,.18*height*12));railsIn=Array.from({length:n},(_,i)=>bottom+(top-bottom)*i/Math.max(1,n-1));}
  return {faceIn,depthIn,railsIn};
 }
 
 // Contacts are computed from existing render thickness, not a supplier wire-gauge claim.
-export function ranchWireSandwich(spec,name,postIn,railDepthIn,wireDiameterIn){
- if(!spec||spec.mode!=='ranch'||spec.wood!==true||!requestedCounts.has(String(name||'').toLowerCase())||!['2x4','2x3'].includes(spec.wire))return null;
+export function ranchWireSandwich(spec,_name,postIn,railDepthIn,wireDiameterIn){
+ if(!spec||spec.mode!=='ranch'||spec.wood!==true||!['2x4','2x3'].includes(spec.wire))return null;
  const explicit=v=>v!=null&&v!==''&&Number.isFinite(+v);
  if(explicit(spec.railZIn)||explicit(spec.wireZIn)||explicit(spec.meshZIn))return null;
  if(positive(spec.gPostIn)&&Math.abs(spec.gPostIn-postIn)>1e-8)return null;

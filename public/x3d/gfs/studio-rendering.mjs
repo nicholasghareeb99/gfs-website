@@ -3,7 +3,7 @@
 import {requireCompleteGateModel} from './model-review.mjs';
 import {withCompleteFence} from './fence-layers.mjs';
 import {upgradeMatLib} from './real-surfaces.mjs';
-export const RENDER_VERSION = 'studio-8-v3191-real';
+export const RENDER_VERSION = 'studio-8-v3191-real-v3271';
 export function qualityProfile(mode = 'auto', {dpr = 1, mobile = false, maxTextureSize = 4096} = {}) {
   const field = mode === 'field' || (mode === 'auto' && mobile);
   return {mode, pixelRatio: Math.min(dpr, field ? 1.25 : mode === 'presentation' ? 2 : 1.75),
@@ -15,7 +15,7 @@ export function autoBoolean(value, fallback = false) {
   return value === true || value === 1 || value === '1' || value === 'true';
 }
 export function shotKey(name, height, options = {}, spec = {}) {
-  return JSON.stringify([RENDER_VERSION, name, height, options, spec]);
+  return JSON.stringify([RENDER_VERSION, "v3284-finishes", name, height, options, spec, spec?.wood ? 'v3283' : null]);
 }
 const textureSets = new WeakMap();
 function random(seed) { return () => ((seed = Math.imul(seed ^ seed >>> 15, 1 | seed) + 0x6d2b79f5 | 0) >>> 0) / 4294967296; }

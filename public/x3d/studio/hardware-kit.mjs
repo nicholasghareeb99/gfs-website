@@ -462,6 +462,37 @@ export function createHardwareKit(viewer, opts = {}) {
   const dropCaches = () => { geoCache.forEach(v => v.geos && Object.values(v.geos).forEach(m => Object.values(m).forEach(g => g && g.dispose && g.dispose()))); geoCache.clear(); mats = null };
   function clearGroup() { if (!group) return; group.traverse(o => { if (o.userData && o.userData.hwOwn && o.geometry) o.geometry.dispose() }); group.clear() }
 
+  function useRenderedHardware(fg, stats) {
+    const kinds = {ghinge:'hinges',glatch:'latches',gdrop:'dropRods',ghandle:'handles'};
+    const seen = new Set();
+    fg.traverse(o => {
+      if (o.userData.hardwareStock) o.visible = !on || !cfg.hideStock;
+      if (!o.userData.hardwareDetail) return;
+      const {hardwareModel:model, hardwareUnit:unit} = o.userData;
+      o.visible = on;
+      if (!stats) return;
+      const {kind} = o.userData.parts[0];
+      const triangles = o.geometry.attributes.position.count / 3;
+      stats.triangles += triangles;
+      stats.trianglesById[model] = (stats.trianglesById[model] || 0) + triangles;
+      if (seen.has(unit)) return;
+      seen.add(unit);
+      if (kinds[kind]) stats[kinds[kind]]++;
+      stats.byId[model] = (stats.byId[model] || 0) + 1;
+    });
+  }
+
+  function refreshRenderedHardware() {
+    const fg = viewer.hooks()?.__f3d?.fenceGroup;
+    if (!fg) return false;
+    let detailed = false;
+    fg.traverse(o => { detailed ||= !!o.userData.hardwareDetail; });
+    if (!detailed) return false;
+    useRenderedHardware(fg, on ? last : null);
+    viewer.redraw?.();
+    return true;
+  }
+
   function materials() {
     if (mats && mats.T === T) return mats;
     mats = {
@@ -527,6 +558,7 @@ export function createHardwareKit(viewer, opts = {}) {
     if (group.parent !== sc) sc.add(group);
     followFence(w2, T, group);   // the viewer can slide and turn the whole fence; the hardware goes with it
     const stats = emptyStats(); last = stats;
+    if (refreshRenderedHardware()) return;
     const specOf = name => { try { return w2.__f3dStyleSpec(name) || {} } catch (_) { return {} } };
     const runs = (() => { try { return w2.__f3dRuns() || [] } catch (_) { return [] } })();
     const curName = (() => { const sel = w2.document.querySelector('#styleRow select'); return sel ? sel.value : (w2.__f3d.spec || {}).style })();
@@ -639,8 +671,17 @@ export function createHardwareKit(viewer, opts = {}) {
   }
 
   const api = {
-    async enable() { on = true; if (!unsub) unsub = viewer.onRebuild(() => setTimeout(() => { build().catch(e => console.warn('[hardware-kit]', e)) }, 60)); await build(); return api.state() },
-    clear() { on = false; gen++; if (unsub) { unsub(); unsub = null } restoreAll(); clearGroup(); if (group && group.parent) group.parent.remove(group); viewer.redraw && viewer.redraw() },
+    async enable() { if (!on && unsub) { unsub(); unsub = null } on = true; if (!unsub) unsub = viewer.onRebuild(() => setTimeout(() => { build().catch(e => console.warn('[hardware-kit]', e)) }, 60)); await build(); return api.state() },
+    clear() {
+      on = false;
+      gen++;
+      if (unsub) { unsub(); unsub = null }
+      restoreAll();
+      clearGroup();
+      if (group?.parent) group.parent.remove(group);
+      if (refreshRenderedHardware()) unsub = viewer.onRebuild(refreshRenderedHardware);
+      viewer.redraw?.();
+    },
     set(patch) { Object.assign(cfg, patch || {}); if (on) return build().then(() => api.state()); return api.state() },
     refresh() { return build() },
     state: () => ({ on, config: { ...cfg }, built: { ...last, byId: { ...last.byId } } }),

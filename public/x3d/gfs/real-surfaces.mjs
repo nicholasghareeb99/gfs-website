@@ -21,6 +21,7 @@ const TAU = Math.PI * 2;
 // tex: wood tile height in pixels (its width is 1/4 of that: a tile is 1 ft across and 4 ft along the grain). 1024 is
 // 21 pixels an inch. 2048 drew stripes across the boards in the test browser's software GPU, so it is not used.
 export const TIERS = {
+  phone: {tex: 512, lawn: 256, shadow: 1024, px: 1.25, contact: true, aniso: 4},
   field: {tex: 1024, lawn: 512, shadow: 1024, px: 1.25, contact: false, aniso: 4},
   balanced: {tex: 1024, lawn: 1024, shadow: 2048, px: 1.5, contact: true, aniso: 8},
   high: {tex: 1024, lawn: 1024, shadow: 2048, px: 2, contact: true, aniso: 16},
@@ -52,6 +53,47 @@ export function speciesOf(hex, pal) {
 // A gentle tint on top of the saved colour so the two woods read differently even where the saved colours are close:
 // pressure treated pine leans green-tan, cedar warm and red.
 export const SPECIES_TINT = {pt: [1, 1, 0.99], cedar: [1.02, 0.99, 0.97], grain: [1, 1, 1]};
+
+const WOOD_FINISHES = {
+  pt:     {color: 0xb9ae81, weathered: 0x9a9789, rings: 19, bump: 0.0030, rough: 0.94},
+  cedar:  {color: 0xb88157, weathered: 0x928e86, rings: 31, bump: 0.0032, rough: 0.91},
+  white:  {color: 0xdec69d, weathered: 0x9d9c91, rings: 38, bump: 0.0045, rough: 1.00},
+  sawn:   {color: 0x8b6548, weathered: 0x928b7a, rings: 21, bump: 0.0040, rough: 0.98},
+};
+const WOOD_COLORS = {
+  cedar: 0xb5793f, cedarTone: 0xc08a4a, white: 0xf0c48e, pt: 0xc9b076, splitPt: 0x9a6a45,
+  weathered: 0x8e8c86, accent: 0x7d5430,
+};
+const WOOD_PALETTE = new Set(Object.values(WOOD_COLORS));
+
+/** Resolve the stock's appearance without changing any saved color or style. */
+export function resolveWoodFinish(spec = {}, value, pal) {
+  const hex = Number(value ?? spec.cPanel ?? WOOD_COLORS.pt);
+  const main = Number(spec.cPanel ?? hex);
+  const isSplit = spec.mode === 'split';
+  const cedarTone = main === WOOD_COLORS.cedarTone || main === pal?.cedartone;
+  let kind;
+  if (spec.srWood === 'locust') kind = 'pt';
+  else if (!isSplit && hex !== main && hex === WOOD_COLORS.pt) kind = 'pt';
+  else if (!isSplit && hex !== main && hex === WOOD_COLORS.cedar) kind = 'cedar';
+  else if (spec.srWood === 'cedar' || main === WOOD_COLORS.white) kind = 'white';
+  else if (spec.srWood === 'pt' || main === WOOD_COLORS.splitPt) kind = 'sawn';
+  else if (spec.woodSpecies === 'northern-white') kind = 'white';
+  else if (spec.woodSpecies === 'western-red') kind = 'cedar';
+  else if (isSplit) kind = spec.railKind === 'round' || spec.cedar ? 'white' : 'sawn';
+  else if (main === WOOD_COLORS.weathered) kind = 'white';
+  else kind = !cedarTone && speciesOf(main, pal) === 'cedar' ? 'cedar' : 'pt';
+  const weathered = spec.woodWeathered === true || spec.srWood === 'grey' || main === WOOD_COLORS.weathered;
+  const stock = WOOD_FINISHES[kind];
+  const defaultColor = WOOD_PALETTE.has(hex) || hex === pal?.cedar || hex === pal?.pt;
+  // The older viewer derived a dark accent when it had no saved accent. Recognize that default as stock too.
+  const channel = shift => Math.round(((main >> shift) & 255) * 0.86);
+  const defaultAccent = WOOD_PALETTE.has(main) && (spec.cAccent == null || spec.cAccent === WOOD_COLORS.accent) &&
+    hex === ((channel(16) << 16) | (channel(8) << 8) | channel(0));
+  const color = spec.srWood === 'locust' || (!defaultColor && !defaultAccent) ? hex
+    : weathered ? stock.weathered : cedarTone && (hex === main || defaultAccent) ? WOOD_COLORS.cedarTone : stock.color;
+  return {kind, hex: color, weathered};
+}
 
 // ------------------------------------------------------------------------------------------------ noise
 export function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
@@ -90,14 +132,15 @@ const WOOD = {
   pt: {rings: 9, late: [0.74, 0.68, 0.5], early: [0.86, 0.8, 0.62], contrast: 1, knotP: 0.55, knotR: [0.022, 0.04], knot: [0.62, 0.5, 0.34], green: 0.02, streak: 0.03, fibre: 0.035},
   // Western red cedar: softer, tighter bands, strong streaks from salmon to chocolate within one board.
   cedar: {rings: 14, late: [0.7, 0.48, 0.33], early: [0.8, 0.56, 0.39], contrast: 1, knotP: 0.45, knotR: [0.018, 0.034], knot: [0.55, 0.36, 0.24], green: 0, streak: 0.08, fibre: 0.04},
+  white: {rings: 12, late: [0.69, 0.61, 0.47], early: [0.85, 0.78, 0.63], contrast: 0.63, knotP: 0.55, knotR: [0.016, 0.032], knot: [0.53, 0.40, 0.28], green: 0, streak: 0.044, fibre: 0.062},
+  sawn: {rings: 10, late: [0.67, 0.54, 0.40], early: [0.84, 0.73, 0.56], contrast: 0.85, knotP: 0.55, knotR: [0.02, 0.038], knot: [0.55, 0.42, 0.29], green: 0.01, streak: 0.034, fibre: 0.055},
   // Wood-grain vinyl: the same figure, much quieter, no knots.
   grain: {rings: 10, late: [0.84, 0.84, 0.84], early: [0.92, 0.92, 0.92], contrast: 0.8, knotP: 0, knotR: [0, 0], knot: [0.8, 0.8, 0.8], green: 0, streak: 0.02, fibre: 0.03},
 };
 const hash1 = n => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
 /**
  * One wood tile: W across (1 ft, two board widths) by H along the grain (4 ft); grain runs along v. Pure, deterministic,
- * tileable. The left half is flat sawn (cathedral arches where the growth rings cut the face), the right half rift
- * sawn (straight lines); boards sample it at random offsets, so neighbours differ.
+ * tileable. Slow growth-ring drift and fine fibers run along the tile. Neighboring boards take different samples.
  * Returns {W, H, rgb (Float32Array 3n, colour relative to the tile's mean: mean 1 per channel), height, rough (0..1)}.
  */
 export function woodFields(W, H, {species = 'pt', seed = 7} = {}) {
@@ -108,6 +151,8 @@ export function woodFields(W, H, {species = 'pt', seed = 7} = {}) {
   const knots = [], kn = rnd() < P.knotP ? 1 : 0;
   for (let k = 0; k < kn; k++) knots.push({u: rnd(), v: rnd(), r: P.knotR[0] + rnd() * (P.knotR[1] - P.knotR[0]), e: 1.2 + rnd() * 0.8});
   const rgb = new Float32Array(n * 3), height = new Float32Array(n), rough = new Float32Array(n);
+  const bands = species === 'grain' ? 64 : P.rings * 2;
+  const figure = species === 'grain' ? null : makeFbm(seed + 7, 5, 2, 3);
   const ringW = []; for (let i = 0; i < 64; i++) ringW.push(0.45 + hash1(i + seed * 13) * 0.35);   // where the late wood starts in each ring
   for (let y = 0; y < H; y++) {
     const v = y / H;
@@ -115,6 +160,7 @@ export function woodFields(W, H, {species = 'pt', seed = 7} = {}) {
       const u = x / W;
       // Mostly straight grain along the board, wandering gently; the depth term adds a slow, faint drift (no loops).
       let ring = u * P.rings * 2 + (warpA(u, v) - 0.5) * 0.8 + (warpB(u, v) - 0.5) * 0.2 + (depth(u, v) - 0.5) * 0.6;
+      if (figure) ring += (figure(u, v) - 0.5) * 2.1;
       let knotCore = 0, knotRing = 0;
       for (const k of knots) {
         let du = u - k.u, dv = v - k.v; du -= Math.round(du); dv -= Math.round(dv);
@@ -124,7 +170,8 @@ export function woodFields(W, H, {species = 'pt', seed = 7} = {}) {
         knotCore = Math.max(knotCore, (1 - sstep(0.45, 1.15, dist)) * 0.75);
         knotRing = Math.max(knotRing, (1 - sstep(1.0, 1.7, dist)) * (1 - knotCore) * 0.5);
       }
-      const ri = Math.floor(ring), f = ring - ri, lw = ringW[((ri % 64) + 64) % 64];
+      const ri = Math.floor(ring), f = ring - ri;
+      const lw = ringW[((ri % bands) + bands) % bands];
       const late = sstep(lw, lw + 0.1, f) * (1 - sstep(0.93, 1, f));
       const fib = fibre(u, v), pt = patch(u, v), st = streak(u, v), pore = pores(u, v);
       const line = sstep(0.62, 0.7, fib) * P.fibre;   // thin dark fibre lines along the grain
@@ -182,6 +229,50 @@ export function grayBytes(f, n) {
 // Roughness lives in the green channel for three.js; grayBytes fills every channel, so either way works.
 
 // ------------------------------------------------------------------------------------------------ other surfaces
+// The keys are existing catalog colors. The values are rendering estimates from Rafab's printed swatches.
+const RAFAB_VINYL_COLORS = new Map([
+  [16053487, 0xf4f2ed], // White
+  [14207395, 0xe4d6b8], // Tan
+  [14272944, 0xcdb696], // Adobe
+  [6251366, 0xa49594],  // Dark Gray
+  [12100746, 0xd2cccd], // Aspen Latte
+  [9407104, 0x8e8898],  // Chai Gray
+  [6178355, 0x836352],  // Mocha Walnut
+  [8223326, 0x72604b],  // Green Teak
+]);
+const HOMEWOOD = new Map([
+  [6251366, {bump: 0.00035, contrast: 0.16}],
+  [12100746, {bump: 0.0008, contrast: 0.45}],
+  [9407104, {bump: 0.001, contrast: 0.65}],
+  [6178355, {bump: 0.0013, contrast: 1}],
+  [8223326, {bump: 0.0012, contrast: 0.88}],
+]);
+const HOMEWOOD_MAP_LEVEL = 0.8;
+const vinylColor = hex => RAFAB_VINYL_COLORS.get(hex) ?? hex;
+
+/** Grayscale variegation and longitudinal emboss for extruded PVC. U is across, V is along the piece. */
+export function homewoodFields(W, H, seed = 31) {
+  const count = W * H, rgb = new Float32Array(count * 3);
+  const height = new Float32Array(count), rough = new Float32Array(count);
+  const drift = makeFbm(seed, 3, 2, 2);
+  const streaks = makeFbm(seed + 4, 16, 3, 3);
+  const emboss = makeFbm(seed + 9, 48, 5, 2);
+  let mean = 0;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, u = x / W, v = y / H;
+    const shifted = u + 0.055 * (drift(u, v) - 0.5);
+    const streak = streaks(shifted, v), ridge = emboss(shifted, v);
+    const tone = 1 + 0.24 * (streak - 0.5) + 0.07 * (ridge - 0.5);
+    rgb.fill(tone, i * 3, i * 3 + 3);
+    mean += tone;
+    height[i] = 0.5 + 0.22 * (streak - 0.5) + 0.65 * (ridge - 0.5);
+    rough[i] = 0.45 + 0.12 * (ridge - 0.5);
+  }
+  const lift = count / mean;
+  for (let i = 0; i < rgb.length; i++) rgb[i] *= lift;
+  return {rgb, height, rough};
+}
+
 /** Square tileable fields for the other families. Returns {S, rgb|null (relative, mean 1), height, rough}. */
 export function surfaceFields(kind, S, seed = 11) {
   const n = S * S, height = new Float32Array(n), rough = new Float32Array(n);
@@ -192,21 +283,27 @@ export function surfaceFields(kind, S, seed = 11) {
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
       const i = y * S + x, u = x / S, v = y / S;
       height[i] = 0.5 + (a(u, v) - 0.5) * (kind === 'powder' ? 0.9 : 0.25);
-      rough[i] = kind === 'powder' ? 0.5 + (b(u, v) - 0.5) * 0.12 : 0.32 + (b(u, v) - 0.5) * 0.1;
+      rough[i] = kind === 'powder' ? 0.46 + (b(u, v) - 0.5) * 0.1 : 0.37 + (b(u, v) - 0.5) * 0.09;
     }
   } else if (kind === 'galv') {
-    // Hot-dip spangle: crystal cells of slightly different brightness and roughness.
-    const r = mulberry32(seed), cells = [];
-    for (let k = 0; k < 90; k++) cells.push([r(), r(), r()]);
+    // Crystalline zinc. One seed per cell, with the surrounding cells read across the tile seam.
+    const r = mulberry32(seed), grid = 9, cells = [];
+    for (let k = 0; k < grid * grid; k++) cells.push([0.15 + r() * 0.7, 0.15 + r() * 0.7, r()]);
     const fine = makeFbm(seed + 3, 24, 24, 3);
     rgb = new Float32Array(n * 3);
     for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
-      const u = x / S, v = y / S; let best = 9, val = 0;
-      for (const c of cells) { let du = u - c[0], dv = v - c[1]; du -= Math.round(du); dv -= Math.round(dv); const d = du * du + dv * dv; if (d < best) { best = d; val = c[2]; } }
-      const i = y * S + x, f = fine(u, v), L = 0.9 + val * 0.18 + (f - 0.5) * 0.08;
+      const u = x / S, v = y / S, gx = u * grid, gy = v * grid;
+      const cx = Math.floor(gx), cy = Math.floor(gy);
+      let best = Infinity, val = 0;
+      for (let j = cy - 1; j <= cy + 1; j++) for (let k = cx - 1; k <= cx + 1; k++) {
+        const cell = cells[((j + grid) % grid) * grid + (k + grid) % grid];
+        const du = gx - k - cell[0], dv = gy - j - cell[1], d = du * du + dv * dv;
+        if (d < best) { best = d; val = cell[2]; }
+      }
+      const i = y * S + x, f = fine(u, v), L = 0.94 + val * 0.12 + (f - 0.5) * 0.08;
       rgb[i * 3] = L; rgb[i * 3 + 1] = L; rgb[i * 3 + 2] = L * 1.01;
       height[i] = 0.5 + (val - 0.5) * 0.15 + (f - 0.5) * 0.2;
-      rough[i] = 0.3 + val * 0.18 + (f - 0.5) * 0.06;
+      rough[i] = 0.34 + val * 0.14 + (f - 0.5) * 0.06;
     }
   } else if (kind === 'concrete') {
     const a = makeFbm(seed, 4, 4, 5), b = makeFbm(seed + 5, 64, 64, 2), r = mulberry32(seed + 1);
@@ -354,12 +451,102 @@ const FRAG_ROUGH = `
 roughnessFactor = clamp(roughnessFactor + gfsWear * 0.08 + (gfsHalf.w > 0.5 ? 0.06 : 0.0) * gfsLook.y, 0.04, 1.0);
 `;
 
+const WOOD_VARYINGS = `
+varying vec4 gfsWoodP;
+varying vec3 gfsWoodN;
+varying vec3 gfsWoodAxis;
+`;
+const WOOD_VERT = `
+{
+  mat4 stock = modelMatrix;
+  #ifdef USE_INSTANCING
+    stock *= instanceMatrix;
+  #endif
+  vec3 scale = vec3(length(stock[0].xyz), length(stock[1].xyz), length(stock[2].xyz));
+  vec3 size = gfsWoodSize.xyz * scale;
+  vec3 p = (position - gfsWoodCenter.xyz) * scale;
+  float rake = gfsWoodCenter.w * scale.y / max(scale.x, 0.0001);
+  p.y -= rake * p.x;
+  p.x *= sqrt(1.0 + rake * rake);
+  gfsWoodAxis = (gfsWoodSize.w > 0.5 || (size.y > size.x && size.y >= size.z)) ? vec3(0, 1, 0)
+    : size.x >= size.z ? vec3(1, 0, 0) : vec3(0, 0, 1);
+  gfsWoodP = vec4(p, fract(sin(dot(floor(stock[3].xyz * 12.0 + 0.5), vec3(12.9898, 78.233, 37.719))) * 43758.5453));
+  gfsWoodN = normal / max(scale, vec3(0.0001));
+}
+`;
+const WOOD_MAP = `
+  vec3 axis = gfsWoodAxis;
+  vec3 acrossA = axis.yzx, acrossB = axis.zxy;
+  vec3 face = abs(normalize(gfsWoodN));
+  vec2 crossCut = vec2(dot(gfsWoodP.xyz, acrossA), dot(gfsWoodP.xyz, acrossB));
+  float along = dot(gfsWoodP.xyz, axis);
+  float seed = gfsWoodP.w;
+  float mixSeed = fract(seed * 91.37 + 0.123);
+  // A split rail can share smoothed normals between its sides and cuts. The triangle gives the actual cut face.
+  vec3 cutNormal = normalize(cross(dFdx(gfsWoodP.xyz), dFdy(gfsWoodP.xyz)));
+  float endGrain = smoothstep(0.52, 0.86, abs(dot(cutNormal, axis)));
+  float side = smoothstep(-0.30, 0.30, dot(face, acrossA - acrossB));
+  vec2 offset = vec2(seed * 7.31, mixSeed * 3.77);
+  vec2 uvA = vec2(crossCut.x, along * 0.25) + offset;
+  vec2 uvB = vec2(crossCut.y, along * 0.25) + offset + vec2(0.27, 0.0);
+  // Both projections advance in feet. Blend around the curved face and keep the flat face planar.
+  #ifdef USE_MAP
+    vec3 faceWood = mix(texture2D(map, uvA).rgb, texture2D(map, uvB).rgb, side);
+  #else
+    vec3 faceWood = vec3(0.6038);
+  #endif
+  vec2 pith = crossCut - vec2(cos(seed * 6.283185), sin(seed * 6.283185)) * (0.05 + seed * 0.24);
+  float radius = length(pith);
+  float rings = radius * gfsWoodLook.x + 0.12 * sin(radius * 29.0 + seed * 16.0);
+  float cutBand = 1.0 - smoothstep(0.11, 0.34, abs(fract(rings) - 0.5));
+  cutBand *= 1.0 - smoothstep(0.15, 0.60, fwidth(rings));
+  vec3 cutWood = mix(vec3(0.61, 0.58, 0.53), vec3(0.43, 0.37, 0.30), cutBand);
+  cutWood = mix(cutWood, vec3(0.53) * (1.0 - cutBand * 0.14), gfsWoodLook.y * 0.8);
+  float boardTone = (1.0 + (seed - 0.5) * 0.12);
+  vec3 wood = mix(faceWood, cutWood, endGrain);
+  float gray = dot(wood, vec3(0.2126, 0.7152, 0.0722));
+  diffuseColor.rgb *= mix(wood, vec3(gray), gfsWoodLook.y * 0.72) * boardTone;
+`;
+const WOOD_ROUGHNESS = `
+  float roughnessFactor = roughness;
+  #ifdef USE_ROUGHNESSMAP
+    vec2 leftStock = texture2D(roughnessMap, uvA).rg;
+    vec2 rightStock = texture2D(roughnessMap, uvB).rg;
+    vec2 surfaceStock = mix(leftStock, rightStock, side);
+    roughnessFactor *= mix(surfaceStock.g, 0.91, endGrain);
+    float stockHeight = mix(surfaceStock.r, 0.50 + cutBand * 0.055, endGrain);
+  #endif
+`;
+const WOOD_NORMAL = `
+  #if defined(USE_BUMPMAP) && defined(USE_ROUGHNESSMAP)
+    vec2 woodRelief = bumpScale * vec2(dFdx(stockHeight), dFdy(stockHeight));
+    normal = perturbNormalArb(-vViewPosition, normal, woodRelief, faceDirection);
+  #endif
+`;
+
 function patchShader(sh, mat) {
+  if (mat.userData.gfsWood) {
+    sh.uniforms.gfsWoodLook = mat.userData.gfsWood;
+    sh.vertexShader = `attribute vec4 gfsWoodSize;
+attribute vec4 gfsWoodCenter;
+` + WOOD_VARYINGS + sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>' + WOOD_VERT);
+    sh.fragmentShader = 'uniform vec2 gfsWoodLook;\n' + WOOD_VARYINGS + sh.fragmentShader
+      .replace('#include <map_fragment>', WOOD_MAP)
+      .replace('#include <roughnessmap_fragment>', WOOD_ROUGHNESS)
+      .replace('#include <normal_fragment_maps>', WOOD_NORMAL);
+    return;
+  }
   const u = mat.userData.gfsU;
   sh.uniforms.gfsTile = u.tile; sh.uniforms.gfsLook = u.look; sh.uniforms.gfsVaryTint = u.tint; sh.uniforms.gfsExt = u.ext; sh.uniforms.gfsMid = u.mid;
+  const map = '#include <map_fragment>';
+  const albedo = mat.userData.gfsFamily === 'grain' ? `
+    vec3 gfsStockTint = diffuseColor.rgb * ${srgbToLinear(HOMEWOOD_MAP_LEVEL)};
+    ${map}
+    diffuseColor.rgb = mix(gfsStockTint, diffuseColor.rgb, gfsTile.w);
+  ` : map;
   sh.vertexShader = VERT_HEAD + sh.vertexShader.replace('#include <uv_vertex>', '#include <uv_vertex>' + VERT_BODY);
   sh.fragmentShader = FRAG_HEAD + sh.fragmentShader
-    .replace('#include <map_fragment>', '#include <map_fragment>' + FRAG_ALBEDO)
+    .replace(map, albedo + FRAG_ALBEDO)
     .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>' + FRAG_ROUGH);
 }
 /** The geometry's bounding box size and centre (cached on the geometry), which the shader reads per draw. */
@@ -373,6 +560,25 @@ export function geometryBox(geo) {
     ext: [Math.max(1e-4, b.max.x - b.min.x), Math.max(1e-4, b.max.y - b.min.y), Math.max(1e-4, b.max.z - b.min.z)],
     mid: [(b.max.x + b.min.x) / 2, (b.max.y + b.min.y) / 2, (b.max.z + b.min.z) / 2]};
   return ud.gfsBox;
+}
+/** Prepare before the first WebGL upload so shared materials never carry another part's bounds. */
+export function prepareWoodMeshes(group, T) {
+  group.traverse(mesh => {
+    const geometry = mesh.geometry;
+    if (!mesh.material?.userData.gfsWood || !geometry || geometry.hasAttribute('gfsWoodSize')) return;
+    const box = geometryBox(geometry);
+    if (!box) return;
+    const cap = mesh.userData.parts?.[0]?.kind === 'cap';
+    const size = [...box.ext, cap ? 1 : 0];
+    const center = [...box.mid, geometry.userData.woodSlope || 0];
+    const dimensions = new Float32Array(box.n * 4), origin = new Float32Array(box.n * 4);
+    for (let i = 0; i < box.n; i++) {
+      dimensions.set(size, i * 4);
+      origin.set(center, i * 4);
+    }
+    geometry.setAttribute('gfsWoodSize', new T.BufferAttribute(dimensions, 4));
+    geometry.setAttribute('gfsWoodCenter', new T.BufferAttribute(origin, 4));
+  });
 }
 // Before each draw: this geometry's box into the material's uniforms (materials are shared by posts, rails and boards).
 function boxHook(m) {
@@ -401,12 +607,17 @@ function finish(T, t, srgb, aniso) {
 /** {map, bumpMap, roughnessMap} for a family at a size, made once and kept. Relief is a height (bump) map: a normal
  * map striped the boards across the grain in the test renders, and a height map is half the work to make. */
 export function textureSet(T, kind, size) {
+  if (kind in WOOD && kind !== 'grain') size = Math.min(size, 1024);
   const st = store(T), key = kind + '@' + size;
   if (st.tex.has(key)) return st.tex.get(key);
   let W, H, f, level = 0.8;
-  if (kind === 'pt' || kind === 'cedar' || kind === 'grain') {
+  if (kind === 'grain') {
+    H = Math.min(size, 512); W = Math.max(32, H >> 2);
+    f = homewoodFields(W, H);
+    level = HOMEWOOD_MAP_LEVEL;
+  } else if (kind in WOOD) {
     H = size; W = Math.max(64, size >> 2);
-    f = woodFields(W, H, {species: kind, seed: kind === 'cedar' ? 23 : kind === 'grain' ? 31 : 7});
+    f = woodFields(W, H, {species: kind, seed: {pt: 7, cedar: 25, grain: 31, white: 19, sawn: 37}[kind]});
     level = 0.8;
   } else {
     const S = kind === 'lawn' ? size : Math.min(512, size >> 1);
@@ -427,10 +638,10 @@ function disposeSet(set) { for (const k of ['map', 'bumpMap']) set[k]?.dispose()
 // Physical settings per family. tile: [across ft, along ft, offset scale]; look: [variation, end grain, wear, rings/ft].
 const FAMILY = {
   wood: {rough: 1, metal: 0, env: 0.55, bump: 0.003, tile: [1, 4, 1], look: [1, 1, 1, 36], clearcoat: 0},
-  grain: {rough: 1, metal: 0, env: 0.8, bump: 0.0015, tile: [1, 4, 1], look: [0.25, 0, 0.4, 0], clearcoat: 0.35, ccRough: 0.35},
-  vinyl: {rough: 1, metal: 0, env: 0.75, bump: 0.0004, tile: [1.5, 1.5, 1], look: [0.05, 0, 0.35, 0], clearcoat: 0.4, ccRough: 0.28},
-  powder: {rough: 1, metal: 0.05, env: 0.9, bump: 0.0008, tile: [0.4, 0.4, 1], look: [0, 0, 0.25, 0], clearcoat: 0.3, ccRough: 0.4},
-  galv: {rough: 1, metal: 0.92, env: 1, bump: 0.0006, tile: [0.75, 0.75, 1], look: [0.15, 0, 0.2, 0], clearcoat: 0},
+  grain: {rough: 1, metal: 0, env: 0.7, bump: 0.001, tile: [0.75, 3, 1], look: [0.2, 0, 0.15, 0], clearcoat: 0.19, ccRough: 0.39},
+  vinyl: {rough: 1, metal: 0, env: 0.75, bump: 0.0003, tile: [1.5, 1.5, 1], look: [0, 0, 0.15, 0], clearcoat: 0.26, ccRough: 0.34},
+  powder: {rough: 0.98, metal: 0, env: 0.8, bump: 0.00035, tile: [0.4, 0.4, 1], look: [0, 0, 0.12, 0], clearcoat: 0.14, ccRough: 0.42},
+  galv: {rough: 0.98, metal: 0.9, env: 1, bump: 0.00045, tile: [0.5, 0.5, 1], look: [0.1, 0, 0.1, 0], clearcoat: 0},
   concrete: {rough: 1, metal: 0, env: 0.35, bump: 0.01, tile: [1, 1, 1], look: [0.2, 0, 0.3, 0], clearcoat: 0},
   soil: {rough: 1, metal: 0, env: 0.2, bump: 0.02, tile: [1.5, 1.5, 1], look: [0, 0, 0, 0], clearcoat: 0},
 };
@@ -439,26 +650,37 @@ const textureKind = (family, species) => family === 'wood' ? species : family;
  * A physically based material for a fence part. family: wood | grain | vinyl | powder | galv | concrete | soil.
  * opts.species (wood): pt | cedar. Materials are tracked so a Quality change can swap their texture size.
  */
-export function surfaceMaterial(T, family, hex, {species = 'pt', size} = {}) {
+export function surfaceMaterial(T, family, hex, {species = 'pt', size, weathered = false, vertexColors = false} = {}) {
   const F = FAMILY[family] || FAMILY.vinyl, st = store(T), tier = st.tier || tierSettings('balanced');
-  const kind = textureKind(family, species), set = textureSet(T, kind, size || tier.tex);
-  const col = new T.Color(hex);
+  const stock = family === 'wood' ? WOOD_FINISHES[species] : null;
+  const kind = textureKind(family, species), set = textureSet(T, kind, size || st.textureSize || tier.tex);
+  const col = new T.Color(family === 'vinyl' || family === 'grain' ? vinylColor(hex) : hex);
   // The texture stores colour at `level` in sRGB; three.js reads it in linear light (level ** 2.2), so the material
   // colour is lifted by exactly that and the saved colour stays the average (dividing by `level` left wood 24% dark).
   const lift = 1 / srgbToLinear(set.level);
   if (family === 'wood') { const t = SPECIES_TINT[species] || SPECIES_TINT.pt; col.r *= t[0] * lift; col.g *= t[1] * lift; col.b *= t[2] * lift; }
   else if (set.map && !set.absolute) col.multiplyScalar(lift);
-  const p = {color: col, map: set.map, bumpMap: set.bumpMap, bumpScale: F.bump, roughnessMap: set.roughnessMap,
-    roughness: family === 'vinyl' ? vinylRough(hex) : family === 'powder' ? 0.62 : family === 'galv' ? 0.62 : F.rough, metalness: F.metal, envMapIntensity: F.env};
+  const grain = family === 'grain' ? HOMEWOOD.get(hex) ?? {bump: F.bump, contrast: 0.65} : null;
+  const bumpScale = grain?.bump ?? F.bump;
+  const p = {color: col, map: set.map, bumpMap: set.bumpMap, bumpScale, roughnessMap: set.roughnessMap,
+    roughness: family === 'vinyl' ? vinylRough(hex) : F.rough, metalness: F.metal, envMapIntensity: F.env};
+  if (stock) {
+    p.bumpScale = stock.bump * (weathered ? 1.28 : 1);
+    p.roughness = weathered ? 1 : stock.rough;
+    p.vertexColors = vertexColors;
+  }
   if (F.clearcoat) { p.clearcoat = F.clearcoat; p.clearcoatRoughness = F.ccRough; }
   // Physical only where a clear coat is wanted (vinyl, powder coat): the standard material is lighter to draw.
-  const m = F.clearcoat ? new T.MeshPhysicalMaterial(p) : new T.MeshStandardMaterial(p);
+  const m = st.phoneLawn && family === 'wood'
+    ? new T.MeshLambertMaterial({color: col, map: set.map, vertexColors})
+    : F.clearcoat ? new T.MeshPhysicalMaterial(p) : new T.MeshStandardMaterial(p);
   const tint = species === 'cedar' ? [1.04, 0.97, 0.95] : family === 'wood' ? [1.02, 1.01, 0.97] : [1, 1, 1];
   m.userData.gfsSurface = VERSION; m.userData.gfsFamily = family; m.userData.gfsKind = kind;
-  m.userData.gfsU = {tile: {value: new T.Vector4(F.tile[0], F.tile[1], F.tile[2], 0)}, look: {value: new T.Vector4(...F.look)}, tint: {value: new T.Vector3(...tint)}, ext: {value: new T.Vector3(1, 1, 1)}, mid: {value: new T.Vector3()}};
+  m.userData.gfsU = {tile: {value: new T.Vector4(F.tile[0], F.tile[1], F.tile[2], grain?.contrast ?? 0)}, look: {value: new T.Vector4(...F.look)}, tint: {value: new T.Vector3(...tint)}, ext: {value: new T.Vector3(1, 1, 1)}, mid: {value: new T.Vector3()}};
+  if (stock) m.userData.gfsWood = {value: new T.Vector2(stock.rings, weathered ? 1 : 0)};
   m.onBeforeCompile = sh => patchShader(sh, m);
-  m.customProgramCacheKey = () => 'gfsSurface-' + VERSION;
-  m.onBeforeRender = boxHook(m);
+  m.customProgramCacheKey = () => 'gfsSurface-' + VERSION + (stock ? '-v3283wood' : grain ? '-homewood' : '');
+  if (!stock) m.onBeforeRender = boxHook(m);
   st.mats.add(m);
   const dispose = m.dispose.bind(m);
   m.dispose = () => { st.mats.delete(m); dispose(); };
@@ -470,20 +692,57 @@ function vinylRough(hex) { const r = hex >> 16 & 255, g = hex >> 8 & 255, b = he
 /** Replace the viewer's material library methods (wood, vinyl, vinylGrain, alu, galv) with these materials. */
 export function upgradeMatLib(MatLib, T, pal) {
   const p = MatLib.prototype; if (p._gfsV3191) return; p._gfsV3191 = true;
-  const fabric = p.fabric;
+  const fabric = p.fabric, lattice = p.latticeMat;
+  const surface = p.surface;
   const mk = (self, key, f) => self._mk('v3191' + key, f);
-  p.wood = function (hex) { const sp = speciesOf(hex, pal || globalThis._bpxPAL); return mk(this, 'w' + sp + hex, () => surfaceMaterial(T, 'wood', hex, {species: sp})); };
-  p.vinyl = function (hex) { return mk(this, 'v' + hex, () => surfaceMaterial(T, 'vinyl', hex)); };
-  p.vinylGrain = function (hex) { return mk(this, 'g' + hex, () => surfaceMaterial(T, 'grain', hex)); };
+  function wood(self, hex, spec, vertexColors) {
+    const {kind, hex: tone, weathered} = resolveWoodFinish(spec, hex, pal || globalThis._bpxPAL);
+    return mk(self, ['w', kind, tone, weathered, vertexColors].join(':'), () =>
+      surfaceMaterial(T, 'wood', tone, {species: kind, weathered, vertexColors}));
+  }
+  p.wood = function (hex, spec) { return wood(this, hex, spec, false); };
+  p.woodVaried = function (hex, spec) { return wood(this, hex, spec, true); };
+  p.prepareWoodMeshes = function (group) { prepareWoodMeshes(group, T); };
+  if (surface) p.surface = function (spec, hex) {
+    if (spec.wood && spec.mode !== 'chain' && spec.mode !== 'alu') return this.wood(hex, spec);
+    return surface.call(this, spec, hex);
+  };
+  p.vinyl = function (hex) {
+    // Older styles can specify a stock color without a grain flag, including Dark Gray.
+    return HOMEWOOD.has(hex) ? this.vinylGrain(hex) : mk(this, 'v' + hex, () => surfaceMaterial(T, 'vinyl', hex));
+  };
+  p.vinylGrain = function (hex, spec) {
+    // A named Homewood style can mix in stock smooth trim. A generic woodgrain style uses its chosen base tint.
+    if (spec && RAFAB_VINYL_COLORS.has(hex) && !HOMEWOOD.has(hex)
+      && [spec.cPanel, spec.cPost, spec.cRail].some(color => HOMEWOOD.has(color))) return this.vinyl(hex);
+    return mk(this, 'g' + hex, () => surfaceMaterial(T, 'grain', hex));
+  };
   p.alu = function (hex) { return mk(this, 'a' + hex, () => surfaceMaterial(T, 'powder', hex)); };
   p.galv = function (hex) { return mk(this, 'z' + hex, () => surfaceMaterial(T, 'galv', hex)); };
+  p.chainCoat = function (hex) {
+    return mk(this, 'chainCoat' + hex, () => {
+      const m = new T.MeshStandardMaterial({color: hex, roughness: 0.56, metalness: 0, envMapIntensity: 0.55});
+      m.userData.gfsFamily = 'chainCoat';
+      m.userData.gfsSurface = VERSION;
+      return m;
+    });
+  };
+  if (lattice) p.latticeMat = function (hex) {
+    const m = lattice.call(this, vinylColor(hex));
+    m.roughness = 0.4;
+    m.metalness = 0;
+    m.userData.gfsSurface = VERSION;
+    return m;
+  };
   if (fabric) p.fabric = function (hex) {
     const m = fabric.call(this, hex);
     if (!m.userData.gfsFabric) {
       m.userData.gfsFabric = 1;
+      m.userData.gfsSurface = VERSION;
       const coated = hex < 6316128;
       // Vinyl-coated (black, green) wire is a rough plastic; galvanised wire is metal.
-      m.roughness = coated ? 0.6 : 0.42; m.metalness = coated ? 0 : 0.85; m.envMapIntensity = coated ? 0.5 : 1;
+      m.userData.gfsFamily = coated ? 'coatedFabric' : 'galvFabric';
+      m.roughness = coated ? 0.58 : 0.44; m.metalness = coated ? 0 : 0.9; m.envMapIntensity = coated ? 0.55 : 1;
       if (m.alphaMap) m.alphaMap.anisotropy = store(T).aniso;
       m.needsUpdate = true;
     }
@@ -494,6 +753,7 @@ export function upgradeMatLib(MatLib, T, pal) {
 /** Swap every tracked material to the textures of another size (Quality change); drop the old textures. */
 export function setTextureSize(T, size) {
   const st = store(T), used = new Set();
+  st.textureSize = size;
   for (const m of st.mats) {
     const kind = m.userData.gfsKind, set = textureSet(T, kind, size); used.add(set);
     if (m.map !== set.map || m.bumpMap !== set.bumpMap) { m.map = set.map; m.bumpMap = set.bumpMap; m.roughnessMap = set.roughnessMap; m.needsUpdate = true; }
@@ -511,9 +771,9 @@ export function stats(T) { const st = store(T); return {textures: st.tex.size, m
 /** Physically based maps on an existing material (site kit concrete and soil): keeps its colour. */
 export function dressMaterial(T, m, family) {
   if (!m || m.userData.gfsSurface) return m;
-  const F = FAMILY[family], st = store(T), set = textureSet(T, family, (st.tier || tierSettings('balanced')).tex);
-  m.map = set.map; m.bumpMap = set.bumpMap; m.bumpScale = F.bump; m.roughnessMap = set.roughnessMap; m.roughness = 1;
-  m.envMapIntensity = F.env;
+  const F = FAMILY[family], st = store(T), set = textureSet(T, family, st.textureSize || (st.tier || tierSettings('balanced')).tex);
+  m.map = set.map; m.bumpMap = set.bumpMap; m.bumpScale = F.bump; m.roughnessMap = set.roughnessMap; m.roughness = F.rough;
+  m.envMapIntensity = F.env; m.metalness = F.metal;
   if (set.map) m.color.multiplyScalar(1 / srgbToLinear(set.level));
   m.userData.gfsSurface = VERSION; m.userData.gfsFamily = family; m.userData.gfsKind = family;
   m.userData.gfsU = {tile: {value: new T.Vector4(F.tile[0], F.tile[1], F.tile[2], 0)}, look: {value: new T.Vector4(...F.look)}, tint: {value: new T.Vector3(1, 1, 1)}, ext: {value: new T.Vector3(1, 1, 1)}, mid: {value: new T.Vector3()}};
@@ -530,6 +790,14 @@ const GROUND_HEAD = `varying vec3 gfsW;
 `;
 const GROUND_VERT = `
 gfsW = (modelMatrix * vec4(transformed, 1.0)).xyz;
+`;
+const LAWN_VERT = `
+#ifdef USE_BUMPMAP
+  vBumpMapUv = gfsW.xz / 3.0;
+#endif
+#ifdef USE_ROUGHNESSMAP
+  vRoughnessMapUv = gfsW.xz / 3.0;
+#endif
 `;
 const GROUND_FRAG_HEAD = `varying vec3 gfsW;
 uniform vec3 gfsHorizon;
@@ -556,6 +824,15 @@ if (gfsLawn > 0.5) {
   diffuseColor.rgb = turf * 1.0;
 }
 `;
+// A single muted turf sample on the phone’s level showroom lawn.
+const GROUND_MAP_PHONE = `
+if (gfsLawn > 0.5) {
+  vec2 w = gfsW.xz;
+  vec3 turf = texture2D(gfsLawnMap, w / 4.0).rgb;
+  float turfVariation = gfsN(w * 0.13);
+  diffuseColor.rgb = mix(turf, vec3(0.17, 0.24, 0.105), 0.14) * mix(0.91, 1.07, turfVariation);
+}
+`;
 const GROUND_FOG = `
 {
   float gd = length(gfsW.xz - cameraPosition.xz);
@@ -568,14 +845,23 @@ const GROUND_FOG = `
  * Called by the viewer once its scene, ground and sky exist. Takes the fog away, dresses the ground, adds contact
  * shadows and applies the quality tier. Returns a small API (also window.__gfsReal191).
  */
-export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, win = globalThis}) {
+export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, win = globalThis, phone = false, sample = false}) {
   const st = store(T);
-  let api_fit = null, lastGroundGeo = ground && ground.geometry;
+  let lastGroundGeo = ground && ground.geometry;
   const caps = renderer.capabilities, maxAniso = caps.getMaxAnisotropy ? caps.getMaxAnisotropy() : 8;
+  const phoneLawn = phone && sample;
+  st.phoneLawn = phoneLawn;
+  const sun = PR?.sunLight;
+  const useSunShadows = Boolean(phoneLawn && sun?.castShadow && cam);
+  const phoneSky = 0xc5dce9;
+  // Limit fill work in the tall full-screen phone view and retain detail in the smaller editing canvas.
+  const phonePixels = (width, height) => Math.min(win.devicePixelRatio || 1, Math.sqrt(220000 / Math.max(1, width * height)));
   const detected = () => { try { return win.GFSPhotoreal ? win.GFSPhotoreal.tier() : 'balanced'; } catch (_) { return 'balanced'; } };
   let quality = 'auto';
+  let contact = null, contactWanted = true, contactTex = null, postTex = null;
   const apply = tierName => {
-    const t = tierSettings(tierName, {dpr: win.devicePixelRatio || 1, maxTexture: caps.maxTextureSize, maxAniso});
+    const dpr = phone ? phonePixels(win.innerWidth, win.innerHeight) : win.devicePixelRatio || 1;
+    const t = tierSettings(phone ? 'phone' : tierName, {dpr, maxTexture: caps.maxTextureSize, maxAniso});
     const prevTex = st.tier && st.tier.tex;
     st.tier = t; setAnisotropy(T, t.aniso);
     if (prevTex && prevTex !== t.tex) setTextureSize(T, t.tex);
@@ -600,32 +886,36 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
   renderer.toneMapping = T.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1;
 
+  if (phone) apply('phone');
+  if (phoneLawn) scene.background = new T.Color(phoneSky);
+
   // ---- ground ----------------------------------------------------------------------------------------------------
   const horizon = new T.Color(0.7, 0.76, 0.82);
   const fade = new T.Vector4(900, 3800, 0, 0);
-  const lawnU = {value: 0}, lawnMap = {value: null};
+  const lawnMap = {value: null};
   const dressGround = (m, lawn) => {
     if (!m || m.userData.gfsGround === VERSION) return m;
     m.userData.gfsGround = VERSION; m.userData.gfsLawn = 1;   // the older lawn code leaves a dressed ground alone
     m.onBeforeCompile = sh => {
       sh.uniforms.gfsHorizon = {value: horizon}; sh.uniforms.gfsFade = {value: fade};
       sh.uniforms.gfsLawn = {value: lawn ? 1 : 0}; sh.uniforms.gfsLawnMap = lawnMap;
-      sh.vertexShader = GROUND_HEAD + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>' + GROUND_VERT);
-      sh.fragmentShader = GROUND_FRAG_HEAD + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>' + GROUND_MAP)
+      const worldUV = GROUND_VERT + (lawn ? LAWN_VERT : '');
+      sh.vertexShader = GROUND_HEAD + sh.vertexShader.replace('#include <worldpos_vertex>', '#include <worldpos_vertex>' + worldUV);
+      const turf = phoneLawn ? GROUND_MAP_PHONE : GROUND_MAP;
+      sh.fragmentShader = GROUND_FRAG_HEAD + sh.fragmentShader.replace('#include <map_fragment>', '#include <map_fragment>' + turf)
         .replace('#include <dithering_fragment>', GROUND_FOG + '#include <dithering_fragment>');
     };
-    m.customProgramCacheKey = () => 'gfsGround-' + VERSION + (lawn ? 'L' : 'F');
+    m.customProgramCacheKey = () => 'gfsGround-' + VERSION + (lawn ? 'L' : 'F') + (phoneLawn ? '-phone' : '');
     m.needsUpdate = true; return m;
   };
   const lawnSet = textureSet(T, 'lawn', (st.tier || tierSettings(detected())).lawn);
   lawnMap.value = lawnSet.map;
   if (ground && ground.material) {
+    // The sample's contact shadows provide its grounding cues. A single turf pass needs no extra lighting pass.
+    if (phoneLawn) ground.material = new T.MeshBasicMaterial({ color: 0xffffff });
     const g = ground.material;
-    g.map = null; g.color = new T.Color(1, 1, 1); g.bumpMap = lawnSet.bumpMap; g.bumpScale = 0.02; g.roughnessMap = lawnSet.roughnessMap; g.roughness = 1; g.envMapIntensity = 0.3;
+    g.map = null; g.color = new T.Color(1, 1, 1); g.bumpMap = phoneLawn ? null : lawnSet.bumpMap; g.bumpScale = 0.02; g.roughnessMap = phoneLawn ? null : lawnSet.roughnessMap; g.roughness = 1; g.envMapIntensity = 0.3;
     dressGround(g, true);
-    // Relief and roughness are read through the ground's own UVs; keep their scale near the turf tile (3 ft).
-    const fitRepeat = () => { try { const p = ground.geometry.parameters, w = (p && p.width) || 1700; for (const t of [lawnSet.bumpMap, lawnSet.roughnessMap]) t.repeat.set(w / 3, w / 3); } catch (_) { } };
-    fitRepeat(); api_fit = fitRepeat;
   }
   // ---- showroom: a soft backdrop that the floor blends into at the horizon --------------------------------------
   let backdropTex = null, floorMat = null;
@@ -652,12 +942,16 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
   function backdrop(on, hex = 0xf2f1ec) {
     showroom = !!on; scene.fog = null;
     // The backdrop is drawn as it is (not tone mapped), so the floor blends to the very same screen colour.
-    if (on) horizon.setRGB((hex >> 16 & 255) / 255, (hex >> 8 & 255) / 255, (hex & 255) / 255); else syncHorizon();
+    if (!on && phoneLawn) scene.background = new T.Color(phoneSky);
+    if (on || phoneLawn) {
+      const tone = on ? hex : phoneSky;
+      horizon.setRGB((tone >> 16 & 255) / 255, (tone >> 8 & 255) / 255, (tone & 255) / 255);
+    } else syncHorizon();
     fitFade();
   }
   function syncHorizon() {
     try {
-      if (showroom) return;
+      if (showroom || phoneLawn) return;
       const s = PR && PR._skyUni ? PR._skyUni.uSun.value : {x: 0.3, y: 0.6, z: 0.4};
       const d = cam ? cam.getWorldDirection(new T.Vector3()) : {x: 1, z: 0}, l = Math.hypot(d.x, d.z) || 1;
       const c = horizonColor(s, {x: d.x / l, z: d.z / l}), ex = (PR && PR._skyUni && PR._skyUni.uExposure) ? PR._skyUni.uExposure.value : 1;
@@ -665,6 +959,7 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
     } catch (_) { }
   }
   // Where the blend starts and ends: well past the fence and the yard, before the ground's edge.
+  if (phoneLawn) horizon.setRGB(197 / 255, 220 / 255, 233 / 255);
   let fenceSpan = 40;
   function fitFade() {
     const half = ground && ground.geometry && ground.geometry.parameters ? ground.geometry.parameters.width / 2 : 1700;
@@ -673,7 +968,42 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
   }
 
   // ---- contact shadow under each run -------------------------------------------------------------------------
-  let contact = null, contactWanted = true, contactTex = null;
+  function clearContact() {
+    if (!contact) return;
+    contact.traverse(o => { o.geometry?.dispose(); o.material?.dispose(); });
+    scene.remove(contact);
+    contact = null;
+  }
+  function postShadows(fence, gy) {
+    if (!postTex) {
+      const canvas = doc().createElement('canvas'); canvas.width = canvas.height = 32;
+      const paint = canvas.getContext('2d'), falloff = paint.createRadialGradient(16, 16, 0, 16, 16, 16);
+      falloff.addColorStop(0, 'rgba(0,0,0,.55)');
+      falloff.addColorStop(.38, 'rgba(0,0,0,.26)');
+      falloff.addColorStop(1, 'rgba(0,0,0,0)');
+      paint.fillStyle = falloff; paint.fillRect(0, 0, 32, 32);
+      postTex = new T.CanvasTexture(canvas);
+    }
+    fence.updateWorldMatrix(true, true);
+    const inverse = fence.matrixWorld.clone().invert(), instance = new T.Matrix4(), point = new T.Vector3(), spots = [];
+    fence.traverse(mesh => {
+      const parts = mesh.userData?.parts;
+      if (!mesh.isMesh || !parts) return;
+      const local = new T.Matrix4().multiplyMatrices(inverse, mesh.matrixWorld);
+      for (let i = 0; i < parts.length; i++) {
+        if (!/^(post|gatepost|linepost|termpost)$/.test(parts[i]?.kind)) continue;
+        if (mesh.isInstancedMesh) mesh.getMatrixAt(i, instance); else instance.identity();
+        point.setFromMatrixPosition(instance).applyMatrix4(local);
+        spots.push([point.x, point.z]);
+      }
+    });
+    const geometry = new T.PlaneGeometry(1.25, 1.25).rotateX(-Math.PI / 2);
+    const material = new T.MeshBasicMaterial({map: postTex, transparent: true, depthWrite: false, opacity: .52});
+    const shadows = new T.InstancedMesh(geometry, material, spots.length);
+    for (const [i, [x, z]] of spots.entries()) shadows.setMatrixAt(i, instance.makeTranslation(x, gy(x, z) + .012, z));
+    shadows.renderOrder = 2;
+    return shadows;
+  }
   function contactTexture() {
     if (contactTex) return contactTex;
     // Dark along the fence line, fading out to both sides and at both ends of each straight piece.
@@ -691,7 +1021,7 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
       // The viewer's first build runs before it publishes window.__f3d: try again shortly.
       if (!win.__f3d) { if (contactTries++ < 40 && win.setTimeout) win.setTimeout(buildContact, 100); return; }
       const f3d = win.__f3d, runs = win.__f3dRuns ? win.__f3dRuns() : [];
-      if (contact) { contact.traverse(o => { o.geometry?.dispose(); }); scene.remove(contact); contact = null; }
+      clearContact();
       if (!f3d || !runs.length) return;
       const mat = new T.MeshBasicMaterial({map: contactTexture(), transparent: true, depthWrite: false, opacity: 0.45, color: 0xffffff, vertexColors: true, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, toneMapped: false});
       contact = new T.Group(); contact.name = 'gfsContactShadow'; contact.userData.noShadow = 1; contact.matrixAutoUpdate = false;
@@ -706,7 +1036,7 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
           const a = r.pts[k], b = r.pts[k + 1], dx = b.x - a.x, dz = b.z - a.z, L = Math.hypot(dx, dz); if (L < 0.2) continue;
           const nx = -dz / L * wdt, nz = dx / L * wdt, ex = dx / L * 0.4, ez = dz / L * 0.4, base = pos.length / 3;
           const ax = a.x - ex, az = a.z - ez, bx = b.x + ex, bz = b.z + ez;
-          for (const [x, z, v, u] of [[ax + nx, az + nz, 0, 0], [ax - nx, az - nz, 1, 0], [bx + nx, bz + nz, 0, 1], [bx - nx, bz - nz, 1, 1]]) { pos.push(x, gy(x, z) + 0.04, z); uv.push(u, v); col.push(0, 0, 0, shade); minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
+          for (const [x, z, v, u] of [[ax + nx, az + nz, 0, 0], [ax - nx, az - nz, 1, 0], [bx + nx, bz + nz, 0, 1], [bx - nx, bz - nz, 1, 1]]) { pos.push(x, gy(x, z) + (phoneLawn ? .01 : .04), z); uv.push(u, v); col.push(0, 0, 0, shade); minX = Math.min(minX, x); maxX = Math.max(maxX, x); minZ = Math.min(minZ, z); maxZ = Math.max(maxZ, z); }
           idx.push(base, base + 2, base + 1, base + 1, base + 2, base + 3);
         }
       }
@@ -717,6 +1047,7 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
       // Moves and turns with the fence (the viewer's move tool and rotate slider act on the fence group).
       mesh.onBeforeRender = () => { const fg = f3d.fenceGroup; if (fg) { fg.updateWorldMatrix(true, false); contact.matrix.copy(fg.matrixWorld); contact.matrixWorld.copy(fg.matrixWorld); mesh.matrixWorld.copy(fg.matrixWorld); } };
       contact.visible = contactWanted && (!st.tier || st.tier.contact);
+      if (phoneLawn) contact.add(postShadows(f3d.fenceGroup, gy));
       scene.add(contact);
       fitSun();
     } catch (e) { win.console && win.console.warn('[gfs] contact shadow', e); }
@@ -739,18 +1070,37 @@ export function installRealScene({THREE: T, renderer, scene, ground, PR, cam, wi
   win.addEventListener && win.addEventListener('gfs:fence-rebuilt', onRebuilt);
   // Keep the horizon colour and the fade in step with the camera and the sun (cheap: a few multiplies a frame).
   const prevBefore = scene.onBeforeRender;
-  scene.onBeforeRender = function (...a) { if (scene.fog) scene.fog = null; syncHorizon(); if (api_fit && ground && ground.geometry !== lastGroundGeo) { lastGroundGeo = ground.geometry; api_fit(); fitFade(); } return prevBefore && prevBefore.apply(this, a); };
+  scene.onBeforeRender = function (...a) {
+    if (scene.fog) scene.fog = null;
+    syncHorizon();
+    if (ground && ground.geometry !== lastGroundGeo) { lastGroundGeo = ground.geometry; fitFade(); }
+    if (useSunShadows) {
+      // The phone preview already draws contact shadows along the fence and at each post.
+      // Use the full sun pass for close inspection, with a small gap between the zoom thresholds.
+      const close = cam.position.distanceTo(sun.target.position) < (sun.castShadow ? 27 : 25);
+      if (close !== sun.castShadow) {
+        sun.castShadow = close;
+        if (close) renderer.shadowMap.needsUpdate = true;
+      }
+    }
+    return prevBefore && prevBefore.apply(this, a);
+  };
   if (PR) { const prevSun = PR.onSun; PR.onSun = (...a) => { if (prevSun) prevSun(...a); if (st.tier) fitSun(); }; }
   const api = {
     version: VERSION,
     setQuality(mode) { quality = mode || 'auto'; return apply(tierForQuality(quality, detected())); },
     tier: () => st.tier && st.tier.name,
+    fitPhonePixels(width, height) {
+      if (!phone) return;
+      const ratio = Math.min(TIERS.phone.px, phonePixels(width, height));
+      if (Math.abs(renderer.getPixelRatio() - ratio) > .01) renderer.setPixelRatio(ratio);
+    },
     backdrop, studioBackground, studioFloor,
     contactShadows(on) { contactWanted = !!on; if (contact) contact.visible = contactWanted && (!st.tier || st.tier.contact); },
     rebuildContact: buildContact, fitSun,
     stats: () => ({...stats(T), fog: !!scene.fog, fade: [fade.x, fade.y], contact: !!(contact && contact.visible)}),
     dressMaterial: (m, family) => dressMaterial(T, m, family),
-    dispose() { win.removeEventListener && win.removeEventListener('gfs:fence-rebuilt', onRebuilt); if (contact) { contact.traverse(o => { o.geometry?.dispose(); o.material?.dispose(); }); scene.remove(contact); } contactTex?.dispose(); backdropTex?.dispose(); floorMat?.dispose(); },
+    dispose() { win.removeEventListener && win.removeEventListener('gfs:fence-rebuilt', onRebuilt); clearContact(); contactTex?.dispose(); postTex?.dispose(); backdropTex?.dispose(); floorMat?.dispose(); },
   };
   apply(tierForQuality(quality, detected()));
   if (win.__f3dRuns) buildContact();

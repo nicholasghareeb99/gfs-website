@@ -2,13 +2,28 @@
 (function (root) {
   'use strict';
   const object = value => value && typeof value === 'object' && !Array.isArray(value);
-  const keys = new Set(('altBoardIn aluTop arch archIn bayMaxMult boardIn boardTIn cAccent cPanel cPost cap capTIn capTrimIn capTrimTIn capTrimFaces capTrimVersion capWIn cedar clBotIn clBraceBands clFrameFinish clGateIn clLineIn clMeshFt clMeshIn clRailIn clTensionBands clTermIn dogAng dogEar dogIn editH finial gArch gBrace gDrop gFrameIn gFrameGapIn gFrameTIn gGapIn gHingeRight gHinges gLatch gMesh gPostIn gRiseIn gStileIn gStyle gSwing gapIn h horiz kickIn latIn meshCol midrailHeightFt mode pkBotIn pkHIn pkIn pkOverPost pkPuppy pkThrough pkZIn postHIn picketRailShape postHeightMode postClearanceIn postTopReference cadFamily postIn puppyIn woodSupport noDig pipeLengthFt embedmentIn flatTopRail railFlat railHIn railKind railLenFt railTIn railWIn railZIn rails railsAuto railsN rings scalIn secFt spear stagger tip gStileAboveIn topRailHIn topRailTIn topProjectionIn topPicketArchIn topPicketStepped topBandIn topGapIn topPicketIn topPicketTIn topper wire wireGa wireRollIn wood woodgrain').split(' '));
+  const keys = new Set(('altBoardIn aluTop arch archIn bayMaxMult boardIn boardTIn cAccent cPanel cPost cap capTIn capTrimIn capTrimTIn capTrimFaces capTrimVersion capWIn cedar clBotIn clBraceBands clFrameFinish clGateIn clLineIn clMeshFt clMeshIn clRailIn clTensionBands clTermIn dogAng dogEar dogIn editH finial gArch gBrace gDrop gFrameIn gFrameGapIn gFrameTIn gGapIn gHingeRight gHinges gLatch gMesh gPostIn gRiseIn gStileIn gStyle gSwing gapIn h horiz kickIn latIn meshCol midrailHeightFt mode pkBotIn pkHIn pkIn pkOverPost pkPuppy pkThrough pkZIn postHIn picketRailShape postHeightMode postClearanceIn postTopReference cadFamily postIn puppyIn woodSupport noDig pipeLengthFt embedmentIn flatTopRail railFlat railHIn railKind railLenFt railTIn railWIn railZIn rails railsAuto railsN rings scalIn secFt spear stagger tip gStileAboveIn topRailHIn topRailTIn topProjectionIn topPicketArchIn topPicketStepped topBandIn topGapIn topPicketIn topPicketTIn topper wire wireGa wireRollIn wood woodgrain pkProduct pkName pkStockIn pkWood srRail srRailEnd srLapIn srPost srEndPost srPostTop srBuryIn srWood srMesh srMeshIn srWireSide srStapleIn srTension srGate').split(' '));
+  // V3-222 Values with a checked range or list (inches unless named). A value that fails is dropped, as an unknown key is.
+  const oneOf = list => v => list.includes(v), between = (lo, hi) => v => typeof v === 'number' && v >= lo && v <= hi;
+  const label = v => typeof v === 'string' && v.length <= 48 && !/[<>\u0000-\u001f\u007f]/.test(v);
+  const checks = {
+    boardIn: between(0.5, 24), boardTIn: between(0.25, 4), tip: oneOf(['', 'flat', 'dog', 'point', 'gothic']),
+    pkProduct: v => typeof v === 'string' && /^[a-z][a-z0-9-]{0,39}$/.test(v), pkName: label, pkStockIn: between(24, 192), pkWood: oneOf(['pt', 'cedar', 'cedartone', 'fir']),
+    srRail: oneOf(['halflog', 'round', 'wedge', 'square', 'diamond']), srRailEnd: oneOf(['tenon', 'lap', 'paddle']), srLapIn: between(0, 12),
+    srPost: oneOf(['round', 'halfround', 'square', 'rect']), srEndPost: oneOf(['same', 'round', 'square']), srPostTop: oneOf(['flat', 'bevel', 'dome', 'point']),
+    srBuryIn: between(12, 72), srWood: oneOf(['cedar', 'pt', 'locust', 'grey']), srMesh: oneOf(['none', 'welded', 'black', 'horse']), srMeshIn: oneOf(['2x4', '2x2', '1x2']),
+    srWireSide: oneOf(['in', 'out']), srStapleIn: between(2, 24), srTension: v => typeof v === 'boolean', srGate: oneOf(['rail', 'tube']), railLenFt: between(4, 16),
+  };
+  // V3-225 The split rail tube farm gate's finish and bar count (checked; a value that fails is dropped, as an unknown key is).
+  for (const key of ['srGateFin', 'srGateBars']) keys.add(key);
+  if (typeof checks === 'object' && typeof oneOf === 'function') Object.assign(checks, { srGateFin: oneOf(['galv', 'black']), srGateBars: oneOf([4, 5, 6]) });   // (V3-222's checks)
   function modelPatch(value) {
     const result = {};
     if (!object(value)) return result;
     for (const key of Object.keys(value)) {
       if (!keys.has(key)) continue;
       const item = value[key];
+      if (item !== null && checks[key] && !checks[key](item)) continue;
       if (item === null || typeof item === 'boolean' || typeof item === 'string' && item.length <= 160 || typeof item === 'number' && Number.isFinite(item)) result[key] = item;
       else if (key === 'rails' && Array.isArray(item) && item.every(n => typeof n === 'number' && Number.isFinite(n))) result[key] = item.slice();
     }
@@ -151,5 +166,13 @@
     if (keepHeights && (styles.size > 1 || heights.size > 1)) return 'Saved layout uses multiple styles/heights';
     return (styles.size > 1 ? 'Multiple fence styles' : selectedStyle || '') + ' · ' + selectedHeight + ' ft';
   }
-  root.GFSModelContract = Object.freeze({ modelPatch, modelMap, attachScope, runPatch, studioPatch, runKey, scopeForOption, heightOf, sketchRunIds, styleForKind, viewerRuns, layoutLabel });
+    // V3-221 A job's own custom pieces and part edits (jobs/<id>.fence3dCustom): only the record's shape is checked here, and it is
+  // copied as plain data; studio/custom-parts.mjs (in the viewer) validates every entry and draws only what passes.
+  function customRecord(value) {
+    if (!object(value) || value.v !== 1 || Object.keys(value).some(k => !['v', 'edits', 'pieces', 'terrain', 'meshes'].includes(k))) return undefined;
+    for (const k of ['edits', 'pieces', 'terrain', 'meshes']) if (value[k] !== undefined && !Array.isArray(value[k])) return undefined;
+    let text = ''; try { text = JSON.stringify(value) } catch (_) { return undefined }
+    return text.length <= 320000 ? JSON.parse(text) : undefined;
+  }
+  root.GFSModelContract = Object.freeze({ modelPatch, modelMap, attachScope, runPatch, studioPatch, runKey, scopeForOption, heightOf, sketchRunIds, styleForKind, viewerRuns, layoutLabel, customRecord });
 })(typeof window !== 'undefined' ? window : globalThis);

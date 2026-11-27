@@ -46,8 +46,10 @@ export async function boot(w) {
   // hardware until this has been looked over there; host pages (the Model Studio) switch it themselves.
   const hardware = createHardwareKit(viewer, {}); w.__gfsHardwareKit = hardware;
   studioHandles(w, viewer, hosted && q.get('portal') !== '1' && q.get('website') !== '1');   // push / pull modes: only when the Studio page answers (block at the end of this file)
+  // V3-221 the job's own custom pieces and part edits (spec.custom), everywhere the viewer runs; a site without the file draws none
+  import('./custom-parts.mjs').then(m => m.attachCustom(w, viewer)).catch(() => { });
   if (hosted || q.get('portal') === '1') return kit;                       // host pages bring their own buttons
-  if (store.get('viewerHardware', true)) { try { await hardware.enable() } catch (e) { console.warn('[gfs] hardware', e) } }
+  if (store.get('viewerHardware', true)) { try { await hardware.enable() } catch (e) { console.warn('[gfs] hardware', e) } } else hardware.clear();
   const rail = w.document.getElementById('rail'); if (!rail) return kit;
   const mk = (label, title, fn) => { const b = w.document.createElement('button'); b.className = 'rbtn'; b.type = 'button'; b.title = title; b.setAttribute('aria-label', title); b.setAttribute('aria-pressed', 'false'); b.textContent = label; b.addEventListener('click', () => fn(b)); rail.insertBefore(b, rail.firstChild); return b };   // at the top: the rail runs off short screens
   const posts = mk('⏚', 'Below grade: see the posts in the ground and the concrete', b => { const on = !kit.state().config.xray; kit.set({ xray: on, footings: on }); b.setAttribute('aria-pressed', String(on)); b.classList.toggle('on', on) });

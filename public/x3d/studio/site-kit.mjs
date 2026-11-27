@@ -25,6 +25,12 @@ const IN = 1 / 12;
 const POST_KINDS = new Set(['post', 'gatepost']);
 const FRAME_KINDS = new Set(['gframe', 'grail', 'gstile', 'gbrace']);
 
+/*gfsV3273DugFooting*/function gfsV3273DugPrivacy(spec) {
+  return spec.wood && !spec.noDig && spec.woodSupport !== 'driven-box' && !spec.horiz &&
+    (spec.mode === 'bob' || (spec.mode === 'shadowbox' && spec.topper === 'lattice') ||
+      (spec.mode === 'solid' && !(Number(spec.gapIn) < -0.02)));
+}
+
 /** How a post goes in the ground, from the resolved style spec. Pure. */
 export function foundationFor(spec) {
   const s = spec || {};
@@ -130,13 +136,18 @@ export function createSiteKit(viewer, opts = {}) {
     if (mats && mats.T === T) return mats;
     mats = {
       T,
-      concrete: new T.MeshStandardMaterial({ color: 0x9f9c94, roughness: 1, metalness: 0, envMapIntensity: 0.15, transparent: true, opacity: 0.9 }),
+      concrete: new T.MeshStandardMaterial({ color: 0xaaa59b, roughness: 1, metalness: 0, envMapIntensity: 0.15, transparent: true, opacity: 0.72, depthWrite: false }),
       steel: new T.MeshStandardMaterial({ color: 0xb8c5ce, roughness: 0.42, metalness: 0.85 }),
       tube: new T.MeshStandardMaterial({ color: 0x23262a, roughness: 0.5, metalness: 0.6 }),
       soil: new T.MeshStandardMaterial({ color: 0x6f5438, roughness: 1, metalness: 0, fog: false }),
     };
-    // V3-191: gritty concrete and crumbly soil from the viewer's own generated textures (colours unchanged).
-    try { const R = (W() || {}).__gfsReal191; if (R) { R.dressMaterial(mats.concrete, 'concrete'); R.dressMaterial(mats.soil, 'soil'); } } catch (_) { }
+    // Use the viewer's texture cache for the cutaway surfaces.
+    try {
+      const real = W()?.__gfsReal191;
+      real?.dressMaterial(mats.concrete, 'concrete');
+      real?.dressMaterial(mats.soil, 'soil');
+      real?.dressMaterial(mats.steel, 'galv');
+    } catch (_) { }
     return mats;
   }
 
@@ -164,10 +175,22 @@ export function createSiteKit(viewer, opts = {}) {
   function applyXray(w) {
     const g = w.__f3d.ground; if (!g) return;
     const seen = new Set();
-    g.traverse(o => { const m = o.material; if (m && !seen.has(m)) { seen.add(m); const k = { transparent: m.transparent, opacity: m.opacity, depthWrite: m.depthWrite }; undo.push(() => { Object.assign(m, k); m.needsUpdate = true }); m.transparent = true; m.opacity = cfg.groundOpacity; m.depthWrite = false; m.needsUpdate = true } });
+    g.traverse(o => {
+      const m = o.material; if (!m) return;
+      // Blend the grade over translucent concrete (order 2), even when the terrain is split into patches.
+      const order = o.renderOrder;
+      o.renderOrder = Math.max(order, 3);
+      undo.push(() => { o.renderOrder = order });
+      if (seen.has(m)) return;
+      seen.add(m);
+      const saved = { transparent: m.transparent, opacity: m.opacity, depthWrite: m.depthWrite };
+      undo.push(() => { Object.assign(m, saved); m.needsUpdate = true });
+      m.transparent = true; m.opacity = cfg.groundOpacity; m.depthWrite = false; m.needsUpdate = true;
+    });
     w.__f3d.scene.children.forEach(o => { if (o.userData && o.userData.ctx === 'grass' && o.visible) { o.visible = false; undo.push(() => { o.visible = true }) } });
     // Soil under the lawn, so the buried parts read against dirt and not against the sky colour.
     soil = new T.Mesh(new T.PlaneGeometry(600, 600), materials().soil);
+    soil.name = 'gfsSiteKitSoilBackdrop';
     soil.rotation.x = -Math.PI / 2; soil.position.y = -Math.max(cfg.holeDepthIn, cfg.drivenDepthIn) * IN - 0.6; soil.userData.noShadow = 1;
     group.add(soil);
   }
@@ -201,10 +224,18 @@ export function createSiteKit(viewer, opts = {}) {
     const runs = (() => { try { return w.__f3dRuns() || [] } catch (_) { return [] } })();
     const curName = (() => { const sel = w.document.querySelector('#styleRow select'); return sel ? sel.value : (w.__f3d.spec || {}).style })();
     const curSpec = specOf(curName);
-    // Driven-box wood fences: the viewer draws the buried pipe itself. Count them, add nothing.
-    const buriedPipes = (() => { let n = 0; fg.traverse(o => { if (o.isMesh && o.userData && Array.isArray(o.userData.parts)) n += o.userData.parts.filter(x => x && x.kind === 'foundation').length }); return n })();
-    const hasBuriedPipe = buriedPipes > 0;
-    stat.posts += buriedPipes; stat.driven += buriedPipes;
+    /* V3-274 embedded posts */
+    // King Plus and driven-box posts already include their buried steel.
+    const buriedPosts = new Set();
+    const postKey = part => part && `${part.run}:${part.index}`;
+    fg.traverse(mesh => {
+      if (!mesh.isMesh) return;
+      for (const part of mesh.userData.parts || []) {
+        if (part?.role === 'king-plus-pipe' || part?.kind === 'foundation') buriedPosts.add(postKey(part));
+      }
+    });
+    stat.posts += buriedPosts.size;
+    stat.driven += buriedPosts.size;
 
     if (cfg.footings) {
       const m4 = new T.Matrix4(), p = new T.Vector3(), q = new T.Quaternion(), s = new T.Vector3(), box = new T.Box3(), size = new T.Vector3();
@@ -220,7 +251,8 @@ export function createSiteKit(viewer, opts = {}) {
         const round = splitPost ? splitPost.outline.length > 4 : /Cylinder/.test(o.geometry.type);
         const n = o.isInstancedMesh ? o.count : 1;
         for (let i = 0; i < n; i++) {
-          const part = parts && parts[i]; if (parts && part && !POST_KINDS.has(part.kind)) continue;
+          const part = parts && parts[i];
+          if (part && (!POST_KINDS.has(part.kind) || buriedPosts.has(postKey(part)))) continue;
           if (o.isInstancedMesh) { o.getMatrixAt(i, m4); m4.premultiply(o.matrixWorld) } else m4.copy(o.matrixWorld);
           m4.decompose(p, q, s);
           const wX = size.x * s.x, hY = size.y * s.y, wZ = size.z * s.z;
@@ -230,7 +262,6 @@ export function createSiteKit(viewer, opts = {}) {
           done.push([p.x, p.z]);
           const run = part && runs.find(r => r.i === part.run), sp = withDesignFoundation(run && run.styleName ? specOf(run.styleName) : curSpec, w.__f3d.spec);
           let how = foundationFor(sp); if (round && sp.wood && sp.mode !== 'split') how = 'driven';   // a round cedar split rail post is tamped in at its own diameter, not a driven pipe (V3-150)
-          if (how === 'driven' && hasBuriedPipe) { stat.posts++; stat.driven++; continue }
           const gate = (part && part.kind === 'gatepost') || kind0 === 'gatepost';
           const depth = (how === 'driven' ? cfg.drivenDepthIn : how === 'tamped' ? cfg.splitPostDepthIn : cfg.postDepthIn) * IN;
           // The post, carried down. A wood post on a driven pipe stops at grade: only the pipe goes in.
@@ -238,11 +269,14 @@ export function createSiteKit(viewer, opts = {}) {
             ? new T.Mesh(new T.CylinderGeometry(2.375 * IN / 2, 2.375 * IN / 2, depth, 18), M.steel)
             : new T.Mesh(round ? new T.CylinderGeometry(wX / 2, wX / 2, depth, 18) : new T.BoxGeometry(wX, depth, wZ), o.material);
           stub.position.set(p.x, bottom - depth / 2, p.z); stub.quaternion.copy(q); stub.userData.kit = 'buriedPost'; stub.userData.fenceStyle = run?.styleName || curName;
+          stub.visible = !!cfg.xray;
           place(stub);
           if (how === 'concrete') {
             const dia = (gate ? cfg.gateHoleDiaIn : cfg.holeDiaIn) * IN, hd = cfg.holeDepthIn * IN;
-            const c = new T.Mesh(new T.CylinderGeometry(dia / 2, dia / 2 * 0.94, hd, 24), M.concrete);
-            c.position.set(p.x, bottom - hd / 2 + 0.01, p.z); c.userData.kit = 'concrete'; c.renderOrder = 2; place(c);
+            const dugPrivacy = gfsV3273DugPrivacy(sp);
+            const c = new T.Mesh(new T.CylinderGeometry(dia / 2, dia / 2 * (dugPrivacy ? 1 : 0.94), hd, 24), M.concrete);
+            c.position.set(p.x, bottom - hd / 2 + (dugPrivacy ? 0 : 0.01), p.z); c.userData.kit = 'concrete'; c.renderOrder = 2; place(c);
+            c.visible = !!cfg.xray;
             stat.concrete++; stat.bags += bagsPerHole({ holeDiaIn: gate ? cfg.gateHoleDiaIn : cfg.holeDiaIn, holeDepthIn: cfg.holeDepthIn, postWIn: wX * 12, postDIn: wZ * 12, postDepthIn: cfg.postDepthIn });
           } else stat[how]++;
           stat.posts++;
@@ -260,11 +294,20 @@ export function createSiteKit(viewer, opts = {}) {
         if (!o.isMesh || o.isInstancedMesh) return;
         const part = o.userData && o.userData.parts && o.userData.parts[0];
         if (!part || !part.gate || !FRAME_KINDS.has(part.kind)) return;
+        if (o.userData.nativeSteelGateFrame) { stat.steelGateParts++; return; }
         if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
         o.geometry.boundingBox.getSize(size); o.getWorldPosition(pos); fg.worldToLocal(pos);
         cands.push({ ref: o, part, size: [size.x, size.y, size.z], scale: [o.scale.x, o.scale.y, o.scale.z], x: pos.x, z: pos.z });
       });
-      if (cands.length) stat.steelGateParts = applySteelPlan(planSteelFrames(cands, runs, runSpec, cfg.steelTubeIn * IN), M.tube, undo);
+      const tubeIn = Number(cfg.steelTubeIn) || 1.5;
+      if ((w.__gfsWoodSteelTubeIn || 1.5) !== tubeIn) {
+        w.__gfsWoodSteelTubeIn = tubeIn;
+        if (stat.steelGateParts && w.__f3dRebuild) {
+          w.__f3dRebuild();
+          return build();
+        }
+      }
+      if (cands.length) stat.steelGateParts += applySteelPlan(planSteelFrames(cands, runs, runSpec, cfg.steelTubeIn * IN), M.tube, undo);
     }
 
     if (cfg.xray) applyXray(w);
