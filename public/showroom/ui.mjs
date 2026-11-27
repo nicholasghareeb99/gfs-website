@@ -141,5 +141,6 @@ export function snippet(text, words, len = 120) {
 // kinds: tap, dtap, swipe, swipev, drag (up/down), pinchin, pinchout, slide, type
 export function gesture(kind) {
   const two = kind === 'pinchin' || kind === 'pinchout';
+  if (kind === 'look') return `<span class="gest g-look" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>`;
   return `<span class="gest g-${kind}" aria-hidden="true">${kind === 'slide' ? '<s></s>' : ''}${kind === 'type' ? '<s></s>' : ''}<i></i>${two ? '<i class="b"></i>' : ''}</span>`;
 }

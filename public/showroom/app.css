@@ -912,3 +912,13 @@ body.has-back .top .brand{display:none}
   .backpill .l{display:none}.backpill .s{display:block}.backpill .x{display:none}.backpill{padding-right:14px;max-width:none}
   body.has-back #btnReviews,body.has-back #btnHelp{display:none}
 }
+@media (max-width:430px){
+  .lab-how .hs-list{gap:6px}
+  .lab-how .hs-list li{gap:10px;padding:6px 8px;border-radius:12px}
+  .lab-how .hs-list li p{font-size:14px;line-height:1.3}
+  .lab-how .gest{width:38px;height:38px;border-radius:10px}
+  .lab-how .gest i{width:12px;height:12px;margin:-6px 0 0 -6px}
+  .lab-how summary{min-height:42px}
+}
+.g-look{display:grid;place-items:center;color:var(--blue-lt)}.g-look svg{width:55%;height:55%;animation:g-look 3s ease-in-out infinite}
+@keyframes g-look{0%,40%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}50%{transform:scaleY(1)}}

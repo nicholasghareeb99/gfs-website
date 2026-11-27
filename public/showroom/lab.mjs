@@ -17,10 +17,10 @@ const TOOLS = [
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
   { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you',
-    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['tap', 'Watch the thinner big-box post bend further than ours.']],
+    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['look', 'Watch the thinner big-box post bend further than ours.']],
     take: 'A thicker wall makes a stiffer post, and ours sleeves over a driven steel post instead of sitting in a concrete plug.' },
   { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style',
-    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['tap', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
+    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
     take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
   { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
     how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match their yard.']],
@@ -121,7 +121,7 @@ function homeHTML() {
   return `<div class="lab-home">${TOOLS.map((t, i) => `<button class="lab-card lab-tile" data-tool="${t.id}">
     <svg viewBox="0 0 64 48" aria-hidden="true">${PICT[t.id]}</svg>
     <span class="lt-b"><span class="mono">${String(i + 1).padStart(2, '0')}${i === 0 ? ' · START HERE' : ''}</span><b>${esc(t.name)}</b><small>${esc(t.line)}</small>
-    <span class="lt-how">${[...new Set(t.how.map(h => h[0]))].map(g => `<em>${{ tap: 'Tap', slide: 'Slide', drag: 'Drag', swipe: 'Swipe' }[g] || g}</em>`).join('')}</span></span>${icons.next}</button>`).join('')}</div>`;
+    <span class="lt-how">${[...new Set(t.how.map(h => h[0]).filter(g => g !== 'look'))].map(g => `<em>${{ tap: 'Tap', slide: 'Slide', drag: 'Drag', swipe: 'Swipe' }[g] || ''}</em>`).join('')}</span></span>${icons.next}</button>`).join('')}</div>`;
 }
 // ── shared bits ───────────────────────────────────────────────────
 const fmt = (v, d = 0) => Number(v).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
