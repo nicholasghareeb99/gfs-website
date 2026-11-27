@@ -28,13 +28,17 @@ function received(fields, form) {
   return Object.fromEntries(Object.entries(fields).filter(([key]) => declared.has(key)));
 }
 
-test('the three hidden forms exist and put the subject first', () => {
+test('the four hidden forms exist and put the subject first', () => {
   const forms = declaredForms();
-  assert.deepEqual(Object.keys(forms).sort(), ['gfs-ballpark', 'gfs-booking', 'gfs-estimate']);
+  assert.deepEqual(Object.keys(forms).sort(), ['gfs-ballpark', 'gfs-booking', 'gfs-careers', 'gfs-estimate']);
   for (const [name, fields] of Object.entries(forms)) {
     const visible = fields.filter(field => field !== 'form-name' && field !== 'bot-field');
     assert.equal(visible[0], 'subject', name + ' starts with the subject');
-    for (const needed of ['name', 'phone', 'best_way_to_reach', 'summary', 'notes', 'submission_id']) assert.ok(fields.includes(needed), name + ' declares ' + needed);
+    if (name === 'gfs-careers') {
+      assert.deepEqual(visible, ['subject', 'gfs_contract', 'intake_kind', 'submission_id', 'application']);
+    } else {
+      for (const needed of ['name', 'phone', 'best_way_to_reach', 'summary', 'notes', 'submission_id']) assert.ok(fields.includes(needed), name + ' declares ' + needed);
+    }
   }
 });
 
