@@ -29,7 +29,7 @@ const FITTING = /^(tensionband|braceband|loopcap|cap|railend|tensionbar|fabricti
 const POSTISH = /^(post|termpost|linepost)$/;
 
 export function createWindScene(host, { specs } = {}) {
-  const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 12, width: 320, back: 160, home: { yaw: -.52, pitch: .1 } });
+  const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 12, width: 320, back: 160, home: { yaw: -.4, pitch: .1 } });
   const R = st.root;
   let built = null, field = null, fkey = '', smokeFor = '', S = null, live = true;
 

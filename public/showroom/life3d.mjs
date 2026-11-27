@@ -19,7 +19,7 @@ const MODELS = {
 const FITTING = /^(tensionband|braceband|loopcap|cap|railend|tensionbar|fabrictie|staple|fastener)$/, POSTISH = /^(post|termpost|linepost)$/;
 
 export function createLifeScene(host, { specs } = {}) {
-  const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 14, width: 200, back: 160, home: { yaw: .45, pitch: .1 } });
+  const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 14, width: 200, back: 160, home: { yaw: .32, pitch: .1 } });
   const R = st.root, ZR = -1.5;
   let built = null;
   const pin = st.pin('main', new THREE.Vector3(), '');
@@ -41,7 +41,7 @@ export function createLifeScene(host, { specs } = {}) {
     const post = posts[Math.min(2, posts.length - 1)];
     pin.set(text);
     pin.move(where === 'post' ? new THREE.Vector3(post.cx, .25, post.box.max.z) : where === 'bottom' ? new THREE.Vector3(-m.bay / 2, .3, front) : new THREE.Vector3(-m.bay / 2, top * .6, front));
-    st.frameView('main', { cx: 0, cy: top * .5, w: half * 2 + 3, h: top + 2.2, cz: ZR });
+    st.frameView('main', { cx: 0, cy: top * .5, w: half * 2.5 + 3, h: top + 2.6, cz: ZR });
     st.dirty();
   }
   return {

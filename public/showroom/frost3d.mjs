@@ -62,9 +62,9 @@ export function createFrostScene(host, { specs } = {}) {
     st.ground.frost(fz.depth * IN, soil === 'clay' ? 1 : 0, fz.thawed * IN);
     const mi = clamp(Math.floor(m), 0, 5), t = m - mi; st.ground.snow(SNOW[mi] + (SNOW[Math.min(5, mi + 1)] - SNOW[mi]) * t);
     if (soil !== soilNow) { st.ground.subsoil(soil === 'clay' ? 0x7b6650 : 0xa48d66); soilNow = soil; }
-    line.position.y = -frost * IN; frostL.move(V3(-2.25, -frost * IN - .42)); frostL.set(`Frost line · ${frost} in`);
+    line.position.y = -frost * IN; frostL.move(V3(6.4, -frost * IN - .42)); frostL.set(`Frost line · ${frost} in`);
     const frozenNow = fz.depth - fz.thawed > 1;
-    frozenL.move(V3(-2.25, -fz.depth * IN - .02)); frozenL.set(`Frozen to ${Math.round(fz.depth)} in`); frozenL.show(frozenNow);
+    frozenL.move(V3(6.4, -fz.depth * IN - .02)); frozenL.set(`Frozen to ${Math.round(fz.depth)} in`); frozenL.show(frozenNow);
     const ups = [], downs = [];
     posts.forEach(o => {
       const L = lift(o.P, m, winter, frost, soil, reach), dy = L.lift * DRAWN * IN, gap = L.gap * DRAWN * IN;

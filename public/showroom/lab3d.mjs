@@ -232,7 +232,11 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     stacked = n > 1 && (W < 700 || stackAlways);
     const own = stacked && V.some(v => v.aspect);
     const hs = own ? V.map(v => Math.round(clamp(W * (v.aspect || 1), v.minH || 160, v.maxH || 560))) : null;
-    const H = own ? hs.reduce((a, b) => a + b, 0) : stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560));
+    // On a wide screen (iPad on its side, a laptop) the whole picture and the slider under it should fit
+    // on screen without scrolling, so the height is also held to what's left under the tool's heading.
+    const room = W >= 700 ? Math.max(300, innerHeight - Math.max(0, host.getBoundingClientRect().top + (host.closest('#v-lab')?.scrollTop || 0)) - 124) : Infinity;
+    const cap = W >= 700 ? Math.max(300, Math.min(room, innerHeight - 210)) : Infinity;
+    const H = own ? hs.reduce((a, b) => a + b, 0) : stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(Math.min(cap, n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560)));
     wrap.style.height = H + 'px'; renderer.setSize(W, H, false);
     let y0 = 0;
     V.forEach((v, i) => { if (own) { v.rect = { x: 0, y: y0, w: W, h: hs[i] }; y0 += hs[i]; } else v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
