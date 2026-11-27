@@ -1,5 +1,5 @@
 // The website's 3D is the Executive app's viewer, carried whole under /x3d/. /fence3d.html only forwards there.
-// tests/x3d-manifest.json pins every carried file; gfs/website-scene.mjs is the one file the website owns.
+// tests/x3d-manifest.json pins the shared viewer files and the website-owned index.html forwarder.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
