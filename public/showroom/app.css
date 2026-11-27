@@ -922,3 +922,5 @@ body.has-back .top .brand{display:none}
 }
 .g-look{display:grid;place-items:center;color:var(--blue-lt)}.g-look svg{width:55%;height:55%;animation:g-look 3s ease-in-out infinite}
 @keyframes g-look{0%,40%,100%{transform:scaleY(1)}45%{transform:scaleY(.1)}50%{transform:scaleY(1)}}
+.fence-style.nudge{animation:nudge .9s var(--ease) 2}
+@keyframes nudge{0%,100%{box-shadow:0 0 0 0 rgba(214,130,63,0)}50%{box-shadow:0 0 0 4px rgba(214,130,63,.75)}}
