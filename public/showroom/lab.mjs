@@ -627,7 +627,7 @@ function gate(body) {
   bindSeg(body, (n, v) => { if (n === 'brace') setOpt({ brace: v }); if (n === 'gpost') setOpt({ post: v }); });
   if (webglOK()) {
     const host = $('.gate-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.g3d-note', body).hidden = false;
-    import('./gate3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createGateScene(host, { specs: app.live?.specs }); scene.set({ w: st.w, brace: st.brace, post: st.post, y: st.y }); draw(); })
+    import('./gate3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createGateScene(host, { specs: app.live?.specs }); body.__gate = scene; scene.set({ w: st.w, brace: st.brace, post: st.post, y: st.y }); draw(); })
       .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.g3d-note', body).hidden = true; scene = null; draw(); });
   }
   draw();

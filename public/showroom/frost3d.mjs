@@ -10,7 +10,7 @@ import { STYLE, STYLE_ND } from './dig-plan.mjs';
 const XS = [-4.5, 0, 4.5], FRAME = { cx: 0, cy: 1.45, w: 13.8, h: 12 };
 
 export function createFrostScene(host, { specs } = {}) {
-  const st = createStage(host, { views: [{ id: 'main' }] });
+  const st = createStage(host, { views: [{ id: 'main' }], winter: true });
   const R = st.root, unit = (o, what, id) => { o.traverse(c => { if (c.isMesh) { c.userData.what = what; c.userData.unit = id; } }); return o; };
   const conc = surfaceMaterial(THREE, 'concrete', 0xaaa8a2), slump = surfaceMaterial(THREE, 'soil', 0x5a4636);
   const gapMat = new THREE.MeshBasicMaterial({ color: 0x120c07 });

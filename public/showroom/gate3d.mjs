@@ -18,6 +18,15 @@ const PIPE_UP_IN = 66.75, PIPE_DOWN_IN = 48;      // the app's gate pipe above g
 const BOX_IN = 6, SIDE_T = 1.5, SIDE_D = 3.5, FACE_T = .75, FACE_OFF = 2.125;
 const WOOD_POST = { topIn: 72 };                  // an 8 ft 4×4, 2 ft of it in the ground
 const LATCH_PLAY_IN = .75, AJAR = 4 * Math.PI / 180;
+// The 8 in butterfly hinge (black steel, lag-screwed): about 8 in across when open, two leaves about
+// 3 in wide that are 3¼ in tall at the barrel and flare to 5 in. Sizes are typical for this kind of
+// hinge; the maker doesn't publish a drawing.
+const BFLY = { leafW: 2.9, barrelH: 3.25, outerH: 5, t: .1 };
+function butterflyLeaf() {
+  const W = BFLY.leafW * IN, b = BFLY.barrelH / 2 * IN, o = BFLY.outerH / 2 * IN, sh = new THREE.Shape();
+  sh.moveTo(0, b); sh.lineTo(W * .72, o); sh.lineTo(W, o - .55 * IN); sh.lineTo(W, -o + .55 * IN); sh.lineTo(W * .72, -o); sh.lineTo(0, -b); sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, { depth: BFLY.t * IN, bevelEnabled: false }); g.translate(0, 0, -BFLY.t * IN / 2); return g;
+}
 
 // volume of a closed mesh in world space (cubic feet)
 function volumeOf(o) {
@@ -87,6 +96,20 @@ export function createGateScene(host, { specs } = {}) {
     const hingeX = root.getWorldPosition(new THREE.Vector3()).x, latchX = -hingeX;
     const kindOf = m => m.userData.parts?.[0]?.kind;
     const leafMeshes = []; leaf.traverse(o => { if (o.isMesh) leafMeshes.push(o); });
+    // GFS hangs wood gates on 8 in butterfly hinges: two matching leaves that flare out from a short
+    // barrel. The app draws one tall wing; the Lab's copy swaps in the butterfly shape, same place, same pin.
+    { const hinge = []; root.traverse(o => { if (o.isMesh && kindOf(o) === 'ghinge') hinge.push(o); });
+      const barrels = hinge.filter(o => o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.height > 6 * IN);
+      const r = barrels[0]?.geometry.parameters.radiusTop || .34 * IN, bGeo = new THREE.CylinderGeometry(r, r, BFLY.barrelH * IN, 14), leafGeo = butterflyLeaf();
+      for (const o of hinge) {
+        if (o.geometry.type === 'ExtrudeGeometry') o.geometry = leafGeo;
+        else if (barrels.includes(o)) o.geometry = bGeo;
+        else if (o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.height < 2 * IN && o.geometry.parameters.radiusTop > r) {   // knuckles: keep them on the shorter barrel
+          const by = barrels.reduce((a, c) => Math.abs(c.position.y - o.position.y) < Math.abs(a - o.position.y) ? c.position.y : a, Infinity), dy = o.position.y - by;
+          o.position.y = by + (Math.abs(dy) > IN ? Math.sign(dy) * (BFLY.barrelH / 2 - .52) * IN : 0);
+        }
+      }
+    }
     const bb = new THREE.Box3(), boxOf = o => bb.setFromObject(o).clone();
     const rails = leafMeshes.filter(m => kindOf(m) === 'grail').map(m => ({ m, b: boxOf(m) })).sort((a, b) => a.b.min.y - b.b.min.y);
     const stiles = leafMeshes.filter(m => kindOf(m) === 'gstile').map(m => ({ m, b: boxOf(m) }));

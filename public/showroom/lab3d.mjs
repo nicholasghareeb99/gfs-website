@@ -133,6 +133,107 @@ function dashTexture() {
   t.wrapS = THREE.RepeatWrapping; return t;
 }
 
+// ── the yard around the fence: mown grass you can see the blades of, and trees at the back ──
+// Grass: tufts of three blades, only in the strip the cameras look at (x0…x1, back to z0); the lawn's
+// own texture carries on past it. Blades follow the grade, stay out of holes and off cleared spots,
+// and lie down under snow. Trees: a soft line of them past the far edge of the lawn, in the haze.
+const GRASS_CLEAR = 8;
+function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(width / 2 - 1, 30), x1 = Math.min(width / 2 - 1, 30), z0 = -14, n, tall = 2.4, on = true, trees = true }) {
+  const group = new THREE.Group(); group.userData.noCheck = true;
+  const rnd = (() => { let a = 20261127; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; })();
+  const uClear = { value: Array.from({ length: GRASS_CLEAR }, () => new THREE.Vector3(0, 0, 0)) }; let nClear = 0;
+  const uSnow = { value: 0 };
+  let grassGeo = null, aY = null, P = null;
+  if (on) {
+    const area = (x1 - x0) * -z0, N = Math.round(Math.min(n || (phone ? 26000 : 46000), area * 90));
+    // one tuft: three blades fanned out, each a thin triangle 1 unit tall
+    const pos = [], uv = [];
+    for (let b = 0; b < 3; b++) { const a = b * 2.094 + .4, c = Math.cos(a), s = Math.sin(a), o = .35; pos.push(-.5 * c + o * s, 0, -.5 * s - o * c, .5 * c + o * s, 0, .5 * s - o * c, o * s * 2.2, 1, -o * c * 2.2); uv.push(0, 0, 1, 0, .5, 1); }
+    grassGeo = new THREE.InstancedBufferGeometry();
+    grassGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); grassGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    grassGeo.setAttribute('normal', new THREE.Float32BufferAttribute(new Array(27).fill(0).map((_, i) => i % 3 === 1 ? 1 : 0), 3));
+    P = new Float32Array(N * 4); const C = new Float32Array(N * 2); aY = new Float32Array(N);
+    for (let i = 0; i < N; i++) {
+      // a little thicker toward the front, where the camera is closest
+      const z = z0 * Math.pow(rnd(), 1.35) - .04;
+      P.set([x0 + rnd() * (x1 - x0), z, (tall * (.65 + rnd() * .7)) * IN, rnd() * 6.283], i * 4); C.set([rnd(), rnd()], i * 2);
+    }
+    grassGeo.setAttribute('aP', new THREE.InstancedBufferAttribute(P, 4)); grassGeo.setAttribute('aC', new THREE.InstancedBufferAttribute(C, 2));
+    grassGeo.setAttribute('aY', new THREE.InstancedBufferAttribute(aY, 1).setUsage(THREE.DynamicDrawUsage));
+    grassGeo.instanceCount = N;
+    const m = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, side: THREE.DoubleSide, envMapIntensity: .15 });
+    m.onBeforeCompile = sh => {
+      Object.assign(sh.uniforms, { uHoles: lawnU.uHoles, uClear, uSnow, uBox: { value: new THREE.Vector3(x0, x1, z0) } });
+      sh.vertexShader = 'uniform vec3 uBox;\n#define uEdge (smoothstep(0.0, 3.0, aP.x - uBox.x) * smoothstep(0.0, 3.0, uBox.y - aP.x) * smoothstep(0.0, 4.0, aP.y - uBox.z))\nattribute vec4 aP; attribute vec2 aC; attribute float aY; uniform vec4 uHoles[' + SECTION_HOLES + ']; uniform vec3 uClear[' + GRASS_CLEAR + ']; uniform float uSnow; varying vec3 vBlade;\n' + sh.vertexShader
+        .replace('#include <beginnormal_vertex>', 'vec3 objectNormal = vec3(0.0, 1.0, 0.0);')
+        .replace('#include <begin_vertex>', `
+          float hgt = aP.z * (1.0 - uSnow * .93) * uEdge;
+          for (int i = 0; i < ${SECTION_HOLES}; i++) { vec4 h = uHoles[i]; if (h.w > .5 && distance(aP.xy, h.xy) < h.z + .03) hgt = 0.0; }
+          for (int i = 0; i < ${GRASS_CLEAR}; i++) { vec3 h = uClear[i]; if (h.z > 0.0 && distance(aP.xy, h.xy) < h.z) hgt = 0.0; }
+          float wd = (.0052 + .0034 * aC.x) * (.4 + .6 * uEdge);
+          vec3 q = vec3(position.x * wd * 6.0, position.y * hgt, position.z * wd * 6.0);
+          float bend = position.y * position.y * hgt;
+          q.x += bend * (aC.y - .5) * 1.1; q.z += bend * (fract(aC.y * 7.3) - .5) * 1.1;
+          float cr = cos(aP.w), sr = sin(aP.w);
+          vec3 transformed = vec3(cr * q.x - sr * q.z + aP.x, q.y + aY, sr * q.x + cr * q.z + aP.y);
+          vBlade = vec3(position.y, aC.x, aC.y);`);
+      sh.fragmentShader = 'varying vec3 vBlade; uniform float uSnow;\n' + sh.fragmentShader
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          vec3 root = vec3(.05, .12, .03), tip = mix(vec3(.13, .30, .06), vec3(.21, .36, .08), vBlade.y);
+          vec3 g = mix(root, tip, smoothstep(0.0, .9, vBlade.x)) * (.8 + .4 * vBlade.z);
+          g = mix(g, vec3(.34, .31, .13), step(.95, vBlade.z) * .5);
+          diffuseColor.rgb = mix(g, vec3(.80, .84, .9), uSnow * .8);`)
+        .replace('#include <normal_fragment_begin>', '#include <normal_fragment_begin>\n normal = normalize(vNormal);');
+    };
+    m.customProgramCacheKey = () => 'gfsLabGrass';
+    const mesh = new THREE.Mesh(grassGeo, m); mesh.frustumCulled = false; mesh.receiveShadow = true; mesh.userData.noCheck = true; mesh.name = 'grass';
+    group.add(mesh);
+  }
+  const regrade = () => { if (!aY) return; for (let i = 0; i < aY.length; i++) aY[i] = grade(P[i * 4]); grassGeo.attributes.aY.needsUpdate = true; };
+
+  // trees
+  let canopyMat = null; const leaf = new THREE.Color(), bare = new THREE.Color(0x6a6159);
+  if (trees) {
+    const blob = new THREE.IcosahedronGeometry(1, 2), bp = blob.attributes.position;
+    for (let i = 0; i < bp.count; i++) { const x = bp.getX(i), y = bp.getY(i), z = bp.getZ(i), k = 1 + .22 * Math.sin(x * 5.1 + y * 3.3) * Math.cos(z * 4.7 + x * 2.1) + .1 * Math.sin(y * 9.0 + z * 7.0); bp.setXYZ(i, x * k, Math.max(y, -.55) * k, z * k); }
+    { const nn = blob.attributes.normal; for (let i = 0; i < bp.count; i++) { const v = new THREE.Vector3(bp.getX(i), bp.getY(i) + .2, bp.getZ(i)).normalize(); nn.setXYZ(i, v.x, v.y, v.z); } }
+    canopyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, envMapIntensity: .25, flatShading: false });
+    const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3d31, roughness: 1 });
+    for (const m of [canopyMat, trunkMat]) { m.onBeforeCompile = sh => { sh.uniforms.uHaze = lawnU.uHaze;
+      sh.vertexShader = 'varying vec3 vTW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vTW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = 'varying vec3 vTW; uniform vec3 uHaze;\n' + NOISE + sh.fragmentShader.replace('#include <dithering_fragment>', 'gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(60.0, 520.0, length(vTW.xz - cameraPosition.xz)) * .5);\n#include <dithering_fragment>')
+        .replace('#include <color_fragment>', '#include <color_fragment>\n { vec3 w = vTW * .55; float n = secN(w.xy + w.z * .7) * .6 + secN(w.xy * 3.1 + w.z * 2.3) * .4; diffuseColor.rgb *= .55 + .9 * n * n; }'); };
+      m.customProgramCacheKey = () => 'gfsLabTree'; }
+    const spots = [];
+    const far = -back - 14;
+    for (let x = -width / 2 - back * .6; x < width / 2 + back * .6; x += 9 + rnd() * 10) spots.push([x, far - rnd() * 60]);
+    for (const sx of [-1, 1]) for (let z = -45; z > far; z -= 22 + rnd() * 26) spots.push([sx * (Math.max(width / 2, 170) + 16 + rnd() * 30), z]);
+    // and across the near side, for views that look from behind the fence
+    for (let x = -width / 2 - back * .6; x < width / 2 + back * .6; x += 9 + rnd() * 10) spots.push([x, -far + rnd() * 60]);
+    const blobs = [], trunks = [], M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3();
+    for (const [x, z] of spots) {
+      const hgt = 26 + rnd() * 22, r = hgt * (.3 + rnd() * .12), hue = rnd();
+      trunks.push([x, z, hgt]);
+      for (let k = 0; k < 7; k++) blobs.push([x + (rnd() - .5) * r * 1.5, hgt * (.5 + rnd() * .38), z + (rnd() - .5) * r * 1.2, r * (.45 + rnd() * .4), hue, rnd()]);
+    }
+    // brush along the foot of the trees, so it reads as one hedgerow and not a row of trunks
+    for (const [x, z, hgt] of trunks.slice()) for (let k = 0; k < 3; k++) { const r = 5 + rnd() * 6; blobs.push([x + (rnd() - .5) * 26, r * .55, z + Math.sign(-z) * 4 + (rnd() - .5) * 10, r, rnd(), rnd() * .6]); }
+    const cm = new THREE.InstancedMesh(blob, canopyMat, blobs.length), tm = new THREE.InstancedMesh(new THREE.CylinderGeometry(.5, .8, 1, 7), trunkMat, trunks.length);
+    blobs.forEach(([x, y, z, r, hue, v], i) => { cm.setMatrixAt(i, M4.compose(V.set(x, y, z), Q.setFromEuler(E.set(0, v * 6.28, 0)), S.set(r, r * (.8 + v * .25), r))); cm.setColorAt(i, leaf.setHSL(.26 + hue * .07, .45 + v * .12, .13 + v * .06)); });
+    trunks.forEach(([x, z, h], i) => tm.setMatrixAt(i, M4.compose(V.set(x, h * .3, z), Q.identity(), S.set(h * .035, h * .6, h * .035))));
+    for (const o of [cm, tm]) { o.userData.noCheck = true; o.frustumCulled = false; o.castShadow = false; o.receiveShadow = false; group.add(o); }
+    group.userData.canopy = cm; group.userData.leaf = blobs.map(([, , , , hue, v]) => new THREE.Color().setHSL(.26 + hue * .07, .45 + v * .12, .13 + v * .06));
+  }
+  // winter: the leaves are down, so the tree line is grey-brown and thinner
+  if (winter && group.userData.canopy) { const cm = group.userData.canopy, M4 = new THREE.Matrix4(); group.userData.leaf.forEach((c, i) => { cm.setColorAt(i, leaf.copy(bare).multiplyScalar(.75 + .5 * ((i * 37) % 10) / 10)); cm.getMatrixAt(i, M4); M4.scale(new THREE.Vector3(.8, .86, .8)); cm.setMatrixAt(i, M4); }); cm.instanceColor.needsUpdate = true; }
+  regrade();
+  return {
+    group, regrade,
+    clear(x, z, r) { if (nClear < GRASS_CLEAR) uClear.value[nClear++].set(x, z, r); },
+    snow(k) { uSnow.value = k; }
+  };
+}
+
 // ── the stage ───────────────────────────────────────────────────
 // host: an element to fill. views: [{ id, label }] — one camera each, drawn side by side on wide
 // screens and stacked on phones, all turned together by the same finger.
@@ -140,7 +241,8 @@ function dashTexture() {
 // drags to the tool (two fingers still pinch, tilt and turn).
 // stackAlways: views one above the other at every width; a view's aspect (height ÷ width, with
 // minH/maxH in px) sets its own height when stacked.
-export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false, home = {} } = {}) {
+export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false, home = {}, grass = {}, winter = false } = {}) {
+  back = Math.max(back, 320);   // the trees at the back of the yard stay well behind the fence
   const mt = mats();
   const wrap = document.createElement('div'); wrap.className = 'l3d'; host.append(wrap);
   const cv = document.createElement('canvas'); cv.className = 'l3d-cv'; wrap.append(cv);
@@ -149,15 +251,31 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap; renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
   renderer.setScissorTest(true);
   const scene = new THREE.Scene();
 
-  // Sky: a plain gradient (no sun disc, no clouds), also used to light metal and paint.
+  // Sky: a clear-day gradient with fair-weather clouds and the glow around the sun. It also lights
+  // metal and paint. uSun: where the sun is. uCloud: how much of the sky the clouds cover (0–1).
   const skyMat = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: new THREE.Color(0x5d8fc8) }, mid: { value: skyMid }, bot: { value: new THREE.Color(0x3a3027) } },
+    uniforms: { top: { value: new THREE.Color(0x4f86c6) }, mid: { value: skyMid }, bot: { value: new THREE.Color(0x3a3027) }, uSun: { value: new THREE.Vector3(-.44, .68, .6).normalize() }, uCloud: { value: .42 } },
     vertexShader: 'varying vec3 v; void main(){ v = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: 'uniform vec3 top, mid, bot; varying vec3 v; void main(){ float y = v.y; vec3 c = y > 0.0 ? mix(mid, top, pow(y, 0.6)) : mix(mid, bot, clamp(-y * 6.0, 0.0, 1.0)); gl_FragColor = vec4(c, 1.0); }' });
+    fragmentShader: 'uniform vec3 top, mid, bot, uSun; uniform float uCloud; varying vec3 v;\n' + NOISE + `
+      float fbm(vec2 p){ float a = .5, s = 0.; for (int i = 0; i < 5; i++) { s += a * secN(p); p = p * 2.03 + 11.3; a *= .5; } return s; }
+      void main(){
+        vec3 d = normalize(v); float y = d.y;
+        vec3 c = y > 0.0 ? mix(mid, top, pow(y, 0.55)) : mix(mid, bot, clamp(-y * 6.0, 0.0, 1.0));
+        float s = max(dot(d, uSun), 0.0);
+        if (y > 0.0) c += vec3(1.0, .93, .8) * (pow(s, 1400.0) * 8.0 + pow(s, 48.0) * .3 + pow(s, 7.0) * .1);
+        if (y > 0.015 && uCloud > 0.0) {
+          vec2 p = d.xz / (y + .16) * 1.25;
+          float n = fbm(p + vec2(3.7, 1.9)) * .75 + fbm(p * 2.7 + 8.1) * .25;
+          float k = smoothstep(1.0 - uCloud * .62, 1.08 - uCloud * .5, n + .32) * smoothstep(.015, .16, y);
+          float lit = .78 + .22 * smoothstep(.45, .8, fbm(p * 1.9 - uSun.xz * .25));
+          c = mix(c, mix(vec3(.66, .71, .8), vec3(1.0, .99, .97), lit) * (.9 + .1 * s), k * .92);
+        }
+        gl_FragColor = vec4(c, 1.0);
+      }` });
   const sky = new THREE.Mesh(new THREE.SphereGeometry(900, 32, 16), skyMat); sky.renderOrder = -1; sky.userData.noCheck = true; scene.add(sky);
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envScene = new THREE.Scene(); envScene.add(new THREE.Mesh(new THREE.SphereGeometry(10, 32, 16), skyMat));
@@ -187,7 +305,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     grade = fn || (() => 0);
     const pa = lawnGeo.attributes.position, b = lawnGeo.userData.base;
     for (let i = 0; i < pa.count; i++) pa.setY(i, b[i * 3 + 1] + grade(b[i * 3]));
-    pa.needsUpdate = true; lawnGeo.computeVertexNormals(); lawnGeo.computeBoundingSphere();
+    pa.needsUpdate = true; lawnGeo.computeVertexNormals(); lawnGeo.computeBoundingSphere(); scenery.regrade();
     for (const [k, f] of faces.entries()) {
       const g = f.geometry, p = g.attributes.position, fb = g.userData.base, top = Math.max(...Array.from({ length: p.count }, (_, i) => fb[i * 3 + 1]));
       // the topsoil band rides on the grade top and bottom; the clay's top follows it and its bottom stays put
@@ -197,6 +315,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     dirty();
   }
   const root = new THREE.Group(); scene.add(root);
+  const scenery = makeScenery({ winter, width, back, lawnU: G.lawn.userData.u, grade: x => grade(x), phone: (wrap.clientWidth || innerWidth) < 700, ...grass });
+  scene.add(scenery.group);
+  // A view that looks from the far side (the picket side of a gate) sees the yard on the near side of
+  // the cut instead, so that side gets a lawn too. It's only drawn for those views.
+  const frontLawn = new THREE.Mesh(new THREE.PlaneGeometry(width, back).rotateX(-Math.PI / 2).translate(0, -.004, back / 2), G.lawn); frontLawn.receiveShadow = true; frontLawn.visible = false; frontLawn.userData.noCheck = true; scene.add(frontLawn);
+  if (winter) skyMat.uniforms.uCloud.value = .9;
 
   // holes: { x0, x1, y } in the cut face, { x, z, r } in the lawn
   const faceHoles = [], lawnHoles = [];
@@ -265,6 +389,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
         // a view that looks from the far side gets its sun from that side too
         const side = v.yaw0 ? Math.sign(Math.cos(v.yaw0)) || 1 : 1;
         sun.target.position.set(v.target.x, 0, 0); sun.position.set(v.target.x - 22 * side, 34, 30 * side); sun.target.updateMatrixWorld(); sun.updateMatrixWorld();
+        skyMat.uniforms.uSun.value.set(-22 * side, 34, 30 * side).normalize(); frontLawn.visible = side < 0;
         renderer.shadowMap.needsUpdate = true;
         renderer.setViewport(r.x, y, r.w, r.h); renderer.setScissor(r.x, y, r.w, r.h);
         renderer.render(scene, v.cam);
@@ -351,7 +476,9 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   // snow on the lawn (0–1), and the colour of the soil under the topsoil (clay or sand)
   const ground = {
     frost(depthFt, lens = 1, thawedFt = 0) { for (const m of [G.topsoil, G.clay]) m.userData.u.uFrost.value.set(Math.max(0, thawedFt), Math.max(0, depthFt), lens); dirty(); },
-    snow(k) { G.lawn.userData.u.uSnow.value = clamp(k, 0, 1); dirty(); },
+    snow(k) { G.lawn.userData.u.uSnow.value = clamp(k, 0, 1); scenery.snow(clamp(k, 0, 1)); skyMat.uniforms.uCloud.value = .42 + .58 * clamp(k * 1.6, 0, 1); dirty(); },
+    // keep grass off something that sits in the lawn (a concrete collar): centre x, z and radius, ft
+    clearGrass(x, z, r) { scenery.clear(x, z, r); dirty(); },
     subsoil(hex) { const ref = surfaceMaterial(THREE, 'soil', hex); G.clay.color.copy(ref.color); ref.dispose(); dirty(); }
   };
 
