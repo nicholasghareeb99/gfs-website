@@ -312,9 +312,10 @@ async function inspectHandoff(page, link) {
 test('careers, click-to-call, click-to-text and financing reach the intended handoffs', async ({ page, context }) => {
   const world = await mockSite(context);
   await openPage(page, '/careers/');
-  const jobEmail = page.locator('main [href^="mailto:"][href*="Application"]');
-  expect(await inspectHandoff(page, jobEmail)).toBe('mailto:nick@ghareebfence.com?subject=Job%20Application');
-  const call = page.locator('main [href^="tel:"]').first();
+  await expect(page.getByRole('heading', { name: 'What kind of work?' })).toBeVisible();
+  const officeEmail = page.locator('footer [href^="mailto:"]');
+  expect(await inspectHandoff(page, officeEmail)).toBe('mailto:nick@ghareebfence.com');
+  const call = page.locator('footer [href^="tel:"]');
   expect((await inspectHandoff(page, call)).replace(/\D/g, '')).toBe('14192142107');
   await openPage(page, '/contact/');
   const sms = page.locator('main [href^="sms:"]').first();
