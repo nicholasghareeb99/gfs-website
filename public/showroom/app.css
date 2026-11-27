@@ -1001,3 +1001,52 @@ body.has-back .top .brand{display:none}
 .l3d-pin.gl-handle small{display:block;font:600 10px var(--mono);margin-top:2px}
 .g3-note{margin:8px 2px 0}
 @media (max-width:640px){.l3d-pin.gl-handle>span{padding:2px 5px;border-width:1.5px}.l3d-pin.gl-handle small{font-size:9px}}
+
+/* ── Brochure: Home, Contents, one/two pages, full screen ── */
+.pager .pg-info{display:flex;align-items:center;gap:10px;min-width:0}
+.pager .pg-btns{display:flex;align-items:center;gap:6px}
+.pager button:disabled{opacity:.35}
+.pager button[data-p=full][aria-pressed=true]{background:rgba(61,127,224,.35)}
+@media (max-width:699px){
+  .pager{flex-direction:column;gap:6px;padding:8px 10px;border-radius:22px;max-width:calc(100vw - 12px)}
+  .pager .pg-info{max-width:100%}.pager .t{max-width:62vw}
+  .pager button{width:38px;height:38px;border-radius:19px}
+  #v-brochure .stage{padding-bottom:calc(var(--dock) + var(--sab) + 84px)}
+  .chrome-hidden #v-brochure .stage{padding-bottom:calc(var(--sab) + 26px)}
+}
+@media (max-width:699px) and (max-height:500px){.pager{flex-direction:row;gap:10px;padding:5px 8px 5px 12px}.pager .t{display:none}.pager button{width:34px;height:34px}}
+@media (max-width:380px){.pager .pg-btns{gap:3px}.pager button{width:35px;height:35px}}
+/* full screen: only the book and its page buttons */
+.br-full .top{opacity:0;transform:translateY(-100%);pointer-events:none}
+.br-full .dock{opacity:0;transform:translate(-50%,140%);pointer-events:none}
+@media (min-width:1000px) and (orientation:landscape){.br-full .dock{transform:translate(-160%,-50%)}}
+.br-full #v-brochure .stage{padding:calc(var(--sat) + 6px) max(6px,var(--sar)) calc(var(--sab) + 58px) max(6px,var(--sal))}
+.br-full.chrome-hidden #v-brochure .stage{padding:max(4px,var(--sat)) max(4px,var(--sar)) max(4px,var(--sab)) max(4px,var(--sal))}
+.br-full .pager{bottom:calc(var(--sab) + 8px);flex-direction:row;gap:10px;padding:5px 8px 5px 12px;border-radius:20px}
+.br-full .pager button{width:34px;height:34px}
+@media (max-width:699px){.br-full .pager .t{display:none}.br-full #v-brochure .stage{padding-bottom:calc(var(--sab) + 58px)}}
+.br-full .progress{display:none}
+@media (max-height:499px) and (orientation:landscape){.pager [data-p=full]{display:none}}
+@media (min-width:700px){.pager .t{max-width:34vw}}
+/* contents */
+.toc{position:absolute;inset:0;z-index:40;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:rgba(4,10,20,.55);opacity:0;pointer-events:none;transition:opacity .3s}
+.toc.on{opacity:1;pointer-events:auto}
+.toc-sheet{width:min(720px,100%);max-height:calc(100dvh - var(--sat) - 70px);min-height:0;display:flex;flex-direction:column;background:var(--glass-2,rgba(13,24,40,.96));border:1px solid var(--line-2);border-radius:24px 24px 0 0;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transform:translateY(40px);transition:transform .4s var(--spring);padding-bottom:var(--sab)}
+.toc.on .toc-sheet{transform:none}
+@media (min-width:900px){.toc{align-items:center}.toc-sheet{border-radius:24px;padding-bottom:0}}
+.toc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.toc-head h2{margin:0;font-size:20px}
+.toc-body{flex:1 1 auto;min-height:0;overflow:auto;-webkit-overflow-scrolling:touch;padding:0 12px 16px;overscroll-behavior:contain}
+.toc-sec+.toc-sec{margin-top:10px}
+.toc-sec{border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.03);overflow:hidden}
+.toc-sec.here{border-color:rgba(140,199,255,.5)}
+.toc-top{display:flex;align-items:center;gap:12px;width:100%;padding:10px;text-align:left}
+.toc-top img{width:46px;height:60px;object-fit:cover;border-radius:6px;background:#fff;flex:none}
+.toc-top b{display:block;font-size:17px}.toc-top small{color:var(--blue-lt);font-size:12px}
+.toc-list{display:grid;border-top:1px solid var(--line)}
+.toc-list button{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:42px;padding:6px 14px;text-align:left;font-size:15px;color:var(--text)}
+.toc-list button+button{border-top:1px solid rgba(255,255,255,.05)}
+.toc-list button i{font-style:normal;color:var(--dim);font-size:13px}
+.toc-list button.here{background:rgba(61,127,224,.2)}
+.toc-top:active,.toc-list button:active{background:rgba(255,255,255,.08)}
+@media (min-width:700px) and (orientation:portrait){body:not(.br-full):not(.chrome-hidden) #v-brochure .stage{padding-bottom:calc(var(--dock) + var(--sab) + 62px)}}
