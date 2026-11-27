@@ -91,3 +91,36 @@ test('frost: driven steel past the frost line never lifts; footings at or above 
   // no jumps from month to month, and the gap under a footing is never negative
   for (let m = 0; m < 5; m += .01) { const a = F.lift(frostline, m, 3, 36, 'clay', hard), b = F.lift(frostline, m + .01, 3, 36, 'clay', hard); assert.ok(Math.abs(a.lift - b.lift) < .1 && a.gap >= 0); }
 });
+
+test('gate sag: the numbers behind the Gate sag tool', async () => {
+  const G = await import('../public/showroom/gate-plan.mjs');
+  const run = (w, brace, post, y) => G.sag(G.gateGeom(w, brace), { brace, post, y });
+  // Eurocode 5 slip modulus for a .131 in nail in southern pine (ρm 570 kg/m³): about 1,190 N/mm
+  near(G.kSer(.131) / 5.7101, 570 ** 1.5 * 3.3274 ** .8 / 30, 1e-9);
+  // a 3 in Schedule 40 gate post (2⅞ in OD, .203 wall) is about 2½ times stiffer than a 4×4
+  const ratio = G.POSTS.steel.EI / G.POSTS.wood.EI; assert.ok(ratio > 2.3 && ratio < 2.7, ratio);
+  // NDS: four toe-nailed .131 nails, 1½ in into wood that dried after it was built, permanent load: about 37 lb
+  assert.ok(Math.abs(G.braceHoldLb() - 36.5) < .5, G.braceHoldLb());
+  for (const w of [3, 4, 5, 6]) for (const brace of ['none', 'wrong', 'right', 'steel']) for (const post of ['wood', 'steel']) {
+    const z = run(w, brace, post, 0);
+    // everything is the change since the gate was hung
+    for (const k of ['drop', 'frame', 'lean', 'offset', 'liftH', 'liftL']) assert.ok(Math.abs(z[k]) < 1e-9, `${w} ${brace} ${post} day one ${k}=${z[k]}`);
+    let prev = -1;
+    for (let y = 0; y <= 15; y += .25) { const r = run(w, brace, post, y); assert.ok(r.drop >= prev - 1e-9, 'sag never undoes itself'); prev = r.drop; assert.ok(r.clear > 0, 'never drags'); }
+    // the wrong-way brace asks more of its nails than the NDS gives them, for every width here
+    assert.ok(z.braceLb > G.braceHoldLb());
+  }
+  // a welded frame on a driven steel post doesn't move
+  for (const w of [3, 6]) assert.ok(run(w, 'steel', 'steel', 15).offset < 1e-3);
+  // a right-way wood brace still settles by the opened-up pockets (about 5/16 in), then holds
+  const right = run(6, 'right', 'steel', 15); assert.ok(Math.abs(right.drop - G.pocketGrowIn(G.gateGeom(6), 15)) < .02, right.drop);
+  // on the same post at 15 years: steel frame < right-way brace < no brace < wrong-way brace (it let go)
+  const d = b => run(6, b, 'steel', 15).drop;
+  assert.ok(d('steel') < d('right') && d('right') < d('none') && d('none') < d('wrong'), [d('steel'), d('right'), d('none'), d('wrong')].join());
+  // wider gates pull harder on the top hinge: about width squared
+  const pull = w => run(w, 'right', 'steel', 0).pullLb; assert.ok(pull(6) / pull(4) > 1.8 && pull(6) / pull(4) < 2.4);
+  // 4×4s in concrete: the latch post heaves more than the hinge post, so the latch ends up further off than the gate dropped
+  const wd = run(4, 'right', 'wood', 15); assert.ok(wd.liftL > wd.liftH && wd.offset > wd.drop);
+  // the gate as measured off the 3D model (77 lb for a 4 ft gate with a brace)
+  assert.ok(Math.abs(G.gateGeom(4, 'right').weightLb - 77) < 2);
+});

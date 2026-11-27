@@ -219,7 +219,8 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     const vf = THREE.MathUtils.degToRad(c.fov), t = Math.tan(vf / 2), fitH = v.base.h / usable / 2 / t, fitW = v.base.w / 2 / t / aspect;
     const d = Math.max(fitH, fitW) * 1.02 / orbit.zoom, ftPerPx = 2 * d * t / h;
     aim.set(v.target.x, v.target.y - (ib - it) / 2 * ftPerPx, v.target.z);
-    c.position.set(aim.x + Math.sin(orbit.yaw) * Math.cos(orbit.pitch) * d, aim.y + Math.sin(orbit.pitch) * d, aim.z + Math.cos(orbit.yaw) * Math.cos(orbit.pitch) * d);
+    const yaw = orbit.yaw + (v.yaw0 || 0);
+    c.position.set(aim.x + Math.sin(yaw) * Math.cos(orbit.pitch) * d, aim.y + Math.sin(orbit.pitch) * d, aim.z + Math.cos(yaw) * Math.cos(orbit.pitch) * d);
     c.lookAt(aim); c.updateProjectionMatrix();
   };
   const layout = () => {
@@ -250,7 +251,9 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
         // each view gets its own tight shadow map, centred on what it looks at
         const s = Math.max(v.base.w, v.base.h) * .8;
         Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 1, far: 160 }); sun.shadow.camera.updateProjectionMatrix();
-        sun.target.position.set(v.target.x, 0, 0); sun.position.set(v.target.x - 22, 34, 30); sun.target.updateMatrixWorld(); sun.updateMatrixWorld();
+        // a view that looks from the far side gets its sun from that side too
+        const side = v.yaw0 ? Math.sign(Math.cos(v.yaw0)) || 1 : 1;
+        sun.target.position.set(v.target.x, 0, 0); sun.position.set(v.target.x - 22 * side, 34, 30 * side); sun.target.updateMatrixWorld(); sun.updateMatrixWorld();
         renderer.shadowMap.needsUpdate = true;
         renderer.setViewport(r.x, y, r.w, r.h); renderer.setScissor(r.x, y, r.w, r.h);
         renderer.render(scene, v.cam);
@@ -359,11 +362,11 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 // so a tool can hide, reveal or move single posts, rails and pickets.
 // grade(x): ground height along the run (the fence follows it); level: keep each section level and
 // step it, the way a store panel goes up on a slope.
-export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level = false } = {}) {
+export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level = false, gates, extra } = {}) {
   const E = engine(name, specs), lib = new E.MatLib(), B = new E.FenceBuilder(lib);
-  const spec = Object.assign({}, E.parse(name) || {}); if (noDig != null) spec.noDig = noDig;
+  const spec = Object.assign({}, E.parse(name) || {}, extra || {}); if (noDig != null) spec.noDig = noDig;
   const gy = grade || (() => 0);
-  const run = { pts: [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0 };
+  const run = { pts: [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
   group.updateMatrixWorld(true);

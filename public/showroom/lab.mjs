@@ -6,6 +6,7 @@
 import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs';
 import { webglOK } from './lab3d-ok.mjs';
 import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
+import { sag, gateGeom, BRACES as GBRACES } from './gate-plan.mjs';
 export { digNumbers } from './ui.mjs';
 import { visit } from './visit.mjs';
 import { helpOnce } from './help.mjs';
@@ -25,9 +26,9 @@ const TOOLS = [
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
-  { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and how a brace stops it',
-    how: [['slide', 'Slide the <b>gate width</b> and the <b>years in use</b>.'], ['tap', 'Try each <b>brace</b> and <b>hinge post</b> to see how much the gate drops.']],
-    take: 'A brace from the bottom hinge up to the latch side holds a gate square. A steel frame and a steel hinge post hold it best.' },
+  { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and what keeps a gate latching for years',
+    how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the bar sits too low for its catch, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
+    take: 'Most of a gate\'s trouble starts at the posts. A 3 in steel post driven below the frost line doesn\'t lean or heave, and a welded steel frame doesn\'t rack.' },
   { id: 'life', more: true, name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
     how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match your yard.']],
     take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
@@ -510,63 +511,102 @@ function frost(body) {
 }
 
 // ═════════════════════════════════════════════════════════════════
-// 5. GATE SAG — lever arm, bracing direction, steel frame
+// 5. GATE SAG — the gate's weight on its hinges, the frame, the brace, the hinge post, frost
 // ═════════════════════════════════════════════════════════════════
-const BRACES = [['none', 'No brace'], ['wrong', 'Brace the wrong way'], ['right', 'Brace the right way'], ['steel', 'GFS steel frame']];
+// The model is in gate-plan.mjs (Eurocode 5 nail slip and creep, NDS nail factors, USDA Wood Handbook
+// shrinkage, beam formulas for the post, the Frost & posts model). In 3D the gate is the Executive
+// App's own; without 3D the same sums run on the gate's measured shape and a drawing shows it.
+const G_BRACES = GBRACES;
 function gate(body) {
-  let width = 4, brace = 'right', years = 5, gpost = 'steel';
+  const st = { w: 4, brace: 'right', post: 'steel', y: 0, playing: false };
   body.innerHTML = `
+    <div class="gate-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the gate in 3D…</div></div>
+    <div class="lab-ctl vs-ctl">
+      <div class="vs-years"><button class="btn primary" id="gtPlay">Play 15 years</button>${slider('y', 'Years in use', 0, 15, .05, 0)}</div>
+    </div>
     <div class="lab-grid">
       <div class="lab-vis"><svg class="gate-svg" viewBox="0 0 420 300" aria-label="A wood gate on its hinges"></svg>
-        <div class="vis-note">Sag drawn bigger than life so you can see it.</div></div>
+        <div class="vis-note">Movement drawn 4 times bigger than life so you can see it.</div></div>
       <div class="lab-ctl">
-        ${slider('gw', 'Gate width', 3, 6, .5, width, ' ft')}
-        <div class="lab-label">Bracing</div>${seg('brace', BRACES, brace)}
-        <div class="lab-label">Hinge post</div>${seg('gpost', [['wood', '4×4 wood post'], ['steel', 'GFS 3 in steel post']], gpost)}
-        ${slider('y', 'Years in use', 0, 15, 1, years)}
+        ${slider('gw', 'Gate width', 3, 6, .5, st.w, ' ft')}
+        <div class="lab-label">Frame</div>${seg('brace', G_BRACES, st.brace)}
+        <div class="lab-label">Gate posts</div>${seg('gpost', [['wood', '4×4 wood in concrete'], ['steel', 'GFS 3 in steel, driven']], st.post)}
         <div class="readouts">
-          <div><b class="mono" id="gPull"></b><small>pull on the top hinge, compared with a 4 ft gate</small></div>
+          <div><b class="mono" id="gWt"></b><small>lb of gate hanging on the hinges</small></div>
+          <div><b class="mono" id="gPull"></b><small>lb pulling the top hinge off the post</small></div>
+          <div><b class="mono" id="gDrop"></b><small>the latch side has dropped since it was hung</small></div>
           <div><b id="gState"></b><small id="gStateS"></small></div>
         </div>
+        <p class="vis-note g3d-note" hidden>Everything moves at true size. Tap Show the math to see how each number is worked out.</p>
       </div>
     </div>
-    ${math(`<p><b>Why wide gates sag more</b>: a gate hangs from one side, so its weight acts as a lever on the hinges. The weight grows with the width and so does the lever, so the pull on the top hinge grows with width squared. A 5 ft gate pulls about (5 ÷ 4)² ≈ 1.6 times as hard as a 4 ft gate.</p>
-      <p><b>Which way a brace goes</b>: a wood brace works in compression, so it runs from the bottom hinge corner up to the top latch corner and props the latch side up. Run it the other way and it hangs off nails in tension, and the gate racks into a parallelogram. A steel cable is the opposite: it works in tension, from the top hinge corner down to the bottom latch corner.</p>
-      <p><b>The hinge post matters as much as the gate</b>: if the post leans, a perfectly square gate still drops at the latch. GFS gate posts are 3 in steel in a bigger wood box, so the post doesn't lean.</p>
-      <p><b>GFS steel frame</b>: wood gates can get a welded steel frame inside, which can't rack the way a wood frame does. Vinyl gates get aluminum inside the frame.</p>`)}`;
+    ${math(`<p><b>Why wide gates sag more</b>: a gate hangs from one side, so its weight works like a lever on the hinges. The top hinge is pulled off the post and the bottom one is pushed in, each with the gate's weight times how far out its middle is, divided by the distance between the hinges. A 6 ft gate weighs about 40% more than a 4 ft one and its weight sits half again as far out, so it pulls about twice as hard on the top hinge.</p>
+      <p><b>The frame</b>: with no brace, only the nails where the pickets cross the rails keep the gate square, and nails slip a little under steady load. Outdoors, wood joints creep: Eurocode 5 puts long-term movement of nailed wood joints kept outside at up to 5 times the first day's. Treated pine also goes up wet; as it dries, nails hold about 70% as well (the NDS wet-service factor).</p>
+      <p><b>Which way a brace goes</b>: a brace from the bottom hinge corner up to the top latch corner is squeezed, so it bears wood on wood and props the latch side up. Run it the other way and it is pulled, so it hangs on the nails at its ends, pulled lengthwise. The NDS gives smooth nails a quarter of their hold in wood that dries after it's built, two-thirds of that again when toe-nailed: about 37 lb for four nails, less than a 4 ft gate asks of them. So the wrong-way brace lets go.</p>
+      <p><b>Even a good brace drops a little</b>: the brace is cut to fit tight between the rails. As the rails dry they shrink across the grain (about 4½% for treated pine going from soaked to 12% moisture, from the USDA Wood Handbook), so each pocket opens about ⅛ in and the latch side settles about ⁵⁄₁₆ in before the brace bears again. That is why wood gates need an adjustment after the first year.</p>
+      <p><b>GFS welded steel frame</b>: 1½ in square steel tube, welded all the way around and corner to corner. A welded frame doesn't slip, creep or shrink, so it stays square.</p>
+      <p><b>The hinge post</b>: the pull on the top hinge bends the post. A 3 in steel post (2⅞ in Schedule 40 pipe) is about 2½ times stiffer than a 4×4 and doesn't creep; a 4×4 outdoors keeps bending a little more for years (Eurocode 5 creep for wood outside). Posts set in concrete also get lifted by frost, each a little differently, so the latch post and the hinge post drift apart (the same model as Frost & posts, Toledo clay, typical winters). GFS drives its steel 4 ft, below the frost line. Driven steel needs clay to grip; in sand GFS sets posts in concrete.</p>
+      <p><b>What isn't counted</b>: kids swinging on the gate, slams, hinge screws working loose, rot, and a footing rocking in soft ground. Each of those only adds to the sag, so these numbers are the least a gate moves, not the most.</p>
+      <p class="src">Sources: EN 1995-1-1 (Eurocode 5) Table 7.1 nail slip modulus, Table 3.2 and 2.3.2.2 creep; NDS for Wood Construction, nail withdrawal and wet-service factors; USDA Forest Products Laboratory, Wood Handbook (loblolly pine shrinkage and density); GFS brochure p. 23 (steel frame) and p. 6 (posts).</p>`)}`;
   const svg = $('.gate-svg', body);
-  const update = () => {
-    const k = (width / 4) ** 2, base = { none: 9, wrong: 7, right: .8, steel: .1 }[brace];
-    // A hinge post that leans lets the whole gate drop, braced or not.
-    const leanDeg = gpost === 'wood' ? clamp(years / 15, 0, 1) * 2.2 * Math.sqrt(k) : 0;
-    const rack = clamp(base * k * Math.sqrt(years / 5 || 0), 0, 40);
-    const pw = 70 + width * 40, drop = rack + pw * Math.sin(leanDeg * Math.PI / 180), lean = drop - rack;
-    $('[data-out=gw]', body).textContent = width + ' ft'; $('[data-out=y]', body).textContent = years;
-    $('#gPull', body).textContent = fmt(k, 2) + '×';
-    $('#gState', body).textContent = drop < 2 ? 'Square and swinging free' : drop < 9 ? 'Starting to drag' : 'Dragging on the ground';
-    $('#gStateS', body).textContent = lean > 3 && brace !== 'none' && brace !== 'wrong' ? 'The gate is square, but the wood hinge post is leaning, so the whole gate drops.' : brace === 'wrong' ? 'The brace is pulling on nails instead of pushing.' : brace === 'none' ? 'Nothing stops the frame from racking.' : brace === 'steel' ? 'A welded frame cannot rack.' : 'The brace props the latch corner up.';
-    const x0 = 210 - pw / 2 + 20, y0 = 60, h = 170, post = x0 - 22, sag = rack;
-    const pts = [[x0, y0], [x0 + pw, y0 + sag], [x0 + pw, y0 + h + sag], [x0, y0 + h]];
-    const P = p => p.join(',');
-    const pickets = Array.from({ length: Math.round(pw / 18) }, (_, i) => { const t = (i + .5) / Math.round(pw / 18), x = x0 + pw * t, dy = sag * t; const T = y0 - 14 + dy, B = T + h + 14, e = 3; return `<path d="M${x - 7},${B} L${x - 7},${T + e} L${x - 7 + e},${T} L${x + 7 - e},${T} L${x + 7},${T + e} L${x + 7},${B} Z" fill="#c98a5b" stroke="#7a4f2f" stroke-width=".8"/>`; }).join('');
-    const br = brace === 'right' ? [pts[3], pts[1]] : brace === 'wrong' ? [pts[0], pts[2]] : null;
+  let scene = null, raf = 0, live = true;
+  const frac = v => { const n = Math.round(Math.abs(v) * 16); if (!n) return '0'; const w = Math.floor(n / 16), r = n % 16; let f = ''; if (r) { let a = r, d = 16; while (a % 2 === 0) { a /= 2; d /= 2; } f = `${a}/${d}`; } return [w || '', f].filter(Boolean).join(' '); };
+  // without 3D: the gate face-on from the rail side, movement drawn 4 times bigger
+  const drawSvg = r => {
+    const K = 4, ppi = 2.6, pw = st.w * 12 * ppi * .82, h = 66 * ppi, x0 = 210 - pw / 2, gy = 250, y0 = gy - 8 - h;
+    const lift = [r.liftH, r.liftL].map(v => v * ppi * K), drop = r.drop * ppi * K;
+    const at = (x, y) => [x, y + (x - x0) / pw * drop - lift[0]];
+    const pts = [at(x0, y0), at(x0 + pw, y0), at(x0 + pw, y0 + h), at(x0, y0 + h)], P = p => p.map(v => v.toFixed(1)).join(',');
+    const n = Math.max(4, Math.round(pw / 15));
+    const pickets = Array.from({ length: n }, (_, i) => { const x = x0 + pw * (i + .5) / n, [tx, ty] = at(x, y0 - 10), [, by] = at(x, y0 + h + 4); return `<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${tx.toFixed(1)}" y2="${by.toFixed(1)}" stroke="#c98a5b" stroke-width="${(pw / n - 1.5).toFixed(1)}"/>`; }).join('');
+    const steel = st.brace === 'steel', frame = steel ? '#1c1e21' : '#7a4f2f';
+    const brace = st.brace === 'right' || steel ? [pts[3], pts[1]] : st.brace === 'wrong' ? [pts[0], pts[2]] : null;
+    const postX = [x0 - 14, x0 + pw + 14], postW = st.post === 'steel' ? 22 : 14;
     svg.innerHTML = `
-      <rect x="0" y="${y0 + h + 6}" width="420" height="80" fill="#1b2c1e"/>
-      ${gpost === 'steel' ? `<rect x="${post - 15}" y="${y0 - 30}" width="30" height="${h + 60}" fill="#b99a68" stroke="#5e4c30"/><rect x="${post - 6}" y="${y0 - 26}" width="12" height="${h + 56}" fill="#c8d2dc" opacity=".45"/>` : `<rect x="${post - 12}" y="${y0 - 30}" width="24" height="${h + 60}" fill="#8f6a46" transform="rotate(${leanDeg} ${post} ${y0 + h + 30})"/>`}
-      <g transform="rotate(${leanDeg} ${post} ${y0 + h + 30})">
+      <rect x="0" y="${gy}" width="420" height="${300 - gy}" fill="#1b2c1e"/>
+      ${postX.map((x, k) => `<rect x="${x - postW / 2}" y="${y0 - 22 - lift[k]}" width="${postW}" height="${gy - y0 + 22}" fill="${st.post === 'steel' ? '#b99a68' : '#8f6a46'}"/>`).join('')}
       ${pickets}
-      <polyline points="${P(pts[0])} ${P(pts[1])}" stroke="#7a4f2f" stroke-width="10" fill="none"/>
-      <polyline points="${P(pts[3])} ${P(pts[2])}" stroke="#7a4f2f" stroke-width="10" fill="none"/>
-      ${brace === 'steel' ? `<polygon points="${pts.map(P).join(' ')}" fill="none" stroke="#c8d2dc" stroke-width="5"/>` : ''}
-      ${br ? `<line x1="${br[0][0]}" y1="${br[0][1]}" x2="${br[1][0]}" y2="${br[1][1]}" stroke="${brace === 'right' ? '#3ecf8e' : '#ef5b5b'}" stroke-width="8" stroke-linecap="round"/>` : ''}
-      <rect x="${post + 8}" y="${y0 + 8}" width="20" height="10" rx="2" fill="#20262c"/><rect x="${post + 8}" y="${y0 + h - 18}" width="20" height="10" rx="2" fill="#20262c"/></g>
-      ${drop > 2 ? `<path d="M${x0 + pw + 14},${y0 + h} v${drop}" stroke="#ef5b5b" stroke-width="2"/><text x="${x0 + pw + 20}" y="${y0 + h + drop / 2 + 4}" class="svg-l red">SAG</text>` : ''}
-      <text x="${x0 + pw / 2}" y="${y0 - 26}" text-anchor="middle" class="svg-n">${width} ft gate</text>`;
+      <polyline points="${P(pts[0])} ${P(pts[1])}" stroke="${frame}" stroke-width="9" fill="none"/>
+      <polyline points="${P(pts[3])} ${P(pts[2])}" stroke="${frame}" stroke-width="9" fill="none"/>
+      ${steel ? `<polygon points="${pts.map(P).join(' ')}" fill="none" stroke="${frame}" stroke-width="6"/>` : ''}
+      ${brace ? `<line x1="${brace[0][0].toFixed(1)}" y1="${brace[0][1].toFixed(1)}" x2="${brace[1][0].toFixed(1)}" y2="${brace[1][1].toFixed(1)}" stroke="${steel ? frame : st.brace === 'right' ? '#3ecf8e' : '#ef5b5b'}" stroke-width="7" stroke-linecap="round"/>` : ''}
+      <rect x="${postX[1] - postW / 2 - 9}" y="${(y0 + h * .4 - lift[1]).toFixed(1)}" width="9" height="7" fill="#20262c"/>
+      <rect x="${(x0 + pw - 10).toFixed(1)}" y="${(at(x0 + pw, y0 + h * .4)[1] + 1).toFixed(1)}" width="10" height="5" fill="#20262c"/>
+      <text x="210" y="22" text-anchor="middle" class="svg-n">${st.w} ft gate · latch side ${r.drop < 1 / 32 ? 'hasn’t dropped' : 'down ' + frac(r.drop) + ' in'}</text>`;
   };
-  $('[name=gw]', body).oninput = e => { width = +e.target.value; update(); };
-  $('[name=y]', body).oninput = e => { years = +e.target.value; update(); };
-  bindSeg(body, (n, v) => { if (n === 'brace') brace = v; if (n === 'gpost') gpost = v; update(); });
-  update();
+  const draw = () => {
+    const r = scene ? scene.numbers() : sag(gateGeom(st.w, st.brace), st);
+    $('[data-out=gw]', body).textContent = st.w + ' ft'; $('[data-out=y]', body).textContent = st.y < .05 ? 'Day one' : `${Math.floor(st.y)} yr${Math.floor(st.y) === 1 ? '' : 's'}`;
+    $('#gWt', body).textContent = fmt(r.weightLb); $('#gPull', body).textContent = fmt(r.pullLb);
+    $('#gDrop', body).textContent = r.drop < 1 / 32 ? '0 in' : frac(r.drop) + ' in';
+    const off = r.offset;
+    $('#gState', body).textContent = off < 1 / 16 ? 'Still where it was hung' : off <= .75 ? 'Latches, but needs adjusting' : 'Won’t latch';
+    $('#gStateS', body).textContent = off < 1 / 16 ? 'The latch still drops right into its catch.' : `The latch now sits ${frac(off)} in lower than its catch${r.liftL > .05 ? ', partly because frost has lifted the posts unevenly' : ''}.`;
+    if (!scene) drawSvg(r);
+  };
+  const setOpt = o => { Object.assign(st, o); if (scene) scene.set({ w: st.w, brace: st.brace, post: st.post, y: st.y }); draw(); };
+  const play = () => {
+    if (st.playing) { st.playing = false; $('#gtPlay', body).textContent = 'Play 15 years'; return; }
+    if (st.y >= 14.9) st.y = 0;
+    if (reduced.matches) { setOpt({ y: 15 }); $('[name=y]', body).value = 15; return; }
+    st.playing = true; $('#gtPlay', body).textContent = 'Pause';
+    let last = performance.now();
+    const step = now => { if (!st.playing || !live) return; const dt = Math.min(.05, (now - last) / 1000); last = now;
+      setOpt({ y: Math.min(15, st.y + dt * 1.2) }); $('[name=y]', body).value = st.y;
+      if (st.y >= 15) { st.playing = false; $('#gtPlay', body).textContent = 'Play again'; return; } raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  };
+  $('#gtPlay', body).onclick = play;
+  $('[name=y]', body).oninput = e => { st.playing = false; $('#gtPlay', body).textContent = 'Play 15 years'; setOpt({ y: +e.target.value }); };
+  $('[name=gw]', body).oninput = e => setOpt({ w: +e.target.value });
+  bindSeg(body, (n, v) => { if (n === 'brace') setOpt({ brace: v }); if (n === 'gpost') setOpt({ post: v }); });
+  if (webglOK()) {
+    const host = $('.gate-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.g3d-note', body).hidden = false;
+    import('./gate3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createGateScene(host, { specs: app.live?.specs }); scene.set({ w: st.w, brace: st.brace, post: st.post, y: st.y }); draw(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.g3d-note', body).hidden = true; scene = null; draw(); });
+  }
+  draw();
+  return () => { live = false; st.playing = false; cancelAnimationFrame(raf); scene?.dispose(); scene = null; };
 }
 
 // ═════════════════════════════════════════════════════════════════
