@@ -48,6 +48,26 @@ test('no-dig: dirt and concrete from a dug 150 ft fence (10 in × 36 in holes, p
   near(n.dirtFt3, 32.72, 0.01);                               // in the ground
   near(n.looseYd3, 32.72 * 1.3 / 27, 0.01);                   // 1.58 cu yd once dug
   near(n.lb, 32.72 * 110, 2);                                 // about 3,600 lb
-  assert.equal(n.bags, 47);                                   // (1.636 − 0.255) × 20 / 0.6 → 46.03 → 47 bags
+  assert.equal(n.bags, 47);                                   // (1.636 − 0.227) × 20 / 0.6 → 46.97 → 47 bags (the 4×4 stands 32 in down)
   assert.equal(n.concLb, 47 * 80);
+});
+
+test('no-dig vs dug: the 3D install day runs in order, and no-dig is built before the dug concrete has cured', async () => {
+  const { DUG, ND, DUR } = await import('../public/showroom/dig-plan.mjs');
+  const flat = o => Object.values(o).flatMap(v => Array.isArray(v[0]) ? v : [v]);
+  for (const w of [...flat(DUG), ...flat(ND)]) assert.ok(w[0] < w[1] && w[0] >= 0 && w[1] <= 1, `window ${w}`);
+  const steps = o => ['dig', 'drive', 'exit', 'lower', 'pour', 'box', 'cure', 'rails', 'pickets', 'clean'].filter(k => o[k]).flatMap(k => Array.isArray(o[k][0]) ? o[k] : [o[k]]);
+  for (const o of [DUG, ND]) { const s = steps(o).sort((a, b) => a[0] - b[0]); for (let i = 1; i < s.length; i++) assert.ok(s[i][0] >= s[i - 1][1] - 1e-9 || s[i - 1] === o.lower?.[0], `steps overlap: ${s[i - 1]} / ${s[i]}`); }
+  assert.ok(ND.pickets[1] < DUG.cure[1], 'the no-dig fence is done while the dug posts still wait on concrete');
+  assert.ok(DUG.rails[0] >= DUG.cure[1], 'no rails on dug posts until the concrete has had its 48 hours');
+  assert.ok(DUR >= 15000 && DUR <= 40000);
+});
+test('Fence Lab 3D uses the Executive App engine byte for byte (vendor/exec/SOURCE.json)', async () => {
+  const fs = await import('node:fs'), crypto = await import('node:crypto');
+  const dir = new URL('../public/showroom/vendor/exec/', import.meta.url), src = JSON.parse(fs.readFileSync(new URL('SOURCE.json', dir)));
+  assert.match(src.commit, /^[0-9a-f]{40}$/);
+  assert.ok(src.files['fence-engine.mjs'] && src.files['real-surfaces.mjs']);
+  for (const [name, sha] of Object.entries(src.files)) assert.equal(crypto.createHash('sha256').update(fs.readFileSync(new URL(name, dir))).digest('hex'), sha, name + ' was edited; run scripts/showroom/sync-exec-engine.mjs instead');
+  const engine = fs.readFileSync(new URL('fence-engine.mjs', dir), 'utf8');
+  assert.ok(engine.includes('sp.noDig&&sp.wood&&sp.woodSupport!=="driven-box"'), 'the King Plus no-dig box build is in the engine');
 });

@@ -31,7 +31,7 @@ const LAB_LINE = { dig: 'No holes, no concrete, no dirt left in your yard', buil
 export function initVisit(a) {
   app = a; D = app.data; load();
   const btn = document.createElement('button');
-  btn.className = 'pill'; btn.id = 'btnVisit'; btn.setAttribute('aria-label', 'This visit');
+  btn.className = 'pill'; btn.id = 'btnVisit'; btn.setAttribute('aria-label', 'Your picks');
   btn.innerHTML = `${icons.heart}<span class="mono" id="visitCount"></span>`;
   $('#btnSearch').before(btn); btn.onclick = () => openRecap();
   const rv = document.createElement('button'); rv.className = 'pill'; rv.id = 'btnReviews'; rv.setAttribute('aria-label', 'Customer reviews');
@@ -68,7 +68,7 @@ export function openRecap(x = null) {
   const first = name => (name || '').split(' ')[0];
   el.innerHTML = `
     <div class="recap-top"><button class="iconbtn" data-x aria-label="Close">${icons.close}</button>
-      <div class="grow"><div class="eyebrow">${ro ? 'FROM GHAREEB FENCING SOLUTIONS' : 'THIS VISIT'}</div><h2>${ro ? (data.customer.name ? `${esc(first(data.customer.name))}, here are your fence picks` : 'Your fence picks') : 'Saved during this visit'}</h2></div></div>
+      <div class="grow"><div class="eyebrow">${ro ? 'FROM GHAREEB FENCING SOLUTIONS' : 'YOUR PICKS'}</div><h2>${ro ? (data.customer.name ? `${esc(first(data.customer.name))}, here are your fence picks` : 'Your fence picks') : 'Your fence picks'}</h2></div></div>
     <div class="recap-body">
       ${data.address ? `<p class="recap-addr">${icons.pin.replace('<svg', '<svg width="16" height="16"')} ${esc(data.address)}</p>` : ''}
       <section><h3>Styles <span class="mono">${styles.length}</span></h3>
@@ -85,20 +85,20 @@ export function openRecap(x = null) {
         <div class="rs-acts"><button class="btn sm blue" data-fence3d>${icons.cube} See it in 3D</button>${ro ? '' : `<button class="btn sm" data-fencemap>${icons.map} Edit on the map</button>`}</div></section>` : ''}
       ${ro ? `<section class="recap-call"><h3>Questions?</h3><p>Call or text Ghareeb Fencing Solutions at <b class="mono">${OFFICE}</b>.</p>
         <div class="rs-acts"><a class="btn primary" href="tel:${OFFICE_TEL}">Call</a><a class="btn" href="sms:${OFFICE_TEL}">Text</a><a class="btn ghost" href="/">ghareebfence.com</a></div></section>`
-      : `<section><h3>Send it to the customer</h3><p class="muted">A link to everything above. It opens on their phone with your photos, blueprints and 3D.</p>
-        <div class="rs-acts"><button class="btn primary" data-send>Send link</button><button class="btn" data-copy>Copy link</button></div>${v.sent ? `<p class="src">Last sent ${esc(new Date(v.sent).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET')}</p>` : ''}</section>
-      <section><h3>Customer sign-in</h3><p class="muted">Saves this customer as a lead in the Executive App with everything from this visit.</p>
+      : `<section><h3>Keep a link</h3><p class="muted">A link to everything above, with the photos, blueprints and 3D. Send it to yourself, or to whoever you're deciding with.</p>
+        <div class="rs-acts"><button class="btn primary" data-send>Share link</button><button class="btn" data-copy>Copy link</button></div>${v.sent ? `<p class="src">Last sent ${esc(new Date(v.sent).toLocaleString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) + ' ET')}</p>` : ''}</section>
+      <section><h3>Get a free quote</h3><p class="muted">Send us your picks and we'll get back to you. Everything above comes with it, so you won't have to explain it twice.</p>
         <form class="lead" novalidate>
           <label>Name<input name="name" autocomplete="name" value="${esc(v.customer.name || '')}" required></label>
           <label>Phone<input name="phone" type="tel" autocomplete="tel" inputmode="tel" value="${esc(v.customer.phone || '')}" required></label>
           <label>Email <small>(optional)</small><input name="email" type="email" autocomplete="email" value="${esc(v.customer.email || '')}"></label>
           <label>Address<input name="address" autocomplete="street-address" value="${esc(v.customer.address || v.address || '')}"></label>
-          <fieldset><legend>Best way to reach them</legend><div class="opts">${['Call', 'Text', 'Email'].map(r => `<label class="chip"><input type="radio" name="reach" value="${r}" ${v.customer.reach === r ? 'checked' : ''}> ${r}</label>`).join('')}</div></fieldset>
-          <label>Notes<textarea name="notes" rows="3">${esc(v.customer.notes || '')}</textarea></label>
+          <fieldset><legend>Best way to reach you</legend><div class="opts">${['Call', 'Text', 'Email'].map(r => `<label class="chip"><input type="radio" name="reach" value="${r}" ${v.customer.reach === r ? 'checked' : ''}> ${r}</label>`).join('')}</div></fieldset>
+          <label>Anything we should know? <small>(optional)</small><textarea name="notes" rows="3">${esc(v.customer.notes || '')}</textarea></label>
           <p class="lead-msg" role="status"></p>
-          <div class="rs-acts"><button class="btn primary" type="submit">Save as lead</button></div>
+          <div class="rs-acts"><button class="btn primary" type="submit">Send my picks</button></div>
         </form></section>
-      <section><div class="rs-acts"><button class="btn ghost" data-new>Start a new visit</button></div></section>`}
+      <section><div class="rs-acts"><button class="btn ghost" data-new>Clear my picks</button></div></section>`}
     </div>`;
   // The customer's copy only shows what was actually picked.
   if (ro) for (const h of $$('.recap-body section h3 .mono', el)) if (h.textContent.trim() === '0') h.closest('section').remove();
@@ -118,7 +118,7 @@ export function openRecap(x = null) {
     if (b.dataset.fencemap !== undefined) { close(); app.go('permits', {}); }
     if (b.dataset.send !== undefined) send();
     if (b.dataset.copy !== undefined) { try { await navigator.clipboard.writeText(shareUrl()); toast('Link copied'); } catch { prompt?.('Copy this link', shareUrl()); } }
-    if (b.dataset.new !== undefined) { modal(`<h2>Start a new visit?</h2><p style="margin:0;color:var(--dim)">This clears the saved styles, pages, fence and customer details on this device.</p><div class="row"><button class="btn ghost" data-close>Keep it</button><button class="btn primary" id="clearVisit">Clear</button></div>`, { onOpen: (m, c) => { m.querySelector('#clearVisit').onclick = () => { v = blank(); save(); c(); el.remove(); toast('New visit started'); }; } }); }
+    if (b.dataset.new !== undefined) { modal(`<h2>Clear your picks?</h2><p style="margin:0;color:var(--dim)">This clears the saved styles, pages, fence and contact details on this device.</p><div class="row"><button class="btn ghost" data-close>Keep it</button><button class="btn primary" id="clearVisit">Clear</button></div>`, { onOpen: (m, c) => { m.querySelector('#clearVisit').onclick = () => { v = blank(); save(); c(); el.remove(); toast('New visit started'); }; } }); }
   };
   const form = el.querySelector('form.lead');
   if (form) {
@@ -129,7 +129,7 @@ export function openRecap(x = null) {
 
 async function send() {
   const url = shareUrl(), name = (v.customer.name || '').split(' ')[0];
-  const text = `${name ? name + ', here' : 'Here'} are the fence styles we looked at today. Photos, blueprints and 3D are all in the link. Questions? Call or text Ghareeb Fencing Solutions at ${OFFICE}.`;
+  const text = `${name ? name + ', here' : 'Here'} are the fence picks from Ghareeb Fencing Solutions. Photos, blueprints and 3D are all in the link. Questions? Call or text ${OFFICE}.`;
   try {
     if (navigator.share) await navigator.share({ title: 'Your fence picks · Ghareeb Fencing Solutions', text, url });
     else { await navigator.clipboard.writeText(text + '\n' + url); toast('Message and link copied. Paste it into a text or email.'); }
@@ -147,15 +147,15 @@ function loadLeads() {
 async function saveLead(form) {
   const msg = form.querySelector('.lead-msg'), btn = form.querySelector('[type=submit]'), c = v.customer;
   const bad = [];
-  if (!String(c.name || '').trim()) bad.push('Add their name.');
+  if (!String(c.name || '').trim()) bad.push('Add your name.');
   if (String(c.phone || '').replace(/\D/g, '').length < 10) bad.push('Add a 10-digit phone number.');
   if (!c.reach) bad.push('Pick call, text or email.');
-  if (c.reach === 'Email' && !/^\S+@\S+\.\S+$/.test(c.email || '')) bad.push('Add their email, since that is how they want to hear from us.');
+  if (c.reach === 'Email' && !/^\S+@\S+\.\S+$/.test(c.email || '')) bad.push('Add your email, since that is how you want to hear from us.');
   msg.className = 'lead-msg';
   if (bad.length) { msg.classList.add('bad'); msg.textContent = bad.join(' '); form.querySelector(!String(c.name || '').trim() ? '[name=name]' : '[name=phone]')?.focus({ preventScroll: true }); return; }
   const sig = [c.name, c.phone, c.email, c.reach, c.notes, c.address || v.address, v.styles.join(), v.pages.join(), v.lab.join(), v.fence?.ft].join('|');
-  if (v.customer.savedSig === sig) { msg.classList.add('ok'); msg.textContent = 'Already saved. Nothing has changed since.'; return; }
-  msg.textContent = 'Saving…'; btn.disabled = true;
+  if (v.customer.savedSig === sig) { msg.classList.add('ok'); msg.textContent = 'Already sent. Nothing has changed since.'; return; }
+  msg.textContent = 'Sending…'; btn.disabled = true;
   try {
     const L = await loadLeads();
     const styles = v.styles.map(id => D.styleById[id]).filter(Boolean);
@@ -164,8 +164,8 @@ async function saveLead(form) {
     const input = { name: c.name, phone: c.phone, email: c.email, address: c.address || v.address, contactMethod: c.reach, notes, source: 'showroom', heardFrom: 'Showroom visit', fenceType: fam, fenceStyle: v.fence?.model || styles.map(s => s.name).join(', ').slice(0, 190) };
     if (v.fence?.geometry?.lines?.length) { input.geometry = JSON.stringify(v.fence.geometry); input.linearFeet = Math.round(v.fence.ft || 0) || ''; input.singleGates = v.fence.geometry.gates.filter(g => g.type !== 'drive').length; input.doubleGates = v.fence.geometry.gates.filter(g => g.type === 'drive').length; }
     const r = await Promise.race([L.submit(input), new Promise((_, no) => setTimeout(() => no(Error('slow')), 25000))]); // never leave the button stuck on "Saving…"
-    if (r.ok) { msg.classList.add('ok'); msg.textContent = 'Saved. The lead is on its way to the Executive App.'; v.customer.savedAt = Date.now(); v.customer.savedSig = sig; save(); }
+    if (r.ok) { msg.classList.add('ok'); msg.textContent = 'Sent. Thanks! We\'ll be in touch soon.'; v.customer.savedAt = Date.now(); v.customer.savedSig = sig; save(); }
     else { msg.classList.add('bad'); msg.textContent = (r.errors || ['Not saved.']).join(' '); }
-  } catch (e) { msg.classList.add('bad'); msg.textContent = navigator.onLine ? 'Could not reach the website. Try again in a moment.' : 'No signal here. The details are kept on this device. Tap Save again when you have signal.'; }
+  } catch (e) { msg.classList.add('bad'); msg.textContent = navigator.onLine ? 'Could not reach us just now. Try again in a moment, or call (419) 214-2107.' : 'No signal here. Your details are kept on this device. Tap Send again when you have signal.'; }
   btn.disabled = false;
 }

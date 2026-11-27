@@ -145,12 +145,14 @@ export function gesture(kind) {
   return `<span class="gest g-${kind}" aria-hidden="true">${kind === 'slide' ? '<s></s>' : ''}${kind === 'type' ? '<s></s>' : ''}<i></i>${two ? '<i class="b"></i>' : ''}</span>`;
 }
 
-export const DIG = { holeIn: 10, depthIn: 36, swell: 1.3, lbPerFt3: 110, barrowFt3: 6, bagLb: 80, bagFt3: 0.6, postIn: 3.5, spacingFt: 8 };
+// A dug post, as the Executive App draws it: a 10 in hole 36 in deep, the 4×4 set 32 in down with
+// concrete under and around it. Driven posts: an 8 ft pipe, 4 ft in the ground.
+export const DIG = { holeIn: 10, depthIn: 36, postDepthIn: 32, swell: 1.3, lbPerFt3: 110, barrowFt3: 6, bagLb: 80, bagFt3: 0.6, postIn: 3.5, spacingFt: 8, pipeOdIn: 2.375, pipeWallIn: .154, pipeLenIn: 96, drivenIn: 48 };
 export function digNumbers(lengthFt, k = DIG) {
   const posts = Math.ceil(lengthFt / k.spacingFt) + 1;
   const r = k.holeIn / 2 / 12, d = k.depthIn / 12;
   const hole = Math.PI * r * r * d;                          // cu ft of dirt out of each hole, in the ground
-  const conc = hole - (k.postIn / 12) ** 2 * d;              // concrete around a 4×4 post
+  const conc = hole - (k.postIn / 12) ** 2 * (k.postDepthIn / 12);   // concrete under and around the 4×4
   const dirt = hole * posts, loose = dirt * k.swell;
   return { posts, hole, dirtFt3: dirt, dirtYd3: dirt / 27, looseFt3: loose, looseYd3: loose / 27, lb: dirt * k.lbPerFt3,
     barrows: loose / k.barrowFt3, bags: Math.ceil(conc * posts / k.bagFt3), concLb: Math.ceil(conc * posts / k.bagFt3) * k.bagLb };

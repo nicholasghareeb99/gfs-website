@@ -54,7 +54,7 @@ export async function init(a, el) {
   els.showChrome.onclick = () => setChrome(false);
   $('.ov-close', root).onclick = () => closeOverview();
   $('.t', els.pager).onclick = () => openOverview();
-  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to this visit` : 'Removed from this visit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
+  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to your picks` : 'Removed from your pisit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
   addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
     if (app.mode !== 'brochure' || e.target.matches('input')) return;

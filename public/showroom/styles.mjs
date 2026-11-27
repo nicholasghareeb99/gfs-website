@@ -78,7 +78,7 @@ function tileHTML(s, i, total) {
     <div class="ph">${imgs.length ? imgs.map((u, j) => `<div class="${j ? '' : 'on'}" style="background-image:${u};animation-delay:${-j * 3}s"></div>`).join('') : NOPHOTO}</div>
     <div class="shade"></div><div class="gloss"></div>
     <span class="count">${String(i + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}</span>
-    <button class="heart" data-act="heart" aria-label="Save ${esc(s.name)} to this visit" aria-pressed="${visit.hasStyle(s.id)}">${icons.heart}</button>
+    <button class="heart" data-act="heart" aria-label="Save ${esc(s.name)} to your picks" aria-pressed="${visit.hasStyle(s.id)}">${icons.heart}</button>
     <span class="pickmark" aria-hidden="true"></span>
     <div class="badges">${s.models.length ? `<span>${icons.cube} 3D</span>` : ''}${n ? `<span>${icons.photos} ${n}</span>` : ''}</div>
     <div class="body">
@@ -148,7 +148,7 @@ function rotatePhotos() {
 
 const photoItems = s => execItems(s);
 function action(a, s, tile) {
-  if (a === 'heart') { const on = visit.toggleStyle(s.id); tile.querySelector('[data-act=heart]').setAttribute('aria-pressed', String(on)); toast(on ? `${s.name} saved to this visit` : 'Removed from this visit', 1400); return; }
+  if (a === 'heart') { const on = visit.toggleStyle(s.id); tile.querySelector('[data-act=heart]').setAttribute('aria-pressed', String(on)); toast(on ? `${s.name} saved to your picks` : 'Removed from your picks', 1400); return; }
   if (a === 'photos') {
     const items = photoItems(s); if (!items.length) return;
     openPhotos({ items, title: s.name, sub: `${items.length} photos`, fromRect: tile.querySelector('.ph').getBoundingClientRect() });

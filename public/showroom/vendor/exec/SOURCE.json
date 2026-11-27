@@ -1,0 +1,14 @@
+{
+  "from": "nicholasghareeb99/gfence-app",
+  "commit": "7379d547af49d41b03330666c2fe2d4854a54ca3",
+  "built": "buildCandidate({allowMissing:true}) → gfs/fence-engine.mjs and its imports",
+  "files": {
+    "fence-engine.mjs": "3187166ff736c5a206727f8e13ff7436445f46f3da41b3a34e4e794625b7fe44",
+    "audited-model-corrections.mjs": "09dc5c8f97eadbf96015a422a2f5baf4978557c7c4c538a638839d5f4182de89",
+    "ranch-model-contract.mjs": "4a30ba820d411b69e60d43b41acb3e7a750b47a8965babc491d8b78d36432515",
+    "studio-rendering.mjs": "3d4b1fdfe7b857aec411edea5dce3f6f00304f364889f56bb9aa80150d22a02a",
+    "model-review.mjs": "b1e135163ba17a0fc89e6dd00f57dbb2390bf10c7e616b1a5d9b0937c3cd86ee",
+    "fence-layers.mjs": "c9cce6441bb3e6e1a6a9226097d92f122cb50888d6434bb7e2604e70f509eeb7",
+    "real-surfaces.mjs": "3015493f1487c2a3838323d89a334e9bafd212c67ad6f6041138ecb508c53a7c"
+  }
+}

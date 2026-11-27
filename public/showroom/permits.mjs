@@ -16,10 +16,10 @@ export async function init(a, el) {
   root.innerHTML = `
     <div id="pmap"></div>
     <div class="p-search">
-      <label class="search">${icons.search}<input type="search" placeholder="Customer address" enterkeyhint="search" autocomplete="off" aria-label="Address"><button class="loc" aria-label="Use this device's location">${icons.locate}</button></label>
+      <label class="search">${icons.search}<input type="search" placeholder="Your address" enterkeyhint="search" autocomplete="off" aria-label="Address"><button class="loc" aria-label="Use this device's location">${icons.locate}</button></label>
       <div class="sugg" hidden></div>
     </div>
-    <div class="p-empty"><div class="box">${icons.map}<h2>Where can the fence go?</h2><p>Enter the customer's address. You'll see the lot, the house, the street, and the height allowed in each part of the yard.</p></div></div>
+    <div class="p-empty"><div class="box">${icons.map}<h2>Where can the fence go?</h2><p>Enter your address. You'll see the lot, the house, the street, and the height allowed in each part of the yard.</p></div></div>
     <div class="p-card" hidden></div>`;
   await loadLeaflet();
   window.GFS_PARCELS = window.GFS_PARCELS || { provider: 'arcgis', setbackInches: 6, counties: [
@@ -218,7 +218,7 @@ function analyse() {
   return { P, lot, house, roads, edges, fronts: fronts2 };
 }
 
-// The salesman's corrections (street side, front of house) are kept per address on this device.
+// Corrections made on the map (street side, front of house) are kept per address on this device.
 const editKey = a => 'gfs-showroom-front:' + String(a).toLowerCase();
 function loadEdits(address) { try { const v = JSON.parse(localStorage.getItem(editKey(address)) || 'null'); return v ? { frontPick: v.pick ?? undefined, override: v.override || undefined } : {}; } catch { return {}; } }
 function saveEdits() { try { if (Array.isArray(cur.frontPick) || cur.override) localStorage.setItem(editKey(cur.address), JSON.stringify({ pick: cur.frontPick ?? null, override: cur.override || null })); else localStorage.removeItem(editKey(cur.address)); } catch {} }
