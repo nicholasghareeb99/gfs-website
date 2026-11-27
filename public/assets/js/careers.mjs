@@ -353,7 +353,7 @@ form.onsubmit = async event => {
       gfs_contract: contract, intake_kind: 'careers', submission_id: submissionId, application: payload,
     });
     const response = await fetch('/_netlify-forms.html', {method: 'POST', body, signal: controller.signal,
-      referrerPolicy: 'no-referrer', redirect: 'error'});
+      mode: 'same-origin', referrerPolicy: 'no-referrer'});
     if (!response.ok) throw Error();
     submitted = 'web_' + submissionId;
     answers = {};

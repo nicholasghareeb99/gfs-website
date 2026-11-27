@@ -22,6 +22,7 @@ for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], [
         const fields = Object.fromEntries(new URLSearchParams(request.postData()));
         posts.push(intakeRecord(fields));
         if (role === 'installer' && posts.length === 1) return route.fulfill({status: 503});
+        if (role === 'installer') return route.fulfill({status: 303, headers: {location: '/careers/'}});
         return route.fulfill({status: 200, body: 'Fixture receipt'});
       }
       return route.continue();
