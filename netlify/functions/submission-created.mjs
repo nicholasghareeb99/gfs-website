@@ -9,7 +9,7 @@
 // 16-18 Nov 2026: the default export was an object ({formSubmitted}), the site was deployed through the
 // API, and every submission failed with "e.default is not a function": leads stayed in Netlify Forms and
 // never reached the office. The function below, with formSubmitted attached, works both ways.
-import { careersRecord } from './careers-intake.mjs';
+import { careersRecord } from '../lib/careers-intake.mjs';
 import { contract as careersContract } from '../../public/assets/js/careers-contract.mjs';
 import { estimateForIntake, readPricingProject } from './ballpark-price.mjs';
 import { formatRange, parseRange } from '../../public/assets/js/ballpark-pricing-rules.mjs';
