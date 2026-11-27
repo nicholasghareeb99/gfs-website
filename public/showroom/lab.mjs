@@ -94,6 +94,8 @@ export function show(opts = {}) {
   // Tapping Lab in the dock while already in the Lab goes back to the Lab home.
   const tool = opts.tool || (opts.via === 'dock' && visible ? 'home' : current || 'home');
   visible = true; select(tool, true);
+  // get the 3D engine loading while the customer is still choosing a tool
+  if (!show.warmed && webglOK()) { show.warmed = true; setTimeout(() => import('./lab3d.mjs').catch(() => {}), 400); }
 }
 export function hide() { visible = false; stop?.(); stop = null; }
 export const where = () => ({ opts: { tool: current || 'home' }, label: current && current !== 'home' ? `Fence Lab · ${TOOLS.find(x => x.id === current).name}` : 'Fence Lab', short: current && current !== 'home' ? TOOLS.find(x => x.id === current).name : 'Lab' });

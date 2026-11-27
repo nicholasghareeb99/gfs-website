@@ -185,3 +185,25 @@ test('wood movement: what the 3D boards are scaled by', async () => {
   // built dry and wetted, a board swells (negative shrink)
   assert.ok(L.shrink(pine, 5.5, 8, 30) < 0);
 });
+
+test('offline: the background download lists every file the 3D Lab imports', async () => {
+  const fs = await import('node:fs'), path = await import('node:path');
+  const dir = new URL('../public/showroom/', import.meta.url).pathname, pub = path.join(dir, '..');
+  const src = fs.readFileSync(path.join(dir, 'app.js'), 'utf8');
+  const list = [...src.match(/export const LAB3D_FILES = \[([\s\S]*?)\];/)[1].matchAll(/'([^']+)'/g)].map(m => m[1]);
+  const sw = fs.readFileSync(path.join(dir, 'sw.js'), 'utf8');
+  const have = new Set(list.map(u => path.normalize(u.startsWith('/') ? path.join(pub, u) : path.join(dir, u))));
+  for (const f of have) assert.ok(fs.existsSync(f), `listed file exists: ${f}`);
+  const seen = new Set();
+  const walk = f => {
+    if (seen.has(f)) return; seen.add(f);
+    for (const m of fs.readFileSync(f, 'utf8').matchAll(/(?:from|import)\s*\(?\s*['"]([^'"]+)['"]/g)) {
+      const u = m[1]; if (!/^[./]/.test(u)) continue;
+      const t = path.normalize(u.startsWith('/') ? path.join(pub, u) : path.join(path.dirname(f), u));
+      if (fs.existsSync(t)) walk(t);
+    }
+  };
+  for (const f of fs.readdirSync(dir).filter(x => /3d\.mjs$/.test(x))) walk(path.join(dir, f));
+  // every imported file is either in the list or already in the service worker's core list
+  for (const f of seen) assert.ok(have.has(f) || sw.includes(`'${path.basename(f)}'`), `covered: ${path.relative(dir, f)}`);
+});
