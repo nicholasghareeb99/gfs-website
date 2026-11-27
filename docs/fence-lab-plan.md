@@ -28,7 +28,7 @@ Any agent working on the Lab (Claude, Codex, Antigravity) should read this first
 | No-dig vs dug | Driven steel is in the same day with no holes, spoil or concrete to cure | Install steps and volumes from the dig plan | Check spoil volume and bag count against a real 150 ft job; crew figures and tools look blocky |
 | Frost & posts | A post set short of the frost line gets lifted; steel driven 4 ft doesn't | Frost depth by county, heave model in `build-plan.mjs` | Lift is drawn bigger than life and the screen says so. Better: draw it true size with a close-up at the ground, like the gate latch view |
 | Our build vs prefab | More wood and steel in the same 8 ft, and it stays straight | Part counts and sizes from the models; ageing model | Ageing (grey, rot band, lean) needs a year-by-year source check; rot timing is the weakest claim |
-| Gate sag | A gate drops at the latch because joints creep and posts lean; steel posts and a steel frame hold | Eurocode 5 joint creep, NDS nail values, beam bending | Hardware: butterfly hinges done (shape from product type, needs a photo to confirm); latch needs a photo of the GFS post latch |
+| Gate sag | A gate drops at the latch because joints creep and posts lean; steel posts and a steel frame hold | Eurocode 5 joint creep, NDS nail values, beam bending | Hardware redrawn from a GFS gate photo. Open: hinge count on 6 ft gates, and which face the hardware mounts on |
 | Grade Lab | We follow the ground, keep the top line clean and close the gaps | Geometry only | Real grass now hides small gaps a little, like a real yard: make sure the gap label still reads |
 | Vinyl walls | Same-size post, thicker wall, steel inside: it bends far less | Beam math, ASCE 7 wind, PVC and steel properties | The big-box post is modelled as bare vinyl in concrete. Confirm that is what the common store kit is; if store kits use an insert, the comparison must change |
 | Wind | Solid fences take the most push; that is why posts and depth matter | ASCE 7; flow from published wind-tunnel work | Smoke lines are an average flow: says so. Add a one-line "what this means for your fence" result |
@@ -60,10 +60,14 @@ Next, in order of how much they change the picture:
 - Hardware is Nationwide Industries. The 8 in contemporary butterfly hinge takes one pair
   on gates 5 ft and under and three hinges on 6 ft and taller. The standard post latch has a
   receiver lag-screwed to the latch post and a spring lever on the face of the gate.
-- The Lab draws the hinge as two matching flared leaves on a short barrel. The maker
-  publishes no drawing, so the leaf sizes are typical ones. **Needs a photo from Nick.**
-- The latch is still the app's gravity latch (arm on the gate, catch on the post face) with
-  a pull handle. **Needs a photo from Nick** before it is redrawn.
+- Reference: `public/assets/img/work/pt-shadowbox-gate-detail.jpg` (a GFS gate, close enough
+  to scale the hardware off the 5½ in pickets) and the gate photo on brochure page 13.
+- The Lab now draws both from that photo: the butterfly hinge (8 in tall at the outer corners,
+  two diamond cut-outs per leaf) and the post latch (spear plate on the gate, round bar, strap
+  catch on the post). The app's separate pull handle is gone.
+- **Open with Nick:** two or three hinges on a 6 ft single gate (the photo shows two; the
+  maker says three), and which face the hardware goes on for a privacy gate (the Lab has it
+  on the picket face; brochure page 13 shows it on the rail side).
 
 ## How to check work
 

@@ -18,14 +18,28 @@ const PIPE_UP_IN = 66.75, PIPE_DOWN_IN = 48;      // the app's gate pipe above g
 const BOX_IN = 6, SIDE_T = 1.5, SIDE_D = 3.5, FACE_T = .75, FACE_OFF = 2.125;
 const WOOD_POST = { topIn: 72 };                  // an 8 ft 4×4, 2 ft of it in the ground
 const LATCH_PLAY_IN = .75, AJAR = 4 * Math.PI / 180;
-// The 8 in butterfly hinge (black steel, lag-screwed): about 8 in across when open, two leaves about
-// 3 in wide that are 3¼ in tall at the barrel and flare to 5 in. Sizes are typical for this kind of
-// hinge; the maker doesn't publish a drawing.
-const BFLY = { leafW: 2.9, barrelH: 3.25, outerH: 5, t: .1 };
+// Gate hardware, drawn from a GFS gate (the shadowbox gate photo on the website's gallery):
+//  • 8 in ornamental butterfly hinge: two matching leaves that spread up and out from a thin barrel,
+//    8 in tall at the outer corners, each with two long diamond cut-outs and a lag screw at each corner.
+//  • Post latch: a spear-shaped plate on the gate with a grip, a round bar that lifts, and a catch on the post.
+// Sizes are scaled off that photo against the 5½ in pickets; the maker doesn't publish a drawing.
+const BFLY = { leafW: 2.75, innerH: 5, outerH: 8, barrelH: 4.4, barrelR: .19, t: .09 };
 function butterflyLeaf() {
-  const W = BFLY.leafW * IN, b = BFLY.barrelH / 2 * IN, o = BFLY.outerH / 2 * IN, sh = new THREE.Shape();
-  sh.moveTo(0, b); sh.lineTo(W * .72, o); sh.lineTo(W, o - .55 * IN); sh.lineTo(W, -o + .55 * IN); sh.lineTo(W * .72, -o); sh.lineTo(0, -b); sh.closePath();
+  const W = BFLY.leafW * IN, a = BFLY.innerH / 2 * IN, o = BFLY.outerH / 2 * IN, I = IN, sh = new THREE.Shape();
+  const half = [[.12 * I, a - .25 * I], [.5 * I, a + .15 * I], [W * .8, o], [W, o - .5 * I], [W - .18 * I, o - 1.5 * I], [W, o - 2.5 * I], [W - .12 * I, 0]];
+  sh.moveTo(.12 * I, 0); for (const [x, y] of half) sh.lineTo(x, y);
+  for (const [x, y] of half.slice(0, -1).reverse()) sh.lineTo(x, -y);
+  sh.closePath();
+  for (const sy of [1, -1]) { const h = new THREE.Path(), cx = W * .52, cy = sy * 1.55 * I; h.moveTo(cx, cy + .9 * I); h.lineTo(cx + .33 * I, cy + .15 * I * sy); h.lineTo(cx, cy - .9 * I); h.lineTo(cx - .33 * I, cy + .15 * I * sy); h.closePath(); sh.holes.push(h); }
   const g = new THREE.ExtrudeGeometry(sh, { depth: BFLY.t * IN, bevelEnabled: false }); g.translate(0, 0, -BFLY.t * IN / 2); return g;
+}
+// the latch's plate on the gate; (0, 0) is where the bar crosses it
+function latchPlate() {
+  const I = IN, sh = new THREE.Shape(), R = [[0, 3.4], [.8, 2.55], [.42, 2.15], [.7, 1.75], [.45, 1.35], [.55, .4], [.5, -2.9], [.85, -3.6], [0, -4.9]];
+  sh.moveTo(0, 3.4 * I); for (const [x, y] of R.slice(1)) sh.lineTo(x * I, y * I);
+  for (const [x, y] of R.slice(1, -1).reverse()) sh.lineTo(-x * I, y * I);
+  sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .1 * I, bevelEnabled: false }); g.translate(0, 0, -.05 * I); return g;
 }
 
 // volume of a closed mesh in world space (cubic feet)
@@ -96,19 +110,50 @@ export function createGateScene(host, { specs } = {}) {
     const hingeX = root.getWorldPosition(new THREE.Vector3()).x, latchX = -hingeX;
     const kindOf = m => m.userData.parts?.[0]?.kind;
     const leafMeshes = []; leaf.traverse(o => { if (o.isMesh) leafMeshes.push(o); });
-    // GFS hangs wood gates on 8 in butterfly hinges: two matching leaves that flare out from a short
-    // barrel. The app draws one tall wing; the Lab's copy swaps in the butterfly shape, same place, same pin.
-    { const hinge = []; root.traverse(o => { if (o.isMesh && kindOf(o) === 'ghinge') hinge.push(o); });
-      const barrels = hinge.filter(o => o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.height > 6 * IN);
-      const r = barrels[0]?.geometry.parameters.radiusTop || .34 * IN, bGeo = new THREE.CylinderGeometry(r, r, BFLY.barrelH * IN, 14), leafGeo = butterflyLeaf();
+    // GFS hangs wood gates on 8 in butterfly hinges and closes them on a post latch. The app draws a
+    // plain tapered wing and a box latch with a separate pull handle; the Lab's copy swaps in the real
+    // shapes, in the same places and on the same pins, so the gate moves exactly as before.
+    { const hw = []; root.traverse(o => { if (o.isMesh && /^(ghinge|glatch|ghandle)$/.test(kindOf(o))) hw.push(o); });
+      const drop = o => { o.parent.remove(o); const k = leafMeshes.indexOf(o); if (k >= 0) leafMeshes.splice(k, 1); };
+      const cyl = o => o.geometry.type === 'CylinderGeometry', hOf = o => o.geometry.parameters.height;
+      // hinges
+      const hinge = hw.filter(o => kindOf(o) === 'ghinge'), barrels = hinge.filter(o => cyl(o) && hOf(o) > 6 * IN);
+      const bGeo = new THREE.CylinderGeometry(BFLY.barrelR * IN, BFLY.barrelR * IN, BFLY.barrelH * IN, 12), leafGeo = butterflyLeaf();
+      const near = o => barrels.reduce((a, c) => Math.abs(c.position.y - o.position.y) < Math.abs(a.position.y - o.position.y) ? c : a);
       for (const o of hinge) {
         if (o.geometry.type === 'ExtrudeGeometry') o.geometry = leafGeo;
         else if (barrels.includes(o)) o.geometry = bGeo;
-        else if (o.geometry.type === 'CylinderGeometry' && o.geometry.parameters.height < 2 * IN && o.geometry.parameters.radiusTop > r) {   // knuckles: keep them on the shorter barrel
-          const by = barrels.reduce((a, c) => Math.abs(c.position.y - o.position.y) < Math.abs(a - o.position.y) ? c.position.y : a, Infinity), dy = o.position.y - by;
-          o.position.y = by + (Math.abs(dy) > IN ? Math.sign(dy) * (BFLY.barrelH / 2 - .52) * IN : 0);
+        else if (cyl(o) && hOf(o) > .6 * IN) drop(o);   // the app's knuckle rings
+        else if (cyl(o)) {   // a lag screw: out to the corner of its leaf, and a second one near the barrel
+          const b = near(o), sx = Math.sign(o.position.x - b.position.x) || 1, sy = Math.sign(o.position.y - b.position.y) || 1;
+          const c2 = o.clone(); c2.userData = o.userData; o.parent.add(c2); if (leafMeshes.includes(o)) leafMeshes.push(c2);
+          o.position.x = b.position.x + sx * (BFLY.leafW * .8 - .28) * IN; o.position.y = b.position.y + sy * (BFLY.outerH / 2 - .75) * IN;
+          c2.position.x = b.position.x + sx * .62 * IN; c2.position.y = b.position.y + sy * (BFLY.innerH / 2 - .55) * IN;
         }
       }
+      // latch
+      const latch = hw.filter(o => kindOf(o) === 'glatch'), ix = o => o.userData.parts[0].index;
+      const plateM = latch.find(o => ix(o) === 0), arm = latch.find(o => ix(o) === 2), tab = latch.find(o => ix(o) === 3);
+      const catchPlate = latch.find(o => ix(o) === 4 && o.geometry.type === 'BoxGeometry' && hOf(o) > 2 * IN);
+      if (plateM && arm && catchPlate) {
+        const out = Math.sign(arm.position.z - plateM.position.z) || 1;
+        plateM.geometry = latchPlate();
+        arm.geometry = new THREE.CylinderGeometry(.2 * IN, .2 * IN, arm.geometry.parameters.width, 12).rotateZ(Math.PI / 2);
+        if (tab) drop(tab);
+        // the grip: a band that stands off the plate above the bar
+        const grip = new THREE.Mesh(new THREE.BoxGeometry(1.15 * IN, 1.5 * IN, .5 * IN), plateM.material); grip.position.set(plateM.position.x, plateM.position.y + 1.25 * IN, plateM.position.z + out * .3 * IN);
+        grip.castShadow = true; grip.userData = { ...plateM.userData, parts: [{ ...plateM.userData.parts[0], index: 6 }] }; plateM.parent.add(grip); leafMeshes.push(grip);
+        // the catch on the post: a narrow strap between two square feet
+        const cd = catchPlate.geometry.parameters.depth;
+        catchPlate.geometry = new THREE.BoxGeometry(.36 * IN, 5.2 * IN, cd);
+        for (const sy of [1, -1]) { const f = new THREE.Mesh(new THREE.BoxGeometry(.8 * IN, .8 * IN, cd), catchPlate.material); f.position.copy(catchPlate.position); f.position.y += sy * 2.2 * IN; f.castShadow = true; f.userData = catchPlate.userData; catchPlate.parent.add(f); }
+        for (const o of latch.filter(o => ix(o) === 5)) {
+          const onGate = Math.abs(o.position.x - plateM.position.x) < Math.abs(o.position.x - catchPlate.position.x), sy = Math.sign(o.position.y - (onGate ? plateM : catchPlate).position.y) || 1;
+          o.position.y = onGate ? plateM.position.y + (sy > 0 ? 2.6 : -3.9) * IN : catchPlate.position.y + sy * 2.2 * IN;
+        }
+      }
+      // the latch has its own grip: there is no separate pull handle
+      for (const o of hw.filter(o => kindOf(o) === 'ghandle')) drop(o);
     }
     const bb = new THREE.Box3(), boxOf = o => bb.setFromObject(o).clone();
     const rails = leafMeshes.filter(m => kindOf(m) === 'grail').map(m => ({ m, b: boxOf(m) })).sort((a, b) => a.b.min.y - b.b.min.y);
@@ -232,7 +277,7 @@ export function createGateScene(host, { specs } = {}) {
       bottomIn: leafBox.min.y / IN
     };
     const yPin = Math.min(...hingeYs) * IN;
-    // the gravity latch: its bar (and lift tab) turn on a pin on the gate and rest on a ledge on the catch
+    // the post latch: its bar turns on a pin on the gate's plate and rests on a ledge on the catch
     const onLeaf = m => { for (let p = m.parent; p; p = p.parent) if (p === leaf) return true; return false; };
     const latchParts = leafMeshes.filter(m => kindOf(m) === 'glatch' && onLeaf(m));
     const barParts = latchParts.filter(m => [2, 3].includes(m.userData.parts[0].index));
@@ -301,7 +346,7 @@ export function createGateScene(host, { specs } = {}) {
     if (b.latch) {
       const pv = b.latch.pvHang.clone().applyMatrix4(M);
       dLatch = (b.latch.pvHang.y - pv.y + lifts[1]) / IN;
-      // a gravity latch's bar rides up the catch and still drops in for a while; past ¾ in it can't, and the gate stays ajar
+      // the latch bar rides up the catch and still drops in for a while; past ¾ in it can't, and the gate stays ajar
       ajar = dLatch > LATCH_PLAY_IN;
       const phi = ajar ? 0 : Math.asin(clamp(dLatch / b.latch.near, 0, 1)) * b.dir;
       const Tp = new THREE.Matrix4().makeTranslation(b.latch.pvLeaf.x, b.latch.pvLeaf.y, b.latch.pvLeaf.z), Tm = new THREE.Matrix4().makeTranslation(-b.latch.pvLeaf.x, -b.latch.pvLeaf.y, -b.latch.pvLeaf.z), Rb = new THREE.Matrix4().makeRotationZ(phi);
