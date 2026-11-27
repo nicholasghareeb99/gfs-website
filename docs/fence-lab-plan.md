@@ -60,11 +60,13 @@ Next, in order of how much they change the picture:
 - Hardware is Nationwide Industries. The 8 in contemporary butterfly hinge takes one pair
   on gates 5 ft and under and three hinges on 6 ft and taller. The standard post latch has a
   receiver lag-screwed to the latch post and a spring lever on the face of the gate.
-- Reference: `public/assets/img/work/pt-shadowbox-gate-detail.jpg` (a GFS gate, close enough
-  to scale the hardware off the 5½ in pickets) and the gate photo on brochure page 13.
-- The Lab now draws both from that photo: the butterfly hinge (8 in tall at the outer corners,
-  two diamond cut-outs per leaf) and the post latch (spear plate on the gate, round bar, strap
-  catch on the post). The app's separate pull handle is gone.
+- References: `public/assets/img/work/pt-shadowbox-gate-detail.jpg` (hinges, handle, catch) and
+  `public/images/gallery/cedar-gate-closeup.jpg` (latch, catch and pull handle close up).
+- The Lab draws from those photos: the butterfly hinge (8 in tall at the outer corners, two
+  diamond cut-outs per leaf); the latch (a 4.6 in flat bar on a small pivot plate near the
+  gate's edge, and a 6.9 in strap catch with two square feet near the post's edge); and a
+  10½ in arched pull handle with tapered ends beside the latch. Sizes are scaled off the
+  photos against 5½ in pickets.
 - **Open with Nick:** two or three hinges on a 6 ft single gate (the photo shows two; the
   maker says three), and which face the hardware goes on for a privacy gate (the Lab has it
   on the picket face; brochure page 13 shows it on the rail side).

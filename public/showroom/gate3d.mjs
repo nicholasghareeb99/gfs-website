@@ -21,7 +21,9 @@ const LATCH_PLAY_IN = .75, AJAR = 4 * Math.PI / 180;
 // Gate hardware, drawn from a GFS gate (the shadowbox gate photo on the website's gallery):
 //  • 8 in ornamental butterfly hinge: two matching leaves that spread up and out from a thin barrel,
 //    8 in tall at the outer corners, each with two long diamond cut-outs and a lag screw at each corner.
-//  • Post latch: a spear-shaped plate on the gate with a grip, a round bar that lifts, and a catch on the post.
+//  • Post latch: a flat bar on the gate that lifts, and a tall strap catch on the post. Beside it, an
+//    arched pull handle with spear-shaped ends.
+// Photos: assets/img/work/pt-shadowbox-gate-detail.jpg and images/gallery/cedar-gate-closeup.jpg.
 // Sizes are scaled off that photo against the 5½ in pickets; the maker doesn't publish a drawing.
 const BFLY = { leafW: 2.75, innerH: 5, outerH: 8, barrelH: 4.4, barrelR: .19, t: .09 };
 function butterflyLeaf() {
@@ -33,13 +35,25 @@ function butterflyLeaf() {
   for (const sy of [1, -1]) { const h = new THREE.Path(), cx = W * .52, cy = sy * 1.55 * I; h.moveTo(cx, cy + .9 * I); h.lineTo(cx + .33 * I, cy + .15 * I * sy); h.lineTo(cx, cy - .9 * I); h.lineTo(cx - .33 * I, cy + .15 * I * sy); h.closePath(); sh.holes.push(h); }
   const g = new THREE.ExtrudeGeometry(sh, { depth: BFLY.t * IN, bevelEnabled: false }); g.translate(0, 0, -BFLY.t * IN / 2); return g;
 }
-// the latch's plate on the gate; (0, 0) is where the bar crosses it
-function latchPlate() {
-  const I = IN, sh = new THREE.Shape(), R = [[0, 3.4], [.8, 2.55], [.42, 2.15], [.7, 1.75], [.45, 1.35], [.55, .4], [.5, -2.9], [.85, -3.6], [0, -4.9]];
-  sh.moveTo(0, 3.4 * I); for (const [x, y] of R.slice(1)) sh.lineTo(x * I, y * I);
-  for (const [x, y] of R.slice(1, -1).reverse()) sh.lineTo(-x * I, y * I);
-  sh.closePath();
+// The post latch and pull handle, in inches, scaled off the GFS photos against 5½ in pickets:
+// pivot 1.2 in from the gate's edge, a 4.6 in flat bar, a 6.9 in strap catch 0.9 in onto the post,
+// and a 10½ in pull handle whose top is 41% of its height above the bar.
+const LATCH = { pivotIn: 1.2, barIn: 4.6, catchIn: .9, catchH: 6.9, handleIn: 1.3, handleH: 10.5 };
+// a flat spear-shaped end of the pull handle; sy = 1 points up, −1 down. (0, 0) is its tip.
+function spearEnd(sy) {
+  const I = IN, sh = new THREE.Shape(), P = [[-.3, 0], [.3, 0], [.56, -.5], [.5, -1.7], [-.5, -1.7], [-.56, -.5]];
+  const pts = sy > 0 ? P : P.map(([x, y]) => [-x, -y]);
+  sh.moveTo(pts[0][0] * I, pts[0][1] * I); for (const [x, y] of pts.slice(1)) sh.lineTo(x * I, y * I); sh.closePath();
   const g = new THREE.ExtrudeGeometry(sh, { depth: .1 * I, bevelEnabled: false }); g.translate(0, 0, -.05 * I); return g;
+}
+// the arched grip between the two ends: len long, standing 1.3 in off the gate at its middle, 0.9 in wide
+function archGrip(len, out) {
+  const I = IN, a = len / 2, hgt = 1.3 * I, t = .28 * I, sh = new THREE.Shape();
+  sh.moveTo(-a, 0); sh.quadraticCurveTo(0, 2 * hgt, a, 0); sh.lineTo(a - t * 1.6, 0); sh.quadraticCurveTo(0, 2 * (hgt - t), -a + t * 1.6, 0); sh.closePath();
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .9 * I, bevelEnabled: false, curveSegments: 10 }); g.translate(0, 0, -.45 * I);
+  // shape x → up the gate, shape y → out from its face, extrusion → across the gate
+  g.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(0, out, 0), new THREE.Vector3(0, 0, out), new THREE.Vector3(1, 0, 0)));
+  return g;
 }
 
 // volume of a closed mesh in world space (cubic feet)
@@ -131,29 +145,35 @@ export function createGateScene(host, { specs } = {}) {
           c2.position.x = b.position.x + sx * .62 * IN; c2.position.y = b.position.y + sy * (BFLY.innerH / 2 - .55) * IN;
         }
       }
-      // latch
+      // latch and pull handle, in the proportions of the GFS photos (see the note at the top):
+      // a flat bar on a small pivot plate near the gate's edge, a tall strap catch with two square
+      // feet near the post's edge, and beside the pivot an arched pull handle with spear ends
       const latch = hw.filter(o => kindOf(o) === 'glatch'), ix = o => o.userData.parts[0].index;
-      const plateM = latch.find(o => ix(o) === 0), arm = latch.find(o => ix(o) === 2), tab = latch.find(o => ix(o) === 3);
-      const catchPlate = latch.find(o => ix(o) === 4 && o.geometry.type === 'BoxGeometry' && hOf(o) > 2 * IN);
-      if (plateM && arm && catchPlate) {
-        const out = Math.sign(arm.position.z - plateM.position.z) || 1;
-        plateM.geometry = latchPlate();
-        arm.geometry = new THREE.CylinderGeometry(.2 * IN, .2 * IN, arm.geometry.parameters.width, 12).rotateZ(Math.PI / 2);
+      const base = latch.find(o => ix(o) === 0), pv = latch.find(o => ix(o) === 1), arm = latch.find(o => ix(o) === 2), tab = latch.find(o => ix(o) === 3);
+      const catchBits = latch.filter(o => ix(o) === 4 && o.geometry.type === 'BoxGeometry'), strap = catchBits.find(o => hOf(o) > 2 * IN);
+      for (const o of hw.filter(o => kindOf(o) === 'ghandle')) drop(o);   // the app's round pull, both faces
+      if (base && pv && arm && strap) {
+        const out = Math.sign(arm.position.z - base.position.z) || 1, mat = base.material, ly = pv.position.y;
+        const edge = base.position.x + dir * 2.4 * IN, postEdge = strap.position.x - dir * 2 * IN;   // where the app measured from
+        const xp = edge - dir * LATCH.pivotIn * IN, xc = postEdge + dir * LATCH.catchIn * IN;
+        base.geometry = new THREE.BoxGeometry(.8 * IN, .8 * IN, .12 * IN); base.position.x = xp; pv.position.x = xp;
+        arm.geometry = new THREE.BoxGeometry(LATCH.barIn * IN, .5 * IN, .19 * IN); arm.position.x = xp + dir * (LATCH.barIn / 2 - .4) * IN;
         if (tab) drop(tab);
-        // the grip: a band that stands off the plate above the bar
-        const grip = new THREE.Mesh(new THREE.BoxGeometry(1.15 * IN, 1.5 * IN, .5 * IN), plateM.material); grip.position.set(plateM.position.x, plateM.position.y + 1.25 * IN, plateM.position.z + out * .3 * IN);
-        grip.castShadow = true; grip.userData = { ...plateM.userData, parts: [{ ...plateM.userData.parts[0], index: 6 }] }; plateM.parent.add(grip); leafMeshes.push(grip);
-        // the catch on the post: a narrow strap between two square feet
-        const cd = catchPlate.geometry.parameters.depth;
-        catchPlate.geometry = new THREE.BoxGeometry(.36 * IN, 5.2 * IN, cd);
-        for (const sy of [1, -1]) { const f = new THREE.Mesh(new THREE.BoxGeometry(.8 * IN, .8 * IN, cd), catchPlate.material); f.position.copy(catchPlate.position); f.position.y += sy * 2.2 * IN; f.castShadow = true; f.userData = catchPlate.userData; catchPlate.parent.add(f); }
-        for (const o of latch.filter(o => ix(o) === 5)) {
-          const onGate = Math.abs(o.position.x - plateM.position.x) < Math.abs(o.position.x - catchPlate.position.x), sy = Math.sign(o.position.y - (onGate ? plateM : catchPlate).position.y) || 1;
-          o.position.y = onGate ? plateM.position.y + (sy > 0 ? 2.6 : -3.9) * IN : catchPlate.position.y + sy * 2.2 * IN;
-        }
+        // the catch
+        const cd = strap.geometry.parameters.depth;
+        for (const o of catchBits) { const q = o.geometry.parameters; o.position.x = xc; if (o !== strap) o.geometry = new THREE.BoxGeometry(.75 * IN, q.height, q.depth); }
+        strap.geometry = new THREE.BoxGeometry(.75 * IN, LATCH.catchH * IN, cd); strap.position.y = ly;
+        const feet = [1, -1].map(sy => { const f = new THREE.Mesh(new THREE.BoxGeometry(.8 * IN, .8 * IN, cd), strap.material); f.position.set(xc + dir * .4 * IN, ly + sy * (LATCH.catchH / 2 - .4) * IN, strap.position.z); f.castShadow = true; f.userData = strap.userData; strap.parent.add(f); return f; });
+        // the pull handle
+        const xh = xp - dir * LATCH.handleIn * IN, top = ly + LATCH.handleH * .41 * IN, bot = top - LATCH.handleH * IN, z0 = base.position.z;
+        const tagH = (m, k) => { m.castShadow = true; m.userData = { ...base.userData, parts: [{ ...base.userData.parts[0], kind: 'ghandle', index: k }] }; base.parent.add(m); leafMeshes.push(m); return m; };
+        const ends = [[top, 1], [bot, -1]].map(([y, sy], k) => { const m = tagH(new THREE.Mesh(spearEnd(sy), mat), k); m.position.set(xh, y, z0); return m; });
+        const grip = tagH(new THREE.Mesh(archGrip((LATCH.handleH - 3.2) * IN, out), mat), 2); grip.position.set(xh, (top + bot) / 2, z0);
+        // lag screws: two in the handle's ends, two in the catch's feet
+        const sc = latch.filter(o => ix(o) === 5), onGate = sc.filter(o => Math.abs(o.position.x - edge) < Math.abs(o.position.x - postEdge) || leafMeshes.includes(o)), onPost = sc.filter(o => !onGate.includes(o));
+        onGate.forEach((o, k) => { o.position.x = xh; o.position.y = k % 2 ? top - .9 * IN : bot + .9 * IN; o.userData = { ...o.userData, parts: [{ ...o.userData.parts[0], kind: 'ghandle' }] }; });
+        onPost.forEach((o, k) => { o.position.x = feet[k % 2].position.x; o.position.y = feet[k % 2].position.y; });
       }
-      // the latch has its own grip: there is no separate pull handle
-      for (const o of hw.filter(o => kindOf(o) === 'ghandle')) drop(o);
     }
     const bb = new THREE.Box3(), boxOf = o => bb.setFromObject(o).clone();
     const rails = leafMeshes.filter(m => kindOf(m) === 'grail').map(m => ({ m, b: boxOf(m) })).sort((a, b) => a.b.min.y - b.b.min.y);
