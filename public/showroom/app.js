@@ -2,7 +2,9 @@
 import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
 import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.6 (2026-11-27)';
+const VERSION = 'showroom-1.7 (2026-11-27)';
+// Start downloading the brochure page that will open, while the rest of the app is still loading.
+try { const h = location.hash.match(/^#brochure-(\d+)/), other = /^#(styles|ar|permits|lab)/.test(location.hash); if (!other) new Image().src = pageImg(Math.max(1, +(h?.[1] || localStorage.getItem('gfs-showroom-page') || 1))); } catch {}
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
@@ -213,6 +215,7 @@ async function saveOffline(progress, { lite = false } = {}) {
   const cache = await caches.open('gfs-showroom-media-v1'), list = [...urls]; let done = 0, failed = 0;
   const worker = async () => { while (list.length) { const u = list.shift(); try { if (!(await cache.match(u))) { const r = await fetch(u, { mode: u.includes('firebasestorage') ? 'no-cors' : u.startsWith('http') ? 'cors' : 'same-origin' }); if (r.ok || r.type === 'opaque') await cache.put(u, r); else failed++; } } catch { failed++; } progress(++done, urls.size); } };
   await Promise.all(Array.from({ length: lite ? 3 : 6 }, worker));
+  if (!lite && navigator.serviceWorker?.controller && !(await fetchLab())) failed++;
   try { localStorage.setItem(lite ? 'gfs-showroom-offline-auto' : 'gfs-showroom-offline', lite ? String(Date.now()) : new Date().toLocaleDateString()); } catch {}
   return failed === 0;
 }
@@ -234,6 +237,21 @@ function bindPresentExit() {
   const down = () => { if (!document.body.classList.contains('present')) return; t = setTimeout(() => present(false), 2000); };
   const up = () => clearTimeout(t);
   logo.addEventListener('pointerdown', down); logo.addEventListener('pointerup', up); logo.addEventListener('pointerleave', up); logo.addEventListener('pointercancel', up);
+}
+// Everything the 3D Fence Lab needs. Fetched quietly after the app opens, so every Lab tool opens
+// fast and still works in a yard with no signal. The service worker keeps each file as it passes.
+export const LAB3D_FILES = ['lab3d.mjs', 'dig3d.mjs', 'dig-plan.mjs', 'frost3d.mjs', 'build3d.mjs', 'gate3d.mjs', 'grade3d.mjs', 'vinyl3d.mjs', 'wind3d.mjs', 'wood3d.mjs', 'life3d.mjs',
+  'vendor/exec/fence-engine.mjs', 'vendor/exec/real-surfaces.mjs', 'vendor/exec/fence-layers.mjs', 'vendor/exec/model-review.mjs', 'vendor/exec/studio-rendering.mjs', 'vendor/exec/audited-model-corrections.mjs', 'vendor/exec/ranch-model-contract.mjs',
+  '/gfs/vendor/three.module.js', '/gfs/website-model.mjs', '/gfs/studio-catalog.mjs', '/gfs/model-profiles.mjs', '/gfs/owner-model-corrections.mjs', '/gfs/audited-model-corrections.mjs', '/gfs/ranch-model-contract.mjs'];
+async function fetchLab() { let ok = true; for (const u of LAB3D_FILES) { try { const url = new URL(u, location.href).href; if (!(await caches.match(url))) { const r = await fetch(url); ok = ok && r.ok; } } catch { ok = false; } } return ok; }
+function warmLab() {
+  if (warmLab.ran) return;
+  if (!navigator.onLine || !('caches' in window) || !navigator.serviceWorker || navigator.connection?.saveData) return;
+  // on the very first visit the service worker isn't in charge yet: wait for it, or nothing would be kept
+  if (!navigator.serviceWorker.controller) { navigator.serviceWorker.addEventListener('controllerchange', warmLab, { once: true }); return; }
+  warmLab.ran = true;
+  const go = () => fetchLab().catch(() => {});
+  ('requestIdleCallback' in window) ? setTimeout(() => requestIdleCallback(go, { timeout: 15000 }), 6000) : setTimeout(go, 8000);
 }
 // Save the brochure and photos on their own about once a week while online.
 function autoOffline() {
@@ -286,7 +304,7 @@ async function boot() {
   setBar(1);
   const wait = Math.max(0, 1900 - (performance.now() - t0));
   setTimeout(() => $('#splash').classList.add('done'), wait);
-  addEventListener('showroom:catalog', autoOffline, { once: true }); setTimeout(autoOffline, 30000);
+  addEventListener('showroom:catalog', autoOffline, { once: true }); setTimeout(autoOffline, 30000); warmLab();
   if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js', { scope: './' }).catch(e => console.info('[Showroom] service worker:', e.message));
 }
 boot();
