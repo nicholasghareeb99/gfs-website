@@ -144,3 +144,14 @@ export function gesture(kind) {
   if (kind === 'look') return `<span class="gest g-look" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></span>`;
   return `<span class="gest g-${kind}" aria-hidden="true">${kind === 'slide' ? '<s></s>' : ''}${kind === 'type' ? '<s></s>' : ''}<i></i>${two ? '<i class="b"></i>' : ''}</span>`;
 }
+
+export const DIG = { holeIn: 10, depthIn: 36, swell: 1.3, lbPerFt3: 110, barrowFt3: 6, bagLb: 80, bagFt3: 0.6, postIn: 3.5, spacingFt: 8 };
+export function digNumbers(lengthFt, k = DIG) {
+  const posts = Math.ceil(lengthFt / k.spacingFt) + 1;
+  const r = k.holeIn / 2 / 12, d = k.depthIn / 12;
+  const hole = Math.PI * r * r * d;                          // cu ft of dirt out of each hole, in the ground
+  const conc = hole - (k.postIn / 12) ** 2 * d;              // concrete around a 4×4 post
+  const dirt = hole * posts, loose = dirt * k.swell;
+  return { posts, hole, dirtFt3: dirt, dirtYd3: dirt / 27, looseFt3: loose, looseYd3: loose / 27, lb: dirt * k.lbPerFt3,
+    barrows: loose / k.barrowFt3, bags: Math.ceil(conc * posts / k.bagFt3), concLb: Math.ceil(conc * posts / k.bagFt3) * k.bagLb };
+}

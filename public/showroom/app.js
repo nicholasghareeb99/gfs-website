@@ -2,7 +2,7 @@
 import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
 import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.4 (2026-11-26)';
+const VERSION = 'showroom-1.5 (2026-11-27)';
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {

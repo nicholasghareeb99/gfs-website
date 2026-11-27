@@ -2,7 +2,8 @@
 // and how tall. Parcel lines come from county GIS (same sources as the website's
 // ballpark tool), the house and streets from OpenStreetMap, the rules from GFS's
 // verified research, and an AI lookup for towns we haven't verified yet.
-import { $, $$, esc, clamp, icons, toast } from './ui.mjs';
+import { $, $$, esc, clamp, icons, toast, digNumbers } from './ui.mjs';
+const fmtN = (v, d = 0) => Number(v).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
 import { visit } from './visit.mjs';
 
 let app, root, D, map, L, layers, cur = null, aiCache = new Map();
@@ -377,8 +378,11 @@ function fenceHTML(A, rule) {
   const opts = D.styles.filter(s => s.models.length).map(s => `<optgroup label="${esc(s.name)}">${s.models.map(m => `<option ${m === cur.fenceModel ? 'selected' : ''}>${esc(m)}</option>`).join('')}</optgroup>`).join('');
   const sum = empty ? '' : `<div class="fence-sum"><b class="mono">${Math.round(st.ft)} ft</b><span>${st.walk ? `${st.walk} walk gate${st.walk > 1 ? 's' : ''}` : ''}${st.walk && st.drive ? ' · ' : ''}${st.drive ? `${st.drive} drive gate${st.drive > 1 ? 's' : ''}` : ''}${!st.walk && !st.drive ? 'No gates' : ''}</span></div>`;
   const issues = fenceIssues(A, rule).map(x => `<p class="warnline">${esc(x)}</p>`).join('');
+  // The no-dig point, in this yard's numbers: what a dug fence this long would leave behind.
+  const dn = st.ft > 10 ? digNumbers(st.ft) : null;
+  const nodig = dn && !cur.drawing ? `<div class="nodig"><p><b>Driven posts in clay soil:</b> no holes, no concrete, and none of the <b>${fmtN(dn.looseYd3, 1)} cu yd</b> of dirt (about ${Math.ceil(dn.barrows)} wheelbarrow loads) a dug fence this long leaves in the yard.</p><button class="btn sm" data-nodig>${icons.spark} See the difference</button></div>` : '';
   const style = `<label class="chip fence-style">Style <select data-fmodel><option value="">Pick a style…</option>${opts}</select></label>`;
-  if (!cur.drawing) return `<div class="fence-box">${sum}${empty ? '' : style}${issues}<div class="where"><button class="btn sm ${empty ? 'primary' : ''}" data-draw>${icons.pen} ${empty ? 'Draw the fence' : 'Edit fence'}</button>${empty ? '' : `<button class="btn sm primary" data-3d>${icons.cube} See it in 3D</button><button class="btn sm" data-packet>${icons.blueprint} Permit packet</button>`}</div></div>`;
+  if (!cur.drawing) return `<div class="fence-box">${sum}${empty ? '' : style}${issues}${nodig}<div class="where"><button class="btn sm ${empty ? 'primary' : ''}" data-draw>${icons.pen} ${empty ? 'Draw the fence' : 'Edit fence'}</button>${empty ? '' : `<button class="btn sm primary" data-3d>${icons.cube} See it in 3D</button><button class="btn sm" data-packet>${icons.blueprint} Permit packet</button>`}</div></div>`;
   return `<div class="fence-box on">
     <p class="warnline" style="color:var(--copper-lt)">${cur.gateMode ? `Tap the fence line where the ${cur.gateMode} gate goes.` : empty && !cur.fence.runs.at(-1).length ? 'Tap the map where the first post goes.' : empty ? 'Now tap where the next corner post goes.' : 'Keep tapping to add corner posts, or add a gate. Drag a post to move it.'}</p>
     ${sum}${style}${issues}
@@ -400,6 +404,7 @@ function bindFence(el) {
   on('[data-clear]', () => { if (fenceEmpty() && !cur.fence.runs.at(-1).length) return toast('Nothing to clear yet.'); cur.fence = blankFence(); saveFence(); draw(); renderCard(); });
   for (const b of $$('[data-gate]', el)) b.onclick = () => { if (fenceEmpty()) return toast('Tap at least two posts to make a line of fence first, then add the gate on it.'); cur.gateMode = cur.gateMode === b.dataset.gate ? null : b.dataset.gate; renderCard(); };
   const sel = $('[data-fmodel]', el); if (sel) sel.onchange = () => { cur.fenceModel = sel.value || null; saveFence(); draw(); renderCard(); };
+  on('[data-nodig]', () => app.go('lab', { tool: 'dig', len: Math.round(fenceStats().ft) }));
   on('[data-3d]', () => { if (!cur.fenceModel) { toast('Pick a style first, then tap See it in 3D.'); const s = $('[data-fmodel]', root)?.closest('.fence-style'); s?.classList.remove('nudge'); void s?.offsetWidth; s?.classList.add('nudge'); s?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; } app.go('ar', { geometry: fenceGeometry(), model: cur.fenceModel }); });
   on('[data-packet]', async () => {
     const { openSitePlan } = await import('./siteplan.mjs');

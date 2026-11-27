@@ -3,41 +3,46 @@
 // ASCE 7 wind loads, the USDA Wood Handbook, local frost depths, and the lifespans
 // already printed in the GFS brochure. Where a drawing exaggerates motion so it can
 // be seen, it says so.
-import { $, $$, esc, clamp, icons, reduced, gesture } from './ui.mjs';
+import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs';
+export { digNumbers } from './ui.mjs';
 import { visit } from './visit.mjs';
 import { helpOnce } from './help.mjs';
 
 let app, root, D, current = null, stop = null;
 
 const TOOLS = [
+  { id: 'dig', name: 'No-dig vs dug', line: 'Watch both crews put in the same fence, and see how much dirt a dug fence leaves in the yard',
+    how: [['tap', 'Tap <b>Play install day</b> to watch both crews work.'], ['slide', 'Slide <b>Their fence</b> to the length of their fence.'], ['look', 'Watch the dirt piles and concrete bags on the left. The right side leaves none.']],
+    take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft into the clay, and no waiting on concrete before the fence goes up.' },
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by',
     how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how their posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to light it up on the drawing.']],
     take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The extra top rail keeps the top line straight.' },
+  { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
+    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and <b>clay</b> or <b>sand</b>.'], ['slide', 'Slide through the <b>months</b> and add <b>winters</b> to watch shallow posts lift.']],
+    take: 'A post has to reach below the frost line, about 3 ft here. Ours are driven 4 ft.' },
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
-  { id: 'vinyl', name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you',
-    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['look', 'Watch the thinner big-box post bend further than ours.']],
-    take: 'A thicker wall makes a stiffer post, and ours sleeves over a driven steel post instead of sitting in a concrete plug.' },
-  { id: 'wind', name: 'Wind', line: 'How hard wind pushes on each style',
-    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
-    take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
-  { id: 'life', name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
-    how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match their yard.']],
-    take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
-  { id: 'wood', name: 'Wood movement', line: 'Why gaps open between boards',
-    how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.']],
-    take: 'All wood shrinks as it dries. Styles that overlap the boards, like board-on-board, hide the gaps.' },
-  { id: 'frost', name: 'Frost & posts', line: 'Why post depth matters in Toledo clay',
-    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and <b>clay</b> or <b>sand</b>.'], ['slide', 'Slide through the <b>months</b> and add <b>winters</b> to watch shallow posts lift.']],
-    take: 'A post has to reach below the frost line, about 3 ft here. Ours are driven 4 ft.' },
   { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and how a brace stops it',
     how: [['slide', 'Slide the <b>gate width</b> and the <b>years in use</b>.'], ['tap', 'Try each <b>brace</b> and <b>hinge post</b> to see how much the gate drops.']],
-    take: 'A brace from the bottom hinge up to the latch side holds a gate square. A steel frame and a steel hinge post hold it best.' }
+    take: 'A brace from the bottom hinge up to the latch side holds a gate square. A steel frame and a steel hinge post hold it best.' },
+  { id: 'life', more: true, name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
+    how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match their yard.']],
+    take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
+  { id: 'vinyl', more: true, name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you',
+    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['look', 'Watch the thinner big-box post bend further than ours.']],
+    take: 'A thicker wall makes a stiffer post, and ours sleeves over a driven steel post instead of sitting in a concrete plug.' },
+  { id: 'wind', more: true, name: 'Wind', line: 'How hard wind pushes on each style',
+    how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
+    take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
+  { id: 'wood', more: true, name: 'Wood movement', line: 'Why gaps open between boards',
+    how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.']],
+    take: 'All wood shrinks as it dries. Styles that overlap the boards, like board-on-board, hide the gaps.' }
 ];
 
 // Small line drawings for the Lab home cards.
 const PICT = {
+  dig: '<path d="M4 30h56"/><path d="M14 30v12" class="mute"/><path d="M6 30q8-11 16 0" class="mute"/><path d="M44 8v34" class="cu"/><path d="M38 5h12" class="cu"/>',
   build: '<path d="M6 40h52"/><path d="M10 40V16M26 40V16" class="mute"/><path d="M10 20l16 3M10 34l16 1" class="mute"/><path d="M36 40V14M54 40V14"/><path d="M36 18h18M36 26h18M36 34h18"/><path d="M36 14h18" class="cu"/>',
   grade: '<path d="M6 36c8-4 14 3 22 0s14-6 30-2" class="cu"/><path d="M8 14h48"/><path d="M10 14v20M24 14v21M38 14v18M52 14v19"/>',
   vinyl: '<rect x="10" y="10" width="16" height="30" rx="1"/><rect x="38" y="10" width="16" height="30" rx="1" class="cu"/><rect x="41" y="13" width="10" height="24" class="cu"/><rect x="12" y="12" width="12" height="26" class="mute"/>',
@@ -78,9 +83,9 @@ export async function init(a, el) {
     select(TOOLS[(i + +n + TOOLS.length) % TOOLS.length].id);
   });
 }
-let fromLink = false, visible = false;
+let fromLink = false, visible = false, preset = {};
 export function show(opts = {}) {
-  fromLink = !!opts.fromLink;
+  fromLink = !!opts.fromLink; preset = { len: opts.len };
   // Tapping Lab in the dock while already in the Lab goes back to the Lab home.
   const tool = opts.tool || (opts.via === 'dock' && visible ? 'home' : current || 'home');
   visible = true; select(tool, true);
@@ -89,7 +94,7 @@ export function hide() { visible = false; stop?.(); stop = null; }
 export const where = () => ({ opts: { tool: current || 'home' }, label: current && current !== 'home' ? `Fence Lab · ${TOOLS.find(x => x.id === current).name}` : 'Fence Lab', short: current && current !== 'home' ? TOOLS.find(x => x.id === current).name : 'Lab' });
 export const help = () => { const t = TOOLS.find(x => x.id === current); return t ? { key: 'lab-' + t.id, extra: { title: t.name, steps: t.how, note: 'Tap <b>All tools</b> to see the other tools, or ‹ › to go to the next one.' } } : { key: 'lab' }; };
 
-const RENDER = { build, grade: gradeTool, vinyl, wind, life, wood, frost, gate };
+const RENDER = { dig, build, grade: gradeTool, vinyl, wind, life, wood, frost, gate };
 function select(id, force) {
   if (id !== 'home' && !RENDER[id]) id = 'home';
   if (id === current && !force && (stop || id === 'home')) return;
@@ -105,9 +110,11 @@ function select(id, force) {
     $('.lab-count', root).textContent = `${i + 1} / ${TOOLS.length}`;
     const how = $('.lab-how', root);
     $('ul', how).innerHTML = t.how.map(([g, s]) => `<li>${gesture(g)}<p>${s}</p></li>`).join('');
+    $('summary span', how).innerHTML = `<b>How to use:</b> ${t.how[0][1].replace(/<[^>]+>/g, '')}`;
     $('summary small', how).textContent = `${t.how.length} steps`;
     // open the first time each tool is used on this device, folded after that
-    let open = true; try { const k = 'gfs-showroom-labhow-' + id; open = !localStorage.getItem(k); localStorage.setItem(k, '1'); } catch {}
+    // Folded so the picture is the first thing you see; the first step shows in the bar.
+    const open = false;
     how.open = open;
     $('.lab-take p', root).textContent = t.take;
     const nx = TOOLS[(i + 1) % TOOLS.length];
@@ -121,10 +128,13 @@ function select(id, force) {
   if (app.mode === 'lab') { const h = '#lab' + (home ? '' : '-' + id); if (location.hash !== h) history.replaceState(null, '', h); }
 }
 function homeHTML() {
-  return `<div class="lab-home">${TOOLS.map((t, i) => `<button class="lab-card lab-tile" data-tool="${t.id}">
+  const tile = (t, i) => `<button class="lab-card lab-tile${t.more ? ' more' : ''}" data-tool="${t.id}">
     <svg viewBox="0 0 64 48" aria-hidden="true">${PICT[t.id]}</svg>
     <span class="lt-b"><span class="mono">${String(i + 1).padStart(2, '0')}${i === 0 ? ' · START HERE' : ''}</span><b>${esc(t.name)}</b><small>${esc(t.line)}</small>
-    <span class="lt-how">${[...new Set(t.how.map(h => h[0]).filter(g => g !== 'look'))].map(g => `<em>${{ tap: 'Tap', slide: 'Slide', drag: 'Drag', swipe: 'Swipe' }[g] || ''}</em>`).join('')}</span></span>${icons.next}</button>`).join('')}</div>`;
+    <span class="lt-how">${[...new Set(t.how.map(h => h[0]).filter(g => g !== 'look'))].map(g => `<em>${{ tap: 'Tap', slide: 'Slide', drag: 'Drag', swipe: 'Swipe' }[g] || ''}</em>`).join('')}</span></span>${icons.next}</button>`;
+  const main = TOOLS.filter(t => !t.more), more = TOOLS.filter(t => t.more);
+  return `<div class="lab-label">Why our fences last</div><div class="lab-home">${main.map((t, i) => tile(t, i)).join('')}</div>
+    <div class="lab-label lab-more-h">More for the curious</div><div class="lab-home">${more.map((t, i) => tile(t, main.length + i)).join('')}</div>`;
 }
 // ── shared bits ───────────────────────────────────────────────────
 const fmt = (v, d = 0) => Number(v).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -201,7 +211,7 @@ function wind(body) {
   const cv = $('.wind-cv', body), { g, fit } = sizedCanvas(cv);
   let W = 0, H = 0, parts = [], t = 0, raf = 0, live = true;
   const res = () => windLoad(st);
-  const update = () => {
+  let update = () => {
     const r = res();
     $('#wNote', body).textContent = st.style.note;
     $('#wH', body).innerHTML = seg('h', st.style.hs.map(h => [h, h + ' ft']), st.h);
@@ -228,9 +238,11 @@ function wind(body) {
   const geo = () => { const ground = H * .8, scale = (H * .52) / 8, fx = W * .4; return { ground, hpx: st.h * scale, fx, scale }; };
   const seed = () => { parts = Array.from({ length: Math.round(clamp(W * H / 1700, 120, 420)) }, () => spawn(true)); };
   const spawn = (anywhere) => { const { ground } = geo(); return { x: anywhere ? Math.random() * W : -10 - Math.random() * 40, y: 12 + Math.random() * (ground - 16), r: Math.random(), trail: [] }; };
-  const resize = () => { ({ w: W, h: H } = fit()); seed(); };
+  // Reduce Motion (an iPhone setting) gets a still picture: the flow is run ahead off-screen and drawn once.
+  const still = () => { if (!W) return; for (let i = 0; i < 70; i++) frame(true); };
+  const resize = () => { ({ w: W, h: H } = fit()); seed(); if (reduced.matches) still(); };
   const ro = new ResizeObserver(resize); ro.observe(cv);
-  const frame = () => {
+  const frame = (once) => {
     t += 1 / 60;
     const { ground, hpx, fx } = geo(), r = res(), eps = r.eps;
     const U = clamp(st.V / 58, .25, 2.2) * 2.4; // px per frame
@@ -279,10 +291,11 @@ function wind(body) {
     g.fillStyle = 'rgba(234,240,247,.85)'; g.font = '600 12px "IBM Plex Mono", monospace'; g.textAlign = 'center';
     g.textAlign = 'right'; g.fillText(`${st.h} FT`, fx - 14, ground - hpx + 4); g.textAlign = 'center';
     if (eddy > .2) { g.fillStyle = 'rgba(140,199,255,.9)'; g.fillText('EDDY', fx + hpx * 1.1, ground - hpx * 1.15); }
-    if (live && vis.on && !reduced.matches) raf = requestAnimationFrame(frame);
+    if (once !== true && live && vis.on && !reduced.matches) raf = requestAnimationFrame(frame);
   };
   const vis = onScreen(cv, () => { if (live && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); } });
   update(); resize(); frame();
+  const upd = update; update = () => { upd(); if (reduced.matches) still(); };
   return () => { live = false; cancelAnimationFrame(raf); ro.disconnect(); vis.stop(); };
 }
 
@@ -853,4 +866,150 @@ function gradeTool(body) {
   body.innerHTML = '<div class="lab-vis" style="min-height:320px;display:grid;place-items:center;color:var(--dim)">Loading Grade Lab…</div>';
   import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt }); });
   return () => { gone = true; stopFn?.(); };
+}
+
+// ── No-dig vs dug ────────────────────────────────────────────────
+// The numbers behind "no leftover dirt": what comes out of a dug post hole and what goes back in.
+function dig(body) {
+  const st = { len: preset.len ? clamp(Math.round(preset.len / 10) * 10, 40, 2000) : 150, p: 0, playing: false };
+  body.innerHTML = `
+    <div class="vs-grid">
+      <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Dug &amp; concrete</span><b>Holes dug, posts set in concrete</b><small>How most fences go in</small></figcaption>
+        <svg class="vs-svg dig-a" viewBox="0 36 380 214" role="img" aria-label="A crew digging post holes and setting posts in concrete"></svg><p class="vs-status" id="dgA"></p></figure>
+      <figure class="vs-card gfs"><figcaption><span class="vs-tag good">GFS no-dig</span><b>Steel posts driven 4 ft</b><small>No holes, no concrete</small></figcaption>
+        <svg class="vs-svg dig-b" viewBox="0 36 380 214" role="img" aria-label="Steel posts driven into the ground with no digging"></svg><p class="vs-status" id="dgB"></p></figure>
+    </div>
+    <div class="lab-ctl vs-ctl">
+      <div class="vs-years"><button class="btn primary" id="dgPlay">Play install day</button>${slider('p', 'Install day', 0, 100, 1, 0, '%')}</div>
+      ${slider('len', 'Their fence', 40, Math.max(400, st.len), 10, st.len, ' ft')}
+    </div>
+    <div class="lab-card dig-sum">
+      <div class="lab-label">Their <span id="dgLen"></span> fence, side by side</div>
+      <div class="dig-t" role="table">
+        <div class="dig-h" role="row"><span></span><span class="bad">Dug &amp; concrete</span><span class="good">GFS no-dig</span></div>
+        <div role="row"><span>Dirt left in the yard</span><b id="dgDirt"></b><b class="g">None</b></div>
+        <div role="row"><span>Concrete hauled in</span><b id="dgConc"></b><b class="g">None</b></div>
+        <div role="row"><span>Holes dug in the lawn</span><b id="dgHoles"></b><b class="g">0</b></div>
+        <div role="row"><span>Before the fence goes on the posts</span><b>Wait about 2 days for concrete</b><b class="g">No wait</b></div>
+        <div role="row"><span>In winter</span><b>Frozen ground to dig, concrete to keep from freezing</b><b class="g">We drive posts all winter</b></div>
+      </div>
+    </div>
+    <div class="lab-card">
+      <div class="lab-label">All of that dirt in one pile</div>
+      <svg class="dig-pile" viewBox="0 0 380 170" role="img" aria-label="The dirt from every post hole in one pile, next to a 6 foot person"></svg>
+      <p class="lab-note" id="dgPileT"></p>
+      <div class="dig-barrows" id="dgBar" aria-hidden="true"></div>
+      <p class="lab-note">It's mostly clay from under the topsoil, so it either gets spread on the lawn or hauled away. With driven posts there's nothing to spread and nothing to haul.</p>
+    </div>
+    ${math(`<p><b>One dug hole</b>: 10 in across and 36 in deep, the size we dig ourselves when a yard's soil calls for concrete. Volume = π × (5 in)² × 36 in = <span class="mono" id="mH"></span> cu ft of dirt in the ground.</p>
+      <p><b>Dirt once it's dug</b>: loose clay takes up about 30% more room than it did in the ground (typical swell for clay is 30 to 40%). Moist clay weighs about 110 lb per cu ft in the ground. A contractor wheelbarrow holds 6 cu ft.</p>
+      <p><b>Concrete</b>: the hole minus a 4×4 post, filled with concrete mix. An 80 lb bag makes about 0.6 cu ft (manufacturer yield for 80 lb bags), so about 2 to 3 bags a post.</p>
+      <p><b>Posts</b>: one every 8 ft plus one at the end. Gate posts would add more.</p>
+      <p><b>The wait</b>: concrete keeps gaining strength for days, so installers usually let it set a day or two before hanging the fence. Our own checklist waits 48 hours on any post we set in concrete.</p>
+      <p class="src">We drive steel in clay, which is most of the Toledo area. In sandy soil we set pressure-treated posts in concrete instead, and we check the soil before we quote.</p>`)}`;
+  const A = $('.dig-a', body), B = $('.dig-b', body), pile = $('.dig-pile', body);
+  const G = 168, S = 12, PX = [46, 142, 238, 334];
+  const cl = (v, a = 0, b = 1) => clamp(v, a, b);
+  const sky = id => `<defs><linearGradient id="${id}k" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0c2036"/><stop offset="1" stop-color="#22486e"/></linearGradient>
+      <linearGradient id="${id}s" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#6b4f36"/><stop offset="1" stop-color="#2f2218"/></linearGradient>
+      <linearGradient id="${id}t" x1="0" x2="1"><stop offset="0" stop-color="#8b98a4"/><stop offset=".5" stop-color="#eef3f7"/><stop offset="1" stop-color="#7d8a96"/></linearGradient></defs>
+    <rect width="380" height="${G}" fill="url(#${id}k)"/>
+    <path d="M0,${G - 34} ${Array.from({ length: 19 }, (_, i) => `Q${i * 20 + 10},${G - 60 - ((i * 29) % 21)} ${i * 20 + 20},${G - 38 - ((i * 13) % 11)}`).join(' ')} L380,${G} L0,${G} Z" fill="#0a1a2a" opacity=".8"/>
+    <rect y="${G}" width="380" height="${250 - G}" fill="url(#${id}s)"/>
+    <path d="M0,${G} H380" stroke="#3f6b33" stroke-width="4"/>
+    <path d="${Array.from({ length: 95 }, (_, i) => { const x = i * 4 + 1, h = 3 + ((i * 7) % 5); return `M${x},${G - 1}q${((i * 3) % 5) - 2},${-h * .6} ${((i * 5) % 7) - 3},${-h}`; }).join('')}" stroke="#4f8a3c" stroke-width="1.2" fill="none"/>`;
+  const ear = (x, top, bot, w) => `M${x},${bot} L${x},${top + 2.5} L${x + 2.5},${top} L${x + w - 2.5},${top} L${x + w},${top + 2.5} L${x + w},${bot} Z`;
+  const pickets = (o, x0, x1) => { let s = ''; for (let x = x0; x < x1 - 1; x += 6) s += `<path d="${ear(x, G - 72, G - 3, 5.6)}" fill="#c98a5b" stroke="#7a4f2f" stroke-width=".5" opacity="${o}"/>`; return s; };
+  const mound = (x, f) => { if (f <= 0) return ''; const w = 26 * Math.sqrt(f), h = 11 * Math.sqrt(f); return `<path d="M${x},${G + 1} Q${x + w * .2},${G - h * 1.05} ${x + w * .5},${G - h} Q${x + w * .8},${G - h * .95} ${x + w},${G + 1} Z" fill="#6a4a2e" stroke="#3d2a19" stroke-width=".8"/><circle cx="${x + w * .35}" cy="${G - h * .55}" r="1.6" fill="#8a6440"/><circle cx="${x + w * .62}" cy="${G - h * .7}" r="1.3" fill="#4a3220"/>`; };
+  const clock = (x, y, txt, o) => `<g opacity="${o}"><rect x="${x - 112}" y="${y - 17}" width="224" height="32" rx="16" fill="rgba(10,20,34,.9)" stroke="rgba(140,199,255,.45)"/><circle cx="${x - 94}" cy="${y - 1}" r="8" fill="none" stroke="#8cc7ff" stroke-width="1.6"/><path d="M${x - 94},${y - 6} v5 l4,3" stroke="#8cc7ff" stroke-width="1.6" fill="none"/><text x="${x - 80}" y="${y + 4}" class="svg-l" style="font-size:12px">${txt}</text></g>`;
+  const drawA = p => {
+    let s = sky('da'), bags = 0, dirtShown = 0;
+    // bags of concrete delivered, used as each post is set
+    const perPost = Math.ceil((Math.PI * (5 / 12) ** 2 * 3 - (3.5 / 12) ** 2 * 3) / .6 * 10) / 10;
+    let used = 0;
+    PX.forEach((x, i) => {
+      const t0 = .02 + i * .1, dg = cl((p - t0) / .08), pour = cl((p - (.46 + i * .035)) / .03);
+      used += perPost * pour;
+      if (dg > 0) {
+        const depth = 3 * S * dg;
+        s += `<rect x="${x - 5}" y="${G}" width="10" height="${depth}" fill="${pour > 0 ? '#9aa3ab' : '#1b130c'}"/>`;
+        if (pour > 0 && pour < 1) s += `<rect x="${x - 5}" y="${G}" width="10" height="${depth * (1 - pour)}" fill="#1b130c"/>`;
+        s += mound(x + 8, dg); dirtShown += dg;
+        if (dg < 1) s += `<g><rect x="${x - 2}" y="${G - 70}" width="4" height="${70 + depth}" fill="#5c6670"/><path d="M${x - 6},${G + depth - 4} l12,-6 m-12,0 l12,-6 m-12,0 l12,-6" stroke="#9aa3ab" stroke-width="2"/><rect x="${x - 10}" y="${G - 84}" width="20" height="14" rx="3" fill="#d6823f"/></g>`;
+      }
+      if (pour > 0) s += `<rect x="${x - 2.5}" y="${G - 72}" width="5" height="${72 + 3 * S - 1}" fill="#a68b60" stroke="#6e5638" stroke-width=".5"/>`;
+    });
+    const total = Math.ceil(perPost * 4); bags = Math.max(0, Math.round(total - used));
+    for (let b = 0; b < bags; b++) { const bx = 6 + (b % 3) * 11, by = G - 7 - Math.floor(b / 3) * 7; s += `<rect x="${bx}" y="${by}" width="10" height="7" rx="1.5" fill="#cfc7b6" stroke="#8d8576" stroke-width=".6"/>`; }
+    const fenceOn = cl((p - .82) / .12);
+    if (fenceOn > 0) {
+      for (const y of [G - 12, G - 38, G - 64]) s += `<rect x="${PX[0]}" y="${y}" width="${PX[3] - PX[0]}" height="4" fill="#b98757" opacity="${fenceOn}"/>`;
+      s += pickets(fenceOn, PX[0] - 3, PX[3] + 3);
+      PX.forEach((x, i) => { s += mound(x + 8, 1); });
+    }
+    const cure = cl((p - .6) / .04) * (1 - cl((p - .8) / .03));
+    if (cure > 0) s += clock(190, 60, 'Concrete curing · about 2 days', cure);
+    if (p >= .99) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#ffd2b0">DIRT PILES LEFT ON THE LAWN</text>`;
+    A.innerHTML = s;
+    const holes = PX.filter((x, i) => p > .02 + i * .1).length;
+    $('#dgA', body).textContent = p <= 0 ? 'A clean yard, before anyone digs.' : p < .45 ? `Digging hole ${Math.min(4, holes)} of 4. Every hole leaves a pile of clay on the lawn.` : p < .6 ? 'Mixing and pouring concrete around each post.' : p < .82 ? 'Waiting on the concrete before the fence can go on.' : 'Fence up, plus 4 dirt piles to spread or haul away.';
+  };
+  const drawB = p => {
+    let s = sky('db');
+    PX.forEach((x, i) => {
+      const t0 = .02 + i * .07, dv = cl((p - t0) / .06);
+      if (p < t0) return;
+      const sink = 4 * S * dv, topY = G - 4 * S - (4 * S - sink), shake = dv > 0 && dv < 1 ? ((Math.floor(p * 900) % 2) ? 1 : -1) : 0;
+      s += `<rect x="${x - 2 + shake}" y="${topY}" width="4" height="${8 * S}" rx="1" fill="url(#dbt)"/>`;
+      if (dv < 1) s += `<rect x="${x - 8 + shake}" y="${topY - 22}" width="16" height="22" rx="3" fill="#2a3644" stroke="#8cc7ff" stroke-width=".8"/><rect x="${x - 3 + shake}" y="${topY - 30}" width="6" height="9" fill="#d6823f"/>`;
+    });
+    const box = cl((p - .32) / .1), fence = cl((p - .44) / .14);
+    if (box > 0) PX.forEach(x => { s += `<rect x="${x - 3.5}" y="${G - 69.5}" width="7" height="67" fill="#b98757" stroke="#7a4f2f" stroke-width=".6" opacity="${box}"/>`; });
+    if (fence > 0) {
+      for (const y of [G - 14, G - 40]) s += `<rect x="${PX[0]}" y="${y}" width="${PX[3] - PX[0]}" height="4" fill="#b98757" opacity="${fence}"/>`;
+      s += `<rect x="${PX[0] - 4}" y="${G - 73}" width="${PX[3] - PX[0] + 8}" height="3" fill="#a8774b" opacity="${fence}"/>`;
+      s += pickets(fence, PX[0] - 3, PX[3] + 3);
+    }
+    if (p >= .6) s += clock(190, 60, 'No concrete to wait on', cl((p - .6) / .05));
+    if (p >= .99 || p === 0) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#b5f3d4">${p === 0 ? 'SAME YARD' : 'NO DIRT. NO CONCRETE. LAWN LEFT AS IT WAS.'}</text>`;
+    B.innerHTML = s;
+    $('#dgB', body).textContent = p <= 0 ? 'The same yard.' : p < .32 ? 'Driving each steel post 4 ft into the clay. Nothing comes out of the ground.' : p < .6 ? 'Building the fence on the posts right away.' : 'Done, with nothing to clean up but scraps.';
+  };
+  const drawPile = n => {
+    const ft = 18, Gp = 150, R = Math.cbrt(n.looseFt3 / .733), H = R * .7; // loose clay at about 35°
+    const cx = 150 + R * ft, w = R * ft, h = H * ft;
+    pile.innerHTML = `<rect width="380" height="170" fill="#0f2034"/><path d="M0,${Gp} H380" stroke="#3f6b33" stroke-width="4"/>
+      <g fill="#9fb4c8"><circle cx="64" cy="${Gp - 6 * ft + 9}" r="8"/><path d="M56,${Gp - 6 * ft + 20} h16 l3,46 h-5 l-2,-30 l-1,30 h-6 l-1,-30 l-2,30 h-5 z"/><rect x="58" y="${Gp - 6 * ft + 64}" width="5" height="${6 * ft - 64}"/><rect x="65" y="${Gp - 6 * ft + 64}" width="5" height="${6 * ft - 64}"/></g>
+      <path d="M40,${Gp - 6 * ft} h48 M44,${Gp} V${Gp - 6 * ft}" stroke="rgba(140,199,255,.5)" stroke-dasharray="3 3"/><text x="30" y="${Gp - 6 * ft / 2}" class="svg-l blue" text-anchor="middle" transform="rotate(-90 30 ${Gp - 6 * ft / 2})">6 FT</text>
+      <path d="M${cx - w},${Gp + 1} C${cx - w * .55},${Gp - h * .75} ${cx - w * .2},${Gp - h} ${cx},${Gp - h} C${cx + w * .2},${Gp - h} ${cx + w * .55},${Gp - h * .75} ${cx + w},${Gp + 1} Z" fill="#6a4a2e" stroke="#3d2a19"/>
+      ${Array.from({ length: 26 }, (_, i) => { const a = (i * 37) % 100 / 100, b = (i * 61) % 100 / 100, x = cx - w * .8 + a * w * 1.6, yTop = Gp - h * (1 - Math.abs(x - cx) / w) ** 1.1; return `<circle cx="${x}" cy="${Gp - (Gp - yTop) * b * .9}" r="${1.2 + (i % 3) * .6}" fill="${i % 2 ? '#8a6440' : '#4a3220'}"/>`; }).join('')}
+      <text x="${cx}" y="${Gp + 16}" text-anchor="middle" class="svg-l">${fmt(R * 2, 1)} FT ACROSS · ${fmt(H, 1)} FT TALL</text>`;
+  };
+  const update = () => {
+    const n = digNumbers(st.len);
+    $('[data-out=len]', body).textContent = st.len + ' ft'; $('#dgLen', body).textContent = st.len + ' ft';
+    $('#dgDirt', body).textContent = `${fmt(n.looseYd3, 1)} cu yd · about ${fmt(Math.ceil(n.barrows))} wheelbarrow loads · ${fmt(Math.round(n.lb / 100) * 100)} lb`;
+    $('#dgConc', body).textContent = `${n.bags} bags · ${fmt(n.concLb)} lb`;
+    $('#dgHoles', body).textContent = n.posts;
+    $('#dgPileT', body).textContent = `${n.posts} holes for a ${st.len} ft fence. About ${fmt(n.lb / 2000, 1)} tons of clay, ${fmt(Math.ceil(n.barrows))} wheelbarrow loads.`;
+    $('#dgBar', body).innerHTML = Array.from({ length: Math.min(40, Math.ceil(n.barrows)) }, () => `<svg viewBox="0 0 32 20"><path d="M3,6 h20 l-3,7 h-14 z" fill="#5d6b78"/><path d="M5,6 q9,-7 18,0 z" fill="#6a4a2e"/><circle cx="22" cy="16" r="3" fill="none" stroke="#9fb4c8" stroke-width="1.6"/><path d="M20,13 l2,3 M3,6 l-2,-3" stroke="#9fb4c8" stroke-width="1.6"/></svg>`).join('') + (n.barrows > 40 ? `<span class="mono">+${Math.ceil(n.barrows) - 40}</span>` : '');
+    $('#mH', body).textContent = fmt(n.hole, 2);
+    drawPile(n);
+  };
+  const paint = () => { drawA(st.p); drawB(st.p); $('[data-out=p]', body).textContent = Math.round(st.p * 100) + '%'; $('[name=p]', body).value = Math.round(st.p * 100); };
+  let raf = 0, live = true, last = 0;
+  const play = () => {
+    if (st.playing) { st.playing = false; $('#dgPlay', body).textContent = 'Play install day'; return; }
+    if (st.p >= 1) st.p = 0;
+    if (reduced.matches) { st.p = 1; paint(); return; }
+    st.playing = true; $('#dgPlay', body).textContent = 'Pause'; last = performance.now();
+    const step = now => { if (!st.playing || !live) return; st.p = Math.min(1, st.p + (now - last) / 9000); last = now; paint();
+      if (st.p >= 1) { st.playing = false; $('#dgPlay', body).textContent = 'Play again'; return; } raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  };
+  $('#dgPlay', body).onclick = play;
+  $('[name=p]', body).oninput = e => { st.playing = false; $('#dgPlay', body).textContent = 'Play install day'; st.p = +e.target.value / 100; paint(); };
+  $('[name=len]', body).oninput = e => { st.len = +e.target.value; update(); };
+  update(); paint();
+  return () => { live = false; st.playing = false; cancelAnimationFrame(raf); };
 }

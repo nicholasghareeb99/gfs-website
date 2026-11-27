@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 globalThis.matchMedia ||= () => ({ matches: false });
-const { windLoad, shrink, lifeEstimate } = await import('../public/showroom/lab.mjs');
+const { windLoad, shrink, lifeEstimate, digNumbers } = await import('../public/showroom/lab.mjs');
 const solid = { eps: () => 1, bay: 8 }, chain = { eps: () => .15, bay: 10 };
 const near = (a, b, tol) => assert.ok(Math.abs(a - b) <= tol, `${a} not within ${tol} of ${b}`);
 
@@ -39,4 +39,15 @@ test('vinyl: a 5 in post at .150 wall is about 10% stiffer than at .135', async 
   const a = tube(5, .150), b = tube(5, .135);
   near(a.A, 25 - 4.7 * 4.7, 1e-9);
   near(a.I / b.I, 1.101, 0.001);
+});
+
+test('no-dig: dirt and concrete from a dug 150 ft fence (10 in × 36 in holes, posts every 8 ft)', () => {
+  const n = digNumbers(150);
+  assert.equal(n.posts, 20);                                   // ceil(150/8) + 1
+  near(n.hole, Math.PI * (5 / 12) ** 2 * 3, 1e-9);             // 1.636 cu ft a hole
+  near(n.dirtFt3, 32.72, 0.01);                               // in the ground
+  near(n.looseYd3, 32.72 * 1.3 / 27, 0.01);                   // 1.58 cu yd once dug
+  near(n.lb, 32.72 * 110, 2);                                 // about 3,600 lb
+  assert.equal(n.bags, 47);                                   // (1.636 − 0.255) × 20 / 0.6 → 46.03 → 47 bags
+  assert.equal(n.concLb, 47 * 80);
 });
