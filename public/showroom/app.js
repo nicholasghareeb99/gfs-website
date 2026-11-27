@@ -224,6 +224,10 @@ function autoOffline() {
 
 function net() { $('#netDot').classList.toggle('off', !navigator.onLine); }
 
+// iPhone Safari ignores user-scalable=no: a stray pinch zooms the whole app and leaves
+// buttons off screen with no way back. Block page zoom; screens that zoom do it themselves.
+for (const t of ['gesturestart', 'gesturechange']) document.addEventListener(t, e => e.preventDefault(), { passive: false });
+
 async function boot() {
   splash(); net();
   addEventListener('online', net); addEventListener('offline', net);

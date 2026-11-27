@@ -445,8 +445,11 @@ export async function openBlueprint(app, name, style) {
       steps.forEach(s => s.className = 'done');
       sheetEl.innerHTML = `<img alt="Blueprint of ${esc(m)}" src="${URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))}">`;
       await sheetEl.firstChild.decode().catch(() => {});
-      load.hidden = true; sheetEl.classList.add('in'); current = { m, svg };
-      $('[data-share]', el).disabled = false; zoomable(sheetEl);
+      load.hidden = true; sheetEl.classList.add('in'); current = { m, svg }; zoomable(sheetEl);
+      // Make the PNG now: iPhone Safari only opens the share sheet if it starts right after the tap.
+      const png = await toPng(svg); if (my !== ticket || !el.isConnected) return;
+      current.file = new File([png], `GFS blueprint - ${m.replace(/[<>:"/\\|?*]/g, '-')}.png`, { type: 'image/png' }); current.png = png;
+      $('[data-share]', el).disabled = false;
     } catch (e) {
       if (my !== ticket) return;
       load.querySelector('ol').innerHTML = `<li class="err">${esc(e.message || 'The blueprint could not be drawn.')}</li>`;
@@ -454,8 +457,8 @@ export async function openBlueprint(app, name, style) {
   };
   el.onclick = e => { const b = e.target.closest('[data-m]'); if (b) show(b.dataset.m); };
   $('[data-share]', el).onclick = async () => {
-    if (!current) return;
-    const png = await toPng(current.svg), file = new File([png], `GFS blueprint - ${current.m.replace(/[<>:"/\\|?*]/g, '-')}.png`, { type: 'image/png' });
+    if (!current?.file) return;
+    const { file, png } = current;
     try {
       if (navigator.canShare?.({ files: [file] })) await navigator.share({ files: [file], title: `Ghareeb Fencing Solutions · ${current.m}` });
       else { const a = document.createElement('a'); a.href = URL.createObjectURL(png); a.download = file.name; a.click(); }
