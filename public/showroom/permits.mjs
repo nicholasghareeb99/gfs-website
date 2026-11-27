@@ -374,7 +374,7 @@ function setDrawing(on) {
 function fenceHTML(A, rule) {
   if (!cur.parcel && !cur.lat) return '';
   const empty = fenceEmpty(), st = fenceStats();
-  const opts = D.styles.map(s => `<optgroup label="${esc(s.name)}">${s.models.map(m => `<option ${m === cur.fenceModel ? 'selected' : ''}>${esc(m)}</option>`).join('')}</optgroup>`).join('');
+  const opts = D.styles.filter(s => s.models.length).map(s => `<optgroup label="${esc(s.name)}">${s.models.map(m => `<option ${m === cur.fenceModel ? 'selected' : ''}>${esc(m)}</option>`).join('')}</optgroup>`).join('');
   const sum = empty ? '' : `<div class="fence-sum"><b class="mono">${Math.round(st.ft)} ft</b><span>${st.walk ? `${st.walk} walk gate${st.walk > 1 ? 's' : ''}` : ''}${st.walk && st.drive ? ' · ' : ''}${st.drive ? `${st.drive} drive gate${st.drive > 1 ? 's' : ''}` : ''}${!st.walk && !st.drive ? 'No gates' : ''}</span></div>`;
   const issues = fenceIssues(A, rule).map(x => `<p class="warnline">${esc(x)}</p>`).join('');
   const style = `<label class="chip fence-style">Style <select data-fmodel><option value="">Pick a style…</option>${opts}</select></label>`;

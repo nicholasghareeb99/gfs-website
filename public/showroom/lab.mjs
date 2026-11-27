@@ -94,7 +94,10 @@ function select(id, force) {
   if (id !== 'home' && !RENDER[id]) id = 'home';
   if (id === current && !force && (stop || id === 'home')) return;
   stop?.(); stop = null; current = id;
-  const body = $('.lab-body', root), home = id === 'home', t = TOOLS.find(x => x.id === id), i = TOOLS.indexOf(t);
+  // Each tool gets a brand-new container: tools hang their tap handlers on it, and reusing one
+  // let handlers from tools seen earlier keep firing (wrong redraws, errors, memory growth).
+  const old = $('.lab-body', root), body = old.cloneNode(false); old.replaceWith(body);
+  const home = id === 'home', t = TOOLS.find(x => x.id === id), i = TOOLS.indexOf(t);
   $('.lab-nav', root).hidden = home; $('.lab-foot', root).hidden = home; $('.lab-how', root).hidden = home;
   $('#labTitle', root).textContent = home ? 'Fence Lab' : t.name;
   $('#labLine', root).textContent = home ? 'Hands-on tools that show how a fence is built, and why ours lasts. Pick one.' : t.line;

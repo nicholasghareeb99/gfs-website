@@ -55,7 +55,13 @@ export function openHelp(key, extra) {
 
 // First visit to a screen: show its help once on this device.
 export function helpOnce(key, extra) {
-  try { const k = 'gfs-showroom-help-' + key; if (localStorage.getItem(k)) return; localStorage.setItem(k, '1'); } catch { return; }
+  const k = 'gfs-showroom-help-' + key;
+  try { if (localStorage.getItem(k)) return; } catch { return; }
   // wait for the splash screen to finish, then a beat
-  let n = 0; const t = setInterval(() => { if (document.getElementById('splash')?.classList.contains('done') || ++n > 20) { clearInterval(t); setTimeout(() => openHelp(key, extra), 600); } }, 300);
+  let n = 0; const t = setInterval(() => { if (document.getElementById('splash')?.classList.contains('done') || ++n > 20) { clearInterval(t); setTimeout(() => {
+    // Not over something else (a customer's link opens their summary first) and not if they've moved on.
+    if (document.querySelector('.recap, .help-sheet, .px, .bp, .cmp, .rv, .modal, .overview.on') || (window.GFSShowroom?.mode && !window.GFSShowroom.mode.startsWith(key.split('-')[0]))) return;
+    try { localStorage.setItem(k, '1'); } catch {}
+    openHelp(key, extra);
+  }, 600); } }, 300);
 }
