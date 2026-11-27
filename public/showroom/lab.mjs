@@ -32,7 +32,7 @@ const TOOLS = [
     how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the bar sits too low for its catch, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'Most of a gate\'s trouble starts at the posts. A 3 in steel post driven below the frost line doesn\'t lean or heave, and a welded steel frame doesn\'t rack.' },
   { id: 'life', more: true, name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
-    how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match your yard.']],
+    how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match your yard.'], ['drag', 'Drag sideways to turn the 3D fence. Pinch to zoom, double-tap to reset.']],
     take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
   { id: 'vinyl', more: true, name: 'Vinyl walls', line: 'Same size post, thicker wall, steel inside: how far each bends',
     how: [['slide', 'Slide <b>Gust speed</b> to push on both fences.'], ['look', 'Watch the big-box post bend further than ours. The bend is drawn true size.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
@@ -41,7 +41,7 @@ const TOOLS = [
     how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
     take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
   { id: 'wood', more: true, name: 'Wood movement', line: 'Why gaps open between boards',
-    how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.']],
+    how: [['tap', 'Pick a <b>wood</b>.'], ['slide', 'Slide the moisture <b>when built</b> and <b>later</b> to watch the gaps open.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
     take: 'All wood shrinks as it dries. Styles that overlap the boards, like board-on-board, hide the gaps.' }
 ];
 
@@ -335,6 +335,7 @@ function life(body) {
   let m = LIFE[1]; const on = new Set(['steel', 'seal']);
   const MAXY = 50;
   body.innerHTML = `
+    <div class="life-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the fence in 3D…</div></div>
     <div class="lab-grid">
       <div class="lab-vis life-vis"><div class="life-big"><b class="mono" id="lY"></b><span>years, about</span></div>
         <div class="life-axis" id="lAxis"></div><p class="lab-note" id="lFirst"></p></div>
@@ -346,11 +347,13 @@ function life(body) {
       </div>
     </div>
     <div class="lab-card"><div class="lab-label">Every material, side by side</div><div class="lchart" id="lChart"></div></div>
-    ${math(`<p>Each bar is a published range. The estimate starts in the middle and the yard choices move it toward one end. It never goes past the range, because nobody has data for that.</p><div id="lSrc"></div>
+    ${math(`<p>Each bar is a published range. The estimate starts in the middle and the yard choices move it toward one end. It never goes past the range, because nobody has data for that. The 3D fence is the Executive App's model of each material, shown new; it isn't aged.</p><div id="lSrc"></div>
       <p><b>Why wood posts fail at the soil line</b>: decay fungi need oxygen, water and a temperature they like. A few inches either side of grade has all three, deeper soil has little oxygen, and the air above dries out. That band is where a wood post rots first, and it is why GFS drives galvanized steel posts in clay.</p>`)}`;
   const tick = y => `<i style="left:${y / MAXY * 100}%"><span>${y}</span></i>`;
+  let scene = null, live = true;
   const update = () => {
     const e = lifeEstimate(m, on);
+    scene?.set({ id: m.id, steel: on.has('steel') });
     $('#lY', body).textContent = m.plus ? m.range[0] + '+' : e.years;
     $('#lFirst', body).innerHTML = `<b>What wears out first:</b> ${esc(m.first)}`;
     $('#lCare', body).textContent = m.care;
@@ -365,6 +368,12 @@ function life(body) {
   body.addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (b) { m = LIFE.find(x => x.id === b.dataset.m); update(); } });
   body.addEventListener('change', e => { const c = e.target.closest('[data-k]'); if (c) { c.checked ? on.add(c.dataset.k) : on.delete(c.dataset.k); update(); } });
   update();
+  if (webglOK()) {
+    const host = $('.life-3d', body); host.hidden = false;
+    import('./life3d.mjs').then(x => { if (!live) return; $('.l3d-wait', host).remove(); scene = x.createLifeScene(host, { specs: app.live?.specs }); body.__life = scene; update(); })
+      .catch(() => { if (!live) return; host.hidden = true; scene = null; });
+  }
+  return () => { live = false; scene?.dispose(); scene = null; };
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -387,6 +396,11 @@ const frac16 = v => { const n = Math.round(Math.abs(v) * 16); if (!n) return '0'
 function wood(body) {
   let sp = SPECIES[0], from = sp.wet, to = 12, width = 5.5;
   body.innerHTML = `
+    <div class="wood-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the boards in 3D…</div></div>
+    <div class="lab-ctl vs-ctl">
+      ${slider('from', 'Moisture when built', 8, 40, 1, from, '%')}
+      ${slider('to', 'Moisture later (Ohio summer is about 12%)', 6, 30, 1, to, '%')}
+    </div>
     <div class="lab-grid">
       <div class="lab-vis wood-vis"><svg class="wood-svg" viewBox="0 0 400 230" aria-label="Pickets seen from above"></svg>
         <div class="vis-note">Looking down on six pickets. Gap drawn 4× bigger so you can see it.</div></div>
@@ -394,10 +408,9 @@ function wood(body) {
         <div class="lab-label">Wood</div>
         ${seg('sp', SPECIES.map(s => [s.id, s.name]), sp.id)}
         <p class="lab-note" id="wdNote"></p>
-        ${slider('from', 'Moisture when built', 8, 40, 1, from, '%')}
-        ${slider('to', 'Moisture later (Ohio summer is about 12%)', 6, 30, 1, to, '%')}
         <div class="readouts">
-          <div><b class="mono" id="wdGap"></b><small>gap that opens between butted 1×6 pickets</small></div>
+          <div><b class="mono" id="wdGap"></b><small>each 1×6 picket gets this much narrower, so that much gap opens between boards set side by side</small></div>
+          <div><b class="mono" id="wdLap"></b><small>overlap left on board-on-board, so nothing shows through</small></div>
           <div><b class="mono" id="wdCup"></b><small>flat-sawn shrinks this many times more than quartersawn, which is what makes boards cup</small></div>
         </div>
       </div>
@@ -405,10 +418,13 @@ function wood(body) {
     <div class="lab-card"><p class="lab-note">This is why GFS builds board-on-board with overlapping boards: a gap opening as the wood dries stays covered. On a butted privacy fence, pine leaves the bigger gaps.</p></div>
     ${math(`<p><b>Shrinkage below the fiber saturation point</b> (USDA Wood Handbook, Ch. 4): S = S<sub>0</sub> · (M<sub>1</sub> − M<sub>2</sub>) / 30, where S<sub>0</sub> is green-to-ovendry shrinkage and moisture above 30% (free water) causes no shrinking. <span class="mono" id="wdEq"></span></p>
       <p>S<sub>0</sub> from Wood Handbook Table 4-3: loblolly pine 7.4% flat-sawn, 4.8% quartersawn; Western redcedar 5.0% and 2.4%; Northern white-cedar 4.9% and 2.2%.</p>
-      <p class="src">Fence pickets are mostly flat-sawn, so the flat-sawn number is used. A 1×6 picket is 5½″ wide.</p>`)}`;
+      <p class="src">Fence pickets are mostly flat-sawn, so the flat-sawn number is used. A 1×6 picket is 5½″ wide. The 3D boards are the Executive App's dog-ear privacy and board-on-board models, drawn true size; each board changes width about its middle, where it's nailed. Cedar is drawn with the app's cedar model for both cedars. Cupping and twisting aren't drawn.</p>`)}`;
   const svg = $('.wood-svg', body);
+  let scene = null, live = true;
   const update = () => {
     const g = shrink(sp, width, from, to);
+    const r3 = scene?.set({ sp: sp.id, s: g / width });
+    $('#wdLap', body).textContent = r3 ? frac16(r3.bob.lapIn) : '1 1/2″';
     $('#wdNote', body).textContent = sp.note;
     $('[data-out=from]', body).textContent = from + '%'; $('[data-out=to]', body).textContent = to + '%';
     $('#wdGap', body).textContent = g < 0 ? `Swells ${frac16(-g)}` : frac16(g) + (g >= 1 / 32 ? ` (${fmt(g, 2)} in)` : '');
@@ -426,6 +442,12 @@ function wood(body) {
   $('[name=from]', body).oninput = e => { from = +e.target.value; update(); };
   $('[name=to]', body).oninput = e => { to = +e.target.value; update(); };
   update();
+  if (webglOK()) {
+    const host = $('.wood-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true;
+    import('./wood3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createWoodScene(host, { specs: app.live?.specs }); body.__wood = scene; update(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; scene = null; });
+  }
+  return () => { live = false; scene?.dispose(); scene = null; };
 }
 
 // ═════════════════════════════════════════════════════════════════

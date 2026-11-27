@@ -173,3 +173,15 @@ test('wind flow: the average flow behind the Wind tool\'s picture', async () => 
   let worst = 1; for (let z = .05; z < 2; z += .01) worst = Math.min(worst, F.vel(10, z)[0] / F.U0(z));
   assert.ok(worst > .65 && worst < .85, worst);
 });
+
+test('wood movement: what the 3D boards are scaled by', async () => {
+  globalThis.matchMedia ??= () => ({ matches: false, addEventListener() {} });
+  const L = await import('../public/showroom/lab.mjs');
+  // treated pine from soaked (30%+) to 12%: 7.4% × 18/30 = 4.44% of the width, about ¼ in on a 5½ in board
+  const pine = { T: 7.4, R: 4.8 };
+  near(L.shrink(pine, 5.5, 40, 12) / 5.5, .074 * 18 / 30, 1e-12);
+  // board-on-board laps about 1½ in or more, so even that shrink leaves over an inch covered
+  assert.ok(1.5 - L.shrink(pine, 5.5, 40, 12) > 1.2);
+  // built dry and wetted, a board swells (negative shrink)
+  assert.ok(L.shrink(pine, 5.5, 8, 30) < 0);
+});
