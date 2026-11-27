@@ -5,6 +5,7 @@
 // be seen, it says so.
 import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs';
 import { webglOK } from './lab3d-ok.mjs';
+import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
 export { digNumbers } from './ui.mjs';
 import { visit } from './visit.mjs';
 import { helpOnce } from './help.mjs';
@@ -19,8 +20,8 @@ const TOOLS = [
     how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to light it up on the drawing.']],
     take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The extra top rail keeps the top line straight.' },
   { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
-    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and <b>clay</b> or <b>sand</b>.'], ['slide', 'Slide through the <b>months</b> and add <b>winters</b> to watch shallow posts lift.']],
-    take: 'A post has to reach below the frost line, about 3 ft here. Ours are driven 4 ft.' },
+    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, <b>clay</b> or <b>sand</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
+    take: 'A post has to reach well below the frost line, 3 ft here and 3½ ft in Michigan. Ours are driven 4 ft.' },
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
@@ -428,63 +429,84 @@ function wood(body) {
 // ═════════════════════════════════════════════════════════════════
 // 4. FROST & POSTS — cross-section through a winter
 // ═════════════════════════════════════════════════════════════════
-const PLACES = [{ id: 'oh', name: 'Toledo · Lucas County', frost: 36, src: 'City of Toledo and Lucas County design frost depth' }, { id: 'mi', name: 'Michigan', frost: 42, src: 'Michigan footings 42 in below grade (Mich. Admin. Code R 408.30522)' }];
-const MONTHS = [['Nov', 0], ['Dec', .35], ['Jan', .75], ['Feb', 1], ['Mar', .55], ['Apr', 0]];
 function frost(body) {
-  let place = PLACES[0], mi = 3, winters = 1, soil = 'clay';
+  let place = PLACES[0], mi = 3, winters = 1, soil = 'clay', winter = WINTERS[0];
   body.innerHTML = `
+    <div class="frost-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the yard in 3D…</div></div>
+    <div class="lab-ctl vs-ctl">
+      <div class="vs-years"><button class="btn primary" id="frPlay">Play a winter</button>${slider('m', 'Month', 0, 5, 1, mi)}</div>
+      ${slider('w', 'Winters', 1, 10, 1, winters)}
+    </div>
     <div class="lab-grid">
       <div class="lab-vis"><svg class="frost-svg" viewBox="0 0 420 330" aria-label="Soil cross-section with three posts"></svg>
-        <div class="vis-note">Post movement drawn bigger than life so you can see it.</div></div>
+        <div class="vis-note">Post movement drawn ${DRAWN} times bigger than life so you can see it.</div></div>
       <div class="lab-ctl">
         <div class="lab-label">Where</div>${seg('place', PLACES.map(p => [p.id, p.name]), place.id)}
         <div class="lab-label">Soil</div>${seg('soil', [['clay', 'Clay (most of Toledo)'], ['sand', 'Sand']], soil)}
-        ${slider('m', 'Month', 0, 5, 1, mi)}
-        ${slider('w', 'Winters', 1, 10, 1, winters)}
+        <div class="lab-label">Winter</div>${seg('winter', WINTERS.map(w => [w.id, w.name]), winter.id)}
         <div class="readouts one"><div><b id="fWhy"></b><small id="fWhyS"></small></div></div>
+        <div class="vis-note f3d-note" hidden>Post movement drawn ${DRAWN} times bigger than life so you can see it.</div>
       </div>
     </div>
-    ${math(`<p><b>Frost depth</b> is how deep the ground freezes in a hard winter: 36 in in Toledo and Lucas County, 42 in across Michigan. A GFS driven post goes 48 in down, past both.</p>
-      <p><b>Frost heave</b>: in wet clay, water is drawn up to the freezing front and freezes into ice lenses that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A post that stops inside the frozen layer gets lifted with it, and each thaw it settles back a little less. A post anchored well below the frost line is held by unfrozen soil.</p>
-      <p><b>Concrete footings lift too</b>: frozen clay grips the rough sides and flared top of a footing, so a footing that stops above the frost line rides up with the ground. That's why the post set about 2.5 ft in concrete moves here.</p>
+    ${math(`<p><b>Frost line</b>: how deep the ground freezes in the hardest winters, 36 in in Toledo and Lucas County and 42 in across Michigan. A typical winter freezes it about two-thirds of the way down. A GFS driven post goes 48 in, past both.</p>
+      <p><b>Frost heave</b>: in wet clay, water is drawn up to the freezing front and freezes into seams of ice (ice lenses) that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A footing whose bottom is in or near the frozen layer rides up with it. At the thaw the ground settles, but loose soil falls into the gap under the footing, so it never quite comes back down, and it creeps up a little more each winter.</p>
+      <p><b>Why depth matters</b>: the arrows show it. Frozen soil grips a post along the frozen part (up arrows). Unfrozen soil below the frost holds it along the rest (down arrows). A post with plenty of length below the frost line is held; a footing that ends at or above it is not. A flared top, where the top of a hole caved in, gives the frost even more to grab.</p>
+      <p><b>The numbers here are a picture, not a measurement</b>: how far a post moves depends on how wet the clay is, how cold the winter gets and how deep the frost goes. We show about 1¼ in of lift in a winter for a footing fully in frozen clay, with about a third of it left behind each spring, drawn ${DRAWN} times bigger.</p>
       <p><b>Why GFS changes method by soil</b>: a driven steel post needs firm clay to grip. In sand, which drains and heaves far less but holds a driven post poorly, GFS sets pressure-treated posts in concrete instead.</p>
       <p class="src">Frost depths: ${PLACES.map(p => esc(p.src)).join('; ')}.</p>`)}`;
   const svg = $('.frost-svg', body);
+  let scene = null;
   const update = () => {
-    const [mName, mf] = MONTHS[mi], fd = place.frost * mf, ppi = 230 / 60, top = 70, gx = y => top + y * ppi;
+    const mName = MONTHS[Math.round(mi)];
     $('[data-out=m]', body).textContent = mName; $('[data-out=w]', body).textContent = winters;
-    const heaving = soil === 'clay' ? 1 : .25;
-    const posts = [
-      { x: 64, d: 24, name: 'Shallow post', sub: '24″ deep', col: '#a68b60' },
-      { x: 178, d: 30, name: 'Wood in concrete', sub: '30″ concrete', col: '#a68b60', conc: true },
-      { x: 292, d: 48, name: soil === 'clay' ? 'GFS driven steel' : 'Driven steel', sub: '48″ driven', col: '#c8d2dc', steel: true }
-    ];
-    // Lift: only posts whose bottom sits within the frozen zone get carried; residual grows each winter.
-    const lift = p => { if (p.d >= place.frost) return 0; const grip = clamp((fd - p.d * .45) / (p.d * .55), 0, 1), k = p.conc ? .7 : 1; return (grip * 14 * heaving + 3 * heaving * (winters - 1)) * k; };
-    svg.innerHTML = `
-      <defs><linearGradient id="soilG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${soil === 'clay' ? '#5b4532' : '#8a7550'}"/><stop offset="1" stop-color="${soil === 'clay' ? '#3d2d20' : '#6b5a3c'}"/></linearGradient>
-        <pattern id="ice" width="14" height="10" patternUnits="userSpaceOnUse"><path d="M0 5h9" stroke="#bfe3ff" stroke-width="2" opacity=".55"/></pattern></defs>
-      <rect x="0" y="0" width="420" height="${top}" fill="#0f2034"/>
-      <rect x="0" y="${top}" width="420" height="${330 - top}" fill="url(#soilG)"/>
-      ${fd > 0 ? `<rect x="0" y="${top}" width="420" height="${fd * ppi}" fill="#9fd0ff" opacity=".16"/>${soil === 'clay' ? `<rect x="0" y="${top}" width="420" height="${fd * ppi}" fill="url(#ice)"/>` : ''}` : ''}
-      <line x1="0" x2="420" y1="${gx(place.frost)}" y2="${gx(place.frost)}" stroke="#8cc7ff" stroke-dasharray="6 6" stroke-width="1.5"/>
-      <text x="414" y="${gx(place.frost) - 6}" text-anchor="end" class="svg-l blue halo">FROST LINE ${place.frost}″</text>
-      ${fd > 0 ? `<text x="6" y="${gx(fd) - 6}" class="svg-l halo">FROZEN TO ${Math.round(fd)}″ · ${esc(mName.toUpperCase())}</text>` : `<text x="6" y="${top + 16}" class="svg-l">${esc(mName.toUpperCase())} · GROUND THAWED</text>`}
-      ${posts.map(p => { const L = lift(p), bot = gx(p.d) - L, w = p.steel ? 9 : 16; return `
-        ${p.conc ? `<path d="M${p.x - 22},${gx(0) - L} L${p.x + 22},${gx(0) - L} L${p.x + 17},${bot + 8} L${p.x - 17},${bot + 8} Z" fill="#9aa3ab" opacity=".9"/>` : ''}
-        <rect x="${p.x - w / 2}" y="${top - 52 - L}" width="${w}" height="${bot - (top - 52 - L)}" fill="${p.col}" rx="${p.steel ? 4 : 1}" ${p.steel ? 'stroke="#eef3f7" stroke-width=".8"' : ''}/>
-        ${L > 1.5 ? `<path d="M${p.x},${top - 60 - L} v-14 m-6 6 l6 -6 l6 6" stroke="#ef5b5b" stroke-width="2.2" fill="none"/>` : ''}
-        <text x="${p.x}" y="${top - 74 - Math.min(L, 16)}" text-anchor="middle" class="svg-n">${esc(p.name)}</text>
-        <text x="${p.x}" y="${328}" text-anchor="middle" class="svg-l">${esc(p.sub)}</text>`; }).join('')}`;
-    const shallow = lift(posts[0]);
-    const conc = lift(posts[1]);
-    $('#fWhy', body).textContent = shallow > 2 || conc > 2 ? (conc > 2 ? 'The shallow post and the concrete footing are being lifted' : 'The shallow post is being jacked up') : mf ? 'Every post is holding' : 'Ground is thawed';
-    $('#fWhyS', body).textContent = soil === 'sand' ? 'Sand drains, so it heaves much less than clay. Posts are set in concrete here because sand holds a driven post poorly.' : `Only a post that reaches past ${place.frost} in is anchored in soil that never freezes. GFS drives to 48 in.`;
+    const ls = POSTS.map(p => lift(p, mi, winters, place.frost, soil, winter.reach));
+    if (scene) scene.set({ m: mi, winter: winters, frost: place.frost, soil, reach: winter.reach });
+    else {
+      const fz = frozenAt(mi, place.frost * winter.reach), ppi = 230 / 60, top = 70, gx = y => top + y * ppi;
+      const xs = [64, 178, 292];
+      svg.innerHTML = `
+        <defs><linearGradient id="soilG" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${soil === 'clay' ? '#5b4532' : '#8a7550'}"/><stop offset="1" stop-color="${soil === 'clay' ? '#3d2d20' : '#6b5a3c'}"/></linearGradient>
+          <pattern id="ice" width="14" height="10" patternUnits="userSpaceOnUse"><path d="M0 5h9" stroke="#bfe3ff" stroke-width="2" opacity=".55"/></pattern></defs>
+        <rect x="0" y="0" width="420" height="${top}" fill="#0f2034"/>
+        <rect x="0" y="${top}" width="420" height="${330 - top}" fill="url(#soilG)"/>
+        ${fz.depth > fz.thawed ? `<rect x="0" y="${gx(fz.thawed)}" width="420" height="${(fz.depth - fz.thawed) * ppi}" fill="#9fd0ff" opacity=".16"/>${soil === 'clay' ? `<rect x="0" y="${gx(fz.thawed)}" width="420" height="${(fz.depth - fz.thawed) * ppi}" fill="url(#ice)"/>` : ''}` : ''}
+        <line x1="0" x2="420" y1="${gx(place.frost)}" y2="${gx(place.frost)}" stroke="#8cc7ff" stroke-dasharray="6 6" stroke-width="1.5"/>
+        <text x="414" y="${gx(place.frost) - 6}" text-anchor="end" class="svg-l blue halo">FROST LINE ${place.frost}″</text>
+        ${fz.depth > fz.thawed ? `<text x="6" y="${gx(fz.depth) - 6}" class="svg-l halo">FROZEN TO ${Math.round(fz.depth)}″ · ${esc(mName.toUpperCase())}</text>` : `<text x="6" y="${top + 16}" class="svg-l">${esc(mName.toUpperCase())} · GROUND THAWED</text>`}
+        ${POSTS.map((p, i) => { const L = ls[i].lift * DRAWN * ppi, x = xs[i], bot = gx(p.depthIn) - L, w = p.pipe ? 9 : 16; return `
+          ${p.pipe ? '' : `<path d="M${x - 20},${gx(0) - L} L${x + 20},${gx(0) - L} L${x + 17},${bot} L${x - 17},${bot} Z" fill="#9aa3ab" opacity=".9"/>`}
+          <rect x="${x - w / 2}" y="${top - 52 - L}" width="${w}" height="${(p.pipe ? bot : gx(p.postBotIn) - L) - (top - 52 - L)}" fill="${p.pipe ? '#c8d2dc' : '#a68b60'}" rx="${p.pipe ? 4 : 1}" ${p.pipe ? 'stroke="#eef3f7" stroke-width=".8"' : ''}/>
+          ${L > 1.5 ? `<path d="M${x},${top - 60 - L} v-14 m-6 6 l6 -6 l6 6" stroke="#ef5b5b" stroke-width="2.2" fill="none"/>` : ''}
+          <text x="${x}" y="${top - 74 - Math.min(L, 16)}" text-anchor="middle" class="svg-n">${esc(p.name)}</text>
+          <text x="${x}" y="${328}" text-anchor="middle" class="svg-l">${esc(p.sub)}</text>`; }).join('')}`;
+    }
+    const fz = frozenAt(mi, place.frost * winter.reach), up = ls.map(l => l.lift > .05);
+    $('#fWhy', body).textContent = up[0] && up[1] ? 'Both concrete footings have been lifted' : up[0] ? 'The typical 24 in footing is being lifted' : fz.depth - fz.thawed > 1 ? 'Every post is holding' : 'The ground is thawed';
+    $('#fWhyS', body).textContent = soil === 'sand' ? 'Sand drains, so it heaves much less than clay. GFS sets posts in concrete in sand, because sand holds a driven post poorly.'
+      : winter.id === 'typical' ? `A typical winter freezes about ${Math.round(place.frost * winter.reach)} in down. Footings that stop near that get lifted. GFS drives steel to 48 in, past the ${place.frost} in frost line.`
+      : `A hard winter freezes all the way to the ${place.frost} in frost line, so even a footing that stops right at it can be lifted. GFS drives steel to 48 in.`;
   };
-  bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'soil') soil = v; update(); });
-  $('[name=m]', body).oninput = e => { mi = +e.target.value; update(); };
-  $('[name=w]', body).oninput = e => { winters = +e.target.value; update(); };
+  bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'soil') soil = v; if (n === 'winter') winter = WINTERS.find(w => w.id === v); update(); });
+  let raf = 0, live = true, playing = false, last = 0;
+  const stopPlay = (label = 'Play a winter') => { playing = false; cancelAnimationFrame(raf); $('#frPlay', body).textContent = label; };
+  $('[name=m]', body).oninput = e => { stopPlay(); mi = +e.target.value; update(); };
+  $('[name=w]', body).oninput = e => { stopPlay(); winters = +e.target.value; update(); };
+  $('#frPlay', body).onclick = () => {
+    if (playing) return stopPlay();
+    if (mi >= 5) { if (winters < 10 && $('#frPlay', body).textContent === 'Next winter') { winters++; $('[name=w]', body).value = winters; } mi = 0; }
+    if (reduced.matches) { mi = 3; $('[name=m]', body).value = 3; update(); return; }
+    playing = true; $('#frPlay', body).textContent = 'Pause'; last = performance.now();
+    const step = now => { if (!playing || !live) return; mi = Math.min(5, mi + Math.min(now - last, 100) / 1400); last = now; $('[name=m]', body).value = Math.round(mi); update();
+      if (mi >= 5) { stopPlay(winters < 10 ? 'Next winter' : 'Play a winter'); return; } raf = requestAnimationFrame(step); };
+    raf = requestAnimationFrame(step);
+  };
+  if (webglOK()) {
+    const host = $('.frost-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.f3d-note', body).hidden = false;
+    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host); update(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.f3d-note', body).hidden = true; scene = null; update(); });
+  }
   update();
+  return () => { live = false; stopPlay(); scene?.dispose(); scene = null; };
 }
 
 // ═════════════════════════════════════════════════════════════════
@@ -611,7 +633,7 @@ function scene(id, gy, fr, G, S) {
 function build(body) {
   const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false, mat: 'wood' };
   body.innerHTML = `
-    <div class="dig-3d" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
+    <div class="dig-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
     <div class="vs-grid">
       <figure class="vs-card pre"><figcaption><span class="vs-tag bad" id="vsPreT">Big-box prefab</span><b id="vsPreB">Panel on 4×4 wood posts</b><small id="vsPreC"></small></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsPreS"></p></figure>
       <figure class="vs-card gfs"><figcaption><span class="vs-tag good" id="vsGfsT">GFS King Plus</span><b id="vsGfsB">Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
@@ -875,7 +897,7 @@ function gradeTool(body) {
 function dig(body) {
   const st = { len: preset.len ? clamp(Math.round(preset.len / 10) * 10, 40, 2000) : 150, p: 0, playing: false };
   body.innerHTML = `
-    <div class="dig-3d" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
+    <div class="dig-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
     <div class="vs-grid">
       <figure class="vs-card pre"><figcaption><span class="vs-tag bad">Dug &amp; concrete</span><b>Holes dug, posts set in concrete</b><small>How most fences go in</small></figcaption>
         <svg class="vs-svg dig-a" viewBox="0 36 380 214" role="img" aria-label="A crew digging post holes and setting posts in concrete"></svg><p class="vs-status" id="dgA"></p></figure>

@@ -71,3 +71,23 @@ test('Fence Lab 3D uses the Executive App engine byte for byte (vendor/exec/SOUR
   const engine = fs.readFileSync(new URL('fence-engine.mjs', dir), 'utf8');
   assert.ok(engine.includes('sp.noDig&&sp.wood&&sp.woodSupport!=="driven-box"'), 'the King Plus no-dig box build is in the engine');
 });
+test('frost: driven steel past the frost line never lifts; footings at or above it do, and creep up each winter', async () => {
+  const F = await import('../public/showroom/frost-plan.mjs');
+  const [shallow, frostline, steel] = F.POSTS, typical = F.WINTERS[0].reach, hard = F.WINTERS[1].reach;
+  for (const pl of F.PLACES) for (const soil of ['clay', 'sand']) for (const reach of [typical, hard]) for (let m = 0; m <= 5; m += .25) for (const w of [1, 5, 10])
+    assert.equal(F.lift(steel, m, w, pl.frost, soil, reach).lift, 0, `steel moved: ${pl.id} ${soil} m${m} w${w}`);
+  // Toledo, clay, a typical winter: the 24 in footing lifts, the 36 in one holds
+  assert.ok(F.lift(shallow, 3, 1, 36, 'clay', typical).lift > 1);
+  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', typical).lift < .05);
+  // a hard winter reaches the frost line, so a footing that stops right at it can lift too
+  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', hard).lift > 1);
+  // Michigan's 42 in frost line: 36 in of concrete is above it, so it lifts even in a typical winter
+  assert.ok(F.lift(frostline, 3, 1, 42, 'clay', typical).lift > .25);
+  // sand heaves about a fifth as much
+  near(F.lift(shallow, 3, 1, 36, 'sand', hard).lift, F.lift(shallow, 3, 1, 36, 'clay', hard).lift * .2, 1e-9);
+  // each spring leaves some behind, and the next winter starts from there
+  const one = F.lift(shallow, 5, 1, 36, 'clay', hard).lift, two = F.lift(shallow, 0, 2, 36, 'clay', hard).lift;
+  assert.ok(one > 0); near(one, two, 1e-9); near(F.lift(shallow, 5, 10, 36, 'clay', hard).lift, one * 10, 1e-9);
+  // no jumps from month to month, and the gap under a footing is never negative
+  for (let m = 0; m < 5; m += .01) { const a = F.lift(frostline, m, 3, 36, 'clay', hard), b = F.lift(frostline, m + .01, 3, 36, 'clay', hard); assert.ok(Math.abs(a.lift - b.lift) < .1 && a.gap >= 0); }
+});

@@ -27,21 +27,22 @@ export const seg = (p, a, b) => clamp((p - a) / (b - a), 0, 1);
 export { webglOK } from './lab3d-ok.mjs';
 
 // ── materials ───────────────────────────────────────────────────
-// Made once per page. Concrete, soil and steel come from the app's surface library; the cut face of
-// the soil and the lawn can each have holes punched in them (a hole being dug, a footing).
+// Made once per page: concrete, steel and dirt from the app's surface library. Each stage makes its
+// own ground (below), whose cut face and lawn can have holes punched in them, freeze, and take snow.
 let M = null;
 const SECTION_HOLES = 6;
 const skyMid = new THREE.Color(0xc9dcec);
-function holeShader(m, key, lawn) {
-  const u = { uHoles: { value: Array.from({ length: SECTION_HOLES }, () => new THREE.Vector4(0, 0, 0, 0)) } };
+const NOISE = 'float secH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat secN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(secH(i),secH(i+vec2(1.0,0.0)),f.x),mix(secH(i+vec2(0.0,1.0)),secH(i+vec2(1.0,1.0)),f.x),f.y);}\n';
+function groundShader(m, lawn) {
+  const u = { uHoles: { value: Array.from({ length: SECTION_HOLES }, () => new THREE.Vector4(0, 0, 0, 0)) }, uFrost: { value: new THREE.Vector3(0, 0, 0) }, uSnow: { value: 0 }, uHaze: { value: skyMid } };
   const prev = m.onBeforeCompile;
   m.onBeforeCompile = (sh, r) => {
     prev?.call(m, sh, r);
-    sh.uniforms.uHoles = u.uHoles;
+    Object.assign(sh.uniforms, u);
     sh.vertexShader = 'varying vec3 vSecW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvSecW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    let f = sh.fragmentShader;
     if (lawn) {
-      sh.uniforms.uHaze = { value: skyMid };
-      sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>', `
+      f = f.replace('#include <map_fragment>', `
         vec2 w = vSecW.xz;
         vec3 ta = texture2D(map, w / 3.0).rgb, tb = texture2D(map, mat2(0.8, -0.6, 0.6, 0.8) * w / 7.3 + 0.37).rgb;
         float k = smoothstep(0.3, 0.7, secN(w * 0.11));
@@ -50,21 +51,43 @@ function holeShader(m, key, lawn) {
         float dry = smoothstep(0.62, 0.86, secN(w * 0.025 + 13.7));
         turf *= mix(vec3(0.9, 0.93, 0.86), vec3(1.06, 1.04, 0.96), big);
         turf = mix(turf, turf * vec3(1.22, 1.08, 0.78), dry * 0.45);
-        diffuseColor.rgb *= turf;`).replace('#include <dithering_fragment>', `
+        diffuseColor.rgb *= turf;
+        if (uSnow > 0.0) { float sn = smoothstep(0.2, 0.8, uSnow + (secN(w * 0.8) - 0.5) * 0.45 + (secN(w * 3.1) - 0.5) * 0.15); vec3 snow = vec3(0.72, 0.76, 0.82) * (0.9 + 0.12 * secN(w * 6.0) + 0.06 * secN(w * 0.4)); diffuseColor.rgb = mix(diffuseColor.rgb, snow, sn); }`)
+        .replace('#include <dithering_fragment>', `
         gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(70.0, 420.0, length(vSecW.xz - cameraPosition.xz)) * 0.85);
         #include <dithering_fragment>`);
-      sh.fragmentShader = 'uniform vec3 uHaze;\nfloat secH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat secN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(secH(i),secH(i+vec2(1.0,0.0)),f.x),mix(secH(i+vec2(0.0,1.0)),secH(i+vec2(1.0,1.0)),f.x),f.y);}\n' + sh.fragmentShader;
+    } else {
+      // frozen soil: a little paler and bluer down to the freezing front; in wet clay, ice lenses
+      // (thin seams of ice) form in bands, thickest just above the front
+      f = f.replace('#include <map_fragment>', `#include <map_fragment>
+        if (uFrost.y > uFrost.x && vSecW.y > -uFrost.y && vSecW.y < -uFrost.x) {
+          float d = -vSecW.y, front = smoothstep(uFrost.y - 1.0, uFrost.y, d);
+          diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.84, 0.92, 1.1) + vec3(0.04, 0.05, 0.07), 0.65);
+          float n = secN(vec2(vSecW.x * 1.3, d * 2.0));
+          float seam = smoothstep(0.9 - 0.07 * front, 0.985, fract(d * 3.2 + n * 0.8)) * smoothstep(0.35, 0.65, secN(vec2(vSecW.x * 0.9 + 3.1, d * 5.0)));
+          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.83, 0.91, 0.97), seam * uFrost.z);
+        }`);
     }
     const test = lawn
       // lawn: round holes (x, z, radius) behind the cut
       ? 'for (int i = 0; i < ' + SECTION_HOLES + '; i++) { vec4 h = uHoles[i]; if (h.w > 0.5 && distance(vSecW.xz, h.xy) < h.z) discard; }'
       // cut face: rectangles from x0 to x1, from grade down to y
       : 'for (int i = 0; i < ' + SECTION_HOLES + '; i++) { vec4 h = uHoles[i]; if (h.w > 0.5 && vSecW.x > h.x && vSecW.x < h.y && vSecW.y > h.z) discard; }';
-    sh.fragmentShader = 'varying vec3 vSecW;\nuniform vec4 uHoles[' + SECTION_HOLES + '];\n' + sh.fragmentShader.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + test);
+    sh.fragmentShader = 'varying vec3 vSecW;\nuniform vec4 uHoles[' + SECTION_HOLES + '];\nuniform vec3 uFrost;\nuniform float uSnow;\nuniform vec3 uHaze;\n' + NOISE + f.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + test);
   };
-  m.customProgramCacheKey = () => 'gfsLabHoles-' + key;
-  m.userData.holes = u.uHoles.value;
+  m.customProgramCacheKey = () => 'gfsLabGround-' + (lawn ? 'lawn' : 'face');
+  m.userData.u = u; m.userData.holes = u.uHoles.value;
   return m;
+}
+function groundMaterials() {
+  const lawnSet = textureSet(THREE, 'lawn', 1024);
+  const lm = lawnSet.map.clone(), lb = lawnSet.bumpMap.clone(); lm.needsUpdate = lb.needsUpdate = true;
+  return {
+    topsoil: groundShader(surfaceMaterial(THREE, 'soil', 0x4d3a29), false),
+    clay: groundShader(surfaceMaterial(THREE, 'soil', 0x7b6650), false),
+    lawn: groundShader(new THREE.MeshStandardMaterial({ color: 0xffffff, map: lm, bumpMap: lb, bumpScale: .02, roughnessMap: lb, roughness: 1, metalness: 0, envMapIntensity: .3 }), true),
+    maps: [lm, lb]
+  };
 }
 export function mats() {
   if (M) return M;
@@ -72,17 +95,11 @@ export function mats() {
   M.steel = surfaceMaterial(THREE, 'galv', 0xb8c5ce);
   M.concrete = surfaceMaterial(THREE, 'concrete', 0xa9a7a1);
   M.wetConcrete = surfaceMaterial(THREE, 'concrete', 0x6e6d69);
-  M.topsoil = holeShader(surfaceMaterial(THREE, 'soil', 0x4d3a29), 'top', false);
-  M.clay = holeShader(surfaceMaterial(THREE, 'soil', 0x7b6650), 'clay', false);
   // inside of a fresh hole: the same clay, in shade
   M.cavity = surfaceMaterial(THREE, 'soil', 0x4a3c2f); M.cavity.side = THREE.BackSide;
   M.cavityFloor = surfaceMaterial(THREE, 'soil', 0x3b3026);
   M.pile = surfaceMaterial(THREE, 'soil', 0x6e5843);
   M.clod = surfaceMaterial(THREE, 'soil', 0x5f4b39);
-  const lawn = textureSet(THREE, 'lawn', 1024);
-  const lm = lawn.map.clone(), lb = lawn.bumpMap.clone(); lm.needsUpdate = lb.needsUpdate = true;
-  M.lawnMaps = [lm, lb];
-  M.lawn = holeShader(new THREE.MeshStandardMaterial({ color: 0xffffff, map: lm, bumpMap: lb, bumpScale: .02, roughnessMap: lb, roughness: 1, metalness: 0, envMapIntensity: .3 }), 'lawn', true);
   M.bag = new THREE.MeshStandardMaterial({ map: bagTexture(), roughness: .92, metalness: 0 });
   M.tool = new THREE.MeshStandardMaterial({ color: 0xd8742c, roughness: .45, metalness: .25 });
   M.toolDark = new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: .5, metalness: .55, envMapIntensity: .8 });
@@ -144,21 +161,23 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 
   // The yard: lawn behind the cut, and the cut face (topsoil over clay) in front.
   const lawnGeo = new THREE.PlaneGeometry(width, back); lawnGeo.rotateX(-Math.PI / 2); lawnGeo.translate(0, 0, -back / 2);
-  const lawn = new THREE.Mesh(lawnGeo, mt.lawn); lawn.receiveShadow = true; lawn.name = 'lawn'; scene.add(lawn);
-  for (const t of mt.lawnMaps) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(width / 3, back / 3); }
+  const G = groundMaterials();
+  const lawn = new THREE.Mesh(lawnGeo, G.lawn); lawn.receiveShadow = true; lawn.name = 'lawn'; scene.add(lawn);
+  for (const t of G.maps) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(width / 3, back / 3); }
   const TOP = 8 * IN;   // topsoil
   const face = (h, y0, m, name) => { const g = new THREE.PlaneGeometry(width, h); g.translate(0, y0 - h / 2, 0); const f = new THREE.Mesh(g, m); f.receiveShadow = true; f.name = name; scene.add(f); return f; };
-  face(TOP, 0, mt.topsoil, 'topsoil'); face(soilDepth - TOP, -TOP, mt.clay, 'clay');
+  face(TOP, 0, G.topsoil, 'topsoil'); face(soilDepth - TOP, -TOP, G.clay, 'clay');
   const root = new THREE.Group(); scene.add(root);
 
   // holes: { x0, x1, y } in the cut face, { x, z, r } in the lawn
   const faceHoles = [], lawnHoles = [];
   const syncHoles = () => {
-    for (const [list, mats] of [[faceHoles, [mt.topsoil, mt.clay]], [lawnHoles, [mt.lawn]]]) for (const m of mats) m.userData.holes.forEach((v, i) => {
+    for (const [list, mats] of [[faceHoles, [G.topsoil, G.clay]], [lawnHoles, [G.lawn]]]) for (const m of mats) m.userData.holes.forEach((v, i) => {
       const h = list[i]; if (!h || !h.on) v.set(0, 0, 0, 0); else if (list === faceHoles) v.set(h.x0, h.x1, h.y, 1); else v.set(h.x, h.z, h.r, 1);
     });
   };
-  const hole = (x, r) => { const f = { x0: x - r, x1: x + r, y: 0, on: false }, l = { x, z: 0, r, on: false }; faceHoles.push(f); lawnHoles.push(l);
+  // a hole r wide in the cut face; its top in the lawn is lawnR (wider where the top of a hole caved in)
+  const hole = (x, r, lawnR = r) => { const f = { x0: x - r, x1: x + r, y: 0, on: false }, l = { x, z: 0, r: lawnR, on: false }; faceHoles.push(f); lawnHoles.push(l);
     if (faceHoles.length > SECTION_HOLES) throw Error('Too many holes for the cut face.');
     return { set(depth) { f.on = l.on = depth > 1e-4; f.y = -depth; syncHoles(); } }; };
 
@@ -181,7 +200,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   const layout = () => {
     const W = wrap.clientWidth || 360, n = V.length;
     stacked = n > 1 && W < 700;
-    const H = stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(Math.min(n > 1 ? W / n * .95 : W * .62, 540));
+    const H = stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560));
     wrap.style.height = H + 'px'; renderer.setSize(W, H, false);
     V.forEach((v, i) => { v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
     V.forEach(v => { if (v.tag) Object.assign(v.tag.style, { left: v.rect.x + 'px', top: v.rect.y + 'px', width: v.rect.w + 'px', height: v.rect.h + 'px' }); });
@@ -288,14 +307,23 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     return { set(h) { el.firstElementChild.innerHTML = h; }, show(on) { if (p.on !== !!on) { p.on = !!on; need = true; kick(); } }, move(v) { p.at.copy(v); }, el };
   }
 
+  // the yard's ground: frozen from thawedFt down to depthFt (lens 0–1 = how much ice forms in seams),
+  // snow on the lawn (0–1), and the colour of the soil under the topsoil (clay or sand)
+  const ground = {
+    frost(depthFt, lens = 1, thawedFt = 0) { for (const m of [G.topsoil, G.clay]) m.userData.u.uFrost.value.set(Math.max(0, thawedFt), Math.max(0, depthFt), lens); dirty(); },
+    snow(k) { G.lawn.userData.u.uSnow.value = clamp(k, 0, 1); dirty(); },
+    subsoil(hex) { const ref = surfaceMaterial(THREE, 'soil', hex); G.clay.color.copy(ref.color); ref.dispose(); dirty(); }
+  };
+
   layout();
   return {
-    THREE, scene, root, renderer, sun, views: V, orbit, wrap, over,
+    THREE, scene, root, renderer, sun, views: V, orbit, wrap, over, ground,
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
     get stacked() { return stacked; }, layout,
     dispose() {
       alive = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
       scene.traverse(o => { if (o.geometry && !o.userData.keepGeo) o.geometry.dispose(); });
+      for (const m of [G.topsoil, G.clay, G.lawn]) m.dispose(); for (const t of G.maps) t.dispose();
       envRT.dispose(); renderer.dispose(); renderer.forceContextLoss?.(); wrap.remove();
     }
   };
@@ -523,4 +551,47 @@ export function overlaps(list, { tolIn = 1 / 32, allow = () => false } = {}) {
     if (dx > tol && dy > tol && dz > tol && !allow(a, b) && !allow(b, a)) bad.push({ a: a.name, b: b.name, inches: [dx, dy, dz].map(v => +(v * 12).toFixed(3)), at: [a.min.x, a.min.y, a.min.z].map(v => +(v * 12).toFixed(2)) });
   }
   return bad;
+}
+
+// ── concrete in the cut face, any outline ───────────────────────
+// outline: the footing's side in the cut, as [x, y] inches (x across, y up from its bottom), convex.
+// The square post (width 2a in) stands in it down to postBotIn; the post is drawn whole, so the cut
+// is the outline less that strip.
+function clipPoly(poly, axis, v, keepBelow) {
+  const out = [], inside = p => keepBelow ? p[axis] <= v + 1e-9 : p[axis] >= v - 1e-9;
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i], b = poly[(i + 1) % poly.length], ia = inside(a), ib = inside(b);
+    if (ia) out.push(a);
+    if (ia !== ib) { const t = (v - a[axis]) / (b[axis] - a[axis]); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+  }
+  return out;
+}
+export function concreteCut(outlineIn, postHalfIn, postBotIn, material) {
+  const pieces = [clipPoly(outlineIn, 0, -postHalfIn, true), clipPoly(outlineIn, 0, postHalfIn, false), clipPoly(clipPoly(clipPoly(outlineIn, 0, -postHalfIn, false), 0, postHalfIn, true), 1, postBotIn, true)].filter(p => p.length >= 3);
+  const pos = [], uv = [], idx = [];
+  for (const poly of pieces) { const k = pos.length / 3; for (const [x, y] of poly) { pos.push(x * IN, y * IN, 0); uv.push(x * IN, y * IN); } for (let i = 1; i + 1 < poly.length; i++) idx.push(k, k + i, k + i + 1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setAttribute('normal', new THREE.Float32BufferAttribute(pos.map((_, i) => i % 3 === 2 ? 1 : 0), 3)); g.setIndex(idx); g.computeBoundingBox(); g.computeBoundingSphere();
+  const m = new THREE.Mesh(g, material); m.receiveShadow = true; m.position.z = .004; return m;
+}
+// The part of a footing that has been pushed up out of the ground: its back half, as a short wall.
+export function collar(rIn, material) {
+  const g = new THREE.CylinderGeometry(rIn * IN, rIn * IN, 1, 28, 1, true, Math.PI / 2, Math.PI); g.translate(0, .5, 0);
+  const m = new THREE.Mesh(g, material); m.castShadow = m.receiveShadow = true;
+  m.userData.set = h => { m.visible = h > 1e-3; m.scale.y = Math.max(1e-3, h); }; m.userData.set(0); return m;
+}
+// A flat rectangle in the cut face (a gap, or slumped soil), set by its bottom and height in feet.
+export function facePatch(wFt, material) {
+  const g = new THREE.PlaneGeometry(wFt, 1); g.translate(0, .5, 0);
+  const m = new THREE.Mesh(g, material); m.position.z = .003; m.receiveShadow = true;
+  m.userData.set = (y0, h) => { m.visible = h > 1e-3; m.position.y = y0; m.scale.y = Math.max(1e-3, h); }; m.userData.set(0, 0); return m;
+}
+// Small arrows drawn on the cut face: frost gripping (up) and unfrozen soil holding (down).
+export function arrows(color) {
+  const s = new THREE.Shape(); s.moveTo(0, .5); s.lineTo(-.45, -.05); s.lineTo(-.16, -.05); s.lineTo(-.16, -.5); s.lineTo(.16, -.5); s.lineTo(.16, -.05); s.lineTo(.45, -.05); s.closePath();
+  const im = new THREE.InstancedMesh(new THREE.ShapeGeometry(s), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: .9, depthWrite: false, toneMapped: false }), 240);
+  im.count = 0; im.renderOrder = 4; im.frustumCulled = false; im.userData.noCheck = true;
+  const M4 = new THREE.Matrix4(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), P = new THREE.Vector3(), up = new THREE.Quaternion(), down = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), Math.PI);
+  im.userData.draw = list => { im.count = 0; for (const a of list) { P.set(a.x, a.y, .012); S.setScalar(a.s); M4.compose(P, a.down ? down : up, S); im.setMatrixAt(im.count++, M4); } im.instanceMatrix.needsUpdate = true; };
+  return im;
 }
