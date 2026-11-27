@@ -14,16 +14,16 @@ export const HELP = {
     ['swipe', '<b>Swipe</b> left or right to see each style.'],
     ['swipev', '<b>Swipe up or down</b>, or tap Wood, Vinyl, Aluminum…, to change material.'],
     ['tap', '<b>Tap a card</b> for photos, specs, colors and the brochure page. Tap ‹ to come back.'],
-    ['tap', '<b>Tap ♥</b> to save a style to this visit. Tap <b>Compare</b>, then pick up to 3 styles.']
+    ['tap', '<b>Tap ♥</b> to save a style to your picks. Tap <b>Compare</b>, then pick up to 3 styles.']
   ] },
   ar: { title: '3D · AR', steps: [
     ['swipe', '<b>Drag</b> on the fence to spin it. <b>Pinch</b> to zoom in on the posts and rails.'],
     ['tap', '<b>Tap</b> the chips under it to change color, gate and how long a run to show.'],
-    ['tap', 'On iPhone or iPad, <b>Save AR file</b> stands the fence in their yard at real size.'],
+    ['tap', 'On iPhone or iPad, <b>Save AR file</b> stands the fence in your yard at real size.'],
     ['tap', '<b>All models</b> lists every fence we can show in 3D.']
   ] },
   permits: { title: 'Permits', steps: [
-    ['type', '<b>Type</b> their address, or tap the target to use where you are standing.'],
+    ['type', '<b>Type</b> your address, or tap the target to use where you are standing.'],
     ['tap', 'The map shows the lot and where a fence can go. Tap <b>Rules for</b> to change the town.'],
     ['tap', 'Tap <b>Draw the fence</b>, then tap the map at each corner post. Tap <b>+ Walk gate</b> or <b>+ Drive gate</b>, then tap the line where it goes.'],
     ['drag', '<b>Drag</b> a post to move it. <b>Undo</b> takes back the last post. Tap <b>Done</b> to finish.']
@@ -55,7 +55,13 @@ export function openHelp(key, extra) {
 
 // First visit to a screen: show its help once on this device.
 export function helpOnce(key, extra) {
-  try { const k = 'gfs-showroom-help-' + key; if (localStorage.getItem(k)) return; localStorage.setItem(k, '1'); } catch { return; }
+  const k = 'gfs-showroom-help-' + key;
+  try { if (localStorage.getItem(k)) return; } catch { return; }
   // wait for the splash screen to finish, then a beat
-  let n = 0; const t = setInterval(() => { if (document.getElementById('splash')?.classList.contains('done') || ++n > 20) { clearInterval(t); setTimeout(() => openHelp(key, extra), 600); } }, 300);
+  let n = 0; const t = setInterval(() => { if (document.getElementById('splash')?.classList.contains('done') || ++n > 20) { clearInterval(t); setTimeout(() => {
+    // Not over something else (a customer's link opens their summary first) and not if they've moved on.
+    if (document.querySelector('.recap, .help-sheet, .px, .bp, .cmp, .rv, .modal, .overview.on') || (window.GFSShowroom?.mode && !window.GFSShowroom.mode.startsWith(key.split('-')[0]))) return;
+    try { localStorage.setItem(k, '1'); } catch {}
+    openHelp(key, extra);
+  }, 600); } }, 300);
 }

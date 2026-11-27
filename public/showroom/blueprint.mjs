@@ -395,7 +395,7 @@ export async function makeBlueprint(app, name, style, host, onStep = () => {}) {
     const D = app.data;
     style ||= D.styles.find(s => s.models.includes(name)) || null;
     const family = (style ? D.familyById[style.family] : D.familyById[familyOfModel(name)])?.name || 'Fence';
-    const svg = sheet({ name, style: style ? `${style.name}` : name, family, code: app.live.codes?.[name], M, views, rows: schedule(built.parts), notes: notesFor(style, M), assets: A, date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) });
+    const svg = sheet({ name, style: style ? `${style.name}` : name, family, code: app.live.codes?.[name], M, views, rows: schedule(built.parts), notes: notesFor(style, M), assets: A, date: new Date().toLocaleDateString('en-US', { timeZone: 'America/New_York', month: 'short', day: 'numeric', year: 'numeric' }) });
     memo.set(key, svg);
     try { const c = await caches.open('gfs-showroom-blueprints-v1'); await c.put(cacheUrl, new Response(svg, { headers: { 'Content-Type': 'image/svg+xml' } })); } catch {}
     return svg;

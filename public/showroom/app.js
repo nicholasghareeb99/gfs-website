@@ -2,7 +2,7 @@
 import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
 import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.3 (2026-11-26)';
+const VERSION = 'showroom-1.6 (2026-11-27)';
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
@@ -175,18 +175,18 @@ function settings() {
   const d = app.data, online = navigator.onLine;
   const { close } = modal(`
     <div class="row"><h2>Showroom</h2><button class="iconbtn" data-close aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-    <p style="margin:0;color:var(--dim)">Save the brochure, photos and 3D files to this iPad or iPhone so the showroom works in yards with no signal.</p>
+    <p style="margin:0;color:var(--dim)">Save the brochure, photos and 3D to this device so the showroom works with no signal.</p>
     <div class="meter"><i id="offMeter"></i></div>
     <div class="row"><span class="mono" id="offText" style="font-size:13px;color:var(--dim)">Not saved yet</span><button class="btn primary sm" id="offGo">Save for offline</button></div>
     <dl class="kv">
       <dt>Connection</dt><dd>${online ? 'Online' : 'Offline'}</dd>
-      <dt>Style catalog</dt><dd>${esc(app.live.from)} · ${(app.live.names || d.models).length} models</dd>
+      <dt>3D models</dt><dd>${(app.live.names || d.models).length}</dd>
       <dt>Brochure</dt><dd>${d.pages.length} pages</dd>
-      <dt>Style photos (Exec App)</dt><dd>${Object.values(app.live.photos || {}).reduce((n, l) => n + l.length, 0)}</dd>
-      <dt>Fence rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
+      <dt>Style photos</dt><dd>${Object.values(app.live.photos || {}).reduce((n, l) => n + l.length, 0)}</dd>
+      <dt>Town rules checked</dt><dd>${esc(d.rulesChecked)}</dd>
       <dt>Version</dt><dd>${esc(VERSION)}${canVT ? '' : ' · Safari mode'}</dd>${lastError ? `<dt>Last problem</dt><dd style="word-break:break-word">${esc(lastError.slice(0, 160))}</dd>` : ''}
     </dl>
-    <div class="row"><span><b>Presentation mode</b><br><small style="color:var(--dim)">Hides this menu so a customer can flip through on their own. To exit, press and hold the logo for 2 seconds.</small></span><button class="btn sm" id="presentGo">Turn on</button></div>
+    <div class="row"><span><b>Hand-off mode</b><br><small style="color:var(--dim)">Hides this menu so someone else can flip through freely. To exit, press and hold the logo for 2 seconds.</small></span><button class="btn sm" id="presentGo">Turn on</button></div>
     <p class="src" style="margin:0">The brochure pages and style photos also save to this device on their own when it's online, so most of the showroom works with no signal.</p>
     <button class="btn ghost sm" id="replay">Replay intro</button>`, {
     onOpen: (m) => {
@@ -223,11 +223,11 @@ function splash(replay = false) {
   s.onclick = () => s.classList.add('done');
 }
 
-// Presentation mode: no menu, so a customer can flip through on their own.
+// Hand-off mode: no menu, so someone else can flip through freely.
 function present(on) {
   document.body.classList.toggle('present', on);
   try { on ? localStorage.setItem('gfs-showroom-present', '1') : localStorage.removeItem('gfs-showroom-present'); } catch {}
-  toast(on ? 'Presentation mode on. Hold the logo for 2 seconds to exit.' : 'Presentation mode off');
+  toast(on ? 'Hand-off mode on. Hold the logo for 2 seconds to exit.' : 'Hand-off mode off');
 }
 function bindPresentExit() {
   const logo = $('.top .brand'); let t = 0;

@@ -11,7 +11,7 @@ const LAYOUTS = [
   { id: 'run24', name: '24 ft run', length: 24 },
   { id: 'run40', name: '40 ft run', length: 40 },
   { id: 'corner', name: 'Corner 24 × 16', corner: [24, 16] },
-  { id: 'yard', name: 'Their yard', yard: true }
+  { id: 'yard', name: 'Your yard', yard: true }
 ];
 const GATES = [['none', 'No gate'], ['walk', 'Walk gate'], ['drive', 'Drive gate'], ['both', 'Walk + drive']];
 // Color and height of a model, read from its Executive App name.

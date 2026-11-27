@@ -54,7 +54,7 @@ export async function init(a, el) {
   els.showChrome.onclick = () => setChrome(false);
   $('.ov-close', root).onclick = () => closeOverview();
   $('.t', els.pager).onclick = () => openOverview();
-  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to this visit` : 'Removed from this visit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
+  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to your picks` : 'Removed from your pisit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
   addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
     if (app.mode !== 'brochure' || e.target.matches('input')) return;
@@ -105,8 +105,8 @@ function layout() {
 }
 
 // Pages that have a matching hands-on tool in the Fence Lab.
-const LAB_PAGES = { 5: 'build', 6: 'build', 22: 'build', 14: 'build', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'grade', 77: 'life', 31: 'vinyl', 32: 'vinyl', 36: 'vinyl', 7: 'frost' };
-const LAB_NAMES = { build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
+const LAB_PAGES = { 5: 'dig', 6: 'dig', 22: 'build', 14: 'build', 9: 'life', 10: 'wood', 11: 'life', 15: 'wind', 23: 'gate', 27: 'wood', 54: 'life', 61: 'grade', 77: 'life', 31: 'vinyl', 32: 'vinyl', 36: 'vinyl', 7: 'frost' };
+const LAB_NAMES = { dig: 'No-dig vs dug', build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', frost: 'Frost & posts', life: 'Lifespan', wood: 'Wood movement', wind: 'Wind', gate: 'Gate sag' };
 function setSlot(slot, n) {
   slot.innerHTML = '';
   if (!n) { slot.classList.add('blank'); slot.style.backgroundImage = 'none'; slot.dataset.n = ''; return; }
