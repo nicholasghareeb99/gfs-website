@@ -61,7 +61,6 @@ export async function init(a, el) {
   els.showChrome.onclick = () => setChrome(false);
   $('.ov-close', root).onclick = () => closeOverview();
   $('.t', els.pager).onclick = () => openOverview();
-  buildToc();
   document.addEventListener('fullscreenchange', () => { if (full && !document.fullscreenElement && wentNative) setFull(false); });
   els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p;
     if (p === 'home') return goHome(); if (p === 'toc') return openToc(); if (p === 'full') return setFull(!full);
@@ -188,6 +187,8 @@ function buildToc() {
 }
 function openToc() {
   if (tocOn) return closeToc();
+  // Build the hidden list only when it opens so its images do not compete with the cover.
+  if (!els.tocBody.childElementCount) buildToc();
   tocOn = true; els.toc.classList.add('on'); els.toc.setAttribute('aria-hidden', 'false');
   let here = null;
   for (const s of $$('.toc-sec', els.tocBody)) { const on = cur >= +s.dataset.from && cur <= +s.dataset.to; s.classList.toggle('here', on); if (on) here = s; }
