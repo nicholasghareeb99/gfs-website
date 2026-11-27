@@ -5,17 +5,17 @@
 import { THREE, IN, createStage, fence, reveal, squarePost, pipe, concreteCut, footingTop, collar, facePatch, arrows, dashLine, ticks, clamp, solids, overlaps } from './lab3d.mjs';
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
 import { POSTS, MONTHS, SNOW, DRAWN, frozenAt, lift } from './frost-plan.mjs';
-import { STYLE } from './dig-plan.mjs';
+import { STYLE, STYLE_ND } from './dig-plan.mjs';
 
 const XS = [-4.5, 0, 4.5], FRAME = { cx: 0, cy: 1.45, w: 13.8, h: 12 };
 
-export function createFrostScene(host) {
+export function createFrostScene(host, { specs } = {}) {
   const st = createStage(host, { views: [{ id: 'main' }] });
   const R = st.root, unit = (o, what, id) => { o.traverse(c => { if (c.isMesh) { c.userData.what = what; c.userData.unit = id; } }); return o; };
   const conc = surfaceMaterial(THREE, 'concrete', 0xaaa8a2), slump = surfaceMaterial(THREE, 'soil', 0x5a4636);
   const gapMat = new THREE.MeshBasicMaterial({ color: 0x120c07 });
   // The wood is the Executive App's: a dug post's 4×4, and the King Plus box from its no-dig model.
-  const dugF = fence(STYLE, -40, -32, { noDig: false }), ndF = fence(STYLE, XS[2], XS[2] + 8, { noDig: true, z: -2.5 * IN });
+  const dugF = fence(STYLE, -40, -32, { noDig: false, specs }), ndF = fence(STYLE_ND, XS[2], XS[2] + 8, { noDig: true, z: -2.5 * IN, specs });
   const wood = dugF.parts.find(p => p.kind === 'post').mesh.material;
   R.add(ndF.group);
   const boxParts = ndF.parts.filter(p => p.kind === 'post' && p.geo !== 'CylinderGeometry' && Math.abs(p.cx - XS[2]) < .5);

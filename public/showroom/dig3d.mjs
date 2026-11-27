@@ -13,8 +13,8 @@ import { THREE, IN, createStage, fence, reveal, squarePost, pipe, footingCut, fo
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
 import { DIG, digNumbers } from './ui.mjs';
 
-import { STYLE, DUR, DUG, ND } from './dig-plan.mjs';
-export { STYLE, DUR, DUG, ND };
+import { STYLE, STYLE_ND, DUR, DUG, ND } from './dig-plan.mjs';
+export { STYLE, STYLE_ND, DUR, DUG, ND };
 const XD = -20, XN = 20, BAY = 8;              // the two fences, far enough apart that neither view sees the other
 const R_HOLE = DIG.holeIn / 2 * IN, D_HOLE = DIG.depthIn * IN;
 const FROST_IN = 36;                         // Toledo frost depth
@@ -23,7 +23,7 @@ const FRAME = { cy: 1.05, w: 12.4, h: 11 };
 const fmt = (v, d = 0) => Number(v).toLocaleString('en-US', { maximumFractionDigits: d, minimumFractionDigits: d });
 
 
-export function createDigScene(host, { len = 150 } = {}) {
+export function createDigScene(host, { len = 150, specs } = {}) {
   const st = createStage(host, { views: [{ id: 'dug', label: 'Dug &amp; concrete', tone: 'bad' }, { id: 'nodig', label: 'GFS no-dig', tone: 'good' }] });
   const R = st.root, unit = (o, what, id) => { o.traverse(c => { if (c.isMesh) { c.userData.what = what; c.userData.unit = id; } }); return o; };
   const n = { len, ...digNumbers(len) };
@@ -31,8 +31,8 @@ export function createDigScene(host, { len = 150 } = {}) {
   conc.mat = surfaceMaterial(THREE, 'concrete', 0xaaa8a2);
 
   // ── the two fences (Executive App models) ──
-  const dugF = fence(STYLE, XD - BAY / 2, XD + BAY / 2, { noDig: false });
-  const ndF = fence(STYLE, XN - BAY / 2, XN + BAY / 2, { noDig: true, z: -2.5 * IN });   // pipe centres on the cut
+  const dugF = fence(STYLE, XD - BAY / 2, XD + BAY / 2, { noDig: false, specs });
+  const ndF = fence(STYLE_ND, XN - BAY / 2, XN + BAY / 2, { noDig: true, z: -2.5 * IN, specs });   // pipe centres on the cut
   R.add(dugF.group, ndF.group);
   const byKind = (F, k) => F.parts.filter(p => p.kind === k);
   // The app draws a dug post from grade up; ours is the same 4×4 carried down 32 in, so it can be set.

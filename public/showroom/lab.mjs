@@ -17,8 +17,8 @@ const TOOLS = [
     how: [['tap', 'Tap <b>Play install day</b> to watch both crews work, or slide <b>Install day</b> to any moment.'], ['slide', 'Slide <b>Your fence</b> to the length of your fence.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.'], ['look', 'Watch the dirt piles and concrete bags in the dug yard. The no-dig yard has none.']],
     take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft into the clay, and no waiting on concrete before the fence goes up.' },
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by',
-    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to light it up on the drawing.']],
-    take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The extra top rail keeps the top line straight.' },
+    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
+    take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The flat 2×4 across the top keeps the top line straight.' },
   { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
     how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, <b>clay</b> or <b>sand</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'A post has to reach well below the frost line, 3 ft here and 3½ ft in Michigan. Ours are driven 4 ft.' },
@@ -502,7 +502,7 @@ function frost(body) {
   };
   if (webglOK()) {
     const host = $('.frost-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.f3d-note', body).hidden = false;
-    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host); update(); })
+    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host, { specs: app.live?.specs }); update(); })
       .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.f3d-note', body).hidden = true; scene = null; update(); });
   }
   update();
@@ -574,7 +574,7 @@ function gate(body) {
 // ═════════════════════════════════════════════════════════════════
 // Every claim here is one the GFS brochure already makes (p. 5, 6, 14, 25):
 // King Plus = 8 ft galvanized Sch. 40 steel post, 2⅜ in OD, driven 4 ft, a wood
-// box around it, rails nailed across the box, and an extra top rail (the "+").
+// box around it, rails nailed across the box, and a flat 2×4 across the top (the King Plus way).
 // Prefab = thin pickets stapled to a light frame on 4×4 wood posts, gaps between
 // panels, can't follow a slope, tends to sag after a few years. The competitor's
 // post is set the two ways p. 6 describes: in tamped dirt about 2 ft deep, or in
@@ -582,15 +582,15 @@ function gate(body) {
 const GFS_PARTS = [
   { k: 'steel', n: 'Driven steel post', d: 'Galvanized Schedule 40 steel, 2⅜ in across, driven 4 ft into undisturbed clay. Below Toledo\'s frost line, with no concrete to heave and no wood underground to rot.' },
   { k: 'box', n: 'Wood box around every post', d: 'Steel in the ground, wood where you see it. The box gives the rails a full nailing surface and makes the post look like a wood post.' },
-  { k: 'plus', n: 'The extra top rail (the + in King Plus)', d: 'A second 2×4 across the top. It locks the pickets straight and crowns the fence, so the top line stays straight for years.' },
+  { k: 'plus', n: 'A flat 2×4 across the top', d: 'A 2×4 laid flat on top of the boxes, behind the boards that rise above it. It ties the posts together and keeps the top line straight.' },
   { k: 'rails', n: 'Rails nailed across the box', d: '2×4 rails run across the face of each box instead of being toe-nailed between posts, with 3 in galvanized nails.' },
   { k: 'pickets', n: 'Pickets nailed one at a time', d: 'Cut and fit in your yard with 1¾ in galvanized coil nails. No staples.' },
   { k: 'grade', n: 'Follows the ground', d: 'Every section follows the grade from post to post, so there is no triangle of gap under the fence on a slope.' }
 ];
 const PRE_PARTS = [
   { k: 'post', n: '4×4 wood post', d: 'Set about 2 ft deep in tamped dirt, or about 2.5 ft in concrete. Either way, wood sits underground where it rots.' },
-  { k: 'staples', n: 'Thin pickets on a stapled frame', d: 'A light frame built in a factory, with thin pickets stapled on.' },
-  { k: 'gap', n: 'Gaps between panels', d: 'Panels come in fixed widths, so there are seams at every post.' },
+  { k: 'staples', n: 'Thin pickets on a light frame', d: 'A factory panel: pickets about ½ in thick on 2×3 rails, stapled or nailed on.' },
+  { k: 'gap', n: 'Seams at every post', d: 'Panels come in fixed widths, so two panels meet at every post.' },
   { k: 'slope', n: 'Can\'t follow a slope', d: 'A rectangle panel stays level, so on a slope it leaves gaps underneath or gets stepped.' },
   { k: 'sag', n: 'Sags after a few years', d: 'The light frame racks and sags between posts.' }
 ];
@@ -631,21 +631,23 @@ function scene(id, gy, fr, G, S) {
   <path d="${BLADES.map(([dx, h], i) => { const x = i * 4 + 1; return `M${x},${gy(x) + 1}q${dx * .4},${-h * .6} ${dx},${-h}`; }).join('')}" stroke="#4f8a3c" stroke-width="1.3" fill="none"/>`;
 }
 function build(body) {
-  const st = { years: 0, set: 'dirt', slope: false, focus: null, playing: false, mat: 'wood' };
+  const st = { years: 0, set: 'concrete', slope: false, focus: null, playing: false, mat: 'wood' };
   body.innerHTML = `
-    <div class="dig-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
+    <div class="build-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the two yards in 3D…</div></div>
     <div class="vs-grid">
       <figure class="vs-card pre"><figcaption><span class="vs-tag bad" id="vsPreT">Big-box prefab</span><b id="vsPreB">Panel on 4×4 wood posts</b><small id="vsPreC"></small></figcaption><svg class="vs-svg" id="vsPre" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsPreS"></p></figure>
       <figure class="vs-card gfs"><figcaption><span class="vs-tag good" id="vsGfsT">GFS King Plus</span><b id="vsGfsB">Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
     </div>
     <div class="lab-ctl vs-ctl">
       <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play 15 years</button>${slider('yr', 'Years', 0, 15, .05, 0)}</div>
+    </div>
+    <div class="lab-ctl">
       <div class="vs-opts">
         <div><div class="lab-label">Fence</div>${seg('mat', [['wood', 'Wood'], ['vinyl', 'Vinyl']], st.mat)}</div>
-        <div id="vsSet"><div class="lab-label">Prefab posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2.5 ft']], st.set)}</div>
+        <div id="vsSet"><div class="lab-label">Prefab posts</div>${seg('set', [['dirt', 'In dirt, ~2 ft'], ['concrete', 'In concrete, ~2½ ft']], st.set)}</div>
         <div><div class="lab-label">Yard</div>${seg('slope', [['0', 'Flat'], ['1', 'Sloped']], '0')}</div>
       </div>
-      <p class="vis-note-inline">Both drawn from the back, so you can see how each is built. Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
+      <p class="vis-note-inline" id="vsNote">Both drawn from the back, so you can see how each is built. Movement and rot are drawn bigger than life so you can see them. Winters show as frost in the ground.</p>
     </div>
     <div class="vs-parts">
       <div class="lab-card"><div class="lab-label">What makes ours different (tap one)</div><div class="vs-list" id="vsG"></div></div>
@@ -653,7 +655,7 @@ function build(body) {
     </div>
     ${math(`<p><b>Why the wood post fails first</b>: decay needs air and water together. On a buried wood post that band is right at the soil line, or where the wood meets the top of the concrete, and that is where it breaks. A steel post has no wood underground.</p>
       <p><b>Why posts lift</b>: wet clay freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
-      <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with an extra top rail holding the line.</p>
+      <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with a flat 2×4 across the top holding the line.</p>
       <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. GFS drives a galvanized steel post, clamps steel adapters to it, and sleeves the vinyl post over the adapters, so there is no footing to lift.</p>
       <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
   const pre = $('#vsPre', body), gfs = $('#vsGfs', body);
@@ -663,7 +665,7 @@ function build(body) {
     const w = clamp(Math.sin(Math.PI * clamp((season - .62) / .36, 0, 1)), 0, 1);
     return { w, depth: w * 3 * S };
   }
-  function draw() {
+  let draw = function () {
     const y = st.years, yi = Math.floor(y), season = y - yi, fr = y < .01 ? { w: 0, depth: 0 } : frostBand(season, y);
     // competitor post movement
     const dirt = st.set === 'dirt';
@@ -729,14 +731,14 @@ function build(body) {
       }
       // rails run across the face of the boxes, nailed with 3 in galvanized nails
       s += `<g class="part${hl('rails')}">${railOffs.map(o => `<line x1="${x0}" y1="${lineAt(x0, o)}" x2="${x1}" y2="${lineAt(x1, o)}" stroke="#a48a5c" stroke-width="10"/>${px.map(x => `<circle cx="${x - 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/><circle cx="${x + 6}" cy="${lineAt(x, o)}" r="1.8" fill="#d7dde3"/>`).join('')}`).join('')}</g>`;
-      // the + : flat cap 2x4 on the boxes, plus the top rail
-      s += `<g class="part plus${hl('plus')}"><line x1="${x0 - 14}" y1="${lineAt(x0, 6 * S - 30) - 12}" x2="${x1 + 14}" y2="${lineAt(x1, 6 * S - 30) - 12}" stroke="#d9823f" stroke-width="7"/><text x="190" y="${lineAt(190, 6 * S) - 18}" text-anchor="middle" class="svg-plus">+ extra top rail</text></g>`;
+      // the flat 2x4 that lies across the tops of the boxes
+      s += `<g class="part plus${hl('plus')}"><line x1="${x0 - 14}" y1="${lineAt(x0, 6 * S - 30) - 12}" x2="${x1 + 14}" y2="${lineAt(x1, 6 * S - 30) - 12}" stroke="#d9823f" stroke-width="7"/><text x="190" y="${lineAt(190, 6 * S) - 18}" text-anchor="middle" class="svg-plus">flat 2×4 on top</text></g>`;
       gfs.innerHTML = s;
       $('#vsGfsS', body).textContent = y < .5 ? 'Straight on day one.' : fade > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
     }
     $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${season > .62 && season < .98 && y > .5 ? ' · winter' : ''}`;
     for (const b of $$('.vs-item', body)) b.classList.toggle('on', b.dataset.k === st.focus);
-  }
+  };
   let raf = 0, live = true;
   const play = () => {
     if (st.playing) { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; return; }
@@ -813,8 +815,24 @@ function build(body) {
     $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${(y - yi) > .62 && (y - yi) < .98 && y > .5 ? ' · winter' : ''}`;
     for (const b of $$('.vs-item', body)) b.classList.toggle('on', b.dataset.k === st.focus);
   }
+  // The yards in 3D, with the Executive App's own models; the drawings stay for devices without 3D.
+  let yard3d = null;
+  const draw2 = draw;
+  draw = () => {
+    if (!yard3d) return draw2();
+    yard3d.set({ y: st.years, mat: st.mat, set: st.set, slope: st.slope }); yard3d.focus(st.focus);
+    const y = st.years, season = y - Math.floor(y);
+    $('[data-out=yr]', body).textContent = y < .05 ? 'Day one' : `${Math.floor(y)} yr${Math.floor(y) === 1 ? '' : 's'}${season > .62 && season < .98 && y > .5 ? ' · winter' : ''}`;
+    for (const b of $$('.vs-item', body)) b.classList.toggle('on', b.dataset.k === st.focus);
+  };
+  if (webglOK()) {
+    const host = $('.build-3d', body); host.hidden = false; $('.vs-grid', body).hidden = true;
+    $('#vsNote', body).textContent = 'Both seen from the rail side, with the ground cut open at the posts. How far store posts move varies from yard to yard; this is a typical case, drawn at true size. Winters show as frost in the ground and snow on the lawn.';
+    import('./build3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); yard3d = m.createBuildScene(host, { specs: app.live?.specs }); draw(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; yard3d = null; draw(); });
+  }
   draw();
-  return () => { live = false; st.playing = false; cancelAnimationFrame(raf); };
+  return () => { live = false; st.playing = false; cancelAnimationFrame(raf); yard3d?.dispose(); yard3d = null; };
 }
 function mixHex(a, b, t) {
   const p = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), A = p(a), B = p(b);
@@ -1030,7 +1048,7 @@ function dig(body) {
     import('./dig3d.mjs').then(m => {
       if (!live) return;
       $('.l3d-wait', host).remove();
-      scene = m.createDigScene(host, { len: st.len }); dur = m.DUR; paint();
+      scene = m.createDigScene(host, { len: st.len, specs: app.live?.specs }); dur = m.DUR; paint();
     }).catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; pile.hidden = false; scene = null; paint(); });
   }
   let dur = 9000;

@@ -13,12 +13,19 @@
 // face is the plane z = 0. Nothing is drawn until something changes (render on demand).
 import * as THREE from '/gfs/vendor/three.module.js';
 import { createFenceEngine } from './vendor/exec/fence-engine.mjs';
+import { modelOverrides } from '/gfs/website-model.mjs';
 import { surfaceMaterial, textureSet } from './vendor/exec/real-surfaces.mjs';
 
 export { THREE };
 export const IN = 1 / 12;
-let ENG = null;
-export const engine = () => (ENG ||= createFenceEngine(THREE));
+// The engine reads a style the way the app and the website 3D viewer do: the name, then the settings
+// saved for that style (live from the app when the Showroom has them, otherwise the website's copy).
+const ENG = new Map();
+export function engine(name, specs) {
+  const ov = name ? modelOverrides(name, specs) : {}, key = JSON.stringify(ov);
+  if (!ENG.has(key)) ENG.set(key, createFenceEngine(THREE, ov));
+  return ENG.get(key);
+}
 const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 export const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 export const ease = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
@@ -160,13 +167,31 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   scene.add(sun, sun.target);
 
   // The yard: lawn behind the cut, and the cut face (topsoil over clay) in front.
-  const lawnGeo = new THREE.PlaneGeometry(width, back); lawnGeo.rotateX(-Math.PI / 2); lawnGeo.translate(0, 0, -back / 2);
+  // The ground can slope along the fence: grade(x) is its height at x. The lawn and the cut face are
+  // made of 1 ft strips so they can follow it.
+  const SEG = Math.round(width);
+  const lawnGeo = new THREE.PlaneGeometry(width, back, SEG, 1); lawnGeo.rotateX(-Math.PI / 2); lawnGeo.translate(0, 0, -back / 2);
   const G = groundMaterials();
   const lawn = new THREE.Mesh(lawnGeo, G.lawn); lawn.receiveShadow = true; lawn.name = 'lawn'; scene.add(lawn);
   for (const t of G.maps) { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(width / 3, back / 3); }
   const TOP = 8 * IN;   // topsoil
-  const face = (h, y0, m, name) => { const g = new THREE.PlaneGeometry(width, h); g.translate(0, y0 - h / 2, 0); const f = new THREE.Mesh(g, m); f.receiveShadow = true; f.name = name; scene.add(f); return f; };
-  face(TOP, 0, G.topsoil, 'topsoil'); face(soilDepth - TOP, -TOP, G.clay, 'clay');
+  const face = (h, y0, m, name) => { const g = new THREE.PlaneGeometry(width, h, SEG, 1); g.translate(0, y0 - h / 2, 0); g.userData.base = g.attributes.position.array.slice(); const f = new THREE.Mesh(g, m); f.receiveShadow = true; f.name = name; scene.add(f); return f; };
+  const faces = [face(TOP, 0, G.topsoil, 'topsoil'), face(soilDepth - TOP, -TOP, G.clay, 'clay')];
+  lawnGeo.userData.base = lawnGeo.attributes.position.array.slice();
+  let grade = () => 0;
+  function setGrade(fn) {
+    grade = fn || (() => 0);
+    const pa = lawnGeo.attributes.position, b = lawnGeo.userData.base;
+    for (let i = 0; i < pa.count; i++) pa.setY(i, b[i * 3 + 1] + grade(b[i * 3]));
+    pa.needsUpdate = true; lawnGeo.computeVertexNormals(); lawnGeo.computeBoundingSphere();
+    for (const [k, f] of faces.entries()) {
+      const g = f.geometry, p = g.attributes.position, fb = g.userData.base, top = Math.max(...Array.from({ length: p.count }, (_, i) => fb[i * 3 + 1]));
+      // the topsoil band rides on the grade top and bottom; the clay's top follows it and its bottom stays put
+      for (let i = 0; i < p.count; i++) { const x = fb[i * 3], y = fb[i * 3 + 1], isTop = Math.abs(y - top) < 1e-6; p.setY(i, y + (k === 0 || isTop ? grade(x) : 0)); }
+      p.needsUpdate = true; g.computeBoundingSphere();
+    }
+    dirty();
+  }
   const root = new THREE.Group(); scene.add(root);
 
   // holes: { x0, x1, y } in the cut face, { x, z, r } in the lawn
@@ -179,7 +204,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   // a hole r wide in the cut face; its top in the lawn is lawnR (wider where the top of a hole caved in)
   const hole = (x, r, lawnR = r) => { const f = { x0: x - r, x1: x + r, y: 0, on: false }, l = { x, z: 0, r: lawnR, on: false }; faceHoles.push(f); lawnHoles.push(l);
     if (faceHoles.length > SECTION_HOLES) throw Error('Too many holes for the cut face.');
-    return { set(depth) { f.on = l.on = depth > 1e-4; f.y = -depth; syncHoles(); } }; };
+    return { set(depth) { f.on = l.on = depth > 1e-4; f.y = -depth; syncHoles(); }, move(nx, nr, nl = nr) { f.x0 = nx - nr; f.x1 = nx + nr; l.x = nx; l.r = nl; syncHoles(); } }; };
 
   // ── cameras ──
   const V = views.map(v => ({ ...v, cam: new THREE.PerspectiveCamera(30, 1, .1, 2000), rect: { x: 0, y: 0, w: 1, h: 1 }, target: new THREE.Vector3(), base: { w: 16, h: 12 }, inset: { top: v.label ? 40 : 8, bottom: 8 }, tag: null }));
@@ -317,7 +342,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 
   layout();
   return {
-    THREE, scene, root, renderer, sun, views: V, orbit, wrap, over, ground,
+    THREE, scene, root, renderer, sun, views: V, orbit, wrap, over, ground, setGrade, grade: x => grade(x),
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
     get stacked() { return stacked; }, layout,
     dispose() {
@@ -332,10 +357,13 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 // ── fences from the Executive App's models ──────────────────────
 // Builds one straight run and returns its parts, each instance with its kind, its box and its matrix,
 // so a tool can hide, reveal or move single posts, rails and pickets.
-export function fence(name, x0, x1, { h = 6, z = 0, noDig } = {}) {
-  const E = engine(), lib = new E.MatLib(), B = new E.FenceBuilder(lib);
+// grade(x): ground height along the run (the fence follows it); level: keep each section level and
+// step it, the way a store panel goes up on a slope.
+export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level = false } = {}) {
+  const E = engine(name, specs), lib = new E.MatLib(), B = new E.FenceBuilder(lib);
   const spec = Object.assign({}, E.parse(name) || {}); if (noDig != null) spec.noDig = noDig;
-  const run = { pts: [{ x: x0, y: 0, z }, { x: x1, y: 0, z }], spec, h, styleName: name, racked: true, gateOpen: 0, i: 0 };
+  const gy = grade || (() => 0);
+  const run = { pts: [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0 };
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
   group.updateMatrixWorld(true);
@@ -351,6 +379,32 @@ export function fence(name, x0, x1, { h = 6, z = 0, noDig } = {}) {
     }
   });
   return { group, parts, spec, run, lib };
+}
+// On a slope the app's model sets the flat top 2×4 a hair low, so its downhill corner dips into the
+// square-cut top of a box (about ¼ in at 1 in 12). This rests each rail on what it sits on instead.
+export function settleRails(F) {
+  const L = solids(F.group), rails = L.filter(s => s.kind === 'rail'), posts = L.filter(s => s.kind === 'post'), M = new THREE.Matrix4();
+  let moved = 0;
+  for (const r of rails) {
+    let up = 0; for (const p of posts) { const k = sink(r, p); if (k > 0 && p.c.y < r.c.y) up = Math.max(up, k / Math.max(.2, r.axes[1].y)); }
+    if (up > 1e-5) { r.ref.mesh.getMatrixAt(r.ref.i, M); M.elements[13] += up + 1e-4; r.ref.mesh.setMatrixAt(r.ref.i, M); r.ref.mesh.instanceMatrix.needsUpdate = true; moved++;
+      const part = F.parts.find(p => p.mesh === r.ref.mesh && p.i === r.ref.i); if (part) { part.base.copy(M); part.box.translate(new THREE.Vector3(0, up, 0)); } }
+  }
+  return moved;
+}
+// On a slope the app's racked vinyl keeps each post the height it has on flat ground, so where the
+// sloped top rail runs into a post its upper edge reaches into the cap. On a real slope the post is cut
+// taller to suit; this does the same: each such post (and its caps) is raised until the cap clears.
+export function settleCaps(F) {
+  const L = solids(F.group), caps = L.filter(s => s.kind === 'cap'), rails = L.filter(s => s.kind === 'rail'), posts = L.filter(s => s.kind === 'post'), M = new THREE.Matrix4();
+  const need = new Map();   // post x → how much taller
+  for (const c of caps) for (const r of rails) { const k = sink(c, r); if (k > 0) { const key = Math.round(c.c.x * 48); need.set(key, Math.max(need.get(key) || 0, k + 1e-3)); } }
+  const P = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3();
+  for (const [key, up] of need) {
+    for (const c of caps.filter(c => Math.round(c.c.x * 48) === key)) { c.ref.mesh.getMatrixAt(c.ref.i, M); M.elements[13] += up; c.ref.mesh.setMatrixAt(c.ref.i, M); c.ref.mesh.instanceMatrix.needsUpdate = true; }
+    for (const p of posts.filter(p => Math.round(p.c.x * 48) === key)) { const m = p.ref.mesh; m.getMatrixAt(p.ref.i, M); M.decompose(P, Q, S); const h = p.half[1] * 2; S.y *= (h + up) / h; P.y += up / 2; M.compose(P, Q, S); m.setMatrixAt(p.ref.i, M); m.instanceMatrix.needsUpdate = true; }
+  }
+  return need.size;
 }
 // Show each part at its own progress (0 hidden, 1 in place); `lift` drops it in from above by that many feet.
 const tmpM = new THREE.Matrix4(), tmpV = new THREE.Vector3(), tmpQ = new THREE.Quaternion(), tmpS = new THREE.Vector3(), zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -520,39 +574,58 @@ export function ticks(x, depthFt) {
 }
 
 // ── checking the geometry ───────────────────────────────────────
-// Every solid that is showing, as world boxes. Boards that touch are fine; a box that sinks into
-// another by more than `tolIn` inches on all three axes is reported. Pass pairs that are meant to
-// meet (a nail in a board, a post in its concrete) in `allow(a, b)`.
+// Every solid that is showing, as an oriented box (its own bounding box turned the way the part is
+// turned), so a rail sloped along the grade is tested as the sloped board it is. Boards that touch
+// are fine; two boxes that sink into each other by more than `tolIn` inches (the least they would
+// have to move apart; 1/16 in, a carpenter's tolerance) are reported. Pass pairs that are meant to meet (a nail in a board, a vinyl
+// rail into its post) in `allow(a, b)`.
 export function solids(root) {
-  const out = [], m = new THREE.Matrix4(), b = new THREE.Box3();
+  const out = [], m = new THREE.Matrix4(), b = new THREE.Box3(), c = new THREE.Vector3();
   root.updateMatrixWorld(true);
   root.traverse(o => {
     if (!o.isMesh || !o.visible || o.userData.noCheck) return;
     for (let p = o.parent; p; p = p.parent) if (!p.visible) return;
     if (!o.geometry.attributes.position?.count) return;
     if (!o.geometry.boundingBox) o.geometry.computeBoundingBox();
-    const n = o.isInstancedMesh ? o.count : 1;
+    const gb = o.geometry.boundingBox, n = o.isInstancedMesh ? o.count : 1;
     for (let i = 0; i < n; i++) {
       if (o.isInstancedMesh) { o.getMatrixAt(i, m); if (Math.abs(m.determinant()) < 1e-12) continue; m.premultiply(o.matrixWorld); } else m.copy(o.matrixWorld);
-      b.copy(o.geometry.boundingBox).applyMatrix4(m);
+      b.copy(gb).applyMatrix4(m);
+      const e = m.elements, cols = [0, 4, 8].map(k => new THREE.Vector3(e[k], e[k + 1], e[k + 2])), len = cols.map(v => v.length());
+      let axes = cols.map((v, k) => v.multiplyScalar(1 / (len[k] || 1))), half = [0, 1, 2].map(k => (gb.max.getComponent(k) - gb.min.getComponent(k)) / 2 * len[k]);
+      gb.getCenter(c).applyMatrix4(m);
       // a part that spins about its own upright axis (an auger bit) reaches only its radius, at any angle
-      if (o.userData.roundR) { const c = new THREE.Vector3().setFromMatrixPosition(m), r = o.userData.roundR * m.getMaxScaleOnAxis(); b.min.x = c.x - r; b.max.x = c.x + r; b.min.z = c.z - r; b.max.z = c.z + r; }
-      const s = b.getSize(new THREE.Vector3());
-      out.push({ name: o.userData.what || o.name || (o.userData.parts?.[i]?.kind) || o.geometry.type, kind: o.userData.parts?.[i]?.kind || o.userData.what || '', unit: o.userData.unit || '', flat: Math.min(s.x, s.y, s.z) < 1e-4, min: b.min.clone(), max: b.max.clone() });
+      if (o.userData.roundR) { const r = o.userData.roundR * m.getMaxScaleOnAxis(); c.setFromMatrixPosition(m).y = (b.min.y + b.max.y) / 2; axes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)]; half = [r, (b.max.y - b.min.y) / 2, r]; b.min.x = c.x - r; b.max.x = c.x + r; b.min.z = c.z - r; b.max.z = c.z + r; }
+      const part = o.userData.parts?.[i];
+      out.push({ ref: { mesh: o, i }, name: o.userData.what || part?.kind || o.name || o.geometry.type, kind: part?.kind || o.userData.what || '', unit: o.userData.unit || '',
+        flat: Math.min(...half) < 5e-5, min: b.min.clone(), max: b.max.clone(), c: c.clone(), axes, half });
     }
   });
   return out;
 }
-export function overlaps(list, { tolIn = 1 / 32, allow = () => false } = {}) {
+// how far two oriented boxes sink into each other (ft); 0 or less means they don't
+export function sink(a, b) {
+  const d = b.c.clone().sub(a.c), axes = [...a.axes, ...b.axes];
+  for (const u of a.axes) for (const v of b.axes) { const w = u.clone().cross(v); if (w.lengthSq() > 1e-8) axes.push(w.normalize()); }
+  let least = Infinity;
+  for (const L of axes) {
+    const ra = a.half.reduce((s, h, k) => s + h * Math.abs(a.axes[k].dot(L)), 0), rb = b.half.reduce((s, h, k) => s + h * Math.abs(b.axes[k].dot(L)), 0);
+    least = Math.min(least, ra + rb - Math.abs(d.dot(L)));
+    if (least <= 0) return least;
+  }
+  return least;
+}
+export function overlaps(list, { tolIn = 1 / 16, allow = () => false } = {}) {
   const tol = tolIn * IN, bad = [];
   for (let i = 0; i < list.length; i++) for (let j = i + 1; j < list.length; j++) {
     const a = list[i], b = list[j]; if (a.flat || b.flat) continue;
-    const dx = Math.min(a.max.x, b.max.x) - Math.max(a.min.x, b.min.x), dy = Math.min(a.max.y, b.max.y) - Math.max(a.min.y, b.min.y), dz = Math.min(a.max.z, b.max.z) - Math.max(a.min.z, b.min.z);
-    if (dx > tol && dy > tol && dz > tol && !allow(a, b) && !allow(b, a)) bad.push({ a: a.name, b: b.name, inches: [dx, dy, dz].map(v => +(v * 12).toFixed(3)), at: [a.min.x, a.min.y, a.min.z].map(v => +(v * 12).toFixed(2)) });
+    if (a.min.x > b.max.x || b.min.x > a.max.x || a.min.y > b.max.y || b.min.y > a.max.y || a.min.z > b.max.z || b.min.z > a.max.z) continue;
+    if (allow(a, b) || allow(b, a)) continue;
+    const k = sink(a, b);
+    if (k > tol) bad.push({ a: a.name, b: b.name, inches: +(k * 12).toFixed(3), at: [a.c.x, a.c.y, a.c.z].map(v => +(v * 12).toFixed(2)) });
   }
   return bad;
 }
-
 // ── concrete in the cut face, any outline ───────────────────────
 // outline: the footing's side in the cut, as [x, y] inches (x across, y up from its bottom), convex.
 // The square post (width 2a in) stands in it down to postBotIn; the post is drawn whole, so the cut

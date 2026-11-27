@@ -969,7 +969,7 @@ body.has-back .top .brand{display:none}
 .l3d-tag.bad{color:#ffd0d0;background:rgba(110,30,30,.72);border:1px solid rgba(239,91,91,.55)}
 .l3d-tag.good{color:#c9f7e1;background:rgba(18,80,56,.72);border:1px solid rgba(62,207,142,.55)}
 .l3d-status{position:absolute;left:10px;right:10px;bottom:10px;margin:0;font:600 13px/1.3 var(--font);color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.8);background:rgba(6,12,20,.62);padding:7px 10px;border-radius:10px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.l3d-pin{position:absolute;left:0;top:0;transition:opacity .25s;will-change:transform}
+.l3d-pin{position:absolute;left:0;top:0;transition:opacity .18s;will-change:transform}
 .l3d-pin>span{--dx:0px;position:absolute;left:0;bottom:6px;width:max-content;max-width:240px;transform:translateX(calc(-50% + var(--dx)));white-space:nowrap;font:600 12px/1.15 var(--font);color:#0b1520;background:rgba(255,255,255,.92);padding:5px 8px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .l3d-pin>span::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:calc(-5px - var(--dx));border:5px solid transparent;border-bottom:0;border-top-color:rgba(255,255,255,.92)}
 .l3d-pin.good>span{background:#c9f7e1}
@@ -991,3 +991,4 @@ body.has-back .top .brand{display:none}
 .l3d-pin.two>span small{font:500 10.5px/1.1 var(--font);color:#334454}
 .l3d-pin.good.two>span small{color:#1d5a40}
 .l3d-pin.ice>span{color:#d8efff}
+.l3d-pin.focus>span{outline:2px solid var(--copper);outline-offset:1px}
