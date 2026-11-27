@@ -200,7 +200,7 @@ test('public-price Ballpark saves the visible range and can start a separate pro
   expect(world.deliveries).toHaveLength(1);
 });
 
-test('draw a corner and a gate on the map and restore it after reload', async ({ page, context }) => {
+test('draw a corner and a gate on the map and restore it after reload', async ({ page, context, hasTouch }) => {
   test.setTimeout(100_000);
   const world = await mockSite(context);
   await openPage(page, ballpark);
@@ -216,13 +216,20 @@ test('draw a corner and a gate on the map and restore it after reload', async ({
   await press(page.locator('#bp-draw-toolbar [data-mode="finish"]'));
   await press(page.getByText('Add gates', { exact: true }));
   await press(page.locator('#bp-draw-toolbar [data-mode="walk-gate"]'));
+  // Finish scrolling before measuring the stroke. A locator click can scroll again before sending the input.
+  await map.evaluate(element => element.scrollIntoView({ block: 'center', behavior: 'instant' }));
   const fenceLine = map.locator('.leaflet-overlay-pane path[stroke="#00E5A0"]');
-  const gatePoint = await fenceLine.evaluate((line) => {
-    const screen = line.getPointAtLength(line.getTotalLength() / 3).matrixTransform(line.getScreenCTM());
-    const mapRect = line.closest('.leaflet-container').getBoundingClientRect();
-    return { x: screen.x - mapRect.left, y: screen.y - mapRect.top };
-  });
-  await press(map, gatePoint);
+  let gatePoint;
+  await expect.poll(async () => {
+    const previous = gatePoint;
+    gatePoint = await fenceLine.evaluate((line) => {
+      const { x, y } = line.getPointAtLength(line.getTotalLength() / 3).matrixTransform(line.getScreenCTM());
+      return document.elementFromPoint(x, y) === line ? { x, y } : null;
+    });
+    return Boolean(gatePoint && previous && Math.hypot(gatePoint.x - previous.x, gatePoint.y - previous.y) < 1);
+  }, { message: 'the rendered fence stroke must stay under the gate input point' }).toBe(true);
+  if (hasTouch) await page.touchscreen.tap(gatePoint.x, gatePoint.y);
+  else await page.mouse.click(gatePoint.x, gatePoint.y);
   const feet = Number(await page.locator('#bp-linear-feet').inputValue());
   expect(feet).toBeGreaterThan(0);
   await expect(page.locator('#bp-single-gates')).toHaveValue('1');
