@@ -8,7 +8,9 @@ export const HELP = {
     ['tap', '<b>Tap</b> a photo on the page to see it big. Tap <b>Try it</b> to open that page in the Fence Lab.'],
     ['dtap', '<b>Double-tap</b> to zoom in on a spot. Double-tap again, or tap <b>Fit</b>, to see the whole page.'],
     ['pinchin', '<b>Pinch in</b> to see every page as a book. Tap a page to open it, or ✕ to go back.'],
-    ['tap', '<b>Tap the middle</b> of the page to hide the buttons. Tap again, or <b>Show buttons</b>, to bring them back.']
+    ['tap', '<b>Tap the middle</b> of the page to hide the buttons. Tap again, or <b>Show buttons</b>, to bring them back.'],
+    ['tap', 'Under the page: <b>Home</b> goes to the cover, <b>Contents</b> jumps to a section, and the corner arrows go <b>full screen</b>.'],
+    ['tap', '<b>Turn the device sideways</b> for two pages at once, or tap the page button to switch between one and two.']
   ], note: 'The ‹ › buttons turn pages too. The book button shows every page with search.' },
   styles: { title: 'Styles', steps: [
     ['swipe', '<b>Swipe</b> left or right to see each style.'],

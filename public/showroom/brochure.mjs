@@ -9,7 +9,8 @@ import { visit } from './visit.mjs';
 
 const N_STRIPS = 12, ASPECT = 900 / 1165;
 let app, root, D;
-let cur = 1, spread = false, chromeHidden = false;
+let cur = 1, spread = false, chromeHidden = false, full = false, pref = 0, tocOn = false;   // pref: 0 = by the screen's shape, 1 or 2 = pages chosen with the button
+const hinted = new Set(); let hintTimer = 0;
 let els = {}, size = { w: 0, h: 0 }, base = { x: 0, y: 0 };
 let view = { s: 1, x: 0, y: 0 };
 let flip = null, busy = false, overviewOn = false, hiTimer = 0;
@@ -26,9 +27,15 @@ export async function init(a, el) {
     <button class="zoom-badge mono" aria-label="Zoom back out to the whole page"></button>
     <button class="show-chrome" hidden>${icons.layers}<span>Show buttons</span></button>
     <div class="pinch-hint">${icons.pinch}<span>Let go to see every page</span></div>
-    <div class="pager"><span class="t"></span><span class="n"></span>
+    <div class="pager"><span class="pg-info"><span class="t"></span><span class="n"></span></span>
+      <span class="pg-btns">
+      <button data-p="home" aria-label="Back to the cover">${icons.home}</button><button data-p="toc" aria-label="Contents">${icons.list}</button>
       <button data-p="-1" aria-label="Previous page">${icons.back}</button><button data-p="1" aria-label="Next page">${icons.next}</button>
-      <button data-p="all" aria-label="All pages">${icons.layers}</button><button data-p="heart" class="heartbtn" aria-label="Save this page to the visit" aria-pressed="false">${icons.heart}</button></div>
+      <button data-p="view" aria-label="Show two pages"></button><button data-p="full" aria-label="Full screen"></button>
+      <button data-p="all" aria-label="All pages">${icons.layers}</button><button data-p="heart" class="heartbtn" aria-label="Save this page to the visit" aria-pressed="false">${icons.heart}</button></span></div>
+    <div class="toc" aria-hidden="true"><div class="toc-sheet" role="dialog" aria-label="Contents">
+      <div class="toc-head"><h2>Contents</h2><button class="btn sm toc-close" aria-label="Close contents">${icons.close}<span>Close</span></button></div>
+      <div class="toc-body"></div></div></div>
     <div class="progress"><i></i></div>
     <div class="overview" aria-hidden="true">
       <div class="ov-head">
@@ -45,7 +52,7 @@ export async function init(a, el) {
     stage: $('.stage', root), wrap: $('.book-wrap', root), book: $('.book', root), l: $('.slot.l', root), r: $('.slot.r', root), shade: $('.under-shade', root),
     badge: $('.zoom-badge', root), showChrome: $('.show-chrome', root), hint: $('.pinch-hint', root), pager: $('.pager', root), bar: $('.progress i', root),
     ov: $('.overview', root), flow: $('.flow', root), rail: $('.flow .rail', root), input: $('.overview input', root), chips: $('.overview .chips', root),
-    ovTitle: $('.ov-title h2', root), ovNo: $('.ov-title .mono', root), ticks: $('.scrub .ticks', root), knob: $('.scrub .knob', root), scrub: $('.scrub', root)
+    toc: $('.toc', root), tocBody: $('.toc-body', root), ovTitle: $('.ov-title h2', root), ovNo: $('.ov-title .mono', root), ticks: $('.scrub .ticks', root), knob: $('.scrub .knob', root), scrub: $('.scrub', root)
   };
   try { cur = clamp(+localStorage.getItem('gfs-showroom-page') || 1, 1, D.pages.length); } catch {}
   buildOverview();
@@ -54,12 +61,17 @@ export async function init(a, el) {
   els.showChrome.onclick = () => setChrome(false);
   $('.ov-close', root).onclick = () => closeOverview();
   $('.t', els.pager).onclick = () => openOverview();
-  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p; if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to your picks` : 'Removed from your pisit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
+  buildToc();
+  document.addEventListener('fullscreenchange', () => { if (full && !document.fullscreenElement && wentNative) setFull(false); });
+  els.pager.onclick = e => { const p = e.target.closest('[data-p]')?.dataset.p;
+    if (p === 'home') return goHome(); if (p === 'toc') return openToc(); if (p === 'full') return setFull(!full);
+    if (p === 'view') { pref = spread ? 1 : 2; layout(); toast(spread ? 'Two pages' : 'One page', 1100); return; }
+    if (p === 'heart') { const n = spread ? (viewPages()[1] || viewPages()[0]) : cur; const on = visit.togglePage(n); toast(on ? `Page ${n} saved to your picks` : 'Removed from your pisit', 1400); paint(); } else if (p === 'all') openOverview(); else if (p) turn(+p); };
   addEventListener('resize', () => { if (root.classList.contains('on')) { layout(); if (overviewOn) { sizeBooklet(); scrollToCard(+centerCard()?.dataset.n || cur, false); } } });
   addEventListener('keydown', e => {
     if (app.mode !== 'brochure' || e.target.matches('input')) return;
     if (e.key === 'ArrowRight') turn(1); if (e.key === 'ArrowLeft') turn(-1);
-    if (e.key === 'Escape' && overviewOn) closeOverview(); else if (e.key === '/' ) { e.preventDefault(); openOverview({ focus: true }); }
+    if (e.key === 'Escape' && tocOn) closeToc(); else if (e.key === 'Escape' && overviewOn) closeOverview(); else if (e.key === 'Escape' && full) setFull(false); else if (e.key === 'Home') goHome(); else if (e.key === 'f') setFull(!full); else if (e.key === '/' ) { e.preventDefault(); openOverview({ focus: true }); }
   });
 }
 
@@ -69,7 +81,7 @@ export function show(opts = {}) {
   if (opts.overview) openOverview({ focus: opts.focus });
   else if (overviewOn) closeOverview(true);
 }
-export function hide() { setChrome(false, true); }
+export function hide() { setChrome(false, true); closeToc(); if (full) setFull(false); }
 export const where = () => ({ opts: { page: cur }, label: `Brochure · page ${cur}`, short: `Page ${cur}` });
 export const help = () => ({ key: 'brochure' });
 // Tapping the middle of a page hides the buttons for a clean look; a small button brings them back.
@@ -89,10 +101,16 @@ function viewPages(p = cur) {
 }
 const firstOf = p => { const [l, r] = viewPages(p); return l || r; };
 
+let wasWide = null, wentNative = false, autoFull = false;
 function layout() {
+  // a phone on its side is too short for the bars and a readable page, so it goes full screen by itself (and back when turned upright)
+  const short = innerHeight < 500 && innerWidth > innerHeight;
+  if (short && !full) setFull(true, true); else if (!short && autoFull) setFull(false, true);
   const cs = getComputedStyle(els.stage);
   const box = { w: els.stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight), h: els.stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) };
-  spread = box.w > box.h * 1.15 && box.w >= 820;
+  // Turning the device picks the layout again: two pages when it's wide, one when it's tall.
+  const wide = box.w > box.h * 1.15; if (wide !== wasWide) { pref = 0; wasWide = wide; }
+  spread = pref ? pref === 2 : wide;
   const cols = spread ? 2 : 1;
   let h = box.h, w = h * ASPECT * cols;
   if (w > box.w) { w = box.w; h = w / ASPECT / cols; }
@@ -134,6 +152,13 @@ function paint() {
   const at = (spread ? (r || l) : cur) / D.pages.length;
   els.book.style.setProperty('--edge-l', (1.5 + at * 9).toFixed(1) + 'px');
   els.book.style.setProperty('--edge-r', (1.5 + (1 - at) * 9).toFixed(1) + 'px');
+  const vb = $('[data-p=view]', els.pager); vb.innerHTML = spread ? icons.onePage : icons.twoPage; vb.setAttribute('aria-label', spread ? 'Show one page' : 'Show two pages');
+  const fb = $('[data-p=full]', els.pager); fb.innerHTML = full ? icons.fullOff : icons.fullOn; fb.setAttribute('aria-label', full ? 'Leave full screen' : 'Full screen'); fb.setAttribute('aria-pressed', String(full));
+  $('[data-p=home]', els.pager).disabled = cur === 1;
+  // the first time a page with photos comes up, its tappable photos glow for a moment
+  const shown = [l, r].filter(n => n && D.page(n).spots.length && !hinted.has(n));
+  clearTimeout(hintTimer); els.book.classList.remove('hint-spots');
+  if (shown.length && !reduced.matches) hintTimer = setTimeout(() => { if (flip || busy || overviewOn) return; shown.forEach(n => hinted.add(n)); els.book.classList.add('hint-spots'); hintTimer = setTimeout(() => els.book.classList.remove('hint-spots'), 3300); }, 700);
   try { localStorage.setItem('gfs-showroom-page', cur); } catch {}
   if (app.mode === 'brochure' && location.hash !== '#brochure-' + cur) history.replaceState(null, '', '#brochure-' + cur);
   // warm the next pages
@@ -145,6 +170,43 @@ function goTo(n, animate = true) {
   if (n === cur || firstOf(n) === firstOf(cur)) { cur = n; paint(); return; }
   if (animate && Math.abs(firstOf(n) - firstOf(cur)) <= 2) return turn(n > cur ? 1 : -1);
   cur = n; paint();
+}
+
+// ── Home, contents, full screen ──────────────────────────────────
+function goHome() { closeToc(); if (overviewOn) closeOverview(true); if (cur === 1) return; resetZoom(); cur = 1; paint(); pop(); }
+// a quick settle so a jump reads as a jump, not a glitch
+function pop() { if (reduced.matches) return; els.book.animate([{ transform: 'scale(.965)', opacity: .5 }, { transform: 'scale(1)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.2,.8,.2,1)' }); }
+function buildToc() {
+  const secs = [];
+  for (const p of D.pages) { const s = secs.at(-1); if (s && s.name === p.section) { s.to = p.n; if (s.items.at(-1).title !== p.title) s.items.push(p); } else secs.push({ name: p.section, from: p.n, to: p.n, items: [p] }); }
+  els.tocBody.innerHTML = secs.map((s, i) => `<section class="toc-sec" data-from="${s.from}" data-to="${s.to}">
+    <button class="toc-top" data-n="${s.from}"><img loading="lazy" alt="" src="${pageImg(s.from)}"><span><b>${esc(s.name)}</b><small class="mono">${s.from === s.to ? 'Page ' + s.from : 'Pages ' + s.from + '–' + s.to}</small></span></button>
+    <div class="toc-list">${s.items.map(p => `<button data-n="${p.n}"><span>${esc(p.title)}</span><i class="mono">${p.n}</i></button>`).join('')}</div></section>`).join('');
+  els.tocBody.onclick = e => { const b = e.target.closest('[data-n]'); if (!b) return; const n = +b.dataset.n; closeToc(); if (overviewOn) closeOverview(true); resetZoom(); if (firstOf(n) !== firstOf(cur)) { cur = n; paint(); pop(); } };
+  $('.toc-close', root).onclick = closeToc;
+  els.toc.addEventListener('pointerdown', e => { if (e.target === els.toc) closeToc(); });
+}
+function openToc() {
+  if (tocOn) return closeToc();
+  tocOn = true; els.toc.classList.add('on'); els.toc.setAttribute('aria-hidden', 'false');
+  let here = null;
+  for (const s of $$('.toc-sec', els.tocBody)) { const on = cur >= +s.dataset.from && cur <= +s.dataset.to; s.classList.toggle('here', on); if (on) here = s; }
+  for (const b of $$('.toc-list button', els.tocBody)) b.classList.remove('here');
+  const at = here && [...$$('.toc-list button', here)].filter(b => +b.dataset.n <= cur).at(-1); at?.classList.add('here');
+  const t = at || here; if (t) { const a = t.getBoundingClientRect(), b = els.tocBody.getBoundingClientRect(); els.tocBody.scrollTop += a.top - b.top - b.height / 2 + a.height / 2; }
+}
+function closeToc() { if (!tocOn) return; tocOn = false; els.toc.classList.remove('on'); els.toc.setAttribute('aria-hidden', 'true'); }
+// Full screen: the top bar and the bottom tabs go away and the book takes the whole screen. The page
+// buttons stay (tap the middle of a page to hide those too). Where the browser allows it (iPad,
+// computers, Android) the browser's own bars go as well; iPhone Safari doesn't allow that.
+function setFull(on, auto = false) {
+  full = on; autoFull = on && auto; document.body.classList.toggle('br-full', on);
+  const de = document.documentElement;
+  if (on && !auto) { wentNative = false; const rq = de.requestFullscreen || de.webkitRequestFullscreen; if (rq) { try { const r = rq.call(de); wentNative = true; r?.catch?.(() => { wentNative = false; }); } catch { wentNative = false; } } }
+  else if (document.fullscreenElement || document.webkitFullscreenElement) { try { (document.exitFullscreen || document.webkitExitFullscreen).call(document)?.catch?.(() => {}); } catch {} }
+  if (on && !auto) toast('Full screen. Tap the middle of a page to hide the buttons too.', 2200);
+  if (auto) { setTimeout(layout, 480); return; }
+  layout(); setTimeout(layout, 480);
 }
 
 // ── Page turning ─────────────────────────────────────────────────
@@ -336,7 +398,7 @@ function bindGestures() {
 }
 
 function tap(x, y) {
-  if (busy || overviewOn) return;
+  if (busy || overviewOn || tocOn) return;
   // "Try it" link to the Fence Lab?
   const lab = document.elementFromPoint(x, y)?.closest('.lab-try');
   if (lab) { ring(x, y); return app.go('lab', { tool: lab.dataset.tool }); }
