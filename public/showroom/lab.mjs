@@ -7,6 +7,7 @@ import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs
 import { webglOK } from './lab3d-ok.mjs';
 import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
 import { sag, gateGeom, BRACES as GBRACES } from './gate-plan.mjs';
+import { bends } from './vinyl-plan.mjs';
 export { digNumbers } from './ui.mjs';
 import { visit } from './visit.mjs';
 import { helpOnce } from './help.mjs';
@@ -32,9 +33,9 @@ const TOOLS = [
   { id: 'life', more: true, name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
     how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match your yard.']],
     take: 'On a wood fence the posts in the ground usually go first. Ours are galvanized steel.' },
-  { id: 'vinyl', more: true, name: 'Vinyl walls', line: 'Same size post, thicker wall: what .015 in buys you',
-    how: [['slide', 'Slide <b>Gust speed</b> to push on both posts.'], ['look', 'Watch the thinner big-box post bend further than ours.']],
-    take: 'A thicker wall makes a stiffer post, and ours sleeves over a driven steel post instead of sitting in a concrete plug.' },
+  { id: 'vinyl', more: true, name: 'Vinyl walls', line: 'Same size post, thicker wall, steel inside: how far each bends',
+    how: [['slide', 'Slide <b>Gust speed</b> to push on both fences.'], ['look', 'Watch the big-box post bend further than ours. The bend is drawn true size.'], ['drag', 'Drag sideways to turn the view. Pinch to zoom, double-tap to reset.']],
+    take: 'A thicker wall makes the vinyl stiffer, and ours sleeves over a steel post driven 4 ft, which takes most of the push.' },
   { id: 'wind', more: true, name: 'Wind', line: 'How hard wind pushes on each style',
     how: [['tap', 'Pick a <b>style</b> and a <b>height</b>.'], ['slide', 'Slide <b>Gust speed</b>, or tap a storm, to see the push on each post.'], ['look', 'Watch the air: solid fences make a swirl behind them, open ones just slow it.']],
     take: 'Solid, tall fences catch the most wind, so post strength and depth matter most on privacy fences.' },
@@ -894,36 +895,52 @@ function onScreen(el, resume) {
 }
 function vinyl(body) {
   const B = 5, HOME = .150, BIG = .135;
-  let V = 58, wob = 0, raf = 0, live = true;
+  let V = 58, wob = 0, raf = 0, live = true, scene = null;
   const h = tube(B, HOME), g = tube(B, BIG), stiff = h.I / g.I, more = h.A / g.A;
   body.innerHTML = `
+    <div class="vinyl-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the posts in 3D…</div></div>
+    <div class="lab-ctl vs-ctl">${slider('V', 'Gust speed', 20, 90, 1, V, ' mph')}</div>
     <div class="lab-grid">
       <div class="lab-vis"><svg class="vinyl-svg" viewBox="0 0 420 330" aria-label="Two vinyl posts bending in the wind"></svg>
-        <div class="vis-note">Walls drawn thicker so you can see the difference. Bend drawn bigger than life.</div></div>
+        <div class="vis-note">Walls drawn thicker so you can see the difference. Bend drawn twice as big as life.</div></div>
       <div class="lab-ctl">
-        ${slider('V', 'Gust speed', 20, 115, 1, V, ' mph')}
         <div class="readouts">
-          <div><b class="mono">${fmt((stiff - 1) * 100, 0)}%</b><small>stiffer post, from a wall just .015 in thicker</small></div>
-          <div><b class="mono">${fmt((1 - 1 / stiff) * 100, 0)}%</b><small>less bend in the same wind</small></div>
-          <div><b class="mono">${fmt((more - 1) * 100, 0)}%</b><small>more vinyl in every foot of post</small></div>
+          <div><b class="mono" id="vBig"></b><small>big-box post bends at the top</small></div>
+          <div><b class="mono" id="vGfs"></b><small>GFS post bends at the top</small></div>
+          <div><b class="mono">${fmt((stiff - 1) * 100, 0)}%</b><small>stiffer vinyl, from a wall just .015 in thicker</small></div>
           <div><b class="mono" id="vLoad"></b><small>lb of wind on each 6 ft × 8 ft section right now</small></div>
         </div>
-        <p class="lab-note">The wall is the part you can't see in the store, and it's where cheaper vinyl saves money. Homeland prints it on the spec sheet: 5″ × 5″ posts at .150″. Every Homeland gate also has aluminum inside the frame.</p>
+        <svg class="vinyl-sec" viewBox="0 0 320 150" aria-label="The two posts cut across at the ground"></svg>
+        <p class="lab-note">The wall is the part you can't see in the store, and it's where cheaper vinyl saves money. Homeland prints it on the spec sheet: 5 in × 5 in posts at .150 in. Ours also sleeves over a steel post driven 4 ft, and the steel does most of the work.</p>
       </div>
     </div>
-    ${math(`<p><b>Section properties of a square tube</b> (outside size b, wall t): area A = b² − (b − 2t)², moment of inertia I = [b⁴ − (b − 2t)⁴] / 12.</p>
-      <p>Homeland 5″ at .150″: A = ${fmt(h.A, 3)} in², I = ${fmt(h.I, 2)} in⁴. Big-box wall .135″ at the same 5″: A = ${fmt(g.A, 3)} in², I = ${fmt(g.I, 2)} in⁴.</p>
-      <p><b>Bending</b>: for the same load, length and material, a post bends in proportion to 1/I, so the thicker wall bends ${fmt((1 - 1 / stiff) * 100, 1)}% less. Bending stress drops by about the same share, which is what keeps a post from cracking at the ground.</p>
-      <p><b>Wind on the section</b> uses the ASCE 7 numbers from the Wind tool (solid 6 ft fence, houses and trees around).</p>
-      <p class="src">Wall thicknesses from the GFS brochure, p. 31 (big-box .135″ vs Homeland .150″) and p. 36 (Homeland 5″ × 5″ at .150″). The big-box post is drawn at the same 5″ size so only the wall changes.</p>`)}`;
-  const svg = $('.vinyl-svg', body);
+    ${math(`<p><b>Section properties of a square tube</b> (outside size b, wall t): area A = b² − (b − 2t)², moment of inertia I = [b⁴ − (b − 2t)⁴] / 12. Homeland 5 in at .150 in: A = ${fmt(h.A, 3)} in², I = ${fmt(h.I, 2)} in⁴. Big-box .135 in at the same 5 in: A = ${fmt(g.A, 3)} in², I = ${fmt(g.I, 2)} in⁴. For the same load a post bends in proportion to 1/I, so the thicker wall alone bends ${fmt((1 - 1 / stiff) * 100, 1)}% less.</p>
+      <p><b>The wind</b> on each 8 ft section uses the ASCE 7 numbers from the Wind tool (solid 6 ft fence, houses and trees around). It reaches each post through the bottom and top rails, split so the push centres at 0.55 of the height, as ASCE 7 does for walls.</p>
+      <p><b>The bend</b> is worked out up the post from the ground, curvature = moment ÷ (E × I). Rigid PVC: E about 392,000 psi (2,700 MPa). The big-box post is vinyl alone. Ours is vinyl over a 2⅜ in Schedule 40 steel post (E 29,000,000 psi, I = 0.666 in⁴) that stands 4 ft above the ground; to there the two bend together, and the steel takes about four-fifths of it.</p>
+      <p><b>Not counted</b>: the footing or the ground giving a little, which adds about the same to both. This shows how far each post bends; it isn't a rating of how much wind either fence can stand.</p>
+      <p class="src">Wall thicknesses from the GFS brochure, p. 31 (big-box .135 in vs Homeland .150 in) and p. 36 (Homeland 5 in × 5 in at .150 in); steel from the brochure spec sheets. The big-box post is drawn at the same 5 in size so only the wall and the steel change. Vinyl in 3D is the app's Kingston section.</p>`)}`;
+  const svg = $('.vinyl-svg', body), sec = $('.vinyl-sec', body);
+  // the two posts cut across at the ground, walls drawn 4 times thicker so the difference shows
+  sec.innerHTML = [[80, BIG, false, 'BIG-BOX .135 IN'], [240, HOME, true, 'GFS .150 IN + STEEL']].map(([cx, t, steel, lab]) => {
+    const s = 5 * 15, w = t * 15 * 4, y = 12;
+    return `<rect x="${cx - s / 2}" y="${y}" width="${s}" height="${s}" fill="#eef0f1"/><rect x="${cx - s / 2 + w}" y="${y + w}" width="${s - 2 * w}" height="${s - 2 * w}" fill="#0f2034"/>
+      ${steel ? `<circle cx="${cx}" cy="${y + s / 2}" r="${2.375 / 2 * 15}" fill="#9fb0bd"/><circle cx="${cx}" cy="${y + s / 2}" r="${(2.375 / 2 - .154 * 2) * 15}" fill="#0f2034"/>` : ''}
+      <text x="${cx}" y="${y + s + 18}" text-anchor="middle" class="svg-l">${lab}</text>`;
+  }).join('') + `<text x="160" y="128" text-anchor="middle" class="svg-l" opacity=".7">CUT ACROSS AT THE GROUND</text><text x="160" y="144" text-anchor="middle" class="svg-l" opacity=".7">WALLS DRAWN 4× THICKER</text>`;
   const draw = () => {
     const load = windLoad({ V, h: 6, exposure: 'B', style: WSTYLES[0] });
     $('[data-out=V]', body).textContent = V + ' mph'; $('#vLoad', body).textContent = fmt(load.perPost, 0);
-    const base = clamp(load.perPost / 900, 0, 1) * 34 * (1 + .12 * Math.sin(wob));
+    if (scene) {
+      const r = scene.set({ V, perPost: load.perPost });
+      $('#vBig', body).textContent = fmt(r.big.top, 1) + ' in'; $('#vGfs', body).textContent = fmt(r.gfs.top, 1) + ' in';
+      return;
+    }
+    // without 3D: the same beam numbers, drawn twice as big as life (the posts are 2.3 px to the inch)
+    const r = bends(load.perPost), k = 2.3 * 2 * (reduced.matches ? 1 : 1 + .08 * Math.sin(wob));
+    $('#vBig', body).textContent = fmt(r.big.top, 1) + ' in'; $('#vGfs', body).textContent = fmt(r.gfs.top, 1) + ' in';
     const post = (x, bend, t, label, good) => {
       const top = 70, gy = 250, tipX = x + bend;
-      const sec = (cx, cy) => { const s = 5 * 8, w = t * 8 * 6; return `<rect x="${cx - s / 2}" y="${cy - s / 2}" width="${s}" height="${s}" fill="${good ? '#f4f6f8' : '#e6e8ea'}"/><rect x="${cx - s / 2 + w}" y="${cy - s / 2 + w}" width="${s - 2 * w}" height="${s - 2 * w}" fill="#0f2034"/>`; };
+      const sec = (cx, cy) => { const s = 5 * 8, w = t * 8 * 6; return `<rect x="${cx - s / 2}" y="${cy - s / 2}" width="${s}" height="${s}" fill="${good ? '#f4f6f8' : '#e6e8ea'}"/><rect x="${cx - s / 2 + w}" y="${cy - s / 2 + w}" width="${s - 2 * w}" height="${s - 2 * w}" fill="#0f2034"/>${good ? `<circle cx="${cx}" cy="${cy}" r="9.5" fill="none" stroke="#9fb0bd" stroke-width="2.4"/>` : ''}`; };
       return `<path d="M${x - 11},${gy} Q${x - 11},${(gy + top) / 2} ${tipX - 11},${top} L${tipX + 11},${top} Q${x + 11},${(gy + top) / 2} ${x + 11},${gy} Z" fill="${good ? '#f4f6f8' : '#e6e8ea'}" stroke="#9aa8b6"/>
         <rect x="${tipX - 13}" y="${top - 8}" width="26" height="8" rx="2" fill="${good ? '#f4f6f8' : '#e6e8ea'}" stroke="#9aa8b6"/>
         ${bend > 1 ? `<path d="M${x},${top - 18} h${bend}" stroke="${good ? '#3ecf8e' : '#ef5b5b'}" stroke-width="2"/><path d="M${x + bend},${top - 22} v8" stroke="${good ? '#3ecf8e' : '#ef5b5b'}" stroke-width="2"/>` : ''}
@@ -932,14 +949,19 @@ function vinyl(body) {
         <text x="${x}" y="${gy + 94}" text-anchor="middle" class="svg-l">${t.toFixed(3).replace(/^0/, '')}″ WALL</text>`;
     };
     svg.innerHTML = `<rect width="420" height="250" fill="#0f2034"/><rect y="250" width="420" height="80" fill="#1b2c1e"/>
-      ${post(120, base * stiff, BIG, 'Big-box vinyl', false)}${post(300, base, HOME, 'Homeland', true)}
+      ${post(120, r.big.top * k, BIG, 'Big-box vinyl', false)}${post(300, r.gfs.top * k, HOME, 'GFS over steel', true)}
       <text x="210" y="34" text-anchor="middle" class="svg-big">${V} mph →</text>`;
   };
-  const tick = () => { wob += .08; draw(); if (live && vis.on && !reduced.matches) raf = requestAnimationFrame(tick); };
-  const vis = onScreen($('.vinyl-svg', body), () => { if (live && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); } });
-  $('[name=V]', body).oninput = e => { V = +e.target.value; if (reduced.matches) draw(); };
+  const tick = () => { wob += .08; draw(); if (live && !scene && vis.on && !reduced.matches) raf = requestAnimationFrame(tick); };
+  const vis = onScreen($('.vinyl-svg', body), () => { if (live && !scene && !reduced.matches) { cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); } });
+  $('[name=V]', body).oninput = e => { V = +e.target.value; if (reduced.matches || scene) draw(); };
+  if (webglOK()) {
+    const host = $('.vinyl-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true;
+    import('./vinyl3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createVinylScene(host, { specs: app.live?.specs }); body.__vinyl = scene; cancelAnimationFrame(raf); draw(); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; scene = null; tick(); });
+  }
   tick();
-  return () => { live = false; cancelAnimationFrame(raf); vis.stop(); };
+  return () => { live = false; cancelAnimationFrame(raf); vis.stop(); scene?.dispose(); scene = null; };
 }
 
 // Grade Lab lives in its own file; it loads the first time it's opened.

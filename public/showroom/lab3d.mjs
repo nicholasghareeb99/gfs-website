@@ -140,7 +140,7 @@ function dashTexture() {
 // drags to the tool (two fingers still pinch, tilt and turn).
 // stackAlways: views one above the other at every width; a view's aspect (height ÷ width, with
 // minH/maxH in px) sets its own height when stacked.
-export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false } = {}) {
+export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false, home = {} } = {}) {
   const mt = mats();
   const wrap = document.createElement('div'); wrap.className = 'l3d'; host.append(wrap);
   const cv = document.createElement('canvas'); cv.className = 'l3d-cv'; wrap.append(cv);
@@ -212,8 +212,8 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 
   // ── cameras ──
   const V = views.map(v => ({ ...v, cam: new THREE.PerspectiveCamera(30, 1, .1, 2000), rect: { x: 0, y: 0, w: 1, h: 1 }, target: new THREE.Vector3(), base: { w: 16, h: 12 }, inset: { top: v.label ? 40 : 8, bottom: 8 }, tag: null }));
-  const orbit = { yaw: 0, pitch: .13, zoom: 1, user: false };
-  const HOME = { yaw: 0, pitch: .13, zoom: 1 };
+  const HOME = { yaw: 0, pitch: .13, zoom: 1, ...home };   // home: where the camera starts and double-tap returns
+  const orbit = { ...HOME, user: false };
   let stacked = false;
   const aim = new THREE.Vector3();
   const place = v => {
@@ -383,7 +383,7 @@ export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level =
   const spec = Object.assign({}, E.parse(name) || {}, extra || {}); if (noDig != null) spec.noDig = noDig;
   const gy = grade || (() => 0);
   // pts: [[x, y], …] runs the fence through each point (a post at each), instead of x0 → x1 on the grade
-  const run = { pts: pts ? pts.map(([x, y]) => ({ x, y, z })) : [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
+  const run = { pts: pts ? pts.map(([x, y, pz]) => ({ x, y, z: pz ?? z })) : [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
   group.updateMatrixWorld(true);

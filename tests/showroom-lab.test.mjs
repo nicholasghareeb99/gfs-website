@@ -124,3 +124,25 @@ test('gate sag: the numbers behind the Gate sag tool', async () => {
   // the gate as measured off the 3D model (77 lb for a 4 ft gate with a brace)
   assert.ok(Math.abs(G.gateGeom(4, 'right').weightLb - 77) < 2);
 });
+
+test('vinyl bend: the beam numbers behind Vinyl walls', async () => {
+  const P = await import('../public/showroom/vinyl-plan.mjs');
+  const K = P.KINGSTON;
+  // the push is split between the rails so it centres at 0.55 of the 6 ft height
+  for (const lb of [26, 221, 533]) {
+    const L = P.railLoads(lb, K.hIn, K.botY, K.topY);
+    near(L[0].lb + L[1].lb, lb, 1e-9); near((L[0].lb * L[0].y + L[1].lb * L[1].y) / lb, .55 * K.hIn, 1e-9);
+  }
+  // vinyl alone matches the textbook cantilever: a load P at height a bends the top P·a²(3L − a)/(6EI)
+  const loads = P.railLoads(533, K.hIn, K.botY, K.topY), EI = P.PVC.E * P.tube(P.BOX_IN, .135).I;
+  const exact = loads.reduce((s, { y, lb }) => s + lb * y * y * (3 * K.postTop - y) / (6 * EI), 0);
+  const r = P.bends(533);
+  assert.ok(Math.abs(r.big.top / exact - 1) < .001, `${r.big.top} vs ${exact}`);
+  // what the Lab shows at 90 mph: big-box about 9.3 in, GFS about 1.8 in; the steel carries about 4/5 at the ground
+  near(r.big.top, 9.3, .05); near(r.gfs.top, 1.85, .05);
+  assert.ok(r.gfs.steelShare > .78 && r.gfs.steelShare < .84, r.gfs.steelShare);
+  // the slider stops at 90 mph, where the big-box vinyl is still under its yield stress and the steel well under 35 ksi
+  assert.ok(r.big.vinylPsi < P.PVC.yieldPsi, r.big.vinylPsi); assert.ok(r.gfs.steelPsi < 35000, r.gfs.steelPsi);
+  // the GFS post bends less at every height
+  for (let y = 6; y <= K.postTop; y += 6) assert.ok(r.gfs.at(y) < r.big.at(y), `at ${y} in`);
+});
