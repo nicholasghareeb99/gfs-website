@@ -418,7 +418,7 @@ function wood(body) {
     <div class="lab-card"><p class="lab-note">This is why GFS builds board-on-board with overlapping boards: a gap opening as the wood dries stays covered. On a butted privacy fence, pine leaves the bigger gaps.</p></div>
     ${math(`<p><b>Shrinkage below the fiber saturation point</b> (USDA Wood Handbook, Ch. 4): S = S<sub>0</sub> · (M<sub>1</sub> − M<sub>2</sub>) / 30, where S<sub>0</sub> is green-to-ovendry shrinkage and moisture above 30% (free water) causes no shrinking. <span class="mono" id="wdEq"></span></p>
       <p>S<sub>0</sub> from Wood Handbook Table 4-3: loblolly pine 7.4% flat-sawn, 4.8% quartersawn; Western redcedar 5.0% and 2.4%; Northern white-cedar 4.9% and 2.2%.</p>
-      <p class="src">Fence pickets are mostly flat-sawn, so the flat-sawn number is used. A 1×6 picket is 5½″ wide. The 3D boards are the Executive App's dog-ear privacy and board-on-board models, drawn true size; each board changes width about its middle, where it's nailed. Cedar is drawn with the app's cedar model for both cedars. Cupping and twisting aren't drawn.</p>`)}`;
+      <p class="src">Fence pickets are mostly flat-sawn, so the flat-sawn number is used. A 1×6 picket is 5½″ wide. The 3D boards are the Executive App's dog-ear privacy and board-on-board models, drawn true size; each board changes width about its middle, where it's nailed. Cedar is drawn with the app's cedar model for both cedars. Board-on-board boards are 5½″ wide, 4″ apart, so each laps its neighbours 1½″. Cupping and twisting aren't drawn.</p>`)}`;
   const svg = $('.wood-svg', body);
   let scene = null, live = true;
   const update = () => {

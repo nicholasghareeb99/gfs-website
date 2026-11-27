@@ -29,6 +29,10 @@ export function createWoodScene(host, { specs } = {}) {
       // run right to left so the picket side faces the viewer
       const F = fence(MODELS[sp][k], 0, 0, { specs, pts: [[x + 4, 0, ZR], [x - 4, 0, ZR]] });
       const g = new THREE.Group(); g.add(F.group); R.add(g);
+      // the app's board-on-board boards come out 5.72 in wide; a 1×6 is 5½ in, so full boards are set to 5½ in about their middles
+      if (k === 1) { const touched = new Set(); for (const p of F.parts) { if (p.kind !== 'picket') continue; const w = (p.box.max.x - p.box.min.x) / IN; if (w < 5.6) continue; const cx = (p.box.min.x + p.box.max.x) / 2, f = 5.5 / w;
+        p.base.premultiply(T1.makeTranslation(-cx, 0, 0)).premultiply(Sm.makeScale(f, 1, 1)).premultiply(T2.makeTranslation(cx, 0, 0)); p.mesh.setMatrixAt(p.i, p.base); touched.add(p.mesh);
+        const hw = 2.75 * IN; p.box.min.x = cx - hw; p.box.max.x = cx + hw; } touched.forEach(m => { m.instanceMatrix.needsUpdate = true; }); }
       const pk = F.parts.filter(p => p.kind === 'picket').map(p => ({ p, x0: p.box.min.x, x1: p.box.max.x, zc: (p.box.min.z + p.box.max.z) / 2, cx: (p.box.min.x + p.box.max.x) / 2 })).sort((a, b) => a.cx - b.cx);
       // layers by depth: one for privacy, two for board-on-board
       const zs = [...new Set(pk.map(q => Math.round(q.zc / IN * 8)))].sort((a, b) => a - b);
