@@ -992,3 +992,12 @@ body.has-back .top .brand{display:none}
 .l3d-pin.good.two>span small{color:#1d5a40}
 .l3d-pin.ice>span{color:#d8efff}
 .l3d-pin.focus>span{outline:2px solid var(--copper);outline-offset:1px}
+/* Grade Lab in 3D: the hint sits over the views; post handles are blue arrows */
+.grade-3d{position:relative}
+.grade-3d .gl-try{top:30%;z-index:3}
+.l3d-pin.gl-handle>span{bottom:auto;top:0;transform:translate(calc(-50% + var(--dx)),-50%);background:rgba(61,127,224,.95);color:#fff;border:2px solid #fff;border-radius:14px;padding:3px 7px;text-align:center;font:700 10px/1 var(--mono)}
+.l3d-pin.gl-handle>span::after{display:none}
+.l3d-pin.gl-handle .arr{display:block;font-size:9px;line-height:1}
+.l3d-pin.gl-handle small{display:block;font:600 10px var(--mono);margin-top:2px}
+.g3-note{margin:8px 2px 0}
+@media (max-width:640px){.l3d-pin.gl-handle>span{padding:2px 5px;border-width:1.5px}.l3d-pin.gl-handle small{font-size:9px}}

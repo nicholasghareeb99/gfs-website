@@ -136,7 +136,11 @@ function dashTexture() {
 // ── the stage ───────────────────────────────────────────────────
 // host: an element to fill. views: [{ id, label }] — one camera each, drawn side by side on wide
 // screens and stacked on phones, all turned together by the same finger.
-export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400 } = {}) {
+// segPerFt: how finely the ground can bend along the fence. turnWithOneFinger: false leaves one-finger
+// drags to the tool (two fingers still pinch, tilt and turn).
+// stackAlways: views one above the other at every width; a view's aspect (height ÷ width, with
+// minH/maxH in px) sets its own height when stacked.
+export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false } = {}) {
   const mt = mats();
   const wrap = document.createElement('div'); wrap.className = 'l3d'; host.append(wrap);
   const cv = document.createElement('canvas'); cv.className = 'l3d-cv'; wrap.append(cv);
@@ -168,8 +172,8 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 
   // The yard: lawn behind the cut, and the cut face (topsoil over clay) in front.
   // The ground can slope along the fence: grade(x) is its height at x. The lawn and the cut face are
-  // made of 1 ft strips so they can follow it.
-  const SEG = Math.round(width);
+  // made of 1 ft strips (or finer) so they can follow it.
+  const SEG = Math.round(width * segPerFt);
   const lawnGeo = new THREE.PlaneGeometry(width, back, SEG, 1); lawnGeo.rotateX(-Math.PI / 2); lawnGeo.translate(0, 0, -back / 2);
   const G = groundMaterials();
   const lawn = new THREE.Mesh(lawnGeo, G.lawn); lawn.receiveShadow = true; lawn.name = 'lawn'; scene.add(lawn);
@@ -225,10 +229,13 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   };
   const layout = () => {
     const W = wrap.clientWidth || 360, n = V.length;
-    stacked = n > 1 && W < 700;
-    const H = stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560));
+    stacked = n > 1 && (W < 700 || stackAlways);
+    const own = stacked && V.some(v => v.aspect);
+    const hs = own ? V.map(v => Math.round(clamp(W * (v.aspect || 1), v.minH || 160, v.maxH || 560))) : null;
+    const H = own ? hs.reduce((a, b) => a + b, 0) : stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560));
     wrap.style.height = H + 'px'; renderer.setSize(W, H, false);
-    V.forEach((v, i) => { v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
+    let y0 = 0;
+    V.forEach((v, i) => { if (own) { v.rect = { x: 0, y: y0, w: W, h: hs[i] }; y0 += hs[i]; } else v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
     V.forEach(v => { if (v.tag) Object.assign(v.tag.style, { left: v.rect.x + 'px', top: v.rect.y + 'px', width: v.rect.w + 'px', height: v.rect.h + 'px' }); });
     wrap.classList.toggle('stacked', stacked);
     dirty();
@@ -268,20 +275,20 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   cv.addEventListener('webglcontextrestored', () => { wrap.classList.remove('lost'); dirty(); });
 
   // ── touch: one finger sideways turns, two fingers pinch to zoom or drag up/down to tilt; double tap resets ──
-  cv.style.touchAction = 'pan-y';
+  cv.style.touchAction = turnWithOneFinger ? 'pan-y' : 'none';
   const pts = new Map(); let pinch = null, drag = null, lastTap = 0;
-  const two = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a[0] - b[0], a[1] - b[1]), y: (a[1] + b[1]) / 2 }; };
+  const two = () => { const [a, b] = [...pts.values()]; return { d: Math.hypot(a[0] - b[0], a[1] - b[1]), x: (a[0] + b[0]) / 2, y: (a[1] + b[1]) / 2 }; };
   cv.addEventListener('pointerdown', e => {
     pts.set(e.pointerId, [e.clientX, e.clientY]);
-    if (pts.size === 2) { const t = two(); pinch = { ...t, zoom: orbit.zoom, pitch: orbit.pitch }; drag = null; }
-    else if (pts.size === 1) {
+    if (pts.size === 2) { const t = two(); pinch = { ...t, zoom: orbit.zoom, pitch: orbit.pitch, yaw: orbit.yaw }; drag = null; }
+    else if (pts.size === 1 && turnWithOneFinger) {
       drag = { x: e.clientX, y: e.clientY, yaw: orbit.yaw, pitch: orbit.pitch, on: false, mouse: e.pointerType === 'mouse' };
       const now = performance.now(); if (now - lastTap < 320) reset(); lastTap = now;
     }
   });
   cv.addEventListener('pointermove', e => {
     if (!pts.has(e.pointerId)) return; pts.set(e.pointerId, [e.clientX, e.clientY]);
-    if (pinch && pts.size === 2) { const t = two(); orbit.zoom = clamp(pinch.zoom * t.d / Math.max(30, pinch.d), .8, 4); orbit.pitch = clamp(pinch.pitch + (t.y - pinch.y) * .004, -.02, .6); orbit.user = true; dirty(); return; }
+    if (pinch && pts.size === 2) { const t = two(); orbit.zoom = clamp(pinch.zoom * t.d / Math.max(30, pinch.d), .8, 4); orbit.pitch = clamp(pinch.pitch + (t.y - pinch.y) * .004, -.02, .6); if (!turnWithOneFinger) orbit.yaw = clamp(pinch.yaw - (t.x - pinch.x) * .005, -.7, .7); orbit.user = true; dirty(); return; }
     if (!drag) return;
     const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.on && (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.2 || drag.mouse && Math.hypot(dx, dy) > 4)) { drag.on = true; try { cv.setPointerCapture(e.pointerId); } catch { } }
@@ -345,6 +352,15 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 
   layout();
   return {
+    // where a point on screen lands on the vertical plane z = z0 (or null): { x, y, view }
+    pick(clientX, clientY, z0 = 0) {
+      const r = cv.getBoundingClientRect(), px = clientX - r.left, py = clientY - r.top;
+      const v = V.find(v => px >= v.rect.x && px <= v.rect.x + v.rect.w && py >= v.rect.y && py <= v.rect.y + v.rect.h); if (!v) return null;
+      const ndc = new THREE.Vector2((px - v.rect.x) / v.rect.w * 2 - 1, -((py - v.rect.y) / v.rect.h * 2 - 1));
+      const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, v.cam);
+      const hit = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), -z0), new THREE.Vector3());
+      return hit ? { x: hit.x, y: hit.y, view: v.id } : null;
+    },
     THREE, scene, root, renderer, sun, views: V, orbit, wrap, over, ground, setGrade, grade: x => grade(x),
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
     get stacked() { return stacked; }, layout,
@@ -362,11 +378,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
 // so a tool can hide, reveal or move single posts, rails and pickets.
 // grade(x): ground height along the run (the fence follows it); level: keep each section level and
 // step it, the way a store panel goes up on a slope.
-export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level = false, gates, extra } = {}) {
+export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level = false, gates, extra, pts } = {}) {
   const E = engine(name, specs), lib = new E.MatLib(), B = new E.FenceBuilder(lib);
   const spec = Object.assign({}, E.parse(name) || {}, extra || {}); if (noDig != null) spec.noDig = noDig;
   const gy = grade || (() => 0);
-  const run = { pts: [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
+  // pts: [[x, y], …] runs the fence through each point (a post at each), instead of x0 → x1 on the grade
+  const run = { pts: pts ? pts.map(([x, y]) => ({ x, y, z })) : [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
   group.updateMatrixWorld(true);
@@ -393,6 +410,44 @@ export function settleRails(F) {
     if (up > 1e-5) { r.ref.mesh.getMatrixAt(r.ref.i, M); M.elements[13] += up + 1e-4; r.ref.mesh.setMatrixAt(r.ref.i, M); r.ref.mesh.instanceMatrix.needsUpdate = true; moved++;
       const part = F.parts.find(p => p.mesh === r.ref.mesh && p.i === r.ref.i); if (part) { part.base.copy(M); part.box.translate(new THREE.Vector3(0, up, 0)); } }
   }
+  return moved;
+}
+// Where a fence changes slope at a post, the square-cut ends of the two bays' rails meet at an angle
+// and their corners reach into each other (a carpenter would trim one). Trims each such end back
+// along its own length just enough to clear.
+export function trimRailJoints(F, kinds = ['rail', 'kick', 'reveal']) {
+  const P = new THREE.Vector3(), Q = new THREE.Quaternion(), S = new THREE.Vector3(), M = new THREE.Matrix4();
+  let trimmed = 0;
+  for (let pass = 0; pass < 4; pass++) {
+    const rails = solids(F.group).filter(s => kinds.includes(s.kind)); let any = false;
+    for (let i = 0; i < rails.length; i++) for (let j = i + 1; j < rails.length; j++) {
+      const a = rails[i], b = rails[j], k = sink(a, b); if (k <= 1e-5) continue;
+      const pa = a.ref.mesh.userData.parts?.[a.ref.i], pb = b.ref.mesh.userData.parts?.[b.ref.i];
+      if (!pa || !pb || pa.bay === pb.bay || pa.kind !== pb.kind) continue;
+      const mid = a.c.clone().add(b.c).multiplyScalar(.5);
+      for (const r of [a, b]) {
+        const ax = r.axes[0], toward = Math.sign(mid.clone().sub(r.c).dot(ax)) || 1, len = r.half[0] * 2, d = k / 2 + 1e-4;
+        r.ref.mesh.getMatrixAt(r.ref.i, M); M.decompose(P, Q, S); S.x *= (len - d) / len; P.addScaledVector(ax, -toward * d / 2); M.compose(P, Q, S);
+        r.ref.mesh.setMatrixAt(r.ref.i, M); r.ref.mesh.instanceMatrix.needsUpdate = true;
+      }
+      any = true; trimmed++;
+    }
+    if (!any) break;
+  }
+  return trimmed;
+}
+// Lifts each `what` part (pickets) off a `on` part (a kickboard) it reaches into: on a slope a square-cut
+// picket bottom meets a sloped kickboard at one corner.
+export function settleOn(F, what, on) {
+  let moved = 0;
+  for (let pass = 0; pass < 4; pass++) { const n = settleOnce(F, what, on); moved += n; if (!n) break; }
+  return moved;
+}
+function settleOnce(F, what, on) {
+  const L = solids(F.group), A = L.filter(s => s.kind === what), B = L.filter(s => s.kind === on), M = new THREE.Matrix4();
+  let moved = 0;
+  for (const a of A) { let up = 0; for (const b of B) { const k = sink(a, b); if (k > 0 && b.c.y < a.c.y) up = Math.max(up, k / Math.max(.2, a.axes[1].y)); }
+    if (up > 1e-5) { a.ref.mesh.getMatrixAt(a.ref.i, M); M.elements[13] += up + 1e-4; a.ref.mesh.setMatrixAt(a.ref.i, M); a.ref.mesh.instanceMatrix.needsUpdate = true; moved++; } }
   return moved;
 }
 // On a slope the app's racked vinyl keeps each post the height it has on flat ground, so where the

@@ -24,7 +24,7 @@ const TOOLS = [
     how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, <b>clay</b> or <b>sand</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'A post has to reach well below the frost line, 3 ft here and 3½ ft in Michigan. Ours are driven 4 ft.' },
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
-    how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.']],
+    how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.'], ['pinchout', 'In 3D, two fingers turn and zoom the view.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
   { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and what keeps a gate latching for years',
     how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the bar sits too low for its catch, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
@@ -946,7 +946,7 @@ function vinyl(body) {
 function gradeTool(body) {
   let stopFn = null, gone = false;
   body.innerHTML = '<div class="lab-vis" style="min-height:320px;display:grid;place-items:center;color:var(--dim)">Loading Grade Lab…</div>';
-  import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt }); });
+  import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt, specs: app.live?.specs }); });
   return () => { gone = true; stopFn?.(); };
 }
 

@@ -9,10 +9,11 @@
 // never sets a post more than 2 in into the ground or 12 in above it; raked dirt is
 // laid up to the bottom of the pickets.
 import { $, $$, esc, clamp, icons, toast, reduced, gesture } from './ui.mjs';
+import { webglOK } from './lab3d-ok.mjs';
 
 const SEC = 8, N = 4, L = SEC * N, STEP = .25, NS = L / STEP + 1, IN = 1 / 12;
 const CLEAR = { wood: 2.5 * IN, vinyl: 2 * IN };
-const KICK = 5.5 * IN; // a 2×6 kickboard
+const KICK = 5.5 * IN; // a 5½ in kickboard, as the app draws it
 const PRESETS = {
   flat: () => 0,
   // Real yards: a few inches up or down over a run is normal, and enough to show in the top line.
@@ -32,6 +33,8 @@ export function grade(body, kit) {
   preset('rolling');
 
   body.innerHTML = `
+    <div class="grade-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the yard in 3D…</div>
+      <div class="gl-try g3" aria-hidden="true">${gesture('drag')}<span id="glTry3">Drag up or down on the yard</span></div></div>
     <div class="gl-stage lab-vis"><canvas class="gl-cv" aria-label="A 32 foot fence on a shaped yard, seen from the side"></canvas>
       <div class="gl-try" aria-hidden="true">${gesture('drag')}<span id="glTry">Drag up or down on the yard</span></div>
       <div class="gl-zoom"><canvas class="gl-zcv" aria-label="Close-up of the bottom of the fence"></canvas><span class="mono" id="glZl">CLOSE-UP 4×</span></div>
@@ -58,9 +61,9 @@ export function grade(body, kit) {
     ${math(`<p><b>We slope every fence, we never step it.</b> Each section runs straight from one post to the next and follows the ground. The tops line up post to post, and there are no stair-step gaps.</p>
       <p><b>The gap under a section</b> is the distance from the bottom of the fence to the ground, checked every 3 in along the run. Wood pickets on our no-dig fence sit 2.5 in off the ground at the posts (72 in boards, rail top at 68.5 in, pickets 6 in above the rail). Because a section is a straight line, a dip between two posts opens a gap and a hump pushes into the fence.</p>
       <p><b>Smooth the top line</b> moves each post up or down so the top reads as one smooth line over bumps and dips. It never sets a post more than 2 in into the ground or 12 in above it, then lifts any section that a hump would still push into.</p>
-      <p><b>Three ways to close what's left</b>: raked dirt up to the bottom of the pickets (we rake dirt along the bottom on every install); a pressure-treated 2×6 kickboard along the bottom of wood fences, which also keeps the pickets off the dirt; or grading the strip under the fence so the ground matches the fence line.</p>
+      <p><b>Three ways to close what's left</b>: raked dirt up to the bottom of the pickets (we rake dirt along the bottom on every install); a pressure-treated kickboard (5½ in tall) along the bottom of wood fences, which also keeps the pickets off the dirt; or grading the strip under the fence so the ground matches the fence line.</p>
       <p><b>Dirt moved</b> is the cut and fill along a 3 ft wide strip under the fence, in cubic yards.</p>
-      <p class="src">Drawn to scale. The close-up under the drawing shows the bottom of the fence 4× bigger at the biggest gap. The yard shapes are examples; at the estimate we measure yours.</p>`)}`;
+      <p class="src">Drawn to scale. In 3D the fence is the same model our Executive App uses, on GFS steel posts driven 4 ft. The close-up shows the bottom of the fence, bigger, at the biggest gap. The yard shapes are examples; at the estimate we measure yours.</p>`)}`;
 
   const cv = $('.gl-cv', body); let g = cv.getContext('2d');
   let W = 0, H = 0, k = 1, sx = 1, sy = 1, ox = 0, oy = 0;
@@ -105,7 +108,11 @@ export function grade(body, kit) {
   // Flat sawn boards: one tone per board with a little variation, not a rounded shading.
   const TONES = ['#cfa674', '#c79d69', '#d4ad7b', '#c39963', '#cca370', '#d0a977'];
   const woodFill = (i, p) => TONES[(i * 7 + p * 3 + (p >> 2)) % TONES.length];
+  let scene = null;
+  const S = { get style() { return st.style; }, get kick() { return st.kick; }, get mode() { return st.mode; }, get ground() { return st.ground; }, get dirt() { return st.dirt; }, get offs() { return st.offs; }, get orig() { return st.orig; },
+    NS, STEP, at: (a, x) => at(a, x), groundAt: x => at(st.ground, x), surf: x => surf(x), base: i => base(i), lineAt: x => lineAt(x), bottomAt: x => bottomAt(x) };
   function draw() {
+    if (scene) { const m = metrics(); scene.update(S, m, brush); readouts(m); status3(m); return; }
     if (!W) return;
     const m = metrics();
     paint(m, false);
@@ -212,6 +219,10 @@ export function grade(body, kit) {
     for (let i = 0; i <= N; i++) g.fillText(`${i * SEC}′`, X(post(i)) - 6, H - 6);
 
   }
+  function status3(m) {
+    const t = $('.grade-3d .l3d-status', body); if (!t) return;
+    t.textContent = `Biggest gap ${m.maxGap < .5 * IN ? 'none' : fmt(m.maxGap * 12, 1) + ' in'} · top line ${m.kink < 1 ? 'smooth' : m.kink < 2.5 ? 'slight bends' : 'uneven'}`;
+  }
   function readouts(m) {
     $('#glGap', body).textContent = m.maxGap < .5 * IN ? 'none' : `${fmt(m.maxGap * 12, 1)}″`;
     $('#glTop', body).textContent = m.kink < 1 ? 'Smooth' : m.kink < 2.5 ? 'Slight bends' : 'Uneven';
@@ -222,6 +233,7 @@ export function grade(body, kit) {
     $('#glWork', body).textContent = dv.total < .01 ? '—' : `${fmt(dv.total, 2)} yd³`;
     $('#glWorkS', body).textContent = st.orig ? `graded: ${fmt(dv.cut, 2)} cut, ${fmt(dv.fill, 2)} fill` : dv.total > .01 ? 'raked dirt along the bottom' : 'dirt moved';
     $('#glNote', body).textContent = { ground: 'Drag on the yard to raise or lower it.', posts: 'Drag a blue dot up or down to raise or lower that post.', dirt: 'Drag along the bottom of the fence to rake dirt into the gaps.' }[st.mode] + ' Drawn to scale.';
+    const n3 = $('.g3-note', body); if (n3) n3.textContent = { ground: 'Drag up or down on the yard to raise or lower it.', posts: 'Drag a post up or down by its blue arrows.', dirt: 'Run your finger along the bottom of the fence to rake dirt into the gaps.' }[st.mode] + ' Two fingers turn and zoom.';
     $('#glKick', body).disabled = st.style !== 'wood';
     $('#glKick', body).textContent = st.kick ? 'Remove the kickboard' : 'Add a kickboard';
   }
@@ -257,7 +269,8 @@ export function grade(body, kit) {
   function fillGaps() { for (let j = 0; j < NS; j++) { const x = j * STEP, gap = bottomAt(x) - (st.ground[j] + st.dirt[j]); if (gap > .5 * IN) st.dirt[j] += gap; } }
   function gradeLine() {
     const from = st.ground.slice(), to = new Float32Array(NS);
-    for (let j = 0; j < NS; j++) to[j] = lineAt(j * STEP) + (st.kick && st.style === 'wood' ? 0 : CLEAR[st.style]) - .4 * IN;
+    // half an inch under the bottom of the fence: the posts end up no more than 2 in into the ground
+    for (let j = 0; j < NS; j++) to[j] = lineAt(j * STEP) + (st.kick && st.style === 'wood' ? 0 : CLEAR[st.style]) - .5 * IN;
     // blend the ends back to the yard so the strip meets the lawn
     if (!st.orig) st.orig = from.slice();
     st.dirt.fill(0);
@@ -279,22 +292,32 @@ export function grade(body, kit) {
     if (a === 'reset') { st.offs.fill(0); st.dirt.fill(0); st.kick = false; if (st.orig) { st.ground.set(st.orig); st.orig = null; } }
     draw();
   });
-  bindSeg(body, (n, v) => { if (n === 'mode') { st.mode = v; const tr = $('.gl-try', body); tr.classList.remove('gone'); $('#glTry', body).textContent = { ground: 'Drag up or down on the yard', posts: 'Drag a post up or down', dirt: 'Run your finger along the bottom to rake in dirt' }[v]; tr.querySelector('.gest').className = 'gest g-' + (v === 'dirt' ? 'slide' : 'drag'); } if (n === 'style') { st.style = v; if (v !== 'wood') st.kick = false; } draw(); });
+  bindSeg(body, (n, v) => { if (n === 'mode') { st.mode = v; const tr = $(scene ? '.gl-try.g3' : '.gl-try', body); tr.classList.remove('gone'); $(scene ? '#glTry3' : '#glTry', body).textContent = { ground: 'Drag up or down on the yard', posts: 'Drag a post up or down', dirt: 'Run your finger along the bottom to rake in dirt' }[v]; tr.querySelector('.gest').className = 'gest g-' + (v === 'dirt' ? 'slide' : 'drag'); } if (n === 'style') { st.style = v; if (v !== 'wood') st.kick = false; } draw(); });
 
   // ── touch ──
   let drag = null, brush = null, live = true;
   // one repaint per screen frame, however fast the finger sends moves
   let pend = 0; const redraw = () => { if (!pend) pend = requestAnimationFrame(() => { pend = 0; if (live) draw(); }); };
-  cv.addEventListener('pointerdown', e => {
-    $('.gl-try', body)?.classList.add('gone');
-    cv.setPointerCapture(e.pointerId); const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
+  // where a finger is, in feet along the run and height: from the drawing, or from the 3D views
+  const where = e => { if (scene) return scene.pick(e.clientX, e.clientY); const r = cv.getBoundingClientRect(); return { x: FX(e.clientX - r.left), y: FY(e.clientY - r.top) }; };
+  const fingers = new Set();
+  const down = e => {
+    fingers.add(e.pointerId);
+    if (fingers.size > 1) { if (drag) { const h = hist.pop(); if (h) { st.ground.set(h.g); st.dirt.set(h.d); st.offs.set(h.o); st.orig = h.orig; } } drag = null; draw(); return; }   // two fingers turn and zoom the view
+    $$('.gl-try', body).forEach(t => t.classList.add('gone'));
+    const p = where(e); if (!p) return;
+    const target = e.currentTarget; try { target.setPointerCapture(e.pointerId); } catch { }
+    const { x, y } = p;
     snap();
-    if (st.mode === 'posts') { let best = -1, bd = 1e9; for (let i = 0; i <= N; i++) { const d = Math.abs(x - i * SEC); if (d < bd) { bd = d; best = i; } } if (bd > 3) return; drag = { kind: 'post', i: best, y0: y, o0: st.offs[best] }; }
+    if (st.mode === 'posts') { let best = -1, bd = 1e9; for (let i = 0; i <= N; i++) { const d = Math.abs(x - i * SEC); if (d < bd) { bd = d; best = i; } } if (bd > 3) { hist.pop(); return; } drag = { kind: 'post', i: best, y0: y, o0: st.offs[best] }; }
     else drag = { kind: st.mode, x, y };
     move(e);
-  });
+  };
+  cv.addEventListener('pointerdown', down);
   const move = e => {
-    const r = cv.getBoundingClientRect(), x = FX(e.clientX - r.left), y = FY(e.clientY - r.top);
+    if (fingers.size > 1) return;
+    const p = where(e); if (!p) return;
+    const { x, y } = p;
     brush = { x }; if (!drag) { if (st.mode !== 'posts') redraw(); return; }
     if (drag.kind === 'post') st.offs[drag.i] = Math.round(clamp(drag.o0 + (y - drag.y0) * .4, -4 * IN, 18 * IN) * 48) / 48; // quarter inches
     if (drag.kind === 'ground') { const R = 2.5, dy = (y - drag.y) * .25; drag.y = y; for (let j = 0; j < NS; j++) { const d = j * STEP - x; if (Math.abs(d) > R * 2) continue; const w = Math.exp(-(d * d) / (R * R)); st.ground[j] = clamp(st.ground[j] + dy * w, -1.5, 2); } if (st.orig) st.orig = null; }
@@ -302,9 +325,25 @@ export function grade(body, kit) {
     redraw();
   };
   cv.addEventListener('pointermove', move);
-  const up = () => { drag = null; if (pend) { cancelAnimationFrame(pend); pend = 0; draw(); } };
+  const up = e => { if (e?.pointerId != null) fingers.delete(e.pointerId); drag = null; if (pend) { cancelAnimationFrame(pend); pend = 0; draw(); } };
   cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
   cv.addEventListener('pointerleave', () => { brush = null; draw(); });
   const ro = new ResizeObserver(fit); ro.observe(cv);
-  return () => { live = false; cancelAnimationFrame(st.anim); cancelAnimationFrame(pend); ro.disconnect(); };
+  // 3D where the device can: the same yard and the same rules, drawn with the app's fence models
+  if (webglOK()) {
+    const host = $('.grade-3d', body); host.hidden = false; $('.gl-stage', body).hidden = true;
+    import('./grade3d.mjs').then(mod => {
+      if (!live) return; $('.l3d-wait', host)?.remove();
+      scene = mod.createGradeScene(host, { specs: kit.specs, L, SEC, N });
+      const note = document.createElement('p'); note.className = 'vis-note-inline g3-note'; host.append(note);
+      const tag = scene.stage.views[0].tag; if (tag) { const el = document.createElement('p'); el.className = 'l3d-status'; tag.append(el); scene.stage.views.forEach(v => { v.inset.bottom = 54; }); }
+      const c3 = $('.l3d-cv', host);
+      c3.addEventListener('pointerdown', down); c3.addEventListener('pointermove', move);
+      c3.addEventListener('pointerup', up); c3.addEventListener('pointercancel', up);
+      c3.addEventListener('pointerleave', () => { brush = null; draw(); });
+      body.__grade = { check: () => scene?.check() || [], metrics, st, draw };   // for the overlap tests
+      draw();
+    }).catch(() => { if (!live) return; host.hidden = true; $('.gl-stage', body).hidden = false; scene = null; fit(); });
+  }
+  return () => { live = false; cancelAnimationFrame(st.anim); cancelAnimationFrame(pend); ro.disconnect(); scene?.dispose(); scene = null; };
 }
