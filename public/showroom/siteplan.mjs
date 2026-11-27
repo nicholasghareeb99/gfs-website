@@ -158,7 +158,9 @@ export async function openSitePlan(app, d) {
       <button class="btn sm" data-share disabled>Share</button></div>
     <div class="bp-stage"><div class="bp-sheet"></div><div class="bp-load"><div class="bp-scan"></div><ol><li class="on">Drawing the site plan</li></ol></div></div>`;
   document.body.append(el); requestAnimationFrame(() => el.classList.add('on'));
-  const close = () => { el.classList.remove('on'); setTimeout(() => el.remove(), 350); if (overlay === el) overlay = null; };
+  const key = e => { if (e.key === 'Escape') close(); };
+  const close = () => { removeEventListener('keydown', key); el.classList.remove('on'); setTimeout(() => el.remove(), 350); if (overlay === el) overlay = null; };
+  addEventListener('keydown', key);
   $('[data-x]', el).onclick = close;
   try {
     const cv = await drawSitePlan(d);

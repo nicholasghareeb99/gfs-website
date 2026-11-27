@@ -350,6 +350,8 @@ function drawFence(A) {
 }
 function onMapClick(e) {
   if (!cur?.drawing) return;
+  // Zoomed out, one tap can be hundreds of feet off: get close to the yard first.
+  if (map.getZoom() < 17) { map.flyTo(e.latlng, 19, { duration: 1 }); toast('Zoomed in on the yard. Now tap the corner posts.', 2400); return; }
   const ll = { lat: e.latlng.lat, lng: e.latlng.lng };
   if (cur.gateMode) {
     const st = fenceStats(), p = st.P.to([ll.lng, ll.lat]);
@@ -365,7 +367,7 @@ function saveFence() {
 }
 function setDrawing(on) {
   cur.drawing = on; cur.gateMode = null;
-  if (on) { cur.picking = false; map.doubleClickZoom.disable(); $('.p-card', root).classList.add('drawing'); }
+  if (on) { cur.picking = false; map.doubleClickZoom.disable(); $('.p-card', root).classList.add('drawing'); if (map.getZoom() < 17 && cur.lat) map.flyTo([cur.lat, cur.lng], 19, { duration: 1 }); }
   else { map.doubleClickZoom.enable(); $('.p-card', root).classList.remove('drawing'); const r = cur.fence.runs; if (r.length > 1 && r.at(-1).length < 2) r.pop(); for (const x of r) if (x.length === 1) x.length = 0; cur.fence.runs = r.filter(x => x.length) ; if (!cur.fence.runs.length) cur.fence.runs = [[]]; saveFence(); }
   draw(); renderCard();
 }
@@ -398,7 +400,7 @@ function bindFence(el) {
   on('[data-clear]', () => { if (fenceEmpty() && !cur.fence.runs.at(-1).length) return toast('Nothing to clear yet.'); cur.fence = blankFence(); saveFence(); draw(); renderCard(); });
   for (const b of $$('[data-gate]', el)) b.onclick = () => { if (fenceEmpty()) return toast('Tap at least two posts to make a line of fence first, then add the gate on it.'); cur.gateMode = cur.gateMode === b.dataset.gate ? null : b.dataset.gate; renderCard(); };
   const sel = $('[data-fmodel]', el); if (sel) sel.onchange = () => { cur.fenceModel = sel.value || null; saveFence(); draw(); renderCard(); };
-  on('[data-3d]', () => { if (!cur.fenceModel) { toast('Pick a style first.'); return; } app.go('ar', { geometry: fenceGeometry(), model: cur.fenceModel }); });
+  on('[data-3d]', () => { if (!cur.fenceModel) { toast('Pick a style first, then tap See it in 3D.'); const s = $('[data-fmodel]', root)?.closest('.fence-style'); s?.classList.remove('nudge'); void s?.offsetWidth; s?.classList.add('nudge'); s?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); return; } app.go('ar', { geometry: fenceGeometry(), model: cur.fenceModel }); });
   on('[data-packet]', async () => {
     const { openSitePlan } = await import('./siteplan.mjs');
     openSitePlan(app, packetData());

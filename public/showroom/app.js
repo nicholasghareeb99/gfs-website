@@ -2,7 +2,7 @@
 import { $, $$, toast, vt, canVT, modal, esc, asset, pageImg, icons } from './ui.mjs';
 import { openHelp, helpOnce } from './help.mjs';
 
-const VERSION = 'showroom-1.2 (2026-11-26)';
+const VERSION = 'showroom-1.3 (2026-11-26)';
 const PUBLIC_CATALOG = 'https://firestore.googleapis.com/v1/projects/ghareeb-fencing/databases/(default)/documents/settings/public?mask.fieldPaths=styleNames&mask.fieldPaths=styleSpecs&mask.fieldPaths=stylePhotos&mask.fieldPaths=styleCodes&mask.fieldPaths=publishedAt';
 const modes = {};
 const loaders = {
@@ -96,18 +96,41 @@ function setBack(b) {
   if (b) { $('.l', el).textContent = b.label; $('.s', el).textContent = b.short || b.label; el.setAttribute('aria-label', 'Back to ' + b.label); }
   el.classList.toggle('on', !!b); document.body.classList.toggle('has-back', !!b);
 }
+// ── New version while the app is open ───────────────────────────
+// A tab left open across an update runs the old code, and a screen loaded later would be the
+// new code, which doesn't fit ("That screen didn't load"). When we notice an update, the next
+// tap reloads into the screen that was tapped instead.
+const MY_V = (document.querySelector('script[src*="app.js"]')?.getAttribute('src') || '').match(/v=(\w+)/)?.[1] || '';
+let stale = false, lastCheck = 0;
+if ('serviceWorker' in navigator && navigator.serviceWorker.controller) navigator.serviceWorker.addEventListener('controllerchange', () => { stale = true; });
+async function checkVersion() {
+  if (stale || !MY_V || Date.now() - lastCheck < 120000 || !navigator.onLine) return; lastCheck = Date.now();
+  try { const t = await (await fetch('index.html', { cache: 'no-store' })).text(); const v = t.match(/app\.js\?v=(\w+)/)?.[1]; if (v && v !== MY_V) stale = true; } catch {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkVersion(); });
+setInterval(checkVersion, 600000);
+function reloadInto(hash) {
+  try { const k = 'gfs-showroom-reloaded', t = +sessionStorage.getItem(k) || 0; if (Date.now() - t < 30000) return false; sessionStorage.setItem(k, String(Date.now())); } catch { return false; }
+  history.replaceState(null, '', hash); location.reload(); return true;
+}
 const loading = {}; let goSeq = 0, lastError = '';
 addEventListener('error', e => { lastError = String(e.message || ''); });
 addEventListener('unhandledrejection', e => { lastError = String(e.reason?.message || e.reason || ''); });
 app.go = async function go(mode, opts = {}) {
   if (!loaders[mode]) mode = 'brochure';
+  const target = '#' + mode + (opts.page ? '-' + opts.page : opts.tool ? '-' + opts.tool : '');
+  if (stale && app.mode && opts.via !== 'pop' && reloadInto(target)) return;
   const seq = ++goSeq;
   if (!modes[mode]) {
     // one load per mode, even if it's tapped twice while the first load is still running
     loading[mode] ||= (async () => { const mod = await loaders[mode](); await mod.init(app, $('#v-' + mode)); modes[mode] = mod; })();
     const slow = setTimeout(() => toast(mode === 'ar' ? 'Loading 3D…' : 'Loading…', 2200), 1500);
     try { await Promise.race([loading[mode], new Promise((_, no) => setTimeout(() => no(Error('timed out')), 20000))]); }
-    catch (e) { clearTimeout(slow); delete loading[mode]; console.error(e); lastError = String(e?.message || e); toast((navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.') + (lastError ? ` (${lastError.slice(0, 80)})` : ''), 4000); return; }
+    catch (e) {
+      clearTimeout(slow); delete loading[mode]; console.error(e); lastError = String(e?.message || e);
+      // Most often an update landed while this tab was open: reload once, straight into this screen.
+      // (old and new code mixed: Chrome says "does not provide an export", Safari "Importing binding name … is not found")
+      if (navigator.onLine && (e instanceof SyntaxError || /export named|binding name|is not found|does not provide/i.test(lastError)) && reloadInto('#' + mode + (opts.tool ? '-' + opts.tool : opts.page ? '-' + opts.page : ''))) return; toast((navigator.onLine ? 'That screen didn\'t load. Tap it again.' : 'That screen needs a connection the first time.') + (lastError ? ` (${lastError.slice(0, 80)})` : ''), 4000); return; }
     clearTimeout(slow);
   }
   if (seq !== goSeq) return; // a later tap won while this screen was loading
@@ -227,6 +250,13 @@ function net() { $('#netDot').classList.toggle('off', !navigator.onLine); }
 // iPhone Safari ignores user-scalable=no: a stray pinch zooms the whole app and leaves
 // buttons off screen with no way back. Block page zoom; screens that zoom do it themselves.
 for (const t of ['gesturestart', 'gesturechange']) document.addEventListener(t, e => e.preventDefault(), { passive: false });
+
+// Escape (iPad keyboard) closes whatever sheet is on top, the same as its ✕.
+addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || e.defaultPrevented || document.querySelector('.help-sheet, .px, .bp, .overview.on')) return; // those close themselves
+  const top = [...document.querySelectorAll('.cmp, .rv, .recap, .modal')].filter(x => x.isConnected && !x.classList.contains('closing')).pop();
+  top?.querySelector('[data-x], [data-close]')?.click();
+});
 
 async function boot() {
   splash(); net();
