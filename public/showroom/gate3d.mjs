@@ -7,7 +7,7 @@
 // and the brace stop at the middle rail (a carpenter cuts them to fit between rails), and the 3 in
 // gate post's box is drawn 6 in wide so the 2⅞ in pipe fits inside it (the app's box is 5½ in, with
 // 2½ in between its sides).
-import { THREE, IN, createStage, fence, reveal, pipe, squarePost, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps, creased } from './lab3d.mjs';
+import { THREE, IN, createStage, fence, reveal, pipe, squarePost, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps, creased, easeLumber, woodLike } from './lab3d.mjs';
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
 import { sag, POSTS, TUBE, PINE, STEEL, WET, LATCH, tubeArea } from './gate-plan.mjs';
 import { season, weather, decay, heave } from './build-plan.mjs';
@@ -124,10 +124,13 @@ function volumeOf(o) {
   return Math.abs(v);
 }
 // a flat piece in the gate's plane: the convex polygon pts (x, y in feet), depth in z centred on z0
-function plate(pts, depth, z0, material) {
+// `turn` is the angle the piece runs at. The app's wood runs its grain along the longest side of a
+// part's own box, so a diagonal piece is made lying flat and then turned: its grain follows it.
+function plate(pts, depth, z0, material, turn = 0) {
   const s = new THREE.Shape(); pts.forEach(([x, y], i) => i ? s.lineTo(x, y) : s.moveTo(x, y)); s.closePath();
   const g = new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false }); g.translate(0, 0, z0 - depth / 2);
-  const m = new THREE.Mesh(g, material); m.castShadow = m.receiveShadow = true; return m;
+  if (turn) g.rotateZ(-turn);
+  const m = new THREE.Mesh(g, material); m.castShadow = m.receiveShadow = true; m.rotation.z = turn; return m;
 }
 // keep the part of a convex polygon where a·x + b·y <= c
 function cut(poly, a, b, c) {
@@ -159,9 +162,11 @@ export function createGateScene(host, { specs } = {}) {
   const HOLES = [st.hole(-3, .4), st.hole(3, .4)];
   let state = { w: 4, brace: 'right', post: 'steel', y: 0 };
   let built = null;
+  const ownMats = [];   // the frame pieces' own copies of the wood, thrown away on each rebuild
   const baseWood = new Map();
 
   function make() {
+    for (const m of ownMats.splice(0)) m.dispose();
     if (built) { R.remove(built.group); built.group.traverse(o => { if (o.geometry && !o.userData.shared) o.geometry.dispose(); }); built.lib.dispose?.(); HOLES.forEach(h => h.set(0)); baseWood.clear(); }
     const steelPost = state.post === 'steel', gpIn = steelPost ? BOX_IN : 3.5;
     const half = (state.w * 12 + gpIn) / 2 * IN;
@@ -275,7 +280,7 @@ export function createGateScene(host, { specs } = {}) {
         for (let i = 0; i + 1 < rails.length; i++) {
           const poly = band(cxy, u, 3.22 * IN / 2, { x0: x0 + stileW, x1: x1 - stileW, y0: rails[i].b.max.y, y1: rails[i + 1].b.min.y });
           if (poly.length < 3) continue;
-          const piece = plate(poly, depth, zR, frameMat); piece.userData.parts = [{ kind: 'gbrace', index: i }]; leaf.attach(piece);
+          const piece = plate(poly, depth, zR, frameMat, Math.atan2(u[1], u[0])); piece.userData.parts = [{ kind: 'gbrace', index: i }]; leaf.attach(piece);
         }
       }
     } else {
@@ -363,6 +368,12 @@ export function createGateScene(host, { specs } = {}) {
       bottomIn: leafBox.min.y / IN
     };
     const yPin = Math.min(...hingeYs) * IN;
+    easeLumber(g);   // the box sides made here are 2×4s too
+    // The app's wood finds each part's grain direction from that part's own box, but hands the box to
+    // the drawing code only when the material changes. Rails, stiles and brace share one material and
+    // are drawn one after another, so the stiles and brace came out with the rails' sideways grain.
+    // Giving each frame piece its own copy of the material makes every one read its own box.
+    leaf.traverse(o => { if (o.isMesh && /^(grail|gstile|gbrace)$/.test(kindOf(o))) { const m = woodLike(o.material); if (m !== o.material) { o.material = m; ownMats.push(m); } } });
     // the post latch: its arm turns on the bolt, and its hook comes down over the rod on the gate
     const K = latchKit, lifted = posts[1].lifted, ctr = m => boxOf(m).getCenter(new THREE.Vector3());
     const pvW = ctr(K.bolt), rodW = ctr(K.rodM), off = (dx, dv, du) => lifted.worldToLocal(pvW.clone().add(new THREE.Vector3(-dir * dx * IN, dv * IN, -K.out * du * IN)));
@@ -492,8 +503,10 @@ export function createGateScene(host, { specs } = {}) {
     check() {
       // hardware is built of pieces that sit in each other (a hinge's leaf, barrel and screws; the latch's arm on its
       // receiver, the rod in its hook); the pull handle arches over the rod's flat end
-      return overlaps(solids(R), { allow: (a, b) => a.kind === 'fastener' || (a.unit && a.unit === b.unit) || (/^(ghinge|glatch|ghandle)$/.test(a.kind) && a.kind === b.kind) || [a.kind, b.kind].sort().join() === 'ghandle,glatch' });
+      // The brace is cut to fit between the rails and stiles, so it cannot be in them; but it is checked as the
+      // box around its mitred ends, which reaches into them, so those two pairs are let through.
+      return overlaps(solids(R), { allow: (a, b) => a.kind === 'fastener' || (a.unit && a.unit === b.unit) || (/^(ghinge|glatch|ghandle)$/.test(a.kind) && a.kind === b.kind) || /^(ghandle,glatch|gbrace,grail|gbrace,gstile)$/.test([a.kind, b.kind].sort().join()) });
     },
-    dispose() { st.dispose(); built?.lib?.dispose?.(); for (const mtl of [conc, slump, gapMat, rotMat, gray, paint, iron]) mtl.dispose(); }
+    dispose() { st.dispose(); built?.lib?.dispose?.(); for (const mtl of [conc, slump, gapMat, rotMat, gray, paint, iron, ...ownMats]) mtl.dispose(); }
   };
 }

@@ -215,8 +215,8 @@ function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3d31, roughness: 1 });
     for (const m of [canopyMat, trunkMat]) { m.onBeforeCompile = sh => { sh.uniforms.uHaze = lawnU.uHaze;
       sh.vertexShader = 'varying vec3 vTW; varying float vUp;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vTW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz; vUp = position.y;');
-      sh.uniforms.uRagged = { value: m === canopyMat ? 1 : 0 };
-      sh.fragmentShader = 'varying vec3 vTW; varying float vUp; uniform vec3 uHaze; uniform float uRagged;\n' + NOISE + sh.fragmentShader.replace('#include <dithering_fragment>', 'gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(60.0, 520.0, length(vTW.xz - cameraPosition.xz)) * .5);\n#include <dithering_fragment>')
+      sh.uniforms.uRagged = { value: m === canopyMat ? 1 : 0 }; sh.uniforms.uBare = { value: m === canopyMat && winter ? 1 : 0 };
+      sh.fragmentShader = 'varying vec3 vTW; varying float vUp; uniform vec3 uHaze; uniform float uRagged; uniform float uBare;\n' + NOISE + sh.fragmentShader.replace('#include <dithering_fragment>', 'gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(60.0, 520.0, length(vTW.xz - cameraPosition.xz)) * .5);\n#include <dithering_fragment>')
         // foliage: sunlit clumps and shaded gaps at a few sizes, darker underneath each clump; then a leaf-sized
         // dapple whose size follows the distance, so it is a few pixels across near or far and never shimmers
         .replace('#include <color_fragment>', `#include <color_fragment>
@@ -226,11 +226,16 @@ function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(
             float clump = smoothstep(.3, .72, n), under = smoothstep(-.55, .75, vUp), dapple = smoothstep(.34, .62, leafN);
             diffuseColor.rgb *= (.5 + .85 * clump) * (.6 + .5 * under) * (.62 + .55 * dapple);
             diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(1.18, 1.12, .78), clump * under * dapple * .5);
-            vLeaf = leafN; }`)
+            vLeaf = leafN;
+            // winter: the leaves are down. What is left of a crown is its twigs, drawn as a net of thin dark
+            // lines with sky showing between them.
+            if (uBare > .5) { float tf = lf * .42;
+              vLeaf = min(abs(secN(w.xy * tf + vec2(w.z * tf * .31, 2.0)) - .5), abs(secN(w.zy * tf * 1.2 + vec2(w.x * tf * .37, 6.0)) - .5));
+              diffuseColor.rgb = vec3(.2, .17, .15) * (.75 + .5 * under); } }`)
         // a ragged, leafy outline: along the rim of each clump, the gaps between leaves are see-through
-        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n if (uRagged > .5) { float rim = abs(dot(normalize(normal), normalize(vViewPosition))); if (rim < .42 && vLeaf < .34 + (.42 - rim) * .75) discard; }')
+        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n if (uBare > .5) { if (vLeaf > .05) discard; } else if (uRagged > .5) { float rim = abs(dot(normalize(normal), normalize(vViewPosition))); if (rim < .42 && vLeaf < .34 + (.42 - rim) * .75) discard; }')
         .replace('void main() {', 'float vLeaf = 1.0;\nvoid main() {'); };
-      m.customProgramCacheKey = () => 'gfsLabTree3' + (m === canopyMat ? 'c' : 't'); }
+      m.customProgramCacheKey = () => 'gfsLabTree4' + (m === canopyMat ? 'c' : 't'); }
     const spots = [];
     const far = -back - 14;
     for (let x = -width / 2 - back * .6; x < width / 2 + back * .6; x += 9 + rnd() * 10) spots.push([x, far - rnd() * 60]);
@@ -275,13 +280,25 @@ function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(
 // a second to draw on a phone, so it's made after the first picture is up, once per wood on the page.
 const SHARP = 2048, sharpWaiting = new Map(), stages = new Set();
 let sharpTimer = 0;
-function sharpen(group) {
-  group.traverse(o => {
-    const m = o.material, kind = m?.userData?.gfsKind;
-    if (!o.isMesh || !m?.map || !/^(pt|cedar|grain)$/.test(kind) || m.userData.sharp) return;
-    m.userData.sharp = true;
-    if (!sharpWaiting.has(kind)) sharpWaiting.set(kind, new Set()); sharpWaiting.get(kind).add(m);
-  });
+function sharpen(group) { group.traverse(o => { if (o.isMesh) sharpenMaterial(o.material, true); }); sharpenSoon(); }
+function sharpenMaterial(m, later) {
+  const kind = m?.userData?.gfsKind;
+  if (!m?.map || !/^(pt|cedar|grain)$/.test(kind) || m.userData.sharp) return;
+  m.userData.sharp = true;
+  if (!sharpWaiting.has(kind)) sharpWaiting.set(kind, new Set()); sharpWaiting.get(kind).add(m);
+  if (!later) sharpenSoon();
+}
+// A copy of one of the app's wood materials that is its own material: same wood, same colour. Parts that
+// share a material and are drawn one after another share one grain direction (the first part's), so a
+// tool that builds its own frame from differently-turned pieces gives each piece a copy.
+export function woodLike(src) {
+  const kind = src?.userData?.gfsKind; if (!/^(pt|cedar)$/.test(kind || '')) return src;
+  const m = surfaceMaterial(THREE, 'wood', 0xffffff, { species: kind });
+  m.color.copy(src.color); m.roughness = src.roughness; m.bumpScale = src.bumpScale; m.envMapIntensity = src.envMapIntensity;
+  if (src.userData.lumber) m.userData.lumber = true;
+  sharpenMaterial(m); return m;
+}
+function sharpenSoon() {
   if (sharpTimer || ![...sharpWaiting.values()].some(set => set.size)) return;
   sharpTimer = setTimeout(function next() {
     sharpTimer = 0;
@@ -320,6 +337,34 @@ function trueToLumber(group) {
       } else o.scale.multiplyScalar(K);
     }
   });
+}
+// Framing lumber has eased edges. A 2×4, a 4×4 or a 4×6 leaves the mill with its four long edges rounded
+// (about ¼ in), and those rounded edges are what catch the light along a rail or down a post. The
+// app's models draw every board as a sharp-cornered box. For framing sizes the Lab swaps in the same
+// box with its long edges rounded; the cut ends stay square. Pickets and 1× boards are left alone:
+// they are sawn square. (The app's wood takes its grain from each part's box, not from the mesh, so
+// the grain stays exactly where the app put it.)
+const EASE_IN = .2, easedCache = new Map();
+function easedBox(geo) {
+  const pos = geo.attributes.position;
+  if (geo.type !== 'BoxGeometry' || geo.userData.eased || pos.count !== 24) return geo;
+  geo.computeBoundingBox(); const size = geo.boundingBox.getSize(new THREE.Vector3()), ctr = geo.boundingBox.getCenter(new THREE.Vector3());
+  const d = size.toArray(), long = d.indexOf(Math.max(...d)), ax = [(long + 1) % 3, (long + 2) % 3], a = d[ax[0]], b = d[ax[1]], L = d[long];
+  if (Math.min(a, b) < 1.4 * IN || Math.max(a, b) > 6 * IN || L < 6 * IN) return geo;
+  const key = [...d, ...ctr.toArray()].map(v => v.toFixed(4)).join(',');
+  if (easedCache.has(key)) return easedCache.get(key);
+  const r = Math.min(EASE_IN * IN, a / 4, b / 4), ha = a / 2, hb = b / 2, sh = new THREE.Shape(), q = Math.PI / 2;
+  sh.moveTo(-ha + r, -hb); sh.lineTo(ha - r, -hb); sh.absarc(ha - r, -hb + r, r, -q, 0, false); sh.lineTo(ha, hb - r); sh.absarc(ha - r, hb - r, r, 0, q, false);
+  sh.lineTo(-ha + r, hb); sh.absarc(-ha + r, hb - r, r, q, 2 * q, false); sh.lineTo(-ha, -hb + r); sh.absarc(-ha + r, -hb + r, r, 2 * q, 3 * q, false);
+  let g = new THREE.ExtrudeGeometry(sh, { depth: L, bevelEnabled: false, curveSegments: 3 }); g.translate(0, 0, -L / 2);
+  const E = [0, 1, 2].map(() => new THREE.Vector3()); E[0].setComponent(ax[0], 1); E[1].setComponent(ax[1], 1); E[2].setComponent(long, 1);
+  g.applyMatrix4(new THREE.Matrix4().makeBasis(E[0], E[1], E[2]).setPosition(ctr));
+  const e = creased(g, 40); e.computeBoundingBox(); e.computeBoundingSphere();
+  e.type = 'BoxGeometry'; e.parameters = geo.parameters; e.userData.eased = true;   // still a box to everything that asks
+  easedCache.set(key, e); return e;
+}
+export function easeLumber(root) {
+  root.traverse(o => { if (o.isMesh && /^(pt|cedar)$/.test(o.material?.userData?.gfsKind || '') && o.geometry?.type === 'BoxGeometry') o.geometry = easedBox(o.geometry); });
 }
 // Smooth shading for a curved part: every corner takes the average direction of the faces that meet
 // there, except across an edge sharper than `deg`, which stays crisp.
@@ -396,7 +441,8 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   const sun = new THREE.DirectionalLight(0xfff2df, 2.7); sun.position.set(-22, 34, 30); sun.castShadow = true;
   // shadows: a finer map on a screen big enough to show it (the app's own top setting is 4096 too)
   const shadowPx = Math.min(renderer.capabilities.maxTextureSize, (host.clientWidth || innerWidth) >= 700 ? 4096 : 2048);
-  sun.shadow.mapSize.set(shadowPx, shadowPx); sun.shadow.bias = -.0004 * 2048 / shadowPx; sun.shadow.normalBias = .03 * 2048 / shadowPx; sun.shadow.radius = 2;
+  sun.shadow.mapSize.set(shadowPx, shadowPx); sun.shadow.normalBias = .03 * 2048 / shadowPx; sun.shadow.radius = 2;
+  const SUN_FT = Math.hypot(22, 34, 30);   // how far the sun's lamp stands from what a view looks at
   scene.add(sun, sun.target);
 
   // The yard: lawn behind the cut, and the cut face (topsoil over clay) in front.
@@ -501,7 +547,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
         place(v); const r = v.rect, y = H - r.y - r.h;
         // each view gets its own tight shadow map, centred on what it looks at
         const s = Math.max(v.base.w, v.base.h) * .8;
-        Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near: 1, far: 160 }); sun.shadow.camera.updateProjectionMatrix();
+        // The shadow's depth is measured across only the slice of yard this view shows, and the slack that
+        // stops a lit face shadowing itself is a fixed tenth of an inch. (With the slack tied to a deep
+        // slice, a brace's shadow started most of an inch away from the brace.)
+        const reach = s * 1.5 + 12, near = Math.max(1, SUN_FT - reach), far = SUN_FT + reach + soilDepth;
+        Object.assign(sun.shadow.camera, { left: -s, right: s, top: s, bottom: -s, near, far }); sun.shadow.camera.updateProjectionMatrix();
+        sun.shadow.bias = -.1 * IN / (far - near);
         // a view that looks from the far side gets its sun from that side too
         const side = v.yaw0 ? Math.sign(Math.cos(v.yaw0)) || 1 : 1;
         sun.target.position.set(v.target.x, 0, 0); sun.position.set(v.target.x - 22 * side, 34, 30 * side); sun.target.updateMatrixWorld(); sun.updateMatrixWorld();
@@ -637,6 +688,7 @@ export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level =
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
   trueToLumber(group);
+  easeLumber(group);
   group.updateMatrixWorld(true);
   const m = new THREE.Matrix4();
   group.traverse(o => {
@@ -735,7 +787,7 @@ export function reveal(parts, progress, lift = 0) {
 // A square post (sizes in inches) carried down below grade, drawn whole.
 export function squarePost(material, wIn, dIn, topIn, bottomIn) {
   const g = new THREE.BoxGeometry(wIn * IN, (topIn - bottomIn) * IN, dIn * IN); g.translate(0, (topIn + bottomIn) / 2 * IN, 0);
-  const m = new THREE.Mesh(g, material); m.castShadow = m.receiveShadow = true; return m;
+  const m = new THREE.Mesh(/^(pt|cedar)$/.test(material?.userData?.gfsKind || '') ? easedBox(g) : g, material); m.castShadow = m.receiveShadow = true; return m;
 }
 // Schedule 40 pipe: outside diameter and wall in inches, length in inches from its bottom end.
 export function pipe(odIn = 2.375, wallIn = .154, lenIn = 96) {

@@ -60,6 +60,18 @@ Done in the definition round (2026-11-27, `lab3d.mjs`):
   dark brown and nail heads as black ⅜ in dots. In the Lab the rails take the pickets' colour
   and the nail heads are ¼ in and galvanized grey.
 
+Done in the second definition round (2026-11-27):
+
+- **Eased framing lumber** (`easedBox()`): 2×4s, 4×4s and 4×6s have their four long edges
+  rounded about ¼ in, as milled. Cut ends stay square. Pickets and 1× boards are left
+  square, as sawn.
+- **Shadows start at the thing that casts them.** The shadow depth is now measured over just
+  the slice of yard in view, with a fixed 1/10 in of slack. Before, a gate brace's shadow
+  started most of an inch away from the brace.
+- **Gate frame grain** runs along each piece: up the stiles and along the brace. It was
+  running sideways on both (see "App model issues" below for why).
+- **Bare winter trees** in Frost heave: twigs with sky between them, not grey leaf shapes.
+
 Next, in order of how much they change the picture:
 
 1. **Real wood textures.** The app's procedural grain reads as drawn. Use photographed
@@ -70,10 +82,8 @@ Next, in order of how much they change the picture:
 3. **Contact shadows** where boards meet rails and the fence meets the ground.
 4. **Soil cut face.** Roots near the top and round stones (a first try at stones came out
    as square specks and was taken back out).
-5. **Eased board edges.** Every board is a sharp-cornered box. Real lumber has rounded
-   edges that catch the light; this is the biggest thing left that makes boards look drawn.
-6. **People and tools** in No-dig vs dug are blocky. Either model them properly or remove them.
-7. **Check on a real iPhone and iPad** for speed, now also with the fine picture and the
+5. **People and tools** in No-dig vs dug are blocky. Either model them properly or remove them.
+6. **Check on a real iPhone and iPad** for speed, now also with the fine picture and the
    bigger wood texture (about a one-second pause once per page on a phone). The grass uses up to 46,000 tufts on an
    iPad and 26,000 on a phone; if it drops frames, lower the count.
 
@@ -108,6 +118,22 @@ Next, in order of how much they change the picture:
   still rests on the drawing alone.
 - Still to draw better: the receiver's back side and the spring are simple; the lag heads are
   plain hex.
+
+## App model issues found from the Lab (for the Executive App)
+
+- **Wood grain direction on gate frames.** The app's wood material reads each part's box
+  (`boxHook` in `real-surfaces.mjs`) to run the grain along the part's longest side, and asks
+  for the new box to be sent to the graphics card with `material.uniformsNeedUpdate`. In
+  three.js r160 that flag is only honoured for `ShaderMaterial`. So when parts that share one
+  material are drawn one after another (a gate's rails, stiles and brace), they all get the
+  first part's grain direction. Fix in the app: give such parts their own material, or pass
+  the box per object another way (per-instance attribute, or `onBeforeRender` writing to the
+  program's uniforms directly). The Lab works around it with `woodLike()`.
+- **Diagonal braces** get their grain along the longest side of an upright box, not along
+  the brace. Build the brace lying flat and turn the mesh.
+- Rails and gate frames a different colour from the pickets; black ⅜ in nail heads; sharp
+  edges on framing lumber; single-wing hinge and box latch on wood gates; three hinges where
+  GFS fits two.
 
 ## Settled with Nick
 
