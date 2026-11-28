@@ -26,7 +26,7 @@ export const visit = {
 };
 const LAB_IDS = ['dig', 'build', 'grade', 'vinyl', 'wind', 'life', 'wood', 'frost', 'gate'];
 const LAB_NAME = { dig: 'No-dig vs dug', build: 'Our build vs prefab', grade: 'Grade Lab', vinyl: 'Vinyl walls', wind: 'Wind', life: 'Lifespan', wood: 'Wood movement', frost: 'Frost & posts', gate: 'Gate sag' };
-const LAB_LINE = { dig: 'No holes, no concrete, no dirt left in your yard', build: 'A prefab panel and our King Plus fence, 15 years later', grade: 'How we keep the top line clean and close gaps on your slope', vinyl: 'What a thicker vinyl wall buys you', wind: 'How hard wind pushes on each style', life: 'How long each material lasts', wood: 'Why gaps open between boards', frost: 'Why post depth matters in clay', gate: 'Why gates sag, and how we stop it' };
+const LAB_LINE = { dig: 'No holes, no concrete, no dirt left in your yard', build: 'A prefab panel and our King Plus fence, 15 years later', grade: 'How we keep the top line clean and close gaps on your slope', vinyl: 'What a thicker vinyl wall buys you', wind: 'How hard wind pushes on each style', life: 'How long each material lasts', wood: 'Why gaps open between boards', frost: 'Why post depth matters', gate: 'Why gates sag, and how we stop it' };
 
 export function initVisit(a) {
   app = a; D = app.data; load();

@@ -3,7 +3,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 globalThis.matchMedia ||= () => ({ matches: false });
-const { windLoad, shrink, lifeEstimate, digNumbers } = await import('../public/showroom/lab.mjs');
+const { windLoad, shrink, lifeEstimate, digNumbers, postLimit, failGust, WPOSTS } = await import('../public/showroom/lab.mjs');
 const solid = { eps: () => 1, bay: 8 }, chain = { eps: () => .15, bay: 10 };
 const near = (a, b, tol) => assert.ok(Math.abs(a - b) <= tol, `${a} not within ${tol} of ${b}`);
 
@@ -14,10 +14,46 @@ test('wind: 6 ft solid privacy, 90 mph, suburban yard', () => {
   near(r.perPost, 533, 1);                                   // lb on one 8 ft section
   near(r.moment, r.perPost * 0.55 * 6, 1e-9);
 });
-test('wind: open fabric gets the ASCE 7 reduction 1 - (1 - e)^1.5', () => {
-  const r = windLoad({ V: 90, h: 6, exposure: 'B', style: chain });
-  near(r.red, 1 - Math.pow(0.85, 1.5), 1e-12);
-  assert.ok(r.perFt < windLoad({ V: 90, h: 6, exposure: 'B', style: solid }).perFt / 4);
+test('wind: a fence 70% solid or more is a wall with the ASCE 7 allowance 1 - (1 - e)^1.5', () => {
+  const r = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .74, bay: 8 } });
+  assert.equal(r.open, false);
+  near(r.red, 1 - Math.pow(0.26, 1.5), 1e-12);
+  near(r.p, r.q * 0.85 * 1.3 * r.red, 1e-9);
+  near(r.moment, r.perPost * 0.55 * 6, 1e-9);
+});
+test('wind: a fence under 70% solid is an open framework (ASCE 7 Fig. 29.4-1), force on the solid area', () => {
+  const flat = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .2, bay: 6 } });
+  assert.equal(flat.open, true);
+  near(flat.p, flat.q * 0.85 * 1.8 * .2, 1e-9);              // flat-sided, 10 to 29% solid
+  near(flat.moment, flat.perPost * 0.5 * 6, 1e-9);           // acts at mid-height
+  const round = windLoad({ V: 90, h: 6, exposure: 'B', style: { ...chain, members: 'round' } });
+  near(round.p, round.q * 0.85 * 1.3 * .15, 1e-9);           // small round parts: wire and pipe
+  const mid = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .5, bay: 8 } });
+  near(mid.p, mid.q * 0.85 * 1.6 * .5, 1e-9);                // 30 to 70% solid
+  assert.ok(round.perFt < windLoad({ V: 90, h: 6, exposure: 'B', style: solid }).perFt / 4);
+  // the two methods agree where they meet, at 70% solid
+  const lo = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .699, bay: 8 } }), hi = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .7, bay: 8 } });
+  assert.ok(Math.abs(lo.p / hi.p - 1) < .05, `${lo.p} vs ${hi.p}`);
+});
+test('wind: a typical 4×4 two feet deep tips out of the ground; steel driven 4 ft holds until the pipe bends', () => {
+  const arm = .55 * 6, store = postLimit(WPOSTS.store, arm), gfs = postLimit(WPOSTS.gfs, arm);
+  assert.equal(store.mode, 'tips'); assert.equal(gfs.mode, 'bends');
+  near(store.lb, 320, 15);                                   // Broms, 10 in footing 2 ft deep, 1,500 psf ground
+  near(gfs.lb, 515, 15);                                     // 2⅜ in Schedule 40 at 30 ksi, plastic section
+  near(WPOSTS.gfs.breakLbFt, 30000 * 0.761 / 12, 5);         // Z = (D³ − d³) / 6 = 0.761 in³
+  // check the ground balance by hand at the tipping load: P (e + 1.5b + f/2) = 2.25 su b g²
+  { const b = 10 / 12, P = store.lb, f = P / (9 * 1500 * b), g = 2 - 1.5 * b - f; near(P * (arm + 1.5 * b + f / 2), 2.25 * 1500 * b * g * g, 1); }
+  // the same post with half its wood gone at the soil line snaps before it tips, in a much lighter wind
+  const rot = postLimit(WPOSTS.rot, arm); assert.equal(rot.mode, 'snaps'); assert.ok(rot.lb < store.lb * .75, String(rot.lb));
+  near(WPOSTS.rot.breakLbFt / WPOSTS.store.breakLbFt, Math.SQRT1_2 ** 3, 1e-12);
+  { const v = failGust({ h: 6, exposure: 'B', style: solid }, WPOSTS.rot).V; assert.ok(v > 50 && v < 62, String(v)); }   // about a severe-thunderstorm gust
+  // 6 ft solid privacy among houses: the typical post goes over in a derecho, the steel post stands
+  const o = { h: 6, exposure: 'B', style: solid }, s = failGust(o, WPOSTS.store), g = failGust(o, WPOSTS.gfs);
+  assert.ok(s.V > 62 && s.V < 78, String(s.V)); assert.ok(g.V > 82 && g.V < 95, String(g.V));
+  // the push at the failing gust is the limit
+  near(windLoad({ ...o, V: g.V }).perPost, g.lb, .5);
+  // open country pushes harder, so both go sooner; a deeper, stronger post never goes first
+  for (const exposure of ['B', 'C']) for (const h of [4, 6, 8]) assert.ok(failGust({ h, exposure, style: solid }, WPOSTS.gfs).V > failGust({ h, exposure, style: solid }, WPOSTS.store).V);
 });
 test('wind: open field (Exposure C) pushes 0.85/0.57 times harder', () => {
   const b = windLoad({ V: 70, h: 6, exposure: 'B', style: solid }), c = windLoad({ V: 70, h: 6, exposure: 'C', style: solid });
@@ -45,21 +81,41 @@ test('no-dig: dirt and concrete from a dug 150 ft fence (10 in × 36 in holes, p
   const n = digNumbers(150);
   assert.equal(n.posts, 20);                                   // ceil(150/8) + 1
   near(n.hole, Math.PI * (5 / 12) ** 2 * 3, 1e-9);             // 1.636 cu ft a hole
-  near(n.dirtFt3, 32.72, 0.01);                               // in the ground
-  near(n.looseYd3, 32.72 * 1.3 / 27, 0.01);                   // 1.58 cu yd once dug
-  near(n.lb, 32.72 * 110, 2);                                 // about 3,600 lb
-  assert.equal(n.bags, 47);                                   // (1.636 − 0.227) × 20 / 0.6 → 46.97 → 47 bags (the 4×4 stands 32 in down)
-  assert.equal(n.concLb, 47 * 80);
+  // GFS fills the hole three-quarters with concrete (27 in) and tamps dirt over it (the top 9 in)
+  near(n.capIn, 9, 1e-9);
+  near(n.backFt3, Math.PI * (5 / 12) ** 2 * .75 - (3.5 / 12) ** 2 * .75, 1e-9);   // 0.345 cu ft a hole goes back in
+  near(n.dirtFt3, (1.6362 - 0.3453) * 20, 0.01);              // 25.8 cu ft left over, measured in the ground
+  near(n.looseYd3, 25.82 * 1.3 / 27, 0.01);                   // 1.24 cu yd once dug
+  near(n.lb, 25.82 * 110, 2);                                 // about 2,840 lb
+  near(n.concFt3, Math.PI * (5 / 12) ** 2 * 2.25 - (3.5 / 12) ** 2 * (23 / 12), 1e-9);   // 1.064 cu ft: 27 in of hole less 23 in of post
+  assert.equal(n.bags, 36);                                   // 1.064 × 20 / 0.6 → 35.5 → 36 bags
+  assert.equal(n.concLb, 36 * 80);
 });
 
-test('no-dig vs dug: the 3D install day runs in order, and no-dig is built before the dug concrete has cured', async () => {
+test('our build vs prefab: the store fence leans as its posts rot and goes down; nothing here moves the GFS fence', async () => {
+  const B = await import('../public/showroom/build-plan.mjs');
+  assert.equal(B.YEARS, 25);
+  for (const set of Object.values(B.SETS)) {
+    assert.equal(B.lean(set, 5), 0);                                     // sound for the first years
+    let last = 0; for (let y = 0; y <= 25; y += .05) { const a = B.lean(set, y); assert.ok(a >= last - 1e-9, `lean goes back at ${y}`); last = a; }
+    assert.ok(B.lean(set, B.FALL_AT[set.id] - .01) < 12, 'still up, leaning, the day before');
+    assert.equal(B.fallen(set, B.FALL_AT[set.id] - .01), false); assert.equal(B.fallen(set, B.FALL_AT[set.id] + .3), true);
+    assert.equal(B.snapped(set, B.FALL_AT[set.id] - .01), false); assert.equal(B.snapped(set, B.FALL_AT[set.id]), true);   // it breaks all at once
+    near(B.lean(set, 25), B.DOWN_DEG, 1e-9);
+    assert.ok(B.FALL_AT[set.id] >= 15 && B.FALL_AT[set.id] >= set.decayFrom + 8, 'not before the published 15 year life, nor before the rot is through');
+  }
+  assert.ok(B.FALL_AT.dirt < B.FALL_AT.concrete);
+  assert.equal(B.lean(B.VINYL_SET, 25), 0); assert.equal(B.fallen(B.VINYL_SET, 25), false);
+});
+test('no-dig vs dug: the 3D install day runs in order, with no wait on concrete, and no-dig is done first', async () => {
   const { DUG, ND, DUR } = await import('../public/showroom/dig-plan.mjs');
   const flat = o => Object.values(o).flatMap(v => Array.isArray(v[0]) ? v : [v]);
   for (const w of [...flat(DUG), ...flat(ND)]) assert.ok(w[0] < w[1] && w[0] >= 0 && w[1] <= 1, `window ${w}`);
-  const steps = o => ['dig', 'drive', 'exit', 'lower', 'pour', 'box', 'cure', 'rails', 'pickets', 'clean'].filter(k => o[k]).flatMap(k => Array.isArray(o[k][0]) ? o[k] : [o[k]]);
+  const steps = o => ['dig', 'drive', 'exit', 'lower', 'pour', 'tamp', 'box', 'rails', 'pickets', 'clean'].filter(k => o[k]).flatMap(k => Array.isArray(o[k][0]) ? o[k] : [o[k]]);
   for (const o of [DUG, ND]) { const s = steps(o).sort((a, b) => a[0] - b[0]); for (let i = 1; i < s.length; i++) assert.ok(s[i][0] >= s[i - 1][1] - 1e-9 || s[i - 1] === o.lower?.[0], `steps overlap: ${s[i - 1]} / ${s[i]}`); }
-  assert.ok(ND.pickets[1] < DUG.cure[1], 'the no-dig fence is done while the dug posts still wait on concrete');
-  assert.ok(DUG.rails[0] >= DUG.cure[1], 'no rails on dug posts until the concrete has had its 48 hours');
+  assert.equal(DUG.cure, undefined, 'GFS does not wait on concrete: the fence goes on the same day');
+  assert.ok(DUG.rails[0] >= DUG.tamp[1][1], 'rails go on once both posts are set and tamped');
+  assert.ok(ND.pickets[1] < DUG.pickets[1], 'the no-dig fence is done first');
   assert.ok(DUR >= 15000 && DUR <= 40000);
 });
 test('Fence Lab 3D uses the Executive App engine byte for byte (vendor/exec/SOURCE.json)', async () => {
@@ -76,13 +132,19 @@ test('frost: driven steel past the frost line never lifts; footings at or above 
   const [shallow, frostline, steel] = F.POSTS, typical = F.WINTERS[0].reach, hard = F.WINTERS[1].reach;
   for (const pl of F.PLACES) for (const soil of ['clay', 'sand']) for (const reach of [typical, hard]) for (let m = 0; m <= 5; m += .25) for (const w of [1, 5, 10])
     assert.equal(F.lift(steel, m, w, pl.frost, soil, reach).lift, 0, `steel moved: ${pl.id} ${soil} m${m} w${w}`);
-  // Toledo, clay, a typical winter: the 24 in footing lifts, the 36 in one holds
-  assert.ok(F.lift(shallow, 3, 1, 36, 'clay', typical).lift > 1);
-  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', typical).lift < .05);
-  // a hard winter reaches the frost line, so a footing that stops right at it can lift too
-  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', hard).lift > 1);
-  // Michigan's 42 in frost line: 36 in of concrete is above it, so it lifts even in a typical winter
-  assert.ok(F.lift(frostline, 3, 1, 42, 'clay', typical).lift > .25);
+  // a typical winter freezes about half the code depth: 18 in in Toledo
+  near(typical, .5, 1e-12); near(F.frozenAt(3, 36 * typical).depth, 18, 1e-9);
+  // the ground lifts half an inch for each foot that freezes (freezing expansion alone, the least)
+  near(F.groundLift(36, 'clay'), 1.5, 1e-12); near(F.groundLift(18, 'clay'), .75, 1e-12);
+  // a footing takes none of it until half its length is frozen, all of it once frozen to the bottom
+  near(F.grip(12, shallow, 36), 0, 1e-12); near(F.grip(18, shallow, 36), .5, 1e-12); near(F.grip(24, shallow, 36), 1, 1e-12); near(F.grip(36, shallow, 36), 1, 1e-12);
+  // Toledo, clay, a typical winter: the 24 in footing lifts 3/8 in, the 36 in one holds
+  near(F.lift(shallow, 3, 1, 36, 'clay', typical).lift, .375, 1e-9);
+  assert.equal(F.lift(frostline, 3, 1, 36, 'clay', typical).lift, 0);
+  // a hard winter reaches the frost line, so a footing that stops right at it lifts with the ground
+  near(F.lift(frostline, 3, 1, 36, 'clay', hard).lift, 1.5, 1e-9);
+  // Michigan's 42 in frost line: a typical winter freezes 21 in, more than half of a 36 in footing
+  assert.ok(F.lift(frostline, 3, 1, 42, 'clay', typical).lift > .1);
   // sand heaves about a fifth as much
   near(F.lift(shallow, 3, 1, 36, 'sand', hard).lift, F.lift(shallow, 3, 1, 36, 'clay', hard).lift * .2, 1e-9);
   // each spring leaves some behind, and the next winter starts from there
@@ -123,6 +185,13 @@ test('gate sag: the numbers behind the Gate sag tool', async () => {
   const wd = run(4, 'right', 'wood', 15); assert.ok(wd.liftL > wd.liftH && wd.offset > wd.drop);
   // the gate as measured off the 3D model (77 lb for a 4 ft gate with a brace)
   assert.ok(Math.abs(G.gateGeom(4, 'right').weightLb - 77) < 2);
+  // the post latch: a 0.71 in rod in a 1.2 in slot has about ¼ in of room. A right-way brace's settling
+  // takes the rod past that (it needs adjusting) but not below the slot's lip (it still latches);
+  // 4×4s in concrete end up below the lip. Two hinges on the gate.
+  assert.ok(Math.abs(G.LATCH.cleanIn - .245) < 1e-9 && Math.abs(G.LATCH.maxIn - .6) < 1e-9);
+  const offR = run(4, 'right', 'steel', 15).offset; assert.ok(offR > G.LATCH.cleanIn && offR < G.LATCH.maxIn, offR);
+  assert.ok(run(4, 'right', 'wood', 15).offset > G.LATCH.maxIn);
+  assert.equal(G.gateGeom(4).hingeYs.length, 2);
 });
 
 test('vinyl bend: the beam numbers behind Vinyl walls', async () => {

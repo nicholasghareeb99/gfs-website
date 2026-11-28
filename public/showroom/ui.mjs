@@ -150,15 +150,18 @@ export function gesture(kind) {
   return `<span class="gest g-${kind}" aria-hidden="true">${kind === 'slide' ? '<s></s>' : ''}${kind === 'type' ? '<s></s>' : ''}<i></i>${two ? '<i class="b"></i>' : ''}</span>`;
 }
 
-// A dug post, as the Executive App draws it: a 10 in hole 36 in deep, the 4×4 set 32 in down with
-// concrete under and around it. Driven posts: an 8 ft pipe, 4 ft in the ground.
-export const DIG = { holeIn: 10, depthIn: 36, postDepthIn: 32, swell: 1.3, lbPerFt3: 110, barrowFt3: 6, bagLb: 80, bagFt3: 0.6, postIn: 3.5, spacingFt: 8, pipeOdIn: 2.375, pipeWallIn: .154, pipeLenIn: 96, drivenIn: 48 };
+// A dug post, the way GFS sets one: a 10 in hole 36 in deep, the 4×4 set 32 in down, concrete to
+// three-quarters of the hole (27 in), and dirt tamped over it up to the lawn. The fence goes on the
+// same day. Driven posts: an 8 ft pipe, 4 ft in the ground.
+export const DIG = { holeIn: 10, depthIn: 36, postDepthIn: 32, concShare: .75, swell: 1.3, lbPerFt3: 110, barrowFt3: 6, bagLb: 80, bagFt3: 0.6, postIn: 3.5, spacingFt: 8, pipeOdIn: 2.375, pipeWallIn: .154, pipeLenIn: 96, drivenIn: 48 };
 export function digNumbers(lengthFt, k = DIG) {
   const posts = Math.ceil(lengthFt / k.spacingFt) + 1;
   const r = k.holeIn / 2 / 12, d = k.depthIn / 12;
   const hole = Math.PI * r * r * d;                          // cu ft of dirt out of each hole, in the ground
-  const conc = hole - (k.postIn / 12) ** 2 * (k.postDepthIn / 12);   // concrete under and around the 4×4
-  const dirt = hole * posts, loose = dirt * k.swell;
-  return { posts, hole, dirtFt3: dirt, dirtYd3: dirt / 27, looseFt3: loose, looseYd3: loose / 27, lb: dirt * k.lbPerFt3,
+  const capIn = k.depthIn * (1 - k.concShare), post = (k.postIn / 12) ** 2;          // the top of the hole, filled with tamped dirt
+  const conc = hole * k.concShare - post * (k.postDepthIn - capIn) / 12;               // concrete under and around the 4×4
+  const back = Math.PI * r * r * capIn / 12 - post * capIn / 12;                       // dirt tamped back in over the concrete
+  const dirt = (hole - back) * posts, loose = dirt * k.swell;                          // what is left on the lawn
+  return { posts, hole, capIn, concFt3: conc, backFt3: back, dirtFt3: dirt, dirtYd3: dirt / 27, looseFt3: loose, looseYd3: loose / 27, lb: dirt * k.lbPerFt3,
     barrows: loose / k.barrowFt3, bags: Math.ceil(conc * posts / k.bagFt3), concLb: Math.ceil(conc * posts / k.bagFt3) * k.bagLb };
 }

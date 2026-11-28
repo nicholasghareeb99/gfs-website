@@ -10,7 +10,7 @@ import { STYLE, STYLE_ND } from './dig-plan.mjs';
 const XS = [-4.5, 0, 4.5], FRAME = { cx: 0, cy: 1.45, w: 13.8, h: 12 };
 
 export function createFrostScene(host, { specs } = {}) {
-  const st = createStage(host, { views: [{ id: 'main' }] });
+  const st = createStage(host, { views: [{ id: 'main' }], winter: true });
   const R = st.root, unit = (o, what, id) => { o.traverse(c => { if (c.isMesh) { c.userData.what = what; c.userData.unit = id; } }); return o; };
   const conc = surfaceMaterial(THREE, 'concrete', 0xaaa8a2), slump = surfaceMaterial(THREE, 'soil', 0x5a4636);
   const gapMat = new THREE.MeshBasicMaterial({ color: 0x120c07 });
@@ -49,22 +49,22 @@ export function createFrostScene(host, { specs } = {}) {
 
   // ── labels ──
   const V3 = (x, y, z = 0) => new THREE.Vector3(x, y, z);
-  posts.forEach((o, k) => st.pin('main', V3(o.x, (k === 1 ? 7.65 : o.top + .45)), `<b>${o.P.name}</b><small>${o.P.sub}</small>`, o.P.pipe ? 'good two' : 'two'));   // the middle one sits higher so the three never overlap
+  posts.forEach((o, k) => st.pin('main', V3(o.x, o.top + .45), `<b>${o.P.name}</b><small>${o.P.sub}</small>`, o.P.pipe ? 'good two' : 'two', { up: k === 1 ? 54 : 0 }));   // the middle one sits a label's height higher so the three never overlap
   const frostL = st.pin('main', V3(-2.25, -3 - .45), '', 'frost'), frozenL = st.pin('main', V3(-2.25, 0), '', 'frost ice');
   for (let f = 1; f <= 4; f++) st.pin('main', V3(-6.35, -f + .02), f + ' ft', 'tick');
   const status = document.createElement('p'); status.className = 'l3d-status'; st.views[0].tag.append(status); st.views[0].inset.bottom = 54; st.views[0].inset.top = 64;
   st.frameView('main', FRAME);
 
   let S = {}, soilNow = null;
-  function set({ m = 3, winter = 1, frost = 36, soil = 'clay', reach = .67 } = {}) {
+  function set({ m = 3, winter = 1, frost = 36, soil = 'clay', reach = .5 } = {}) {
     S = { m, winter, frost, soil, reach };
     const fz = frozenAt(m, frost * reach);
     st.ground.frost(fz.depth * IN, soil === 'clay' ? 1 : 0, fz.thawed * IN);
     const mi = clamp(Math.floor(m), 0, 5), t = m - mi; st.ground.snow(SNOW[mi] + (SNOW[Math.min(5, mi + 1)] - SNOW[mi]) * t);
     if (soil !== soilNow) { st.ground.subsoil(soil === 'clay' ? 0x7b6650 : 0xa48d66); soilNow = soil; }
-    line.position.y = -frost * IN; frostL.move(V3(-2.25, -frost * IN - .42)); frostL.set(`Frost line · ${frost} in`);
+    line.position.y = -frost * IN; frostL.move(V3(6.4, -frost * IN - .42)); frostL.set(`Frost line · ${frost} in`);
     const frozenNow = fz.depth - fz.thawed > 1;
-    frozenL.move(V3(-2.25, -fz.depth * IN - .02)); frozenL.set(`Frozen to ${Math.round(fz.depth)} in`); frozenL.show(frozenNow);
+    frozenL.move(V3(6.4, -fz.depth * IN - .02)); frozenL.set(`Frozen to ${Math.round(fz.depth)} in`); frozenL.show(frozenNow);
     const ups = [], downs = [];
     posts.forEach(o => {
       const L = lift(o.P, m, winter, frost, soil, reach), dy = L.lift * DRAWN * IN, gap = L.gap * DRAWN * IN;
