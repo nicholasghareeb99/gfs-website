@@ -6,7 +6,7 @@
 import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs';
 import { webglOK } from './lab3d-ok.mjs';
 import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
-import { sag, gateGeom, BRACES as GBRACES } from './gate-plan.mjs';
+import { sag, gateGeom, BRACES as GBRACES, LATCH } from './gate-plan.mjs';
 import { flowField, streamlines } from './wind-plan.mjs';
 import { bends } from './vinyl-plan.mjs';
 export { digNumbers } from './ui.mjs';
@@ -29,7 +29,7 @@ const TOOLS = [
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.'], ['pinchout', 'In 3D, two fingers turn and zoom the view.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
   { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and what keeps a gate latching for years',
-    how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the bar sits too low for its catch, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
+    how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the rod on the gate sits too low for the latch on the post, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'Most of a gate\'s trouble starts at the posts. A 3 in steel post driven below the frost line doesn\'t lean or heave, and a welded steel frame doesn\'t rack.' },
   { id: 'life', more: true, name: 'Lifespan', line: 'How long each material lasts, and what wears out first',
     how: [['tap', 'Tap a <b>material</b> to see about how long it lasts.'], ['tap', 'Flip the switches under <b>This yard</b> to match your yard.'], ['drag', 'Drag sideways to turn the 3D fence. Pinch to zoom, double-tap to reset.']],
@@ -605,8 +605,8 @@ function gate(body) {
     $('#gWt', body).textContent = fmt(r.weightLb); $('#gPull', body).textContent = fmt(r.pullLb);
     $('#gDrop', body).textContent = r.drop < 1 / 32 ? '0 in' : frac(r.drop) + ' in';
     const off = r.offset;
-    $('#gState', body).textContent = off < 1 / 16 ? 'Still where it was hung' : off <= .75 ? 'Latches, but needs adjusting' : 'Won’t latch';
-    $('#gStateS', body).textContent = off < 1 / 16 ? 'The latch still drops right into its catch.' : `The latch now sits ${frac(off)} in lower than its catch${r.liftL > .05 ? ', partly because frost has lifted the posts unevenly' : ''}.`;
+    $('#gState', body).textContent = off < 1 / 16 ? 'Still where it was hung' : off <= LATCH.cleanIn ? 'Still latches' : off <= LATCH.maxIn ? 'Latches, but needs adjusting' : 'Won’t latch';
+    $('#gStateS', body).textContent = off < 1 / 16 ? 'The rod on the gate still goes straight into the latch on the post.' : `The rod on the gate now sits ${frac(off)} in lower than the latch on the post${r.liftL > .05 ? ', partly because frost has lifted the posts unevenly' : ''}.`;
     if (!scene) drawSvg(r);
   };
   const setOpt = o => { Object.assign(st, o); if (scene) scene.set({ w: st.w, brace: st.brace, post: st.post, y: st.y }); draw(); };

@@ -28,7 +28,7 @@ Any agent working on the Lab (Claude, Codex, Antigravity) should read this first
 | No-dig vs dug | Driven steel is in the same day with no holes, spoil or concrete to cure | Install steps and volumes from the dig plan | Check spoil volume and bag count against a real 150 ft job; crew figures and tools look blocky |
 | Frost & posts | A post set short of the frost line gets lifted; steel driven 4 ft doesn't | Frost depth by county, heave model in `build-plan.mjs` | Lift is drawn bigger than life and the screen says so. Better: draw it true size with a close-up at the ground, like the gate latch view |
 | Our build vs prefab | More wood and steel in the same 8 ft, and it stays straight | Part counts and sizes from the models; ageing model | Ageing (grey, rot band, lean) needs a year-by-year source check; rot timing is the weakest claim |
-| Gate sag | A gate drops at the latch because joints creep and posts lean; steel posts and a steel frame hold | Eurocode 5 joint creep, NDS nail values, beam bending | Hardware redrawn from a GFS gate photo. Open: hinge count on 6 ft gates, and which face the hardware mounts on |
+| Gate sag | A gate drops at the latch because joints creep and posts lean; steel posts and a steel frame hold | Eurocode 5 joint creep, NDS nail values, beam bending | Hinges and post latch redrawn from the maker's drawing and photos; latch limits now come from the latch's own slot. Open: Nick to confirm the ¼ in and ⅝ in limits |
 | Grade Lab | We follow the ground, keep the top line clean and close the gaps | Geometry only | Real grass now hides small gaps a little, like a real yard: make sure the gap label still reads |
 | Vinyl walls | Same-size post, thicker wall, steel inside: it bends far less | Beam math, ASCE 7 wind, PVC and steel properties | The big-box post is modelled as bare vinyl in concrete. Confirm that is what the common store kit is; if store kits use an insert, the comparison must change |
 | Wind | Solid fences take the most push; that is why posts and depth matter | ASCE 7; flow from published wind-tunnel work | Smoke lines are an average flow: says so. Add a one-line "what this means for your fence" result |
@@ -56,20 +56,34 @@ Next, in order of how much they change the picture:
 
 ## Hardware (from Nick, 2026-11-27)
 
-- Wood gates hang on **butterfly hinges** and close on **post-mount latches**.
-- Hardware is Nationwide Industries. The 8 in contemporary butterfly hinge takes one pair
-  on gates 5 ft and under and three hinges on 6 ft and taller. The standard post latch has a
-  receiver lag-screwed to the latch post and a spring lever on the face of the gate.
-- References: `public/assets/img/work/pt-shadowbox-gate-detail.jpg` (hinges, handle, catch) and
-  `public/images/gallery/cedar-gate-closeup.jpg` (latch, catch and pull handle close up).
-- The Lab draws from those photos: the butterfly hinge (8 in tall at the outer corners, two
-  diamond cut-outs per leaf); the latch (a 4.6 in flat bar on a small pivot plate near the
-  gate's edge, and a 6.9 in strap catch with two square feet near the post's edge); and a
-  10½ in arched pull handle with tapered ends beside the latch. Sizes are scaled off the
-  photos against 5½ in pickets.
-- **Open with Nick:** two or three hinges on a 6 ft single gate (the photo shows two; the
-  maker says three), and which face the hardware goes on for a privacy gate (the Lab has it
-  on the picket face; brochure page 13 shows it on the rail side).
+- Wood gates hang on **butterfly hinges** and close on **post-mount latches**. Both are
+  Nationwide Industries parts.
+- **Two hinges** on a 6 ft single gate (Nick). The maker's sheet says three on 6 ft and up;
+  GFS fits two.
+- **The hardware goes on the side the gate swings to**, so it depends on the job (Nick). The
+  Lab shows a gate that swings to the picket side. The app's model has the same rule
+  (`gSwing`).
+- Sources for the shapes and sizes, all checked by eye against the product itself:
+  - Butterfly hinge NW38943: the maker's two tape-measure photos. About 5¼ in wide open and
+    7 in tall at the outer corners, a 5 in barrel, two kite cut-outs and three lag holes per leaf.
+  - Standard post latch NW38308: the maker's dimensioned drawing (`NW38308Q-specs.pdf`), its
+    instructions and product photos. The receiver (5.47 in tall, 2.72 in flanges, 4.53 in
+    front plate, with the arm turning between the two) is lagged to the side of the latch post that faces the gate, so it sits **in the
+    gap** with its arm square to the fence. The arm is 10.63 in long: the hooked end stands
+    out on the swing side, the tail comes out the other side so the gate opens from both. The
+    striker rod (0.71 in round, 6.42 in long, pressed flat with two square holes) is lagged to
+    the gate's face and reaches across the gap into the hook. A spring holds the hook down.
+  - Pull handle: `public/assets/img/work/pt-shadowbox-gate-detail.jpg`, where the rod passes
+    under the handle. In that photo the latch is seen edge-on between the two leaves.
+- **How much sag the latch takes** now comes from the latch itself instead of a guessed ¾ in:
+  the 0.71 in rod comes into the receiver over a lip about 0.6 in below the middle of the
+  hook, so the rod can be about ¼ in low and still go straight in. Lower than that it has to
+  ride up over the lip (latches with a push, needs adjusting). Once the rod's centre is below
+  the lip, 0.6 in low, it won't latch. The lip's height is scaled off the maker's drawing,
+  which doesn't dimension it: good to about 1/16 in.
+  **Ask Nick** whether ¼ in and ⅝ in match what his crews see.
+- Still to draw better: the receiver's back side and the spring are simple; the lag heads are
+  plain hex.
 
 ## How to check work
 

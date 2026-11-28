@@ -52,6 +52,13 @@ export const TUBE = { sizeIn: 1.5, wallIn: .065 };
 export const tubeArea = (b = TUBE.sizeIn, t = TUBE.wallIn) => b * b - (b - 2 * t) ** 2;
 // frost: the hinge post and the latch post heave a little differently (wetter clay at one)
 export const WET = { hinge: .6, latch: 1 };
+// The latch (Nationwide standard post latch, sizes from the maker's drawing): the striker rod on the
+// gate is 0.71 in round, and it comes into the receiver on the post over a lip that sits about 0.6 in
+// below the middle of the hook. So the rod can be about ¼ in low and still go straight in. Lower than
+// that the round rod strikes the lip and has to ride up over it, which it can do until its centre is
+// level with the lip, 0.6 in low. Past that it hits the lip square, and the gate won't latch.
+// The drawing doesn't dimension the lip; 0.6 in is scaled off it and is good to about 1/16 in.
+export const LATCH = { rodIn: .71, lipIn: .6, cleanIn: .6 - .71 / 2, maxIn: .6 };
 
 // creep with time: grows with the log of time and reaches k_def at 50 years
 export const creep = (y, k = K_DEF) => 1 + k * Math.log(1 + Math.max(0, y)) / Math.log(51);
@@ -121,7 +128,7 @@ export function sag(g, o) {
 
 // The app's 6 ft no-dig gate measured into the shape sag() takes, without building it in 3D (used
 // where 3D isn't available, and by the tests): a leaf 2 in narrower than the opening, rails at 7.8,
-// 36 and 66¾ in, 5½ in pickets from 2½ to 74½ in, a hinge at each rail, a brace cut between rails.
+// 36 and 66¾ in, 5½ in pickets from 2½ to 74½ in, a hinge at the bottom and top rails, a brace cut between rails.
 export function gateGeom(wFt, brace = 'right') {
   const leaf = wFt * 12 - 2, run = leaf - 1.2, n = Math.ceil(run / 5.61 - .05), pickets = Array.from({ length: n }, (_, i) => i < n - 1 ? 5.45 : clamp(run - (n - 1) * 5.61, 1, 5.45));
   const steel = brace === 'steel', rails = [7.8, 36, 66.75];
@@ -129,5 +136,5 @@ export function gateGeom(wFt, brace = 'right') {
   const len = Math.hypot(line.x1 - line.x0, line.y1 - line.y0);
   let woodIn3 = pickets.reduce((s, w) => s + w * 72 * .62, 0) + (steel ? 0 : 3 * leaf * 5.25 + 2 * 5.25 * 51.95 + (brace === 'none' ? 0 : 5.25 * (len - 6)));
   const lb = woodIn3 * PINE.lbPerFt3 / 1728 + 4 + (steel ? tubeArea() * (2 * leaf + 2 * 57.45 + len) / 1728 * STEEL.lbPerFt3 : 0);
-  return { weightLb: lb, cgXIn: leaf / 2 + .5, latchXIn: leaf + .5, rails, railHIn: 3.5, pickets, hingeYs: [7.75, 36, 66.75], brace: line, braceLenIn: len, bottomIn: 2.5 };
+  return { weightLb: lb, cgXIn: leaf / 2 + .5, latchXIn: leaf + .5, rails, railHIn: 3.5, pickets, hingeYs: [7.75, 66.75], brace: line, braceLenIn: len, bottomIn: 2.5 };
 }

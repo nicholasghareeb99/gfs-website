@@ -123,6 +123,13 @@ test('gate sag: the numbers behind the Gate sag tool', async () => {
   const wd = run(4, 'right', 'wood', 15); assert.ok(wd.liftL > wd.liftH && wd.offset > wd.drop);
   // the gate as measured off the 3D model (77 lb for a 4 ft gate with a brace)
   assert.ok(Math.abs(G.gateGeom(4, 'right').weightLb - 77) < 2);
+  // the post latch: a 0.71 in rod in a 1.2 in slot has about ¼ in of room. A right-way brace's settling
+  // takes the rod past that (it needs adjusting) but not below the slot's lip (it still latches);
+  // 4×4s in concrete end up below the lip. Two hinges on the gate.
+  assert.ok(Math.abs(G.LATCH.cleanIn - .245) < 1e-9 && Math.abs(G.LATCH.maxIn - .6) < 1e-9);
+  const offR = run(4, 'right', 'steel', 15).offset; assert.ok(offR > G.LATCH.cleanIn && offR < G.LATCH.maxIn, offR);
+  assert.ok(run(4, 'right', 'wood', 15).offset > G.LATCH.maxIn);
+  assert.equal(G.gateGeom(4).hingeYs.length, 2);
 });
 
 test('vinyl bend: the beam numbers behind Vinyl walls', async () => {

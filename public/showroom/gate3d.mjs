@@ -9,7 +9,7 @@
 // 2½ in between its sides).
 import { THREE, IN, createStage, fence, reveal, pipe, squarePost, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps } from './lab3d.mjs';
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
-import { sag, POSTS, TUBE, PINE, STEEL, WET, tubeArea } from './gate-plan.mjs';
+import { sag, POSTS, TUBE, PINE, STEEL, WET, LATCH, tubeArea } from './gate-plan.mjs';
 import { season, weather, decay, heave } from './build-plan.mjs';
 import { STYLE_ND } from './dig-plan.mjs';
 
@@ -17,28 +17,84 @@ const BRACE_APP = { none: 'none', wrong: 'hh', right: 'auto', steel: 'none' };
 const PIPE_UP_IN = 66.75, PIPE_DOWN_IN = 48;      // the app's gate pipe above grade; driven 4 ft
 const BOX_IN = 6, SIDE_T = 1.5, SIDE_D = 3.5, FACE_T = .75, FACE_OFF = 2.125;
 const WOOD_POST = { topIn: 72 };                  // an 8 ft 4×4, 2 ft of it in the ground
-const LATCH_PLAY_IN = .75, AJAR = 4 * Math.PI / 180;
-// Gate hardware, drawn from a GFS gate (the shadowbox gate photo on the website's gallery):
-//  • 8 in ornamental butterfly hinge: two matching leaves that spread up and out from a thin barrel,
-//    8 in tall at the outer corners, each with two long diamond cut-outs and a lag screw at each corner.
-//  • Post latch: a flat bar on the gate that lifts, and a tall strap catch on the post. Beside it, an
-//    arched pull handle with spear-shaped ends.
-// Photos: assets/img/work/pt-shadowbox-gate-detail.jpg and images/gallery/cedar-gate-closeup.jpg.
-// Sizes are scaled off that photo against the 5½ in pickets; the maker doesn't publish a drawing.
-const BFLY = { leafW: 2.75, innerH: 5, outerH: 8, barrelH: 4.4, barrelR: .19, t: .09 };
+// Gate hardware. GFS hangs wood gates on Nationwide ornamental butterfly hinges and closes them on a
+// Nationwide standard post latch; both are drawn from the maker's own drawing and tape-measure photos.
+//  • Butterfly hinge: about 5¼ in wide open and 7 in tall at its outer corners. Each leaf has two
+//    kite-shaped cut-outs and three lag screws, and the barrel is 5 in tall. Two hinges on a gate.
+//  • Post latch: a receiver, 5.47 in tall, lagged to the side of the latch post that looks at the gate,
+//    so it sits in the gap. In it a flat arm, 10.63 in long, turns on one bolt. The arm's hooked end
+//    stands out past the fence on the side the gate swings to, and its long tail comes out the other
+//    side so the gate opens from both. A 0.71 in striker rod, 6.4 in long, is lagged flat to the gate
+//    and reaches across the gap into the hook; a spring holds the hook down on the rod.
+//  • Beside the latch, an arched pull handle with spear ends, from a GFS gate photo
+//    (assets/img/work/pt-shadowbox-gate-detail.jpg).
+// The hardware goes on the side the gate swings to. The Lab shows a gate that swings to the picket side.
+const BFLY = { leafW: 2.3, innerH: 5.5, outerH: 7.1, barrelH: 5, barrelR: .28, t: .09,
+  holes: [[1.65, 2.76], [1.42, 0], [1.8, -2.73]] };   // the three lag holes, from the barrel's centre line
+const ring = (pts, sc = IN) => { const p = new THREE.Path(); pts.forEach(([x, y], i) => i ? p.lineTo(x * sc, y * sc) : p.moveTo(x * sc, y * sc)); p.closePath(); return p; };
 function butterflyLeaf() {
-  const W = BFLY.leafW * IN, a = BFLY.innerH / 2 * IN, o = BFLY.outerH / 2 * IN, I = IN, sh = new THREE.Shape();
-  const half = [[.12 * I, a - .25 * I], [.5 * I, a + .15 * I], [W * .8, o], [W, o - .5 * I], [W - .18 * I, o - 1.5 * I], [W, o - 2.5 * I], [W - .12 * I, 0]];
-  sh.moveTo(.12 * I, 0); for (const [x, y] of half) sh.lineTo(x, y);
-  for (const [x, y] of half.slice(0, -1).reverse()) sh.lineTo(x, -y);
+  const r = BFLY.barrelR, W = r + BFLY.leafW, a = BFLY.innerH / 2, o = BFLY.outerH / 2, I = IN, sh = new THREE.Shape();
+  // top half of the outline, from the barrel out: the top edge climbs to the outer corner, then the
+  // outer edge steps in and draws in a little more at the waist
+  const half = [[r + .02, a], [W - .2, o], [W, o - .13], [W, o - 1.3], [W - .18, o - 1.5], [W - .18, 1.05], [W - .3, 0]];
+  sh.moveTo((r + .02) * I, 0); for (const [x, y] of half) sh.lineTo(x * I, y * I);
+  for (const [x, y] of half.slice(0, -1).reverse()) sh.lineTo(x * I, -y * I);
   sh.closePath();
-  for (const sy of [1, -1]) { const h = new THREE.Path(), cx = W * .52, cy = sy * 1.55 * I; h.moveTo(cx, cy + .9 * I); h.lineTo(cx + .33 * I, cy + .15 * I * sy); h.lineTo(cx, cy - .9 * I); h.lineTo(cx - .33 * I, cy + .15 * I * sy); h.closePath(); sh.holes.push(h); }
+  for (const sy of [1, -1]) sh.holes.push(ring([[1.47, 1.98 * sy], [1.87, .8 * sy], [1.6, .45 * sy], [1.34, .45 * sy], [1.07, .8 * sy]]));
+  for (const [x, y] of BFLY.holes) sh.holes.push(ring([[x, y + .17], [x + .17, y], [x, y - .17], [x - .17, y]]));
   const g = new THREE.ExtrudeGeometry(sh, { depth: BFLY.t * IN, bevelEnabled: false }); g.translate(0, 0, -BFLY.t * IN / 2); return g;
 }
-// The post latch and pull handle, in inches, scaled off the GFS photos against 5½ in pickets:
-// pivot 1.2 in from the gate's edge, a 4.6 in flat bar, a 6.9 in strap catch 0.9 in onto the post,
-// and a 10½ in pull handle whose top is 41% of its height above the bar.
-const LATCH = { pivotIn: 1.2, barIn: 4.6, catchIn: .9, catchH: 6.9, handleIn: 1.3, handleH: 10.5 };
+// the barrel: three knuckles with a line between them, and the head of the pin on top
+function butterflyBarrel() {
+  const r = BFLY.barrelR, h = BFLY.barrelH / 2, k = h / 3, P = [[0, -h]];
+  P.push([r, -h], [r, -k - .03], [r - .04, -k - .01], [r - .04, -k + .01], [r, -k + .03], [r, k - .03], [r - .04, k - .01], [r - .04, k + .01], [r, k + .03], [r, h], [.13, h], [.13, h + .14], [0, h + .14]);
+  return new THREE.LatheGeometry(P.map(([x, y]) => new THREE.Vector2(x * IN, y * IN)), 14);
+}
+// The post latch, in inches. u runs along the arm from the tip of its hook (0) to the end of its
+// tail (10.63); v is up from the bolt the arm turns on; x is out from the post toward the gate.
+const PL = { uN: 2.44, uPivot: 5.62, t: .12, rise: .3, lip: LATCH.lipIn, rodR: LATCH.rodIn / 2, rodLen: 6.42, past: .35 };
+const circle = (u, v, r) => { const p = new THREE.Path(); p.absarc((u - PL.uN) * IN, v * IN, r * IN, 0, Math.PI * 2, true); return p; };
+const slab = (sh, x0, t) => { const g = new THREE.ExtrudeGeometry(sh, { depth: t * IN, bevelEnabled: false, curveSegments: 10 }); g.translate(0, 0, x0 * IN); return g; };
+function latchArm() {
+  const s = new THREE.Shape(), X = u => (u - PL.uN) * IN, L = (u, v) => s.lineTo(X(u), v * IN), Q = (a, b, u, v) => s.quadraticCurveTo(X(a), b * IN, X(u), v * IN);
+  s.moveTo(X(.25), 1.37 * IN); L(10.3, 1.27); Q(10.63, 1.27, 10.63, .95); Q(10.63, .62, 10.3, .62);   // top edge, round end of the tail
+  L(6.55, .32); Q(6.15, .32, 6.15, 0); L(6.15, -.6); L(5.76, -.94); L(2.83, -.94); L(2.83, 0);              // under the tail, the body
+  s.absarc(0, 0, .39 * IN, 0, Math.PI, false);                                                         // the hook, open underneath
+  L(1.99, -.41); L(1.85, -.55); L(1.67, -.62); L(.07, .66); Q(0, .71, 0, .95); L(0, 1.12); Q(0, 1.37, .25, 1.37);   // its jaw, and the ramp the rod rides up
+  s.holes.push(circle(.36, 1.01, .19), circle(1.96, 1.01, .19), circle(5.85, 1.01, .19), ring([[3.2 - PL.uN, -.45], [3.6 - PL.uN, -.45], [3.6 - PL.uN, .35], [3.2 - PL.uN, .35]]));
+  return slab(s, PL.rise, PL.t);
+}
+// The receiver's front plate, 4.53 in wide: the arm turns between it and the bracket on the post. Its
+// left ear is the lip the rod has to clear on its way in; the hook comes down behind the rod above it.
+function latchPlate() {
+  const s = new THREE.Shape(), X = u => (u - PL.uN) * IN, L = (u, v) => s.lineTo(X(u), v * IN);
+  s.moveTo(X(2.83), .55 * IN); L(6.15, .55); L(6.15, -1.25); L(5.95, -1.45); L(5.6, -1.45); L(5.45, -1); L(2.45, -1); L(2.3, -1.45); L(1.84, -1.45); L(1.64, -1.25); L(1.64, -.72); L(1.79, -PL.lip); L(2.83, -PL.lip);
+  s.holes.push(circle(1.96, -1.02, .19), circle(5.85, -1.02, .19), ring([[3.25 - PL.uN, -.25], [3.55 - PL.uN, -.25], [3.55 - PL.uN, .2], [3.25 - PL.uN, .2]]));
+  return slab(s, PL.rise + PL.t, .1);
+}
+// The striker rod, from the maker's drawing: 0.71 in round for 2 in, then pressed flat over the next 1.9 in
+// into a tab 0.94 in wide with two square holes. s runs from its round tip back along the gate, v is up,
+// n is out from the gate's face (the rod lies on the face, flat side down).
+function strikerRod() {
+  const R = PL.rodR, round = 2, taper = 1.87, a = round + taper, b = PL.rodLen, tw = .47, tt = .12;
+  const cyl = new THREE.CylinderGeometry(R * IN, R * IN, round * IN, 16); cyl.rotateZ(Math.PI / 2); cyl.translate(round / 2 * IN, 0, R * IN);
+  // the pressed part: a square the size of the rod at one end, the tab's flat section at the other
+  const P = [[round, -R, 0], [round, R, 0], [round, R, 2 * R], [round, -R, 2 * R], [a, -tw, 0], [a, tw, 0], [a, tw, tt], [a, -tw, tt]].map(q => q.map(c => c * IN));
+  const F = [[0, 1, 2, 3], [5, 4, 7, 6], [1, 0, 4, 5], [3, 2, 6, 7], [2, 1, 5, 6], [0, 3, 7, 4]], pos = [];
+  for (const [i, j, k, l] of F) for (const q of [i, k, j, i, l, k]) pos.push(...P[q]);   // wound to face outward
+  const wedge = new THREE.BufferGeometry(); wedge.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); wedge.computeVertexNormals();
+  const t = new THREE.Shape(); t.moveTo(a * IN, -tw * IN); t.lineTo((b - .12) * IN, -tw * IN); t.lineTo(b * IN, -.3 * IN); t.lineTo(b * IN, .3 * IN); t.lineTo((b - .12) * IN, tw * IN); t.lineTo(a * IN, tw * IN); t.closePath();
+  const holes = [4.28, 5.88];
+  for (const h of holes) t.holes.push(ring([[h - .15, -.15], [h + .15, -.15], [h + .15, .15], [h - .15, .15]]));
+  return { cyl, wedge, tab: new THREE.ExtrudeGeometry(t, { depth: tt * IN, bevelEnabled: false }), holes };
+}
+// the latch's spring: a coil one foot long up its own y axis, stretched to fit between its two hooks
+class Coil extends THREE.Curve { getPoint(t, o = new THREE.Vector3()) { const a = t * Math.PI * 2 * 9; return o.set(Math.cos(a) * .1 * IN, t, Math.sin(a) * .1 * IN); } }
+// a hex head (a lag screw or a bolt), lying on a face: its axis is local z
+const hexHead = (r, h) => { const g = new THREE.CylinderGeometry(r * IN, r * IN, h * IN, 6); g.rotateX(Math.PI / 2); return g; };
+// The pull handle is 10½ in long; its top is 41% of its height above the latch, and it sits 2½ in in from the gate’s edge.
+const HANDLE = { inIn: 2.5, h: 10.5 };
+const UP = new THREE.Vector3(0, 1, 0), LATCH_VIEW_YAW = .7;   // the close view looks at the latch from a little to the gate's side
 // a flat spear-shaped end of the pull handle; sy = 1 points up, −1 down. (0, 0) is its tip.
 function spearEnd(sy) {
   const I = IN, sh = new THREE.Shape(), P = [[-.3, 0], [.3, 0], [.56, -.5], [.5, -1.7], [-.5, -1.7], [-.56, -.5]];
@@ -50,7 +106,7 @@ function spearEnd(sy) {
 function archGrip(len, out) {
   const I = IN, a = len / 2, hgt = 1.3 * I, t = .28 * I, sh = new THREE.Shape();
   sh.moveTo(-a, 0); sh.quadraticCurveTo(0, 2 * hgt, a, 0); sh.lineTo(a - t * 1.6, 0); sh.quadraticCurveTo(0, 2 * (hgt - t), -a + t * 1.6, 0); sh.closePath();
-  const g = new THREE.ExtrudeGeometry(sh, { depth: .9 * I, bevelEnabled: false, curveSegments: 10 }); g.translate(0, 0, -.45 * I);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .9 * I, bevelEnabled: false, curveSegments: 28 }); g.translate(0, 0, -.45 * I);
   // shape x → up the gate, shape y → out from its face, extrusion → across the gate
   g.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(0, out, 0), new THREE.Vector3(0, 0, out), new THREE.Vector3(1, 0, 0)));
   return g;
@@ -99,6 +155,7 @@ export function createGateScene(host, { specs } = {}) {
   const gapMat = new THREE.MeshBasicMaterial({ color: 0x120c07 }), rotMat = new THREE.MeshStandardMaterial({ color: 0x2a1c12, roughness: 1, transparent: true, opacity: 0, depthWrite: false });
   const gray = surfaceMaterial(THREE, 'wood', 0x9b968c);
   const paint = new THREE.MeshStandardMaterial({ color: 0x1c1e21, roughness: .55, metalness: .35 });
+  const iron = new THREE.MeshStandardMaterial({ color: 0x23262a, roughness: .42, metalness: .6 });   // black powder-coated hardware, with enough sheen to read its shape
   const HOLES = [st.hole(-3, .4), st.hole(3, .4)];
   let state = { w: 4, brace: 'right', post: 'steel', y: 0 };
   let built = null;
@@ -108,7 +165,7 @@ export function createGateScene(host, { specs } = {}) {
     if (built) { R.remove(built.group); built.group.traverse(o => { if (o.geometry && !o.userData.shared) o.geometry.dispose(); }); built.lib.dispose?.(); HOLES.forEach(h => h.set(0)); baseWood.clear(); }
     const steelPost = state.post === 'steel', gpIn = steelPost ? BOX_IN : 3.5;
     const half = (state.w * 12 + gpIn) / 2 * IN;
-    const F = fence(STYLE_ND, -half, half, { noDig: true, z: 0, specs, gates: [{ at: half, ft: state.w }], extra: { gPostIn: gpIn, gBrace: BRACE_APP[state.brace] } });
+    const F = fence(STYLE_ND, -half, half, { noDig: true, z: 0, specs, gates: [{ at: half, ft: state.w }], extra: { gPostIn: gpIn, gBrace: BRACE_APP[state.brace], gHinges: 2 } });
     const g = new THREE.Group(); g.add(F.group); R.add(g);
     // the app's own posts are replaced by ours (below), so they are hidden
     const appPosts = F.parts.filter(p => p.part?.kind === 'gatepost' || p.kind === 'gatepost' || p.kind === 'post');
@@ -124,58 +181,70 @@ export function createGateScene(host, { specs } = {}) {
     const hingeX = root.getWorldPosition(new THREE.Vector3()).x, latchX = -hingeX;
     const kindOf = m => m.userData.parts?.[0]?.kind;
     const leafMeshes = []; leaf.traverse(o => { if (o.isMesh) leafMeshes.push(o); });
-    // GFS hangs wood gates on 8 in butterfly hinges and closes them on a post latch. The app draws a
-    // plain tapered wing and a box latch with a separate pull handle; the Lab's copy swaps in the real
-    // shapes, in the same places and on the same pins, so the gate moves exactly as before.
+    // The app draws a plain tapered hinge wing and a box latch; the Lab's copy swaps in the hinges and
+    // the post latch GFS fits (see the note at the top). The hinges stay on the app's pins, so the gate
+    // turns exactly as before.
+    const bb = new THREE.Box3(), boxOf = o => bb.setFromObject(o).clone();
+    const pkBox = new THREE.Box3(); for (const m of leafMeshes.filter(m => kindOf(m) === 'gpicket')) pkBox.union(boxOf(m));
+    const railBox = new THREE.Box3(); for (const m of leafMeshes.filter(m => kindOf(m) === 'grail')) railBox.union(boxOf(m));
+    const out = Math.sign(pin.z - (pkBox.min.z + pkBox.max.z) / 2) || -1;      // which way the hardware faces
+    const zFace = out < 0 ? pkBox.min.z : pkBox.max.z;                          // the pickets' face, flush with the posts'
+    const edgeX = dir > 0 ? railBox.max.x : railBox.min.x, jambX = latchX - dir * gpIn / 2 * IN;   // the gate's latch edge; the post's side
+    let latchKit = null;
     { const hw = []; root.traverse(o => { if (o.isMesh && /^(ghinge|glatch|ghandle)$/.test(kindOf(o))) hw.push(o); });
       const drop = o => { o.parent.remove(o); const k = leafMeshes.indexOf(o); if (k >= 0) leafMeshes.splice(k, 1); };
       const cyl = o => o.geometry.type === 'CylinderGeometry', hOf = o => o.geometry.parameters.height;
-      // hinges
-      const hinge = hw.filter(o => kindOf(o) === 'ghinge'), barrels = hinge.filter(o => cyl(o) && hOf(o) > 6 * IN);
-      const bGeo = new THREE.CylinderGeometry(BFLY.barrelR * IN, BFLY.barrelR * IN, BFLY.barrelH * IN, 12), leafGeo = butterflyLeaf();
-      const near = o => barrels.reduce((a, c) => Math.abs(c.position.y - o.position.y) < Math.abs(a.position.y - o.position.y) ? c : a);
+      const hinge = hw.filter(o => kindOf(o) === 'ghinge'), mat = iron;
+      // a new piece, placed in the yard's own coordinates and then handed to the post (root) or the gate (leaf)
+      const put = (geo, kind, index, to, M) => {
+        const m = new THREE.Mesh(geo, mat); m.castShadow = true; m.userData.parts = [{ kind, index, gate: true }];
+        if (M) m.applyMatrix4(M); R.add(m); to.attach(m); if (to === leaf) leafMeshes.push(m); return m;
+      };
+      const at = (x, y, z) => new THREE.Matrix4().makeTranslation(x, y, z);
+      // ── hinges ──
+      const barrels = hinge.filter(o => cyl(o) && hOf(o) > 3 * IN), leafGeo = butterflyLeaf(), barrelGeo = butterflyBarrel(), lag = hexHead(.25, .2);
+      const zOf = (o, z) => { o.position.z += z - o.getWorldPosition(new THREE.Vector3()).z; };
+      barrels.forEach((b, k) => {
+        const c = b.getWorldPosition(new THREE.Vector3());
+        b.geometry = barrelGeo; b.material = mat; zOf(b, zFace + out * .1 * IN);
+        for (const [side, to] of [[-dir, root], [dir, leaf]]) for (const [hx, hy] of BFLY.holes) put(lag, 'ghinge', k, to, at(c.x + side * hx * IN, c.y + hy * IN, zFace + out * (BFLY.t + .1) * IN));
+      });
       for (const o of hinge) {
-        if (o.geometry.type === 'ExtrudeGeometry') o.geometry = leafGeo;
-        else if (barrels.includes(o)) o.geometry = bGeo;
-        else if (cyl(o) && hOf(o) > .6 * IN) drop(o);   // the app's knuckle rings
-        else if (cyl(o)) {   // a lag screw: out to the corner of its leaf, and a second one near the barrel
-          const b = near(o), sx = Math.sign(o.position.x - b.position.x) || 1, sy = Math.sign(o.position.y - b.position.y) || 1;
-          const c2 = o.clone(); c2.userData = o.userData; o.parent.add(c2); if (leafMeshes.includes(o)) leafMeshes.push(c2);
-          o.position.x = b.position.x + sx * (BFLY.leafW * .8 - .28) * IN; o.position.y = b.position.y + sy * (BFLY.outerH / 2 - .75) * IN;
-          c2.position.x = b.position.x + sx * .62 * IN; c2.position.y = b.position.y + sy * (BFLY.innerH / 2 - .55) * IN;
-        }
+        if (barrels.includes(o)) continue;
+        if (o.geometry.type === 'ExtrudeGeometry') { o.geometry = leafGeo; o.material = mat; zOf(o, zFace + out * BFLY.t / 2 * IN); }
+        else drop(o);                                   // the app's knuckle rings and its screws
       }
-      // latch and pull handle, in the proportions of the GFS photos (see the note at the top):
-      // a flat bar on a small pivot plate near the gate's edge, a tall strap catch with two square
-      // feet near the post's edge, and beside the pivot an arched pull handle with spear ends
-      const latch = hw.filter(o => kindOf(o) === 'glatch'), ix = o => o.userData.parts[0].index;
-      const base = latch.find(o => ix(o) === 0), pv = latch.find(o => ix(o) === 1), arm = latch.find(o => ix(o) === 2), tab = latch.find(o => ix(o) === 3);
-      const catchBits = latch.filter(o => ix(o) === 4 && o.geometry.type === 'BoxGeometry'), strap = catchBits.find(o => hOf(o) > 2 * IN);
-      for (const o of hw.filter(o => kindOf(o) === 'ghandle')) drop(o);   // the app's round pull, both faces
-      if (base && pv && arm && strap) {
-        const out = Math.sign(arm.position.z - base.position.z) || 1, mat = base.material, ly = pv.position.y;
-        const edge = base.position.x + dir * 2.4 * IN, postEdge = strap.position.x - dir * 2 * IN;   // where the app measured from
-        const xp = edge - dir * LATCH.pivotIn * IN, xc = postEdge + dir * LATCH.catchIn * IN;
-        base.geometry = new THREE.BoxGeometry(.8 * IN, .8 * IN, .12 * IN); base.position.x = xp; pv.position.x = xp;
-        arm.geometry = new THREE.BoxGeometry(LATCH.barIn * IN, .5 * IN, .19 * IN); arm.position.x = xp + dir * (LATCH.barIn / 2 - .4) * IN;
-        if (tab) drop(tab);
-        // the catch
-        const cd = strap.geometry.parameters.depth;
-        for (const o of catchBits) { const q = o.geometry.parameters; o.position.x = xc; if (o !== strap) o.geometry = new THREE.BoxGeometry(.75 * IN, q.height, q.depth); }
-        strap.geometry = new THREE.BoxGeometry(.75 * IN, LATCH.catchH * IN, cd); strap.position.y = ly;
-        const feet = [1, -1].map(sy => { const f = new THREE.Mesh(new THREE.BoxGeometry(.8 * IN, .8 * IN, cd), strap.material); f.position.set(xc + dir * .4 * IN, ly + sy * (LATCH.catchH / 2 - .4) * IN, strap.position.z); f.castShadow = true; f.userData = strap.userData; strap.parent.add(f); return f; });
-        // the pull handle
-        const xh = xp - dir * LATCH.handleIn * IN, top = ly + LATCH.handleH * .41 * IN, bot = top - LATCH.handleH * IN, z0 = base.position.z;
-        const tagH = (m, k) => { m.castShadow = true; m.userData = { ...base.userData, parts: [{ ...base.userData.parts[0], kind: 'ghandle', index: k }] }; base.parent.add(m); leafMeshes.push(m); return m; };
-        const ends = [[top, 1], [bot, -1]].map(([y, sy], k) => { const m = tagH(new THREE.Mesh(spearEnd(sy), mat), k); m.position.set(xh, y, z0); return m; });
-        const grip = tagH(new THREE.Mesh(archGrip((LATCH.handleH - 3.2) * IN, out), mat), 2); grip.position.set(xh, (top + bot) / 2, z0);
-        // lag screws: two in the handle's ends, two in the catch's feet
-        const sc = latch.filter(o => ix(o) === 5), onGate = sc.filter(o => Math.abs(o.position.x - edge) < Math.abs(o.position.x - postEdge) || leafMeshes.includes(o)), onPost = sc.filter(o => !onGate.includes(o));
-        onGate.forEach((o, k) => { o.position.x = xh; o.position.y = k % 2 ? top - .9 * IN : bot + .9 * IN; o.userData = { ...o.userData, parts: [{ ...o.userData.parts[0], kind: 'ghandle' }] }; });
-        onPost.forEach((o, k) => { o.position.x = feet[k % 2].position.x; o.position.y = feet[k % 2].position.y; });
+      // ── the post latch ──
+      const old = hw.filter(o => kindOf(o) === 'glatch'), pv = old.find(o => o.userData.parts[0].index === 1) || old[0];
+      const ly = pv ? pv.getWorldPosition(new THREE.Vector3()).y : 47 * IN;        // the height the app sets its latch at
+      for (const o of hw) if (kindOf(o) !== 'ghinge') drop(o);
+      const zN = zFace + out * PL.rodR * IN;                                         // the rod lies on the gate's face
+      // receiver and arm: u − uN → along the post's side toward the far face, v → up, x → out into the gap
+      const Lm = new THREE.Matrix4().makeBasis(new THREE.Vector3(0, 0, -out), new THREE.Vector3(0, 1, 0), new THREE.Vector3(-dir, 0, 0)).setPosition(jambX, ly, zN);
+      const box = (u0, u1, v0, v1, x0, x1) => { const g = new THREE.BoxGeometry((u1 - u0) * IN, (v1 - v0) * IN, (x1 - x0) * IN); g.translate(((u0 + u1) / 2 - PL.uN) * IN, (v0 + v1) / 2 * IN, (x0 + x1) / 2 * IN); return g; };
+      const hexAt = (u, v, x0, r, h) => { const g = hexHead(r, h); g.translate((u - PL.uN) * IN, v * IN, (x0 + h / 2) * IN); return g; };
+      for (const sy of [1, -1]) {
+        put(box(2.56, 5.28, sy > 0 ? 1.6 : -2.735, sy > 0 ? 2.735 : -1.6, 0, .1), 'glatch', 0, root, Lm);                 // a flange, flat on the post
+        put(box(2.56, 5.28, sy * 1.6 - .05, sy * 1.6 + .05, 0, PL.rise), 'glatch', 0, root, Lm);                              // the step up from it
+        put(hexAt(4.02, sy * 2.3, .1, .25, .2), 'glatch', 5, root, Lm);                                                      // its lag screw
       }
+      put(box(2.56, 5.28, -1.6, 1.6, PL.rise - .1, PL.rise), 'glatch', 0, root, Lm);                                         // the bracket's raised middle, behind the arm
+      const arm = put(latchArm(), 'glatch', 2, root, Lm);
+      put(latchPlate(), 'glatch', 0, root, Lm);                                                                              // the front plate, over the arm
+      put(box(3.3, 3.5, -.2, .15, PL.rise, PL.rise + PL.t + .16), 'glatch', 0, root, Lm);                                    // the stop that comes through the arm and the plate
+      const bolt = put(hexAt(PL.uPivot, 0, PL.rise + PL.t + .1, .28, .18), 'glatch', 1, root, Lm);                           // the bolt the arm turns on
+      const spring = put(new THREE.TubeGeometry(new Coil(), 150, .028 * IN, 5), 'glatch', 3, root); spring.userData.noCheck = true;
+      // striker rod: s → from its tip back along the gate, v → up, n → out from the gate's face
+      const Gm = new THREE.Matrix4().makeBasis(new THREE.Vector3(-dir, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, out)).setPosition(jambX + dir * PL.past * IN, ly, zFace);
+      const rod = strikerRod(), rodM = put(rod.cyl, 'glatch', 4, leaf, Gm); put(rod.wedge, 'glatch', 4, leaf, Gm); put(rod.tab, 'glatch', 4, leaf, Gm);
+      for (const h of rod.holes) { const g = hexHead(.25, .2); g.translate(h * IN, 0, .22 * IN); put(g, 'glatch', 5, leaf, Gm); }
+      // ── the pull handle, arched over the rod ──
+      const xh = edgeX - dir * HANDLE.inIn * IN, top = ly + HANDLE.h * .41 * IN, bot = top - HANDLE.h * IN, z0 = zFace + out * .05 * IN;
+      [[top, 1], [bot, -1]].forEach(([y, sy], k) => put(spearEnd(sy), 'ghandle', k, leaf, at(xh, y, z0)));
+      put(archGrip((HANDLE.h - 3.2) * IN, out), 'ghandle', 2, leaf, at(xh, (top + bot) / 2, z0));
+      for (const y of [top - .9 * IN, bot + .9 * IN]) put(lag, 'ghandle', 3, leaf, at(xh, y, zFace + out * .2 * IN));
+      latchKit = { arm, bolt, spring, rodM, out };
     }
-    const bb = new THREE.Box3(), boxOf = o => bb.setFromObject(o).clone();
     const rails = leafMeshes.filter(m => kindOf(m) === 'grail').map(m => ({ m, b: boxOf(m) })).sort((a, b) => a.b.min.y - b.b.min.y);
     const stiles = leafMeshes.filter(m => kindOf(m) === 'gstile').map(m => ({ m, b: boxOf(m) }));
     const braceM = leafMeshes.find(m => kindOf(m) === 'gbrace');
@@ -191,8 +260,6 @@ export function createGateScene(host, { specs } = {}) {
     const a = ang * (state.brace === 'wrong' ? -1 : 1) * dir, u = [Math.cos(a), Math.sin(a)];
     const cxy = [(x0 + x1) / 2, (yb + yt) / 2];
     if (braceM) braceM.parent.remove(braceM);
-    // the app's pull handle sits ¼ in into the bottom of the latch plate; it goes on just below it
-    for (const m of leafMeshes.filter(m => kindOf(m) === 'ghandle')) m.position.y -= .3 * IN;
     let tubeLenIn = 0;
     // ── the wood frame, cut to fit: stiles and brace stop at the middle rail ──
     if (state.brace !== 'steel') {
@@ -230,9 +297,8 @@ export function createGateScene(host, { specs } = {}) {
     // ── the posts ──
     F.group.updateMatrixWorld(true);
     const rootKids = root.children.filter(c => c.isMesh);
-    // the front (picket-side) face of a post sits just behind the hinge leaves the app mounts on it
-    let hingeBack = -Infinity; for (const m of rootKids) if ((kindOf(m) === 'ghinge' && m.geometry.type === 'ExtrudeGeometry') || (kindOf(m) === 'glatch' && m.geometry.type === 'BoxGeometry')) hingeBack = Math.max(hingeBack, boxOf(m).max.z);
-    const front = hingeBack + .01 * IN;
+    // the front (picket-side) face of a post is flush with the gate's pickets, so a hinge lies flat across both
+    const front = zFace;
     const posts = [hingeX, latchX].map((x, k) => {
       const grp = new THREE.Group(); grp.position.set(x, 0, 0); g.add(grp);
       const lifted = new THREE.Group(); grp.add(lifted);
@@ -297,25 +363,26 @@ export function createGateScene(host, { specs } = {}) {
       bottomIn: leafBox.min.y / IN
     };
     const yPin = Math.min(...hingeYs) * IN;
-    // the post latch: its bar turns on a pin on the gate's plate and rests on a ledge on the catch
-    const onLeaf = m => { for (let p = m.parent; p; p = p.parent) if (p === leaf) return true; return false; };
-    const latchParts = leafMeshes.filter(m => kindOf(m) === 'glatch' && onLeaf(m));
-    const barParts = latchParts.filter(m => [2, 3].includes(m.userData.parts[0].index));
-    const pinPart = latchParts.find(m => m.userData.parts[0].index === 1);
-    const ledge = posts[1].lifted.children.filter(m => kindOf(m) === 'glatch' && m.geometry.type === 'BoxGeometry' && m.geometry.parameters.height < .03).map(m => boxOf(m))[0];
-    const pvW = pinPart ? boxOf(pinPart).getCenter(new THREE.Vector3()) : null;
-    const latch = pvW && ledge ? {
-      parts: barParts.map(m => { m.updateMatrix(); m.matrixAutoUpdate = false; return { m, M0: m.matrix.clone() }; }),
-      pvLeaf: leaf.worldToLocal(pvW.clone()), pvHang: hang.worldToLocal(pvW.clone()),
-      near: Math.min(Math.abs(ledge.min.x - pvW.x), Math.abs(ledge.max.x - pvW.x)) / IN
-    } : null;
+    // the post latch: its arm turns on the bolt, and its hook comes down over the rod on the gate
+    const K = latchKit, lifted = posts[1].lifted, ctr = m => boxOf(m).getCenter(new THREE.Vector3());
+    const pvW = ctr(K.bolt), rodW = ctr(K.rodM), off = (dx, dv, du) => lifted.worldToLocal(pvW.clone().add(new THREE.Vector3(-dir * dx * IN, dv * IN, -K.out * du * IN)));
+    K.arm.updateMatrix(); K.arm.matrixAutoUpdate = false;
+    const latch = {
+      arm: K.arm, M0: K.arm.matrix.clone(), pv: lifted.worldToLocal(pvW.clone()), pvHang: hang.worldToLocal(rodW.clone()), out: K.out,
+      armIn: PL.uPivot - PL.uN,                     // from the bolt to the hook
+      stopIn: PL.uN - 1.64 + PL.rodR,               // a rod that misses the slot stops this far out, against the receiver
+      // the spring's two hooks: on the top flange, and on the arm beside its tail (from the bolt: toward the gate, up, along the arm)
+      spring: K.spring, A: off(-.51, 2.22, -.54), B0: off(-.25, 1.15, .79)
+    };
     built = { group: g, lib: F.lib, F, posts, leaf, hang, latch, pinZ: pin.z, pin: new THREE.Vector3(pin.x, yPin, 0), dir, G, steelPost, x0, x1, yb, yt, leafBox, hingeX, latchX, latchY: 0 };
     // where the latch is, for the close view
     let lb2 = null; for (const m of leafMeshes) if (kindOf(m) === 'glatch' && m.parent) lb2 = lb2 ? lb2.union(boxOf(m)) : boxOf(m);
     built.latchY = lb2 ? (lb2.min.y + lb2.max.y) / 2 : 47 * IN;
     const deep = steelPost ? 4.3 : 2.85, high = 6.7;   // the view takes in the posts' full depth in the ground
     st.frameView('gate', { cx: 0, cy: (high - deep) / 2, w: state.w + 2.4, h: high + deep });
-    built.latchCx = latchX - dir * 4 * IN;
+    built.latchCx = jambX - dir * 1.5 * IN; built.zFace = zFace + shift; built.out = out;
+    built.backIn = Math.abs(posts[1].zc - (out < 0 ? pkBox.max.z : pkBox.min.z)) / IN;   // from the post's centre line to the back of the gate's pickets
+    st.views.find(v => v.id === 'latch').yaw0 = (out < 0 ? Math.PI : 0) - dir * out * LATCH_VIEW_YAW;
     set3(state.y);
   }
 
@@ -361,24 +428,37 @@ export function createGateScene(host, { specs } = {}) {
     const P = b.pin, M = new THREE.Matrix4(), T1 = new THREE.Matrix4().makeTranslation(-P.x, -P.y, 0), T2 = new THREE.Matrix4().makeTranslation(P.x + r.post.u2 * IN * b.dir, P.y + lifts[0], 0);
     const Rz = new THREE.Matrix4().makeRotationZ(-r.tilt * b.dir), S = new THREE.Matrix4().set(1, 0, 0, 0, -r.rack * b.dir, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
     M.copy(T2).multiply(Rz).multiply(S).multiply(T1);
-    // the latch: how far its pin has come down against the catch
-    let dLatch = 0, ajar = false;
+    // the latch: how far the rod on the gate has come down against the latch on the post
+    let dLatch = 0, ajar = false, ride = 0;
     if (b.latch) {
-      const pv = b.latch.pvHang.clone().applyMatrix4(M);
-      dLatch = (b.latch.pvHang.y - pv.y + lifts[1]) / IN;
-      // the latch bar rides up the catch and still drops in for a while; past ¾ in it can't, and the gate stays ajar
-      ajar = dLatch > LATCH_PLAY_IN;
-      const phi = ajar ? 0 : Math.asin(clamp(dLatch / b.latch.near, 0, 1)) * b.dir;
-      const Tp = new THREE.Matrix4().makeTranslation(b.latch.pvLeaf.x, b.latch.pvLeaf.y, b.latch.pvLeaf.z), Tm = new THREE.Matrix4().makeTranslation(-b.latch.pvLeaf.x, -b.latch.pvLeaf.y, -b.latch.pvLeaf.z), Rb = new THREE.Matrix4().makeRotationZ(phi);
-      for (const q of b.latch.parts) { q.m.matrix.copy(Tp).multiply(Rb).multiply(Tm).multiply(q.M0); q.m.matrixWorldNeedsUpdate = true; }
+      const K = b.latch, rod = K.pvHang.clone().applyMatrix4(M);
+      dLatch = (K.pvHang.y - rod.y + lifts[1]) / IN;
+      // The rod has ¼ in of room in the receiver's slot. Lower than that it rides up over the slot's lip
+      // as the gate is pushed shut, so the latch ends up carrying the gate's corner. Once the rod's
+      // centre is below the lip it hits it square: the gate stops there and won't latch.
+      // (A rod that sits high just lifts the hook: there is no lip above it.)
+      ajar = dLatch > LATCH.maxIn;
+      ride = ajar ? 0 : Math.max(0, dLatch - LATCH.cleanIn);
+      const Tz = (v, k = 1) => new THREE.Matrix4().makeTranslation(v.x * k, v.y * k, v.z * k);
+      if (ride) M.premultiply(Tz(P, -1)).premultiply(new THREE.Matrix4().makeRotationZ(ride / b.G.latchXIn * b.dir)).premultiply(Tz(P));
+      const phi = ajar ? 0 : K.out * Math.asin(clamp((dLatch - ride) / K.armIn, -.5, .5));
+      const T = Tz(K.pv).multiply(new THREE.Matrix4().makeRotationX(phi)).multiply(Tz(K.pv, -1));
+      K.arm.matrix.copy(T).multiply(K.M0); K.arm.matrixWorldNeedsUpdate = true;
+      const d = K.B0.clone().applyMatrix4(T).sub(K.A), len = d.length();
+      K.spring.position.copy(K.A); K.spring.quaternion.setFromUnitVectors(UP, d.multiplyScalar(1 / len)); K.spring.scale.set(1, len, 1);
     }
+    let onFooting = false;
     if (ajar) {
-      const Ry = new THREE.Matrix4().makeRotationY(AJAR * b.dir), Ta = new THREE.Matrix4().makeTranslation(b.pin.x, 0, b.pinZ), Tb = new THREE.Matrix4().makeTranslation(-b.pin.x, 0, -b.pinZ);
+      // The gate stops where the rod meets the receiver. If frost has pushed the latch post's footing up
+      // higher than the gate's bottom corner, the corner meets the concrete first, further out.
+      let stop = b.latch.stopIn;
+      if (!b.steelPost && r.clear < r.liftL) { onFooting = true; stop = Math.max(stop, POSTS.wood.set.holeIn / 2 - b.backIn + .2); }
+      const Ry = new THREE.Matrix4().makeRotationY(Math.asin(stop / b.G.latchXIn) * b.dir), Ta = new THREE.Matrix4().makeTranslation(b.pin.x, 0, b.pinZ), Tb = new THREE.Matrix4().makeTranslation(-b.pin.x, 0, -b.pinZ);
       M.premultiply(Tb).premultiply(Ry).premultiply(Ta);
     }
-    b.ajar = ajar; b.dLatch = dLatch;
-    // the close view follows the catch, and takes in the latch bar wherever it has dropped to
-    st.frameView('latch', { cx: b.latchCx, cy: b.latchY + lifts[1] - dLatch * IN / 2 - .05, w: 1.5, h: 1.25 + Math.max(0, dLatch - 4) * IN });
+    b.ajar = ajar; b.dLatch = dLatch; b.ride = ride;
+    // the close view stays on the latch, a little to the gate's side so the arm and its hook show
+    st.frameView('latch', { cx: b.latchCx, cy: b.latchY + lifts[1] - .08, cz: b.zFace + b.out * 1.5 * IN, w: 1.45, h: 1.25 });
     b.hang.matrix.copy(M); b.hang.matrixWorldNeedsUpdate = true;
     // weathering: bare treated pine goes silver-gray
     const wk = weather(y) * .7;
@@ -394,12 +474,13 @@ export function createGateScene(host, { specs } = {}) {
     L.drop.set(r.drop >= 1 / 16 ? `Latch side down ${frac(r.drop)} in` : 'Latch side hasn’t dropped'); L.drop.move(V3((b.dir > 0 ? b.x1 : b.x0) - b.dir * .2, b.leafBox.min.y - .1, .1)); L.drop.show(y >= 1);
     L.rot.move(V3(hx, .45, .15)); L.rot.show(!b.steelPost && decay({ decayFrom: 8 }, y) > .25);
     const off = r.offset;
-    L.latch.set(Math.abs(off) < 1 / 16 ? 'Latch lines up where it was set' : b.ajar ? `Latch bar ${frac(off)} in low: it can’t reach the catch` : `Latch ${frac(off)} in low: the bar rides up the catch`); L.latch.move(V3(lx - b.dir * 4 * IN, b.latchY + .3, -.3));
+    const lowBy = `${frac(off)} in ${off < 0 ? 'high' : 'low'}`;
+    L.latch.set(Math.abs(off) < 1 / 16 ? 'The rod sits in the latch where it was set' : b.ajar ? `Rod ${lowBy}: it hits the latch and stops` : b.ride ? `Rod ${lowBy}: it has to ride up into the latch` : `Rod ${lowBy}: still drops straight in`); L.latch.move(V3(b.latchCx, b.latchY + lifts[1] + .34, b.zFace + b.out * .25));
     const win = m != null && m < 5;
     status.gate.textContent = y < .5 ? 'Hung square and level on day one.' : [
       r.drop >= 1 / 16 ? `latch side down ${frac(r.drop)} in` : 'hasn’t moved',
       r.liftL >= 1 / 8 ? 'posts lifted by frost' : '', r.clear <= 0 ? 'dragging on the ground' : '', win ? 'winter' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase());
-    status.latch.textContent = Math.abs(off) < 1 / 16 ? 'Still latches like the day it was hung.' : b.ajar ? 'Won’t latch: the gate hangs open until it’s re-hung.' : off < .25 ? 'Still latches.' : 'Still latches, but it needs adjusting.';
+    status.latch.textContent = Math.abs(off) < 1 / 16 ? 'Still latches like the day it was hung.' : b.ajar ? (onFooting ? 'Won’t latch: the gate’s corner hits the footing that frost pushed up.' : 'Won’t latch: the gate stays open until it’s re-hung.') : b.ride ? 'Latches with a push. The latch is holding the gate’s corner up, so it needs adjusting.' : 'Still latches.';
     st.dirty();
     return r;
   }
@@ -409,9 +490,10 @@ export function createGateScene(host, { specs } = {}) {
     get state() { return { ...state }; }, get gate() { return built?.G; }, stage: st,
     numbers() { return sag(built.G, state); },
     check() {
-      // hardware is built of pieces that sit in each other (a hinge's strap, knuckle and pin; a latch and its screws)
-      return overlaps(solids(R), { allow: (a, b) => a.kind === 'fastener' || (a.unit && a.unit === b.unit) || (/^(ghinge|glatch|ghandle)$/.test(a.kind) && a.kind === b.kind) });
+      // hardware is built of pieces that sit in each other (a hinge's leaf, barrel and screws; the latch's arm on its
+      // receiver, the rod in its hook); the pull handle arches over the rod's flat end
+      return overlaps(solids(R), { allow: (a, b) => a.kind === 'fastener' || (a.unit && a.unit === b.unit) || (/^(ghinge|glatch|ghandle)$/.test(a.kind) && a.kind === b.kind) || [a.kind, b.kind].sort().join() === 'ghandle,glatch' });
     },
-    dispose() { st.dispose(); built?.lib?.dispose?.(); for (const mtl of [conc, slump, gapMat, rotMat, gray, paint]) mtl.dispose(); }
+    dispose() { st.dispose(); built?.lib?.dispose?.(); for (const mtl of [conc, slump, gapMat, rotMat, gray, paint, iron]) mtl.dispose(); }
   };
 }
