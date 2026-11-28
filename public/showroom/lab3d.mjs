@@ -532,7 +532,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   const V = views.map(v => ({ ...v, cam: new THREE.PerspectiveCamera(30, 1, .1, 2000), rect: { x: 0, y: 0, w: 1, h: 1 }, target: new THREE.Vector3(), base: { w: 16, h: 12 }, inset: { top: v.label ? 40 : 8, bottom: 8 }, tag: null }));
   const HOME = { yaw: 0, pitch: .13, zoom: 1, ...home };   // home: where the camera starts and double-tap returns
   const orbit = { ...HOME, user: false };
-  let stacked = false;
+  let stacked = false, solo = -1;
   const aim = new THREE.Vector3();
   const place = v => {
     const c = v.cam, w = v.rect.w, h = v.rect.h, aspect = w / h; c.aspect = aspect;
@@ -547,22 +547,29 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   };
   const layout = () => {
     const W = wrap.clientWidth || 360, n = V.length;
-    stacked = n > 1 && (W < 700 || stackAlways);
+    // On a phone the Lab gives the picture a fixed height (it stays in view while the controls scroll),
+    // and two views go side by side in it so both can be compared without scrolling.
+    const fitH = W < 700 && getComputedStyle(host).getPropertyValue('--l3d-fit').trim() === '1' ? host.clientHeight : 0;
+    stacked = n > 1 && (W < 700 || stackAlways) && !fitH;
+    if (!fitH || n !== 2) solo = -1;
     const own = stacked && V.some(v => v.aspect);
     const hs = own ? V.map(v => Math.round(clamp(W * (v.aspect || 1), v.minH || 160, v.maxH || 560))) : null;
     // On a wide screen (iPad on its side, a laptop) the whole picture and the slider under it should fit
     // on screen without scrolling, so the height is also held to what's left under the tool's heading.
     const room = W >= 700 ? Math.max(300, innerHeight - Math.max(0, host.getBoundingClientRect().top + (host.closest('#v-lab')?.scrollTop || 0)) - 124) : Infinity;
     const cap = W >= 700 ? Math.max(300, Math.min(room, innerHeight - 210)) : Infinity;
-    const H = own ? hs.reduce((a, b) => a + b, 0) : stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(Math.min(cap, n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560)));
+    const H = fitH ? fitH : own ? hs.reduce((a, b) => a + b, 0) : stacked ? Math.round(Math.min(W * 1.02, 430) * n) : Math.round(Math.min(cap, n > 1 ? Math.min(W / n * .95, 540) : Math.min(W * (W < 700 ? 1.08 : .62), 560)));
     wrap.style.height = H + 'px'; renderer.setSize(W, H, false);
     let y0 = 0;
-    V.forEach((v, i) => { if (own) { v.rect = { x: 0, y: y0, w: W, h: hs[i] }; y0 += hs[i]; } else v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
-    V.forEach(v => { if (v.tag) Object.assign(v.tag.style, { left: v.rect.x + 'px', top: v.rect.y + 'px', width: v.rect.w + 'px', height: v.rect.h + 'px' }); });
-    wrap.classList.toggle('stacked', stacked);
+    V.forEach((v, i) => { v.off = solo >= 0 && i !== solo; if (solo >= 0) v.rect = { x: 0, y: 0, w: v.off ? 0 : W, h: H }; else if (own) { v.rect = { x: 0, y: y0, w: W, h: hs[i] }; y0 += hs[i]; } else v.rect = stacked ? { x: 0, y: Math.round(H / n * i), w: W, h: Math.round(H / n) } : { x: Math.round(W / n * i), y: 0, w: Math.round(W / n), h: H }; });
+    V.forEach((v, i) => { if (!v.tag) return; Object.assign(v.tag.style, { left: v.rect.x + 'px', top: v.rect.y + 'px', width: v.rect.w + 'px', height: v.rect.h + 'px', display: v.off ? 'none' : '' });
+      const b = v.tag.querySelector('.l3d-solo'); if (b) { b.classList.toggle('on', solo === i); b.setAttribute('aria-label', solo === i ? 'Show both sides' : 'Make this side bigger'); b.setAttribute('aria-pressed', String(solo === i)); } });
+    wrap.classList.toggle('stacked', stacked); wrap.classList.toggle('fit', !!fitH); wrap.classList.toggle('narrow', V.some(v => !v.off && v.rect.w < 260));
     dirty();
   };
-  V.forEach(v => { const t = document.createElement('div'); t.className = 'l3d-view'; t.innerHTML = v.label ? `<span class="l3d-tag ${v.tone || ''}">${v.label}</span>` : ''; over.append(t); v.tag = t; });
+  V.forEach((v, i) => { const t = document.createElement('div'); t.className = 'l3d-view'; t.innerHTML = v.label ? `<span class="l3d-tag ${v.tone || ''}">${v.label}</span>` : ''; over.append(t); v.tag = t;
+    // two views share a phone's width; this button gives one of them all of it, and gives it back
+    if (V.length === 2) { const b = document.createElement('button'); b.type = 'button'; b.className = 'l3d-solo'; b.innerHTML = '<svg viewBox="0 0 24 24" class="one"><path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><svg viewBox="0 0 24 24" class="both"><rect x="3" y="5" width="18" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 5v14" stroke="currentColor" stroke-width="2.2"/></svg><span>Both</span>'; b.onclick = () => { solo = solo === i ? -1 : i; layout(); }; t.append(b); } });
 
   stages.add(dirty);
   // ── render on demand ──
@@ -629,6 +636,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     if (need || more) {
       const H = renderer.domElement.height / renderer.getPixelRatio();
       for (const v of V) {
+        if (v.off) continue;
         place(v); const r = v.rect, y = H - r.y - r.h;
         // each view gets its own tight shadow map, centred on what it looks at
         const s = Math.max(v.base.w, v.base.h) * .8;
@@ -702,7 +710,8 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   function placePins() {
     for (const p of pins) {
       const v = V.find(x => x.id === p.view) || V[0];
-      if (!p.on) { p.el.style.opacity = 0; continue; }
+      if (!p.on || v.off) { p.el.style.opacity = 0; continue; }
+      p.el.firstElementChild.style.maxWidth = Math.min(240, Math.round(v.rect.w - 12)) + 'px';
       vec.copy(p.at).project(v.cam);
       const x = v.rect.x + (vec.x * .5 + .5) * v.rect.w, y = v.rect.y + (-vec.y * .5 + .5) * v.rect.h;
       const inside = vec.z < 1 && x > v.rect.x + 4 && x < v.rect.x + v.rect.w - 4 && y > v.rect.y + 4 && y < v.rect.y + v.rect.h - 4;
@@ -721,8 +730,10 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     }
   }
   afters.add(placePins);
-  function pin(view, at, html, cls = '') {
+  // up: px to raise the label above its spot (so labels in a row can be staggered at any zoom)
+  function pin(view, at, html, cls = '', { up = 0 } = {}) {
     const el = document.createElement('div'); el.className = 'l3d-pin ' + cls; el.innerHTML = `<span>${html}</span>`; over.append(el);
+    if (up) { el.classList.add('up'); el.style.setProperty('--up', up + 'px'); }
     const p = { view, at: at.clone(), el, on: true }; pins.push(p);
     return { set(h) { el.firstElementChild.innerHTML = h; }, show(on) { if (p.on !== !!on) { p.on = !!on; need = true; kick(); } }, move(v) { p.at.copy(v); }, el };
   }
@@ -742,7 +753,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     // where a point on screen lands on the vertical plane z = z0 (or null): { x, y, view }
     pick(clientX, clientY, z0 = 0) {
       const r = cv.getBoundingClientRect(), px = clientX - r.left, py = clientY - r.top;
-      const v = V.find(v => px >= v.rect.x && px <= v.rect.x + v.rect.w && py >= v.rect.y && py <= v.rect.y + v.rect.h); if (!v) return null;
+      const v = V.find(v => !v.off && px >= v.rect.x && px <= v.rect.x + v.rect.w && py >= v.rect.y && py <= v.rect.y + v.rect.h); if (!v) return null;
       const ndc = new THREE.Vector2((px - v.rect.x) / v.rect.w * 2 - 1, -((py - v.rect.y) / v.rect.h * 2 - 1));
       const ray = new THREE.Raycaster(); ray.setFromCamera(ndc, v.cam);
       const hit = ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 0, 1), -z0), new THREE.Vector3());
@@ -750,7 +761,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     },
     THREE, scene, root, renderer, sun, views: V, orbit, wrap, over, ground, setGrade, grade: x => grade(x),
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
-    get stacked() { return stacked; }, layout,
+    get stacked() { return stacked; }, get solo() { return solo; }, layout,
     dispose() {
       alive = false; cancelAnimationFrame(raf); clearTimeout(fineTimer); stages.delete(dirty); aoRT?.depthTexture?.dispose(); aoRT?.dispose(); aoMat.dispose(); aoDepth.dispose(); ro.disconnect(); io.disconnect();
       scene.traverse(o => { if (o.geometry && !o.userData.keepGeo) o.geometry.dispose(); });

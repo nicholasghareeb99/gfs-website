@@ -38,10 +38,13 @@ export function createLifeScene(host, { specs } = {}) {
     const front = Math.max(...F.parts.map(p => p.box.max.z)), top = Math.max(...F.parts.map(p => p.box.max.y));
     built = { k, g, F, id };
     const [text, where] = m.wood ? (nd ? ['Galvanized steel posts: no wood in the ground', 'post'] : ['Wood posts rot first, here at the soil line', 'post']) : m.pin;
-    const post = posts[Math.min(2, posts.length - 1)];
+    const phone = (host.clientWidth || innerWidth) < 700;
+    // on a phone only the middle section is in view, so the label goes on a post of that section
+    const post = phone ? [...posts].sort((a, b) => Math.abs(Math.abs(a.cx) - m.bay / 2) - Math.abs(Math.abs(b.cx) - m.bay / 2) || b.cx - a.cx)[0] : posts[Math.min(2, posts.length - 1)];
     pin.set(text);
     pin.move(where === 'post' ? new THREE.Vector3(post.cx, .25, post.box.max.z) : where === 'bottom' ? new THREE.Vector3(-m.bay / 2, .3, front) : new THREE.Vector3(-m.bay / 2, top * .6, front));
-    st.frameView('main', { cx: 0, cy: top * .5, w: half * 2.5 + 3, h: top + 2.6, cz: ZR });
+    // a phone shows the middle section and its two posts; a wider screen shows all three sections
+    st.frameView('main', { cx: 0, cy: top * .5, w: phone ? m.bay + 3.4 : half * 2.5 + 3, h: top + 2.6, cz: ZR });
     st.dirty();
   }
   return {

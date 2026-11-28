@@ -128,11 +128,23 @@ function select(id, force) {
     $('.lab-next [data-nav="1"]', root).innerHTML = `<span>Next: ${esc(nx.name)}</span>${icons.next}`;
   }
   body.classList.remove('in'); void body.offsetWidth;
+  $('.lab', root).classList.toggle('tool', !home);
   if (home) { body.innerHTML = homeHTML(); if (visible) helpOnce('lab'); }
-  else { stop = RENDER[id](body) || null; if (!fromLink) visit.addLab(id); } // tools opened go in the picks summary and the share link
+  else { stop = RENDER[id](body) || null; liveWrap(body); if (!fromLink) visit.addLab(id); } // tools opened go in the picks summary and the share link
   body.classList.add('in');
   root.scrollTo?.({ top: 0 }); $('.lab', root).scrollTop = 0;
   if (app.mode === 'lab') { const h = '#lab' + (home ? '' : '-' + id); if (location.hash !== h) history.replaceState(null, '', h); }
+}
+// The picture and everything that changes it (sliders, choices, the numbers that come out) go in one
+// block. On a phone the picture stays in view at the top of that block while its controls scroll
+// under it, so a choice and what it does are on screen together. Lists, charts and the math follow.
+function liveWrap(body) {
+  const kids = [...body.children], at = kids.findIndex(k => k.matches('.l3d-host'));
+  if (at < 0) return;
+  let end = at;
+  kids.forEach((k, i) => { if (i > at && k.matches('.lab-ctl, .lab-grid, .vs-grid') && !k.matches('.lab-card')) end = i; });
+  const live = document.createElement('div'); live.className = 'lab-live';
+  kids[at].before(live); live.append(...kids.slice(at, end + 1));
 }
 function homeHTML() {
   const tile = (t, i) => `<button class="lab-card lab-tile${t.more ? ' more' : ''}" data-tool="${t.id}">
@@ -170,17 +182,27 @@ const WSTYLES = [
   { id: 'picket', name: 'Picket', note: 'About three-quarters solid, once you count the rails behind the pickets', eps: h => ({ 3: .76, 4: .74, 5: .73 })[h] ?? .74, hs: [3, 4, 5], bay: 8 },
   { id: 'split', name: 'Split rail', note: 'About 20 to 25% solid', eps: h => h <= 3 ? .2 : .24, hs: [3, 4], bay: 10 },
   { id: 'alu', name: 'Aluminum', note: 'About 20% solid. Typical 6 ft panels', eps: h => ({ 4: .22, 5: .21, 6: .2 })[h] ?? .21, hs: [4, 5, 6], bay: 6 },
-  { id: 'chain', name: 'Chain link', note: 'Fabric about 15% solid, plus the top rail and posts. Posts up to 10 ft apart (ASTM F567)', eps: h => .15 + 1.37 / (12 * h) + 1.62 / 120, hs: [4, 5, 6], bay: 10 }
+  { id: 'chain', name: 'Chain link', note: 'Fabric about 15% solid, plus the top rail and posts, all round. Posts up to 10 ft apart (ASTM F567)', eps: h => .15 + 1.37 / (12 * h) + 1.62 / 120, hs: [4, 5, 6], bay: 10, members: 'round' }
 ];
+// A fence under 70% solid is an "open sign or lattice framework" in ASCE 7 (Fig. 29.4-1), not a wall
+// with holes: the force is worked out on the solid area alone, with a coefficient set by how open the
+// fence is and by whether its parts are flat-sided (pickets, rails, square tube) or round (wire and
+// pipe; these are the values for small round parts, D·√q ≤ 2.5, which fence wire and rail always are).
+export const OPEN_CF = { flat: [2.0, 1.8, 1.6], round: [1.2, 1.3, 1.5] };   // ε under 0.1, 0.1 to 0.29, 0.3 to 0.7
 const PRESETS = [[25, 'Breezy'], [58, 'Severe storm'], [80, 'Derecho'], [115, 'Ohio design gust']];
 export function windLoad({ V, h, exposure, style }) {
   const Kz = exposure === 'C' ? 0.85 : 0.57, Kd = 0.85, Kzt = 1, Ke = 1, G = 0.85, Cf = 1.3;
   const q = 0.00256 * Kz * Kzt * Kd * Ke * V * V;              // psf, ASCE 7-16 Eq. 26.10-1
-  const eps = clamp(style.eps(h), 0, 1);
-  const red = eps >= .999 ? 1 : 1 - Math.pow(1 - eps, 1.5);    // ASCE 7 reduction for walls with openings
-  const p = q * G * Cf * red;                                   // psf on the gross area
-  const perFt = p * h, perPost = perFt * style.bay, moment = perPost * 0.55 * h;
-  return { q, eps, red, p, perFt, perPost, moment, Kz, Kd, G, Cf };
+  const eps = clamp(style.eps(h), 0, 1), open = eps < .7;
+  // 70% solid and up: a solid wall, less the ASCE 7 allowance for openings (Fig. 29.3-1, note 2)
+  const red = open || eps >= .999 ? 1 : 1 - Math.pow(1 - eps, 1.5);
+  // under 70% solid: open framework, force on the solid area (Fig. 29.4-1)
+  const cfOpen = open ? OPEN_CF[style.members === 'round' ? 'round' : 'flat'][eps < .1 ? 0 : eps < .3 ? 1 : 2] : null;
+  const net = open ? cfOpen * eps : Cf * red;                   // force coefficient on the gross area
+  const p = q * G * net;                                        // psf on the gross area
+  const arm = open ? .5 : .55;                                  // where the push acts, as a share of the height
+  const perFt = p * h, perPost = perFt * style.bay, moment = perPost * arm * h;
+  return { q, eps, red, open, cfOpen, net, arm, p, perFt, perPost, moment, Kz, Kd, G, Cf };
 }
 
 function wind(body) {
@@ -213,8 +235,8 @@ function wind(body) {
       <p><b>Velocity pressure</b> (ASCE 7-16 Eq. 26.10-1): q = 0.00256 · K<sub>z</sub> · K<sub>zt</sub> · K<sub>d</sub> · K<sub>e</sub> · V² <span class="mono" id="mQ"></span></p>
       <p>K<sub>z</sub> = 0.57 for houses and trees (Exposure B) or 0.85 for open ground (Exposure C), 0–15 ft (Table 26.10-1). K<sub>zt</sub> = 1 (flat ground). K<sub>d</sub> = 0.85. K<sub>e</sub> = 1.</p>
       <p><b>Force on a freestanding wall</b> (Eq. 29.3-1): F = q · G · C<sub>f</sub> · A<sub>s</sub>, with gust factor G = 0.85 and C<sub>f</sub> = 1.3 for a long wall standing on the ground (Fig. 29.3-1, s/h = 1).</p>
-      <p><b>Open styles</b>: C<sub>f</sub> is multiplied by 1 − (1 − ε)<sup>1.5</sup>, where ε is the solid share of the section. <span class="mono" id="mE"></span> The solid shares are measured off the Executive App's own models, face-on, from post centre to post centre and from the ground to the top: picket about 75% (the rails behind the gaps count), split rail 20–24%, aluminum 20–22%, lattice top 91%. Chain-link fabric is thin wire, so it's worked out instead: about 15% for the fabric, plus the top rail and posts.</p>
-      <p><b>Bending at the ground</b>: the resultant acts at 0.55 h above grade, so M = F · 0.55 h.</p>
+      <p><b>Fences with gaps</b>: ε is the solid share of the section. At 70% solid and up (picket, lattice top) the code still treats the fence as a wall and multiplies C<sub>f</sub> by 1 − (1 − ε)<sup>1.5</sup> (Fig. 29.3-1). Under 70% solid (split rail, aluminum, chain link) it is an open framework (Fig. 29.4-1): the force is worked out on the solid area alone, F = q · G · C<sub>f</sub> · ε · A, with C<sub>f</sub> = 1.8 for flat-sided parts at 10 to 29% solid (1.6 from 30 to 70%), and 1.3 for small round parts such as chain-link wire and pipe. <span class="mono" id="mE"></span> The solid shares are measured off the Executive App's own models, face-on, from post centre to post centre and from the ground to the top: picket about 75% (the rails behind the gaps count), split rail 20–24%, aluminum 20–22%, lattice top 91%. Chain-link fabric is thin wire, so it's worked out instead: about 15% for the fabric, plus the top rail and posts.</p>
+      <p><b>Bending at the ground</b>: on a solid fence the push acts at 0.55 h above the ground, so M = F · 0.55 h. On an open fence it acts at mid-height, 0.5 h.</p>
       <p><b>The moving air</b> is the average flow, slowed way down so you can follow it. The open-yard wind grows with height (ASCE 7 power law, 1/7 among houses, 1/9.5 in open country). Air that gets through an open fence is worked out from the pressure loss of a perforated plate (Idelchik, <i>Handbook of Hydraulic Resistance</i>, diagram 8-1) and actuator-disc momentum. Behind a fence less than about 30% open the air rolls back toward the fence (Perera 1981; <i>Scientific Reports</i> 4:6619, 2014). In wind-tunnel work that swirl reaches about 13 fence heights back; turbulence shortens it, so it's drawn 10 heights long among houses and 12 in open country. Further back the slow air recovers as Perera's far-wake formula (as given in <i>Wind Energy Science</i> 1:101, 2016). What can't get through goes over the top, faster.</p>
       <p><b>Ends and corners</b> see higher pressure than the middle of a long run (ASCE 7 Case C), which is why end, corner and gate posts matter most.</p>
       <p class="src">Gust speeds are 3-second gusts. 115 mph is Ohio's ultimate design wind speed for ordinary buildings, a rare event. These are unfactored loads for comparing styles, not a stamped design. Fences in 3D are the Executive App's models: no-dig dog-ear privacy, shadowbox, lattice top, spaced picket, cedar split rail, 3-rail aluminum and galvanized chain link.</p>`)}`;
@@ -231,7 +253,7 @@ function wind(body) {
     $('#rBags', body).textContent = fmt(r.perPost / 80, 1);
     $('#wgN', body).textContent = fmt(r.perPost, 0);
     $('#mQ', body).textContent = `= ${fmt(r.q, 1)} psf at ${st.V} mph`;
-    $('#mE', body).textContent = `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, factor ${fmt(r.red, 2)}.`;
+    $('#mE', body).textContent = r.open ? `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, C_f ${fmt(r.cfOpen, 1)} on the solid area.` : `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, factor ${fmt(r.red, 2)}.`;
     for (const b of $$('#wStyle .chip', body)) b.setAttribute('aria-pressed', String(b.dataset.s === st.style.id));
     for (const b of $$('.presets .chip', body)) b.setAttribute('aria-pressed', String(+b.dataset.v === st.V));
     const all = WSTYLES.map(s => { const h = s.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, s.hs[0]); return { s, h, r: windLoad({ ...st, style: s, h }) }; });
@@ -311,12 +333,12 @@ function wind(body) {
 // Ranges are the ones already printed in the GFS brochure (p. 9, 11, 31, 77). The
 // toggles only move the estimate inside the range; nothing here goes past it.
 const LIFE = [
-  { id: 'pt', name: 'Pressure-treated pine', range: [10, 15], wood: true, care: 'Stain or seal every few years', first: 'Boards check, twist and turn gray. Wood posts rot where they meet the soil, where there is both air and water.', src: 'GFS brochure p. 9 (up to about 15 years). Fannie Mae useful-life tables list a 6 ft wood privacy fence at 15 years (10 to 20).' },
+  { id: 'pt', name: 'Pressure-treated pine', range: [10, 15], wood: true, care: 'Stain or seal every few years', first: 'Boards check, twist and turn gray. Wood posts rot where they meet the soil, where there is both air and water.', src: 'GFS brochure p. 9 (up to about 15 years). Fannie Mae useful-life tables list a 6 ft wood privacy fence at 15 years (10 to 20). HUD’s capital-needs table gives a wood board fence 20 to 25, so this range is on the cautious side.' },
   { id: 'wrc', name: 'Western Red Cedar', range: [15, 30], wood: true, care: 'Seal every 3 to 5 years, or let it gray', first: 'Surface weathering and graying. The heartwood\'s natural oils resist decay, so boards outlast pine.', src: 'GFS brochure p. 9 and 11 (15 to 30 years). Re-seal interval from brochure p. 27.' },
   { id: 'nwc', name: 'Northern White Cedar', range: [15, 30], wood: true, care: 'Seal every 3 to 5 years, or let it gray', first: 'Surface weathering. Very decay resistant, and it moves less as it dries than pine.', src: 'GFS brochure p. 9 and 11 (15 to 30 years).' },
-  { id: 'vinyl', name: 'Homeland vinyl', range: [20, 30], care: 'Wash it once a year', first: 'Knocks from mowers and trimmers, and stress at the gate. Thin big-box vinyl fades and cracks first; Homeland walls are thicker.', src: 'Angi: 20 to 30 years. Fannie Mae useful-life tables: PVC fencing 25 years. Homeland limited lifetime warranty (brochure p. 31).' },
-  { id: 'alu', name: 'Elite aluminum', range: [30, 45], plus: true, care: 'Nothing. Rinse if you want', first: 'Very little. Aluminum does not rust, and Elite\'s powder coat is covered for peeling and cracking.', src: 'GFS brochure p. 77 (30+ years). Elite lifetime warranty on the finish (brochure p. 52).' },
-  { id: 'cl', name: 'Galvanized chain link', range: [20, 30], care: 'None', first: 'The zinc coating wears slowly, most where the fabric touches wet soil or mulch.', src: 'GFS brochure p. 77 (20 to 30 years). Fannie Mae lists chain link at 40 years.' },
+  { id: 'vinyl', name: 'Homeland vinyl', range: [20, 30], care: 'Wash it once a year', first: 'Knocks from mowers and trimmers, and stress at the gate. Thin big-box vinyl fades and cracks first; Homeland walls are thicker.', src: 'Angi: 20 to 30 years. Fannie Mae useful-life tables: PVC fencing 25 years. HUD’s capital-needs table is more cautious, 15 to 20. Homeland limited lifetime warranty (brochure p. 31).' },
+  { id: 'alu', name: 'Elite aluminum', range: [30, 45], plus: true, care: 'Nothing. Rinse if you want', first: 'Very little. Aluminum does not rust, and Elite\'s powder coat is covered for peeling and cracking.', src: 'GFS brochure p. 77 (30+ years). Elite lifetime warranty on the finish (brochure p. 52). HUD’s capital-needs table lists steel or aluminum fence at 20 to 25, which covers painted steel too.' },
+  { id: 'cl', name: 'Galvanized chain link', range: [20, 30], care: 'None', first: 'The zinc coating wears slowly, most where the fabric touches wet soil or mulch.', src: 'GFS brochure p. 77 (20 to 30 years). Fannie Mae and HUD both list chain link at 40 years, so this range is on the cautious side.' },
   { id: 'clb', name: 'Black vinyl-coated chain link', range: [25, 35], care: 'None', first: 'Trimmer nicks in the coating along the bottom.', src: 'GFS brochure p. 77 (25 to 35 years).' },
   { id: 'split', name: 'Cedar split rail', range: [15, 30], wood: true, care: 'None needed', first: 'Posts at the soil line. Mortised rails have no nails to work loose.', src: 'GFS brochure p. 77 (15 to 30 years).' }
 ];
@@ -338,12 +360,11 @@ function life(body) {
   const MAXY = 50;
   body.innerHTML = `
     <div class="life-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the fence in 3D…</div></div>
+    <div class="lab-ctl vs-ctl life-mat"><div class="chips wrap" id="lMat">${LIFE.map(x => `<button class="chip" data-m="${x.id}">${esc(x.name)}</button>`).join('')}</div></div>
     <div class="lab-grid">
       <div class="lab-vis life-vis"><div class="life-big"><b class="mono" id="lY"></b><span>years, about</span></div>
         <div class="life-axis" id="lAxis"></div><p class="lab-note" id="lFirst"></p></div>
       <div class="lab-ctl">
-        <div class="lab-label">Material</div>
-        <div class="chips wrap" id="lMat">${LIFE.map(x => `<button class="chip" data-m="${x.id}">${esc(x.name)}</button>`).join('')}</div>
         <div class="lab-label">This yard</div><div class="toggles" id="lTog"></div>
         <div class="readouts one"><div><b id="lCare"></b><small>Upkeep</small></div></div>
       </div>
@@ -363,7 +384,8 @@ function life(body) {
     const ticks = careEvery && on.has('seal') ? Array.from({ length: Math.floor(e.years / careEvery) }, (_, i) => `<em style="left:${(i + 1) * careEvery / MAXY * 100}%" title="Seal"></em>`).join('') : '';
     $('#lAxis', body).innerHTML = `<div class="la-track"><div class="la-range" style="left:${m.range[0] / MAXY * 100}%;width:${(m.range[1] - m.range[0]) / MAXY * 100}%">${m.plus ? '<span class="la-plus"></span>' : ''}</div>${ticks}<div class="la-mark" style="left:${(m.plus ? m.range[0] : e.years) / MAXY * 100}%"></div></div><div class="la-ticks">${[0, 10, 20, 30, 40, 50].map(tick).join('')}</div>${ticks ? '<p class="src">Dots: a re-seal about every ' + careEvery + ' years.</p>' : ''}`;
     $('#lTog', body).innerHTML = LTOGGLES.filter(x => x.on(m)).map(x => `<label class="tog"><input type="checkbox" data-k="${x.id}" ${on.has(x.id) ? 'checked' : ''}><i></i><span>${esc(x.label)}</span></label>`).join('');
-    for (const b of $$('#lMat .chip', body)) b.setAttribute('aria-pressed', String(b.dataset.m === m.id));
+    for (const b of $$('#lMat .chip', body)) { b.setAttribute('aria-pressed', String(b.dataset.m === m.id));
+      if (b.dataset.m === m.id) { const box = b.parentElement; if (box.scrollWidth > box.clientWidth + 4) box.scrollLeft += b.getBoundingClientRect().left - box.getBoundingClientRect().left - (box.clientWidth - b.offsetWidth) / 2; } }
     $('#lChart', body).innerHTML = LIFE.map(x => `<button class="lrow${x === m ? ' on' : ''}" data-m="${x.id}"><span>${esc(x.name)}</span><span class="lr-t"><i style="left:${x.range[0] / MAXY * 100}%;width:${(x.range[1] - x.range[0]) / MAXY * 100}%" class="${x.plus ? 'plus' : ''}"></i></span><b class="mono">${x.plus ? x.range[0] + '+' : x.range[0] + '–' + x.range[1]}</b></button>`).join('');
     $('#lSrc', body).innerHTML = LIFE.map(x => `<p><b>${esc(x.name)}</b>: ${esc(x.src)}</p>`).join('');
   };
@@ -474,12 +496,13 @@ function frost(body) {
         <div class="vis-note f3d-note" hidden>Post movement drawn ${DRAWN} times bigger than life so you can see it.</div>
       </div>
     </div>
-    ${math(`<p><b>Frost line</b>: how deep the ground freezes in the hardest winters, 36 in in Toledo and Lucas County and 42 in across Michigan. A typical winter freezes it about two-thirds of the way down. A GFS driven post goes 48 in, past both.</p>
+    ${math(`<p><b>Frost line</b>: how deep the building code says the ground can freeze in the hardest winters, 36 in in Toledo and Lucas County and 42 in across Michigan. Most winters freeze about half that deep. A GFS driven post goes 48 in, past both.</p>
       <p><b>Frost heave</b>: in wet clay, water is drawn up to the freezing front and freezes into seams of ice (ice lenses) that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A footing whose bottom is in or near the frozen layer rides up with it. At the thaw the ground settles, but loose soil falls into the gap under the footing, so it never quite comes back down, and it creeps up a little more each winter.</p>
-      <p><b>Why depth matters</b>: the arrows show it. Frozen soil grips a post along the frozen part (up arrows). Unfrozen soil below the frost holds it along the rest (down arrows). A post with plenty of length below the frost line is held; a footing that ends at or above it is not. A flared top, where the top of a hole caved in, gives the frost even more to grab.</p>
-      <p><b>The numbers here are a picture, not a measurement</b>: how far a post moves depends on how wet the clay is, how cold the winter gets and how deep the frost goes. We show about 1¼ in of lift in a winter for a footing fully in frozen clay, with about a third of it left behind each spring, drawn ${DRAWN} times bigger.</p>
+      <p><b>Why depth matters</b>: the arrows show it. Frozen soil grips a post along the frozen part (up arrows). Unfrozen soil below the frost holds it along the rest (down arrows). A footing starts to give once more than half its length is frozen, and rides all the way up with the ground once it is frozen to the bottom. A post with plenty of length below the frost line is held. A flared top, where the top of a hole caved in, gives the frost even more to grab.</p>
+      <p><b>The numbers here are a picture, not a measurement</b>: how far a post moves depends on how wet the soil is, how cold the winter gets and how deep the frost goes. We use the least the ground can lift: water grows about 9% as it freezes, which comes to about ½ in for each foot of wet soil that freezes (¾ in in a typical Toledo winter, 1½ in in a hard one). Ice seams can add a lot to that. About a third is left behind each spring, because a lifted post mostly stays lifted. Drawn ${DRAWN} times bigger.</p>
+      <p><b>No post is frost-proof in every yard</b>. Wet, silty ground lifts more than well-drained ground, and a rough concrete plug gives frost far more to grip than a slim, smooth steel post. Driving 4 ft puts a foot or more of post in ground that doesn't freeze even in the hardest winter.</p>
       <p><b>Why GFS changes method by soil</b>: a driven steel post needs firm clay to grip. In sand, which drains and heaves far less but holds a driven post poorly, GFS sets pressure-treated posts in concrete instead.</p>
-      <p class="src">Frost depths: ${PLACES.map(p => esc(p.src)).join('; ')}.</p>`)}`;
+      <p class="src">Frost depths: ${PLACES.map(p => esc(p.src)).join('; ')}. Lift from freezing, and posts staying lifted: North Dakota Geological Survey, "Frost Heave" (2011).</p>`)}`;
   const svg = $('.frost-svg', body);
   let scene = null;
   const update = () => {
@@ -509,7 +532,7 @@ function frost(body) {
     const fz = frozenAt(mi, place.frost * winter.reach), up = ls.map(l => l.lift > .05);
     $('#fWhy', body).textContent = up[0] && up[1] ? 'Both concrete footings have been lifted' : up[0] ? 'The typical 24 in footing is being lifted' : fz.depth - fz.thawed > 1 ? 'Every post is holding' : 'The ground is thawed';
     $('#fWhyS', body).textContent = soil === 'sand' ? 'Sand drains, so it heaves much less than clay. GFS sets posts in concrete in sand, because sand holds a driven post poorly.'
-      : winter.id === 'typical' ? `A typical winter freezes about ${Math.round(place.frost * winter.reach)} in down. Footings that stop near that get lifted. GFS drives steel to 48 in, past the ${place.frost} in frost line.`
+      : winter.id === 'typical' ? `A typical winter freezes about ${Math.round(place.frost * winter.reach)} in down. A footing with more than half its length in frozen ground starts to lift. GFS drives steel to 48 in, past the ${place.frost} in frost line.`
       : `A hard winter freezes all the way to the ${place.frost} in frost line, so even a footing that stops right at it can be lifted. GFS drives steel to 48 in.`;
   };
   bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'soil') soil = v; if (n === 'winter') winter = WINTERS.find(w => w.id === v); update(); });
@@ -570,8 +593,8 @@ function gate(body) {
       <p><b>Which way a brace goes</b>: a brace from the bottom hinge corner up to the top latch corner is squeezed, so it bears wood on wood and props the latch side up. Run it the other way and it is pulled, so it hangs on the nails at its ends, pulled lengthwise. The NDS gives smooth nails a quarter of their hold in wood that dries after it's built, two-thirds of that again when toe-nailed: about 37 lb for four nails, less than a 4 ft gate asks of them. So the wrong-way brace lets go.</p>
       <p><b>Even a good brace drops a little</b>: the brace is cut to fit tight between the rails. As the rails dry they shrink across the grain (about 4½% for treated pine going from soaked to 12% moisture, from the USDA Wood Handbook), so each pocket opens about ⅛ in and the latch side settles about ⁵⁄₁₆ in before the brace bears again. That is why wood gates need an adjustment after the first year.</p>
       <p><b>GFS welded steel frame</b>: 1½ in square steel tube, welded all the way around and corner to corner. A welded frame doesn't slip, creep or shrink, so it stays square.</p>
-      <p><b>The hinge post</b>: the pull on the top hinge bends the post. A 3 in steel post (2⅞ in Schedule 40 pipe) is about 2½ times stiffer than a 4×4 and doesn't creep; a 4×4 outdoors keeps bending a little more for years (Eurocode 5 creep for wood outside). Posts set in concrete also get lifted by frost, each a little differently, so the latch post and the hinge post drift apart (the same model as Frost & posts, Toledo clay, typical winters). GFS drives its steel 4 ft, below the frost line. Driven steel needs clay to grip; in sand GFS sets posts in concrete.</p>
-      <p><b>What isn't counted</b>: kids swinging on the gate, slams, hinge screws working loose, rot, and a footing rocking in soft ground. Each of those only adds to the sag, so these numbers are the least a gate moves, not the most.</p>
+      <p><b>The hinge post</b>: the pull on the top hinge bends the post. A 3 in steel post (2⅞ in Schedule 40 pipe) is about 2½ times stiffer than a 4×4 and doesn't creep; a 4×4 outdoors keeps bending a little more for years (Eurocode 5 creep for wood outside). Posts set in concrete also get lifted by frost, each a little differently, so the latch post and the hinge post drift apart. That share is an estimate, not a measurement: it is the Frost & posts picture for Toledo clay in typical winters, and a wet yard or a hard winter moves posts more. GFS drives its steel 4 ft, below the frost line. Driven steel needs clay to grip; in sand GFS sets posts in concrete.</p>
+      <p><b>What isn't counted</b>: kids swinging on the gate, slams, hinge screws working loose, rot, and a footing rocking in soft ground. Each of those only adds to the sag, so the frame and post numbers are the least a gate moves, not the most.</p>
       <p class="src">Sources: EN 1995-1-1 (Eurocode 5) Table 7.1 nail slip modulus, Table 3.2 and 2.3.2.2 creep; NDS for Wood Construction, nail withdrawal and wet-service factors; USDA Forest Products Laboratory, Wood Handbook (loblolly pine shrinkage and density); GFS brochure p. 23 (steel frame) and p. 6 (posts).</p>`)}`;
   const svg = $('.gate-svg', body);
   let scene = null, raf = 0, live = true;

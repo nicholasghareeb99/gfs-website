@@ -26,7 +26,7 @@ Any agent working on the Lab (Claude, Codex, Antigravity) should read this first
 | Tool | The point | Honest basis | Still to do |
 |---|---|---|---|
 | No-dig vs dug | Driven steel is in the same day with no holes, spoil or concrete to cure | Install steps and volumes from the dig plan | Check spoil volume and bag count against a real 150 ft job; crew figures and tools look blocky |
-| Frost & posts | A post set short of the frost line gets lifted; steel driven 4 ft doesn't | Frost depth by county, heave model in `build-plan.mjs` | Lift is drawn bigger than life and the screen says so. Better: draw it true size with a close-up at the ground, like the gate latch view |
+| Frost & posts | A post set short of the frost line gets lifted; steel driven 4 ft doesn't | Frost depth by county; lift of ½ in per frozen foot (the least, from freezing alone) in `frost-plan.mjs` | Lift is drawn bigger than life and the screen says so. Better: draw it true size with a close-up at the ground, like the gate latch view |
 | Our build vs prefab | More wood and steel in the same 8 ft, and it stays straight | Part counts and sizes from the models; ageing model | Ageing (grey, rot band, lean) needs a year-by-year source check; rot timing is the weakest claim |
 | Gate sag | A gate drops at the latch because joints creep and posts lean; steel posts and a steel frame hold | Eurocode 5 joint creep, NDS nail values, beam bending | Hinges and post latch redrawn from the maker's drawing and photos; latch limits now come from the latch's own slot. Open: Nick to confirm the ¼ in and ⅝ in limits |
 | Grade Lab | We follow the ground, keep the top line clean and close the gaps | Geometry only | Real grass now hides small gaps a little, like a real yard: make sure the gap label still reads |
@@ -98,6 +98,59 @@ Next, in order of how much they change the picture:
    bigger wood texture and the contact shade (about a one-second pause once per page on a
    phone). The grass uses up to 46,000 tufts on an iPad and 26,000 on a phone; if it drops
    frames, lower the count. If the contact shade is what slows it, set `AO_STRENGTH` to 0.
+## Math check (2026-11-28)
+
+Every tool's numbers were recomputed by hand and against sources. What changed:
+
+- **Wind, open fences.** ASCE 7's allowance for openings, 1 − (1 − ε)^1.5, is only for walls at
+  least 70% solid. Split rail, aluminum and chain link are under that, and the code treats them as
+  open frameworks (Fig. 29.4-1): force on the solid area, C_f 1.8 for flat-sided parts, 1.3 for
+  small round ones, acting at mid-height. Split rail and aluminum barely moved. **Chain link came
+  down about 30%** (7 → 5 lb per ft at 58 mph, 6 ft). Picket, lattice top and solid are unchanged.
+- **Frost.** Two numbers had no source: "a typical winter freezes two-thirds of the code depth"
+  and "1¼ in of lift". Now: a typical winter freezes about **half** the code depth (18 in in
+  Toledo), and the ground lifts **½ in per frozen foot**, which is freezing expansion alone and so
+  the least it can be (North Dakota Geological Survey, 2011). A footing takes none of that until
+  half its length is frozen and all of it once frozen to the bottom. Effect: a store post in
+  concrete now rises about ¾ in in 15 years (was 3⅜ in); in dirt about 2 in (was 6½ in). In Gate
+  sag, frost adds about 5⁄16 in between wood posts at 15 years (was 1⅜ in).
+  The "typical winter" depth rests on frost-tube records from around the lower Great Lakes, not a
+  Toledo record. A Toledo source would be better.
+- **Gate sag** copy now says the frost share is an estimate, and that "the least a gate moves"
+  applies to the frame and post numbers.
+- **Lifespan** ranges match what is published (Lowe's, Angi, Fannie Mae). HUD's capital-needs
+  table is now quoted beside them where it differs: vinyl 15 to 20, steel or aluminum 20 to 25,
+  wood board 20 to 25, chain link 40.
+- Checked and left alone: velocity pressure and wall coefficients (ASCE 7-16), wood shrinkage
+  (Wood Handbook Table 4-3), vinyl post bending (beam formulas, Schedule 40 pipe section), dirt and
+  concrete volumes, gate weights, nail slip and creep factors.
+
+Still open:
+- No-post-is-frost-proof: the Frost tool holds a 4 ft driven post at zero lift in every winter (the
+  building-code rule: bottom below the frost line). The tool now says in words that no post is
+  frost-proof in every yard. If GFS has ever had a driven post lift, the tool should show it.
+- Steel wall thickness (Schedule 40) for line and gate posts is assumed, not confirmed by Nick.
+
+## Phones (2026-11-28)
+
+Nick: touch works, but it is tight and clunky on an iPhone. What was wrong: the heading block took
+about a third of the screen before the picture; two-view tools stacked their views 730 px tall, so
+only one could be seen at a time; the slider bar floated over the picture; and choices sat far below
+the picture, so you could not see what a tap did. Two notes were also printed on top of the
+readouts in Frost and Gate sag.
+
+Now, under 700 px wide:
+- One slim bar: All tools, the tool's name, previous and next.
+- The picture is 43% of the screen's height and **stays in view** while its sliders, choices and
+  readouts scroll under it (`.lab-live`, made by `liveWrap()` in `lab.mjs`).
+- Two-view tools show both views **side by side**; a button on each makes that side full width
+  and back (`solo` in `lab3d.mjs`).
+- Labels wrap inside a narrow view; depth ticks are hidden there.
+- Lifespan: the materials are one row to swipe under the picture, and the picture frames one
+  section instead of three.
+- "How to use" moved below the tool (the ? in the top bar opens the same steps).
+- iPad and wider are unchanged, except the Lifespan materials now sit under the picture there too.
+
 ## Hardware (from Nick, 2026-11-27)
 
 - Wood gates hang on **butterfly hinges** and close on **post-mount latches**. Both are

@@ -49,14 +49,14 @@ export function createFrostScene(host, { specs } = {}) {
 
   // ── labels ──
   const V3 = (x, y, z = 0) => new THREE.Vector3(x, y, z);
-  posts.forEach((o, k) => st.pin('main', V3(o.x, (k === 1 ? 7.65 : o.top + .45)), `<b>${o.P.name}</b><small>${o.P.sub}</small>`, o.P.pipe ? 'good two' : 'two'));   // the middle one sits higher so the three never overlap
+  posts.forEach((o, k) => st.pin('main', V3(o.x, o.top + .45), `<b>${o.P.name}</b><small>${o.P.sub}</small>`, o.P.pipe ? 'good two' : 'two', { up: k === 1 ? 54 : 0 }));   // the middle one sits a label's height higher so the three never overlap
   const frostL = st.pin('main', V3(-2.25, -3 - .45), '', 'frost'), frozenL = st.pin('main', V3(-2.25, 0), '', 'frost ice');
   for (let f = 1; f <= 4; f++) st.pin('main', V3(-6.35, -f + .02), f + ' ft', 'tick');
   const status = document.createElement('p'); status.className = 'l3d-status'; st.views[0].tag.append(status); st.views[0].inset.bottom = 54; st.views[0].inset.top = 64;
   st.frameView('main', FRAME);
 
   let S = {}, soilNow = null;
-  function set({ m = 3, winter = 1, frost = 36, soil = 'clay', reach = .67 } = {}) {
+  function set({ m = 3, winter = 1, frost = 36, soil = 'clay', reach = .5 } = {}) {
     S = { m, winter, frost, soil, reach };
     const fz = frozenAt(m, frost * reach);
     st.ground.frost(fz.depth * IN, soil === 'clay' ? 1 : 0, fz.thawed * IN);

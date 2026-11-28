@@ -14,10 +14,26 @@ test('wind: 6 ft solid privacy, 90 mph, suburban yard', () => {
   near(r.perPost, 533, 1);                                   // lb on one 8 ft section
   near(r.moment, r.perPost * 0.55 * 6, 1e-9);
 });
-test('wind: open fabric gets the ASCE 7 reduction 1 - (1 - e)^1.5', () => {
-  const r = windLoad({ V: 90, h: 6, exposure: 'B', style: chain });
-  near(r.red, 1 - Math.pow(0.85, 1.5), 1e-12);
-  assert.ok(r.perFt < windLoad({ V: 90, h: 6, exposure: 'B', style: solid }).perFt / 4);
+test('wind: a fence 70% solid or more is a wall with the ASCE 7 allowance 1 - (1 - e)^1.5', () => {
+  const r = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .74, bay: 8 } });
+  assert.equal(r.open, false);
+  near(r.red, 1 - Math.pow(0.26, 1.5), 1e-12);
+  near(r.p, r.q * 0.85 * 1.3 * r.red, 1e-9);
+  near(r.moment, r.perPost * 0.55 * 6, 1e-9);
+});
+test('wind: a fence under 70% solid is an open framework (ASCE 7 Fig. 29.4-1), force on the solid area', () => {
+  const flat = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .2, bay: 6 } });
+  assert.equal(flat.open, true);
+  near(flat.p, flat.q * 0.85 * 1.8 * .2, 1e-9);              // flat-sided, 10 to 29% solid
+  near(flat.moment, flat.perPost * 0.5 * 6, 1e-9);           // acts at mid-height
+  const round = windLoad({ V: 90, h: 6, exposure: 'B', style: { ...chain, members: 'round' } });
+  near(round.p, round.q * 0.85 * 1.3 * .15, 1e-9);           // small round parts: wire and pipe
+  const mid = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .5, bay: 8 } });
+  near(mid.p, mid.q * 0.85 * 1.6 * .5, 1e-9);                // 30 to 70% solid
+  assert.ok(round.perFt < windLoad({ V: 90, h: 6, exposure: 'B', style: solid }).perFt / 4);
+  // the two methods agree where they meet, at 70% solid
+  const lo = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .699, bay: 8 } }), hi = windLoad({ V: 90, h: 6, exposure: 'B', style: { eps: () => .7, bay: 8 } });
+  assert.ok(Math.abs(lo.p / hi.p - 1) < .05, `${lo.p} vs ${hi.p}`);
 });
 test('wind: open field (Exposure C) pushes 0.85/0.57 times harder', () => {
   const b = windLoad({ V: 70, h: 6, exposure: 'B', style: solid }), c = windLoad({ V: 70, h: 6, exposure: 'C', style: solid });
@@ -76,13 +92,19 @@ test('frost: driven steel past the frost line never lifts; footings at or above 
   const [shallow, frostline, steel] = F.POSTS, typical = F.WINTERS[0].reach, hard = F.WINTERS[1].reach;
   for (const pl of F.PLACES) for (const soil of ['clay', 'sand']) for (const reach of [typical, hard]) for (let m = 0; m <= 5; m += .25) for (const w of [1, 5, 10])
     assert.equal(F.lift(steel, m, w, pl.frost, soil, reach).lift, 0, `steel moved: ${pl.id} ${soil} m${m} w${w}`);
-  // Toledo, clay, a typical winter: the 24 in footing lifts, the 36 in one holds
-  assert.ok(F.lift(shallow, 3, 1, 36, 'clay', typical).lift > 1);
-  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', typical).lift < .05);
-  // a hard winter reaches the frost line, so a footing that stops right at it can lift too
-  assert.ok(F.lift(frostline, 3, 1, 36, 'clay', hard).lift > 1);
-  // Michigan's 42 in frost line: 36 in of concrete is above it, so it lifts even in a typical winter
-  assert.ok(F.lift(frostline, 3, 1, 42, 'clay', typical).lift > .25);
+  // a typical winter freezes about half the code depth: 18 in in Toledo
+  near(typical, .5, 1e-12); near(F.frozenAt(3, 36 * typical).depth, 18, 1e-9);
+  // the ground lifts half an inch for each foot that freezes (freezing expansion alone, the least)
+  near(F.groundLift(36, 'clay'), 1.5, 1e-12); near(F.groundLift(18, 'clay'), .75, 1e-12);
+  // a footing takes none of it until half its length is frozen, all of it once frozen to the bottom
+  near(F.grip(12, shallow, 36), 0, 1e-12); near(F.grip(18, shallow, 36), .5, 1e-12); near(F.grip(24, shallow, 36), 1, 1e-12); near(F.grip(36, shallow, 36), 1, 1e-12);
+  // Toledo, clay, a typical winter: the 24 in footing lifts 3/8 in, the 36 in one holds
+  near(F.lift(shallow, 3, 1, 36, 'clay', typical).lift, .375, 1e-9);
+  assert.equal(F.lift(frostline, 3, 1, 36, 'clay', typical).lift, 0);
+  // a hard winter reaches the frost line, so a footing that stops right at it lifts with the ground
+  near(F.lift(frostline, 3, 1, 36, 'clay', hard).lift, 1.5, 1e-9);
+  // Michigan's 42 in frost line: a typical winter freezes 21 in, more than half of a 36 in footing
+  assert.ok(F.lift(frostline, 3, 1, 42, 'clay', typical).lift > .1);
   // sand heaves about a fifth as much
   near(F.lift(shallow, 3, 1, 36, 'sand', hard).lift, F.lift(shallow, 3, 1, 36, 'clay', hard).lift * .2, 1e-9);
   // each spring leaves some behind, and the next winter starts from there

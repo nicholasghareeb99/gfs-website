@@ -1050,3 +1050,54 @@ body.has-back .top .brand{display:none}
 .toc-list button.here{background:rgba(61,127,224,.2)}
 .toc-top:active,.toc-list button:active{background:rgba(255,255,255,.08)}
 @media (min-width:700px) and (orientation:portrait){body:not(.br-full):not(.chrome-hidden) #v-brochure .stage{padding-bottom:calc(var(--dock) + var(--sab) + 62px)}}
+
+/* ── Fence Lab on a phone ─────────────────────────────────────────
+   One slim bar instead of a heading block, and the picture stays in view at the top while the
+   sliders, choices and numbers that go with it scroll under it. */
+.lab-live{display:grid;gap:16px}
+.lab-ctl .vis-note{position:static}
+@media (max-width:699px){
+  .lab.tool{gap:12px}
+  .lab.tool .lab-head{position:relative;z-index:6;grid-template-columns:auto minmax(0,1fr) auto auto auto;align-items:center;gap:6px;min-height:44px}
+  .lab.tool .lab-nav{display:contents}
+  .lab.tool .lab-nav .grow,.lab.tool .lab-head .eyebrow,.lab.tool #labLine,.lab.tool .lab-nav [data-nav=home] span{display:none}
+  .lab.tool .lab-nav [data-nav=home]{width:40px;height:40px;padding:0;justify-content:center;border-radius:20px}
+  .lab.tool .lab-head h2{grid-row:1;grid-column:2;font-size:20px;line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:4px}
+  .lab.tool .lab-count{min-width:34px;font-size:12px}
+  .lab.tool .lab-how{order:3}
+  .lab.tool .lab-foot{order:4}
+  .lab-live{display:flex;flex-direction:column;gap:10px}
+  .lab-live>.l3d-host:not([hidden]){--l3d-fit:1;position:sticky;top:calc(var(--top) + var(--sat));z-index:5;height:min(100vw,43svh);flex:none;margin:0}
+  .lab-live>.l3d-host:not([hidden])::before{content:'';position:absolute;left:-16px;right:-16px;bottom:calc(100% - 20px);height:calc(var(--top) + var(--sat) + 30px);background:var(--void);z-index:-1}
+  .lab-live>.l3d-host:not([hidden])::after{content:'';position:absolute;left:-16px;right:-16px;top:calc(100% - 20px);height:30px;background:linear-gradient(180deg,var(--void) 20px,rgba(6,12,20,0));z-index:-1;pointer-events:none}
+  .lab-live>.l3d-host .l3d-wait{height:100%}
+  .lab-live>.l3d-host:not([hidden])~.vs-ctl{position:static;box-shadow:none;background:var(--panel);backdrop-filter:none;-webkit-backdrop-filter:none;padding:10px 14px}
+  .lab-live .lab-ctl{padding:12px 14px;gap:10px;border-radius:18px}
+  .lab-live .lab-grid{gap:10px}
+  .lab-live .l3d-status{font-size:11.5px;line-height:1.25;padding:5px 8px;left:6px;right:6px;bottom:6px}
+  .lab-live .l3d-tag{left:6px;top:6px;font-size:10px;padding:5px 7px;max-width:calc(100% - 12px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lab-live .l3d:not(.stacked) .l3d-view+.l3d-view{border-left-width:3px}
+}
+.l3d-solo{display:none}
+.l3d.fit .l3d-solo{position:absolute;right:6px;top:6px;height:32px;min-width:32px;padding:0 8px;border-radius:16px;display:inline-flex;align-items:center;justify-content:center;gap:5px;pointer-events:auto;color:#fff;background:rgba(6,12,20,.6);border:1px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);font:700 12px/1 var(--font)}
+.l3d.fit .l3d-solo::after{content:'';position:absolute;inset:-7px}
+.l3d-solo svg{width:15px;height:15px}
+.l3d-solo .both,.l3d-solo span,.l3d-solo.on .one{display:none}
+.l3d-solo.on .both,.l3d-solo.on span{display:block}
+.l3d-solo:active{transform:scale(.94)}
+.l3d.fit .l3d-tag{max-width:calc(100% - 50px)}
+.l3d.narrow .l3d-pin>span{white-space:normal;text-align:center;line-height:1.15}
+.l3d.narrow .l3d-pin.tick{display:none}
+@media (max-width:699px){
+  .lab-live>.l3d-host:not([hidden])~.vs-ctl{z-index:auto}
+  body:has(#v-lab.on) .top{background:linear-gradient(180deg,var(--void) 86%,rgba(6,12,20,0))}
+}
+.l3d-pin.up>span{bottom:calc(6px + var(--up))}
+.l3d-pin.up>span::before{content:'';position:absolute;left:50%;top:calc(100% + 4px);width:2px;height:calc(var(--up) - 2px);margin-left:calc(-1px - var(--dx));background:rgba(255,255,255,.85);border-radius:1px}
+@media (max-width:699px){
+  /* Lifespan: the materials in one row to swipe, right under the picture */
+  .lab-live .life-mat{padding:8px 10px}
+  .lab-live .life-mat .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;touch-action:pan-x;margin:0 -10px;padding:0 10px;scroll-snap-type:x proximity}
+  .lab-live .life-mat .chips::-webkit-scrollbar{display:none}
+  .lab-live .life-mat .chip{flex:none;scroll-snap-align:center}
+}
