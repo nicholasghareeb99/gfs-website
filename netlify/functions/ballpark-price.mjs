@@ -2,8 +2,8 @@
 //
 // The per-foot and per-gate rates live only in Firestore settings/global,
 // which visitors cannot read. This function reads them with a read-only
-// service account, prices the project exactly the way the ballpark page
-// used to do it in the browser, and returns the planning range only.
+// service account, uses the app’s section and cent rounding, and returns the planning
+// range only.
 //
 // Safe to deploy before it is configured: without the two environment
 // variables below it answers 503 {"error":"not-configured"} and the page
@@ -30,7 +30,7 @@
 // The answer never carries a total, a per-foot figure, billable feet or
 // anything else a rate follows from directly.
 import crypto from 'node:crypto';
-import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, parseRange, positiveRate, priceBand, pricingRows } from '../../public/assets/js/ballpark-pricing-rules.mjs';
+import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, parseRange, positiveRate, priceBand, pricingRows, roundPrice } from '../../public/assets/js/ballpark-pricing-rules.mjs';
 
 const SCOPE = 'https://www.googleapis.com/auth/datastore';
 const MAX_FEET = 2000;
@@ -52,8 +52,7 @@ const SESSION_LABEL = 'gfs-ballpark-session-v1';
 const SESSION_RE = /^v1\.[A-Za-z0-9_-]{20,400}\.[A-Za-z0-9_-]{43}$/;
 const USE_COLLECTION = 'ballparkPriceUse';
 
-// ---- pricing math: a port of assets/js/ballpark.js, kept in step with it ---
-// tests/ballpark-server-parity.test.mjs runs both and compares them.
+// ---- pricing math: same section spacing and cents as the quote core ---
 export function slugify(name) { return String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 
 // Same reading of the "Name : perFoot : single : double" list as the page.
@@ -78,38 +77,44 @@ function removalRate(factors, material) {
   if (material === 'chain') return factors.remChain;
   return factors.remOther;
 }
-export function readFactors(raw) {
-  return Object.fromEntries(Object.entries(DEFAULT_REMOVAL_RATES).map(([key, fallback]) => [key, positiveRate(raw?.[key], fallback)]));
+export function readFactors(raw, { materials = raw?.materials, styleMaterialMap = raw?.styleMaterialMap } = {}) {
+  const removal = Object.fromEntries(Object.entries(DEFAULT_REMOVAL_RATES).map(([key, fallback]) => [key, positiveRate(raw?.[key], fallback)]));
+  return { ...removal, materials, styleMaterialMap };
 }
 
-function pricePart(styles, part, styleName) {
+function pricePart(styles, factors, part, styleName) {
   const id = slugify(styleName);
   const fence = Object.hasOwn(styles, id) ? styles[id] : null;
   if (!fence || !Number.isFinite(fence.perFoot) || fence.perFoot <= 0) return null;
   if (!Number.isFinite(part.feet) || part.feet <= 0) return null;
   const named = supportedStyleHeight(fence.name), height = partHeight(fence.name, part.height);
   if (!canPriceHeight(fence.name, height) || (named === null && ![4, 5, 6, 8].includes(height))) return null;
-  const size = getSectionSize(fence.name);
+  const size = getSectionSize(fence.name, factors);
   const billable = size ? Math.ceil(part.feet / size) * size : part.feet;
   const gates = gateCost(part.singleGates, part.doubleGates, fence.singleGate, fence.doubleGate);
-  return gates === null ? null : { fenceCost: billable * fence.perFoot, gateCost: gates };
+  return gates === null ? null : { fenceCost: roundPrice(billable * fence.perFoot), gateCost: gates };
 }
 
 // null whenever the project cannot be priced: a missing rate is not a free fence.
-export function priceProject(styles, factors, request, mainStyle) {
+export function projectAmount(styles, factors, request, mainStyle) {
   const parts = request.parts;
   // The page sends the whole length too (the main part is that length less
   // the added styles, rounded to 0.01 ft); removal is priced on the whole length.
   const sum = parts.reduce((s, p) => s + p.feet, 0);
   const totalFeet = request.removal.feet || sum;
   if (!Number.isFinite(totalFeet) || totalFeet <= 0 || totalFeet > MAX_FEET) return null;
-  const priced = parts.map((part, i) => pricePart(styles, part, i === 0 && mainStyle ? mainStyle : part.style));
+  const priced = parts.map((part, i) => pricePart(styles, factors, part, i === 0 && mainStyle ? mainStyle : part.style));
   if (priced.some(p => !p)) return null;
   if (request.removal.on && !['wood', 'chain', 'vinyl', 'aluminum', 'other'].includes(request.removal.material)) return null;
   // Removal is allowed for the same run length as the new fence.
-  const removal = request.removal.on ? totalFeet * removalRate(factors, request.removal.material) : 0;
+  const removal = request.removal.on ? roundPrice(totalFeet * removalRate(factors, request.removal.material)) : 0;
   const total = priced.reduce((s, p) => s + p.fenceCost, 0) + priced.reduce((s, p) => s + p.gateCost, 0) + removal;
-  return priceBand(total);
+  return roundPrice(total);
+}
+
+export function priceProject(styles, factors, request, mainStyle) {
+  const total = projectAmount(styles, factors, request, mainStyle);
+  return total === null ? null : priceBand(total);
 }
 
 // Other styles priced for the same project: same height as the customer's
@@ -201,10 +206,26 @@ export function plain(field) {
 let settingsCache = null;
 async function loadSettings(fetcher, project, token, now) {
   if (settingsCache && settingsCache.project === project && settingsCache.at > now - SETTINGS_TTL) return settingsCache.value;
-  const res = await fetcher(docUrl(project, 'settings/global'), { headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000) });
-  if (!res.ok) throw Error('Could not read the price list (HTTP ' + res.status + ')');
-  const fields = (await res.json()).fields || {};
-  const value = { styles: parsePricing(plain(fields.pricing)), factors: readFactors({ remWood: plain(fields.remWood), remChain: plain(fields.remChain), remOther: plain(fields.remOther) }) };
+  async function readDocument(name, optional = false) {
+    const response = await fetcher(docUrl(project, 'settings/' + name), {
+      headers: { Authorization: 'Bearer ' + token }, signal: AbortSignal.timeout(10000),
+    });
+    if (optional && response.status === 404) return null;
+    if (!response.ok) throw Error('Could not read pricing settings (HTTP ' + response.status + ')');
+    return (await response.json()).fields || {};
+  }
+  const [fields, materials, styleMaterialMap] = await Promise.all([
+    readDocument('global'), readDocument('materials', true), readDocument('styleMaterialMap', true),
+  ]);
+  const spacingFields = materials ?? fields.materials?.mapValue?.fields ?? {};
+  const value = {
+    styles: parsePricing(plain(fields.pricing)),
+    factors: readFactors({ remWood: plain(fields.remWood), remChain: plain(fields.remChain), remOther: plain(fields.remOther) }, {
+      materials: Object.fromEntries(Object.entries(spacingFields).map(([name, field]) =>
+        [name, { postSpacing: plain(field.mapValue?.fields?.postSpacing) }])),
+      styleMaterialMap: Object.fromEntries(Object.entries(styleMaterialMap || {}).map(([name, field]) => [name, plain(field)])),
+    }),
+  };
   settingsCache = { at: now, project, value };
   return value;
 }
