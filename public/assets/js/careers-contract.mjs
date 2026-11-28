@@ -48,10 +48,13 @@ function date(value, field, month = false) {
   const pattern = month ? /^\d{4}-\d{2}$/ : /^\d{4}-\d{2}-\d{2}$/;
   const full = month ? value + '-01' : value;
   const instant = typeof value === 'string' && pattern.test(value) && Date.parse(full + 'T00:00:00Z');
-  if (!Number.isFinite(instant) || new Date(instant).toISOString().slice(0, 10) !== full) fail(field, 'Enter a valid date.');
+  if (!Number.isFinite(instant) || new Date(instant).toISOString().slice(0, 10) !== full) {
+    fail(field, month ? 'Enter a valid month in YYYY-MM format, like 2025-06.' : 'Enter a valid date.');
+  }
   return value;
 }
-const baseKeys = ['roles', 'name', 'phone', 'email', 'street', 'city', 'state', 'zip', 'reachWay', 'reachTime',
+export const employmentKeys = ['company', 'role', 'start', 'end', 'duties', 'mayContact'];
+export const applicationKeys = ['roles', 'name', 'phone', 'email', 'street', 'city', 'state', 'zip', 'reachWay', 'reachTime',
   'transportation', 'license', 'fenceYears', 'fenceTypes', 'skills', 'otherSkills', 'tools', 'employment', 'pay',
   'hours', 'days', 'startDate', 'travel', 'authorized', 'adult', 'crewSize', 'business', 'liability', 'workersComp',
   'salesYears', 'onSiteQuote', 'heardFrom', 'notes', 'consent'];
@@ -61,6 +64,7 @@ export function normalizeStep(step, input, selected = []) {
     case 'roles': return {roles: choices(input.roles, Object.keys(roles), 'roles', true)};
     case 'contact': {
       const name = text(input.name, 'name', 120);
+      if (name.length < 2) fail('name', 'Enter at least two characters for your name.');
       const phone = text(input.phone, 'phone', 36);
       const email = text(input.email, 'email', 200).toLowerCase();
       if (!/^\+?[\d(). -]+$/.test(phone) || !/^(?:\d{10}|\+?1\d{10}|\+[2-9]\d{9,14})$/.test(phone.replace(/[^\d+]/g, ''))) {
@@ -84,13 +88,16 @@ export function normalizeStep(step, input, selected = []) {
     case 'employment': {
       const list = input.employment ?? [];
       if (!Array.isArray(list) || list.length > 3) fail('employment', 'Add up to three previous jobs.');
-      return {employment: list.map(row => {
-        keys(row, ['company', 'role', 'start', 'end', 'duties', 'mayContact'], 'employment');
-        const start = date(row.start, 'employment', true);
-        const end = row.end ? date(row.end, 'employment', true) : '';
-        if (end && end < start) fail('employment', 'An end month cannot be before the start month.');
-        return {company: text(row.company, 'employment', 120), role: text(row.role, 'employment', 100),
-          start, end, duties: text(row.duties, 'employment', 600), mayContact: choice(row.mayContact, yesNo, 'employment')};
+      return {employment: list.map((row, index) => {
+        const field = key => 'employment-' + index + '-' + key;
+        keys(row, employmentKeys, field('company'));
+        const company = text(row.company, field('company'), 120);
+        const role = text(row.role, field('role'), 100);
+        const start = date(row.start, field('start'), true);
+        const end = row.end === undefined || row.end === '' ? '' : date(row.end, field('end'), true);
+        if (end && end < start) fail(field('end'), 'An end month cannot be before the start month.');
+        return {company, role, start, end, duties: text(row.duties, field('duties'), 600),
+          mayContact: choice(row.mayContact, yesNo, field('mayContact'))};
       })};
     }
     case 'crew': return {crewSize: number(input.crewSize, 'crewSize', {min: 1, max: 150, whole: true}),
@@ -98,13 +105,14 @@ export function normalizeStep(step, input, selected = []) {
       workersComp: choice(input.workersComp, yesNo, 'workersComp')};
     case 'sales': return {salesYears: number(input.salesYears, 'salesYears', {max: 80}), onSiteQuote: choice(input.onSiteQuote, yesNo, 'onSiteQuote')};
     case 'pay': {
-      keys(input.pay, Object.keys(roles), 'pay');
+      keys(input.pay ?? {}, Object.keys(roles), 'pay');
       const pay = {};
       for (const role of selected) {
-        const entry = input.pay[role];
-        keys(entry, ['unit', 'amount'], 'pay');
-        const unit = choice(entry.unit, payByRole[role], 'pay');
-        pay[role] = {unit, amount: number(entry.amount, 'pay', {min: 0.01, max: unit === 'commission' ? 100 : 1000000})};
+        const field = key => 'pay-' + role + '-' + key;
+        const entry = input.pay?.[role] ?? {};
+        keys(entry, ['unit', 'amount'], field('unit'));
+        const unit = choice(entry.unit, payByRole[role], field('unit'));
+        pay[role] = {unit, amount: number(entry.amount, field('amount'), {min: 0.01, max: unit === 'commission' ? 100 : 1000000})};
       }
       return {pay, hours: number(input.hours, 'hours', {min: 1, max: 112, whole: true})};
     }
@@ -124,7 +132,7 @@ export function applicationSteps(selected = []) {
 }
 
 export function normalizeApplication(input) {
-  keys(input, baseKeys, 'application');
+  keys(input, applicationKeys, 'application');
   const selected = normalizeStep('roles', input).roles;
   const result = Object.assign({}, ...applicationSteps(selected).map(step => normalizeStep(step, input, selected)));
   if (new TextEncoder().encode(JSON.stringify(result)).length > maxPayload) fail('application', 'Shorten your written answers and try again.');

@@ -1,5 +1,6 @@
 import {applicationSteps, contract, days, fenceTypes, formName, maxPayload, normalizeApplication, normalizeStep,
   payByRole, payUnits, reachTimes, reachWays, roles, skills, states} from './careers-contract.mjs';
+import {applicationFormData} from './careers-form.mjs';
 
 const form = document.getElementById('application');
 const question = document.getElementById('question');
@@ -9,6 +10,7 @@ const count = document.getElementById('step-count');
 const error = document.getElementById('form-error');
 const back = document.getElementById('back');
 const next = document.getElementById('next');
+const nextArrow = next.querySelector('[aria-hidden="true"]');
 const storageKey = 'gfs-careers-draft-v1';
 const yesNo = {yes: 'Yes', no: 'No'};
 const roleNotes = {installer: 'Build and install fences', crew: 'Your own truck, tools and insurance',
@@ -151,7 +153,7 @@ function employment() {
     const change = (key, value) => set('employment', answers.employment.map((row, i) => i === index ? {...row, [key]: value} : row));
     const field = (key, options) => input('employment-' + index + '-' + key, options, historyFields[key], job[key], value => change(key, value));
     group.append(field('company', {maxlength: 120}), field('role', {maxlength: 100}),
-      pair(field('start', {type: 'month'}), field('end', {type: 'month'})),
+      pair(field('start', {type: 'month', placeholder: 'YYYY-MM'}), field('end', {type: 'month', placeholder: 'YYYY-MM'})),
       hint('Leave the end month blank if you still work there.'),
       field('duties', {type: 'textarea', rows: 2, maxlength: 600}),
       choices('employment-' + index + '-mayContact', yesNo, {label: historyFields.mayContact, value: job.mayContact,
@@ -196,7 +198,7 @@ function pay() {
 
 const blocks = {
   roles: () => [choices('roles', roles, {label: 'Pick one or more roles', notes: roleNotes})],
-  contact: () => [input('name', {autocomplete: 'name', maxlength: 120, autocapitalize: 'words'}),
+  contact: () => [input('name', {autocomplete: 'name', minlength: 2, maxlength: 120, autocapitalize: 'words'}),
     input('phone', {type: 'tel', autocomplete: 'tel', maxlength: 36}),
     input('email', {type: 'email', autocomplete: 'email', maxlength: 200})],
   address: () => [input('street', {autocomplete: 'address-line1', maxlength: 160}),
@@ -271,7 +273,8 @@ function draw({focus = false, direction = 0} = {}) {
   progress.max = plan.length;
   progress.value = index + 1;
   back.disabled = index === 0 && !editFromReview;
-  next.textContent = current === 'review' ? 'Send application' : editFromReview ? 'Back to review' : 'Next →';
+  if (current === 'review' || editFromReview) next.replaceChildren(current === 'review' ? 'Send application' : 'Back to review');
+  else next.replaceChildren('Next', nextArrow);
   error.textContent = '';
   const heading = node('h2', titles[current]);
   heading.tabIndex = -1;
@@ -291,8 +294,8 @@ function go(step, direction, edit = false) {
 function showError(problem) {
   error.textContent = problem.message;
   const controls = [...question.querySelectorAll('[data-answer]')];
-  const first = controls.find(input => input.dataset.answer === problem.field ||
-    input.dataset.answer.startsWith(problem.field + '-'));
+  const first = controls.find(input => input.dataset.answer === problem.field) ??
+    controls.find(input => input.dataset.answer.startsWith(problem.field + '-'));
   if (first) {
     first.setAttribute('aria-invalid', 'true');
     first.setAttribute('aria-describedby', 'form-error');
@@ -304,6 +307,20 @@ function confirmReceipt() {
   confirmation.hidden = false;
   confirmation.querySelector('.receipt span').textContent = submitted;
   confirmation.querySelector('h2').focus();
+}
+
+// Chromium can resize the page for the keyboard. Safari can instead shrink
+// or pan only the visible viewport, leaving sticky controls behind it.
+const viewport = window.visualViewport;
+if (viewport) {
+  const fitActions = () => {
+    const overlap = viewport.scale === 1
+      ? Math.max(0, document.documentElement.clientHeight - viewport.height - viewport.offsetTop) : 0;
+    form.style.setProperty('--keyboard-overlap', Math.round(overlap) + 'px');
+  };
+  viewport.addEventListener('resize', fitActions);
+  viewport.addEventListener('scroll', fitActions);
+  fitActions();
 }
 back.onclick = () => {
   if (busy) return;
@@ -350,7 +367,7 @@ form.onsubmit = async event => {
     persist();
     const body = new URLSearchParams({
       'form-name': formName, 'bot-field': form.elements['bot-field'].value, subject: 'New GFS careers application',
-      gfs_contract: contract, intake_kind: 'careers', submission_id: submissionId, application: payload,
+      gfs_contract: contract, intake_kind: 'careers', submission_id: submissionId, ...applicationFormData(application),
     });
     const response = await fetch('/_netlify-forms.html', {method: 'POST', body, signal: controller.signal,
       mode: 'same-origin', referrerPolicy: 'no-referrer'});

@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import {test} from 'node:test';
-import {intakeRecord, deliverIntake} from '../netlify/functions/submission-created.mjs';
-import {applicationSteps, normalizeApplication, payByRole} from '../public/assets/js/careers-contract.mjs';
+import handler, {intakeRecord, deliverIntake} from '../netlify/functions/submission-created.mjs';
+import {applicationSteps, normalizeApplication, normalizeStep, payByRole} from '../public/assets/js/careers-contract.mjs';
+import {applicationFormData, applicationFormFields} from '../public/assets/js/careers-form.mjs';
 import {declaredForms, read} from './helpers.mjs';
 
 function application(roles = ['installer']) {
@@ -15,11 +16,19 @@ function application(roles = ['installer']) {
     heardFrom: 'Friend', notes: 'Available most afternoons', consent: true};
 }
 const fields = application => ({'form-name': 'gfs-careers', 'bot-field': '', subject: 'New GFS careers application',
-  gfs_contract: 'gfs-careers-v1', intake_kind: 'careers', submission_id: 'test_application_001', application: JSON.stringify(application)});
+  gfs_contract: 'gfs-careers-v1', intake_kind: 'careers', submission_id: 'test_application_001',
+  ...applicationFormData(normalizeApplication(application))});
 
 test('the applicant form uses a dedicated Netlify event and the existing website intake envelope', () => {
   const post = fields(application(['crew', 'sales']));
-  assert.deepEqual(Object.keys(post).sort(), declaredForms()['gfs-careers'].sort());
+  const declared = declaredForms()['gfs-careers'];
+  assert.ok(Object.keys(post).every(key => declared.includes(key)));
+  assert.deepEqual(declared.slice(6).sort(), [...applicationFormFields].sort());
+  assert.equal(post.roles, 'Subcontractor crew, Salesperson');
+  assert.equal(post.job_1_company, 'Test Employer');
+  assert.equal(post.crew_pay_unit, 'Per foot ($/ft)');
+  assert.equal(Object.hasOwn(post, 'application'), false);
+  assert.ok(Object.values(post).every(value => typeof value === 'string'));
   const {collection, id, record} = intakeRecord(post, new Date('2026-11-27T15:00:00Z'));
   const {record: existing} = intakeRecord({gfs_contract: 'gfs-intake-v1', intake_kind: 'estimate',
     submission_id: 'test_website_form_001', source: 'website', name: 'Test Customer', phone: '4195550150'});
@@ -32,7 +41,51 @@ test('the applicant form uses a dedicated Netlify event and the existing website
   assert.equal(JSON.parse(record.meta).pay.crew.unit, 'foot');
   assert.equal(JSON.parse(record.meta).onSiteQuote, 'yes');
   assert.equal(intakeRecord({...post, 'bot-field': 'filled'}), null);
-  assert.throws(() => intakeRecord({...post, gfs_contract: 'gfs-intake-v1', intake_kind: 'estimate', source: 'careers'}), /source/);
+  assert.throws(() => intakeRecord({...post, 'form-name': 'gfs-estimate', gfs_contract: 'gfs-intake-v1',
+    intake_kind: 'estimate', source: 'careers'}), /source/);
+});
+
+test('both Netlify event entry points save an application and discard provider metadata', async t => {
+  const previousProject = process.env.GFS_FIREBASE_PROJECT_ID;
+  process.env.GFS_FIREBASE_PROJECT_ID = 'synthetic-gfs';
+  t.after(() => {
+    if (previousProject === undefined) delete process.env.GFS_FIREBASE_PROJECT_ID;
+    else process.env.GFS_FIREBASE_PROJECT_ID = previousProject;
+  });
+  const writes = [];
+  const logs = [];
+  t.mock.method(globalThis, 'fetch', async (url, options) => {
+    writes.push({url, record: JSON.parse(options.body).fields});
+    return new Response(null, {status: 200});
+  });
+  t.mock.method(console, 'info', (...args) => logs.push(args));
+  t.mock.method(console, 'warn', (...args) => logs.push(args));
+  const metadata = {ip: '192.0.2.44', user_agent: 'Synthetic Agent', referrer: 'https://example.test/careers/'};
+  const data = {...fields(application()), ...metadata};
+  delete data['form-name']; // The actual Netlify payload identifies the form outside data.
+  const call = data => handler(new Request('https://example.test/.netlify/functions/submission-created', {
+    method: 'POST', body: JSON.stringify({payload: {form_name: 'gfs-careers', data}}),
+  }));
+  assert.equal((await call(data)).status, 204);
+  await handler.formSubmitted({data});
+  for (const {url, record} of writes) {
+    assert.match(url, /\/websiteLeads\?documentId=web_test_application_001$/);
+    assert.equal(record.source.stringValue, 'careers');
+    assert.equal(record.name.stringValue, 'Test Applicant');
+    for (const [key, value] of Object.entries(metadata)) {
+      assert.equal(Object.hasOwn(record, key), false);
+      assert.ok(!JSON.stringify(record).includes(value));
+    }
+  }
+  assert.equal(writes.length, 2);
+  assert.ok(intakeRecord({...data, referrer: null}));
+  const file = {filename: 'attachment.pdf', url: 'https://example.test/attachment.pdf'};
+  for (const rejected of [{name: file}, {referrer: file}, {'bot-field': file}, {upload: file}, {notes: ['text']}]) {
+    await assert.rejects(call({...data, ...rejected}), /Careers application failed validation/);
+    await assert.rejects(handler.formSubmitted({data: {...data, ...rejected}}), /Careers application failed validation/);
+  }
+  assert.equal(writes.length, 2, 'only the two valid events wrote a record');
+  assert.deepEqual(logs, []);
 });
 
 test('applications can branch for one or several roles and omit answers outside those roles', () => {
@@ -52,13 +105,31 @@ test('the server refuses prohibited fields, invalid answers, overlong text and m
     {...sample, dateOfBirth: '2000-01-01'}, {...sample, consent: false},
     {...sample, employment: [...sample.employment, {...sample.employment[0], ssn: 'invalid'}]},
     {...sample, employment: Array(4).fill(sample.employment[0])},
-    {...sample, phone: 'invalid'}, {...sample, email: 'test@example'}, {...sample, zip: 'invalid'},
+    {...sample, name: ' A '}, {...sample, phone: 'invalid'}, {...sample, email: 'test@example'}, {...sample, zip: 'invalid'},
     {...sample, startDate: '2027-02-30'}, {...sample, notes: 'a'.repeat(901)}, {...sample, notes: '000-00-0000'},
     {...sample, pay: {installer: {unit: 'commission', amount: 20}}},
   ];
-  for (const input of invalid) assert.throws(() => intakeRecord(fields(input)), /^Error: Careers application failed validation\.$/);
-  assert.throws(() => intakeRecord({...fields(sample), photo: {url: 'https://example.test/photo'}}), /failed validation/);
-  assert.throws(() => intakeRecord({...fields(sample), application: 'a'.repeat(18001)}), /failed validation/);
+  for (const input of invalid) assert.throws(() => normalizeApplication(input));
+  const post = fields(sample);
+  for (const invalid of [{name: ' A '}, {consent: 'no'}, {date_of_birth: '2000-01-01'}, {job_1_start: '2020-19'},
+    {installer_pay_amount: 'abc'}, {notes: '000-00-0000'}, {notes: 'a'.repeat(18001)}, {application: '{}'}]) {
+    assert.throws(() => intakeRecord({...post, ...invalid}), /^Error: Careers application failed validation\.$/);
+  }
+});
+
+test('employment and pay validation identify the exact field, including the second job or role', () => {
+  const first = application().employment[0];
+  for (const [key, value, message] of [['company', '', /fill in/i], ['start', '2020-19', /YYYY-MM/],
+    ['end', '2019-07', /before the start/], ['mayContact', '', /choose/i]]) {
+    assert.throws(() => normalizeStep('employment', {employment: [first, {...first, [key]: value}]}),
+      error => error.field === 'employment-1-' + key && message.test(error.message));
+  }
+  const sample = application(['installer', 'sales']);
+  assert.throws(() => normalizeStep('pay', {...sample, pay: {installer: sample.pay.installer}}, sample.roles),
+    {field: 'pay-sales-unit'});
+  assert.throws(() => normalizeStep('pay', {...sample, pay: {...sample.pay, sales: {unit: 'commission', amount: '101'}}}, sample.roles),
+    {field: 'pay-sales-amount'});
+  assert.throws(() => normalizeStep('contact', {...sample, name: ' A '}), {field: 'name'});
 });
 
 test('duplicate event delivery has the same Firestore document ID and never triggers an Ads request', async () => {

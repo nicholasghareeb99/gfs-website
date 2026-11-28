@@ -63,7 +63,7 @@ progress::-moz-progress-bar { background: #ad712b; border-radius: 5px; }
 .field > :is(input,select,textarea) { width: 100%; min-height: 44px; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; background: white; font-weight: 450; }
 textarea { resize: vertical; }
 .fields { display: grid; gap: 13px; }
-.pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.pair { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); align-items: end; gap: 12px; }
 fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
 legend { padding: 0; margin-bottom: 5px; font-weight: 650; }
 .choices { display: flex; flex-wrap: wrap; gap: 7px; }
@@ -114,7 +114,17 @@ button:disabled { opacity: .56; cursor: default; }
   .work-photo picture img { height: 100%; max-height: 175px; min-height: 100px; border-radius: 8px; }
   .work-photo :is(figcaption,.detail-photo) { display: none; }
   .form-head { margin-bottom: 14px; }
-  .form-actions { position: sticky; bottom: env(safe-area-inset-bottom); padding: 9px 0 2px; background: var(--paper); border-top: 1px solid #ded8cc; }
+}
+@media (max-width: 740px), (pointer: coarse) {
+  .form-actions {
+    position: sticky;
+    bottom: 0;
+    bottom: var(--keyboard-overlap, 0px);
+    z-index: 1;
+    padding: 9px 0 max(9px, env(safe-area-inset-bottom));
+    background: var(--paper);
+    border-top: 1px solid #ded8cc;
+  }
 }
 @media (max-width: 355px) {
   .intro { grid-template-columns: minmax(0,1fr) 86px; }
