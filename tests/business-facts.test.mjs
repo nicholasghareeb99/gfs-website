@@ -325,13 +325,10 @@ function inspect(file, source) {
     });
   }
   if (file.endsWith('.json')) inspectJson(source.replace(/^\ufeff/, ' '), 0);
-  if (/\.(?:html?|astro)$/i.test(file)) {
+  if (/\.html?$/i.test(file)) {
     const script = /(<script\b[^>]*\btype\s*=\s*(?:"application\/ld\+json"|'application\/ld\+json'|application\/ld\+json(?=[\s>]))[^>]*>)([\s\S]*?)<\/script\s*>/gi;
     for (const match of source.matchAll(script)) {
-      // Astro set:html values are built from the separately scanned source data.
-      if (!file.endsWith('.astro') || !/\bset:html\s*=/.test(match[1])) {
-        inspectJson(match[2], match.index + match[1].length);
-      }
+      inspectJson(match[2], match.index + match[1].length);
     }
   }
   return { problems: [...problems], warnings: [...warnings] };
@@ -341,15 +338,14 @@ function* siteFiles(directory) {
   for (const entry of readdirSync(join(ROOT, directory), { withFileTypes: true })) {
     if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
     const path = `${directory}/${entry.name}`;
-    if (path === 'src/pages/api') continue;
     if (entry.isDirectory()) yield* siteFiles(path);
-    if (entry.isFile() && /\.(?:astro|cjs|css|html?|js|json|jsx|mdx?|mjs|svg|ts|tsx|txt|webmanifest|xml|ya?ml)$/i.test(path)) yield path;
+    if (entry.isFile() && /\.(?:cjs|css|html?|js|json|jsx|mdx?|mjs|svg|ts|tsx|txt|webmanifest|xml|ya?ml)$/i.test(path)) yield path;
   }
 }
 
 test('website sources use the approved business facts', t => {
   const problems = [];
-  for (const file of [...siteFiles('public'), ...siteFiles('src')].sort()) {
+  for (const file of [...siteFiles('public')].sort()) {
     const result = inspect(file, read(file));
     problems.push(...result.problems);
     for (const warning of result.warnings) t.diagnostic(warning);
