@@ -296,10 +296,11 @@ function sharpen(group) {
 // Two things the app's wood models draw for clarity on a small screen that a real fence doesn't have,
 // put right for the Lab's close views:
 //  • The rails and gate frame are drawn a dark brown so they stand out from the pickets. On a real
-//    fence they are the same lumber as the pickets, so they take the pickets' colour (a touch deeper,
-//    as a 2×4 reads next to a ⅝ in board).
+//    fence they are the same lumber as the pickets, so they take the pickets' colour, a little darker
+//    so the framing still reads at a glance.
 //  • The picket nails are drawn as black ⅜ in dots. GFS shoots galvanized coil nails, whose heads are
 //    about ¼ in and zinc grey.
+const RAIL_TONE = .84;   // rails and gate frames: the pickets' colour, a little darker (Nick, 2026-11-27)
 let nailMat = null;
 function trueToLumber(group) {
   const kindOf = (o, i = 0) => o.userData.parts?.[i]?.kind, isWood = m => /^(pt|cedar)$/.test(m?.userData?.gfsKind || '');
@@ -308,7 +309,7 @@ function trueToLumber(group) {
   group.traverse(o => {
     if (!o.isMesh) return; const k = kindOf(o) || '';
     if (picket && /^(rail|kick|grail|gstile|gbrace)$/.test(k) && isWood(o.material) && o.material !== picket && !o.material.userData.lumber) {
-      o.material.userData.lumber = true; o.material.color.copy(picket.color).multiplyScalar(.95);
+      o.material.userData.lumber = true; o.material.color.copy(picket.color).multiplyScalar(RAIL_TONE);
     }
     if (k === 'fastener' && picket) {
       nailMat ||= new THREE.MeshStandardMaterial({ color: 0x8f979b, roughness: .5, metalness: .7, envMapIntensity: .9 });

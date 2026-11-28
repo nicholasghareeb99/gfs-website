@@ -104,11 +104,19 @@ Next, in order of how much they change the picture:
   ride up over the lip (latches with a push, needs adjusting). Once the rod's centre is below
   the lip, 0.6 in low, it won't latch. The lip's height is scaled off the maker's drawing,
   which doesn't dimension it: good to about 1/16 in.
-  **Ask Nick** whether ¼ in and ⅝ in match what his crews see.
+  Nick confirmed about ¼ in as the point a gate needs a fix. The ⅝ in "won't latch" point
+  still rests on the drawing alone.
 - Still to draw better: the receiver's back side and the spring are simple; the lag heads are
   plain hex.
 
 ## Settled with Nick
+
+- **Rails and gate frames** are the pickets' colour, a little darker (`RAIL_TONE` in
+  `lab3d.mjs`, 2026-11-27).
+- **A gate needs a fix once it has sagged about ¼ in** (Nick wrote "1-4 in", read as ¼ in,
+  2026-11-27; check with him if he meant 1 to 4 in). That matches the latch: the rod has about
+  ¼ in of room before it has to ride up over the lip. Past that the tool says the gate needs
+  adjusting.
 
 - **Line posts** are 2½ in nominal, 2.375 in actual (2026-11-27). The Lab and the app's models
   already draw 2.375 in, and the customer copy says "2⅜ in across". The brochure calls the same
