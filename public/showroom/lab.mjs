@@ -7,6 +7,7 @@ import { $, $$, esc, clamp, icons, reduced, gesture, digNumbers } from './ui.mjs
 import { webglOK } from './lab3d-ok.mjs';
 import { PLACES, MONTHS, WINTERS, POSTS, DRAWN, frozenAt, lift } from './frost-plan.mjs';
 import { sag, gateGeom, BRACES as GBRACES, LATCH } from './gate-plan.mjs';
+import { YEARS as BUILD_YEARS } from './build-plan.mjs';
 import { flowField, streamlines } from './wind-plan.mjs';
 import { bends } from './vinyl-plan.mjs';
 export { digNumbers } from './ui.mjs';
@@ -18,15 +19,15 @@ let app, root, D, current = null, stop = null;
 const TOOLS = [
   { id: 'dig', name: 'No-dig vs dug', line: 'Watch both crews put in the same fence, and see how much dirt a dug fence leaves in the yard',
     how: [['tap', 'Tap <b>Play install day</b> to watch both crews work, or slide <b>Install day</b> to any moment.'], ['slide', 'Slide <b>Your fence</b> to the length of your fence.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.'], ['look', 'Watch the dirt piles and concrete bags in the dug yard. The no-dig yard has none.']],
-    take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft, and no waiting on concrete before the fence goes up.' },
-  { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by',
-    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
+    take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft, and the lawn left as it was.' },
+  { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 25 years go by',
+    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 25 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The flat 2×4 across the top keeps the top line straight.' },
   { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
-    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
+    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['look', 'The winters play by themselves. Watch the footings creep up a little more each spring.'], ['slide', 'Tap <b>Pause</b>, or slide to any <b>month</b> and <b>winter</b>.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'A post has to reach well below the frost line, 3 ft here and 3½ ft in Michigan. Ours are driven 4 ft.' },
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
-    how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.'], ['pinchout', 'In 3D, two fingers turn and zoom the view.']],
+    how: [['tap', 'Pick a <b>yard</b>: lumpy, a low spot, a hump.'], ['tap', 'Tap <b>Build it the GFS way</b>. We smooth the top line, then rake dirt in under the fence.'], ['drag', 'Or drag <b>up or down</b> on the yard to shape the ground yourself.'], ['look', 'Watch the close-up: the gap under the fence closes.']],
     take: 'We set a clean top line first, then close what is left underneath with raked dirt, a kickboard or grading.' },
   { id: 'gate', name: 'Gate sag', line: 'Why gates sag, and what keeps a gate latching for years',
     how: [['slide', 'Slide <b>Years in use</b>, or tap <b>Play 15 years</b>.'], ['tap', 'Try each <b>frame</b> and both kinds of <b>gate posts</b>, and slide the <b>gate width</b>.'], ['look', 'Watch the close-up of the latch: when the rod on the gate sits too low for the latch on the post, the gate won\'t latch.'], ['drag', 'Drag sideways on a view to turn it. Pinch to zoom, double-tap to reset.']],
@@ -176,10 +177,10 @@ function sizedCanvas(cv) {
 // to post centre and ground to fence top (chain-link fabric is thin wire, so it is worked out
 // instead: about 15% for the fabric, plus the top rail and posts).
 const WSTYLES = [
-  { id: 'privacy', name: 'Solid privacy', note: 'Dog-ear, board-on-board, Kingston vinyl. Counted as solid', eps: () => 1, hs: [4, 5, 6, 7, 8], bay: 8 },
-  { id: 'shadowbox', name: 'Shadowbox', note: 'Engineers treat it as solid. Air does weave through the offset boards, so the real push is a bit lower, but we never count on that', eps: () => 1, hs: [4, 6], bay: 8 },
-  { id: 'lattice', name: 'Lattice top', note: 'Solid boards with a lattice band at the top: about 91% solid', eps: () => .91, hs: [6], bay: 8 },
-  { id: 'picket', name: 'Picket', note: 'About three-quarters solid, once you count the rails behind the pickets', eps: h => ({ 3: .76, 4: .74, 5: .73 })[h] ?? .74, hs: [3, 4, 5], bay: 8 },
+  { id: 'privacy', name: 'Solid privacy', note: 'Dog-ear, board-on-board, Kingston vinyl. Counted as solid', eps: () => 1, hs: [4, 5, 6, 7, 8], bay: 8, posts: true },
+  { id: 'shadowbox', name: 'Shadowbox', note: 'Engineers treat it as solid. Air does weave through the offset boards, so the real push is a bit lower, but we never count on that', eps: () => 1, hs: [4, 6], bay: 8, posts: true },
+  { id: 'lattice', name: 'Lattice top', note: 'Solid boards with a lattice band at the top: about 91% solid', eps: () => .91, hs: [6], bay: 8, posts: true },
+  { id: 'picket', name: 'Picket', note: 'About three-quarters solid, once you count the rails behind the pickets', eps: h => ({ 3: .76, 4: .74, 5: .73 })[h] ?? .74, hs: [3, 4, 5], bay: 8, posts: true },
   { id: 'split', name: 'Split rail', note: 'About 20 to 25% solid', eps: h => h <= 3 ? .2 : .24, hs: [3, 4], bay: 10 },
   { id: 'alu', name: 'Aluminum', note: 'About 20% solid. Typical 6 ft panels', eps: h => ({ 4: .22, 5: .21, 6: .2 })[h] ?? .21, hs: [4, 5, 6], bay: 6 },
   { id: 'chain', name: 'Chain link', note: 'Fabric about 15% solid, plus the top rail and posts, all round. Posts up to 10 ft apart (ASTM F567)', eps: h => .15 + 1.37 / (12 * h) + 1.62 / 120, hs: [4, 5, 6], bay: 10, members: 'round' }
@@ -189,6 +190,34 @@ const WSTYLES = [
 // fence is and by whether its parts are flat-sided (pickets, rails, square tube) or round (wire and
 // pipe; these are the values for small round parts, D·√q ≤ 2.5, which fence wire and rail always are).
 export const OPEN_CF = { flat: [2.0, 1.8, 1.6], round: [1.2, 1.3, 1.5] };   // ε under 0.1, 0.1 to 0.29, 0.3 to 0.7
+// What gives first on one line post, and at how much push. Two posts are compared:
+//  • typical: a 4×4 (3½ in square) in a 10 in concrete footing 2 ft deep. Average bending strength of No. 2
+//    southern pine about 4,600 psi (NDS design value 1,100 psi × 2.1 to the 5th-percentile strength,
+//    ÷ 0.5 to the average);
+//  • GFS: 2⅜ in Schedule 40 steel pipe driven 4 ft, yield 30,000 psi (the least ASTM F1083 allows for
+//    regular-grade fence pipe), bending until the whole section has yielded (plastic modulus).
+// The ground: Broms' method for a short post pushed sideways in firm ground with 1,500 psf of shear
+// strength. Nothing holds in the top 1½ post widths; below that the ground pushes back with 9 × its
+// strength × the post's width. The post tips out when the ground below can't balance the push, and
+// the post itself gives where the bending is greatest, a little below the surface.
+export const GROUND_PSF = 1500;
+export const WPOSTS = {
+  store: { id: 'store', name: 'Typical 4×4, 2 ft deep', wFt: 10 / 12, depthFt: 2, breakLbFt: 4600 * 3.5 ** 3 / 6 / 12, snaps: true },
+  gfs: { id: 'gfs', name: 'GFS steel, driven 4 ft', wFt: 2.375 / 12, depthFt: 4, breakLbFt: 30000 * (2.375 ** 3 - 2.067 ** 3) / 6 / 12, snaps: false }
+};
+export function postLimit(post, armFt, su = GROUND_PSF) {
+  const b = post.wFt, k = 9 * su * b;
+  const arm = P => armFt + 1.5 * b + .5 * P / k;                     // from the push down to where the bending is greatest
+  const solve = f => { let lo = 0, hi = 50000; for (let i = 0; i < 60; i++) { const m = (lo + hi) / 2; if (f(m) > 0) lo = m; else hi = m; } return lo; };
+  const tip = solve(P => 2.25 * su * b * Math.max(0, post.depthFt - 1.5 * b - P / k) ** 2 - P * arm(P));
+  const bend = solve(P => post.breakLbFt - P * arm(P));
+  return tip < bend ? { lb: tip, mode: 'tips' } : { lb: bend, mode: post.snaps ? 'snaps' : 'bends' };
+}
+// the gust at which a fence's posts give: the push grows with the square of the wind
+export function failGust(o, post) {
+  const one = windLoad({ ...o, V: 100 }), lim = postLimit(post, one.arm * o.h);
+  return { ...lim, V: 100 * Math.sqrt(lim.lb / one.perPost) };
+}
 const PRESETS = [[25, 'Breezy'], [58, 'Severe storm'], [80, 'Derecho'], [115, 'Ohio design gust']];
 export function windLoad({ V, h, exposure, style }) {
   const Kz = exposure === 'C' ? 0.85 : 0.57, Kd = 0.85, Kzt = 1, Ke = 1, G = 0.85, Cf = 1.3;
@@ -206,10 +235,11 @@ export function windLoad({ V, h, exposure, style }) {
 }
 
 function wind(body) {
-  const st = { style: WSTYLES[0], h: 6, V: 58, exposure: 'B' };
+  const st = { style: WSTYLES[0], h: 6, V: 58, exposure: 'B', post: 'gfs' };
   body.innerHTML = `
     <div class="wind-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the fence in 3D…</div></div>
-    <div class="lab-ctl vs-ctl">${slider('V', 'Gust speed', 10, 120, 1, st.V, ' mph')}</div>
+    <div class="lab-ctl vs-ctl">${slider('V', 'Gust speed', 10, 120, 1, st.V, ' mph')}
+      <div id="wPostW" class="wpost">${seg('wpost', Object.values(WPOSTS).map(p => [p.id, p.name]), st.post)}</div></div>
     <div class="lab-grid">
       <div class="lab-vis"><canvas class="wind-cv" aria-label="Wind flowing over the fence"></canvas>
         <div class="wind-gauge"><div class="wg-n mono" id="wgN"></div><div class="wg-l">lb on each post</div></div>
@@ -226,7 +256,7 @@ function wind(body) {
           <div><b class="mono" id="rP"></b><small>lb per sq ft on the fence</small></div>
           <div><b class="mono" id="rF"></b><small>lb per running foot</small></div>
           <div><b class="mono" id="rM"></b><small>lb·ft trying to bend each post at the ground</small></div>
-          <div><b class="mono" id="rBags"></b><small>80 lb concrete bags, same push</small></div>
+          <div id="rFailW"><b id="rFail"></b><small id="rFailS"></small></div>
         </div>
       </div>
     </div>
@@ -238,6 +268,7 @@ function wind(body) {
       <p><b>Fences with gaps</b>: ε is the solid share of the section. At 70% solid and up (picket, lattice top) the code still treats the fence as a wall and multiplies C<sub>f</sub> by 1 − (1 − ε)<sup>1.5</sup> (Fig. 29.3-1). Under 70% solid (split rail, aluminum, chain link) it is an open framework (Fig. 29.4-1): the force is worked out on the solid area alone, F = q · G · C<sub>f</sub> · ε · A, with C<sub>f</sub> = 1.8 for flat-sided parts at 10 to 29% solid (1.6 from 30 to 70%), and 1.3 for small round parts such as chain-link wire and pipe. <span class="mono" id="mE"></span> The solid shares are measured off the Executive App's own models, face-on, from post centre to post centre and from the ground to the top: picket about 75% (the rails behind the gaps count), split rail 20–24%, aluminum 20–22%, lattice top 91%. Chain-link fabric is thin wire, so it's worked out instead: about 15% for the fabric, plus the top rail and posts.</p>
       <p><b>Bending at the ground</b>: on a solid fence the push acts at 0.55 h above the ground, so M = F · 0.55 h. On an open fence it acts at mid-height, 0.5 h.</p>
       <p><b>The moving air</b> is the average flow, slowed way down so you can follow it. The open-yard wind grows with height (ASCE 7 power law, 1/7 among houses, 1/9.5 in open country). Air that gets through an open fence is worked out from the pressure loss of a perforated plate (Idelchik, <i>Handbook of Hydraulic Resistance</i>, diagram 8-1) and actuator-disc momentum. Behind a fence less than about 30% open the air rolls back toward the fence (Perera 1981; <i>Scientific Reports</i> 4:6619, 2014). In wind-tunnel work that swirl reaches about 13 fence heights back; turbulence shortens it, so it's drawn 10 heights long among houses and 12 in open country. Further back the slow air recovers as Perera's far-wake formula (as given in <i>Wind Energy Science</i> 1:101, 2016). What can't get through goes over the top, faster.</p>
+      <p><b>When the posts give</b>: the push on each post is set against two limits, and the lower one decides. The ground: Broms' method for a short post in firm ground (1,500 psf shear strength), where nothing holds in the top 1½ post widths and below that the ground pushes back with 9 times its strength times the post's width. The post: a 4×4 breaks at about 4,600 psi of bending (average No. 2 southern pine, from the NDS design value); a 2⅜ in Schedule 40 steel pipe bends over once the whole section yields at 30,000 psi (the least the fence-pipe standard, ASTM F1083, allows). A typical 4×4 in a 2 ft footing tips out of the ground long before the wood breaks. Steel driven 4 ft is held by twice the depth, so the pipe itself is the limit, and steel bends where wood snaps. These are estimates for a new fence in firm ground. Soaked ground holds less, and a wood post loses strength as it rots.</p>
       <p><b>Ends and corners</b> see higher pressure than the middle of a long run (ASCE 7 Case C), which is why end, corner and gate posts matter most.</p>
       <p class="src">Gust speeds are 3-second gusts. 115 mph is Ohio's ultimate design wind speed for ordinary buildings, a rare event. These are unfactored loads for comparing styles, not a stamped design. Fences in 3D are the Executive App's models: no-dig dog-ear privacy, shadowbox, lattice top, spaced picket, cedar split rail, 3-rail aluminum and galvanized chain link.</p>`)}`;
   const cv = $('.wind-cv', body), { g, fit } = sizedCanvas(cv);
@@ -250,7 +281,16 @@ function wind(body) {
     $('#wH', body).innerHTML = seg('h', st.style.hs.map(h => [h, h + ' ft']), st.h);
     $('[data-out=V]', body).textContent = st.V + ' mph';
     $('#rP', body).textContent = fmt(r.p, 1); $('#rF', body).textContent = fmt(r.perFt, 0); $('#rM', body).textContent = fmt(r.moment, 0);
-    $('#rBags', body).textContent = fmt(r.perPost / 80, 1);
+    const fg = st.style.posts ? failGust(st, WPOSTS[st.post]) : null, down = !!fg && st.V >= fg.V;
+    $('#wPostW', body).hidden = $('#rFailW', body).hidden = !fg;
+    if (fg) {
+      // each choice of post carries the gust it holds to, for this fence in this yard
+      for (const b of $$('.seg[data-name=wpost] button', body)) { const P = WPOSTS[b.dataset.v], g = failGust(st, P); b.innerHTML = `${esc(P.name)}<small>${st.V >= g.V ? { tips: 'tips out', snaps: 'snaps', bends: 'bends over' }[g.mode] + ' at' : 'holds to'} about ${Math.round(g.V / 5) * 5} mph</small>`; b.classList.toggle('gone', st.V >= g.V); }
+      const how = { tips: 'tip out of the ground', snaps: 'snap at the ground', bends: 'bend over' }[fg.mode];
+      $('#rFail', body).textContent = down ? { tips: 'Down: posts tipped out', snaps: 'Down: posts snapped', bends: 'Posts bent over' }[fg.mode] : `Holds to about ${Math.round(fg.V / 5) * 5} mph`;
+      $('#rFailS', body).textContent = down ? `These posts ${how} at about ${Math.round(fg.V / 5) * 5} mph in firm ground. An estimate, not a test.` : `Past that these posts ${how}. An estimate for firm ground; soaked ground holds less.`;
+      $('#rFailW', body).classList.toggle('bad', down);
+    }
     $('#wgN', body).textContent = fmt(r.perPost, 0);
     $('#mQ', body).textContent = `= ${fmt(r.q, 1)} psf at ${st.V} mph`;
     $('#mE', body).textContent = r.open ? `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, C_f ${fmt(r.cfOpen, 1)} on the solid area.` : `${st.style.name}: ε ≈ ${fmt(r.eps, 2)}, factor ${fmt(r.red, 2)}.`;
@@ -259,13 +299,13 @@ function wind(body) {
     const all = WSTYLES.map(s => { const h = s.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, s.hs[0]); return { s, h, r: windLoad({ ...st, style: s, h }) }; });
     const max = Math.max(...all.map(x => x.r.perFt), 1);
     $('#wBars', body).innerHTML = all.map(x => `<button class="wbar${x.s === st.style ? ' on' : ''}" data-s="${x.s.id}"><span class="wb-n">${esc(x.s.name)} <small>${x.h} ft</small></span><span class="wb-t"><i style="--w:${(x.r.perFt / max * 100).toFixed(1)}%"></i></span><b class="mono">${fmt(x.r.perFt)} <small>lb/ft</small></b></button>`).join('');
-    if (scene) scene.set({ style: st.style.id, h: st.h, bay: st.style.bay, eps: r.eps, V: st.V, exposure: st.exposure, p: r.p, perPost: r.perPost });
+    if (scene) scene.set({ style: st.style.id, h: st.h, bay: st.style.bay, eps: r.eps, V: st.V, exposure: st.exposure, p: r.p, perPost: r.perPost, fail: fg ? { down, mode: fg.mode, frac: st.V / fg.V, V: fg.V } : null });
   };
   body.addEventListener('click', e => {
     const s = e.target.closest('[data-s]'); if (s) { st.style = WSTYLES.find(x => x.id === s.dataset.s); if (!st.style.hs.includes(st.h)) st.h = st.style.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, st.style.hs[0]); update(); seed(); }
     const p = e.target.closest('.presets [data-v]'); if (p) { st.V = +p.dataset.v; $('[name=V]', body).value = st.V; update(); }
   });
-  bindSeg(body, (n, v) => { if (n === 'h') st.h = +v; if (n === 'exposure') st.exposure = v; update(); });
+  bindSeg(body, (n, v) => { if (n === 'h') st.h = +v; if (n === 'exposure') st.exposure = v; if (n === 'wpost') st.post = v; update(); });
   $('[name=V]', body).oninput = e => { st.V = +e.target.value; update(); };
 
   // ── flow picture without 3D: the same smoke lines as the 3D, side on ──
@@ -482,7 +522,7 @@ function frost(body) {
   body.innerHTML = `
     <div class="frost-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the yard in 3D…</div></div>
     <div class="lab-ctl vs-ctl">
-      <div class="vs-years"><button class="btn primary" id="frPlay">Play a winter</button>${slider('m', 'Month', 0, 5, 1, mi)}</div>
+      <div class="vs-years"><button class="btn primary" id="frPlay">Play</button>${slider('m', 'Month', 0, 5, 1, mi)}</div>
       ${slider('w', 'Winters', 1, 10, 1, winters)}
     </div>
     <div class="lab-grid">
@@ -533,24 +573,36 @@ function frost(body) {
       : `A hard winter freezes all the way to the ${place.frost} in frost line, so even a footing that stops right at it can be lifted. GFS drives steel to 48 in.`;
   };
   bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'winter') winter = WINTERS.find(w => w.id === v); update(); });
-  let raf = 0, live = true, playing = false, last = 0;
-  const stopPlay = (label = 'Play a winter') => { playing = false; cancelAnimationFrame(raf); $('#frPlay', body).textContent = label; };
-  $('[name=m]', body).oninput = e => { stopPlay(); mi = +e.target.value; update(); };
-  $('[name=w]', body).oninput = e => { stopPlay(); winters = +e.target.value; update(); };
-  $('#frPlay', body).onclick = () => {
-    if (playing) return stopPlay();
-    if (mi >= 5) { if (winters < 10 && $('#frPlay', body).textContent === 'Next winter') { winters++; $('[name=w]', body).value = winters; } mi = 0; }
-    if (reduced.matches) { mi = 3; $('[name=m]', body).value = 3; update(); return; }
+  // The winters play by themselves: one after another, with a short pause each spring, until the
+  // tenth. Touching a slider or the button takes over.
+  let raf = 0, live = true, playing = false, last = 0, auto = !reduced.matches, wait = 0;
+  const stopPlay = (label = 'Play') => { playing = false; cancelAnimationFrame(raf); clearTimeout(wait); $('#frPlay', body).textContent = label; };
+  const run = () => {
     playing = true; $('#frPlay', body).textContent = 'Pause'; last = performance.now();
-    const step = now => { if (!playing || !live) return; mi = Math.min(5, mi + Math.min(now - last, 100) / 1400); last = now; $('[name=m]', body).value = Math.round(mi); update();
-      if (mi >= 5) { stopPlay(winters < 10 ? 'Next winter' : 'Play a winter'); return; } raf = requestAnimationFrame(step); };
+    const step = now => { if (!playing || !live) return; mi = Math.min(5, mi + Math.min(now - last, 100) / 1100); last = now; $('[name=m]', body).value = Math.round(mi); update();
+      if (mi >= 5) {
+        if (winters >= 10) { auto = false; stopPlay('Play again'); return; }
+        playing = false; wait = setTimeout(() => { if (!live || !auto) return; winters++; $('[name=w]', body).value = winters; mi = 0; update(); run(); }, 700);
+        return;
+      }
+      raf = requestAnimationFrame(step); };
     raf = requestAnimationFrame(step);
   };
+  $('[name=m]', body).oninput = e => { auto = false; stopPlay(); mi = +e.target.value; update(); };
+  $('[name=w]', body).oninput = e => { auto = false; stopPlay(); winters = +e.target.value; update(); };
+  $('#frPlay', body).onclick = () => {
+    if (playing || wait && auto && $('#frPlay', body).textContent === 'Pause') { auto = false; return stopPlay(); }
+    if (reduced.matches) { mi = 3; $('[name=m]', body).value = 3; update(); return; }
+    if (winters >= 10 && mi >= 5) { winters = 1; $('[name=w]', body).value = 1; }
+    if (mi >= 5) mi = 0;
+    auto = true; run();
+  };
+  const start = () => { if (!live || !auto || playing) return; winters = 1; $('[name=w]', body).value = 1; mi = 0; update(); run(); };
   if (webglOK()) {
     const host = $('.frost-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.f3d-note', body).hidden = false;
-    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host, { specs: app.live?.specs }); body.__frost = scene; update(); })
-      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.f3d-note', body).hidden = true; scene = null; update(); });
-  }
+    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host, { specs: app.live?.specs }); body.__frost = scene; update(); setTimeout(start, 900); })
+      .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.f3d-note', body).hidden = true; scene = null; update(); start(); });
+  } else setTimeout(start, 600);
   update();
   return () => { live = false; stopPlay(); scene?.dispose(); scene = null; };
 }
@@ -724,7 +776,7 @@ function build(body) {
       <figure class="vs-card gfs"><figcaption><span class="vs-tag good" id="vsGfsT">GFS King Plus</span><b id="vsGfsB">Driven steel, built board by board</b><small>Steel driven 4 ft, no concrete</small></figcaption><svg class="vs-svg" id="vsGfs" viewBox="0 64 380 396"></svg><p class="vs-status" id="vsGfsS"></p></figure>
     </div>
     <div class="lab-ctl vs-ctl">
-      <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play 15 years</button>${slider('yr', 'Years', 0, 15, .05, 0)}</div>
+      <div class="vs-years"><button class="btn sm primary" id="vsPlay">Play ${BUILD_YEARS} years</button>${slider('yr', 'Years', 0, BUILD_YEARS, .05, 0)}</div>
     </div>
     <div class="lab-ctl">
       <div class="vs-opts">
@@ -742,7 +794,8 @@ function build(body) {
       <p><b>Why posts lift</b>: wet ground freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
       <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with a flat 2×4 across the top holding the line.</p>
       <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. GFS drives a galvanized steel post, clamps steel adapters to it, and sleeves the vinyl post over the adapters, so there is no footing to lift.</p>
-      <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
+      <p><b>How long a store fence lasts</b>: Fannie Mae's useful-life table gives a 6 ft wood privacy fence 15 years, 10 to 20 at the outside. We give the store fence longer than that. Its posts lean as they rot at the soil line, then break there at 19 years set in dirt and 21 set in concrete. By then our wood is gray and a picket or two may need replacing, but the posts are steel, so the fence is still standing straight.</p>
+      <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). How fast any one fence goes varies from yard to yard; this is a typical case, not a measurement.</p>`)}`;
   const pre = $('#vsPre', body), gfs = $('#vsGfs', body);
   const S = 34, G = 300; // px per ft, ground line
   const groundY = (x) => st.slope ? G - (x - 40) * 0.16 : G; // slope rises to the right
@@ -826,17 +879,17 @@ function build(body) {
   };
   let raf = 0, live = true;
   const play = () => {
-    if (st.playing) { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; return; }
-    if (st.years >= 14.9) st.years = 0;
+    if (st.playing) { st.playing = false; $('#vsPlay', body).textContent = `Play ${BUILD_YEARS} years`; return; }
+    if (st.years >= BUILD_YEARS - .1) st.years = 0;
     st.playing = true; $('#vsPlay', body).textContent = 'Pause';
     let last = performance.now();
     const step = now => { if (!st.playing || !live) return; const dt = Math.min(.05, (now - last) / 1000); last = now;
-      st.years = Math.min(15, st.years + dt * (reduced.matches ? 3 : 1.2)); $('[name=yr]', body).value = st.years; draw();
-      if (st.years >= 15) { st.playing = false; $('#vsPlay', body).textContent = 'Play again'; return; } raf = requestAnimationFrame(step); };
+      st.years = Math.min(BUILD_YEARS, st.years + dt * (reduced.matches ? 4 : 1.5)); $('[name=yr]', body).value = st.years; draw();
+      if (st.years >= BUILD_YEARS) { st.playing = false; $('#vsPlay', body).textContent = 'Play again'; return; } raf = requestAnimationFrame(step); };
     raf = requestAnimationFrame(step);
   };
   $('#vsPlay', body).onclick = play;
-  $('[name=yr]', body).oninput = e => { st.playing = false; $('#vsPlay', body).textContent = 'Play 15 years'; st.years = +e.target.value; draw(); };
+  $('[name=yr]', body).oninput = e => { st.playing = false; $('#vsPlay', body).textContent = `Play ${BUILD_YEARS} years`; st.years = +e.target.value; draw(); };
   bindSeg(body, (n, v) => { if (n === 'set') st.set = v; if (n === 'slope') st.slope = v === '1'; if (n === 'mat') { st.mat = v; lists(); } draw(); });
   lists();
   body.addEventListener('click', e => { const b = e.target.closest('.vs-item'); if (!b) return; st.focus = st.focus === b.dataset.k ? null : b.dataset.k; draw(); });
@@ -1039,7 +1092,6 @@ function dig(body) {
         <div role="row"><span>Dirt left in the yard</span><b id="dgDirt"></b><b class="g">None</b></div>
         <div role="row"><span>Concrete hauled in</span><b id="dgConc"></b><b class="g">None</b></div>
         <div role="row"><span>Holes dug in the lawn</span><b id="dgHoles"></b><b class="g">0</b></div>
-        <div role="row"><span>Before the fence goes on the posts</span><b>Wait about 2 days for concrete</b><b class="g">No wait</b></div>
         <div role="row"><span>In winter</span><b>Frozen ground to dig, concrete to keep from freezing</b><b class="g">We drive posts all winter</b></div>
       </div>
     </div>
@@ -1052,9 +1104,9 @@ function dig(body) {
     </div>
     ${math(`<p><b>One dug hole</b>: 10 in across and 36 in deep, the size we dig ourselves when a yard calls for concrete. Volume = π × (5 in)² × 36 in = <span class="mono" id="mH"></span> cu ft of dirt in the ground.</p>
       <p><b>Dirt once it's dug</b>: loose dirt takes up about 30% more room than it did in the ground, and the heavy subsoil around here weighs about 110 lb per cu ft in the ground. A contractor wheelbarrow holds 6 cu ft.</p>
-      <p><b>Concrete</b>: the hole less the 32 in of 4×4 post standing in it, filled with concrete mix. An 80 lb bag makes about 0.6 cu ft (manufacturer yield for 80 lb bags), so about 2 to 3 bags a post.</p>
+      <p><b>Concrete</b>: we fill the hole three-quarters of the way with concrete around the 4×4, 27 in of the 36, then tamp dirt over it up to the lawn. An 80 lb bag makes about 0.6 cu ft (manufacturer yield for 80 lb bags), so about 2 bags a post.</p>
+      <p><b>Dirt left over</b>: what came out of the hole, less what gets tamped back in over the concrete.</p>
       <p><b>Posts</b>: one every 8 ft plus one at the end. Gate posts would add more.</p>
-      <p><b>The wait</b>: concrete keeps gaining strength for days, so installers usually let it set a day or two before hanging the fence. Our own checklist waits 48 hours on any post we set in concrete.</p>
       <p class="src">Driven posts suit most yards around Toledo. Where the ground calls for it we set posts in concrete instead, and we check before we quote.</p>`)}`;
   const A = $('.dig-a', body), B = $('.dig-b', body), pile = $('.dig-pile', body);
   const G = 168, S = 12, PX = [46, 142, 238, 334];
@@ -1074,7 +1126,7 @@ function dig(body) {
   const drawA = p => {
     let s = sky('da'), bags = 0, dirtShown = 0;
     // bags of concrete delivered, used as each post is set
-    const perPost = Math.ceil((Math.PI * (5 / 12) ** 2 * 3 - (3.5 / 12) ** 2 * 3) / .6 * 10) / 10;
+    const perPost = Math.ceil(digNumbers(8).concFt3 / .6 * 10) / 10;
     let used = 0;
     PX.forEach((x, i) => {
       const t0 = .02 + i * .1, dg = cl((p - t0) / .08), pour = cl((p - (.46 + i * .035)) / .03);
@@ -1096,12 +1148,10 @@ function dig(body) {
       s += pickets(fenceOn, PX[0] - 3, PX[3] + 3);
       PX.forEach((x, i) => { s += mound(x + 8, 1); });
     }
-    const cure = cl((p - .6) / .04) * (1 - cl((p - .8) / .03));
-    if (cure > 0) s += clock(190, 60, 'Concrete curing · about 2 days', cure);
     if (p >= .99) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#ffd2b0">DIRT PILES LEFT ON THE LAWN</text>`;
     A.innerHTML = s;
     const holes = PX.filter((x, i) => p > .02 + i * .1).length;
-    $('#dgA', body).textContent = p <= 0 ? 'A clean yard, before anyone digs.' : p < .45 ? `Digging hole ${Math.min(4, holes)} of 4. Every hole leaves a pile of dirt on the lawn.` : p < .6 ? 'Mixing and pouring concrete around each post.' : p < .82 ? 'Waiting on the concrete before the fence can go on.' : 'Fence up, plus 4 dirt piles to spread or haul away.';
+    $('#dgA', body).textContent = p <= 0 ? 'A clean yard, before anyone digs.' : p < .45 ? `Digging hole ${Math.min(4, holes)} of 4. Every hole leaves a pile of dirt on the lawn.` : p < .82 ? 'Setting each post in concrete and tamping dirt over it.' : 'Fence up, plus 4 dirt piles to spread or haul away.';
   };
   const drawB = p => {
     let s = sky('db');
@@ -1119,7 +1169,6 @@ function dig(body) {
       s += `<rect x="${PX[0] - 4}" y="${G - 73}" width="${PX[3] - PX[0] + 8}" height="3" fill="#a8774b" opacity="${fence}"/>`;
       s += pickets(fence, PX[0] - 3, PX[3] + 3);
     }
-    if (p >= .6) s += clock(190, 60, 'No concrete to wait on', cl((p - .6) / .05));
     if (p >= .99 || p === 0) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#b5f3d4">${p === 0 ? 'SAME YARD' : 'NO DIRT. NO CONCRETE. LAWN LEFT AS IT WAS.'}</text>`;
     B.innerHTML = s;
     $('#dgB', body).textContent = p <= 0 ? 'The same yard.' : p < .32 ? 'Driving each steel post 4 ft into the ground. Nothing comes out of it.' : p < .6 ? 'Building the fence on the posts right away.' : 'Done, with nothing to clean up but scraps.';

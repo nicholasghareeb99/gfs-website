@@ -41,16 +41,22 @@ export function grade(body, kit) {
       <div class="gl-hud"><div><b class="mono" id="glGap"></b><small>biggest gap under the fence</small></div><div><b class="mono" id="glTop"></b><small>top line</small></div></div>
       <div class="vis-note" id="glNote"></div></div>
     <div class="gl-tools lab-ctl">
-      <div class="gl-row"><div class="lab-label">Your finger</div>${seg('mode', [['ground', 'Shape the yard'], ['posts', 'Raise / lower posts'], ['dirt', 'Dirt pen']], st.mode)}</div>
-      <div class="gl-row"><div class="lab-label">Start from</div><div class="chips wrap" id="glPre">${[['flat', 'Flat'], ['slope', 'Steady 2% slope'], ['hump', 'Hump'], ['dip', 'Low spot'], ['rolling', 'Rolling'], ['lumpy', 'Lumpy']].map(([k, n]) => `<button class="chip" data-pre="${k}">${n}</button>`).join('')}</div></div>
-      <div class="gl-row"><div class="lab-label">Fence</div>${seg('style', [['wood', 'Wood privacy'], ['vinyl', 'Vinyl privacy']], st.style)}</div>
-      <div class="gl-row"><div class="lab-label">Make it look great</div><div class="gl-acts">
-        <button class="btn sm" data-a="smooth">${icons.spark} Smooth the top line</button>
-        <button class="btn sm" data-a="fill">Fill the gaps with raked dirt</button>
-        <button class="btn sm" data-a="kick" id="glKick">Add a kickboard</button>
-        <button class="btn sm" data-a="grade">Grade the line</button>
-        <button class="btn sm ghost" data-a="reset">Back to the ground</button>
-        <button class="btn sm ghost" data-a="undo">Undo</button></div></div>
+      <div class="gl-row"><div class="lab-label">1 · Pick a yard</div><div class="chips wrap" id="glPre">${[['lumpy', 'Lumpy'], ['dip', 'Low spot'], ['hump', 'Hump'], ['rolling', 'Rolling'], ['slope', 'Steady slope'], ['flat', 'Flat']].map(([k, n]) => `<button class="chip" data-pre="${k}">${n}</button>`).join('')}</div></div>
+      <div class="gl-row"><div class="lab-label">2 · See how we build on it</div>
+        <div class="gl-acts"><button class="btn primary" data-a="gfs">${icons.spark} Build it the GFS way</button><button class="btn sm ghost" data-a="reset">Start over</button></div>
+        <p class="lab-note" id="glSay">Tap it: we smooth the top line first, then rake dirt in under the fence.</p></div>
+      <details class="gl-more"><summary>More: shape the yard yourself, move posts, kickboard, grading</summary>
+        <div class="gl-more-b">
+          <div class="gl-row"><div class="lab-label">Your finger</div>${seg('mode', [['ground', 'Shape the yard'], ['posts', 'Raise / lower posts'], ['dirt', 'Dirt pen']], st.mode)}</div>
+          <div class="gl-row"><div class="lab-label">Fence</div>${seg('style', [['wood', 'Wood privacy'], ['vinyl', 'Vinyl privacy']], st.style)}</div>
+          <div class="gl-row"><div class="lab-label">One step at a time</div><div class="gl-acts">
+            <button class="btn sm" data-a="smooth">${icons.spark} Smooth the top line</button>
+            <button class="btn sm" data-a="fill">Fill the gaps with raked dirt</button>
+            <button class="btn sm" data-a="kick" id="glKick">Add a kickboard</button>
+            <button class="btn sm" data-a="grade">Grade the line</button>
+            <button class="btn sm ghost" data-a="undo">Undo</button></div></div>
+        </div>
+      </details>
       <div class="readouts gl-read">
         <div><b class="mono" id="glOver"></b><small>of fence with more than a 4 in gap underneath</small></div>
         <div><b class="mono" id="glBur"></b><small>where the bottom sits in the dirt</small></div>
@@ -280,9 +286,20 @@ export function grade(body, kit) {
     const step = now => { const t = clamp((now - t0) / dur, 0, 1), e = 1 - Math.pow(1 - t, 3); for (let j = 0; j < NS; j++) st.ground[j] = from[j] + (to[j] - from[j]) * e; for (let i = 0; i <= N; i++) st.offs[i] = keep[i] - at(st.ground, i * SEC); draw(); if (t < 1 && live) st.anim = requestAnimationFrame(step); };
     st.anim = requestAnimationFrame(step);
   }
+  let gfsT = 0;
   body.addEventListener('click', e => {
-    const p = e.target.closest('[data-pre]'); if (p) { snap(); preset(p.dataset.pre); draw(); }
-    const a = e.target.closest('[data-a]')?.dataset.a; if (!a) return;
+    const say = t => { const el = $('#glSay', body); if (el) el.textContent = t; };
+    const p = e.target.closest('[data-pre]'); if (p) { snap(); preset(p.dataset.pre); draw(); say('Tap it: we smooth the top line first, then rake dirt in under the fence.'); }
+    const a = e.target.closest('[data-a]')?.dataset.a;
+    if (p || a) for (const t of body.querySelectorAll('.gl-try')) t.classList.add('gone');   // the drag hint has done its job
+    if (!a) return;
+    // the two things we do on every job, one after the other so each can be seen
+    if (a === 'gfs') {
+      snap(); st.offs.fill(0); st.dirt.fill(0); smoothTop(); draw(); say('Top line smoothed: each post set a little higher or lower so the top reads as one line.');
+      clearTimeout(gfsT); gfsT = setTimeout(() => { if (!body.isConnected) return; fillGaps(); draw(); say('Then dirt raked in along the bottom, so nothing is left open under the fence.'); }, 1100);
+      return;
+    }
+    if (a === 'reset') say('Tap it: we smooth the top line first, then rake dirt in under the fence.');
     if (a === 'undo') { const h = hist.pop(); if (!h) return toast('Nothing to undo'); st.ground.set(h.g); st.dirt.set(h.d); st.offs.set(h.o); st.orig = h.orig; draw(); return; }
     snap();
     if (a === 'smooth') smoothTop();

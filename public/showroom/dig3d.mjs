@@ -2,8 +2,8 @@
 // (stacked on a phone), at the same moment of the install day.
 //
 //  Dug:    a 10 in auger hole 36 in deep at each post, the clay thrown on the lawn, the 4×4 set
-//          32 in down and the hole filled with concrete (80 lb bags, 0.6 cu ft each), a 48 hour
-//          wait for the concrete (GFS's own checklist), then rails and pickets.
+//          32 in down, concrete to three-quarters of the hole (80 lb bags, 0.6 cu ft each), dirt
+//          tamped over it up to the lawn, then rails and pickets the same day (how GFS sets a post).
 //  No-dig: an 8 ft galvanized Schedule 40 pipe (2⅜ in outside, 0.154 in wall) driven 4 ft, the
 //          King Plus box built around it, then rails and pickets. Nothing comes out of the ground.
 //
@@ -55,7 +55,9 @@ export function createDigScene(host, { len = 150, specs } = {}) {
   });
 
   // ── dug: holes, concrete, dirt ──
-  const vLoose = Math.PI * R_HOLE ** 2 * D_HOLE * DIG.swell;
+  const vLoose = Math.PI * R_HOLE ** 2 * D_HOLE * DIG.swell, vBack = n.backFt3 * DIG.swell;   // out of a hole, and tamped back into it
+  const CAP = n.capIn * IN, FILL = DIG.concShare;                                              // the dirt over the concrete; how full the concrete goes
+  const dirtCut = surfaceMaterial(THREE, 'soil', 0x5a4636), dirtTop = surfaceMaterial(THREE, 'soil', 0x5f4a37);
   const pickBack = Math.max(...[...byKind(dugF, 'picket'), ...byKind(dugF, 'rail')].map(p => -p.box.min.z));
   const holes = posts.map((P, k) => {
     const side = k === 0 ? -1 : 1;
@@ -68,11 +70,16 @@ export function createDigScene(host, { len = 150, specs } = {}) {
     const reach = h.pile.userData.reach(vLoose);
     h.px = P.x - side * .95; h.pz = -(pickBack + 2 * IN) - reach.R; h.reach = reach;
     h.pile.position.set(h.px, 0, h.pz);
-    for (const o of [h.cav, h.cut, h.top, h.fill, h.fillLow]) o.position.x = P.x;
-    R.add(h.cav, h.cut, h.top, h.fill, h.fillLow, h.pile);
+    // dirt tamped over the concrete: its cut face either side of the post, and its top at the lawn
+    h.cap = new THREE.Group(); h.cap.userData = { kind: 'tamped dirt', key: 'cap' + k, noCheck: true };
+    const cw = R_HOLE - 1.75 * IN;
+    h.capSides = [-1, 1].map(s => { const m = new THREE.Mesh(new THREE.PlaneGeometry(cw, 1).translate(0, .5, 0), dirtCut); m.position.set(s * (1.75 * IN + cw / 2), -CAP, .005); m.receiveShadow = true; h.cap.add(m); return m; });
+    h.capTop = footingTop(DIG.holeIn, 3.5, 3.5, dirtTop); h.cap.add(h.capTop); h.cap.traverse(o => { o.userData.noCheck = true; });
+    for (const o of [h.cav, h.cut, h.top, h.fill, h.fillLow, h.cap]) o.position.x = P.x;
+    R.add(h.cav, h.cut, h.top, h.fill, h.fillLow, h.cap, h.pile);
     return h;
   });
-  const bagsPerHole = (Math.PI * R_HOLE ** 2 * D_HOLE - (3.5 * IN) ** 2 * DIG.postDepthIn * IN) / DIG.bagFt3;
+  const bagsPerHole = n.concFt3 / DIG.bagFt3;
   const nBags = Math.ceil(bagsPerHole * posts.length);
   const bags = unit(bagStack(nBags), 'concrete bags', 'bags'); bags.position.set(XD, 0, -(pickBack + 2 * IN) - 2.05); R.add(bags);
   const bagOrder = [...bags.children].reverse();   // the top of the stack goes first
@@ -93,7 +100,8 @@ export function createDigScene(host, { len = 150, specs } = {}) {
     hole: st.pin('dug', V3(posts[0].x + .75, -1.5, .1), '10 in × 36 in hole'),
     pile: st.pin('dug', V3(holes[0].px, holes[0].reach.H + .35, holes[0].pz), `${fmt(vLoose, 1)} cu ft of loose dirt per hole`),
     bags: st.pin('dug', V3(XD, 1.25, bags.position.z), `${nBags} bags of concrete, 80 lb each`),
-    concrete: st.pin('dug', V3(posts[1].x + .75, -1.7, .1), '4×4 set 32 in down in concrete'),
+    concrete: st.pin('dug', V3(posts[1].x + .75, -1.7, .1), 'Concrete to ¾ of the hole'),
+    tamped: st.pin('dug', V3(posts[0].x + .75, -.35, .1), 'Dirt tamped over the concrete'),
     heap: st.pin('dug', V3(0, 0, 0), ''),
     pipe: st.pin('nodig', V3(pipes[0].x + .55, -2.2, .1), 'Galvanized steel, driven 4 ft'),
     none: st.pin('nodig', V3(XN, -.55, .05), 'No holes · no concrete · no dirt', 'good'),
@@ -142,22 +150,26 @@ export function createDigScene(host, { len = 150, specs } = {}) {
     P = p = clamp(p, 0, 1);
     // dug: holes and piles
     holes.forEach((h, k) => {
-      const { depth } = digAt(k, p), fill = seg(p, ...DUG.pour[k]), lowered = seg(p, ...DUG.lower[k]);
+      const { depth } = digAt(k, p), fill = seg(p, ...DUG.pour[k]) * FILL, lowered = seg(p, ...DUG.lower[k]), tamp = ease(seg(p, ...DUG.tamp[k]));
       h.face.set(depth); h.cav.userData.set(depth);
       h.cut.userData.set(fill, lowered >= 1);
+      // the concrete's top: rising while it's poured, then resting three-quarters of the way up
       const fy = -D_HOLE + D_HOLE * fill;
-      h.fill.visible = fill > 0 && fill < 1 && fy > -DIG.postDepthIn * IN; h.fill.position.y = fy + .004;
+      h.fill.visible = fill > 0 && fy > -DIG.postDepthIn * IN && tamp < 1; h.fill.position.y = fy + .004;
       h.fillLow.visible = fill > 0 && fy <= -DIG.postDepthIn * IN; h.fillLow.position.y = fy + .004;
-      h.top.visible = fill >= 1;
+      h.top.visible = false;
+      // dirt tamped in over it, up to the lawn
+      h.cap.visible = tamp > 0; for (const m of h.capSides) m.scale.y = Math.max(1e-3, CAP * tamp);
+      h.capTop.position.y = -CAP + CAP * tamp + .006;
       const cleaned = ease(seg(p, ...DUG.clean));
-      h.pile.userData.setVolume(vLoose * depth / D_HOLE * (1 - cleaned));
+      h.pile.userData.setVolume(Math.max(0, vLoose * depth / D_HOLE - vBack * tamp) * (1 - cleaned));
     });
     posts.forEach((P_, k) => { const l = seg(p, ...DUG.lower[k]); P_.m.visible = l > 0; P_.m.position.y = (1 - ease(l)) * 3.2; });
     // bags used as each hole is filled
     const used = holes.reduce((a, h, k) => a + seg(p, ...DUG.pour[k]) * bagsPerHole, 0);
     bagOrder.forEach((b, j) => { b.visible = used <= j + .05; });
     // concrete darkens wet and lightens as it cures
-    conc.mat.color.lerpColors(conc.wet.color, conc.dry.color, ease(seg(p, ...DUG.cure)));
+    conc.mat.color.lerpColors(conc.wet.color, conc.dry.color, ease(seg(p, DUG.tamp[1][1], DUG.clean[1])));
     // the auger: down into each hole, up, over to the next, then away
     {
       const d0 = digAt(0, p), d1 = digAt(1, p), lift = q => q < .75 ? 0 : seg(q, .8, 1);
@@ -215,21 +227,22 @@ export function createDigScene(host, { len = 150, specs } = {}) {
     const dg = digAt(0, p);
     L.hole.show(dg.q > .2 && p < DUG.lower[0][0]);
     L.pile.show(dg.q > .5 && p < DUG.clean[0]);
+    L.pile.set(p >= DUG.tamp[0][1] ? `${fmt(vLoose - vBack, 1)} cu ft of dirt left over per hole` : `${fmt(vLoose, 1)} cu ft of loose dirt per hole`);
     L.bags.show(p > .02 && p < DUG.pour[1][1]);
     L.concrete.show(p > DUG.pour[1][0] && p < DUG.rails[0]);
+    L.tamped.show(p > DUG.tamp[0][1] && p < DUG.rails[0]);
     L.pipe.show(p > ND.drive[0][0] + .05);
     L.none.show(p >= ND.pickets[1]);
     status.dug.textContent = p <= 0 ? 'A clean yard, before anyone digs.'
       : p < DUG.exit[1] ? 'Augering a 10 in hole 36 in deep at each post. The dirt comes out onto the lawn.'
-      : p < DUG.pour[1][1] ? 'Setting each 4×4 and filling the hole with concrete.'
-      : p < DUG.cure[1] ? 'Waiting about 48 hours for the concrete before the fence goes on.'
-      : p < DUG.pickets[1] ? 'Rails and pickets go on once the concrete has set.'
-      : 'Done, with the dirt from every hole to spread or haul away.';
+      : p < DUG.tamp[1][1] ? 'Setting each 4×4, filling the hole three-quarters with concrete and tamping dirt over it.'
+      : p < DUG.pickets[1] ? 'Rails and pickets go on.'
+      : 'Done, with the leftover dirt from every hole to spread or haul away.';
     status.nodig.textContent = p <= 0 ? 'The same yard.'
       : p < ND.drive[1][1] ? 'Driving each steel post 4 ft into the ground. Nothing comes out of it.'
       : p < ND.box[1][1] ? 'Building the wood box around each steel post.'
-      : p < ND.pickets[1] ? 'Rails and pickets go on right away. No concrete to wait on.'
-      : 'Done the same day. The lawn is left as it was.';
+      : p < ND.pickets[1] ? 'Rails and pickets go on right away.'
+      : 'Done sooner. The lawn is left as it was.';
     st.dirty();
   }
   function setLen(l) { Object.assign(n, { len: l }, digNumbers(l)); placeHeap(); set(P); }

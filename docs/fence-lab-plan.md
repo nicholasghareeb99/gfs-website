@@ -100,6 +100,32 @@ Next, in order of how much they change the picture:
    bigger wood texture and the contact shade (about a one-second pause once per page on a
    phone). The grass uses up to 46,000 tufts on an iPad and 26,000 on a phone; if it drops
    frames, lower the count. If the contact shade is what slows it, set `AO_STRENGTH` to 0.
+## From Nick, 2026-11-28 (second round)
+
+- **Dug posts, the GFS way.** Concrete to three-quarters of the hole (27 in of 36), dirt tamped
+  over it to the lawn, and **no wait**: the fence goes on the same day. No-dig vs dug now shows
+  that. Per 150 ft: 36 bags (was 47) and 1.2 cu yd of dirt left over (was 1.6). The "wait 2 days"
+  row, the curing clock and the 48-hour line are gone. Note: the Executive App's production
+  checklist still has "Concrete cured (48hr)"; that should be changed there.
+- **Frost & posts plays by itself**: ten winters, one after another. Touching a slider or Pause
+  takes over.
+- **Our build vs prefab runs 25 years** (was 15). The store fence leans as its posts rot at the
+  soil line, pickets work loose, and it goes down at 19 years (posts in dirt) or 21 (in concrete).
+  Basis: Fannie Mae's 15-year useful life for a wood privacy fence, 10 to 20 at the outside; the
+  store fence is given longer than that. Ours is shown gray, with "a picket or two may need
+  replacing", still standing on steel. Numbers in `build-plan.mjs` (`lean`, `fallen`, `LOOSE`).
+- **Wind shows posts giving way.** A choice of post under the picture, each with the gust it
+  holds to for the fence and yard chosen: a typical 4×4 two feet deep tips out of the ground
+  (about 70 mph for 6 ft privacy among houses); GFS steel driven 4 ft holds until the pipe bends
+  (about 90 mph). Past its limit the 3D fence goes down, or bends over. Method and assumptions
+  are in the tool's math section and in `lab.mjs` above `postLimit()`.
+  **Assumed, to confirm with Nick:** the line post is 2⅜ in Schedule 40 pipe at 30,000 psi yield
+  (the minimum for regular-grade fence pipe). If GFS buys high-strength pipe (50,000 psi) the
+  steel limit is higher, about 105 to 115 mph. Ground strength is taken as 1,500 psf (firm).
+  The wood box and the flat 2×4 are not counted as adding strength.
+- **Grade Lab is two steps**: pick a yard, tap "Build it the GFS way" (smooths the top line, then
+  rakes dirt in). The finger modes, kickboard, grading and undo are under "More".
+
 ## Math check (2026-11-28)
 
 Every tool's numbers were recomputed by hand and against sources. What changed:

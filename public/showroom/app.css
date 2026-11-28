@@ -1103,3 +1103,18 @@ body.has-back .top .brand{display:none}
 }
 .l3d.fit.stacked .l3d-solo{display:none}
 @media (max-width:699px){.lab-live .g3-note{margin:-2px 2px 0}}
+.readouts>div.bad{border-color:rgba(239,91,91,.55);background:rgba(110,30,30,.28)}
+#rFail{font-size:18px;line-height:1.15}
+.wpost .seg button{display:grid;gap:1px;line-height:1.15;padding:6px 10px;min-height:46px}
+.wpost .seg button small{font:500 11.5px/1.2 var(--font);color:var(--dim)}
+.wpost .seg button.gone small{color:#ffb3b3}
+.wpost .seg button[aria-pressed=true] small{color:#cfe6ff}
+.wpost .seg button.gone[aria-pressed=true] small{color:#ffc4c4}
+.gl-more{border-top:1px solid var(--line);padding-top:6px}
+.gl-more summary{list-style:none;cursor:pointer;min-height:40px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px;color:var(--blue-lt)}
+.gl-more summary::-webkit-details-marker{display:none}
+.gl-more summary::after{content:'';margin-left:auto;width:8px;height:8px;border-right:2px solid var(--dim);border-bottom:2px solid var(--dim);transform:rotate(45deg);transition:transform .25s}
+.gl-more[open] summary::after{transform:rotate(-135deg)}
+.gl-more-b{display:grid;gap:14px;padding:8px 0 4px}
+.gl-acts .btn.primary{min-height:44px}
+@media (min-width:860px){.gl-more{grid-column:1/-1}}

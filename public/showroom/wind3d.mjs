@@ -31,7 +31,7 @@ const POSTISH = /^(post|termpost|linepost)$/;
 export function createWindScene(host, { specs } = {}) {
   const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 12, width: 320, back: 160, home: { yaw: -.4, pitch: .1 } });
   const R = st.root;
-  let built = null, field = null, fkey = '', smokeFor = '', S = null, live = true;
+  let built = null, field = null, fkey = '', smokeFor = '', S = null, live = true, lean = 0, leanTo = 0;
 
   // ── the fence ──
   function build(style, h, bay) {
@@ -43,7 +43,7 @@ export function createWindScene(host, { specs } = {}) {
     // the no-dig steel runs up inside each box; under the ground it's hidden (the yard isn't cut here)
     if (M.noDig) reveal(F.parts.filter(p => p.geo === 'CylinderGeometry' && p.kind === 'post'), () => 0);
     clearPosts(F);
-    const g = new THREE.Group(); g.add(F.group); R.add(g);
+    const g = new THREE.Group(); g.add(F.group); R.add(g); g.rotation.z = -lean * Math.PI / 180;
     const box = new THREE.Box3(); for (const p of F.parts) if (p.mesh.visible && !p.hidden) box.union(p.box);
     g.updateMatrixWorld(true); box.union(new THREE.Box3().setFromObject(F.group));
     const posts = F.parts.filter(p => POSTISH.test(p.kind || '')).map(p => p.box);
@@ -126,23 +126,27 @@ export function createWindScene(host, { specs } = {}) {
   const L = {
     push: st.pin('main', V3(0, 0), ''), post: st.pin('main', V3(0, 0), ''),
     over: st.pin('main', V3(0, 0), 'Faster over the top', 'tick'), swirl: st.pin('main', V3(0, 0), 'Air rolls back', 'tick'),
-    slow: st.pin('main', V3(0, 0), 'Slower air behind', 'tick')
+    slow: st.pin('main', V3(0, 0), 'Slower air behind', 'tick'), down: st.pin('main', V3(0, 0), '')
   };
 
   // load: { style, h, bay, eps, V, exposure, p (psf), perPost (lb) }
   function set(load) {
     const prev = S; S = load;
     build(load.style, load.h, load.bay);
-    const fk = `${load.eps}|${load.h}|${load.exposure}`;
-    if (fk !== fkey || built.k !== smokeFor) { field = flowField({ eps: load.eps, hFt: load.h, exposure: load.exposure }); fkey = fk; smokeFor = built.k; smoke(); }
+    // a fence that has gone over no longer stands in the wind's way
+    const down = !!load.fail?.down, flat = down && load.fail.mode !== 'bends';
+    leanTo = !load.fail ? 0 : down ? (flat ? 82 : 40) : 1.4 * Math.min(1, load.fail.frac) ** 2;
+    const fk = `${flat ? 0 : load.eps}|${load.h}|${load.exposure}`;
+    if (fk !== fkey || built.k !== smokeFor) { field = flowField({ eps: flat ? 0 : load.eps, hFt: load.h, exposure: load.exposure }); fkey = fk; smokeFor = built.k; smoke(); }
     speed = .55 + 1.25 * load.V / 58;
     placeArrows(load.p);
     const h = load.h;
     L.push.set(`${fmt1(load.p)} lb per sq ft`); L.push.move(V3(built.face - Math.min(4.2, .35 + load.p * .16) * Math.max(.7, h / 6) * .5, h * .02));
-    L.post.set(`${Math.round(load.perPost).toLocaleString()} lb on each post`); L.post.move(V3((built.face + built.back) / 2, built.top + .15, Z0 - built.bay));
-    L.over.move(V3(h * 1.3, h * 1.6)); L.over.show(field.open < .5);
+    L.post.set(down ? { tips: 'Posts tipped out of the ground', snaps: 'Posts snapped at the ground', bends: 'Steel posts bent over' }[load.fail.mode] : `${Math.round(load.perPost).toLocaleString()} lb on each post`); L.post.show(!down); L.down.set(L.post.el.textContent); L.down.show(down); L.down.move(V3(built.back + .4, .9, Z0 - built.bay));
+    L.push.show(!flat); L.post.move(V3((built.face + built.back) / 2, built.top + .15, Z0 - built.bay));
+    L.over.move(V3(h * 1.3, h * 1.6)); L.over.show(field.open < .5 && !flat);
     L.swirl.move(V3(h * 1.9, h * .5)); L.swirl.show(field.swirl > .5);
-    L.slow.move(V3(h * 1.9, h * .45)); L.slow.show(field.swirl <= .5);
+    L.slow.move(V3(h * 1.9, h * .45)); L.slow.show(field.swirl <= .5 && !flat);
     if (!prev || prev.h !== h || prev.bay !== load.bay) st.frameView('main', { cx: h * 1.4, cy: h * 1.05, w: h * 4.6, h: h * 2.5, cz: zS() }, prev ? 500 : 0);
     st.dirty();
   }
@@ -153,6 +157,8 @@ export function createWindScene(host, { specs } = {}) {
     if (!live || !S) return live;
     const dt = Math.min(.05, t0 ? (now - t0) / 1000 : .016); t0 = now;
     if (!reducedMotion()) { uT.value = (uT.value + dt * speed * 1.6) % 1000; st.dirty(); }
+    // the fence eases toward its lean: a little sway under load, over when the posts give
+    if (built && Math.abs(lean - leanTo) > .01) { lean = reducedMotion() ? leanTo : lean + (leanTo - lean) * Math.min(1, dt * (leanTo > lean ? 5 : 3)); built.g.rotation.z = -lean * Math.PI / 180; st.dirty(); }
     return true;
   });
   const rm = matchMedia('(prefers-reduced-motion: reduce)'), reducedMotion = () => rm.matches;

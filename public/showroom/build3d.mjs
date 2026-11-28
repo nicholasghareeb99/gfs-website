@@ -1,5 +1,5 @@
 // Our build vs prefab in 3D: one 8 ft section each way, side by side (stacked on phones), seen from
-// the rail side with the yard cut open at the posts, aged up to 15 years.
+// the rail side with the yard cut open at the posts, aged up to 25 years.
 //
 //  Prefab (wood): a store 6 × 8 dog-ear panel (½ in pickets on 2×3 rails) hung on 4×4 posts set
 //    about 2 ft in dirt or 2½ ft in concrete. Frost lifts the posts (each a little differently, so the
@@ -12,7 +12,7 @@
 // Movement here is a typical case at true size; the numbers are in build-plan.mjs.
 import { THREE, IN, createStage, fence, reveal, settleRails, settleCaps, squarePost, pipe, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps } from './lab3d.mjs';
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
-import { PANEL, SETS, VINYL_SET, SLOPE_IN, WET, heave, sag, decay, weather, yellow, season } from './build-plan.mjs';
+import { PANEL, SETS, VINYL_SET, SLOPE_IN, WET, LOOSE, FALL_AT, heave, sag, decay, lean, fallen, weather, yellow, season } from './build-plan.mjs';
 import { STYLE, STYLE_ND } from './dig-plan.mjs';
 
 const XP = -20, XG = 20, HALF = 4, VINYL = 'Kingston - White 6ft';
@@ -68,7 +68,11 @@ export function createBuildScene(host, { specs } = {}) {
       const grp = new THREE.Group(); grp.position.set(x, gy(x), 0); g.add(grp);
       const lifted = new THREE.Group(); grp.add(lifted);
       const o = { x, grp, lifted, k };
-      if (!vinyl) lifted.add(tag(squarePost(wood, 3.5, 3.5, (panelTop - gy(x)) / IN, -set.postBotIn), 'store post', 'pre' + k));
+      if (!vinyl) {
+        // in two pieces, so it can break where it rots: the part in the ground, and the part above it
+        lifted.add(tag(squarePost(wood, 3.5, 3.5, .75, -set.postBotIn), 'store post', 'pre' + k));
+        o.up = tag(squarePost(wood, 3.5, 3.5, (panelTop - gy(x)) / IN, .75), 'store post', 'pre' + k);
+      }
       else {
         // the app's vinyl post stands above grade (it rides up with the panel); here it is carried down into its concrete
         const vp = preF.parts.filter(p => p.kind === 'post').sort((a, b) => a.cx - b.cx)[k];
@@ -101,8 +105,11 @@ export function createBuildScene(host, { specs } = {}) {
       const span = PANEL.pickets * PANEL.picketWIn + (PANEL.pickets - 1) * PANEL.gapIn, xs = Array.from({ length: PANEL.pickets }, (_, i) => XP + (-span / 2 + PANEL.picketWIn / 2 + i * (PANEL.picketWIn + PANEL.gapIn)) * IN);
       // rails: 2×3s on edge across the post faces, in 2 in strips so they can sag
       const rails = PANEL.railsIn.map((ry, i) => { const geo = new THREE.BoxGeometry(2 * HALF, PANEL.railHIn * IN, PANEL.railTIn * IN, 48, 1, 1); geo.translate(XP, 0, -2.5 * IN); geo.userData.base = geo.attributes.position.array.slice(); const m = new THREE.Mesh(geo, wood); m.castShadow = m.receiveShadow = true; m.userData.what = 'store rail'; m.userData.ry = ry * IN; g.add(m); return m; });
-      g.add(pickets);
-      panel = { pickets, xs, rails };
+      // everything above the ground hangs off one hinge along the soil line, so the fence can lean and go down
+      const fall = new THREE.Group(), hang = new THREE.Group(); fall.add(hang); g.add(fall);
+      for (const r of rails) hang.add(r);
+      hang.add(pickets); for (const o of posts) hang.add(o.up);
+      panel = { pickets, xs, rails, fall, hang };
     }
     R.add(g);
     built = { group: g, libs, holes, posts, panel, gfs: gfsB, steel, preF, set, vinyl, panelBot, panelTop, gy, x0, x1, gPosts };
@@ -116,6 +123,7 @@ export function createBuildScene(host, { specs } = {}) {
     set: st.pin('pre', V3(XP - HALF + .6, -1.2, .1), ''),
     lift: st.pin('pre', V3(XP + HALF, 6.6), ''),
     rot: st.pin('pre', V3(XP - HALF, .5, .2), 'Decay starts at the soil line'),
+    down: st.pin('pre', V3(XP - HALF, .7, .2), 'Post broke at the soil line'),
     sag: st.pin('pre', V3(XP, 6.6, -.3), 'Sagging between posts'),
     gap: st.pin('pre', V3(XP - HALF / 2, .3, -.3), 'Gap under the panel'),
     steel: st.pin('gfs', V3(XG - HALF + .55, -2.1, .1), 'Steel driven 4 ft'),
@@ -144,10 +152,28 @@ export function createBuildScene(host, { specs } = {}) {
       const bot = -b.set.depthIn * IN; o.fill.userData.set(bot, Lk - gapH); o.gap.userData.set(bot + Lk - gapH, gapH);
       if (o.band) { rotMat.opacity = decay(b.set, y) * .85; o.band.visible = rotMat.opacity > .02; }
     });
-    const sg = sag(y) * IN;
+    const sg = sag(y) * IN, tilt = vinyl ? 0 : lean(b.set, y), down = !vinyl && fallen(b.set, y);
     if (b.panel) {
-      const { pickets, xs, rails } = b.panel, M = new THREE.Matrix4(), at = x => { const t = (x - b.x0) / (b.x1 - b.x0); return lifts[0] + (lifts[1] - lifts[0]) * t - sg * Math.sin(Math.PI * clamp(t, 0, 1)); };
-      xs.forEach((x, i) => { M.makeTranslation(x, b.panelBot + at(x), 0); pickets.setMatrixAt(i, M); }); pickets.instanceMatrix.needsUpdate = true;
+      const { pickets, xs, rails, fall, hang } = b.panel, M = new THREE.Matrix4(), at = x => { const t = (x - b.x0) / (b.x1 - b.x0); return lifts[0] + (lifts[1] - lifts[0]) * t - sg * Math.sin(Math.PI * clamp(t, 0, 1)); };
+      // the hinge: along the soil line from post to post, at the back of the pickets so the fence lies on them
+      const p0 = new THREE.Vector3(b.x0, b.gy(b.x0) + lifts[0] + .75 * IN, -(3.25 + PANEL.picketTIn) * IN), p1 = new THREE.Vector3(b.x1, b.gy(b.x1) + lifts[1] + .75 * IN, p0.z);
+      fall.position.copy(p0); fall.quaternion.setFromAxisAngle(p1.clone().sub(p0).normalize(), -tilt * Math.PI / 180); hang.position.copy(p0).negate();
+      b.posts.forEach((o, k) => o.up.position.set(o.x, b.gy(o.x) + lifts[k], 0));
+      const Q = new THREE.Quaternion(), S1 = new THREE.Vector3(1, 1, 1), E = new THREE.Euler(), top = PANEL.picketLIn * IN;
+      // world → the leaning panel's own space, for pickets that have dropped off and lie still on the lawn
+      const toPanel = new THREE.Matrix4().compose(p0, fall.quaternion, S1).multiply(new THREE.Matrix4().makeTranslation(-p0.x, -p0.y, -p0.z)).invert();
+      xs.forEach((x, i) => {
+        const loose = LOOSE.find(l => l[0] === i), yb = b.panelBot + at(x);
+        if (loose && loose[2] && y >= loose[2] && !down) {
+          M.compose(new THREE.Vector3(x + (i % 2 ? .25 : -.2), b.gy(x) + .3, -1.4 - (i % 3) * .4), Q.setFromEuler(E.set(-Math.PI / 2 + .04, 0, (i % 2 ? .22 : -.3))), S1).premultiply(toPanel);
+        } else if (loose && y >= loose[1]) {
+          // one nail left at the top: it hangs crooked and a little low
+          const a = (i % 2 ? 1 : -1) * Math.min(.07, (y - loose[1]) * .035);
+          M.makeTranslation(x, yb + top - .5 * IN, -(PANEL.picketTIn + .06) * IN).multiply(new THREE.Matrix4().makeRotationZ(a))   // loose, so it hangs proud of its neighbours, not through them.multiply(new THREE.Matrix4().makeTranslation(0, -top, 0));
+        } else M.makeTranslation(x, yb, 0);
+        pickets.setMatrixAt(i, M);
+      });
+      pickets.instanceMatrix.needsUpdate = true;
       for (const r of rails) { const p = r.geometry.attributes.position, base = r.geometry.userData.base; for (let i = 0; i < p.count; i++) p.setY(i, base[i * 3 + 1] + b.panelBot + r.userData.ry + at(base[i * 3])); p.needsUpdate = true; r.geometry.computeBoundingBox(); r.geometry.computeBoundingSphere(); }
     }
     if (b.preF) {
@@ -162,15 +188,16 @@ export function createBuildScene(host, { specs } = {}) {
     if (!vinyl) for (const mtl of new Set([...b.gfs.parts.map(p => p.mesh.material), b.panel.pickets.material])) { if (!mtl.map && !mtl.userData.gfsFamily) continue; if (!baseWood.has(mtl)) baseWood.set(mtl, mtl.color.clone()); mtl.color.copy(baseWood.get(mtl)).lerp(gray.color, wk); }
     // labels
     const inch = v => Math.round(v / IN * 10) / 10;
-    L.panel.show(!vinyl && y < 1.5); L.set.set(b.vinyl ? 'Vinyl post in ~2½ ft of concrete' : b.set.id === 'dirt' ? 'Post ~2 ft in dirt' : 'Post ~2½ ft in concrete'); L.set.show(y < 1.5);
-    L.lift.set(`Pushed up ${inch(lifts[1])} in by frost`); L.lift.show(lifts[1] > .4 * IN); L.lift.move(V3(b.x1, b.panelTop + lifts[1] + .3));
-    L.rot.show(!vinyl && decay(b.set, y) > .25); L.sag.set(`Sagged ${inch(sg)} in`); L.sag.show(!vinyl && sg > .5 * IN); L.sag.move(V3(XP, b.panelTop + (lifts[0] + lifts[1]) / 2 - sg + .3, -.3));
+    L.panel.show(!vinyl && y < 1.5); L.down.show(down); if (down) L.down.move(V3(b.x0 + .3, b.gy(b.x0) + .7, .2)); L.set.set(b.vinyl ? 'Vinyl post in ~2½ ft of concrete' : b.set.id === 'dirt' ? 'Post ~2 ft in dirt' : 'Post ~2½ ft in concrete'); L.set.show(y < 1.5);
+    L.lift.set(`Pushed up ${inch(lifts[1])} in by frost`); L.lift.show(lifts[1] > .4 * IN && tilt < 3); L.lift.move(V3(b.x1, b.panelTop + lifts[1] + .3));
+    L.rot.show(!vinyl && decay(b.set, y) > .25 && !down); L.sag.set(`Sagged ${inch(sg)} in`); L.sag.show(!vinyl && sg > .5 * IN && tilt < 3); L.sag.move(V3(XP, b.panelTop + (lifts[0] + lifts[1]) / 2 - sg + .3, -.3));
     L.gap.show(state.slope); L.grade.show(state.slope);
     L.steel.show(y < 1.5 || !state.slope); L.box.show(!vinyl && y < 1.5); L.top.show(!vinyl && y < 1.5); L.top.move(V3(XG, b.gy(XG) + 68.5 * IN + .15, 0));
     L.box.set(vinyl ? 'Vinyl post sleeved over the steel' : 'Wood box on the steel'); if (vinyl) L.box.show(y < 1.5);
     const yrs = Math.floor(y), win = m != null && m < 5;
-    status.pre.textContent = y < .5 ? 'Looks fine the day it goes in.' : [lifts[1] > .4 * IN ? `posts pushed up by frost${Math.abs(lifts[0] - lifts[1]) > .3 * IN ? ', unevenly, so the panel racks' : ''}` : '', !vinyl && decay(b.set, y) > .25 ? 'decay at the soil line' : '', !vinyl && sg > .5 * IN ? 'panel sagging' : '', vinyl && yellow(y) > .4 ? 'vinyl yellowing' : '', state.slope ? 'gap under the panel' : '', win ? 'winter' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
-    status.gfs.textContent = y < .5 ? (state.slope ? 'Built to follow the ground, post to post.' : 'Straight on day one.') : vinyl ? 'Still straight, square and white.' : weather(y) > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
+    const off = vinyl ? 0 : LOOSE.filter(l => l[2] && y >= l[2]).length;
+    status.pre.textContent = y < .5 ? 'Looks fine the day it goes in.' : down ? `Down at ${FALL_AT[b.set.id]} years. The posts rotted through at the soil line and a storm took it over.` : [tilt > 1.5 ? `leaning ${Math.round(tilt)}°: the posts are rotting through at the soil line` : '', off ? `${off} picket${off > 1 ? 's' : ''} off` : '', lifts[1] > .4 * IN ? `posts pushed up by frost${Math.abs(lifts[0] - lifts[1]) > .3 * IN ? ', unevenly, so the panel racks' : ''}` : '', !vinyl && decay(b.set, y) > .25 ? 'decay at the soil line' : '', !vinyl && sg > .5 * IN ? 'panel sagging' : '', vinyl && yellow(y) > .4 ? 'vinyl yellowing' : '', state.slope ? 'gap under the panel' : '', win ? 'winter' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
+    status.gfs.textContent = y < .5 ? (state.slope ? 'Built to follow the ground, post to post.' : 'Straight on day one.') : vinyl ? 'Still straight, square and white.' : y >= 16 ? 'Still standing straight on its steel posts. The wood is gray, and a picket or two may need replacing by now.' : weather(y) > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
     st.dirty();
     return yrs;
   }
