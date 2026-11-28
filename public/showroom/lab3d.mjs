@@ -41,12 +41,12 @@ const SECTION_HOLES = 6;
 const skyMid = new THREE.Color(0xc9dcec);
 const NOISE = 'float secH(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}\nfloat secN(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mix(secH(i),secH(i+vec2(1.0,0.0)),f.x),mix(secH(i+vec2(0.0,1.0)),secH(i+vec2(1.0,1.0)),f.x),f.y);}\n';
 function groundShader(m, lawn) {
-  const u = { uHoles: { value: Array.from({ length: SECTION_HOLES }, () => new THREE.Vector4(0, 0, 0, 0)) }, uFrost: { value: new THREE.Vector3(0, 0, 0) }, uSnow: { value: 0 }, uHaze: { value: skyMid } };
+  const u = { uHoles: { value: Array.from({ length: SECTION_HOLES }, () => new THREE.Vector4(0, 0, 0, 0)) }, uFrost: { value: new THREE.Vector3(0, 0, 0) }, uSnow: { value: 0 }, uHaze: { value: skyMid }, uBand: { value: new THREE.Vector2(0, 1) } };
   const prev = m.onBeforeCompile;
   m.onBeforeCompile = (sh, r) => {
     prev?.call(m, sh, r);
     Object.assign(sh.uniforms, u);
-    sh.vertexShader = 'varying vec3 vSecW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvSecW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.vertexShader = 'varying vec3 vSecW; varying vec2 vSecUv;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\nvSecW = (modelMatrix * vec4(transformed, 1.0)).xyz; vSecUv = uv;');
     let f = sh.fragmentShader;
     if (lawn) {
       f = f.replace('#include <map_fragment>', `
@@ -75,6 +75,30 @@ function groundShader(m, lawn) {
           diffuseColor.rgb *= mix(0.84, 1.15, big);
           diffuseColor.rgb *= mix(0.94, 1.05, secN(vec2(q.x * 0.12, q.y * 2.6 + 1.7)));
           diffuseColor.rgb *= mix(0.95, 1.04, secN(q * 5.3 + 1.1)); }
+        // What a real cut through a lawn shows. dep is feet below the grass at this spot.
+        { float dep = uBand.x + (1.0 - vSecUv.y) * uBand.y, px = fwidth(vSecW.x);
+          // Grass roots: a mat of fine roots in the top few inches, and here and there a thicker root
+          // going down as far as a foot. Each is a pale thread that wanders and thins out.
+          for (int layer = 0; layer < 2; layer++) {
+            float cell = layer == 0 ? 0.26 : 0.07, reach = layer == 0 ? 0.95 : 0.3, thick = layer == 0 ? 0.011 : 0.0045, share = layer == 0 ? 0.55 : 0.8;
+            float gx = vSecW.x / cell, ix = floor(gx);
+            for (int i = -1; i <= 1; i++) { float c = ix + float(i), h = secH(vec2(c, 3.7 + float(layer) * 11.0));
+              if (h > share) continue;
+              float len = reach * (0.3 + 0.7 * secH(vec2(c, 8.1))); if (dep > len) continue;
+              float xr = (c + 0.15 + 0.7 * secH(vec2(c, 1.3))) * cell + (secN(vec2(c * 3.1, dep * 7.0)) - 0.5) * cell * 0.9 * (0.3 + dep / len);
+              float t = thick * (1.0 - 0.85 * dep / len), tt = max(t, px * 0.8);
+              float a = (1.0 - smoothstep(tt * 0.45, tt, abs(vSecW.x - xr))) * min(1.0, 1.4 * t / tt);
+              diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.6, 0.47, 0.32), a * 0.62); } }
+          // Stones: a few rounded pebbles, one to three inches across, below the topsoil's first inches.
+          vec2 g = vec2(vSecW.x, dep) * 2.4, id = floor(g), fr = fract(g);
+          for (int j = -1; j <= 1; j++) for (int i = -1; i <= 1; i++) { vec2 o = vec2(float(i), float(j)), c = id + o;
+            if (secH(c + 17.3) < 0.94) continue;
+            vec2 ctr = o + 0.15 + 0.7 * vec2(secH(c + 3.1), secH(c + 9.7)), dv = (fr - ctr) / vec2(1.0 + 0.6 * secH(c + 1.9), 1.0);
+            float rad = 0.1 + 0.2 * secH(c + 5.5), dd = length(dv) / rad, depC = (id.y + ctr.y) / 2.4;
+            if (depC < 0.3) continue;
+            float inside = 1.0 - smoothstep(0.82, 1.0, dd), lit = 0.82 + 0.3 * clamp(-dv.y / rad, -1.0, 1.0);
+            vec3 tone = mix(vec3(0.34, 0.31, 0.28), vec3(0.52, 0.49, 0.43), secH(c + 7.7)) * (0.9 + 0.2 * secN(g * 6.0));
+            diffuseColor.rgb = mix(diffuseColor.rgb * (1.0 - 0.28 * smoothstep(1.35, 1.0, dd) * step(0.0, dv.y)), mix(tone, diffuseColor.rgb, 0.3) * lit, inside * 0.85); } }
         if (uFrost.y > uFrost.x && vSecW.y > -uFrost.y && vSecW.y < -uFrost.x) {
           float d = -vSecW.y, front = smoothstep(uFrost.y - 1.0, uFrost.y, d);
           diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.84, 0.92, 1.1) + vec3(0.04, 0.05, 0.07), 0.65);
@@ -88,9 +112,9 @@ function groundShader(m, lawn) {
       ? 'for (int i = 0; i < ' + SECTION_HOLES + '; i++) { vec4 h = uHoles[i]; if (h.w > 0.5 && distance(vSecW.xz, h.xy) < h.z) discard; }'
       // cut face: rectangles from x0 to x1, from grade down to y
       : 'for (int i = 0; i < ' + SECTION_HOLES + '; i++) { vec4 h = uHoles[i]; if (h.w > 0.5 && vSecW.x > h.x && vSecW.x < h.y && vSecW.y > h.z) discard; }';
-    sh.fragmentShader = 'varying vec3 vSecW;\nuniform vec4 uHoles[' + SECTION_HOLES + '];\nuniform vec3 uFrost;\nuniform float uSnow;\nuniform vec3 uHaze;\n' + NOISE + f.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + test);
+    sh.fragmentShader = 'varying vec3 vSecW; varying vec2 vSecUv;\nuniform vec4 uHoles[' + SECTION_HOLES + '];\nuniform vec3 uFrost;\nuniform float uSnow;\nuniform vec3 uHaze;\nuniform vec2 uBand;\n' + NOISE + f.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + test);
   };
-  m.customProgramCacheKey = () => 'gfsLabGround-' + (lawn ? 'lawn' : 'face2');
+  m.customProgramCacheKey = () => 'gfsLabGround-' + (lawn ? 'lawn' : 'face5');
   m.userData.u = u; m.userData.holes = u.uHoles.value;
   return m;
 }
@@ -118,6 +142,9 @@ export function mats() {
   M.bag = new THREE.MeshStandardMaterial({ map: bagTexture(), roughness: .92, metalness: 0 });
   M.tool = new THREE.MeshStandardMaterial({ color: 0xd8742c, roughness: .45, metalness: .25 });
   M.toolDark = new THREE.MeshStandardMaterial({ color: 0x2b3038, roughness: .5, metalness: .55, envMapIntensity: .8 });
+  M.toolDarkBoth = M.toolDark.clone(); M.toolDarkBoth.side = THREE.DoubleSide;                                   // the auger's flight is one sheet, seen from both sides
+  M.toolWorn = new THREE.MeshStandardMaterial({ color: 0x9aa1a6, roughness: .38, metalness: .85, envMapIntensity: 1 });   // steel rubbed bright
+  M.rubber = new THREE.MeshStandardMaterial({ color: 0x17181a, roughness: .9, metalness: 0 });
   M.line = new THREE.MeshBasicMaterial({ map: dashTexture(), transparent: true, depthWrite: false, toneMapped: false });
   M.tick = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: .75, depthWrite: false, toneMapped: false });
   return M;
@@ -126,14 +153,20 @@ function canvasTexture(w, h, draw, srgb = true) {
   const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
   const t = new THREE.CanvasTexture(c); if (srgb) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 }
-// An 80 lb bag of concrete mix, printed plainly (no brand).
+// An 80 lb bag of concrete mix: brown kraft paper, printed plainly (no brand), sewn shut at both ends.
 function bagTexture() {
-  return canvasTexture(256, 192, (g, w, h) => {
-    g.fillStyle = '#d9d3c4'; g.fillRect(0, 0, w, h);
-    g.fillStyle = '#9b2f24'; g.fillRect(0, h * .3, w, h * .34);
-    g.fillStyle = '#f4efe4'; g.font = 'bold 44px Helvetica, Arial, sans-serif'; g.textAlign = 'center'; g.fillText('80 LB', w / 2, h * .56);
-    g.fillStyle = '#5b5750'; g.font = 'bold 20px Helvetica, Arial, sans-serif'; g.fillText('CONCRETE MIX', w / 2, h * .85);
-    for (let i = 0; i < 900; i++) { g.fillStyle = `rgba(0,0,0,${Math.random() * .06})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); }
+  return canvasTexture(512, 384, (g, w, h) => {
+    g.fillStyle = '#c9b48f'; g.fillRect(0, 0, w, h);
+    // the paper: fibres, creases and scuffs
+    for (let i = 0; i < 2600; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '70,52,30' : '255,244,220'},${Math.random() * .07})`; g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 14, 1); }
+    for (let i = 0; i < 9; i++) { const x = Math.random() * w, y = Math.random() * h; g.strokeStyle = `rgba(60,44,26,${.05 + Math.random() * .08})`; g.lineWidth = 1 + Math.random() * 2; g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - .5) * 220, y + (Math.random() - .5) * 120); g.stroke(); }
+    // the print
+    g.fillStyle = '#a3352a'; g.fillRect(w * .1, h * .26, w * .8, h * .4);
+    g.fillStyle = '#f3ead8'; g.textAlign = 'center'; g.font = 'bold 74px Helvetica, Arial, sans-serif'; g.fillText('CONCRETE', w / 2, h * .46); g.font = 'bold 46px Helvetica, Arial, sans-serif'; g.fillText('MIX', w / 2, h * .61);
+    g.fillStyle = '#4a3f30'; g.font = 'bold 40px Helvetica, Arial, sans-serif'; g.fillText('80 LB', w / 2, h * .82); g.font = '15px Helvetica, Arial, sans-serif'; g.fillText('JUST ADD WATER  ·  0.6 CU FT', w / 2, h * .9);
+    g.strokeStyle = '#4a3f30'; g.lineWidth = 3; g.strokeRect(w * .1, h * .1, w * .8, h * .1); g.font = 'bold 22px Helvetica, Arial, sans-serif'; g.fillText('4000 PSI', w / 2, h * .175);
+    // sewn ends: a folded band and a row of stitches at each short end
+    for (const x of [w * .035, w * .965]) { g.fillStyle = 'rgba(70,52,30,.16)'; g.fillRect(x - w * .035, 0, w * .07, h); g.strokeStyle = 'rgba(245,238,224,.9)'; g.lineWidth = 3; g.setLineDash([9, 7]); g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); g.setLineDash([]); }
   });
 }
 function dashTexture() {
@@ -456,6 +489,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   const TOP = 8 * IN;   // topsoil
   const face = (h, y0, m, name) => { const g = new THREE.PlaneGeometry(width, h, SEG, 1); g.translate(0, y0 - h / 2, 0); g.userData.base = g.attributes.position.array.slice(); const f = new THREE.Mesh(g, m); f.receiveShadow = true; f.name = name; scene.add(f); return f; };
   const faces = [face(TOP, 0, G.topsoil, 'topsoil'), face(soilDepth - TOP, -TOP, G.clay, 'clay')];
+  G.topsoil.userData.u.uBand.value.set(0, TOP); G.clay.userData.u.uBand.value.set(TOP, soilDepth - TOP);   // where each face sits below the grass
   lawnGeo.userData.base = lawnGeo.attributes.position.array.slice();
   let grade = () => 0;
   function setGrade(fn) {
@@ -537,6 +571,57 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   function dirty() { need = true; if (fine) { fine = false; setPR(basePR); } clearTimeout(fineTimer); kick(); }
   const refine = () => { if (!alive || fineOff || fine || !onscreen || ticks.size) return; fine = true; setPR(finePR()); need = true; kick(); };
   function kick() { if (!raf && alive && onscreen) raf = requestAnimationFrame(frame); }
+  // ── contact shade ──
+  // Where two parts meet, less of the sky reaches the corner between them: under a rail, behind a
+  // brace, at the foot of a post, in the gap beside a gate. A sun shadow doesn't show that; this does.
+  // It is worked out from how far every pixel is from the eye, only for the fine picture at rest: the
+  // solid parts are drawn once more for depth alone, then each pixel is darkened a little by how
+  // much of the half-ball of space in front of its surface is taken up by something nearer than
+  // AO_FT. Grass, trees, labels and anything see-through are left out of it.
+  const AO_FT = .3, AO_STRENGTH = .5;
+  let aoRT = null;
+  const aoDepth = new THREE.MeshBasicMaterial({ colorWrite: false }), aoScene = new THREE.Scene(), aoCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const aoMat = new THREE.ShaderMaterial({
+    uniforms: { tDepth: { value: null }, uProj: { value: new THREE.Matrix4() }, uProjInv: { value: new THREE.Matrix4() }, uRes: { value: new THREE.Vector2(1, 1) }, uRadius: { value: AO_FT }, uStrength: { value: AO_STRENGTH } },
+    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
+    fragmentShader: `uniform sampler2D tDepth; uniform mat4 uProj, uProjInv; uniform vec2 uRes; uniform float uRadius, uStrength; varying vec2 vUv;
+      vec3 eye(vec2 uv) { vec4 v = uProjInv * vec4(uv * 2.0 - 1.0, texture2D(tDepth, uv).x * 2.0 - 1.0, 1.0); return v.xyz / v.w; }
+      void main() {
+        if (texture2D(tDepth, vUv).x >= 0.99995) { gl_FragColor = vec4(1.0); return; }
+        vec2 px = 1.0 / uRes; vec3 p = eye(vUv), r = eye(vUv + vec2(px.x, 0.0)), l = eye(vUv - vec2(px.x, 0.0)), u = eye(vUv + vec2(0.0, px.y)), d = eye(vUv - vec2(0.0, px.y));
+        vec3 dx = abs(r.z - p.z) < abs(p.z - l.z) ? r - p : p - l, dy = abs(u.z - p.z) < abs(p.z - d.z) ? u - p : p - d, n = normalize(cross(dx, dy));
+        vec3 t = normalize(abs(n.y) < 0.99 ? cross(n, vec3(0.0, 1.0, 0.0)) : cross(n, vec3(1.0, 0.0, 0.0))), b = cross(n, t);
+        float turn = 6.2831853 * fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(0.06711056, 0.00583715)))), occ = 0.0;
+        for (int i = 0; i < 16; i++) {
+          float f = (float(i) + 0.5) / 16.0, rr = sqrt(f), a = turn + float(i) * 2.39996323;
+          vec3 sp = p + (t * cos(a) * rr + b * sin(a) * rr + n * sqrt(1.0 - f)) * uRadius * mix(0.2, 1.0, f);
+          vec4 c = uProj * vec4(sp, 1.0); vec2 suv = c.xy / c.w * 0.5 + 0.5;
+          if (suv.x < 0.0 || suv.x > 1.0 || suv.y < 0.0 || suv.y > 1.0) continue;
+          float sz = eye(suv).z;
+          occ += step(sp.z + 0.02 * uRadius, sz) * smoothstep(0.0, 1.0, uRadius / max(abs(p.z - sz), 1e-4));
+        }
+        gl_FragColor = vec4(vec3(1.0 - uStrength * occ / 16.0), 1.0);
+      }`,
+    blending: THREE.MultiplyBlending, depthTest: false, depthWrite: false, transparent: true, toneMapped: false
+  });
+  { const q = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), aoMat); q.frustumCulled = false; aoScene.add(q); }
+  function contactShade(v, y) {
+    const r = v.rect, k = Math.min(2, renderer.getPixelRatio()), w = Math.max(2, Math.round(r.w * k)), h = Math.max(2, Math.round(r.h * k));
+    if (!aoRT) { aoRT = new THREE.WebGLRenderTarget(w, h, { depthTexture: new THREE.DepthTexture(w, h, THREE.UnsignedIntType), minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter }); }
+    else if (aoRT.width !== w || aoRT.height !== h) aoRT.setSize(w, h);
+    const hidden = [];
+    scene.traverse(o => {
+      if (!o.visible || !(o.isMesh || o.isLine || o.isPoints || o.isSprite)) return;
+      const m = o.material;
+      if (o === sky || !o.isMesh || m.transparent || m.depthWrite === false || m.side === THREE.BackSide || m.colorWrite === false) { o.visible = false; hidden.push(o); }
+    });
+    const sceneryOn = scenery.group.visible; scenery.group.visible = false;
+    scene.overrideMaterial = aoDepth; renderer.setRenderTarget(aoRT); renderer.clear(); renderer.render(scene, v.cam);
+    scene.overrideMaterial = null; renderer.setRenderTarget(null); scenery.group.visible = sceneryOn; for (const o of hidden) o.visible = true;
+    aoMat.uniforms.tDepth.value = aoRT.depthTexture; aoMat.uniforms.uProj.value.copy(v.cam.projectionMatrix); aoMat.uniforms.uProjInv.value.copy(v.cam.projectionMatrixInverse); aoMat.uniforms.uRes.value.set(w, h);
+    renderer.setViewport(r.x, y, r.w, r.h); renderer.setScissor(r.x, y, r.w, r.h);
+    const auto = renderer.autoClear; renderer.autoClear = false; renderer.render(aoScene, aoCam); renderer.autoClear = auto;
+  }
   function frame(now) {
     raf = 0; if (!alive) return;
     let more = false;
@@ -560,6 +645,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
         renderer.shadowMap.needsUpdate = true;
         renderer.setViewport(r.x, y, r.w, r.h); renderer.setScissor(r.x, y, r.w, r.h);
         renderer.render(scene, v.cam);
+        if (fine) contactShade(v, y);
       }
       need = false; for (const f of afters) f();
       clearTimeout(fineTimer); if (!more && !fine && !fineOff) fineTimer = setTimeout(refine, 260);
@@ -666,7 +752,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
     get stacked() { return stacked; }, layout,
     dispose() {
-      alive = false; cancelAnimationFrame(raf); clearTimeout(fineTimer); stages.delete(dirty); ro.disconnect(); io.disconnect();
+      alive = false; cancelAnimationFrame(raf); clearTimeout(fineTimer); stages.delete(dirty); aoRT?.depthTexture?.dispose(); aoRT?.dispose(); aoMat.dispose(); aoDepth.dispose(); ro.disconnect(); io.disconnect();
       scene.traverse(o => { if (o.geometry && !o.userData.keepGeo) o.geometry.dispose(); });
       for (const m of [G.topsoil, G.clay, G.lawn]) m.dispose(); for (const t of G.maps) t.dispose();
       envRT.dispose(); renderer.dispose(); renderer.forceContextLoss?.(); wrap.remove();
@@ -901,27 +987,54 @@ export function bagStack(n) {
   return g;
 }
 // A hydraulic auger: a 10 in bit (flight on a center shaft, 4 ft long) under its drive head.
+// A two-man post-hole auger: a helical flight on a shaft with a fishtail point and two cutting blades,
+// a gearbox and small engine on top, and a tube handle frame with a grip at each corner.
 export function auger(diaIn = 10) {
-  const g = new THREE.Group(), R = diaIn / 2 * IN, L = 4, turns = 6, pts = [];
-  for (let i = 0; i <= 240; i++) { const a = i / 240 * Math.PI * 2 * turns, y = -i / 240 * (L - .2); pts.push(new THREE.Vector3(Math.cos(a) * (R - .03), y - .1, Math.sin(a) * (R - .03))); }
-  const spin = new THREE.Group();
-  const flight = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 480, .03, 6), mats().toolDark);
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(.08, .08, L + .2, 14), mats().toolDark); shaft.position.y = -L / 2 + .1;
-  const tip = new THREE.Mesh(new THREE.ConeGeometry(.09, .3, 10), mats().toolDark); tip.rotation.x = Math.PI; tip.position.y = -L - .05;
-  flight.userData.roundR = R; shaft.userData.roundR = .08; tip.userData.roundR = .09;
-  spin.add(flight, shaft, tip);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(.75, .62, .62), mats().tool); head.position.y = .45;
-  const cap = new THREE.Mesh(new THREE.CylinderGeometry(.22, .22, .14, 18), mats().toolDark); cap.position.y = .83;
-  g.add(spin, head, cap); g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  const g = new THREE.Group(), R = diaIn / 2 * IN, L = 4, turns = 6, r0 = .07, N = 360, spin = new THREE.Group();
+  const dark = mats().toolDark, paint = mats().tool, worn = mats().toolWorn, rubber = mats().rubber;
+  // the flight: a ribbon wound from the shaft out to the hole's radius, with a bright worn edge
+  const P = [], I = [], edge = [];
+  for (let i = 0; i <= N; i++) {
+    const a = i / N * Math.PI * 2 * turns, y = -i / N * (L - .25) - .12, c = Math.cos(a), sn = Math.sin(a), ro = R - .012;
+    P.push(r0 * c, y, r0 * sn, ro * c, y - .02, ro * sn); edge.push(new THREE.Vector3(ro * c, y - .02, ro * sn));
+    if (i) { const k = i * 2; I.push(k - 2, k - 1, k, k - 1, k + 1, k); }
+  }
+  const ribbon = new THREE.BufferGeometry(); ribbon.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); ribbon.setIndex(I); ribbon.computeVertexNormals();
+  const flight = new THREE.Mesh(ribbon, mats().toolDarkBoth), rim = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(edge), N, .011, 5), worn);
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(r0, r0, L + .2, 18), dark); shaft.position.y = -L / 2 + .1;
+  const tip = new THREE.Mesh(new THREE.ConeGeometry(.075, .32, 4), worn); tip.rotation.x = Math.PI; tip.position.y = -L - .06;       // fishtail point
+  const blades = [0, 1].map(k => { const m = new THREE.Mesh(new THREE.BoxGeometry(R - .03, .03, .16), worn); m.position.set((k ? -1 : 1) * (R + .02) / 2, -L + .08, 0); m.rotation.x = (k ? -1 : 1) * .5; return m; });
+  for (const m of [flight, rim]) m.userData.roundR = R; shaft.userData.roundR = r0; tip.userData.roundR = .08;   // what each sweeps as it spins
+  spin.add(flight, rim, shaft, tip, ...blades);
+  // the powerhead
+  const at = (m, x, y, z) => { m.position.set(x, y, z); return m; }, cyl = (r, h, mat, seg = 20) => new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, seg), mat);
+  const coupler = at(cyl(.1, .22, dark), 0, .12, 0), gearbox = at(cyl(.24, .26, paint, 28), 0, .36, 0);
+  const engine = at(new THREE.Mesh(creased(new THREE.BoxGeometry(.46, .4, .44, 3, 3, 3), 60), paint), 0, .69, 0);
+  { const p = engine.geometry.attributes.position; for (let i = 0; i < p.count; i++) { const x = p.getX(i) / .23, y = p.getY(i) / .2, z = p.getZ(i) / .22, k = 1 - .06 * (Math.abs(x * y) + Math.abs(y * z) + Math.abs(x * z)); p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k); } engine.geometry.computeVertexNormals(); }
+  const tank = at(cyl(.15, .34, dark, 22), 0, .98, 0); tank.rotation.z = Math.PI / 2;
+  const cap = at(cyl(.045, .05, worn, 14), .06, 1.14, 0), recoil = at(cyl(.15, .06, dark, 22), 0, .7, .25); recoil.rotation.x = Math.PI / 2;
+  const muffler = at(cyl(.07, .22, worn, 14), -.28, .72, 0); muffler.rotation.x = Math.PI / 2;
+  // handle frame: two bars across, joined at the ends, with rubber grips
+  const HX = 1.12, HZ = .34, HY = .4, bar = (len, mat, r = .032) => cyl(r, len, mat, 12), frame = [];
+  for (const z of [-HZ, HZ]) { const b = at(bar(HX * 2, dark), 0, HY, z); b.rotation.z = Math.PI / 2; frame.push(b); for (const x of [-HX, HX]) { const gr = at(bar(.42, rubber, .045), x - Math.sign(x) * .25, HY, z); gr.rotation.z = Math.PI / 2; frame.push(gr); } }
+  for (const x of [-HX, HX, -.3, .3]) { const b = at(bar(HZ * 2, dark), x, HY, 0); b.rotation.x = Math.PI / 2; frame.push(b); }
+  g.add(spin, coupler, gearbox, engine, tank, cap, recoil, muffler, ...frame); g.traverse(o => { if (o.isMesh) o.castShadow = true; });
   g.userData.spin = spin; g.userData.L = L; return g;
 }
-// A post driver sitting on a pipe: a heavy sleeve with two handles.
+// A gas post driver: the barrel that drops over the pipe, a collar at its mouth, a handle each side
+// and the small engine on top.
 export function driver() {
-  const g = new THREE.Group();
-  const body = new THREE.Mesh(new THREE.CylinderGeometry(.19, .19, 1.7, 22), mats().tool); body.position.y = .85;
-  const top = new THREE.Mesh(new THREE.CylinderGeometry(.13, .19, .22, 22), mats().toolDark); top.position.y = 1.81;
-  const grip = new THREE.Mesh(new THREE.TorusGeometry(.42, .035, 8, 28, Math.PI), mats().toolDark); grip.position.y = 1.05; grip.rotation.y = Math.PI / 2;
-  g.add(body, top, grip); g.traverse(o => { if (o.isMesh) o.castShadow = true; }); return g;
+  const g = new THREE.Group(), dark = mats().toolDark, paint = mats().tool, worn = mats().toolWorn, rubber = mats().rubber;
+  const cyl = (r0, r1, h, mat, seg = 24) => new THREE.Mesh(new THREE.CylinderGeometry(r0, r1, h, seg), mat), at = (m, x, y, z) => { m.position.set(x, y, z); return m; };
+  const body = at(cyl(.19, .19, 1.7, paint), 0, .85, 0), collar = at(cyl(.2, .2, .1, dark), 0, .05, 0), band = at(cyl(.195, .195, .06, dark), 0, 1.2, 0);
+  const top = at(cyl(.13, .19, .22, dark), 0, 1.81, 0), engine = at(new THREE.Mesh(new THREE.BoxGeometry(.3, .26, .28), dark), 0, 2.03, 0), tank = at(cyl(.1, .1, .26, paint, 18), 0, 2.2, 0); tank.rotation.z = Math.PI / 2;
+  const pull = at(cyl(.09, .09, .05, worn, 18), 0, 2.03, .16); pull.rotation.x = Math.PI / 2;
+  const parts = [body, collar, band, top, engine, tank, pull];
+  for (const sx of [-1, 1]) {       // a D handle each side, with a rubber grip
+    const d = at(new THREE.Mesh(new THREE.TorusGeometry(.2, .028, 8, 22, Math.PI), dark), sx * .19, .95, 0); d.rotation.z = -sx * Math.PI / 2;
+    const grip = at(cyl(.04, .04, .22, rubber, 12), sx * .39, .95, 0); parts.push(d, grip);
+  }
+  g.add(...parts); g.traverse(o => { if (o.isMesh) o.castShadow = true; }); return g;
 }
 // A thin dashed line across the cut face (the frost line), and depth ticks.
 export function dashLine(x0, x1, y) {

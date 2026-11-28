@@ -72,6 +72,21 @@ Done in the second definition round (2026-11-27):
   running sideways on both (see "App model issues" below for why).
 - **Bare winter trees** in Frost heave: twigs with sky between them, not grey leaf shapes.
 
+Done in the third definition round (2026-11-28):
+
+- **Soil cut face.** Fine pale grass roots hang from the sod into the topsoil, and a few
+  round pebbles sit in the soil below. Both are drawn by the soil shader, so they cost
+  nothing extra and stay sharp close up. Stones are sparse on purpose: this is Toledo clay,
+  not gravel.
+- **Auger, post driver and concrete bags** in No-dig vs dug are modelled as the real tools:
+  a spiral flight with a worn bright edge, fishtail tip, gearbox, engine, fuel tank and a
+  handle frame with rubber grips; a gas post driver with its barrel, engine and two handles;
+  kraft paper bags printed "CONCRETE MIX, 80 LB" with sewn ends. No brand names.
+- **Contact shade** (`contactShade()`): a soft darkening where two surfaces meet within about
+  3½ in, such as pickets on rails, rails on posts, and posts at the ground. It is drawn only
+  on the fine resting picture, never while something moves. Grass, trees and labels are
+  left out of it.
+
 Next, in order of how much they change the picture:
 
 1. **Real wood textures.** The app's procedural grain reads as drawn. Use photographed
@@ -79,14 +94,10 @@ Next, in order of how much they change the picture:
    variation so no two pickets match. Needs CC0 or GFS's own photos.
 2. **Real sky lighting.** Light the scene from a photographed sky (HDRI) so steel, vinyl
    and wet soil pick up real reflections.
-3. **Contact shadows** where boards meet rails and the fence meets the ground.
-4. **Soil cut face.** Roots near the top and round stones (a first try at stones came out
-   as square specks and was taken back out).
-5. **People and tools** in No-dig vs dug are blocky. Either model them properly or remove them.
-6. **Check on a real iPhone and iPad** for speed, now also with the fine picture and the
-   bigger wood texture (about a one-second pause once per page on a phone). The grass uses up to 46,000 tufts on an
-   iPad and 26,000 on a phone; if it drops frames, lower the count.
-
+3. **Check on a real iPhone and iPad** for speed, now also with the fine picture, the
+   bigger wood texture and the contact shade (about a one-second pause once per page on a
+   phone). The grass uses up to 46,000 tufts on an iPad and 26,000 on a phone; if it drops
+   frames, lower the count. If the contact shade is what slows it, set `AO_STRENGTH` to 0.
 ## Hardware (from Nick, 2026-11-27)
 
 - Wood gates hang on **butterfly hinges** and close on **post-mount latches**. Both are

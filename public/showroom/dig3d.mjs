@@ -127,7 +127,7 @@ export function createDigScene(host, { len = 150, specs } = {}) {
   const full = (x) => ({ cx: x, cy: FRAME.cy, w: FRAME.w, h: FRAME.h }), close = (x, toward = 0) => ({ cx: x + toward * .45, cy: -.85, w: 6, h: 6.8 });
   const DUG_SHOTS = () => [[0, full(XD)], [.035, close(posts[0].x, 1)], [.16, close(posts[0].x, 1)], [.19, close(posts[1].x, -1)], [.31, close(posts[1].x, -1)], [.345, full(XD)]];
   // while a pipe goes in, frame from the 4 ft mark up to the top of its driver
-  const drv = (k, p) => { const top = pipes[k].dr.visible ? pipes[k].dr.position.y + 1.95 : 2.5, hi = Math.max(2.5, top + .3), lo = -4.3; return { cx: pipes[k].x, cy: (hi + lo) / 2, w: 6, h: hi - lo }; };
+  const drv = (k, p) => { const top = pipes[k].dr.visible ? pipes[k].dr.position.y + 2.32 : 2.5, hi = Math.max(2.5, top + .3), lo = -4.3; return { cx: pipes[k].x, cy: (hi + lo) / 2, w: 6, h: hi - lo }; };
   const ND_SHOTS = p => [[0, full(XN)], [.035, drv(0, p)], [.12, drv(0, p)], [.14, drv(1, p)], [.22, drv(1, p)], [.255, full(XN)]];
   const follow = (shots, p) => {
     let i = 0; while (i < shots.length - 1 && p > shots[i + 1][0]) i++;
