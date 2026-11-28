@@ -18,8 +18,10 @@ Any agent working on the Lab (Claude, Codex, Antigravity) should read this first
 6. **No colliding parts.** Every 3D scene has a `check()` that must return no overlaps.
 7. **GFS's real build.** Parts, sizes and hardware match what GFS installs. When the
    Executive App's model is wrong, fix the Lab's copy and list it for the app.
-8. Customer copy is plain-spoken. No supplier names. No-dig claims are for clay soil; in
-   sand GFS sets posts in concrete. Per-foot prices never reach the browser.
+8. Customer copy is plain-spoken. No supplier names. Per-foot prices never reach the browser.
+9. **Don't dwell on soil type** (Nick, 2026-11-28). The Lab no longer names clay or sand. One
+   line, in No-dig vs dug's math, says driven posts suit most yards around Toledo and that where
+   the ground calls for it GFS sets posts in concrete and checks before quoting. Don't add more.
 
 ## The point each tool makes, and what still needs work
 
@@ -149,6 +151,8 @@ Now, under 700 px wide:
 - Lifespan: the materials are one row to swipe under the picture, and the picture frames one
   section instead of three.
 - "How to use" moved below the tool (the ? in the top bar opens the same steps).
+- Grade Lab is pinned too; its two views stay stacked (the long run over its close-up).
+- Frost & posts lost its Soil switch: one fewer choice, and no clay-or-sand talk.
 - iPad and wider are unchanged, except the Lifespan materials now sit under the picture there too.
 
 ## Hardware (from Nick, 2026-11-27)

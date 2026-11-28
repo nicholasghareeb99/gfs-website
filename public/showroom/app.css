@@ -999,7 +999,7 @@ body.has-back .top .brand{display:none}
 .l3d-pin.gl-handle>span::after{display:none}
 .l3d-pin.gl-handle .arr{display:block;font-size:9px;line-height:1}
 .l3d-pin.gl-handle small{display:block;font:600 10px var(--mono);margin-top:2px}
-.g3-note{margin:8px 2px 0}
+.g3-note{margin:-8px 2px 0}
 @media (max-width:640px){.l3d-pin.gl-handle>span{padding:2px 5px;border-width:1.5px}.l3d-pin.gl-handle small{font-size:9px}}
 
 /* ── Brochure: Home, Contents, one/two pages, full screen ── */
@@ -1101,3 +1101,5 @@ body.has-back .top .brand{display:none}
   .lab-live .life-mat .chips::-webkit-scrollbar{display:none}
   .lab-live .life-mat .chip{flex:none;scroll-snap-align:center}
 }
+.l3d.fit.stacked .l3d-solo{display:none}
+@media (max-width:699px){.lab-live .g3-note{margin:-2px 2px 0}}

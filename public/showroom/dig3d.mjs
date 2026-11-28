@@ -220,13 +220,13 @@ export function createDigScene(host, { len = 150, specs } = {}) {
     L.pipe.show(p > ND.drive[0][0] + .05);
     L.none.show(p >= ND.pickets[1]);
     status.dug.textContent = p <= 0 ? 'A clean yard, before anyone digs.'
-      : p < DUG.exit[1] ? 'Augering a 10 in hole 36 in deep at each post. The clay comes out onto the lawn.'
+      : p < DUG.exit[1] ? 'Augering a 10 in hole 36 in deep at each post. The dirt comes out onto the lawn.'
       : p < DUG.pour[1][1] ? 'Setting each 4×4 and filling the hole with concrete.'
       : p < DUG.cure[1] ? 'Waiting about 48 hours for the concrete before the fence goes on.'
       : p < DUG.pickets[1] ? 'Rails and pickets go on once the concrete has set.'
       : 'Done, with the dirt from every hole to spread or haul away.';
     status.nodig.textContent = p <= 0 ? 'The same yard.'
-      : p < ND.drive[1][1] ? 'Driving each steel post 4 ft into the clay. Nothing comes out of the ground.'
+      : p < ND.drive[1][1] ? 'Driving each steel post 4 ft into the ground. Nothing comes out of it.'
       : p < ND.box[1][1] ? 'Building the wood box around each steel post.'
       : p < ND.pickets[1] ? 'Rails and pickets go on right away. No concrete to wait on.'
       : 'Done the same day. The lawn is left as it was.';

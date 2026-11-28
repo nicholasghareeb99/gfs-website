@@ -550,10 +550,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     // On a phone the Lab gives the picture a fixed height (it stays in view while the controls scroll),
     // and two views go side by side in it so both can be compared without scrolling.
     const fitH = W < 700 && getComputedStyle(host).getPropertyValue('--l3d-fit').trim() === '1' ? host.clientHeight : 0;
-    stacked = n > 1 && (W < 700 || stackAlways) && !fitH;
-    if (!fitH || n !== 2) solo = -1;
+    // (a tool whose views are always stacked, like a long run over its close-up, keeps them stacked)
+    stacked = n > 1 && (W < 700 || stackAlways) && !(fitH && !stackAlways);
+    if (!fitH || n !== 2 || stacked) solo = -1;
     const own = stacked && V.some(v => v.aspect);
-    const hs = own ? V.map(v => Math.round(clamp(W * (v.aspect || 1), v.minH || 160, v.maxH || 560))) : null;
+    let hs = own ? V.map(v => Math.round(clamp(W * (v.aspect || 1), v.minH || 160, v.maxH || 560))) : null;
+    if (own && fitH) { const sum = hs.reduce((a, b) => a + b, 0); hs = hs.map(h => Math.round(h * fitH / sum)); hs[hs.length - 1] += fitH - hs.reduce((a, b) => a + b, 0); }
     // On a wide screen (iPad on its side, a laptop) the whole picture and the slider under it should fit
     // on screen without scrolling, so the height is also held to what's left under the tool's heading.
     const room = W >= 700 ? Math.max(300, innerHeight - Math.max(0, host.getBoundingClientRect().top + (host.closest('#v-lab')?.scrollTop || 0)) - 124) : Infinity;

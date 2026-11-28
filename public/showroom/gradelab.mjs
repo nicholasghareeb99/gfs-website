@@ -335,7 +335,7 @@ export function grade(body, kit) {
     import('./grade3d.mjs').then(mod => {
       if (!live) return; $('.l3d-wait', host)?.remove();
       scene = mod.createGradeScene(host, { specs: kit.specs, L, SEC, N });
-      const note = document.createElement('p'); note.className = 'vis-note-inline g3-note'; host.append(note);
+      const note = document.createElement('p'); note.className = 'vis-note-inline g3-note'; host.after(note);   // after the picture, not in it: on a phone the picture has a fixed height
       const tag = scene.stage.views[0].tag; if (tag) { const el = document.createElement('p'); el.className = 'l3d-status'; tag.append(el); scene.stage.views.forEach(v => { v.inset.bottom = 54; }); }
       const c3 = $('.l3d-cv', host);
       c3.addEventListener('pointerdown', down); c3.addEventListener('pointermove', move);

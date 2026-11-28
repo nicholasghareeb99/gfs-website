@@ -18,12 +18,12 @@ let app, root, D, current = null, stop = null;
 const TOOLS = [
   { id: 'dig', name: 'No-dig vs dug', line: 'Watch both crews put in the same fence, and see how much dirt a dug fence leaves in the yard',
     how: [['tap', 'Tap <b>Play install day</b> to watch both crews work, or slide <b>Install day</b> to any moment.'], ['slide', 'Slide <b>Your fence</b> to the length of your fence.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.'], ['look', 'Watch the dirt piles and concrete bags in the dug yard. The no-dig yard has none.']],
-    take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft into the clay, and no waiting on concrete before the fence goes up.' },
+    take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft, and no waiting on concrete before the fence goes up.' },
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 15 years go by',
     how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 15 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The flat 2×4 across the top keeps the top line straight.' },
   { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
-    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, <b>clay</b> or <b>sand</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
+    how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['tap', 'Tap <b>Play a winter</b>, or slide through the <b>months</b>. Add <b>winters</b> to watch footings creep up.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'A post has to reach well below the frost line, 3 ft here and 3½ ft in Michigan. Ours are driven 4 ft.' },
   { id: 'grade', name: 'Grade Lab', line: 'Shape the yard and see how we make the top line look great and close the gaps',
     how: [['drag', 'Drag <b>up or down</b> on the yard to shape the ground under the fence.'], ['tap', 'Pick what your finger does: <b>Shape the yard</b>, <b>Raise / lower posts</b>, or the <b>Dirt pen</b>.'], ['tap', 'Then tap <b>Smooth the top line</b>, <b>Fill the gaps</b>, <b>Add a kickboard</b> or <b>Grade the line</b>.'], ['pinchout', 'In 3D, two fingers turn and zoom the view.']],
@@ -371,7 +371,7 @@ function life(body) {
     </div>
     <div class="lab-card"><div class="lab-label">Every material, side by side</div><div class="lchart" id="lChart"></div></div>
     ${math(`<p>Each bar is a published range. The estimate starts in the middle and the yard choices move it toward one end. It never goes past the range, because nobody has data for that. The 3D fence is the Executive App's model of each material, shown new; it isn't aged.</p><div id="lSrc"></div>
-      <p><b>Why wood posts fail at the soil line</b>: decay fungi need oxygen, water and a temperature they like. A few inches either side of grade has all three, deeper soil has little oxygen, and the air above dries out. That band is where a wood post rots first, and it is why GFS drives galvanized steel posts in clay.</p>`)}`;
+      <p><b>Why wood posts fail at the soil line</b>: decay fungi need oxygen, water and a temperature they like. A few inches either side of grade has all three, deeper soil has little oxygen, and the air above dries out. That band is where a wood post rots first, and it is why GFS drives galvanized steel posts.</p>`)}`;
   const tick = y => `<i style="left:${y / MAXY * 100}%"><span>${y}</span></i>`;
   let scene = null, live = true;
   const update = () => {
@@ -490,18 +490,16 @@ function frost(body) {
         <div class="vis-note">Post movement drawn ${DRAWN} times bigger than life so you can see it.</div></div>
       <div class="lab-ctl">
         <div class="lab-label">Where</div>${seg('place', PLACES.map(p => [p.id, p.name]), place.id)}
-        <div class="lab-label">Soil</div>${seg('soil', [['clay', 'Clay (most of Toledo)'], ['sand', 'Sand']], soil)}
         <div class="lab-label">Winter</div>${seg('winter', WINTERS.map(w => [w.id, w.name]), winter.id)}
         <div class="readouts one"><div><b id="fWhy"></b><small id="fWhyS"></small></div></div>
         <div class="vis-note f3d-note" hidden>Post movement drawn ${DRAWN} times bigger than life so you can see it.</div>
       </div>
     </div>
     ${math(`<p><b>Frost line</b>: how deep the building code says the ground can freeze in the hardest winters, 36 in in Toledo and Lucas County and 42 in across Michigan. Most winters freeze about half that deep. A GFS driven post goes 48 in, past both.</p>
-      <p><b>Frost heave</b>: in wet clay, water is drawn up to the freezing front and freezes into seams of ice (ice lenses) that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A footing whose bottom is in or near the frozen layer rides up with it. At the thaw the ground settles, but loose soil falls into the gap under the footing, so it never quite comes back down, and it creeps up a little more each winter.</p>
+      <p><b>Frost heave</b>: in wet ground, water is drawn up to the freezing front and freezes into seams of ice (ice lenses) that lift the ground. Frozen soil also grips whatever is in it (adfreeze). A footing whose bottom is in or near the frozen layer rides up with it. At the thaw the ground settles, but loose soil falls into the gap under the footing, so it never quite comes back down, and it creeps up a little more each winter.</p>
       <p><b>Why depth matters</b>: the arrows show it. Frozen soil grips a post along the frozen part (up arrows). Unfrozen soil below the frost holds it along the rest (down arrows). A footing starts to give once more than half its length is frozen, and rides all the way up with the ground once it is frozen to the bottom. A post with plenty of length below the frost line is held. A flared top, where the top of a hole caved in, gives the frost even more to grab.</p>
       <p><b>The numbers here are a picture, not a measurement</b>: how far a post moves depends on how wet the soil is, how cold the winter gets and how deep the frost goes. We use the least the ground can lift: water grows about 9% as it freezes, which comes to about ½ in for each foot of wet soil that freezes (¾ in in a typical Toledo winter, 1½ in in a hard one). Ice seams can add a lot to that. About a third is left behind each spring, because a lifted post mostly stays lifted. Drawn ${DRAWN} times bigger.</p>
-      <p><b>No post is frost-proof in every yard</b>. Wet, silty ground lifts more than well-drained ground, and a rough concrete plug gives frost far more to grip than a slim, smooth steel post. Driving 4 ft puts a foot or more of post in ground that doesn't freeze even in the hardest winter.</p>
-      <p><b>Why GFS changes method by soil</b>: a driven steel post needs firm clay to grip. In sand, which drains and heaves far less but holds a driven post poorly, GFS sets pressure-treated posts in concrete instead.</p>
+      <p><b>No post is frost-proof in every yard</b>. Wet ground lifts more than well-drained ground, and a rough concrete plug gives frost far more to grip than a slim, smooth steel post. Driving 4 ft puts a foot or more of post in ground that doesn't freeze even in the hardest winter.</p>
       <p class="src">Frost depths: ${PLACES.map(p => esc(p.src)).join('; ')}. Lift from freezing, and posts staying lifted: North Dakota Geological Survey, "Frost Heave" (2011).</p>`)}`;
   const svg = $('.frost-svg', body);
   let scene = null;
@@ -531,11 +529,10 @@ function frost(body) {
     }
     const fz = frozenAt(mi, place.frost * winter.reach), up = ls.map(l => l.lift > .05);
     $('#fWhy', body).textContent = up[0] && up[1] ? 'Both concrete footings have been lifted' : up[0] ? 'The typical 24 in footing is being lifted' : fz.depth - fz.thawed > 1 ? 'Every post is holding' : 'The ground is thawed';
-    $('#fWhyS', body).textContent = soil === 'sand' ? 'Sand drains, so it heaves much less than clay. GFS sets posts in concrete in sand, because sand holds a driven post poorly.'
-      : winter.id === 'typical' ? `A typical winter freezes about ${Math.round(place.frost * winter.reach)} in down. A footing with more than half its length in frozen ground starts to lift. GFS drives steel to 48 in, past the ${place.frost} in frost line.`
+    $('#fWhyS', body).textContent = winter.id === 'typical' ? `A typical winter freezes about ${Math.round(place.frost * winter.reach)} in down. A footing with more than half its length in frozen ground starts to lift. GFS drives steel to 48 in, past the ${place.frost} in frost line.`
       : `A hard winter freezes all the way to the ${place.frost} in frost line, so even a footing that stops right at it can be lifted. GFS drives steel to 48 in.`;
   };
-  bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'soil') soil = v; if (n === 'winter') winter = WINTERS.find(w => w.id === v); update(); });
+  bindSeg(body, (n, v) => { if (n === 'place') place = PLACES.find(p => p.id === v); if (n === 'winter') winter = WINTERS.find(w => w.id === v); update(); });
   let raf = 0, live = true, playing = false, last = 0;
   const stopPlay = (label = 'Play a winter') => { playing = false; cancelAnimationFrame(raf); $('#frPlay', body).textContent = label; };
   $('[name=m]', body).oninput = e => { stopPlay(); mi = +e.target.value; update(); };
@@ -593,7 +590,7 @@ function gate(body) {
       <p><b>Which way a brace goes</b>: a brace from the bottom hinge corner up to the top latch corner is squeezed, so it bears wood on wood and props the latch side up. Run it the other way and it is pulled, so it hangs on the nails at its ends, pulled lengthwise. The NDS gives smooth nails a quarter of their hold in wood that dries after it's built, two-thirds of that again when toe-nailed: about 37 lb for four nails, less than a 4 ft gate asks of them. So the wrong-way brace lets go.</p>
       <p><b>Even a good brace drops a little</b>: the brace is cut to fit tight between the rails. As the rails dry they shrink across the grain (about 4½% for treated pine going from soaked to 12% moisture, from the USDA Wood Handbook), so each pocket opens about ⅛ in and the latch side settles about ⁵⁄₁₆ in before the brace bears again. That is why wood gates need an adjustment after the first year.</p>
       <p><b>GFS welded steel frame</b>: 1½ in square steel tube, welded all the way around and corner to corner. A welded frame doesn't slip, creep or shrink, so it stays square.</p>
-      <p><b>The hinge post</b>: the pull on the top hinge bends the post. A 3 in steel post (2⅞ in Schedule 40 pipe) is about 2½ times stiffer than a 4×4 and doesn't creep; a 4×4 outdoors keeps bending a little more for years (Eurocode 5 creep for wood outside). Posts set in concrete also get lifted by frost, each a little differently, so the latch post and the hinge post drift apart. That share is an estimate, not a measurement: it is the Frost & posts picture for Toledo clay in typical winters, and a wet yard or a hard winter moves posts more. GFS drives its steel 4 ft, below the frost line. Driven steel needs clay to grip; in sand GFS sets posts in concrete.</p>
+      <p><b>The hinge post</b>: the pull on the top hinge bends the post. A 3 in steel post (2⅞ in Schedule 40 pipe) is about 2½ times stiffer than a 4×4 and doesn't creep; a 4×4 outdoors keeps bending a little more for years (Eurocode 5 creep for wood outside). Posts set in concrete also get lifted by frost, each a little differently, so the latch post and the hinge post drift apart. That share is an estimate, not a measurement: it is the Frost & posts picture for typical Toledo winters, and a wet yard or a hard winter moves posts more. GFS drives its steel 4 ft, below the frost line.</p>
       <p><b>What isn't counted</b>: kids swinging on the gate, slams, hinge screws working loose, rot, and a footing rocking in soft ground. Each of those only adds to the sag, so the frame and post numbers are the least a gate moves, not the most.</p>
       <p class="src">Sources: EN 1995-1-1 (Eurocode 5) Table 7.1 nail slip modulus, Table 3.2 and 2.3.2.2 creep; NDS for Wood Construction, nail withdrawal and wet-service factors; USDA Forest Products Laboratory, Wood Handbook (loblolly pine shrinkage and density); GFS brochure p. 23 (steel frame) and p. 6 (posts).</p>`)}`;
   const svg = $('.gate-svg', body);
@@ -668,7 +665,7 @@ function gate(body) {
 // post is set the two ways p. 6 describes: in tamped dirt about 2 ft deep, or in
 // concrete about 2.5 ft deep.
 const GFS_PARTS = [
-  { k: 'steel', n: 'Driven steel post', d: 'Galvanized Schedule 40 steel, 2⅜ in across, driven 4 ft into undisturbed clay. Below Toledo\'s frost line, with no concrete to heave and no wood underground to rot.' },
+  { k: 'steel', n: 'Driven steel post', d: 'Galvanized Schedule 40 steel, 2⅜ in across, driven 4 ft into undisturbed ground. Below Toledo\'s frost line, with no concrete to heave and no wood underground to rot.' },
   { k: 'box', n: 'Wood box around every post', d: 'Steel in the ground, wood where you see it. The box gives the rails a full nailing surface and makes the post look like a wood post.' },
   { k: 'plus', n: 'A flat 2×4 across the top', d: 'A 2×4 laid flat on top of the boxes, behind the boards that rise above it. It ties the posts together and keeps the top line straight.' },
   { k: 'rails', n: 'Rails nailed across the box', d: '2×4 rails run across the face of each box instead of being toe-nailed between posts, with 3 in galvanized nails.' },
@@ -683,7 +680,7 @@ const PRE_PARTS = [
   { k: 'sag', n: 'Sags after a few years', d: 'The light frame racks and sags between posts.' }
 ];
 const GFS_PARTS_V = [
-  { k: 'steel', n: 'Driven steel inside every post', d: 'A galvanized steel post is driven 4 ft into the clay. Steel adapters clamp onto it, and the vinyl post sleeves down over them. No concrete to lift in frost, and nothing gripping the vinyl at the ground.' },
+  { k: 'steel', n: 'Driven steel inside every post', d: 'A galvanized steel post is driven 4 ft into the ground. Steel adapters clamp onto it, and the vinyl post sleeves down over them. No concrete to lift in frost, and nothing gripping the vinyl at the ground.' },
   { k: 'wall', n: 'Homeland .150″ post walls', d: 'Thicker walls than the big-box brand (.135″), so the post flexes less in wind and holds up longer.' },
   { k: 'uv', n: 'ACCU-Shield UV protection', d: 'Made in the USA with UV protection built in, so it stays white instead of yellowing.' },
   { k: 'grade', n: 'Slopes with the ground', d: 'Rails pass through the posts, so each section follows the grade with no stair-step gaps.' }
@@ -742,7 +739,7 @@ function build(body) {
       <div class="lab-card"><div class="lab-label" id="vsPL">What you get with prefab (tap one)</div><div class="vs-list" id="vsP"></div></div>
     </div>
     ${math(`<p><b>Why the wood post fails first</b>: decay needs air and water together. On a buried wood post that band is right at the soil line, or where the wood meets the top of the concrete, and that is where it breaks. A steel post has no wood underground.</p>
-      <p><b>Why posts lift</b>: wet clay freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
+      <p><b>Why posts lift</b>: wet ground freezes onto a post and lifts it as the ground heaves. A post that stops inside the frozen layer (about 3 ft in Toledo) rides up a little each winter. A post in concrete can lift the whole footing. A post driven 4 ft is held below the frost line by soil that never freezes.</p>
       <p><b>Why a prefab panel sags</b>: the panel hangs between two posts on a light stapled frame, so its weight keeps working at the staples and joints. Ours spreads the load across rails nailed to a wood box on a steel post, with a flat 2×4 across the top holding the line.</p>
       <p><b>Vinyl in concrete</b>: a vinyl post sunk in a concrete plug has the same frost problem as any footing, and the concrete holds the vinyl rigid right at the ground, which is where a pushed post cracks. GFS drives a galvanized steel post, clamps steel adapters to it, and sleeves the vinyl post over the adapters, so there is no footing to lift.</p>
       <p class="src">The specs and comparisons here are the ones printed in the GFS brochure (pages 5, 6, 14, 25 and 31). Rates of movement in the drawing are for illustration, not measurements.</p>`)}`;
@@ -1015,7 +1012,7 @@ function vinyl(body) {
 function gradeTool(body) {
   let stopFn = null, gone = false;
   body.innerHTML = '<div class="lab-vis" style="min-height:320px;display:grid;place-items:center;color:var(--dim)">Loading Grade Lab…</div>';
-  import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt, specs: app.live?.specs }); });
+  import('./gradelab.mjs').then(m => { if (gone || current !== 'grade') return; body.innerHTML = ''; stopFn = m.grade(body, { seg, bindSeg, math, fmt, specs: app.live?.specs }); liveWrap(body); });
   return () => { gone = true; stopFn?.(); };
 }
 
@@ -1051,14 +1048,14 @@ function dig(body) {
       <svg class="dig-pile" viewBox="0 0 380 170" role="img" aria-label="The dirt from every post hole in one pile, next to a 6 foot person"></svg>
       <p class="lab-note" id="dgPileT"></p>
       <div class="dig-barrows" id="dgBar" aria-hidden="true"></div>
-      <p class="lab-note">It's mostly clay from under the topsoil, so it either gets spread on the lawn or hauled away. With driven posts there's nothing to spread and nothing to haul.</p>
+      <p class="lab-note">It's subsoil, not topsoil, so it either gets spread on the lawn or hauled away. With driven posts there's nothing to spread and nothing to haul.</p>
     </div>
-    ${math(`<p><b>One dug hole</b>: 10 in across and 36 in deep, the size we dig ourselves when a yard's soil calls for concrete. Volume = π × (5 in)² × 36 in = <span class="mono" id="mH"></span> cu ft of dirt in the ground.</p>
-      <p><b>Dirt once it's dug</b>: loose clay takes up about 30% more room than it did in the ground (typical swell for clay is 30 to 40%). Moist clay weighs about 110 lb per cu ft in the ground. A contractor wheelbarrow holds 6 cu ft.</p>
+    ${math(`<p><b>One dug hole</b>: 10 in across and 36 in deep, the size we dig ourselves when a yard calls for concrete. Volume = π × (5 in)² × 36 in = <span class="mono" id="mH"></span> cu ft of dirt in the ground.</p>
+      <p><b>Dirt once it's dug</b>: loose dirt takes up about 30% more room than it did in the ground, and the heavy subsoil around here weighs about 110 lb per cu ft in the ground. A contractor wheelbarrow holds 6 cu ft.</p>
       <p><b>Concrete</b>: the hole less the 32 in of 4×4 post standing in it, filled with concrete mix. An 80 lb bag makes about 0.6 cu ft (manufacturer yield for 80 lb bags), so about 2 to 3 bags a post.</p>
       <p><b>Posts</b>: one every 8 ft plus one at the end. Gate posts would add more.</p>
       <p><b>The wait</b>: concrete keeps gaining strength for days, so installers usually let it set a day or two before hanging the fence. Our own checklist waits 48 hours on any post we set in concrete.</p>
-      <p class="src">We drive steel in clay, which is most of the Toledo area. In sandy soil we set pressure-treated posts in concrete instead, and we check the soil before we quote.</p>`)}`;
+      <p class="src">Driven posts suit most yards around Toledo. Where the ground calls for it we set posts in concrete instead, and we check before we quote.</p>`)}`;
   const A = $('.dig-a', body), B = $('.dig-b', body), pile = $('.dig-pile', body);
   const G = 168, S = 12, PX = [46, 142, 238, 334];
   const cl = (v, a = 0, b = 1) => clamp(v, a, b);
@@ -1104,7 +1101,7 @@ function dig(body) {
     if (p >= .99) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#ffd2b0">DIRT PILES LEFT ON THE LAWN</text>`;
     A.innerHTML = s;
     const holes = PX.filter((x, i) => p > .02 + i * .1).length;
-    $('#dgA', body).textContent = p <= 0 ? 'A clean yard, before anyone digs.' : p < .45 ? `Digging hole ${Math.min(4, holes)} of 4. Every hole leaves a pile of clay on the lawn.` : p < .6 ? 'Mixing and pouring concrete around each post.' : p < .82 ? 'Waiting on the concrete before the fence can go on.' : 'Fence up, plus 4 dirt piles to spread or haul away.';
+    $('#dgA', body).textContent = p <= 0 ? 'A clean yard, before anyone digs.' : p < .45 ? `Digging hole ${Math.min(4, holes)} of 4. Every hole leaves a pile of dirt on the lawn.` : p < .6 ? 'Mixing and pouring concrete around each post.' : p < .82 ? 'Waiting on the concrete before the fence can go on.' : 'Fence up, plus 4 dirt piles to spread or haul away.';
   };
   const drawB = p => {
     let s = sky('db');
@@ -1125,7 +1122,7 @@ function dig(body) {
     if (p >= .6) s += clock(190, 60, 'No concrete to wait on', cl((p - .6) / .05));
     if (p >= .99 || p === 0) s += `<text x="190" y="${G + 72}" text-anchor="middle" class="svg-l halo" fill="#b5f3d4">${p === 0 ? 'SAME YARD' : 'NO DIRT. NO CONCRETE. LAWN LEFT AS IT WAS.'}</text>`;
     B.innerHTML = s;
-    $('#dgB', body).textContent = p <= 0 ? 'The same yard.' : p < .32 ? 'Driving each steel post 4 ft into the clay. Nothing comes out of the ground.' : p < .6 ? 'Building the fence on the posts right away.' : 'Done, with nothing to clean up but scraps.';
+    $('#dgB', body).textContent = p <= 0 ? 'The same yard.' : p < .32 ? 'Driving each steel post 4 ft into the ground. Nothing comes out of it.' : p < .6 ? 'Building the fence on the posts right away.' : 'Done, with nothing to clean up but scraps.';
   };
   const drawPile = n => {
     const ft = 18, Gp = 150, R = Math.cbrt(n.looseFt3 / .733), H = R * .7; // loose clay at about 35°
@@ -1143,7 +1140,7 @@ function dig(body) {
     $('#dgDirt', body).textContent = `${fmt(n.looseYd3, 1)} cu yd · about ${fmt(Math.ceil(n.barrows))} wheelbarrow loads · ${fmt(Math.round(n.lb / 100) * 100)} lb`;
     $('#dgConc', body).textContent = `${n.bags} bags · ${fmt(n.concLb)} lb`;
     $('#dgHoles', body).textContent = n.posts;
-    $('#dgPileT', body).textContent = `${n.posts} holes for a ${st.len} ft fence. About ${fmt(n.lb / 2000, 1)} tons of clay, ${fmt(Math.ceil(n.barrows))} wheelbarrow loads.`;
+    $('#dgPileT', body).textContent = `${n.posts} holes for a ${st.len} ft fence. About ${fmt(n.lb / 2000, 1)} tons of dirt, ${fmt(Math.ceil(n.barrows))} wheelbarrow loads.`;
     $('#dgBar', body).innerHTML = Array.from({ length: Math.min(40, Math.ceil(n.barrows)) }, () => `<svg viewBox="0 0 32 20"><path d="M3,6 h20 l-3,7 h-14 z" fill="#5d6b78"/><path d="M5,6 q9,-7 18,0 z" fill="#6a4a2e"/><circle cx="22" cy="16" r="3" fill="none" stroke="#9fb4c8" stroke-width="1.6"/><path d="M20,13 l2,3 M3,6 l-2,-3" stroke="#9fb4c8" stroke-width="1.6"/></svg>`).join('') + (n.barrows > 40 ? `<span class="mono">+${Math.ceil(n.barrows) - 40}</span>` : '');
     $('#mH', body).textContent = fmt(n.hole, 2);
     drawPile(n);
