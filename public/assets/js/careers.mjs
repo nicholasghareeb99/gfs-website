@@ -309,8 +309,8 @@ function confirmReceipt() {
   confirmation.querySelector('h2').focus();
 }
 
-// Chromium can resize the page for the keyboard. Safari can instead shrink
-// or pan only the visible viewport, leaving sticky controls behind it.
+// A mobile keyboard can resize or pan only the visible viewport, leaving
+// sticky controls behind it.
 const viewport = window.visualViewport;
 if (viewport) {
   const fitActions = () => {

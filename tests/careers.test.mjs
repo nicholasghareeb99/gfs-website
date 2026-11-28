@@ -45,6 +45,46 @@ test('the applicant form uses a dedicated Netlify event and the existing website
     intake_kind: 'estimate', source: 'careers'}), /source/);
 });
 
+test('the Firestore Careers receipt meets the live websiteLeads public create rule', async () => {
+  const applicant = application(['installer', 'crew', 'sales', 'other']);
+  const name = 'N'.repeat(120);
+  const phone = '(419)' + ' '.repeat(23) + '555-0182';
+  const email = 'İ' + 'a'.repeat(186) + '@example.test';
+  const notes = 'N'.repeat(900);
+  assert.equal(email.length, 200);
+  assert.equal(email.toLowerCase().length, 201);
+  const post = {...fields(applicant), name, phone, email, notes,
+    street: 'S'.repeat(160), city: 'C'.repeat(80), zip: '43612-0000',
+    job_1_duties: 'D'.repeat(600), other_skills: 'S'.repeat(600), tools: 'T'.repeat(600)};
+  let receipt;
+  const result = await deliverIntake(post, {project: 'synthetic-gfs', fetcher: async (url, options) => {
+    assert.match(url, /\/websiteLeads\?documentId=web_test_application_001$/);
+    receipt = JSON.parse(options.body).fields;
+    return new Response(null, {status: 200});
+  }});
+  assert.equal(result.duplicate, false);
+  assert.equal(Object.keys(receipt).length, 18, 'the live rule allows at most 20 fields');
+  for (const [field, max] of Object.entries({name: 200, phone: 50, source: 100})) {
+    const value = receipt[field]?.stringValue;
+    assert.equal(typeof value, 'string', field);
+    assert.ok(value.length >= 1 && value.length <= max, field);
+  }
+  assert.equal(receipt.status.stringValue, 'new');
+  assert.equal(receipt.source.stringValue, 'careers');
+  for (const [field, max] of Object.entries({email: 200, address: 500, notes: 2000, fenceType: 200, geometry: 45000})) {
+    const value = receipt[field]?.stringValue;
+    assert.equal(typeof value, 'string', field);
+    assert.ok(value.length <= max, field);
+  }
+  assert.equal(receipt.name.stringValue, name);
+  assert.equal(receipt.phone.stringValue, phone);
+  assert.equal(receipt.email.stringValue, email);
+  assert.equal(receipt.address.stringValue.length, 257);
+  assert.equal(receipt.notes.stringValue, '');
+  assert.ok(receipt.meta.stringValue.length > 2000);
+  assert.equal(JSON.parse(receipt.meta.stringValue).notes, notes);
+});
+
 test('both Netlify event entry points save an application and discard provider metadata', async t => {
   const previousProject = process.env.GFS_FIREBASE_PROJECT_ID;
   process.env.GFS_FIREBASE_PROJECT_ID = 'synthetic-gfs';
@@ -111,7 +151,9 @@ test('the server refuses prohibited fields, invalid answers, overlong text and m
   ];
   for (const input of invalid) assert.throws(() => normalizeApplication(input));
   const post = fields(sample);
-  for (const invalid of [{name: ' A '}, {consent: 'no'}, {date_of_birth: '2000-01-01'}, {job_1_start: '2020-19'},
+  for (const invalid of [{name: ' A '}, {name: 'N'.repeat(201)}, {phone: '(419)' + ' '.repeat(38) + '555-0182'},
+    {email: 'a'.repeat(188) + '@example.test'}, {street: 'S'.repeat(501)},
+    {consent: 'no'}, {date_of_birth: '2000-01-01'}, {job_1_start: '2020-19'},
     {installer_pay_amount: 'abc'}, {notes: '000-00-0000'}, {notes: 'a'.repeat(18001)}, {application: '{}'}]) {
     assert.throws(() => intakeRecord({...post, ...invalid}), /^Error: Careers application failed validation\.$/);
   }

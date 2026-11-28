@@ -66,12 +66,15 @@ export function normalizeStep(step, input, selected = []) {
       const name = text(input.name, 'name', 120);
       if (name.length < 2) fail('name', 'Enter at least two characters for your name.');
       const phone = text(input.phone, 'phone', 36);
-      const email = text(input.email, 'email', 200).toLowerCase();
+      const maxEmailLength = 200;
+      const email = text(input.email, 'email', maxEmailLength);
+      const lowerEmail = email.toLowerCase();
       if (!/^\+?[\d(). -]+$/.test(phone) || !/^(?:\d{10}|\+?1\d{10}|\+[2-9]\d{9,14})$/.test(phone.replace(/[^\d+]/g, ''))) {
         fail('phone', 'Enter a valid phone number.');
       }
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fail('email', 'Enter a valid email address.');
-      return {name, phone, email};
+      // Unicode lowercasing can expand an address past the Firestore limit.
+      return {name, phone, email: lowerEmail.length <= maxEmailLength ? lowerEmail : email};
     }
     case 'reach': return {reachWay: choice(input.reachWay, reachWays, 'reachWay'), reachTime: choice(input.reachTime, reachTimes, 'reachTime')};
     case 'address': {
