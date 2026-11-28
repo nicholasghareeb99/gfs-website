@@ -7,7 +7,7 @@
 // and the brace stop at the middle rail (a carpenter cuts them to fit between rails), and the 3 in
 // gate post's box is drawn 6 in wide so the 2⅞ in pipe fits inside it (the app's box is 5½ in, with
 // 2½ in between its sides).
-import { THREE, IN, createStage, fence, reveal, pipe, squarePost, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps } from './lab3d.mjs';
+import { THREE, IN, createStage, fence, reveal, pipe, squarePost, concreteCut, footingTop, collar, facePatch, clamp, solids, overlaps, creased } from './lab3d.mjs';
 import { surfaceMaterial } from './vendor/exec/real-surfaces.mjs';
 import { sag, POSTS, TUBE, PINE, STEEL, WET, LATCH, tubeArea } from './gate-plan.mjs';
 import { season, weather, decay, heave } from './build-plan.mjs';
@@ -48,13 +48,13 @@ function butterflyLeaf() {
 function butterflyBarrel() {
   const r = BFLY.barrelR, h = BFLY.barrelH / 2, k = h / 3, P = [[0, -h]];
   P.push([r, -h], [r, -k - .03], [r - .04, -k - .01], [r - .04, -k + .01], [r, -k + .03], [r, k - .03], [r - .04, k - .01], [r - .04, k + .01], [r, k + .03], [r, h], [.13, h], [.13, h + .14], [0, h + .14]);
-  return new THREE.LatheGeometry(P.map(([x, y]) => new THREE.Vector2(x * IN, y * IN)), 14);
+  return creased(new THREE.LatheGeometry(P.map(([x, y]) => new THREE.Vector2(x * IN, y * IN)), 32), 40);
 }
 // The post latch, in inches. u runs along the arm from the tip of its hook (0) to the end of its
 // tail (10.63); v is up from the bolt the arm turns on; x is out from the post toward the gate.
 const PL = { uN: 2.44, uPivot: 5.62, t: .12, rise: .3, lip: LATCH.lipIn, rodR: LATCH.rodIn / 2, rodLen: 6.42, past: .35 };
 const circle = (u, v, r) => { const p = new THREE.Path(); p.absarc((u - PL.uN) * IN, v * IN, r * IN, 0, Math.PI * 2, true); return p; };
-const slab = (sh, x0, t) => { const g = new THREE.ExtrudeGeometry(sh, { depth: t * IN, bevelEnabled: false, curveSegments: 10 }); g.translate(0, 0, x0 * IN); return g; };
+const slab = (sh, x0, t) => { const g = new THREE.ExtrudeGeometry(sh, { depth: t * IN, bevelEnabled: false, curveSegments: 20 }); g.translate(0, 0, x0 * IN); return creased(g, 40); };
 function latchArm() {
   const s = new THREE.Shape(), X = u => (u - PL.uN) * IN, L = (u, v) => s.lineTo(X(u), v * IN), Q = (a, b, u, v) => s.quadraticCurveTo(X(a), b * IN, X(u), v * IN);
   s.moveTo(X(.25), 1.37 * IN); L(10.3, 1.27); Q(10.63, 1.27, 10.63, .95); Q(10.63, .62, 10.3, .62);   // top edge, round end of the tail
@@ -77,7 +77,7 @@ function latchPlate() {
 // n is out from the gate's face (the rod lies on the face, flat side down).
 function strikerRod() {
   const R = PL.rodR, round = 2, taper = 1.87, a = round + taper, b = PL.rodLen, tw = .47, tt = .12;
-  const cyl = new THREE.CylinderGeometry(R * IN, R * IN, round * IN, 16); cyl.rotateZ(Math.PI / 2); cyl.translate(round / 2 * IN, 0, R * IN);
+  const cyl = new THREE.CylinderGeometry(R * IN, R * IN, round * IN, 32); cyl.rotateZ(Math.PI / 2); cyl.translate(round / 2 * IN, 0, R * IN);
   // the pressed part: a square the size of the rod at one end, the tab's flat section at the other
   const P = [[round, -R, 0], [round, R, 0], [round, R, 2 * R], [round, -R, 2 * R], [a, -tw, 0], [a, tw, 0], [a, tw, tt], [a, -tw, tt]].map(q => q.map(c => c * IN));
   const F = [[0, 1, 2, 3], [5, 4, 7, 6], [1, 0, 4, 5], [3, 2, 6, 7], [2, 1, 5, 6], [0, 3, 7, 4]], pos = [];
@@ -109,7 +109,7 @@ function archGrip(len, out) {
   const g = new THREE.ExtrudeGeometry(sh, { depth: .9 * I, bevelEnabled: false, curveSegments: 28 }); g.translate(0, 0, -.45 * I);
   // shape x → up the gate, shape y → out from its face, extrusion → across the gate
   g.applyMatrix4(new THREE.Matrix4().makeBasis(new THREE.Vector3(0, out, 0), new THREE.Vector3(0, 0, out), new THREE.Vector3(1, 0, 0)));
-  return g;
+  return creased(g, 30);   // one smooth bend, with crisp edges
 }
 
 // volume of a closed mesh in world space (cubic feet)

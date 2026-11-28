@@ -528,7 +528,7 @@ function frost(body) {
   };
   if (webglOK()) {
     const host = $('.frost-3d', body); host.hidden = false; $('.lab-vis', body).hidden = true; $('.f3d-note', body).hidden = false;
-    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host, { specs: app.live?.specs }); update(); })
+    import('./frost3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); scene = m.createFrostScene(host, { specs: app.live?.specs }); body.__frost = scene; update(); })
       .catch(() => { if (!live) return; host.hidden = true; $('.lab-vis', body).hidden = false; $('.f3d-note', body).hidden = true; scene = null; update(); });
   }
   update();
@@ -893,7 +893,7 @@ function build(body) {
   if (webglOK()) {
     const host = $('.build-3d', body); host.hidden = false; $('.vs-grid', body).hidden = true;
     $('#vsNote', body).textContent = 'Both seen from the rail side, with the ground cut open at the posts. How far store posts move varies from yard to yard; this is a typical case, drawn at true size. Winters show as frost in the ground and snow on the lawn.';
-    import('./build3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); yard3d = m.createBuildScene(host, { specs: app.live?.specs }); draw(); })
+    import('./build3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); yard3d = m.createBuildScene(host, { specs: app.live?.specs }); body.__build = yard3d; draw(); })
       .catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; yard3d = null; draw(); });
   }
   draw();
@@ -1134,7 +1134,7 @@ function dig(body) {
     import('./dig3d.mjs').then(m => {
       if (!live) return;
       $('.l3d-wait', host).remove();
-      scene = m.createDigScene(host, { len: st.len, specs: app.live?.specs }); dur = m.DUR; paint();
+      scene = m.createDigScene(host, { len: st.len, specs: app.live?.specs }); body.__dig = scene; dur = m.DUR; paint();
     }).catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; pile.hidden = false; scene = null; paint(); });
   }
   let dur = 9000;

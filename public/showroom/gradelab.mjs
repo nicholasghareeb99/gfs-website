@@ -341,7 +341,7 @@ export function grade(body, kit) {
       c3.addEventListener('pointerdown', down); c3.addEventListener('pointermove', move);
       c3.addEventListener('pointerup', up); c3.addEventListener('pointercancel', up);
       c3.addEventListener('pointerleave', () => { brush = null; draw(); });
-      body.__grade = { check: () => scene?.check() || [], metrics, st, draw };   // for the overlap tests
+      body.__grade = { check: () => scene?.check() || [], metrics, st, draw, get stage() { return scene?.stage; } };   // for the overlap tests
       draw();
     }).catch(() => { if (!live) return; host.hidden = true; $('.gl-stage', body).hidden = false; scene = null; fit(); });
   }

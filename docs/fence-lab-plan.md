@@ -41,6 +41,25 @@ Done in this round (`lab3d.mjs`): clouds and sun glow in the sky, a tree line at
 the yard (bare and grey in the Frost tool), grass blades in the strip near the fence, softer
 shadows, a lawn on the near side for views that look from behind the fence.
 
+Done in the definition round (2026-11-27, `lab3d.mjs`):
+
+- **Fine picture at rest.** While something moves the picture is drawn at the screen's own
+  pixels. A quarter second after it stops it is drawn once more, finer (every pixel on a
+  phone, more than the screen's pixels on an iPad or laptop), capped at 4.5 million pixels.
+  If a device ever drops the 3D picture while doing this, the fine pass turns itself off.
+- **Sharper wood.** The app's own grain at twice the size (512 × 2048), swapped in about a
+  third of a second after the first picture, and the sharpest texture filtering the device has.
+- **Finer shadows** on screens 700 points wide and up (4096 map, the app's own top setting),
+  and more sky light in the shade so shadows are deep but not black.
+- **Smooth curved hardware** (`creased()`): the pull handle, hinge barrels and striker rod.
+- **Trees that read as trees**: ragged leafy outlines, sunlit and shaded clumps, leaf dapple
+  that keeps its size on screen at any distance.
+- **Soil face** no longer shows the texture repeating as a grid.
+- **Far ground** below the horizon is hazy green (or snow), not a dark band.
+- **Lumber the right colour** (`trueToLumber()`): the app's models draw rails and gate frames
+  dark brown and nail heads as black ⅜ in dots. In the Lab the rails take the pickets' colour
+  and the nail heads are ¼ in and galvanized grey.
+
 Next, in order of how much they change the picture:
 
 1. **Real wood textures.** The app's procedural grain reads as drawn. Use photographed
@@ -49,9 +68,13 @@ Next, in order of how much they change the picture:
 2. **Real sky lighting.** Light the scene from a photographed sky (HDRI) so steel, vinyl
    and wet soil pick up real reflections.
 3. **Contact shadows** where boards meet rails and the fence meets the ground.
-4. **Soil cut face.** Layered topsoil, roots near the top, stones, a cleaner cut edge.
-5. **People and tools** in No-dig vs dug are blocky. Either model them properly or remove them.
-6. **Check on a real iPhone and iPad** for speed. The grass uses up to 46,000 tufts on an
+4. **Soil cut face.** Roots near the top and round stones (a first try at stones came out
+   as square specks and was taken back out).
+5. **Eased board edges.** Every board is a sharp-cornered box. Real lumber has rounded
+   edges that catch the light; this is the biggest thing left that makes boards look drawn.
+6. **People and tools** in No-dig vs dug are blocky. Either model them properly or remove them.
+7. **Check on a real iPhone and iPad** for speed, now also with the fine picture and the
+   bigger wood texture (about a one-second pause once per page on a phone). The grass uses up to 46,000 tufts on an
    iPad and 26,000 on a phone; if it drops frames, lower the count.
 
 ## Hardware (from Nick, 2026-11-27)

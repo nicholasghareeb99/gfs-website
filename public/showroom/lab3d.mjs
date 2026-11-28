@@ -14,7 +14,7 @@
 import * as THREE from '/gfs/vendor/three.module.js';
 import { createFenceEngine } from './vendor/exec/fence-engine.mjs';
 import { modelOverrides } from '/gfs/website-model.mjs';
-import { surfaceMaterial, textureSet } from './vendor/exec/real-surfaces.mjs';
+import { surfaceMaterial, textureSet, setAnisotropy } from './vendor/exec/real-surfaces.mjs';
 
 export { THREE };
 export const IN = 1 / 12;
@@ -66,7 +66,15 @@ function groundShader(m, lawn) {
     } else {
       // frozen soil: a little paler and bluer down to the freezing front; in wet clay, ice lenses
       // (thin seams of ice) form in bands, thickest just above the front
+      // The soil picture repeats every couple of feet, which shows as a grid on a wide cut. Slow changes
+      // in tone and faint level bands hide the repeat, the way a real
+      // trench wall is never one even colour.
       f = f.replace('#include <map_fragment>', `#include <map_fragment>
+        { vec2 q = vSecW.xy;
+          float big = secN(q * 0.23) * 0.5 + secN(q * 0.71 + 4.2) * 0.3 + secN(q * 2.3 + 9.1) * 0.2;
+          diffuseColor.rgb *= mix(0.84, 1.15, big);
+          diffuseColor.rgb *= mix(0.94, 1.05, secN(vec2(q.x * 0.12, q.y * 2.6 + 1.7)));
+          diffuseColor.rgb *= mix(0.95, 1.04, secN(q * 5.3 + 1.1)); }
         if (uFrost.y > uFrost.x && vSecW.y > -uFrost.y && vSecW.y < -uFrost.x) {
           float d = -vSecW.y, front = smoothstep(uFrost.y - 1.0, uFrost.y, d);
           diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.84, 0.92, 1.1) + vec3(0.04, 0.05, 0.07), 0.65);
@@ -82,7 +90,7 @@ function groundShader(m, lawn) {
       : 'for (int i = 0; i < ' + SECTION_HOLES + '; i++) { vec4 h = uHoles[i]; if (h.w > 0.5 && vSecW.x > h.x && vSecW.x < h.y && vSecW.y > h.z) discard; }';
     sh.fragmentShader = 'varying vec3 vSecW;\nuniform vec4 uHoles[' + SECTION_HOLES + '];\nuniform vec3 uFrost;\nuniform float uSnow;\nuniform vec3 uHaze;\n' + NOISE + f.replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n' + test);
   };
-  m.customProgramCacheKey = () => 'gfsLabGround-' + (lawn ? 'lawn' : 'face');
+  m.customProgramCacheKey = () => 'gfsLabGround-' + (lawn ? 'lawn' : 'face2');
   m.userData.u = u; m.userData.holes = u.uHoles.value;
   return m;
 }
@@ -194,16 +202,35 @@ function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(
   // trees
   let canopyMat = null; const leaf = new THREE.Color(), bare = new THREE.Color(0x6a6159);
   if (trees) {
-    const blob = new THREE.IcosahedronGeometry(1, 2), bp = blob.attributes.position;
-    for (let i = 0; i < bp.count; i++) { const x = bp.getX(i), y = bp.getY(i), z = bp.getZ(i), k = 1 + .22 * Math.sin(x * 5.1 + y * 3.3) * Math.cos(z * 4.7 + x * 2.1) + .1 * Math.sin(y * 9.0 + z * 7.0); bp.setXYZ(i, x * k, Math.max(y, -.55) * k, z * k); }
+    // one clump of leaves: a ball pushed in and out at three sizes so its outline is ragged like foliage,
+    // not lumpy like clay
+    const blob = new THREE.IcosahedronGeometry(1, 3), bp = blob.attributes.position;
+    for (let i = 0; i < bp.count; i++) {
+      const x = bp.getX(i), y = bp.getY(i), z = bp.getZ(i);
+      const k = 1 + .16 * Math.sin(x * 4.1 + y * 3.3 + 1.7) * Math.cos(z * 3.7 + x * 2.1) + .09 * Math.sin(x * 9.3 + z * 8.1) * Math.cos(y * 10.7 + z * 2.9) + .05 * Math.sin(x * 21.0 + y * 17.0) * Math.cos(z * 19.0 + y * 6.0);
+      bp.setXYZ(i, x * k, Math.max(y, -.55) * k, z * k);
+    }
     { const nn = blob.attributes.normal; for (let i = 0; i < bp.count; i++) { const v = new THREE.Vector3(bp.getX(i), bp.getY(i) + .2, bp.getZ(i)).normalize(); nn.setXYZ(i, v.x, v.y, v.z); } }
     canopyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0, envMapIntensity: .25, flatShading: false });
     const trunkMat = new THREE.MeshStandardMaterial({ color: 0x4a3d31, roughness: 1 });
     for (const m of [canopyMat, trunkMat]) { m.onBeforeCompile = sh => { sh.uniforms.uHaze = lawnU.uHaze;
-      sh.vertexShader = 'varying vec3 vTW;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vTW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = 'varying vec3 vTW; uniform vec3 uHaze;\n' + NOISE + sh.fragmentShader.replace('#include <dithering_fragment>', 'gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(60.0, 520.0, length(vTW.xz - cameraPosition.xz)) * .5);\n#include <dithering_fragment>')
-        .replace('#include <color_fragment>', '#include <color_fragment>\n { vec3 w = vTW * .55; float n = secN(w.xy + w.z * .7) * .6 + secN(w.xy * 3.1 + w.z * 2.3) * .4; diffuseColor.rgb *= .55 + .9 * n * n; }'); };
-      m.customProgramCacheKey = () => 'gfsLabTree'; }
+      sh.vertexShader = 'varying vec3 vTW; varying float vUp;\n' + sh.vertexShader.replace('#include <project_vertex>', '#include <project_vertex>\n vTW = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz; vUp = position.y;');
+      sh.uniforms.uRagged = { value: m === canopyMat ? 1 : 0 };
+      sh.fragmentShader = 'varying vec3 vTW; varying float vUp; uniform vec3 uHaze; uniform float uRagged;\n' + NOISE + sh.fragmentShader.replace('#include <dithering_fragment>', 'gl_FragColor.rgb = mix(gl_FragColor.rgb, uHaze, smoothstep(60.0, 520.0, length(vTW.xz - cameraPosition.xz)) * .5);\n#include <dithering_fragment>')
+        // foliage: sunlit clumps and shaded gaps at a few sizes, darker underneath each clump; then a leaf-sized
+        // dapple whose size follows the distance, so it is a few pixels across near or far and never shimmers
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          { vec3 w = vTW; float dist = length(vTW - cameraPosition), lf = clamp(230.0 / dist, 0.5, 4.0);
+            float n = secN(w.xy * .11 + w.z * .07) * .34 + secN(w.xy * .27 + w.z * .19 + 3.1) * .3 + secN(w.xy * .61 + w.z * .43 + 7.7) * .22 + secN(w.xy * 1.3 + w.z * .9 + 1.3) * .14;
+            float leafN = secN(w.xy * lf + vec2(w.z * lf * .37, 5.0)) * .34 + secN(w.zy * lf * 1.1 + vec2(w.x * lf * .41, 3.0)) * .33 + secN(w.xz * lf * 2.1 + vec2(11.0, w.y * lf * .9)) * .33;
+            float clump = smoothstep(.3, .72, n), under = smoothstep(-.55, .75, vUp), dapple = smoothstep(.34, .62, leafN);
+            diffuseColor.rgb *= (.5 + .85 * clump) * (.6 + .5 * under) * (.62 + .55 * dapple);
+            diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(1.18, 1.12, .78), clump * under * dapple * .5);
+            vLeaf = leafN; }`)
+        // a ragged, leafy outline: along the rim of each clump, the gaps between leaves are see-through
+        .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\n if (uRagged > .5) { float rim = abs(dot(normalize(normal), normalize(vViewPosition))); if (rim < .42 && vLeaf < .34 + (.42 - rim) * .75) discard; }')
+        .replace('void main() {', 'float vLeaf = 1.0;\nvoid main() {'); };
+      m.customProgramCacheKey = () => 'gfsLabTree3' + (m === canopyMat ? 'c' : 't'); }
     const spots = [];
     const far = -back - 14;
     for (let x = -width / 2 - back * .6; x < width / 2 + back * .6; x += 9 + rnd() * 10) spots.push([x, far - rnd() * 60]);
@@ -241,6 +268,77 @@ function makeScenery({ winter, width, back, lawnU, grade, phone, x0 = -Math.min(
 // drags to the tool (two fingers still pinch, tilt and turn).
 // stackAlways: views one above the other at every width; a view's aspect (height ÷ width, with
 // minH/maxH in px) sets its own height when stacked.
+// ── definition ──────────────────────────────────────────────────
+// Wood up close. The app draws its board grain into a 256 × 1024 texture, which is right for a whole
+// fence but goes soft when a tool looks at a latch or a joint from a foot away. The Lab asks the app's
+// own grain maker for the same grain at twice the size and swaps it in. The bigger texture takes about
+// a second to draw on a phone, so it's made after the first picture is up, once per wood on the page.
+const SHARP = 2048, sharpWaiting = new Map(), stages = new Set();
+let sharpTimer = 0;
+function sharpen(group) {
+  group.traverse(o => {
+    const m = o.material, kind = m?.userData?.gfsKind;
+    if (!o.isMesh || !m?.map || !/^(pt|cedar|grain)$/.test(kind) || m.userData.sharp) return;
+    m.userData.sharp = true;
+    if (!sharpWaiting.has(kind)) sharpWaiting.set(kind, new Set()); sharpWaiting.get(kind).add(m);
+  });
+  if (sharpTimer || ![...sharpWaiting.values()].some(set => set.size)) return;
+  sharpTimer = setTimeout(function next() {
+    sharpTimer = 0;
+    const kind = [...sharpWaiting.keys()].find(k => sharpWaiting.get(k).size); if (!kind) return;
+    const set = textureSet(THREE, kind, SHARP);            // kept by the app's surface library: made once
+    for (const m of sharpWaiting.get(kind)) { m.map = set.map; m.bumpMap = set.bumpMap; m.roughnessMap = set.roughnessMap; m.needsUpdate = true; }
+    sharpWaiting.get(kind).clear();
+    for (const st of stages) st();
+    sharpTimer = setTimeout(next, 60);
+  }, 350);
+}
+// Two things the app's wood models draw for clarity on a small screen that a real fence doesn't have,
+// put right for the Lab's close views:
+//  • The rails and gate frame are drawn a dark brown so they stand out from the pickets. On a real
+//    fence they are the same lumber as the pickets, so they take the pickets' colour (a touch deeper,
+//    as a 2×4 reads next to a ⅝ in board).
+//  • The picket nails are drawn as black ⅜ in dots. GFS shoots galvanized coil nails, whose heads are
+//    about ¼ in and zinc grey.
+let nailMat = null;
+function trueToLumber(group) {
+  const kindOf = (o, i = 0) => o.userData.parts?.[i]?.kind, isWood = m => /^(pt|cedar)$/.test(m?.userData?.gfsKind || '');
+  let picket = null; group.traverse(o => { if (!picket && o.isMesh && /^g?picket$/.test(kindOf(o) || '') && isWood(o.material)) picket = o.material; });
+  const M = new THREE.Matrix4(), K = .72;
+  group.traverse(o => {
+    if (!o.isMesh) return; const k = kindOf(o) || '';
+    if (picket && /^(rail|kick|grail|gstile|gbrace)$/.test(k) && isWood(o.material) && o.material !== picket && !o.material.userData.lumber) {
+      o.material.userData.lumber = true; o.material.color.copy(picket.color).multiplyScalar(.95);
+    }
+    if (k === 'fastener' && picket) {
+      nailMat ||= new THREE.MeshStandardMaterial({ color: 0x8f979b, roughness: .5, metalness: .7, envMapIntensity: .9 });
+      o.material = nailMat;
+      if (o.isInstancedMesh) {
+        for (let i = 0; i < o.count; i++) { o.getMatrixAt(i, M); const e = M.elements; for (const j of [0, 1, 2, 4, 5, 6, 8, 9, 10]) e[j] *= K; o.setMatrixAt(i, M); }
+        o.instanceMatrix.needsUpdate = true;
+      } else o.scale.multiplyScalar(K);
+    }
+  });
+}
+// Smooth shading for a curved part: every corner takes the average direction of the faces that meet
+// there, except across an edge sharper than `deg`, which stays crisp.
+export function creased(geo, deg = 35) {
+  const g = geo.index ? geo.toNonIndexed() : geo, p = g.attributes.position, n = p.count, cos = Math.cos(deg * Math.PI / 180);
+  const A = new THREE.Vector3(), B = new THREE.Vector3(), C = new THREE.Vector3(), fn = [], at = new Map(), key = i => `${Math.round(p.getX(i) * 2e4)},${Math.round(p.getY(i) * 2e4)},${Math.round(p.getZ(i) * 2e4)}`;
+  for (let i = 0; i < n; i += 3) {
+    A.fromBufferAttribute(p, i); B.fromBufferAttribute(p, i + 1); C.fromBufferAttribute(p, i + 2);
+    const f = B.sub(A).cross(C.sub(A)).clone(); fn.push(f);                    // length = twice the face's area, so big faces count for more
+    for (let k = 0; k < 3; k++) { const q = key(i + k); if (!at.has(q)) at.set(q, []); at.get(q).push(i / 3); }
+  }
+  const unit = fn.map(f => f.clone().normalize()), out = new Float32Array(n * 3), N = new THREE.Vector3();
+  for (let i = 0; i < n; i++) {
+    const me = Math.floor(i / 3); N.set(0, 0, 0);
+    for (const f of at.get(key(i))) if (unit[f].dot(unit[me]) >= cos) N.add(fn[f]);
+    N.normalize(); out[i * 3] = N.x; out[i * 3 + 1] = N.y; out[i * 3 + 2] = N.z;
+  }
+  g.setAttribute('normal', new THREE.BufferAttribute(out, 3)); return g;
+}
+
 export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, width = 400, back = 400, segPerFt = 1, turnWithOneFinger = true, stackAlways = false, home = {}, grass = {}, winter = false } = {}) {
   back = Math.max(back, 320);   // the trees at the back of the yard stay well behind the fence
   const mt = mats();
@@ -248,7 +346,17 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   const cv = document.createElement('canvas'); cv.className = 'l3d-cv'; wrap.append(cv);
   const over = document.createElement('div'); over.className = 'l3d-over'; wrap.append(over);
   const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, powerPreference: 'high-performance', preserveDrawingBuffer: false });
-  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+  // Two sharpnesses. While something is moving the picture is drawn at the screen's own pixels (at
+  // most 2 per point). A quarter second after it comes to rest it is drawn once more, finer: every
+  // pixel a phone has, or more pixels than the screen on an iPad or laptop, which smooths the edges
+  // of pickets, wire and hardware. The fine picture is held to FINE_PX pixels to stay inside a
+  // phone's memory, and is given up for good if the browser ever drops the 3D picture.
+  const basePR = Math.min(devicePixelRatio || 1, 2), FINE_PX = 4.5e6;
+  let fine = false, fineTimer = 0, fineOff = false; try { fineOff = sessionStorage.getItem('gfs-lab-fine') === 'off'; } catch (e) { /* private mode */ }
+  const finePR = () => Math.max(basePR, Math.min(3, Math.max(2, (devicePixelRatio || 1) * 1.5), Math.sqrt(FINE_PX / Math.max(1, cv.clientWidth * cv.clientHeight))));
+  const setPR = r => { if (Math.abs(renderer.getPixelRatio() - r) < .01) return; renderer.setPixelRatio(r); renderer.setSize(cv.clientWidth, cv.clientHeight, false); };
+  renderer.setPixelRatio(basePR);
+  setAnisotropy(THREE, renderer.capabilities.getMaxAnisotropy());   // textures seen at a slant (rails, the lawn, a fence running away) stay sharp
   renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
@@ -258,7 +366,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   // Sky: a clear-day gradient with fair-weather clouds and the glow around the sun. It also lights
   // metal and paint. uSun: where the sun is. uCloud: how much of the sky the clouds cover (0–1).
   const skyMat = new THREE.ShaderMaterial({ side: THREE.BackSide, depthWrite: false, fog: false,
-    uniforms: { top: { value: new THREE.Color(0x4f86c6) }, mid: { value: skyMid }, bot: { value: new THREE.Color(0x3a3027) }, uSun: { value: new THREE.Vector3(-.44, .68, .6).normalize() }, uCloud: { value: .42 } },
+    uniforms: { top: { value: new THREE.Color(0x4f86c6) }, mid: { value: skyMid }, bot: { value: new THREE.Color(0x6d8758) }, uSun: { value: new THREE.Vector3(-.44, .68, .6).normalize() }, uCloud: { value: .42 } },
     vertexShader: 'varying vec3 v; void main(){ v = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: 'uniform vec3 top, mid, bot, uSun; uniform float uCloud; varying vec3 v;\n' + NOISE + `
       float fbm(vec2 p){ float a = .5, s = 0.; for (int i = 0; i < 5; i++) { s += a * secN(p); p = p * 2.03 + 11.3; a *= .5; } return s; }
@@ -282,10 +390,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   { const g = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshBasicMaterial({ color: 0x4a5a33 })); g.position.y = -2; g.rotation.x = -Math.PI / 2; envScene.add(g); }
   const envRT = pmrem.fromScene(envScene, .04); scene.environment = envRT.texture; pmrem.dispose();
 
-  scene.add(new THREE.HemisphereLight(0xdfeaf6, 0x6b5a45, .55));
+  scene.add(new THREE.HemisphereLight(0xdfeaf6, 0x6b5a45, .72));   // open sky fills the shade: shadows are deep, not black
   // Late-morning sun from the viewer's left and in front, so the cut face is lit.
   const sun = new THREE.DirectionalLight(0xfff2df, 2.7); sun.position.set(-22, 34, 30); sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -.0004; sun.shadow.normalBias = .03; sun.shadow.radius = 2;
+  // shadows: a finer map on a screen big enough to show it (the app's own top setting is 4096 too)
+  const shadowPx = Math.min(renderer.capabilities.maxTextureSize, (host.clientWidth || innerWidth) >= 700 ? 4096 : 2048);
+  sun.shadow.mapSize.set(shadowPx, shadowPx); sun.shadow.bias = -.0004 * 2048 / shadowPx; sun.shadow.normalBias = .03 * 2048 / shadowPx; sun.shadow.radius = 2;
   scene.add(sun, sun.target);
 
   // The yard: lawn behind the cut, and the cut face (topsoil over clay) in front.
@@ -320,7 +430,10 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   // A view that looks from the far side (the picket side of a gate) sees the yard on the near side of
   // the cut instead, so that side gets a lawn too. It's only drawn for those views.
   const frontLawn = new THREE.Mesh(new THREE.PlaneGeometry(width, back).rotateX(-Math.PI / 2).translate(0, -.004, back / 2), G.lawn); frontLawn.receiveShadow = true; frontLawn.visible = false; frontLawn.userData.noCheck = true; scene.add(frontLawn);
-  if (winter) skyMat.uniforms.uCloud.value = .9;
+  // below the horizon the sky takes the colour of far-off ground (hazy green, or snow), so where the
+  // lawn runs out there is more yard in the distance and not a dark band
+  const farGreen = new THREE.Color(0x6d8758), farSnow = new THREE.Color(0xd9e1e6);
+  if (winter) { skyMat.uniforms.uCloud.value = .9; skyMat.uniforms.bot.value.copy(farGreen).lerp(farSnow, .5); }
 
   // holes: { x0, x1, y } in the cut face, { x, z, r } in the lawn
   const faceHoles = [], lawnHoles = [];
@@ -370,10 +483,12 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   };
   V.forEach(v => { const t = document.createElement('div'); t.className = 'l3d-view'; t.innerHTML = v.label ? `<span class="l3d-tag ${v.tone || ''}">${v.label}</span>` : ''; over.append(t); v.tag = t; });
 
+  stages.add(dirty);
   // ── render on demand ──
   let need = true, raf = 0, alive = true, onscreen = true;
   const ticks = new Set(), afters = new Set();
-  function dirty() { need = true; kick(); }
+  function dirty() { need = true; if (fine) { fine = false; setPR(basePR); } clearTimeout(fineTimer); kick(); }
+  const refine = () => { if (!alive || fineOff || fine || !onscreen || ticks.size) return; fine = true; setPR(finePR()); need = true; kick(); };
   function kick() { if (!raf && alive && onscreen) raf = requestAnimationFrame(frame); }
   function frame(now) {
     raf = 0; if (!alive) return;
@@ -395,13 +510,15 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
         renderer.render(scene, v.cam);
       }
       need = false; for (const f of afters) f();
+      clearTimeout(fineTimer); if (!more && !fine && !fineOff) fineTimer = setTimeout(refine, 260);
     }
     if (more) kick();
   }
   const ro = new ResizeObserver(() => layout()); ro.observe(wrap);
   const io = new IntersectionObserver(([e]) => { onscreen = e.isIntersecting; if (onscreen) dirty(); }); io.observe(wrap);
-  cv.addEventListener('webglcontextlost', e => { e.preventDefault(); wrap.classList.add('lost'); });
-  cv.addEventListener('webglcontextrestored', () => { wrap.classList.remove('lost'); dirty(); });
+  cv.addEventListener('webglcontextlost', e => { if (!alive) return;   // closing a tool drops its own picture on purpose
+    e.preventDefault(); wrap.classList.add('lost'); if (fine) { fineOff = true; try { sessionStorage.setItem('gfs-lab-fine', 'off'); } catch (err) { /* private mode */ } } fine = false; clearTimeout(fineTimer); });
+  cv.addEventListener('webglcontextrestored', () => { wrap.classList.remove('lost'); renderer.setPixelRatio(basePR); layout(); });
 
   // ── touch: one finger sideways turns, two fingers pinch to zoom or drag up/down to tilt; double tap resets ──
   cv.style.touchAction = turnWithOneFinger ? 'pan-y' : 'none';
@@ -476,7 +593,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
   // snow on the lawn (0–1), and the colour of the soil under the topsoil (clay or sand)
   const ground = {
     frost(depthFt, lens = 1, thawedFt = 0) { for (const m of [G.topsoil, G.clay]) m.userData.u.uFrost.value.set(Math.max(0, thawedFt), Math.max(0, depthFt), lens); dirty(); },
-    snow(k) { G.lawn.userData.u.uSnow.value = clamp(k, 0, 1); scenery.snow(clamp(k, 0, 1)); skyMat.uniforms.uCloud.value = .42 + .58 * clamp(k * 1.6, 0, 1); dirty(); },
+    snow(k) { G.lawn.userData.u.uSnow.value = clamp(k, 0, 1); scenery.snow(clamp(k, 0, 1)); skyMat.uniforms.uCloud.value = .42 + .58 * clamp(k * 1.6, 0, 1); skyMat.uniforms.bot.value.copy(farGreen).lerp(farSnow, clamp(k, 0, 1)); dirty(); },
     // keep grass off something that sits in the lawn (a concrete collar): centre x, z and radius, ft
     clearGrass(x, z, r) { scenery.clear(x, z, r); dirty(); },
     subsoil(hex) { const ref = surfaceMaterial(THREE, 'soil', hex); G.clay.color.copy(ref.color); ref.dispose(); dirty(); }
@@ -497,7 +614,7 @@ export function createStage(host, { views = [{ id: 'main' }], soilDepth = 14, wi
     dirty, tick(f) { ticks.add(f); kick(); }, frameView, reset, hole, pin,
     get stacked() { return stacked; }, layout,
     dispose() {
-      alive = false; cancelAnimationFrame(raf); ro.disconnect(); io.disconnect();
+      alive = false; cancelAnimationFrame(raf); clearTimeout(fineTimer); stages.delete(dirty); ro.disconnect(); io.disconnect();
       scene.traverse(o => { if (o.geometry && !o.userData.keepGeo) o.geometry.dispose(); });
       for (const m of [G.topsoil, G.clay, G.lawn]) m.dispose(); for (const t of G.maps) t.dispose();
       envRT.dispose(); renderer.dispose(); renderer.forceContextLoss?.(); wrap.remove();
@@ -518,6 +635,7 @@ export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level =
   const run = { pts: pts ? pts.map(([x, y, pz]) => ({ x, y, z: pz ?? z })) : [{ x: x0, y: gy(x0), z }, { x: x1, y: gy(x1), z }], spec, h, styleName: name, racked: !level, gateOpen: 0, i: 0, ...(gates ? { gates } : {}) };
   E.buildRun(B, run, { gateOpen: 0 });
   const group = B.flush(), parts = [];
+  trueToLumber(group);
   group.updateMatrixWorld(true);
   const m = new THREE.Matrix4();
   group.traverse(o => {
@@ -530,6 +648,7 @@ export function fence(name, x0, x1, { h = 6, z = 0, noDig, specs, grade, level =
       parts.push({ mesh: o, i, kind: part.kind, part, geo: o.geometry.type, base: m.clone(), box, cx: (box.min.x + box.max.x) / 2 });
     }
   });
+  sharpen(group);
   return { group, parts, spec, run, lib };
 }
 // On a slope the app's model sets the flat top 2×4 a hair low, so its downhill corner dips into the
