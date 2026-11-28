@@ -1123,3 +1123,5 @@ body.has-back .top .brand{display:none}
 .lab:has(.lab-point) .lab-take{display:none}
 @media (max-width:699px){.lab-point{font-size:16px;padding:12px 14px}}
 .wpost{display:grid;gap:6px}
+.wpost .seg button{font-size:13px}
+@media (max-width:699px){.wpost .seg button{padding:6px 6px;flex:1 1 30%}}

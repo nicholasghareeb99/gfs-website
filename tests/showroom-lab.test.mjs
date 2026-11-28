@@ -43,6 +43,10 @@ test('wind: a typical 4×4 two feet deep tips out of the ground; steel driven 4 
   near(WPOSTS.gfs.breakLbFt, 30000 * 0.761 / 12, 5);         // Z = (D³ − d³) / 6 = 0.761 in³
   // check the ground balance by hand at the tipping load: P (e + 1.5b + f/2) = 2.25 su b g²
   { const b = 10 / 12, P = store.lb, f = P / (9 * 1500 * b), g = 2 - 1.5 * b - f; near(P * (arm + 1.5 * b + f / 2), 2.25 * 1500 * b * g * g, 1); }
+  // the same post with half its wood gone at the soil line snaps before it tips, in a much lighter wind
+  const rot = postLimit(WPOSTS.rot, arm); assert.equal(rot.mode, 'snaps'); assert.ok(rot.lb < store.lb * .75, String(rot.lb));
+  near(WPOSTS.rot.breakLbFt / WPOSTS.store.breakLbFt, Math.SQRT1_2 ** 3, 1e-12);
+  { const v = failGust({ h: 6, exposure: 'B', style: solid }, WPOSTS.rot).V; assert.ok(v > 50 && v < 62, String(v)); }   // about a severe-thunderstorm gust
   // 6 ft solid privacy among houses: the typical post goes over in a derecho, the steel post stands
   const o = { h: 6, exposure: 'B', style: solid }, s = failGust(o, WPOSTS.store), g = failGust(o, WPOSTS.gfs);
   assert.ok(s.V > 62 && s.V < 78, String(s.V)); assert.ok(g.V > 82 && g.V < 95, String(g.V));

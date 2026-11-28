@@ -160,11 +160,20 @@ Next, in order of how much they change the picture:
   side, so the posts' limit is the same. On the rail side the boards and rails are pulled off
   their nails. By NDS smooth-nail pull-out values, the nails of a new fence outlast its posts, so
   the tool does **not** show boards blowing off: it has no honest number for that yet.
-- **To show boards or panels coming off, needed from Nick:** the nails GFS uses (smooth or ring
-  shank, how many per picket at each rail, how many where a rail crosses a box), how a store panel
-  is usually hung on its posts, and what he actually sees fail after a storm. With those, a
-  "boards pulled off the rails" failure can be added on the rail side with real limits. Rusted or
-  loosened nails on an old fence would be the honest way to show it for the store fence.
+- **From Nick (2026-11-28):** GFS nails are ring shank, 2 per picket at each rail and 3 where a
+  rail crosses a box. Store panels are hung with nails or screws and their pickets are nailed.
+  After storms he sees posts snap once they have started to rot, and sometimes rails pulled out of
+  the post next to a broken one.
+- **So the tool now has a third post: "Typical 4×4, rotted".** Assumption, stated in the math: rot
+  has taken half the wood at the soil line, and a square core with half the area has (1/√2)³ = 35%
+  of the bending strength. That post snaps before it tips, at about 55 mph for 6 ft privacy among
+  houses (the new post tips at about 70).
+- **The two sides fail differently with rotted posts.** Rail side: the panel is blown away from its
+  posts, so the two end posts are left standing with the rails pulled out and the run between them
+  down. Picket side: boards and rails are pressed onto the posts and can't pull away, so the whole
+  run goes over. Which posts hold is a picture, not a calculation.
+- GFS's ring-shank nailing is stated in the math. By NDS values it holds past any gust on the
+  slider, so nothing is drawn pulling off a GFS fence.
 
 ## Math check (2026-11-28)
 
