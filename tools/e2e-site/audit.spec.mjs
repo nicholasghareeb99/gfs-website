@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { createHash } from 'node:crypto';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { BASE, DIST, SITE_HOSTS, localURL } from './server.mjs';
@@ -10,7 +11,18 @@ test.use({ trace: 'off' });
 
 const PHONE = '4192142107';
 const EMAIL = 'nick@ghareebfence.com';
-const STALE = /(?:419[\s).+-]*902[\s.-]*8257|3823\s+Bowen|2910\s+N\.?\s+109th)/i;
+const STALE_ADDRESS = /(?:3823\s+Bowen|2910\s+N\.?\s+109th)/i;
+// Compare only the hash of normalized digits so the private number stays out of this test.
+const PRIVATE_PHONE_HASH = '83eb386c7d425392deb845d9efbac612d3f2c3d9a667d1f36c36ff1c59d4ade7';
+
+function hasStaleFacts(text) {
+  if (STALE_ADDRESS.test(text)) return true;
+  for (const [candidate] of text.matchAll(/(?<!\d)(?:\+?1[\s.()/_·–—-]*)?\(?[2-9]\d{2}[\s.()/_·–—-]*\d{3}[\s.()/_·–—-]*\d{4}(?!\d)/g)) {
+    const digits = candidate.replace(/\D/g, '').replace(/^1(?=\d{10}$)/, '');
+    if (createHash('sha256').update(digits).digest('hex') === PRIVATE_PHONE_HASH) return true;
+  }
+  return false;
+}
 const adCopy = /built straight, built honest|premier (?:fence|fencing)|top[- ]notch|unmatched quality|transform your (?:yard|outdoor)|dream (?:yard|backyard)|elevate your|your trusted (?:fence|partner)|second to none|don't settle for less/i;
 
 async function inspect(page) {
@@ -72,7 +84,7 @@ function* businessNodes(value) {
 
 function facts(audit, raw, path) {
   const errors = [];
-  if (STALE.test(raw)) errors.push('former phone or address appears');
+  if (hasStaleFacts(raw)) errors.push('former phone or address appears');
   if (/8F5C4C98-DDFA-4D07-8135-8366CF7247FA/i.test(raw)) errors.push('former logo asset appears');
   if (audit.links.some(href => {
     const target = href.split('?')[0];
@@ -171,7 +183,7 @@ test('walk the production sitemap and audit links, assets, business facts, layou
   const output = {
     profile: info.project.name, visited, internalTargets: targets.length,
     broken: broken.sort((a, b) => a.target.localeCompare(b.target)), outboundMocks: [...new Set(world.outbound.map(row => row.host))].sort(),
-    llmsErrors: llmsFacts.filter(value => !llms.includes(value)).concat(STALE.test(llms) ? ['old facts'] : []),
+    llmsErrors: llmsFacts.filter(value => !llms.includes(value)).concat(hasStaleFacts(llms) ? ['old facts'] : []),
   };
   await writeFile(info.outputPath('audit.json'), JSON.stringify(output, null, 2) + '\n');
   await info.attach('sitemap-audit', { path: info.outputPath('audit.json'), contentType: 'application/json' });

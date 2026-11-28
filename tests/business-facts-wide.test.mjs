@@ -3,6 +3,7 @@
 // Runs under `npm test` (node:test, no external dependencies).
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -24,16 +25,24 @@ const FACTS = {
   closes: '18:00',
 };
 
-const FORBIDDEN = [
-  {
-    label: 'owner cell number (419-902-8257)',
+// SHA-256 of the ten normalized digits. Keep the private number out of the source and diagnostics.
+const PRIVATE_PHONE_HASH = '83eb386c7d425392deb845d9efbac612d3f2c3d9a667d1f36c36ff1c59d4ade7';
+const phoneHash = (digits) => createHash('sha256').update(digits).digest('hex');
+
+function privatePhoneRule(expectedHash) {
+  return {
+    label: 'private phone number',
     testLine(text) {
-      if (/(?:(?:\+?1[\s.\-()\/]*)?419[\s.\-()\/]*902[\s.\-()\/]*8257|(?<!\d)902[\s.\-()]*8257(?!\d))/.test(text)) {
-        return true;
+      for (const [candidate] of text.matchAll(/(?<!\d)(?:\+?1[\s.()/_·–—-]*)?\(?[2-9]\d{2}[\s.()/_·–—-]*\d{3}[\s.()/_·–—-]*\d{4}(?!\d)/g)) {
+        if (phoneHash(normalizePhone(candidate)) === expectedHash) return true;
       }
-      return text.replace(/\D/g, '').includes('419' + '902' + '8257');
+      return false;
     },
-  },
+  };
+}
+
+const FORBIDDEN = [
+  privatePhoneRule(PRIVATE_PHONE_HASH),
   {
     label: 'former address (3823 Bowen Rd)',
     testLine(text) {
@@ -173,14 +182,14 @@ function* walkBusinessNodes(node) {
   }
 }
 
-function scanForbidden(sources) {
+function scanForbidden(sources, rules = FORBIDDEN) {
   const issues = [];
   for (const { rel, text } of sources) {
     const lines = text.split(/\r?\n/);
     for (let i = 0; i < lines.length; i++) {
       const cleaned = stripBase64(lines[i]);
       const decoded = decodeLine(lines[i]);
-      for (const rule of FORBIDDEN) {
+      for (const rule of rules) {
         if (rule.testLine(cleaned) || rule.testLine(decoded)) {
           issues.push(`${rel}:${i + 1}: forbidden ${rule.label} appears`);
         }
@@ -218,14 +227,14 @@ function scanPhones(sources) {
           const digits = normalizePhone(target);
           if (!digits) continue;
           if (digits !== FACTS.phoneDigits) {
-            issues.push(`${rel}:${i + 1}: contact link "${match[0]}" does not match ${FACTS.phoneDisplay}`);
+            issues.push(`${rel}:${i + 1}: contact link does not match ${FACTS.phoneDisplay}`);
           }
         }
         if (/municipal-permit|data-gfs-sec="fence-rules"|zoning office/i.test(line)) continue;
         for (const match of line.matchAll(/(?<!\d)(?:\+?1[-.\s]?)?\(?([2-9]\d{2})\)?[-.\s](\d{3})[-.\s](\d{4})(?!\d)/g)) {
           const digits = `${match[1]}${match[2]}${match[3]}`;
           if (digits === FACTS.phoneDigits || match[2] === '555') continue;
-          issues.push(`${rel}:${i + 1}: unexpected phone number "${match[0]}" (expected ${FACTS.phoneDisplay})`);
+          issues.push(`${rel}:${i + 1}: unexpected phone number (expected ${FACTS.phoneDisplay})`);
         }
       }
     }
@@ -243,7 +252,7 @@ function scanPhones(sources) {
         for (const node of walkBusinessNodes(parsed)) {
           if (node.telephone && normalizePhone(node.telephone) !== FACTS.phoneDigits) {
             const ln = findFieldLine(text, 'telephone', node.telephone, block.startOffset);
-            issues.push(`${rel}:${ln}: JSON-LD telephone "${node.telephone}" does not match ${FACTS.phoneDisplay}`);
+            issues.push(`${rel}:${ln}: JSON-LD telephone does not match ${FACTS.phoneDisplay}`);
           }
         }
       }
@@ -274,7 +283,7 @@ function scanPhones(sources) {
       for (const [key, val] of entries) {
         if (!val || normalizePhone(val) !== FACTS.phoneDigits) {
           const ln = findFieldLine(text, key, val);
-          issues.push(`${rel}:${ln}: ${key} "${val}" does not match ${FACTS.phoneDisplay}`);
+          issues.push(`${rel}:${ln}: ${key} does not match ${FACTS.phoneDisplay}`);
         }
       }
     }
@@ -719,7 +728,7 @@ test('founded year in repo templates and data files is 2022', (t) => {
 });
 
 test('guard catches forbidden and wrong business facts with file and line (synthetic fixtures)', () => {
-  const badCell = ['419', '902', '8257'];
+  const badCell = ['202', '555', '0147'];
   const badBowen = ['3823', 'Bowen', 'Rd'].join(' ');
   const badNorth = ['2910', 'N', '109th', 'St'].join(' ');
   const badInfo = ['info', 'ghareebfencingsolutions.com'].join('@');
@@ -739,7 +748,10 @@ test('guard catches forbidden and wrong business facts with file and line (synth
       ].join('\n'),
     },
   ];
-  const forbiddenHits = scanForbidden(syntheticForbidden);
+  const forbiddenHits = scanForbidden(syntheticForbidden, [
+    privatePhoneRule(phoneHash(badCell.join(''))),
+    ...FORBIDDEN.slice(1),
+  ]);
   assert.equal(forbiddenHits.length, 6, forbiddenHits.join('\n'));
   assert.match(forbiddenHits[0], /^synthetic\/contact\.html:2:/);
   assert.match(forbiddenHits[1], /^synthetic\/contact\.html:3:/);
