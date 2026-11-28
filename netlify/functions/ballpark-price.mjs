@@ -77,7 +77,7 @@ function removalRate(factors, material) {
   if (material === 'chain') return factors.remChain;
   return factors.remOther;
 }
-export function readFactors(raw, { materials, styleMaterialMap } = {}) {
+export function readFactors(raw, { materials = raw?.materials, styleMaterialMap = raw?.styleMaterialMap } = {}) {
   const removal = Object.fromEntries(Object.entries(DEFAULT_REMOVAL_RATES).map(([key, fallback]) => [key, positiveRate(raw?.[key], fallback)]));
   return { ...removal, materials, styleMaterialMap };
 }

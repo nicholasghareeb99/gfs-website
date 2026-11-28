@@ -12,6 +12,7 @@ test('website stays cent-exact with quote-core for the shared ballpark matrix', 
   const {priceList, sections, settings, cases, centsByStyle} = reference;
   const catalog = parsePricing(priceList.join('\n'));
   const factors = readFactors(settings, sections);
+  assert.deepEqual(readFactors({...settings, ...sections}), factors);
   let changes = 0;
   const examples = [];
   for (const [style, expected] of Object.entries(centsByStyle)) {
