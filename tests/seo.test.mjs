@@ -59,7 +59,7 @@ test('sitemap lists the three comparison guides; llms.txt states the financing t
 
 test('style page intros state real build specs, and never products we do not sell', () => {
   const must = {
-    wood: [/8-ft galvanized steel posts 4 ft into the ground/, /welded steel frames/],
+    wood: [/8-ft galvanized steel posts 4 ft into the ground/, /compression brace or a welded steel frame/],
     cedar: [/Western Red Cedar/, /Northern White Cedar/],
     vinyl: [/Sections are 8 ft wide/, /reinforced with aluminum/],
     chainlink: [/up to 6 ft tall/, /top rail is standard/],
@@ -67,7 +67,7 @@ test('style page intros state real build specs, and never products we do not sel
     aluminum: [/flat-top and spear-top/],
   };
   for (const [k, res] of Object.entries(must)) {
-    const intro = read(`fences/${k}/index.html`).match(new RegExp(`data-editable="fence\\.v2\\.${k}\\.intro\\.nov18"[^>]*>(.*?)</p>`, 's'))[1];
+    const intro = read(`fences/${k}/index.html`).match(new RegExp(`data-editable="fence\\.v2\\.${k}\\.intro\\.nov(?:18|27)"[^>]*>(.*?)</p>`, 's'))[1];
     for (const re of res) assert.match(intro, re, k);
     assert.doesNotMatch(intro, /locust|wrought iron|composite|lifetime/i, k);
   }

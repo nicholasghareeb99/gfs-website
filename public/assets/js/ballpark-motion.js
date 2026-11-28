@@ -104,6 +104,15 @@
     if (stepper) requestAnimationFrame(() => bump(stepper.parentElement.querySelector('output')));
   });
 
+  // Full-screen map: rest the floating instructions after 7 s; show them again whenever they change.
+  const hint = document.getElementById('bp-draw-hint');
+  if (hint) {
+    let restTimer = 0;
+    const wake = () => { hint.classList.remove('bp-hint-rest'); clearTimeout(restTimer); restTimer = setTimeout(() => { if (document.querySelector('.bp-map-full')) hint.classList.add('bp-hint-rest'); }, 7000); };
+    new MutationObserver(wake).observe(hint, { childList: true, characterData: true, subtree: true });
+    wake();
+  }
+
   let queued = false;
   function sync() {
     queued = false;
