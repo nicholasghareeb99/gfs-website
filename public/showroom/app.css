@@ -1122,3 +1122,4 @@ body.has-back .top .brand{display:none}
 .lab-point b{display:block;font:700 11px/1.2 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--copper-lt);margin-bottom:5px}
 .lab:has(.lab-point) .lab-take{display:none}
 @media (max-width:699px){.lab-point{font-size:16px;padding:12px 14px}}
+.wpost{display:grid;gap:6px}

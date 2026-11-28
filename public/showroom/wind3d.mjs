@@ -37,8 +37,10 @@ export function createWindScene(host, { specs } = {}) {
   const concrete = new THREE.MeshStandardMaterial({ color: 0xa9a7a1, roughness: .95 }), holeMat = new THREE.MeshBasicMaterial({ color: 0x1d140c });
 
   // ── the fence ──
-  function build(style, h, bay, post) {
-    const k = style + '|' + h + '|' + (post === 'store' ? 'store' : '');
+  // side: which face of the fence the wind hits, 'picket' or 'rail'. The wind always blows the same way
+  // across the picture; the fence is turned end for end to face it.
+  function build(style, h, bay, post, side = 'picket') {
+    const k = style + '|' + h + '|' + (post === 'store' ? 'store' : '') + '|' + side;
     if (built?.k === k) return;
     if (built) { R.remove(built.g, built.holes); built.F.lib?.dispose?.(); built.g.traverse(o => o.geometry?.dispose?.()); built.holes.traverse(o => o.geometry?.dispose?.()); }
     const M = windModel(style, h, post), pts = Array.from({ length: BAYS + 1 }, (_, i) => [0, 0, Z0 - i * bay]);
@@ -46,10 +48,14 @@ export function createWindScene(host, { specs } = {}) {
     // the no-dig steel runs up inside each box; under the ground it's hidden (the yard isn't cut here)
     if (M.noDig) reveal(F.parts.filter(p => p.geo === 'CylinderGeometry' && p.kind === 'post'), () => 0);
     clearPosts(F);
-    const g = new THREE.Group(); g.add(F.group); R.add(g); g.rotation.z = -lean * Math.PI / 180;
-    const box = new THREE.Box3(); for (const p of F.parts) if (p.mesh.visible && !p.hidden) box.union(p.box);
-    g.updateMatrixWorld(true); box.union(new THREE.Box3().setFromObject(F.group));
-    const posts = F.parts.filter(p => POSTISH.test(p.kind || '')).map(p => p.box);
+    const g = new THREE.Group(), turn = new THREE.Group(); turn.add(F.group); g.add(turn); R.add(g); g.rotation.z = -lean * Math.PI / 180;
+    // which face the model has toward the wind as built, from where its boards sit against its posts
+    const mean = re => { const ps = F.parts.filter(p => re.test(p.kind || '') && !p.hidden); return ps.length ? ps.reduce((a, p) => a + (p.box.min.x + p.box.max.x) / 2, 0) / ps.length : 0; };
+    const asBuilt = mean(/^picket$/) <= mean(POSTISH) ? 'picket' : 'rail', flip = side !== asBuilt, zc = Z0 - BAYS * bay / 2;
+    if (flip) { turn.position.z = zc; turn.rotation.y = Math.PI; F.group.position.z = -zc; }
+    g.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(F.group);
+    const posts = F.parts.filter(p => POSTISH.test(p.kind || '')).map(p => flip ? new THREE.Box3(new THREE.Vector3(-p.box.max.x, p.box.min.y, 2 * zc - p.box.max.z), new THREE.Vector3(-p.box.min.x, p.box.max.y, 2 * zc - p.box.min.z)) : p.box);
     // ordinary posts stand in a 10 in concrete plug 2 ft deep. It is under the lawn until the fence goes
     // over; then it comes out of the ground with its post, and leaves its hole behind.
     const holes = new THREE.Group(); holes.visible = false; R.add(holes);
@@ -143,12 +149,13 @@ export function createWindScene(host, { specs } = {}) {
   // load: { style, h, bay, eps, V, exposure, p (psf), perPost (lb) }
   function set(load) {
     const prev = S; S = load;
-    build(load.style, load.h, load.bay, load.fail?.post);
+    const was = built?.k; build(load.style, load.h, load.bay, load.fail?.post, load.side);
     // A fence that has gone over no longer stands in the wind's way. Steel posts don't go over: past
     // their limit they lean (the pipe bends a little and stays in one piece, box and all).
     const down = !!load.fail?.down, flat = down && load.fail.mode !== 'bends';
     leanTo = !load.fail ? 0 : down ? (flat ? 84 : 2 + 4 * Math.min(1, (load.fail.frac - 1) / .35)) : 1.4 * Math.min(1, load.fail.frac) ** 2;
     built.holes.visible = flat;
+    if (built.k !== was) { lean = leanTo; built.g.rotation.z = -lean * Math.PI / 180; }   // a different fence starts where it belongs; it doesn't swing there from the last one's lean
     const fk = `${flat ? 0 : load.eps}|${load.h}|${load.exposure}`;
     if (fk !== fkey || built.k !== smokeFor) { field = flowField({ eps: flat ? 0 : load.eps, hFt: load.h, exposure: load.exposure }); fkey = fk; smokeFor = built.k; smoke(); }
     speed = .55 + 1.25 * load.V / 58;

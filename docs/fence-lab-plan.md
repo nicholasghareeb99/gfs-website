@@ -152,6 +152,20 @@ Next, in order of how much they change the picture:
   falls. Before that it only leans.
 - Still open: the 90 mph figure for GFS steel uses minimum-grade pipe. Nick to confirm wall and grade.
 
+## Wind from either side (Nick, 2026-11-28)
+
+- The Wind tool has a choice of which face the wind hits: the picket side or the rail side. The
+  fence is turned end for end to face the wind, so it goes over the other way.
+- **What is and isn't worked out.** The push and the load on the posts are the same from either
+  side, so the posts' limit is the same. On the rail side the boards and rails are pulled off
+  their nails. By NDS smooth-nail pull-out values, the nails of a new fence outlast its posts, so
+  the tool does **not** show boards blowing off: it has no honest number for that yet.
+- **To show boards or panels coming off, needed from Nick:** the nails GFS uses (smooth or ring
+  shank, how many per picket at each rail, how many where a rail crosses a box), how a store panel
+  is usually hung on its posts, and what he actually sees fail after a storm. With those, a
+  "boards pulled off the rails" failure can be added on the rail side with real limits. Rusted or
+  loosened nails on an old fence would be the honest way to show it for the store fence.
+
 ## Math check (2026-11-28)
 
 Every tool's numbers were recomputed by hand and against sources. What changed:

@@ -238,11 +238,12 @@ export function windLoad({ V, h, exposure, style }) {
 }
 
 function wind(body) {
-  const st = { style: WSTYLES[0], h: 6, V: 58, exposure: 'B', post: 'gfs' };
+  const st = { style: WSTYLES[0], h: 6, V: 58, exposure: 'B', post: 'gfs', side: 'picket' };
   body.innerHTML = `
     <div class="wind-3d l3d-host" hidden><div class="l3d-wait"><span></span>Loading the fence in 3D…</div></div>
     <div class="lab-ctl vs-ctl">${slider('V', 'Gust speed', 10, 120, 1, st.V, ' mph')}
-      <div id="wPostW" class="wpost">${seg('wpost', Object.values(WPOSTS).map(p => [p.id, p.name]), st.post)}</div></div>
+      <div id="wPostW" class="wpost">${seg('wpost', Object.values(WPOSTS).map(p => [p.id, p.name]), st.post)}
+        <div class="seg" data-name="wside"><button data-v="picket" aria-pressed="true">Wind on the picket side<small>boards press onto the rails</small></button><button data-v="rail" aria-pressed="false">Wind on the rail side<small>wind pulls on the nails</small></button></div></div></div>
     <div class="lab-grid">
       <div class="lab-vis"><canvas class="wind-cv" aria-label="Wind flowing over the fence"></canvas>
         <div class="wind-gauge"><div class="wg-n mono" id="wgN"></div><div class="wg-l">lb on each post</div></div>
@@ -272,6 +273,7 @@ function wind(body) {
       <p><b>Bending at the ground</b>: on a solid fence the push acts at 0.55 h above the ground, so M = F · 0.55 h. On an open fence it acts at mid-height, 0.5 h.</p>
       <p><b>The moving air</b> is the average flow, slowed way down so you can follow it. The open-yard wind grows with height (ASCE 7 power law, 1/7 among houses, 1/9.5 in open country). Air that gets through an open fence is worked out from the pressure loss of a perforated plate (Idelchik, <i>Handbook of Hydraulic Resistance</i>, diagram 8-1) and actuator-disc momentum. Behind a fence less than about 30% open the air rolls back toward the fence (Perera 1981; <i>Scientific Reports</i> 4:6619, 2014). In wind-tunnel work that swirl reaches about 13 fence heights back; turbulence shortens it, so it's drawn 10 heights long among houses and 12 in open country. Further back the slow air recovers as Perera's far-wake formula (as given in <i>Wind Energy Science</i> 1:101, 2016). What can't get through goes over the top, faster.</p>
       <p><b>When the posts give</b>: the push on each post is set against two limits, and the lower one decides. The ground: Broms' method for a short post in firm ground (1,500 psf shear strength), where nothing holds in the top 1½ post widths and below that the ground pushes back with 9 times its strength times the post's width. The post: a 4×4 breaks at about 4,600 psi of bending (average No. 2 southern pine, from the NDS design value); a 2⅜ in Schedule 40 steel pipe starts to bend once the whole section yields at 30,000 psi (the least the fence-pipe standard, ASTM F1083, allows; the wood box around it is not counted). A typical 4×4 in a 2 ft footing tips out of the ground, footing and all, long before the wood breaks. Steel driven 4 ft is held by twice the depth, so the pipe itself is the limit. Steel does not snap: past its limit it bends and the fence is left leaning, with the post and its box in one piece. These are estimates for a new fence in firm ground. Soaked ground holds less, and a wood post loses strength as it rots.</p>
+      <p><b>Which side the wind hits</b>: the push is the same from either side, and so is the load on the posts, so the fence goes over the other way at the same gust. What changes is what holds the boards on. With wind on the picket side the boards press onto the rails and the rails onto the posts. With wind on the rail side the boards and rails are pulled away from the posts, so their nails are loaded in pull-out. By the standard nail values (NDS) the nails of a new fence outlast its posts, so the posts are still shown as the limit; nails that have rusted or worked loose with age would let boards go first, and that is not worked out here.</p>
       <p><b>Ends and corners</b> see higher pressure than the middle of a long run (ASCE 7 Case C), which is why end, corner and gate posts matter most.</p>
       <p class="src">Gust speeds are 3-second gusts. 115 mph is Ohio's ultimate design wind speed for ordinary buildings, a rare event. These are unfactored loads for comparing styles, not a stamped design. Fences in 3D are the Executive App's models: no-dig dog-ear privacy, shadowbox, lattice top, spaced picket, cedar split rail, 3-rail aluminum and galvanized chain link.</p>`)}`;
   const cv = $('.wind-cv', body), { g, fit } = sizedCanvas(cv);
@@ -293,6 +295,7 @@ function wind(body) {
       $('#rFail', body).textContent = down ? { tips: 'Down: posts tipped out', snaps: 'Down: posts snapped', bends: 'Leaning, posts intact' }[fg.mode] : `Holds to about ${at} mph`;
       $('#rFailS', body).textContent = down ? `Past about ${at} mph these posts ${how}. An estimate for firm ground, not a test.` : `Past that these posts ${how}. An estimate for firm ground; soaked ground holds less.`;
       $('#rFailW', body).classList.toggle('bad', down && fg.mode !== 'bends');
+      $('#rFailS', body).textContent += st.side === 'rail' ? ' From this side the wind also pulls the boards and rails away from their nails.' : ' From this side the boards bear on the rails and the rails on the posts, so the posts take all of it.';
     }
     $('#wgN', body).textContent = fmt(r.perPost, 0);
     $('#mQ', body).textContent = `= ${fmt(r.q, 1)} psf at ${st.V} mph`;
@@ -302,13 +305,13 @@ function wind(body) {
     const all = WSTYLES.map(s => { const h = s.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, s.hs[0]); return { s, h, r: windLoad({ ...st, style: s, h }) }; });
     const max = Math.max(...all.map(x => x.r.perFt), 1);
     $('#wBars', body).innerHTML = all.map(x => `<button class="wbar${x.s === st.style ? ' on' : ''}" data-s="${x.s.id}"><span class="wb-n">${esc(x.s.name)} <small>${x.h} ft</small></span><span class="wb-t"><i style="--w:${(x.r.perFt / max * 100).toFixed(1)}%"></i></span><b class="mono">${fmt(x.r.perFt)} <small>lb/ft</small></b></button>`).join('');
-    if (scene) scene.set({ style: st.style.id, h: st.h, bay: st.style.bay, eps: r.eps, V: st.V, exposure: st.exposure, p: r.p, perPost: r.perPost, fail: fg ? { down, mode: fg.mode, frac: st.V / fg.V, V: fg.V, post: st.post } : null });
+    if (scene) scene.set({ style: st.style.id, h: st.h, bay: st.style.bay, eps: r.eps, V: st.V, exposure: st.exposure, p: r.p, perPost: r.perPost, side: st.side, fail: fg ? { down, mode: fg.mode, frac: st.V / fg.V, V: fg.V, post: st.post } : null });
   };
   body.addEventListener('click', e => {
     const s = e.target.closest('[data-s]'); if (s) { st.style = WSTYLES.find(x => x.id === s.dataset.s); if (!st.style.hs.includes(st.h)) st.h = st.style.hs.reduce((a, x) => Math.abs(x - st.h) < Math.abs(a - st.h) ? x : a, st.style.hs[0]); update(); seed(); }
     const p = e.target.closest('.presets [data-v]'); if (p) { st.V = +p.dataset.v; $('[name=V]', body).value = st.V; update(); }
   });
-  bindSeg(body, (n, v) => { if (n === 'h') st.h = +v; if (n === 'exposure') st.exposure = v; if (n === 'wpost') st.post = v; update(); });
+  bindSeg(body, (n, v) => { if (n === 'h') st.h = +v; if (n === 'exposure') st.exposure = v; if (n === 'wpost') st.post = v; if (n === 'wside') st.side = v; update(); });
   $('[name=V]', body).oninput = e => { st.V = +e.target.value; update(); };
 
   // ── flow picture without 3D: the same smoke lines as the 3D, side on ──
