@@ -18,10 +18,10 @@ let app, root, D, current = null, stop = null;
 
 const TOOLS = [
   { id: 'dig', name: 'No-dig vs dug', line: 'Watch both crews put in the same fence, and see how much dirt a dug fence leaves in the yard',
-    how: [['tap', 'Tap <b>Play install day</b> to watch both crews work, or slide <b>Install day</b> to any moment.'], ['slide', 'Slide <b>Your fence</b> to the length of your fence.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.'], ['look', 'Watch the dirt piles and concrete bags in the dug yard. The no-dig yard has none.']],
+    how: [['tap', 'The install day plays by itself. Tap <b>Pause</b>, or slide <b>Install day</b> to any moment.'], ['slide', 'Slide <b>Your fence</b> to the length of your fence.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.'], ['look', 'Watch the dirt piles and concrete bags in the dug yard. The no-dig yard has none.']],
     take: 'No holes, no concrete, no dirt left in the yard. Steel posts driven 4 ft, and the lawn left as it was.' },
   { id: 'build', name: 'Our build vs prefab', line: 'One 8 ft section, side by side, then watch 25 years go by',
-    how: [['slide', 'Slide <b>Years</b>, or tap <b>Play 25 years</b>, to age both fences.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
+    how: [['slide', 'The years play by themselves. Tap <b>Pause</b>, or slide <b>Years</b> to any age.'], ['tap', 'Switch <b>Wood</b> or <b>Vinyl</b>, how the prefab posts are set, and a flat or sloped yard.'], ['tap', 'Tap a part in the lists below to point it out.'], ['drag', 'Drag sideways on a yard to turn it. Pinch to zoom, double-tap to reset.']],
     take: 'Steel driven 4 ft has no wood in the ground to rot and nothing above the frost line to heave. The flat 2×4 across the top keeps the top line straight.' },
   { id: 'frost', name: 'Frost & posts', line: 'What Toledo winters do to dug posts, and why driven steel stays put',
     how: [['tap', 'Pick <b>Toledo</b> or <b>Michigan</b>, and a <b>typical</b> or <b>hard</b> winter.'], ['look', 'The winters play by themselves. Watch the footings creep up a little more each spring.'], ['slide', 'Tap <b>Pause</b>, or slide to any <b>month</b> and <b>winter</b>.'], ['drag', 'Drag sideways on the yard to turn it. Pinch to zoom, double-tap to reset.']],
@@ -146,6 +146,9 @@ function liveWrap(body) {
   kids.forEach((k, i) => { if (i > at && k.matches('.lab-ctl, .lab-grid, .vs-grid') && !k.matches('.lab-card')) end = i; });
   const live = document.createElement('div'); live.className = 'lab-live';
   kids[at].before(live); live.append(...kids.slice(at, end + 1));
+  // what the tool is there to say, right under the picture and its controls, not at the foot of the page
+  const t = TOOLS.find(x => x.id === current);
+  if (t) { const pt = document.createElement('p'); pt.className = 'lab-point'; pt.innerHTML = `<b>Why it matters</b>${esc(t.take)}`; live.after(pt); }
 }
 function homeHTML() {
   const tile = (t, i) => `<button class="lab-card lab-tile${t.more ? ' more' : ''}" data-tool="${t.id}">
@@ -966,7 +969,9 @@ function build(body) {
   if (webglOK()) {
     const host = $('.build-3d', body); host.hidden = false; $('.vs-grid', body).hidden = true;
     $('#vsNote', body).textContent = 'Both seen from the rail side, with the ground cut open at the posts. How far store posts move varies from yard to yard; this is a typical case, drawn at true size. Winters show as frost in the ground and snow on the lawn.';
-    import('./build3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); yard3d = m.createBuildScene(host, { specs: app.live?.specs }); body.__build = yard3d; draw(); })
+    import('./build3d.mjs').then(m => { if (!live) return; $('.l3d-wait', host).remove(); yard3d = m.createBuildScene(host, { specs: app.live?.specs }); body.__build = yard3d; draw();
+      // the years start rolling by themselves; touching the slider or the button takes over
+      setTimeout(() => { if (live && !st.playing && st.years === 0 && !reduced.matches) play(); }, 1400); })
       .catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; yard3d = null; draw(); });
   }
   draw();
@@ -1204,6 +1209,7 @@ function dig(body) {
       if (!live) return;
       $('.l3d-wait', host).remove();
       scene = m.createDigScene(host, { len: st.len, specs: app.live?.specs }); body.__dig = scene; dur = m.DUR; paint();
+      setTimeout(() => { if (live && !st.playing && st.p === 0 && !reduced.matches) play(); }, 1400);   // the install day plays by itself
     }).catch(() => { if (!live) return; host.hidden = true; $('.vs-grid', body).hidden = false; pile.hidden = false; scene = null; paint(); });
   }
   let dur = 9000;

@@ -169,7 +169,8 @@ export function createBuildScene(host, { specs } = {}) {
         } else if (loose && y >= loose[1]) {
           // one nail left at the top: it hangs crooked and a little low
           const a = (i % 2 ? 1 : -1) * Math.min(.07, (y - loose[1]) * .035);
-          M.makeTranslation(x, yb + top - .5 * IN, -(PANEL.picketTIn + .06) * IN).multiply(new THREE.Matrix4().makeRotationZ(a))   // loose, so it hangs proud of its neighbours, not through them.multiply(new THREE.Matrix4().makeTranslation(0, -top, 0));
+          // loose, so it hangs proud of its neighbours, not through them
+          M.makeTranslation(x, yb + top - .5 * IN, -(PANEL.picketTIn + .06) * IN).multiply(new THREE.Matrix4().makeRotationZ(a)).multiply(new THREE.Matrix4().makeTranslation(0, -top, 0));
         } else M.makeTranslation(x, yb, 0);
         pickets.setMatrixAt(i, M);
       });
@@ -196,8 +197,13 @@ export function createBuildScene(host, { specs } = {}) {
     L.box.set(vinyl ? 'Vinyl post sleeved over the steel' : 'Wood box on the steel'); if (vinyl) L.box.show(y < 1.5);
     const yrs = Math.floor(y), win = m != null && m < 5;
     const off = vinyl ? 0 : LOOSE.filter(l => l[2] && y >= l[2]).length;
-    status.pre.textContent = y < .5 ? 'Looks fine the day it goes in.' : down ? `Down at ${FALL_AT[b.set.id]} years. The posts rotted through at the soil line and a storm took it over.` : [tilt > 1.5 ? `leaning ${Math.round(tilt)}°: the posts are rotting through at the soil line` : '', off ? `${off} picket${off > 1 ? 's' : ''} off` : '', lifts[1] > .4 * IN ? `posts pushed up by frost${Math.abs(lifts[0] - lifts[1]) > .3 * IN ? ', unevenly, so the panel racks' : ''}` : '', !vinyl && decay(b.set, y) > .25 ? 'decay at the soil line' : '', !vinyl && sg > .5 * IN ? 'panel sagging' : '', vinyl && yellow(y) > .4 ? 'vinyl yellowing' : '', state.slope ? 'gap under the panel' : '', win ? 'winter' : ''].filter(Boolean).join(' · ').replace(/^./, c => c.toUpperCase()) || 'Starting to move.';
-    status.gfs.textContent = y < .5 ? (state.slope ? 'Built to follow the ground, post to post.' : 'Straight on day one.') : vinyl ? 'Still straight, square and white.' : y >= 16 ? 'Still standing straight on its steel posts. The wood is gray, and a picket or two may need replacing by now.' : weather(y) > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
+    // short enough to read in a narrow view: the worst thing first, then at most one more
+    const uneven = Math.abs(lifts[0] - lifts[1]) > .3 * IN;
+    const woes = [tilt > 1.5 ? `leaning ${Math.round(tilt)}°, posts rotting at the soil line` : '', off ? `${off} picket${off > 1 ? 's' : ''} off` : '',
+      !vinyl && tilt <= 1.5 && decay(b.set, y) > .25 ? 'decay at the soil line' : '', lifts[1] > .4 * IN && tilt <= 1.5 ? (uneven ? 'frost has lifted the posts unevenly' : 'posts pushed up by frost') : '',
+      !vinyl && sg > .5 * IN && tilt <= 1.5 ? 'panel sagging' : '', vinyl && yellow(y) > .4 ? 'vinyl yellowing' : '', state.slope ? 'gap under the panel' : ''].filter(Boolean).slice(0, 2);
+    status.pre.textContent = y < .5 ? 'Looks fine the day it goes in.' : down ? `Down at ${FALL_AT[b.set.id]} years. The posts rotted through at the soil line.` : woes.length ? (woes.join(' · ').replace(/^./, c => c.toUpperCase()) + '.') : 'Starting to move.';
+    status.gfs.textContent = y < .5 ? (state.slope ? 'Built to follow the ground, post to post.' : 'Straight on day one.') : vinyl ? 'Still straight, square and white.' : y >= 16 ? 'Still standing straight on steel. The wood is gray; a picket or two may need replacing.' : weather(y) > .5 ? 'Still straight and tight. The wood has weathered to gray.' : 'Still straight and tight.';
     st.dirty();
     return yrs;
   }

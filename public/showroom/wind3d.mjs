@@ -147,7 +147,7 @@ export function createWindScene(host, { specs } = {}) {
     L.over.move(V3(h * 1.3, h * 1.6)); L.over.show(field.open < .5 && !flat);
     L.swirl.move(V3(h * 1.9, h * .5)); L.swirl.show(field.swirl > .5);
     L.slow.move(V3(h * 1.9, h * .45)); L.slow.show(field.swirl <= .5 && !flat);
-    if (!prev || prev.h !== h || prev.bay !== load.bay) st.frameView('main', { cx: h * 1.4, cy: h * 1.05, w: h * 4.6, h: h * 2.5, cz: zS() }, prev ? 500 : 0);
+    if (!prev || prev.h !== h || prev.bay !== load.bay) st.frameView('main', (host.clientWidth || innerWidth) < 700 ? { cx: h * .95, cy: h * .95, w: h * 3.3, h: h * 2.3, cz: zS() } : { cx: h * 1.4, cy: h * 1.05, w: h * 4.6, h: h * 2.5, cz: zS() }, prev ? 500 : 0);   // closer on a phone, so the fence reads
     st.dirty();
   }
   const fmt1 = v => (Math.round(v * 10) / 10).toFixed(1);

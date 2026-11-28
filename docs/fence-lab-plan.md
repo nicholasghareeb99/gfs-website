@@ -126,6 +126,19 @@ Next, in order of how much they change the picture:
 - **Grade Lab is two steps**: pick a yard, tap "Build it the GFS way" (smooths the top line, then
   rakes dirt in). The finger modes, kickboard, grading and undo are under "More".
 
+## Getting the point across (2026-11-28, third round)
+
+- **The takeaway sits under the picture.** Each tool's "Why it matters" line used to be at the
+  very bottom, after the lists and the math. It is now right under the picture and its controls
+  (`.lab-point`, added by `liveWrap()`).
+- **No-dig vs dug and Our build vs prefab play by themselves** when opened, like Frost & posts.
+  Touching the slider or the button takes over. Gate sag does not: its opening state is our own
+  braced gate, which is not the comparison.
+- **Status lines are short**: the worst thing first and at most one more, so they fit a
+  half-width phone view.
+- **Wind on a phone** frames the fence closer.
+- Fixed in this round: a loose picket in the ageing run was drawn pointing up into the sky.
+
 ## Math check (2026-11-28)
 
 Every tool's numbers were recomputed by hand and against sources. What changed:
