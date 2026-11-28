@@ -108,6 +108,12 @@ Next, in order of how much they change the picture:
 - Still to draw better: the receiver's back side and the spring are simple; the lag heads are
   plain hex.
 
+## Settled with Nick
+
+- **Line posts** are 2½ in nominal, 2.375 in actual (2026-11-27). The Lab and the app's models
+  already draw 2.375 in, and the customer copy says "2⅜ in across". The brochure calls the same
+  post 2½ in. Both are right; nothing to change.
+
 ## How to check work
 
 - `npm test` : unit tests, including the math behind each tool.
