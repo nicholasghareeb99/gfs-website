@@ -9,13 +9,18 @@
 // 16-18 Nov 2026: the default export was an object ({formSubmitted}), the site was deployed through the
 // API, and every submission failed with "e.default is not a function": leads stayed in Netlify Forms and
 // never reached the office. The function below, with formSubmitted attached, works both ways.
+import { careersRecord } from '../lib/careers-intake.mjs';
+import { contract as careersContract } from '../../public/assets/js/careers-contract.mjs';
 import { estimateForIntake, readPricingProject } from './ballpark-price.mjs';
 import { formatRange, parseRange } from '../../public/assets/js/ballpark-pricing-rules.mjs';
 
 const text=(v,n)=>String(v??'').trim().slice(0,n);
 const number=(v,max=100000)=>{const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=max?n:0;};
 export function intakeRecord(data,now=new Date()){
- if(!data||data.gfs_contract!=='gfs-intake-v1'||String(data['bot-field']??'').trim())return null;
+ if(data&&(data.gfs_contract===careersContract||data.intake_kind==='careers'))return careersRecord(data,now);
+ if(!data||String(data['bot-field']??'').trim())return null;
+ if(data.gfs_contract!=='gfs-intake-v1')return null;
+ if(data.source==='careers')throw Error('Invalid intake source');
  if(!['estimate','ballpark','booking'].includes(data.intake_kind))throw Error('Invalid intake type');
  if(!/^[a-zA-Z0-9_-]{16,80}$/.test(data.submission_id||''))throw Error('Invalid intake reference');
  // Do not turn a truncated click, ad or parent-receipt ID into a different ID.
@@ -106,6 +111,7 @@ export async function deliverIntake(data,{fetcher=fetch,env=process.env,project=
   failure='HTTP '+response.status;
   if(response.status<500&&response.status!==408&&response.status!==429)break;
  }
+ if(intake.record.source==='careers')throw Error('Careers application could not sync to Firestore. It remains in Netlify Forms for recovery.');
  throw Error('Intake '+intake.id+' could not sync to Firestore ('+failure+'). It remains in Netlify Forms for recovery.');
 }
 const report=result=>{if(!result.ignored)console.info('GFS intake synced',result.id,result.duplicate?'already present':'created');};
@@ -114,10 +120,14 @@ async function handler(request){
  let body;try{body=await request.json();}catch{return new Response('Bad request',{status:400});}
  const payload=body&&typeof body.payload==='object'&&body.payload?body.payload:null;
  const data=payload?(payload.data&&typeof payload.data==='object'?payload.data:payload.gfs_contract?payload:null):body&&body.data;
- if(!data||typeof data!=='object'){console.warn('GFS intake: unexpected request shape, keys:',Object.keys(body||{}).join(','),'payload keys:',Object.keys(payload||{}).join(','));return new Response('Bad request',{status:400});}
- report(await deliverIntake(data));
+ if(!data||typeof data!=='object'){console.warn('GFS intake: unexpected request shape');return new Response('Bad request',{status:400});}
+ const result=await deliverIntake(data);
+ if(data.gfs_contract!==careersContract)report(result);
  return new Response(null,{status:204});
 }
 // Registered-handler call (Netlify build): the submission is event.data.
-handler.formSubmitted=async event=>{report(await deliverIntake(event.data));};
+handler.formSubmitted=async event=>{
+ const result=await deliverIntake(event.data);
+ if(event.data?.gfs_contract!==careersContract)report(result);
+};
 export default handler;

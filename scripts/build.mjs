@@ -46,14 +46,27 @@ function walk(dir, out = []) {
 }
 
 let pages = 0;
+function withCareersLinks(html) {
+  const link = '<a href="/careers/">Careers</a>';
+  const add = (all, start, end) => start.includes('href="/careers/"') ? all : start + '<li>' + link + '</li>\n' + end;
+  return html
+    .replace(/(<ul class="nav-links">[\s\S]*?)(<\/ul>\s*<div class="nav-cta-group">)/,
+      (all, start, end) => start.includes('href="/careers/"') ? all : start + '<li class="nav-opt">' + link + '</li>\n' + end)
+    .replace(/(<div class="mobile-drawer" id="mobileDrawer">[\s\S]*?<ul>[\s\S]*?)(<\/ul>)/, add)
+    .replace(/<footer class="footer">[\s\S]*?<\/footer>/, footer => footer.includes('href="/careers/"') ? footer :
+      footer.replace(/(<div class="project-footer">[\s\S]*?)(<\/div>)/, '$1' + link + '$2'));
+}
+
 for (const file of walk('dist')) {
-  const html = fs.readFileSync(file, 'utf8');
+  const source = fs.readFileSync(file, 'utf8');
+  const html = withCareersLinks(source);
   const next = html.replace(RUN, run => {
     const dir = '/' + path.relative('dist', path.dirname(file)).split(path.sep).filter(Boolean).join('/');
     const files = [...run.matchAll(new RegExp(LINK.source, 'g'))].map(m => path.posix.resolve(dir, m[1]));
     return `<link rel="stylesheet" href="${bundle(files)}">`;
   });
-  if (next !== html) { fs.writeFileSync(file, next); pages++; }
+  if (next !== source) fs.writeFileSync(file, next);
+  if (next !== html) pages++;
 }
 // 3. In <head>, local stylesheets are often split by preloads or JSON-LD. Those
 //    tags carry no CSS, so neighbouring stylesheets can be fetched as one file in
