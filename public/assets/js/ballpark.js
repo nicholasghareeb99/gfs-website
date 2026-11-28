@@ -1,4 +1,4 @@
-import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, isChainLink, isOfferedStyle, positiveRate, priceBand, pricingRows } from './ballpark-pricing-rules.mjs';
+import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectionSize, isChainLink, isOfferedStyle, positiveRate, priceBand, pricingRows, roundPrice } from './ballpark-pricing-rules.mjs';
 
 // Nov 1 pixel audit. Display selection only; stored originals are retained.
 // Match exact legacy files so later staff uploads remain authoritative.
@@ -1501,13 +1501,13 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     if (state.removeOldFence && !existingFenceMaterialLabel()) return null;
     // Ballpark assumes removal of the same run length being installed
     const removalCost = state.removeOldFence
-      ? state.linearFeet * removalRateFor(existingRemovalType())
+      ? roundPrice(state.linearFeet * removalRateFor(existingRemovalType()))
       : 0;
     const fenceCost = parts.reduce((sum, part) => sum + part.fenceCost, 0);
     const gateCost = parts.reduce((sum, part) => sum + part.gateCost, 0);
     const total = fenceCost + gateCost + removalCost;
 
-    return priceBand(total);
+    return priceBand(roundPrice(total));
   }
 
   function existingFenceMaterialLabel(value = state.existingFenceMaterial) {
@@ -4191,7 +4191,7 @@ import { DEFAULT_REMOVAL_RATES, canPriceHeight, formatRange, gateCost, getSectio
     // Round the gross run to full sections, then add gate charges.
     const rounding = roundToSections(part.feet, fence.name);
     const gates = gateCost(part.singleGates, part.doubleGates, fence.singleGate, fence.doubleGate);
-    return gates === null ? null : { fenceCost: rounding.billable * fence.perFoot, gateCost: gates };
+    return gates === null ? null : { fenceCost: roundPrice(rounding.billable * fence.perFoot), gateCost: gates };
   }
   function gateWords(single, double) {
     const bits = [];
