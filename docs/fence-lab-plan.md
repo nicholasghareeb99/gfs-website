@@ -139,6 +139,19 @@ Next, in order of how much they change the picture:
 - **Wind on a phone** frames the fence closer.
 - Fixed in this round: a loose picket in the ageing run was drawn pointing up into the sky.
 
+## Nick, 2026-11-28: "the box and metal post should remain intact"
+
+- **Wind never draws GFS's box or steel post failing.** Past its estimated limit the GFS fence is
+  drawn leaning a few degrees (2° to 6°), labelled "Leaning. Steel posts and boxes intact". Steel
+  yields, it doesn't snap, so a lean is what the math describes. It used to fold to 40°.
+- **The fence that goes over is no longer drawn as ours.** With "Typical 4×4, 2 ft deep" chosen,
+  solid privacy is drawn on plain 4×4 posts (the app's dug-post model), and its concrete footings
+  come out of the lawn with it.
+- **The ageing run has a real break.** At 19 or 21 years the store posts snap at the soil line all
+  at once: the stubs stay in the ground with splintered tops and the fence drops, faster as it
+  falls. Before that it only leans.
+- Still open: the 90 mph figure for GFS steel uses minimum-grade pipe. Nick to confirm wall and grade.
+
 ## Math check (2026-11-28)
 
 Every tool's numbers were recomputed by hand and against sources. What changed:

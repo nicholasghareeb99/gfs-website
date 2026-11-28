@@ -41,10 +41,12 @@ export const decay = (set, y) => set?.decayFrom ? clamp((y - set.decayFrom) / 8,
 export function lean(set, y) {
   if (!set?.decayFrom) return 0;
   const d = decay(set, y), full = set.decayFrom + 8, slow = LEAN_DEG * clamp((d - .35) / .65, 0, 1) ** 1.6 + Math.max(0, y - full) * .7;
-  const fall = clamp((y - FALL_AT[set.id]) / .14, 0, 1), k = fall * fall * (3 - 2 * fall);
+  // the break is sudden: nothing, then it goes, faster as it falls
+  const fall = clamp((y - FALL_AT[set.id]) / .22, 0, 1), k = fall * fall;
   return slow + (DOWN_DEG - slow) * k;
 }
-export const fallen = (set, y) => !!set?.decayFrom && y >= FALL_AT[set.id] + .14;
+export const fallen = (set, y) => !!set?.decayFrom && y >= FALL_AT[set.id] + .22;
+export const snapped = (set, y) => !!set?.decayFrom && y >= FALL_AT[set.id];
 // store pickets working loose: [which picket, the year it goes crooked, the year it drops off (or 0)]
 export const LOOSE = [[4, 11, 0], [12, 13, 17], [8, 14.5, 15.5], [2, 16.5, 18]];
 export const weather = y => clamp(y / 4, 0, 1);        // bare pressure-treated pine goes silver-gray in a few years

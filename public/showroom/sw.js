@@ -2,7 +2,7 @@
    Shell: network first so updates arrive, cache as fallback for no-signal yards.
    Brochure pages, photos and fonts: cache first (they are versioned by file name).
    "Save for offline" in the app fills gfs-showroom-media-v1 ahead of time. */
-const SHELL = 'gfs-showroom-shell-v28', MEDIA = 'gfs-showroom-media-v1';
+const SHELL = 'gfs-showroom-shell-v29', MEDIA = 'gfs-showroom-media-v1';
 const CORE = ['./', 'index.html', 'app.css?v=16', 'app.js?v=11', 'ui.mjs', 'photos.mjs', 'brochure.mjs', 'styles.mjs', 'ar.mjs', 'permits.mjs', 'blueprint.mjs', 'visit.mjs', 'reviews.mjs', 'siteplan.mjs', 'lab.mjs', 'lab3d-ok.mjs', 'frost-plan.mjs', 'build-plan.mjs', 'gate-plan.mjs', 'vinyl-plan.mjs', 'wind-plan.mjs', 'gradelab.mjs', 'help.mjs', 'data.json', 'logo-white.png', 'icon-192.png', 'manifest.webmanifest',
   '/assets/fonts/archivo-latin-wght-normal.woff2', '/assets/fonts/source-sans-3-latin-wght-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-500-normal.woff2', '/assets/fonts/ibm-plex-mono-latin-400-normal.woff2'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(SHELL).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });

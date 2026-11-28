@@ -9,7 +9,7 @@
 // Red arrows on the face show the push from ASCE 7; their length goes with lb per sq ft.
 import { THREE, IN, createStage, fence, reveal, solids, overlaps } from './lab3d.mjs';
 import { flowField, streamlines } from './wind-plan.mjs';
-import { STYLE_ND } from './dig-plan.mjs';
+import { STYLE, STYLE_ND } from './dig-plan.mjs';
 
 // the app models drawn for each style in the Wind tool
 const MODELS = {
@@ -21,7 +21,9 @@ const MODELS = {
   alu: { name: () => 'Aluminum 3-Rail 4ft' },
   chain: { name: h => `Galv Chain Link ${h}ft` }
 };
-export const windModel = (id, h) => { const m = MODELS[id]; return m && { name: m.name(h), noDig: m.noDig, extra: m.extra }; };
+// post: 'store' draws solid privacy on ordinary 4×4 posts (the app's dug-post model) instead of GFS's
+// boxed steel, so the fence that goes over is not drawn as ours
+export const windModel = (id, h, post) => { const m = MODELS[id]; if (!m) return m; const dug = id === 'privacy' && post === 'store'; return { name: dug ? STYLE : m.name(h), noDig: dug ? false : m.noDig, extra: m.extra }; };
 
 const BAYS = 3, Z0 = -1.5;
 // fittings that wrap or plug into a post or rail by design (bands, caps, rails into punched or mortised posts)
@@ -32,13 +34,14 @@ export function createWindScene(host, { specs } = {}) {
   const st = createStage(host, { views: [{ id: 'main' }], soilDepth: 12, width: 320, back: 160, home: { yaw: -.4, pitch: .1 } });
   const R = st.root;
   let built = null, field = null, fkey = '', smokeFor = '', S = null, live = true, lean = 0, leanTo = 0;
+  const concrete = new THREE.MeshStandardMaterial({ color: 0xa9a7a1, roughness: .95 }), holeMat = new THREE.MeshBasicMaterial({ color: 0x1d140c });
 
   // ── the fence ──
-  function build(style, h, bay) {
-    const k = style + '|' + h;
+  function build(style, h, bay, post) {
+    const k = style + '|' + h + '|' + (post === 'store' ? 'store' : '');
     if (built?.k === k) return;
-    if (built) { R.remove(built.g); built.F.lib?.dispose?.(); built.g.traverse(o => o.geometry?.dispose?.()); }
-    const M = windModel(style, h), pts = Array.from({ length: BAYS + 1 }, (_, i) => [0, 0, Z0 - i * bay]);
+    if (built) { R.remove(built.g, built.holes); built.F.lib?.dispose?.(); built.g.traverse(o => o.geometry?.dispose?.()); built.holes.traverse(o => o.geometry?.dispose?.()); }
+    const M = windModel(style, h, post), pts = Array.from({ length: BAYS + 1 }, (_, i) => [0, 0, Z0 - i * bay]);
     const F = fence(M.name, 0, 0, { h, specs, pts, noDig: M.noDig, extra: M.extra });
     // the no-dig steel runs up inside each box; under the ground it's hidden (the yard isn't cut here)
     if (M.noDig) reveal(F.parts.filter(p => p.geo === 'CylinderGeometry' && p.kind === 'post'), () => 0);
@@ -47,7 +50,15 @@ export function createWindScene(host, { specs } = {}) {
     const box = new THREE.Box3(); for (const p of F.parts) if (p.mesh.visible && !p.hidden) box.union(p.box);
     g.updateMatrixWorld(true); box.union(new THREE.Box3().setFromObject(F.group));
     const posts = F.parts.filter(p => POSTISH.test(p.kind || '')).map(p => p.box);
-    built = { k, g, F, top: box.max.y, face: box.min.x, back: box.max.x, posts, bay };
+    // ordinary posts stand in a 10 in concrete plug 2 ft deep. It is under the lawn until the fence goes
+    // over; then it comes out of the ground with its post, and leaves its hole behind.
+    const holes = new THREE.Group(); holes.visible = false; R.add(holes);
+    if (post === 'store') for (const b of posts) {
+      const cx = (b.min.x + b.max.x) / 2, cz = (b.min.z + b.max.z) / 2;
+      const plug = new THREE.Mesh(new THREE.CylinderGeometry(5 * IN, 5 * IN, 2, 20).translate(0, -1, 0), concrete); plug.position.set(cx, -.01, cz); plug.castShadow = plug.receiveShadow = true; plug.userData.noCheck = true; g.add(plug);
+      const hole = new THREE.Mesh(new THREE.CircleGeometry(5.4 * IN, 20).rotateX(-Math.PI / 2), holeMat); hole.position.set(cx, .02, cz); hole.userData.noCheck = true; holes.add(hole);
+    }
+    built = { k, g, F, top: box.max.y, face: box.min.x, back: box.max.x, posts, bay, holes };
   }
   // the app's lattice-top trim board sits ¼ in into the face of each post: set it just in front
   function clearPosts(F) {
@@ -132,17 +143,19 @@ export function createWindScene(host, { specs } = {}) {
   // load: { style, h, bay, eps, V, exposure, p (psf), perPost (lb) }
   function set(load) {
     const prev = S; S = load;
-    build(load.style, load.h, load.bay);
-    // a fence that has gone over no longer stands in the wind's way
+    build(load.style, load.h, load.bay, load.fail?.post);
+    // A fence that has gone over no longer stands in the wind's way. Steel posts don't go over: past
+    // their limit they lean (the pipe bends a little and stays in one piece, box and all).
     const down = !!load.fail?.down, flat = down && load.fail.mode !== 'bends';
-    leanTo = !load.fail ? 0 : down ? (flat ? 82 : 40) : 1.4 * Math.min(1, load.fail.frac) ** 2;
+    leanTo = !load.fail ? 0 : down ? (flat ? 84 : 2 + 4 * Math.min(1, (load.fail.frac - 1) / .35)) : 1.4 * Math.min(1, load.fail.frac) ** 2;
+    built.holes.visible = flat;
     const fk = `${flat ? 0 : load.eps}|${load.h}|${load.exposure}`;
     if (fk !== fkey || built.k !== smokeFor) { field = flowField({ eps: flat ? 0 : load.eps, hFt: load.h, exposure: load.exposure }); fkey = fk; smokeFor = built.k; smoke(); }
     speed = .55 + 1.25 * load.V / 58;
     placeArrows(load.p);
     const h = load.h;
     L.push.set(`${fmt1(load.p)} lb per sq ft`); L.push.move(V3(built.face - Math.min(4.2, .35 + load.p * .16) * Math.max(.7, h / 6) * .5, h * .02));
-    L.post.set(down ? { tips: 'Posts tipped out of the ground', snaps: 'Posts snapped at the ground', bends: 'Steel posts bent over' }[load.fail.mode] : `${Math.round(load.perPost).toLocaleString()} lb on each post`); L.post.show(!down); L.down.set(L.post.el.textContent); L.down.show(down); L.down.move(V3(built.back + .4, .9, Z0 - built.bay));
+    L.post.set(down ? { tips: 'Posts and footings tipped out of the ground', snaps: 'Posts snapped at the ground', bends: 'Leaning. Steel posts and boxes intact' }[load.fail.mode] : `${Math.round(load.perPost).toLocaleString()} lb on each post`); L.post.show(!down); L.down.set(L.post.el.textContent); L.down.show(down); L.down.move(V3(built.back + .4, .9, Z0 - built.bay));
     L.push.show(!flat); L.post.move(V3((built.face + built.back) / 2, built.top + .15, Z0 - built.bay));
     L.over.move(V3(h * 1.3, h * 1.6)); L.over.show(field.open < .5 && !flat);
     L.swirl.move(V3(h * 1.9, h * .5)); L.swirl.show(field.swirl > .5);
@@ -173,6 +186,6 @@ export function createWindScene(host, { specs } = {}) {
         || (a.kind === 'rail' && b.kind === 'rail' && built.k.startsWith('split'))   // split-rail tenons share the mortise
         || (a.kind === 'picket' && b.kind === 'rail' && built.k.startsWith('alu')) });   // aluminum pickets run through punched rails
     },
-    dispose() { live = false; st.dispose(); built?.F.lib?.dispose?.(); red.dispose(); shaft.dispose(); head.dispose(); airMat.dispose(); air.children.forEach(m => m.geometry.dispose()); }
+    dispose() { live = false; st.dispose(); built?.F.lib?.dispose?.(); concrete.dispose(); holeMat.dispose(); red.dispose(); shaft.dispose(); head.dispose(); airMat.dispose(); air.children.forEach(m => m.geometry.dispose()); }
   };
 }

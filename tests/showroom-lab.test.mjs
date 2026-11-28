@@ -95,7 +95,8 @@ test('our build vs prefab: the store fence leans as its posts rot and goes down;
     assert.equal(B.lean(set, 5), 0);                                     // sound for the first years
     let last = 0; for (let y = 0; y <= 25; y += .05) { const a = B.lean(set, y); assert.ok(a >= last - 1e-9, `lean goes back at ${y}`); last = a; }
     assert.ok(B.lean(set, B.FALL_AT[set.id] - .01) < 12, 'still up, leaning, the day before');
-    assert.equal(B.fallen(set, B.FALL_AT[set.id] - .01), false); assert.equal(B.fallen(set, B.FALL_AT[set.id] + .2), true);
+    assert.equal(B.fallen(set, B.FALL_AT[set.id] - .01), false); assert.equal(B.fallen(set, B.FALL_AT[set.id] + .3), true);
+    assert.equal(B.snapped(set, B.FALL_AT[set.id] - .01), false); assert.equal(B.snapped(set, B.FALL_AT[set.id]), true);   // it breaks all at once
     near(B.lean(set, 25), B.DOWN_DEG, 1e-9);
     assert.ok(B.FALL_AT[set.id] >= 15 && B.FALL_AT[set.id] >= set.decayFrom + 8, 'not before the published 15 year life, nor before the rot is through');
   }
