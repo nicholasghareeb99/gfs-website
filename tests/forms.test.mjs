@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { declaredForms, loadLeads, read } from './helpers.mjs';
 import { intakeRecord } from '../netlify/functions/submission-created.mjs';
+import { applicationFormFields } from '../public/assets/js/careers-form.mjs';
 
 // Sent with every request but not form fields: Netlify's own routing and
 // spam fields, and `status`, which the intake function sets itself.
@@ -35,7 +36,7 @@ test('the four hidden forms exist and put the subject first', () => {
     const visible = fields.filter(field => field !== 'form-name' && field !== 'bot-field');
     assert.equal(visible[0], 'subject', name + ' starts with the subject');
     if (name === 'gfs-careers') {
-      assert.deepEqual(visible, ['subject', 'gfs_contract', 'intake_kind', 'submission_id', 'application']);
+      assert.deepEqual(visible, ['subject', 'gfs_contract', 'intake_kind', 'submission_id', ...applicationFormFields]);
     } else {
       for (const needed of ['name', 'phone', 'best_way_to_reach', 'summary', 'notes', 'submission_id']) assert.ok(fields.includes(needed), name + ' declares ' + needed);
     }

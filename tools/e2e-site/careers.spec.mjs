@@ -7,7 +7,7 @@ import {intakeRecord} from '../../netlify/functions/submission-created.mjs';
 
 for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], ['crew', 'Subcontractor crew', 'foot'],
   ['sales', 'Salesperson', 'commission'], ['other', 'General / other', 'hourly']]) {
-  test('Careers application for ' + label, async ({page, context}, info) => {
+  test('Careers application for ' + label, async ({page, context, browserName}, info) => {
     const posts = [];
     const redirects = [];
     await context.route('**/*', async route => {
@@ -20,9 +20,11 @@ for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], [
       if (request.method() === 'POST') {
         if (url.pathname !== '/_netlify-forms.html' || url.search) return route.abort();
         const fields = Object.fromEntries(new URLSearchParams(request.postData()));
-        posts.push(intakeRecord(fields));
+        assert.equal(Object.hasOwn(fields, 'application'), false);
+        posts.push(intakeRecord({...fields, ip: '192.0.2.44', user_agent: 'Synthetic Agent', referrer: null}));
         if (role === 'installer' && posts.length === 1) return route.fulfill({status: 503});
-        if (role === 'installer') return route.fulfill({status: 303, headers: {location: '/careers/'}});
+        // Playwright's WebKit interception cannot fulfill a 3xx response.
+        if (role === 'installer' && browserName === 'chromium') return route.fulfill({status: 303, headers: {location: '/careers/'}});
         return route.fulfill({status: 200, body: 'Fixture receipt'});
       }
       return route.continue();
@@ -37,6 +39,8 @@ for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], [
     await expect(page.getByRole('heading', {name: 'What kind of work?'})).toBeVisible();
     await expect(page.locator('progress')).toHaveAttribute('value', '1');
     await expect(page.getByRole('button', {name: 'Back', exact: true})).toBeDisabled();
+    const next = page.getByRole('button', {name: 'Next', exact: true});
+    await expect(next.locator('[aria-hidden="true"]')).toHaveText('→');
     await go();
     await expect(page.getByRole('alert')).toContainText('Choose');
     await choose('roles', role);
@@ -76,6 +80,11 @@ for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], [
       await page.getByRole('button', {name: 'Add a job'}).click();
       await fill('employment-0-company', 'Test Employer');
       await fill('employment-0-role', 'Installer');
+      const start = control('employment-0-start');
+      await expect(start).toHaveAttribute('placeholder', 'YYYY-MM');
+      await go();
+      await expect(page.getByRole('alert')).toContainText('YYYY-MM');
+      await expect(start).toBeFocused();
       await fill('employment-0-start', '2020-01');
       await fill('employment-0-duties', 'Layout');
       await choose('employment-0-mayContact', 'no');
@@ -94,6 +103,10 @@ for (const [role, label, unit] of [['installer', 'Fence installer', 'hourly'], [
       await go();
     }
     await control('pay-' + role + '-unit').selectOption(unit);
+    const amount = control('pay-' + role + '-amount');
+    await go();
+    await expect(amount).toBeFocused();
+    await expect(amount).toHaveAttribute('aria-invalid', 'true');
     await fill('pay-' + role + '-amount', '32');
     await fill('hours', '40');
     await go();
@@ -143,4 +156,28 @@ test('the public menu and footer link to Careers', async ({page, context}) => {
   await expect(page.locator('.nav-links a[href="/careers/"]')).toHaveCount(1);
   await expect(page.locator('#mobileDrawer a[href="/careers/"]')).toHaveCount(1);
   await expect(page.locator('footer a[href="/careers/"]').last()).toHaveAttribute('href', '/careers/');
+});
+
+test('Next stays above a keyboard that shrinks the visual viewport', async ({page}, info) => {
+  test.skip(info.project.name !== 'iphone', 'phone layout');
+  await page.addInitScript(() => {
+    const viewport = Object.assign(new EventTarget(), {height: innerHeight, offsetTop: 0, scale: 1});
+    Object.defineProperty(window, 'visualViewport', {value: viewport});
+  });
+  await page.goto('/careers/');
+  await page.getByRole('checkbox', {name: /Fence installer/}).check();
+  const next = page.getByRole('button', {name: 'Next', exact: true});
+  await next.click();
+  await page.getByRole('textbox', {name: 'Email address'}).focus();
+  const bottom = await page.evaluate(() => {
+    Object.assign(visualViewport, {height: 350, offsetTop: 64});
+    visualViewport.dispatchEvent(new Event('resize'));
+    return visualViewport.height + visualViewport.offsetTop;
+  });
+  await expect.poll(async () => {
+    const rect = await next.boundingBox();
+    return rect.y + rect.height;
+  }).toBeLessThanOrEqual(bottom);
+  await next.click();
+  await expect(page.getByRole('textbox', {name: 'Full name'})).toBeFocused();
 });

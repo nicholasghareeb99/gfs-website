@@ -17,8 +17,8 @@ import { formatRange, parseRange } from '../../public/assets/js/ballpark-pricing
 const text=(v,n)=>String(v??'').trim().slice(0,n);
 const number=(v,max=100000)=>{const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=max?n:0;};
 export function intakeRecord(data,now=new Date()){
+ if(data&&(data.gfs_contract===careersContract||data.intake_kind==='careers'))return careersRecord(data,now);
  if(!data||String(data['bot-field']??'').trim())return null;
- if(data.gfs_contract===careersContract)return careersRecord(data,now);
  if(data.gfs_contract!=='gfs-intake-v1')return null;
  if(data.source==='careers')throw Error('Invalid intake source');
  if(!['estimate','ballpark','booking'].includes(data.intake_kind))throw Error('Invalid intake type');
