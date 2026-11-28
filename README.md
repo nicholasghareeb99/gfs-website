@@ -13,3 +13,15 @@ Netlify site: gfencing (b06c8983-3e76-4ff1-8f19-206155103a97), ghareebfence.com.
 For this consolidated source, the equivalent CLI production command is: netlify deploy --prod --build --site b06c8983-3e76-4ff1-8f19-206155103a97 --dir dist --functions netlify/functions
 
 No deployment was performed when creating this repository branch. Credentials belong in local/provider environment settings and are excluded.
+
+### Website and Executive App form contract
+
+Run the website check with `node --test tests/website-forms-contract.test.mjs`. This replays the documented Netlify `formSubmitted` event and the reserved-function Request used by `tests/intake-handler.test.mjs`. It checks the Firestore writes for Careers, Contact, Ballpark, and Booking with a mocked network.
+
+For the paired check, run the following from the Executive App checkout. Use the website checkout that contains this fixture.
+
+```sh
+GFS_WEBSITE_ROOT=../gfs-website node --test tests/website-forms-contract.test.mjs
+```
+
+The paired check compares the fixture copies and feeds the website's captured writes into the Executive App. To change the contract, edit `tests/fixtures/website-forms-contract.mjs` here first and copy it to the same path in the Executive App. Both repos can run their tests independently. Use synthetic values in the fixture.
